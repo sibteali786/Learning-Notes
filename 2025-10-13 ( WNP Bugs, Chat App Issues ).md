@@ -1,0 +1,5 @@
+ - [x] Why did we use externalUserType as User OR Client in the User Model chat app backend
+ - [ ] We are generating shared secret both in tenant.service.ts registerTenant method and using openssl command ? we should stick with one approach that is scalable in future.
+ - [ ] We have to setup email verification system just like in the wnp we did using resend and locally using mailhog.
+ - [ ] The cron Job in WNP edits the task status to overdue even if `complete` or reviewed already ( FIX IT ) 
+ - [ ] The Session stuff in tenant should or maybe handled using eisting refreshToken logic

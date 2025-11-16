@@ -1,0 +1,19 @@
+- [ ] Hanlde Error for backend from chat app in settings/integration
+- [ ] Handle infinite request to chat backend to auhtenticate if domain is not allowed
+- [x] Refresh several times and then request to backend chat app works and returns response ? its weird find out why it happens.
+	- [x] We get 401 errors as Access Token is not there becuase iframe do  not allow reading from cookies
+		- [x] After making changes to get token from localStorage in case of iframe we are now seeing another issue that user is not being found ?? in database while i can see its record already 
+		- [x] Next thing is that user.service had default as tenant hard coded, which is wrong but other only way to fi is to maybe pass tenant from user info ?
+
+- [ ] We need to figure out how to provide context when login using plain users with default tenant
+- [x] We can login without login info but now when we create a conversation its being created using default tenant ? weird
+- [x] The attachments get uploaded but we cannot send them because they were being cretaed for wrong tenantId
+- [x] When we login into wnp using credentials A and then logout and login using credentials B we get invalid refreshToken error at chat backend  ?
+	- [x] My suspect is that when we logout we should ideally maybe remove the refreshToken from cookies so that if we login using different credentials it should work fine
+	- [x] It was an issue with client user it was not handled on wnp backend.
+	- [ ] The infinite loading is still there in FullPageChat and ChatModal so need to take care of it. 
+- [x] Rich text editor in light mode shows no text since its color is also white, fix it
+- [x] Editing is not working in real time have to refresh or click edit again to amke it work.
+- [ ] Run migration script for mongodb database so it accepts new chnages of tenant based auhtentication and working
+- [x] Wehn tried to refresh session observed invalid refresh token error
+- [ ] When we refresh suddenly we no longer stay online and are prompted to login into chat app again ? 

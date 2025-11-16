@@ -1,0 +1,8 @@
+- Explore what path we can take for whimsical.  
+- A whole process or a process which can be divided to sub process . 
+- A new column for customer where 
+- Task Agents list not showing and always loading and once we select 
+- Skills added should be done in a better way in the settings drop-down
+- Serial number 
+- Make Kevin just like all of us  allow Super User to be assigned tasks.
+- Assign tasks to yourself ( Task SuperVisor )
