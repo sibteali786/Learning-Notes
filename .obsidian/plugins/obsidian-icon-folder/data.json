@@ -6,12 +6,12 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
-      "LiCode",
-      "LiNetwork",
-      "LiGithub",
-      "📫",
-      "LiMessageCircle",
-      "LiComputer"
+      "LiFileCode",
+      "LiLetterText",
+      "LiChartNetwork",
+      "LiFileSliders",
+      "💰",
+      "LiCode"
     ],
     "recentlyUsedIconsSize": 6,
     "rules": [],
@@ -35,10 +35,15 @@
     "debugMode": false,
     "useInternalPlugins": false
   },
-  "Learning/Fundamental of DevOps.md": "LiComputer",
-  "Learning/Cargo Bussiness.md": "📫",
-  "Learning/Chat App.md": "LiMessageCircle",
-  "Learning/Git Contributions.md": "LiGithub",
-  "Learning/Networking-Basics.pdf": "LiNetwork",
-  "Learning/GO Projects.md": "LiCode"
+  "Learning/Devops/Fundamental of DevOps.md": "LiComputer",
+  "Learning/Freelance/Cargo Bussiness.md": "📫",
+  "Learning/Open Source/Git Contributions.md": "LiGithub",
+  "Learning/Side Projects/GO Projects.md": "LiCode",
+  "Learning/Networking/Networking-Basics.pdf": "LiNetwork",
+  "Learning/Work Stuff/Chat App.md": "LiMessageCircle",
+  "Learning/Work Stuff": "💰",
+  "Learning/Slides and PDFs": "LiFileSliders",
+  "Learning/Networking": "LiChartNetwork",
+  "Learning/Work Stuff/Serial Number Feature.md": "LiLetterText",
+  "Learning/Freelance/attachments": "LiFileCode"
 }

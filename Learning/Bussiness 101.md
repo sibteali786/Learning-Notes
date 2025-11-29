@@ -1,2 +1,0 @@
-- Start with Why ? its much important to know our WHY 
-	- Because it shapes the way we act and think.

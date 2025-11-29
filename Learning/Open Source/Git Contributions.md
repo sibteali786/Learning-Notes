@@ -1,3 +1,5 @@
+```table-of-contents
+```
 # Zen
 ## fix:sidebar flickering during drag operations in compact mode #11015
 Today i contributed to zen browser desktop feature
@@ -229,4 +231,10 @@ return `${block} ${inline}`;
 
 },
   ``` 
-  
+### Last Tab not closing 
+Relevant files found 
+- ZenWorksapce.mjs
+- drag_and_drop.js -> handle_drop
+- tabBrowser.js -> adoptTab and swapBrowsersAndCloseOther and _beginRemoveTab_
+	- checing fucntion #isLastTabInWindow 
+	- asked MrCheffy to provide any pointer he can why isLasTabInWindow returns false.

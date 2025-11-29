@@ -14,4 +14,19 @@ DevOps is fundamentally about unifying teams and fostering a culture of continuo
 more at [Notes](https://notes.kodekloud.com/docs/Fundamentals-of-DevOps/People/Culture-Considerations)
 
 ## DevOps Core
-Better Collaboration and Information Sahring is most important factor of DevOps as Communication is key to success to every career.
+Better Collaboration and Information Sharing is most important factor of DevOps as Communication is key to success to every career.
+
+## DORA 
+Something used to measure how efficient a devops team is
+### Mean Time To Deployment 
+1. How fast new changes can be deployed to production ( From first commit to when its available in production)
+### Deployment Frequency
+- How often a deployment is made on daily basis
+### Change failure  Rate
+ How often changes fail after deployment 
+
+### Mean Time to Recovery
+how quickly issues can be resolved which are caught in production
+
+## Additional Metrics
+[Notes](https://notes.kodekloud.com/docs/Fundamentals-of-DevOps/ProductTechnology/Measurement-additional-metrics)

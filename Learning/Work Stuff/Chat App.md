@@ -20,13 +20,19 @@ Steps
 
 
 - [ ] Multiple task agents with same task wtih different deadlines
-- [ ] Having Logs for each task so that we can track how a given person did what on which day (Simmilar to Jira).
+### Logs System
+- [ ] Having Logs for each task so that we can track how a given person did what on which day (Similar to Jira).
 	- [ ] Then Handle Multiple people 
-- [ ] Handle Serial Numbers for the  OR Filter Tasks based on requirements
-	- [ ] Client or Company Name followed by Numbers 
-	- [ ] If they are are duplicates we can go for number as suffix, the client name as suffix
-	- [ ] Way better Allow clients to search tasks based on Title, Description, Company Name, Priority etc.
-	- [ ] There might be a CODE assigned to a given task
+### Serial Number Feature
+Handle Serial Numbers for the  OR Filter Tasks based on requirements
+We have a new feature Handle Serial Numbers for the OR Filter Tasks based on requirements 
+- [ ] Client or Company Name followed by Numbers 
+- [ ] If they are are duplicates we can go for number as suffix, the client name as suffix
+- [ ] Way better Allow clients to search tasks based on Title, Description, Company Name, Priority etc. 
+- [ ] There might be a CODE assigned to a given task 
+## Context and Background 
+- Project Managers in our organization want that there should be some way they can reference the tasks to clients, teams and others usually like in github issues are assigned issue number which can be referenced across whole github , 
+- we need somehting like that but it should be simpler and easy to recall so a person can recall it easily. as in notes
 - [ ] Edit Client Does not work.
 - [ ] Task Supervisors Can Edit Clients as well
 - [ ] Ability to assign Clients to a given task
