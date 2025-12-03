@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "a5de5aae8abf560b",
+        "id": "412822ed9e0fc893",
         "type": "tabs",
         "children": [
           {
-            "id": "932fbbb459137c6f",
+            "id": "31126cda3f5184c9",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
-                "mode": "source",
-                "source": false
+                "aFile": ".gitignore",
+                "bFile": ".gitignore",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Cargo Bussiness"
+              "icon": "diff",
+              "title": "Diff: .gitignore"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 391.5
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -113,12 +113,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cargo Bussiness"
+              "title": "Outgoing links"
             }
           },
           {
@@ -142,13 +141,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cargo Bussiness"
+              "title": "Outline"
             }
           },
           {
@@ -181,28 +179,33 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "932fbbb459137c6f",
+  "active": "31126cda3f5184c9",
   "lastOpenFiles": [
-    "Untitled.base",
+    "Personal/Maryam's Things.md",
     "Learning/Freelance/Cargo Bussiness.md",
-    "Learning/Freelance/attachments/boxShipWiseReport.pdf",
-    "Learning/Freelance/attachments/Pasted image 20251129213518.png",
-    "Untitled.canvas",
-    "Learning/Freelance/attachments/Pasted image 20251129215947.png",
-    "Learning/Freelance/attachments/GodamWiseShipReport.png",
+    "Test Driven Development/Guide and Resources.md",
+    "Test Driven Development",
+    "cityInfo.png",
+    "Pasted image 20251202235849.png",
+    "Learning/Freelance/attachments/containerdetailsFromContainerInfo.pdf",
+    "Learning/Freelance/attachments/Pasted image 20251202235315.png",
+    "Learning/Freelance/attachments/Pasted image 20251202235815.png",
+    "Learning/Freelance/attachments/Pasted image 20251202235710.png",
+    "Learning/Freelance/attachments/Pasted image 20251202235528.png",
+    "Learning/Freelance/attachments/containerDetailsByContainerNo.pdf",
+    "Learning/Freelance/attachments/containerInfoAgentListDetails.png",
+    "Learning/Freelance/attachments/TripContainerLoadingBranchOffice.png",
+    "Learning/Freelance/attachments/Pasted image 20251202113555.png",
+    "Learning/Freelance/attachments/Pasted image 20251202113339.png",
+    "Untitled.base",
+    "Personal",
     "Learning/Freelance/attachments/agentReport.pdf",
+    "Container Info.md",
+    "Learning/Freelance/attachments/boxShipWiseReport.pdf",
+    "Untitled.canvas",
     "Learning/Freelance/attachments/allContainerReport.pdf",
     "Learning/Freelance/attachments/biltySearchByMobileNumber.pdf",
     "Learning/Freelance/attachments/biltySearchByMobileNumber 1.pdf",
-    "Learning/Freelance/attachments/missingCities.pdf",
-    "Learning/Freelance/attachments/Pasted image 20251127112500.png",
-    "Learning/Freelance/attachments/Pasted image 20251127125839.png",
-    "Learning/Freelance/attachments/containerDetails.pdf",
-    "Learning/Freelance/attachments",
-    "biltyByBiltyNumber 1.pdf",
-    "Learning/Freelance/attachments/Pasted image 20251119152827.png",
-    "Learning/Freelance/attachments/Pasted image 20251127112108.png",
-    "Learning/Freelance/attachments/TripInfoDetailsByTripId.png",
     "Learning/Work Stuff/Wnp Links Section or Screen.md",
     "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
     "Learning/Work Stuff/Serial Number Feature.md",
@@ -216,11 +219,9 @@
     "2025-10-16.md",
     "Learning/Work Stuff/Chat App.md",
     "Excalidraw/Drawing 2025-11-16 13.13.00.excalidraw.md",
-    "Learning/Images/Pasted image 20251011215108.png",
     "Learning/Side Projects/GO Projects.md",
     "Learning/Bussiness 101.md",
     "Learning/Devops/Fundamental of DevOps.md",
-    "Learning/Images/Pasted image 20251023142330.png",
     "Learning/Devops/DevOps Prerequsite.md",
     "WNP Features.md",
     "GO Projects 235333a276fc801fa58efeb315263aeb.md",

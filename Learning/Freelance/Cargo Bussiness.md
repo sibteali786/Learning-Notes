@@ -281,6 +281,8 @@ What is the purpose of this table as i think we saw almost similar one in  [[#Bi
 ![[missingCities.pdf]]
 
 - What does it represents ? what does these values show 
+	- It show those cities which are mispelled and then appear in this report
+	- They are corrected from another portal
 
 ### All Container Report 
 - We can write value like 554 as ship no ![[allContainerReport.pdf]]
@@ -296,11 +298,14 @@ What is the purpose of this table as i think we saw almost similar one in  [[#Bi
 
 
 ### Godam Loading
+### Show Godam Report
 - We can enter a ship number `554`
 - Container = Godam 
 - Godam Loading Date ( Start Date)
 - To Date ( End Date)
 ![[GodamWiseShipReport.png]]
+- If we enter ship 554 and click `Show Godam Report` it shows all items that were left out from 554 and previous ships  
+-  If we enter 553 the list of items it shows are all those which are loaded into next ship i.e 554 but were left out from Ship 553.
 #### How to load a given item into given Cargo ( Ship ) 
 - As in the picture we can mark as check a given item which shows it is loaded from godam into given container .
 - We mark an item using `check` 
@@ -315,8 +320,117 @@ What is the purpose of this table as i think we saw almost similar one in  [[#Bi
 ![[Pasted image 20251129215947.png]]
 - This Is with a Date Filter otherwise its shows whole report with all time until today irrespective of Ship No 
 #### Saudi Godam
-This one shows a report which is specifically designed to accommodate Saudi Arabia branches GODAM
+- This one shows a report which is specifically designed to accommodate Saudi Arabia branches GODAM
+- ![[SaudiGodamReport.png]]
+- This report shows what proerties it has as compare to previous Godam Report 
+- Clearly it is Office Wise as compare to Ship Wise from Last Godam Reports we saw for all other offices. 
+## Master Data
+In Navigation panel we have Master Data and it has several tabs lets look at each and what does each of them have 
+### Document Info
+- Click on `Document Info`
+- This page is used for various purposes
+	- Adding New or Updating existing document's expiry or Renewal Date ![[Pasted image 20251129224503.png]]
+- Like Alain was one i added to check how does it work![[Pasted image 20251129224545.png]]
+- I added `Alain` in remarks input and `Document` was `cheque` with `30 Nov, 2025` as expiry date.
+- There are two places to see it one is [[#Top Bar]] at Home Page or Below New Update section using `Search Dcoument` and selecting Document ( Type ) in our case it was `Cheque`![[DocumentSearch_DocInfo.png]]
+#### Document Search
+This input is used to search documents using their Document ( Type ) such as ![[Pasted image 20251129225159.png]]
+- It has different things like 
+	- `Edit` which fills the New/Update Input at top and fils values there and then we can edit `Remarks` input and Document ( Type ) and Expiry/Renewal Date  
+	- `Del` for deleting this Document 
+	- `View` which opens up the document 
+		- ![[Pasted image 20251129225849.png]]
+		- If the file was uploaded it will show here otherwise we can upload it from here and then we can see it
+#### Document 
+- This section is last and allows to effectively add a new Document ( Type) in the dropdown for `Document`![[Pasted image 20251129230047.png]]
+- Like i added here `Alain2` with all other existing ones
+	- I am not seeing any place to delete it, there should be a way to do so
 
+### Trip Upload 
+- Each Individual branches sometimes cannot export their trip documents directly from software so this section is used to upload that
+- The branch shares the export of database and then we use this to upload that file in main branch office website so that both remain in sync ( Manually )![[Pasted image 20251129232713.png]]
+### Ship Info
+- This page is used to 
+#### Create New/Update ExisitingShip
+- We can add new ship or update exisiting one 
+#### Show Last 5 Ships 
+- Shows data for last 5 active ships 
+- ![[Pasted image 20251129233024.png]]
+- It has sections as 
+	- Edit Ship Info 
+		- Seems like three options but it only adds ship value at Top `Ship` Input and then we can modify its `From` and `To Date`
+- This is linked with next Page [[#Container Info]] where the newly added ship appears since the most recent ship added is considered as the current ship so that appears in the [[#Container Info]] page
+### Container Info
+![[Pasted image 20251201234913.png]]
+- After adding a new ship it shows here in Container Info under property `Select Ship` 
+- Ideally its assumed by Head Office employees to never change it since it shows current on going Ship 
+- But software allows us to change to previous ships  which in turn leads to errors and thus we have to make sure this is fixed value and can only be updated from [[#Ship Info]] page
+- Using `Container Name` we can add new container in current ship by Button `Create/Update Container`
+#### Agent
+![[containerInfoAgentListDetails.png]]
+- `Agent Name` are ones in Karachi which are used to do clearance of containers 
+- The Values like `KICT` are used for Port so it can be another column as well in our new software
+- We need to ask team to provide know port values in a list 
+- For each container there is a corresponding `agent` and its `passport` for clearance from Customs 
+- Each agent can provide multiple passports 
+- Clicking on `Show` takes to another page with report for `Container Number`  at [[#Container Details from Container Info]]
+-  When container gets cleared at Karachi port then they send an amount or rate at which container is cleared , its named as `Agent Kharch (Expense)` 
+- Similarly the expense for `Supply` is written in `Supply Kharch` 
+- `Container Full` check is used to denote that a given container is full now.  This also shows at another page `Office` section and  `Daily Office Dashboard` 
+- Agent and Passport numbers are written when a ship gets closed.
+- `Container Loading, Ship Loadin and Clearance` are date values 
+#### Edit Container Info
+- `Edit Cotainer Info` fills the top values which can then be edited, like we can use `Update Container Ship` to change the ship of a given container ( as previously said if someone mistakenly assign container to previous ship which was closed already )
+![[Pasted image 20251202001157.png]]
+### Container Details from Container Info 
+- Probably shows all the bilties ( Invoices ) from `Office`s , quantity, weight and each `Station` items from this container would go to
+- This table shows the items belonging to each station in `Pakistan`
+![[containerdetailsFromContainerInfo.pdf]]
+### Main Station
+![[Pasted image 20251202001518.png]]
+- Main Station dropdown shows all available stations 
+- This tab is used to update Station from Old to new 
+- Or sometimes sub branch employees enter a station which is out of order now so this page is used by head branch to change it from that to new 
+- like `batkhaila` is an old station and if someone needs to send an item to there then its changed to `Peshawar` station or `Peshawara Tarnol` 
+- Its also used to fix wrong city names sometimes, Wrong city names are displayed under [[#Missing Cities]] page
+### City Info
+- Can be used to see list of all cities in English and Urdu and also have ability to add new and edit existing city 
+	![[cityInfo.png]]
+- Import City button is not working
+## Branch Office (Website)
+This website seems to be for individual branches 
+[Branch Office](https://branchoffice.superasiacargo.com/)
+![[Pasted image 20251202104029.png]]
+- We then take  a Trip Id from [[#Missing Cities]] list and put it into Dropdown and select [[#Trip Container Loading]]
+- ![[Pasted image 20251202112854.png]]
+### Trip Container Loading 
+- This tab has info about specific `Trip id`
+- ![[TripContainerLoadingBranchOffice.png]]
+- AS we can at its bottom we have line `Maston Maston Update` 
+- This line if clicked takes us to another page where we can fix the wrong name entered 
+#### Update City 
+At [updateCity](https://branchoffice.superasiacargo.com/updatecity.php) we see this page where we can update wrongly entered city name
+![[Pasted image 20251202113339.png]]
+![[Pasted image 20251202113555.png]]
+- There are 4 rows of wrong city names in trip id `01-352` so updating this would fix names for these four.
+- After this change these wrong city names are updated in the [[#Trip Container Loading]] list
+
+## Karachi Office 
+go to [Karachi Office](https://pakoffice.superasiacargo.com/)
+![[Pasted image 20251202235315.png]]
+- This is used by people in karachi office 
+- Go to Reports tab
+### Reports 
+![[Pasted image 20251202235528.png]]
+- This always shows the current ship and container 
+- Selecting city from list does not matter 
+- ![[Pasted image 20251202235710.png]]
+- The kidn of report we select does matter in our case we want to see [[#Container Loading Report]] 
+- ![[Pasted image 20251202235849.png]] we can also chose the container to see its one detailed report a well
+#### Container Loading Report
+After selecting a container and then choosing `Container Loading Report`
+![[Pasted image 20251202235815.png]]
+- 
 ## Top Bar
 - Shows expiry of different things like Vehicle, Office 
 - Ship No and Trip id 
