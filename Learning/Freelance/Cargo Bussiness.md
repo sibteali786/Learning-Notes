@@ -1,3 +1,4 @@
+
 ```table-of-contents
 ```
 ## ERP 
@@ -214,20 +215,24 @@ Retained Goods: We will need to implement it since its part of core operations a
 
 fruther more * We also need to include an invoice system so that the head office continuously receives the actual data online. The same invoice will be provided to the client as well. since for now its done manually, there can be issues, as anyone can add or change things on their own. An online system will prevent these problems and provide security and avoid fraudulent activites I have again shared REQUIREMENT DOCUMENT so you can understand it again with details and pointer i provided now.
 
-## Website Analysis 
+# Website Analysis 
 ### Home Page
 #### Container Details 
 ![[containerDetails.pdf]]
 ##### Questions
 - What is unit of weight here in Column `Total Weight` ? i am assuming its Kilogram 
-- What are `nugs` values here ? are these no of items ? 
-- What is currency for packing amount ? should there be more than one currencies we can show it or should there be option to change currency format
+- What are `nugs` values here ? are these no of items ?
+	- These are meant Items / Bilties carried in a particular Trip
+- What is currency for packing amount ? should there be more than one currencies we can show it or should there be option to change currency format 
+	- Currency is AED in UAE
 - What is TGBU XXXX, TEMU XXXX etc 
+	- These are container names 
 
 If we 
-#### Flow for Row click in first column Trip Info
+#### Flow for Row click in first column Trip Info OR Trip load to Container
 Clicking on each line opens up a new Page ( Show Trip Detail with query param tripId)
 like 48-2065 at url
+This can also be opened from Home Page Dropdown by entering trip id like `06-1308` and then `Trip Load to Container`
 https://mainoffice.superasiacargo.com/showtripdetail.php?tripid=48-2065
 ![[TripInfoDetailsByTripId.png]]
 ##### Questions
@@ -237,9 +242,13 @@ https://mainoffice.superasiacargo.com/showtripdetail.php?tripid=48-2065
 	- The suffix or number after dash ( - ) is denotes the number of items in this `marka`  like `0178597-1` means it has one item and if there is also `0178597-2` its the second item in this marka
 - What does `unit price` denotes here ? is it currency or what
 - What does `custom duty` , `discount` value represents ? again is it currency
+	- The amount paid as Customs duty and discount applied to given item ranging from 0 to 20 as per employees
 - What does `City` value here means
+	- The city means to which destination it will be shipped to.
 - Office Expense Details probably means the expense office made related to this shipment or Ship No ? 
-- Log Data probably shows any changes in this specific `Branch` and made by who 
+	- Yes exactly
+- Log Data probably shows any changes in this specific `Branch` and made by which person
+	- These are logs for changes made directly to database by head office employees and its not allowed to individuals from sub branches
 - The line at top `## OFFICE: AVEER branch TRIP ID: 48-2065, DATED: 07-Nov-25 Prepared By:zeeshan` has details like `branch name` , `trip id`, `date` and `Person prepared these details` ? if so from where these details are recorded and how 
 ### Office Trip Detail Report ( Trip Income/Expense )
 From Home page chose option `Trip Income/Expense`
@@ -295,9 +304,18 @@ What is the purpose of this table as i think we saw almost similar one in  [[#Bi
 - ![[boxShipWiseReport.pdf]]
 - We can update values but what does it update specifically ?
 ### Packing Godam Report
+### Ship Wise Qarza Detail
+- We can use ship no to search how much Qarza ( Debt / Loan ) this ship is carrying for specific items 
+![[QarzaByShipNoReport.pdf]]
+- Qarza Kiya => Amount which was debt / or loan taken for specific item
+- Qarza Wasool => Amount received for given debt item / loan which was paid for given item 
+- Bilty Status => kind of dropdown thing which has values like `Cleared From Customs`,  `Loaded at Container(Trip)`, `Loaded at Container(Godam)`, `Sent to Godam`
 
-
-### Godam Loading
+### Box Ship Wise Report 
+- ![[Pasted image 20251220134407.png]]
+- ![[boxWiseShipReport.pdf]]
+- The update `input` is not used by employees (it was originally to add or update expense column)
+## Godam Loading
 ### Show Godam Report
 - We can enter a ship number `554`
 - Container = Godam 
@@ -397,6 +415,55 @@ This input is used to search documents using their Document ( Type ) such as ![[
 - Can be used to see list of all cities in English and Urdu and also have ability to add new and edit existing city 
 	![[cityInfo.png]]
 - Import City button is not working
+
+### Trip Info
+
+#### Trip Expense Date Updation 
+- For a given `ship` and `container` we can change dates of all the expenses which were done in connection to given ship ![[Pasted image 20251203202141.png]]
+- After selecting a date we can click on `Trip Expense Date Updation` to update date for given expenses., marka ( Bilty No ).
+- ![[TripPrintByGivenTripId.pdf]]
+- At bottom we can see the date as 28 Nov, 2025 which we set a while ago to check how it works ![[TripPrintByGivenTripId2.pdf]]
+- We can go to [[#Reports]] in the [[#Accounts ]] sections 
+#### Trip Lock / Unlock
+- We can also lock and unlock a particular trip
+- What it means any changes made to a trip info ( after it locked ) from a sub branch are not updated in head office website, that changed data is not shown here after a trip is locked for that trip 
+#### Ship Lock
+- Same goes for Ship Lock / unlock 
+- So locking it wont update any things or data for given ship after its locked 
+#### Trip expense Delete 
+As the name suggests allows us to delete an expense from the data for a given ![[Pasted image 20251204003614.png]]
+- After we select a trip and then press `Trip Exp Deletion` we see this list from where clicking Delete would delete this expense
+- What is ==Trans.ID== here 
+#### Show Trip
+- This shows all items which are in godam and are not loaded to container, it appears in red color with Godam at top
+![[GodamItemForTrip.png]]
+- Once loaded they show Container number at top like as in picture
+![[ShowTrip.png]]
+- Q.Status show Qarz or Debt status, `N` means no Debt, `Q` means `Debt` 
+
+### Bilty Hold/Deletion
+- ![[Pasted image 20251218223417.png]]
+- This tab allows us to `hold` a particular bilty 
+  What does `hold` here means ? 
+#### Hold
+- A bilty is kept on `hold` in cases like when `payment` is not made for bilty or when there is some item which is prohibited or not allowed to be shipped like Electronic Items, medical supplies for example.
+- Clicking on this once `Holds` it while clicking again `Unhold`
+#### Deletion 
+- Once a bilty is exported all its details are shown online afterwards 
+Lets search a bilty using [[#Bilty Report by Bilty Number]]
+We can see the report here and it shows all the items for a given `bilty` 
+![[Pasted image 20251219003424.png]]
+- Sometimes a customer says they do not want to ship an item like `FOAM(foom)` as its shipment is costly thus would like to delete it or remove from shipment.
+- In that case we use the `marka no` along with value after dash like for FOAM it would be `0342533-4` this is specific invoice no or marka no for this item `FOAM` 
+- Similarly we also sometimes can delete a bilty by using its number in input box and pressing Delete Bilty 
+
+### KSA Qarza Detail
+- This has no realation to UAE headoffice as for Qarza stuff we can go to Home and [[#Ship Wise Qarza Detail]] report to see qarza / debt for a given ship
+## How Debt system works
+There are two ways Qarz or Debt is handled 
+- If someone sents an item and does it on `debt` the employees in sub brnach sends the amount to headoffice from their own pocket and ask for debt from the person or customer as per their own commitment.
+OR
+- From the [[Trip Load to Container]] tab when we mark a bilty as `Q` using `Qarz Status update` button after checking the `Check All` column and specific row or bilty value , in the main website where customer can see their bilty status its details are shows as `HOLD` which forbids the people in Karachi port to see the details of the customer bilty like `Destination address`, customer details like mobile number, stopping them to deliver it until head office marks it as `R` for receieved.  
 ## Branch Office (Website)
 This website seems to be for individual branches 
 [Branch Office](https://branchoffice.superasiacargo.com/)
@@ -428,18 +495,136 @@ go to [Karachi Office](https://pakoffice.superasiacargo.com/)
 - The kidn of report we select does matter in our case we want to see [[#Container Loading Report]] 
 - ![[Pasted image 20251202235849.png]] we can also chose the container to see its one detailed report a well
 #### Container Loading Report
-After selecting a container and then choosing `Container Loading Report`
+After selecting a container and then choosing `Container Loading Report` we this report 
 ![[Pasted image 20251202235815.png]]
-- 
+- This report shows us what items | bilty a particular container has and which station and city it will be delivered or go to.
+
+## Accounts 
+### Reports ( Accounts ) 
+![[Pasted image 20251203235559.png]]
+- We can use this to check different report types like `Cash Book`, `Accoutns Master File`, `Cargo Mix Kharch` and `Office Exp`, `Account type Report`, `Office Ledger`, `Saudi Cash book` , `Bajwa Ledger` and `Shipline ledger`
+- For now lets just see [[#Cash Book]]
+#### Cash Book
+- ![[cashbook.pdf]]
+- This is how a cash book report looks like for given Account Type and Account 
+- This shows that all expenses for given trip id i.e `01-1699` are dated as `28 Nov, 2025`
+- Note all other were added later on same date
+#### Cargo Mix kharch and office Expense
+![[CargoMixKharchExpense.pdf]]
+- There are no associated receipts for these expenses so there should be some which we have to add in new software 
+## Pak Accounts 
+In this section we have different pages for now we will only look at [[#Reports]]
+### Reports ( Pak Accounts )
+
+
+## SMS
+### Container SMS
+- This tab in navigation is used for purpose 
+- When container is loaded from UAE, for example `558` is being loaded currently, so we will select container on ship 558 and provide a date and then have several options
+#### Received at Pakistan
+- When the container or shipment is reaches Karachi and gets cleared from customs, then we use this button after selecting a particular container. 
+- This changes the bilty status for all items in that container to `Cleared From Customs`
+- This info is relayed over social media apps like Whatsapp by employees in Karachi office that an item is cleared from customs and then head office comes to this tab and choses container, date and press `Received At Pakistan`
+#### Container Custom Cleared SMS
+- This sends sms to all customers that their item is cleared from customs ( Karachi ).
+### Container Nug Loaded SMS 
+- When ship gets closed then we select each container and click on `Container Nug Loaded SMS` and customers get sms that their item is loaded into container ( sent from UAE )
+#### Enter Container Message
+- This can be used to enter a custom message or status for a given bilty ( Bilty Status )
+#### Contact No / Bilty No
+- It can be used to get list contact nos for a given container  
+- ![[ContactNoBiltyNo.png]]
+- For some reason if message is not sent then we can use a manual approach and get these contact numbers and manually send messages to customers .
+## Trip Load To Container 
+- This is used for several purposes 
+### Select File to Upload 
+![[Pasted image 20251220120149.png]]
+- Sometimes in local branches when we are not able to export trips via our website for some reason, we export txt files from database and import it using this section
+![[ManualExportTripFromDatabaseExample.mp4]]
+- This video shows that if web export option in [[#Database]] does not works then we use manual file exported as `text`  in File system drive C and upload it in [[#Select File to Upload]]
+### Show Trip Bilties
+- Shows the bilties list which are in Godam or in any selected container
+- ![[ShowTripBilties.png]]
+- This trip had bilties which are in Godam thus its Red once loaded it will appear as white 
+### Load Checked Marka to Container 
+- Go to [[#Trip Load To Container]] enter a trip id let say `01-1717` and then click on [[#Show Trip Bilties]] then choose any row or all rows in `Check all` column, select a container from the list and press `LOAD CHECKED MARKA TO CONTAINER` and it will load that item to container and it will go away from `GODAM` list like shown ![[ShowTripBilties.png]]
+- Now this trip items are loaded to container ad its no longer in `Godam` aka `Warehouse` but in a container with ship 559 `TEMU 8669560:SHIP # 559` 
+- ![[showTripBilitiesGodam.png]]
+- Selecting items in the Container and then clicking again on the button `LOAD CHECKED MARKA TO CONTAINER` would send them to GODAM or `Warehouse`
+### Box / UnBox Markas
+- Select a marka from [[#Show Trip Bilties]] and Click this button to associate a box with this `marka` or `item` , this means this item was sent in a wooden box
+- ![[Pasted image 20251220134047.png]]
+- Clicking again would change `BOX` column value from `1` to `0` 
+## Booking 
+- This tab was added to add and ( Pickpup ) track bookings, but this functionality is incomplete thus wont be there in our MVP for Asia Group Of Companies
+## Office
+- This section has dashboard and reports for each office
+### Daily Office Dashboard 
+![[Pasted image 20251220151143.png]]
+- This shows how much `items` (Nug) each office has/have received today are their in the office ( Not in Office Godam , not in Head Office nor in Head Office Godam)
+- The red table shows `offices` which have received no nugs today.
+- `Trip Nugs` means the no of Nugs head Office receives as a Trip from this office.
+- The red portion shows the details about last trip from this branch which arrived at Head OFfice 
+- ![[Pasted image 20251220151229.png]]
+- When a container gets full, this is where we see that this container is full now ![[Pasted image 20251220151321.png]] which is marked from [[#Container Info]] tab, so what we do is 
+- We clcik on `Last 10 Ship Containers` and from list click `Edit Container Info` and then click on `Cotnainer Full` which will mark the container as full
+- ![[Pasted image 20251220161924.png]]
+- ![[Pasted image 20251220163446.png]]
+- Then we at start of this screen we also have individual office reports ( As Card element probably ) 
+- ![[Pasted image 20251220205117.png]]
+- Nugs arrived at Local Office from customers like `03:Commercial` has 28 Nugs since `16-12-2025`
+- This shows all `Nugs` / `Items` which are received from `Commercial` branch since `16-12-2025`
+- Local branch employee exports the trip from Database as `Web Export` and then only we can see those trip details like Nugs/ Items no received at given branch here in [[#Daily Office Dashboard]] as the video in [[#Select File to Upload]] shows this
+- C.Amount means Cargo Amount 
+- G.Nugs means Godam Nugs or Warehouse Items which are left in the Head Office Godam not in the local office Godam or Warehouse. It can also be checked from [[#Show Godam Report]] and we can also see for a particular branch how many items they have in their Godam by visiting [Branch Office](https://branchoffice.superasiacargo.com/)
+### Daily Office Report
+Not used by Head Office ( Probably not working at all) since most of stuff is already taken care of in [[#Misc Reports]]
+### Office Godam Report
+- This shows us the reports similar to one in [[#Godam]] from Branch Office website. 
+
+## Misc Reports
+This page as per Head office is mostly used only for [[#Container Office Wise Report]], [[#Container Marka Wise Details Report]] , and [[#]]
+### Container Marka Wise Details Report
+![[ContainerMarkaWiseReport_MiscReports.pdf]]
+
+### Container Office Wise Report
+- ![[CotnainerOfficeWiseReport_MiscReports.pdf]]
+- this is office wise and the previous one was Marka Wise 
+### Container Packing List Report 
+- Usually shows all kind of item details 
+- ![[CotnainerPackingList_MiscReports.pdf]]
+### Ship Office Summarize Report 
+- For this report we only need to mention Ship no and select `Office Wise Summarized Report`
+![[OfficeWiseSummaryReportForSHip_MiscReports.pdf]]
+## Branch Office Website 
+[Link](https://branchoffice.superasiacargo.com/) 
+![[Pasted image 20251220225347.png]]
+- Go to Godam
+### Godam
+- Here we can see All Items in this Branch's Godam in our Example its for Sanaya
+- ![[BranchOffice_Godam_Report.png]]
+- It shows both items from Local Godam ( Warehouse ) and Main Office Godam (Warehouse)
+- At Bottom it has also items list which are loaded into container and sent to Head Office 
+## Define a Trip 
+- It means that from a particular office like Alain or Sanaya when some items / nugs are loaded into a Vehicle and sent to UAE head office and details about these items is exported from database using web export. Its called as TRIP
+- We search a trip using Trip id as in [[#Trip Load To Container]] to get Trip.
+- Trip Id is generated automatically when we create a trip.
 ## Top Bar
-- Shows expiry of different things like Vehicle, Office 
-- Ship No and Trip id 
-- Marka No -> Invoice No / Bilty No
-- Bilty no followed by 1,2 shows number of items 
-- `LOAD` value is usually a Tick sign on physical paper
-- Expiring check info using `Document Info` 
-- Expiured items should only show for few days after
-- `Document Upload` Section in Master Data
-- CIty Info is not imortant 
-- Local office should have receipt upload 
-- File Size upload issue from head-office should be catered
+
+## Saudia Branch Things 
+- `Bajwa Payment` Tab in the [[#Master Data]] tab is only for KSA ( Kingdom of Saudi Arabia) branch 
+- Enquire about it from Saudia Branch office.
+- Similalry [[#KSA Qarza Detail]] is another tab in [[#Master Data]] which belongs particularly to Saudia Branch Office.
+
+### Inter Bank Transactions 
+- When money is transferred from UAE to Pakistan branch then we need to convert the profit and loss amount into PKR from AED
+- Rate for currency conversion should be custom so user can enter a custom rate since Currency Rate is not fixed and changes constantly 
+	- This can be protected further by making sure entered rate is in compliance with Local banks so that fraud related activity can be prevented
+### Audit Tracking
+Every accounts related entry should be double entry ? what it means that 
+- IF they are recording an expense, there should be answers to questions like from which branch they are recording these. Make sure accounting transactions are double entry
+- Because currently when an accountant gets the expense report of a given Branch Godam, there is no way to track who did what expense, or who was responsible for making given expense.
+- We should track each expense using the account with which the person logged in and did expense and if an entry was edited, who edited this entry
+- Each Cash sale should be recorded and we should have answers to questions such as Where did the money from given sale went to and done by who?
+- There should be a way to track who received which salary and when, verify if a person has already received a salary. 
+- List off all employees so we know how many people are there in our organization.

@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "412822ed9e0fc893",
+        "id": "8bf26a5d28e56a38",
         "type": "tabs",
         "children": [
           {
-            "id": "31126cda3f5184c9",
+            "id": "aaaffc056200baac",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": ".gitignore",
-                "bFile": ".gitignore",
-                "aRef": ""
+                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: .gitignore"
+              "icon": "lucide-file",
+              "title": "Cargo Bussiness"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 391.5
+    "width": 264.5
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -113,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from Cargo Bussiness"
             }
           },
           {
@@ -141,12 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Cargo Bussiness"
             }
           },
           {
@@ -176,38 +178,41 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "obsidian-excalidraw-plugin:New drawing": false,
-      "obsidian-git:Open Git source control": false
+      "obsidian-git:Open Git source control": false,
+      "publish:Publish changes...": false,
+      "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "31126cda3f5184c9",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Personal/Maryam's Things.md",
+    "OfficeWiseSummaryReportForSHip_MiscReports.pdf",
+    "CotnainerPackingList_MiscReports.pdf",
+    "CotnainerOfficeWiseReport_MiscReports.pdf",
+    "ContainerMarkaWiseReport_MiscReports.pdf",
+    "BranchOffice_Godam_Report.png",
+    "Pasted image 20251220225347.png",
+    "Learning/Freelance/attachments/ManualExportTripFromDatabaseExample.mp4",
     "Learning/Freelance/Cargo Bussiness.md",
-    "Test Driven Development/Guide and Resources.md",
-    "Test Driven Development",
-    "cityInfo.png",
-    "Pasted image 20251202235849.png",
-    "Learning/Freelance/attachments/containerdetailsFromContainerInfo.pdf",
-    "Learning/Freelance/attachments/Pasted image 20251202235315.png",
-    "Learning/Freelance/attachments/Pasted image 20251202235815.png",
-    "Learning/Freelance/attachments/Pasted image 20251202235710.png",
-    "Learning/Freelance/attachments/Pasted image 20251202235528.png",
-    "Learning/Freelance/attachments/containerDetailsByContainerNo.pdf",
-    "Learning/Freelance/attachments/containerInfoAgentListDetails.png",
-    "Learning/Freelance/attachments/TripContainerLoadingBranchOffice.png",
-    "Learning/Freelance/attachments/Pasted image 20251202113555.png",
-    "Learning/Freelance/attachments/Pasted image 20251202113339.png",
-    "Untitled.base",
-    "Personal",
-    "Learning/Freelance/attachments/agentReport.pdf",
-    "Container Info.md",
-    "Learning/Freelance/attachments/boxShipWiseReport.pdf",
-    "Untitled.canvas",
-    "Learning/Freelance/attachments/allContainerReport.pdf",
-    "Learning/Freelance/attachments/biltySearchByMobileNumber.pdf",
-    "Learning/Freelance/attachments/biltySearchByMobileNumber 1.pdf",
-    "Learning/Work Stuff/Wnp Links Section or Screen.md",
+    "Pasted image 20251220205117.png",
+    "Pasted image 20251220163446.png",
+    "Pasted image 20251220161924.png",
+    "Pasted image 20251220151321.png",
+    "Pasted image 20251220151229.png",
+    "Pasted image 20251220151143.png",
+    "Pasted image 20251220150628.png",
+    "boxWiseShipReport.pdf",
+    "Pasted image 20251220134407.png",
+    "Learning/Freelance/attachments/CargoMixKharchExpense.pdf",
+    "Learning/Freelance/attachments/TripPrintByGivenTripId2.pdf",
+    "Learning/Freelance/attachments/QarzaByShipNoReport.pdf",
+    "Recording 20251204104514.m4a",
+    "Recording 20251204104505.m4a",
     "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
+    "Personal/Maryam's Things.md",
+    "Test Driven Development/Guide and Resources.md",
+    "Container Info.md",
+    "Untitled.canvas",
+    "Learning/Work Stuff/Wnp Links Section or Screen.md",
     "Learning/Work Stuff/Serial Number Feature.md",
     "Learning/Open Source/Git Contributions.md",
     "2025-10-23.md",
