@@ -4,21 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "412822ed9e0fc893",
+        "id": "a1b498e571fd1ade",
         "type": "tabs",
         "children": [
           {
-            "id": "31126cda3f5184c9",
+            "id": "4406e2e3578f4673",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "excalidraw",
               "state": {
-                "aFile": ".gitignore",
-                "bFile": ".gitignore",
-                "aRef": ""
+                "file": "Learning/System Design/Networking/Application Layer.excalidraw.md"
               },
-              "icon": "diff",
-              "title": "Diff: .gitignore"
+              "icon": "excalidraw-icon",
+              "title": "Application Layer.excalidraw"
             }
           }
         ]
@@ -78,7 +76,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 391.5
+    "width": 264.5,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -113,11 +112,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from Cargo Bussiness"
             }
           },
           {
@@ -141,12 +141,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Learning/System Design/Networking/Application Layer.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Application Layer.excalidraw"
             }
           },
           {
@@ -176,57 +177,60 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "obsidian-excalidraw-plugin:New drawing": false,
-      "obsidian-git:Open Git source control": false
+      "obsidian-git:Open Git source control": false,
+      "publish:Publish changes...": false,
+      "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "31126cda3f5184c9",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Personal/Maryam's Things.md",
+    "Learning/System Design/Networking/Transport Layer Protocols.excalidraw.md",
+    "Learning/DSA/ValidAnagrams.excalidraw.md",
+    "Learning/DSA/TwoSum.excalidraw.md",
+    "Learning/DSA/CotnainsADuplicate.excalidraw.md",
     "Learning/Freelance/Cargo Bussiness.md",
-    "Test Driven Development/Guide and Resources.md",
-    "Test Driven Development",
-    "cityInfo.png",
-    "Pasted image 20251202235849.png",
-    "Learning/Freelance/attachments/containerdetailsFromContainerInfo.pdf",
-    "Learning/Freelance/attachments/Pasted image 20251202235315.png",
-    "Learning/Freelance/attachments/Pasted image 20251202235815.png",
-    "Learning/Freelance/attachments/Pasted image 20251202235710.png",
-    "Learning/Freelance/attachments/Pasted image 20251202235528.png",
-    "Learning/Freelance/attachments/containerDetailsByContainerNo.pdf",
-    "Learning/Freelance/attachments/containerInfoAgentListDetails.png",
-    "Learning/Freelance/attachments/TripContainerLoadingBranchOffice.png",
-    "Learning/Freelance/attachments/Pasted image 20251202113555.png",
-    "Learning/Freelance/attachments/Pasted image 20251202113339.png",
+    "Screenshot 2026-01-07 at 1.18.28 PM.png",
+    "Screenshot 2026-01-07 at 12.54.16 PM.png",
+    "Qarza_Wasoolu_Ledger.pdf",
+    "Screenshot 2026-01-07 at 12.39.21 PM.png",
+    "Learning/System Design/Networking/Application Layer.excalidraw.md",
+    "Learning/System Design/Networking/Networking.md",
+    "Pasted image 20260106123620.png",
+    "Screenshot 2026-01-06 at 12.21.25 PM.png",
+    "Screenshot 2026-01-06 at 12.17.31 PM.png",
+    "Screenshot 2026-01-06 at 12.15.31 PM.png",
+    "cashbook_dated.pdf",
+    "Screenshot 2026-01-06 at 11.44.08 AM.png",
+    "Screenshot 2026-01-06 at 11.41.28 AM.png",
+    "Screenshot 2026-01-06 at 11.25.01 AM.png",
+    "MustafaQarza_AccountReportType.pdf",
+    "Trip Load to Container.md",
+    "Excalidraw/Drawing 2025-12-31 11.42.37.excalidraw.md",
+    "2025-10-25.md",
+    "2025-10-23.md",
     "Untitled.base",
-    "Personal",
-    "Learning/Freelance/attachments/agentReport.pdf",
-    "Container Info.md",
-    "Learning/Freelance/attachments/boxShipWiseReport.pdf",
-    "Untitled.canvas",
-    "Learning/Freelance/attachments/allContainerReport.pdf",
-    "Learning/Freelance/attachments/biltySearchByMobileNumber.pdf",
-    "Learning/Freelance/attachments/biltySearchByMobileNumber 1.pdf",
-    "Learning/Work Stuff/Wnp Links Section or Screen.md",
+    "Learning/System Design/Networking/Attachments",
+    "Learning/System Design/Networking/Attachments/Fundamentals+of+Networking+Engineering.pdf",
+    "~$Fundamentals+of+Networking+Engineering.pptx",
+    "Fundamentals+of+Networking+Engineering.pptx",
+    "Learning/System Design/Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
+    "Learning/DSA",
+    "Learning/Freelance/attachments/boxWiseShipReport.pdf",
     "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
+    "Personal/Maryam's Things.md",
+    "Test Driven Development/Guide and Resources.md",
+    "Container Info.md",
+    "Untitled.canvas",
+    "Learning/Work Stuff/Wnp Links Section or Screen.md",
     "Learning/Work Stuff/Serial Number Feature.md",
     "Learning/Open Source/Git Contributions.md",
-    "2025-10-23.md",
     "2025-10-31  ( Whimsical ).md",
     "2025-10-27 ( Multi-Tenant Chat App findings and Issues ).md",
-    "2025-10-25.md",
     "2025-10-14.md",
     "2025-10-17.md",
     "2025-10-16.md",
     "Learning/Work Stuff/Chat App.md",
     "Excalidraw/Drawing 2025-11-16 13.13.00.excalidraw.md",
-    "Learning/Side Projects/GO Projects.md",
-    "Learning/Bussiness 101.md",
-    "Learning/Devops/Fundamental of DevOps.md",
-    "Learning/Devops/DevOps Prerequsite.md",
-    "WNP Features.md",
-    "GO Projects 235333a276fc801fa58efeb315263aeb.md",
-    "Untitled 1.canvas",
-    "2025-10-11.md",
-    "2024-09-05.md"
+    "Untitled 1.canvas"
   ]
 }
