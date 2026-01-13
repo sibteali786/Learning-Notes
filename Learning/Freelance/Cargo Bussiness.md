@@ -497,6 +497,7 @@ go to [Karachi Office](https://pakoffice.superasiacargo.com/)
 - ![[Pasted image 20251202235849.png]] we can also chose the container to see its one detailed report a well
 #### Container Loading Report
 After selecting a container and then choosing `Container Loading Report` we this report 
+After selecting a container and then choosing `Container Loading Report` we this report 
 ![[Pasted image 20251202235815.png]]
 - This report shows us what items | bilty a particular container has and which station and city it will be delivered or go to.
 ## Pak Accounts 
