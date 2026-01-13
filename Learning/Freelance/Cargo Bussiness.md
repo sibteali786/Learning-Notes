@@ -499,24 +499,8 @@ go to [Karachi Office](https://pakoffice.superasiacargo.com/)
 After selecting a container and then choosing `Container Loading Report` we this report 
 ![[Pasted image 20251202235815.png]]
 - This report shows us what items | bilty a particular container has and which station and city it will be delivered or go to.
-
-## Accounts 
-### Reports ( Accounts ) 
-![[Pasted image 20251203235559.png]]
-- We can use this to check different report types like `Cash Book`, `Accoutns Master File`, `Cargo Mix Kharch` and `Office Exp`, `Account type Report`, `Office Ledger`, `Saudi Cash book` , `Bajwa Ledger` and `Shipline ledger`
-- For now lets just see [[#Cash Book]]
-#### Cash Book
-- ![[cashbook.pdf]]
-- This is how a cash book report looks like for given Account Type and Account 
-- This shows that all expenses for given trip id i.e `01-1699` are dated as `28 Nov, 2025`
-- Note all other were added later on same date
-#### Cargo Mix kharch and office Expense
-![[CargoMixKharchExpense.pdf]]
-- There are no associated receipts for these expenses so there should be some which we have to add in new software 
 ## Pak Accounts 
-In this section we have different pages for now we will only look at [[#Reports]]
-### Reports ( Pak Accounts )
-
+In this section we have different pages for Pakistan Accounts similar to UAE head office but they are related to Pakistan bussiness ( construction ) now we will only look at [[#Reports]]
 
 ## SMS
 ### Container SMS
@@ -622,9 +606,17 @@ lets start with [[#Account Types]]
 - ![[MustafaQarza_AccountReportType.pdf]] It has fields like S.No, Account Name, Opening Balance, Amt. Paid/ Deposited, Amt.Received/ Withdrawal and Balance Amt.
 - We can see the `Account Type Report` for sub Account ( Dummy ) `Bussiness Loan` for Main Account `ExpenseIncome`
 - ![[Screenshot 2026-01-06 at 11.44.08 AM.png]] This shows Account Type Report for each legder in the `Bussiness Loan` sub Account. 
+#### Cargo Mix Kharch and Office Exp
+- ![[Cargo_Mix_Kharcha_Reports(Accounts).png]] For a given Date Range we can see the [[#Cargo Mix Kharch and Office Exp]] 
+#### Account Type Report
+- This shows Account Type Report for given account like `Commercial Qarza Aqib` account.
+- No need to provide Date Range works without it.
+- ![[Commercial_Qarza_Aqib_Account_Type_Report.pdf]]
 #### Cash Book
 - This shows Cash Book Report from a given date to given Date.
-- ![[cashbook_dated.pdf]] It has different kind of report merged into one as we can see here in pdf
+- ![[cashbook_dated.pdf]] In Other Exepnses Section of Cash Book we can clearly see bold and normal weight values in last column.
+- These also have a specific meaning that Bold values are ones associated with Exenses that Belong to Cargo while normal weight are expenses which are not related to Cargo but other things.
+ It has different kind of report merged into one as we can see here in pdf
 - Income Account, Narration and Amount Recieved. We also have associated Trip Id for reference 
 #### Accounts Master File
 - ![[Screenshot 2026-01-06 at 12.15.31 PM.png]] We can select `Accounts Master File` in `Select Report` and get all `Account Sub Type` for a given Main Account i.e `Bussiness Loan` ![[Screenshot 2026-01-06 at 12.17.31 PM.png]]
@@ -644,6 +636,11 @@ lets start with [[#Account Types]]
 - ![[Pasted image 20260106123620.png]] This is a ledger Account detail report from a given date to a given date for a given `Sub Account Name` `Rauf Dubai Ledger` . 
 - Whatever amount is paid to this ledger would be recorded as an expense in this Sub Account i.e `Rauf Dubai Ledger`
 - Ledger report is also used to see what expenses are made by a particular ledger account. For Instance how many expenses were made by `Naeem Account` so we can get its ledger report and see all expenses made in name of this account.
+- `Commercial Qarza Legder` is series of another accounts which are used to record Debts or Qarza Payments. This account only shows `Expenses` which are debts that has not been received till now, its due.![[commerical_account_ledger.pdf]]
+- **For instance this commercial account shows Debt to trips which are not yet received.**
+- **`Dilmarjan ..` accounts are also those which are not Cargo Expenses.**
+- **So in Total `Not Asmat Expenses`, `Commercial ..` and `Dilmarjan..` accounts are expenses not related to cargo**
+- 
 ### Expense/ Income Voucher Entry
 - In this section we can create expense entries for any sub account for a given Main Account.
 - ![[Screenshot 2026-01-07 at 12.39.21 PM.png]]
@@ -652,7 +649,7 @@ lets start with [[#Account Types]]
 - Amount paid and received and self explanatory.
 - Specifc Accounts are made to record receiving of Debt or `Qarza` for instance, if `Naeem Account` was given 5000 AED it will show in its ledger and as `Amount Paid` when it returns this money it will be transferred to another account `Qarza Wasooli` ( or Debt Collected ) using [[#Bank/Other Account Deposit Voucher]]
 - ![[Qarza_Wasoolu_Ledger.pdf]] This doc shows the Amount on Money paid and received in the Debt Collection Account `Qarza Wasooli Ledger`
-- 
+- ![[Pasted image 20260109113016.png]] `Trip ID (if any)` was used to record an expense within a given Trip, but now we ask Local Branch employees to export or record their their branch expenses in their own trip.
 ### Bank/Other Account Deposit Voucher
 - This is used to record a double entry, that is transfer of Amount from one account to another account. 
 - For example the amount paid to `Naeem Account` was paid back by `Naeem` so now it will be transferred to `Qarza Wasooli Ledger` using this section. 
@@ -665,8 +662,13 @@ lets start with [[#Account Types]]
 ![[Screenshot 2026-01-07 at 1.18.28 PM.png]]
 - We can change its date, Change the `Debit Account` or `Credit Account` or things like `Narration` , `Amount Paid` and click on `Update Record`
 - We can also upload a picture for the transaction made using this section, from button `Choose a signature/invoice picture`
-- 
-## Branch Office Website 
+#### Update Asmat Kharcha 
+- This is used for specific reason
+- An expense which is not associated with Cargo ( Cargo Bussiness ), for instance some amount of money left at the end of closing a ship, its sent to a Hawala ( DilMarjan for example is a Hawaladar ( Hawala, which means "transfer" or "trust" in Arabic, operates through a network of brokers called hawaladars who rely on a system of mutual trust and balancing of accounts over time ). It receives profit from all three states and transfer them to pakistan head office. )
+- There is an option in [[#Expense/ Income Voucher Entry]] tab i.e Not Asmat Expense , its used to specify an expense which is not related to cargo .
+- If by mistake, we do not check it, then it becomes a normal expense and then comes [[#Update Asmat Kharcha]] into picture
+- Select Transaction ID and search it and Click on `Update Asmat Kharcha`![[Screenshot 2026-01-09 at 10.32.57 AM.png]] 
+ ## Branch Office Website 
 [Link](https://branchoffice.superasiacargo.com/) 
 ![[Pasted image 20251220225347.png]]
 - Go to Godam
