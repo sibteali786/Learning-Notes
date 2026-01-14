@@ -4,4 +4,5 @@
 - Love taking pictures 
 - Loves outing 
 - Loves rings the beautiful ones 
+- Spicy Pappar
 and what Not hahahahha
