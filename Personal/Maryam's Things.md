@@ -5,4 +5,6 @@
 - Loves outing 
 - Loves rings the beautiful ones 
 - Spicy Pappar
+- Loves Flowers way too much
+- Loved the London Confiti Perfume i bought from dwatson
 and what Not hahahahha

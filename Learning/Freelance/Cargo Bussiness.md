@@ -234,7 +234,8 @@ Clicking on each line opens up a new Page ( Show Trip Detail with query param tr
 like 48-2065 at url
 This can also be opened from Home Page Dropdown by entering trip id like `06-1308` and then `Trip Load to Container`
 https://mainoffice.superasiacargo.com/showtripdetail.php?tripid=48-2065
-![[TripInfoDetailsByTripId.png]]
+![[Screenshot 2026-01-15 at 7.42.54 PM.png]]
+![[Screenshot 2026-01-15 at 7.43.22 PM.png]]
 ##### Questions
 - What is `Marka No` ? 
 	- It is kind of like `invoice number` in normal financial softwares used to track a particular item being sent in cargo.
@@ -322,7 +323,8 @@ What is the purpose of this table as i think we saw almost similar one in  [[#Bi
 - Container = Godam 
 - Godam Loading Date ( Start Date)
 - To Date ( End Date)
-![[GodamWiseShipReport.png]]
+![[Screenshot 2026-01-15 at 7.28.31 PM.png]]
+![[Screenshot 2026-01-15 at 7.28.49 PM.png]]
 - If we enter ship 554 and click `Show Godam Report` it shows all items that were left out from 554 and previous ships  
 -  If we enter 553 the list of items it shows are all those which are loaded into next ship i.e 554 but were left out from Ship 553.
 #### How to load a given item into given Cargo ( Ship ) 
@@ -340,7 +342,7 @@ What is the purpose of this table as i think we saw almost similar one in  [[#Bi
 - This Is with a Date Filter otherwise its shows whole report with all time until today irrespective of Ship No 
 #### Saudi Godam
 - This one shows a report which is specifically designed to accommodate Saudi Arabia branches GODAM
-- ![[SaudiGodamReport.png]]
+- ![[Screenshot 2026-01-15 at 7.38.34 PM.png]]
 - This report shows what proerties it has as compare to previous Godam Report 
 - Clearly it is Office Wise as compare to Ship Wise from Last Godam Reports we saw for all other offices. 
 ## Master Data
@@ -386,7 +388,7 @@ This input is used to search documents using their Document ( Type ) such as ![[
 - But software allows us to change to previous ships  which in turn leads to errors and thus we have to make sure this is fixed value and can only be updated from [[#Ship Info]] page
 - Using `Container Name` we can add new container in current ship by Button `Create/Update Container`
 #### Agent
-![[containerInfoAgentListDetails.png]]
+![[Screenshot 2026-01-15 at 7.39.31 PM.png]]
 - `Agent Name` are ones in Karachi which are used to do clearance of containers 
 - The Values like `KICT` are used for Port so it can be another column as well in our new software
 - We need to ask team to provide know port values in a list 
@@ -437,9 +439,10 @@ As the name suggests allows us to delete an expense from the data for a given ![
 - What is ==Trans.ID== here 
 #### Show Trip
 - This shows all items which are in godam and are not loaded to container, it appears in red color with Godam at top
-![[GodamItemForTrip.png]]
+![[GodamItemForTrip_1.png]]
+![[GodamItemForTrip_2.png]]
 - Once loaded they show Container number at top like as in picture
-![[ShowTrip.png]]
+![[ShowTrip_1.png]]
 - Q.Status show Qarz or Debt status, `N` means no Debt, `Q` means `Debt` 
 
 ### Bilty Hold/Deletion
@@ -530,12 +533,15 @@ In this section we have different pages for Pakistan Accounts similar to UAE hea
 - This video shows that if web export option in [[#Database]] does not works then we use manual file exported as `text`  in File system drive C and upload it in [[#Select File to Upload]]
 ### Show Trip Bilties
 - Shows the bilties list which are in Godam or in any selected container
-- ![[ShowTripBilties.png]]
+- ![[ShowTripBilties_1.png]]
+- ![[ShowTripBilties_2.png]]
 - This trip had bilties which are in Godam thus its Red once loaded it will appear as white 
 ### Load Checked Marka to Container 
-- Go to [[#Trip Load To Container]] enter a trip id let say `01-1717` and then click on [[#Show Trip Bilties]] then choose any row or all rows in `Check all` column, select a container from the list and press `LOAD CHECKED MARKA TO CONTAINER` and it will load that item to container and it will go away from `GODAM` list like shown ![[ShowTripBilties.png]]
+- Go to [[#Trip Load To Container]] enter a trip id let say `01-1717` and then click on [[#Show Trip Bilties]] then choose any row or all rows in `Check all` column, select a container from the list and press `LOAD CHECKED MARKA TO CONTAINER` and it will load that item to container and it will go away from `GODAM` list like shown ![[ShowTripBilties_1.png]]
+  ![[ShowTripBilties_2.png]]
 - Now this trip items are loaded to container ad its no longer in `Godam` aka `Warehouse` but in a container with ship 559 `TEMU 8669560:SHIP # 559` 
-- ![[showTripBilitiesGodam.png]]
+- ![[showTripBilitiesGodam_1.png]]
+- ![[showTripBilitiesGodam_2.png]]
 - Selecting items in the Container and then clicking again on the button `LOAD CHECKED MARKA TO CONTAINER` would send them to GODAM or `Warehouse`
 ### Box / UnBox Markas
 - Select a marka from [[#Show Trip Bilties]] and Click this button to associate a box with this `marka` or `item` , this means this item was sent in a wooden box
@@ -608,7 +614,8 @@ lets start with [[#Account Types]]
 - We can see the `Account Type Report` for sub Account ( Dummy ) `Bussiness Loan` for Main Account `ExpenseIncome`
 - ![[Screenshot 2026-01-06 at 11.44.08 AM.png]] This shows Account Type Report for each legder in the `Bussiness Loan` sub Account. 
 #### Cargo Mix Kharch and Office Exp
-- ![[Cargo_Mix_Kharcha_Reports(Accounts).png]] For a given Date Range we can see the [[#Cargo Mix Kharch and Office Exp]] 
+- ![[Cargo_Mix_Kharcha_Reports(Accounts)_1.png]]
+- ![[Cargo_Mix_Kharcha_Reports(Accounts).png]]For a given Date Range we can see the [[#Cargo Mix Kharch and Office Exp]] 
 #### Account Type Report
 - This shows Account Type Report for given account like `Commercial Qarza Aqib` account.
 - No need to provide Date Range works without it.
@@ -675,7 +682,9 @@ lets start with [[#Account Types]]
 - Go to Godam
 ### Godam
 - Here we can see All Items in this Branch's Godam in our Example its for Sanaya
-- ![[BranchOffice_Godam_Report.png]]
+- ![[BranchOffice_Godam_Report_1.png]]
+- ![[BranchOffice_Godam_Report_2.png]]
+- ![[BranchOffice_Godam_Report_3.png]]
 - It shows both items from Local Godam ( Warehouse ) and Main Office Godam (Warehouse)
 - At Bottom it has also items list which are loaded into container and sent to Head Office 
 ## Define a Trip 
