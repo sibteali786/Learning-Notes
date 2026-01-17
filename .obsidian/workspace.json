@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "8bf26a5d28e56a38",
+        "id": "b100b424094df371",
         "type": "tabs",
         "children": [
           {
-            "id": "aaaffc056200baac",
+            "id": "d551b6e54e6798f9",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": ".obsidian/workspace.json",
-                "bFile": ".obsidian/workspace.json",
+                "aFile": "conflict-files-obsidian-git.md",
+                "bFile": "conflict-files-obsidian-git.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: workspace.json"
+              "title": "Diff: conflict-files-obsidian-git"
             }
           }
         ]
@@ -183,21 +183,30 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aaaffc056200baac",
+  "active": "d551b6e54e6798f9",
   "lastOpenFiles": [
+    "conflict-files-obsidian-git.md",
+    "Learning/JavaScript/attachments/namaste-javascript-notes.pdf",
+    "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
+    "Learning/JavaScript/attachments/functional-programming.pdf",
+    "Learning/JavaScript/attachments/Untitled.png",
+    "Learning/JavaScript/attachments/Untitled 99.png",
+    "Learning/JavaScript/attachments/Untitled 98.png",
+    "Learning/JavaScript/attachments/Untitled 97.png",
+    "Learning/JavaScript/attachments/Untitled 96.png",
+    "Learning/JavaScript/attachments/Untitled 95.png",
+    "Learning/JavaScript/attachments/Untitled 94.png",
+    "Learning/JavaScript/attachments/Untitled 93.png",
+    "Learning/JavaScript/attachments/Untitled 92.png",
+    "Learning/JavaScript/attachments/Untitled 91.png",
+    "Learning/JavaScript/attachments",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/JavaScript",
+    "Learning/Frontend Interview Preparation/Overview.md",
+    "Learning/Frontend Interview Preparation",
     "Learning/Freelance/Cargo Bussiness.md",
     "Untitled 1.base",
     "ShowTripBilties.png.md",
-    "Screenshot 2026-01-15 at 7.43.22 PM.png",
-    "Screenshot 2026-01-15 at 7.42.54 PM.png",
-    "Screenshot 2026-01-15 at 7.39.31 PM.png",
-    "Screenshot 2026-01-15 at 7.38.34 PM.png",
-    "Screenshot 2026-01-15 at 7.28.49 PM.png",
-    "Screenshot 2026-01-15 at 7.28.31 PM.png",
-    "Screenshot 2026-01-15 at 12.28.04 PM.png",
-    "Screenshot 2026-01-15 at 12.25.39 PM.png",
-    "Screenshot 2026-01-15 at 12.24.39 PM.png",
-    "Screenshot 2026-01-15 at 12.16.11 PM.png",
     "Learning/System Design/Networking/Attachments/Fundamentals+of+Networking+Engineering.pdf",
     "Learning/System Design/Networking/Transport Layer Protocols.excalidraw.md",
     "Learning/System Design/Networking/Networking.md",
@@ -205,12 +214,6 @@
     "Learning/System Design/Networking/Application Layer.excalidraw.md",
     "Learning/System Design/Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
     "Learning/System Design/Networking",
-    "Learning/System Design",
-    "Learning/Freelance/attachments/commerical_account_ledger.pdf",
-    "Learning/Freelance/attachments/cashbook_dated.pdf",
-    "Learning/Freelance/attachments/boxWiseShipReport.pdf",
-    "Learning/Freelance/attachments/Qarza_Wasoolu_Ledger.pdf",
-    "Learning/Freelance/attachments/OfficeWiseSummaryReportForSHip_MiscReports.pdf",
     "Learning/DSA/Arrays and Hashing/ValidAnagrams.excalidraw.md",
     "Learning/DSA/Arrays and Hashing/TwoSum.excalidraw.md",
     "Learning/DSA/Arrays and Hashing/TopKFrequentElements.excalidraw.md",
@@ -229,8 +232,6 @@
     "2025-10-27 ( Multi-Tenant Chat App findings and Issues ).md",
     "2025-10-25.md",
     "2025-10-14.md",
-    "2025-10-17.md",
-    "2025-10-16.md",
     "Untitled 1.canvas"
   ]
 }
