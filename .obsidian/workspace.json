@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "ce731dff84cd7be5",
+        "id": "8bf26a5d28e56a38",
         "type": "tabs",
         "children": [
           {
-            "id": "693d6be01261393e",
+            "id": "aaaffc056200baac",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
-                "mode": "source",
-                "source": false
+                "aFile": ".obsidian/workspace.json",
+                "bFile": ".obsidian/workspace.json",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Cargo Bussiness"
+              "icon": "diff",
+              "title": "Diff: workspace.json"
             }
           }
         ]
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/DSA/Arrays and Hashing/Group Anagrams.excalidraw.md",
+                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Group Anagrams.excalidraw"
+              "title": "Outline of Cargo Bussiness"
             }
           },
           {
@@ -183,55 +183,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "693d6be01261393e",
+  "active": "aaaffc056200baac",
   "lastOpenFiles": [
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report_3.png.sb-bf13c377-MkoCVU",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report_2.png.sb-bf13c377-Ex52Cc",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report_3.png",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report_2.png",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report copy 2.png",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report copy.png",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report_1.png.sb-bf13c377-WZ1WQp",
-    "Learning/Freelance/attachments/BranchOffice_Godam_Report_1.png",
-    "Learning/Freelance/attachments/Cargo_Mix_Kharcha_Reports(Accounts)_2.png.sb-bf13c377-SHch3z",
-    "Learning/Freelance/attachments/Cargo_Mix_Kharcha_Reports(Accounts)_2.png",
-    "Learning/Freelance/attachments/Cargo_Mix_Kharcha_Reports(Accounts) copy 2.png",
-    "Learning/Freelance/attachments/Cargo_Mix_Kharcha_Reports(Accounts) copy.png",
-    "Learning/Freelance/attachments/Cargo_Mix_Kharcha_Reports(Accounts)_1.png.sb-bf13c377-rb3A4G",
-    "Learning/Freelance/attachments/Cargo_Mix_Kharcha_Reports(Accounts)_1.png",
-    "Learning/Freelance/attachments/ShowTripBilties.png",
-    "ShowTripBilties.png.md",
     "Learning/Freelance/Cargo Bussiness.md",
-    "Learning/Freelance/attachments/ShowTripBilties copy 2.png.sb-bf13c377-IMakpz",
-    "Learning/Freelance/attachments/ShowTripBilties copy.png.sb-bf13c377-Vy7Efh",
-    "Learning/Freelance/attachments/showTripBilitiesGodam copy 2.png.sb-bf13c377-4WVqBu",
-    "Learning/Freelance/attachments/showTripBilitiesGodam copy.png.sb-bf13c377-rCplLO",
-    "Learning/Freelance/attachments/ShowTrip_1.png.sb-bf13c377-1v4sl4",
-    "Learning/Freelance/attachments/GodamWiseShipReport_3.png.sb-bf13c377-x1d7qi",
-    "Learning/System Design/Networking/Application Layer.excalidraw.md",
-    "Learning/System Design/Networking/Networking.md",
-    "Personal/Maryam's Things.md",
-    "Learning/DSA/Arrays and Hashing/TopKFrequentElements.excalidraw.md",
-    "Learning/Side Projects/GO Projects.md",
+    "Untitled 1.base",
+    "ShowTripBilties.png.md",
+    "Screenshot 2026-01-15 at 7.43.22 PM.png",
+    "Screenshot 2026-01-15 at 7.42.54 PM.png",
+    "Screenshot 2026-01-15 at 7.39.31 PM.png",
+    "Screenshot 2026-01-15 at 7.38.34 PM.png",
+    "Screenshot 2026-01-15 at 7.28.49 PM.png",
+    "Screenshot 2026-01-15 at 7.28.31 PM.png",
+    "Screenshot 2026-01-15 at 12.28.04 PM.png",
+    "Screenshot 2026-01-15 at 12.25.39 PM.png",
+    "Screenshot 2026-01-15 at 12.24.39 PM.png",
+    "Screenshot 2026-01-15 at 12.16.11 PM.png",
+    "Learning/System Design/Networking/Attachments/Fundamentals+of+Networking+Engineering.pdf",
     "Learning/System Design/Networking/Transport Layer Protocols.excalidraw.md",
-    "conflict-files-obsidian-git.md",
-    "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
-    "2025-10-23.md",
-    "2025-10-25.md",
-    "2025-10-27 ( Multi-Tenant Chat App findings and Issues ).md",
-    "2025-10-31  ( Whimsical ).md",
-    "Learning/DSA/Arrays and Hashing/Group Anagrams.excalidraw.md",
-    "Learning/Freelance/attachments/conflict-files-obsidian-git.md",
-    "Learning/DSA/ValidAnagrams.excalidraw.md",
-    "Learning/DSA/TwoSum.excalidraw.md",
-    "Learning/DSA/CotnainsADuplicate.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/ValidAnagrams.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/CotnainsADuplicate.excalidraw.md",
-    "Test Driven Development/Guide and Resources.md",
+    "Learning/System Design/Networking/Networking.md",
+    "Learning/System Design/Networking/Attachments",
+    "Learning/System Design/Networking/Application Layer.excalidraw.md",
     "Learning/System Design/Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
-    "Excalidraw/Drawing 2026-01-09 00.22.28.excalidraw.md",
+    "Learning/System Design/Networking",
+    "Learning/System Design",
+    "Learning/Freelance/attachments/commerical_account_ledger.pdf",
+    "Learning/Freelance/attachments/cashbook_dated.pdf",
+    "Learning/Freelance/attachments/boxWiseShipReport.pdf",
+    "Learning/Freelance/attachments/Qarza_Wasoolu_Ledger.pdf",
+    "Learning/Freelance/attachments/OfficeWiseSummaryReportForSHip_MiscReports.pdf",
+    "Learning/DSA/Arrays and Hashing/ValidAnagrams.excalidraw.md",
     "Learning/DSA/Arrays and Hashing/TwoSum.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/TopKFrequentElements.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/Group Anagrams.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/CotnainsADuplicate.excalidraw.md",
+    "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
+    "Personal/Maryam's Things.md",
+    "Test Driven Development/Guide and Resources.md",
+    "Container Info.md",
     "Untitled.canvas",
+    "Learning/Work Stuff/Wnp Links Section or Screen.md",
+    "Learning/Work Stuff/Serial Number Feature.md",
+    "Learning/Open Source/Git Contributions.md",
+    "2025-10-23.md",
+    "2025-10-31  ( Whimsical ).md",
+    "2025-10-27 ( Multi-Tenant Chat App findings and Issues ).md",
+    "2025-10-25.md",
+    "2025-10-14.md",
+    "2025-10-17.md",
+    "2025-10-16.md",
     "Untitled 1.canvas"
   ]
 }
