@@ -4,21 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "b100b424094df371",
+        "id": "cef3763bf59005f3",
         "type": "tabs",
         "children": [
           {
-            "id": "d551b6e54e6798f9",
+            "id": "40fc87acbb28276c",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "excalidraw",
               "state": {
-                "aFile": "conflict-files-obsidian-git.md",
-                "bFile": "conflict-files-obsidian-git.md",
-                "aRef": ""
+                "file": "Learning/DSA/Arrays and Hashing/TopKFrequentElements.excalidraw.md"
               },
-              "icon": "diff",
-              "title": "Diff: conflict-files-obsidian-git"
+              "icon": "excalidraw-icon",
+              "title": "TopKFrequentElements.excalidraw"
             }
           }
         ]
@@ -78,7 +76,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 264.5
+    "width": 264.5,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -142,13 +141,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cargo Bussiness"
+              "title": "Outline"
             }
           },
           {
@@ -162,7 +160,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -183,55 +181,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "d551b6e54e6798f9",
+  "active": "9e5df222a664fcfb",
   "lastOpenFiles": [
+    "Learning/DSA/Java/Java_DSA.md",
     "conflict-files-obsidian-git.md",
-    "Learning/JavaScript/attachments/namaste-javascript-notes.pdf",
-    "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
-    "Learning/JavaScript/attachments/functional-programming.pdf",
-    "Learning/JavaScript/attachments/Untitled.png",
-    "Learning/JavaScript/attachments/Untitled 99.png",
-    "Learning/JavaScript/attachments/Untitled 98.png",
-    "Learning/JavaScript/attachments/Untitled 97.png",
-    "Learning/JavaScript/attachments/Untitled 96.png",
-    "Learning/JavaScript/attachments/Untitled 95.png",
-    "Learning/JavaScript/attachments/Untitled 94.png",
-    "Learning/JavaScript/attachments/Untitled 93.png",
-    "Learning/JavaScript/attachments/Untitled 92.png",
-    "Learning/JavaScript/attachments/Untitled 91.png",
-    "Learning/JavaScript/attachments",
-    "Learning/JavaScript/Javascript.md",
-    "Learning/JavaScript",
-    "Learning/Frontend Interview Preparation/Overview.md",
-    "Learning/Frontend Interview Preparation",
-    "Learning/Freelance/Cargo Bussiness.md",
-    "Untitled 1.base",
-    "ShowTripBilties.png.md",
-    "Learning/System Design/Networking/Attachments/Fundamentals+of+Networking+Engineering.pdf",
-    "Learning/System Design/Networking/Transport Layer Protocols.excalidraw.md",
-    "Learning/System Design/Networking/Networking.md",
-    "Learning/System Design/Networking/Attachments",
-    "Learning/System Design/Networking/Application Layer.excalidraw.md",
-    "Learning/System Design/Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
-    "Learning/System Design/Networking",
-    "Learning/DSA/Arrays and Hashing/ValidAnagrams.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/TwoSum.excalidraw.md",
     "Learning/DSA/Arrays and Hashing/TopKFrequentElements.excalidraw.md",
+    "Learning/DSA/Java/attachments/Untitled 185.png",
+    "Learning/DSA/Java/attachments/Untitled 191.png",
+    "Learning/DSA/Java/attachments/Untitled 146.png",
+    "Learning/DSA/Java/attachments/Untitled 152.png",
+    "Learning/DSA/Java/attachments/Untitled 26.png",
+    "Learning/DSA/Java/attachments/Untitled 32.png",
+    "Learning/DSA/Java/attachments/Untitled 5.jpeg",
+    "Learning/DSA/Java/attachments/Handwritten_notes_on_Binary_Search.pdf",
+    "Learning/DSA/Java/attachments/Untitled 230.png",
+    "Learning/DSA/Java/attachments/Untitled 224.png",
+    "Learning/DSA/Java/attachments/Untitled 218.png",
+    "Learning/DSA/Java/attachments/Divide_and_conquer_.pdf",
+    "Learning/DSA/Java/attachments/cyclic_sort_notes.pdf",
+    "Learning/DSA/Java/attachments/little_omega.pdf",
+    "Learning/DSA/Java/attachments/Recursion_-_1.pdf",
+    "Learning/DSA/Java/attachments/linear_recurrence_.pdf",
+    "Learning/DSA/Java/attachments/Handwritten_Notes_on_Insertion_Sort.pdf.pdf",
+    "Learning/DSA/Java/attachments/Graphs Hard Problems/1671018490191",
+    "Learning/DSA/Java/attachments/Graphs Hard Problems",
+    "Learning/DSA/Java/attachments/Patterns.pdf",
+    "Learning/DSA/Java/attachments/Graphs Hard Problems feaa6fb950bd48b9b8f6dcb00492e85a.md",
     "Learning/DSA/Arrays and Hashing/Group Anagrams.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/CotnainsADuplicate.excalidraw.md",
-    "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
+    "Learning/Book Reading/Atomic Habbits.md",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
+    "Learning/Freelance/Cargo Bussiness.md",
+    "Learning/Frontend Interview Preparation/Overview.md",
+    "ShowTripBilties.png.md",
+    "Learning/System Design/Networking/Application Layer.excalidraw.md",
+    "Learning/System Design/Networking/Networking.md",
     "Personal/Maryam's Things.md",
-    "Test Driven Development/Guide and Resources.md",
-    "Container Info.md",
-    "Untitled.canvas",
-    "Learning/Work Stuff/Wnp Links Section or Screen.md",
-    "Learning/Work Stuff/Serial Number Feature.md",
-    "Learning/Open Source/Git Contributions.md",
+    "Learning/Side Projects/GO Projects.md",
+    "Learning/System Design/Networking/Transport Layer Protocols.excalidraw.md",
+    "2025-10-13 ( WNP Bugs, Chat App Issues ).md",
     "2025-10-23.md",
-    "2025-10-31  ( Whimsical ).md",
-    "2025-10-27 ( Multi-Tenant Chat App findings and Issues ).md",
     "2025-10-25.md",
-    "2025-10-14.md",
+    "2025-10-27 ( Multi-Tenant Chat App findings and Issues ).md",
+    "2025-10-31  ( Whimsical ).md",
+    "Learning/Freelance/attachments/conflict-files-obsidian-git.md",
+    "Learning/DSA/ValidAnagrams.excalidraw.md",
+    "Learning/DSA/TwoSum.excalidraw.md",
+    "Learning/DSA/CotnainsADuplicate.excalidraw.md",
+    "Untitled.canvas",
     "Untitled 1.canvas"
   ]
 }

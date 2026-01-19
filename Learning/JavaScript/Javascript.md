@@ -939,7 +939,7 @@ Summary
             ![Untitled](Untitled%2077.png)
             
         4. The difference is because of the fact that square2 and square4 are variables while square is a function only.
-        5. 
+        
         
         ### Code Execution Phase
         
@@ -1089,7 +1089,6 @@ Summary
     
 
 ### Window and this → Keyword
-
 1. An empty Js file is the shortest Js program.
 2. Even though there is no code but still JS Engine sets up the **GEC** and maintains the **Call Stack.**
 3. ***Window*** if we write in inspection logs, Is an object containing many functions and method.
@@ -1097,38 +1096,22 @@ Summary
 5. Another one is ***this***, which points to window object at GEC and is created with every Execution Context created. 
 
 > Window is a global object created along with Global Execution Context, and along with GEC a this variable is created.
-> 
 1. the global object may differ from environment to environment but there will always be one may it be a Browser or an OS etc. 
 2. Where this ==== window at Global EC.
 - Example
-    
     ![Untitled](Untitled%20108.png)
-    
-    At Global level we can access any variable using window or simple the variable name itself.
-    
-    ![Untitled](Untitled%20109.png)
-    
+    At Global level we can access any variable using window or simple the variable name itself.![Untitled](Untitled%20109.png)
     Same goes for this at Global level.
-    
-
 ### Undefined vs Not Defined
-
 ![Untitled](Untitled%20110.png)
-
 1. Undefined a special keyword in JS. Before any line is executed, Js engine reserves memory to all variables and the values assigned to variables before execution is undefined.
 2. Undefined is more of a placeholder, placed there in memory reserved for that variable.
-3. While if we try to access something for which there is memory reserved then its gonna give a reference error.
-
+3. While if we try to access something for which there is no memory reserved then its gonna give a reference error.
 ![Untitled](Untitled%20111.png)
-
-1. Using given code we can check if a is truly assigned an undefined value or not.
-
+4. Using given code we can check if a is truly assigned an undefined value or not.
 ![Untitled](Untitled%20112.png)
-
-1. JS is a loosely typed language. We can assign any kind of value string, Int or Boolean to given variable given the fact that its prior value might be different from what we are assigning now
-
+5. JS is a loosely typed language. We can assign any kind of value string, Int or Boolean to given variable given the fact that its prior value might be different from what we are assigning now
 ![Untitled](Untitled%20113.png)
-
 ### Scope Chain
 
 - Example
@@ -1160,7 +1143,7 @@ Summary
 1. Scope is directly linked with lexical environment.
 
 ## Lexical Environment
-
+ 
 ![Untitled](Untitled%20117.png)
 
 1. Global EC is pushed into Call Stack.
@@ -1180,8 +1163,7 @@ Summary
 Like ***function c*** is lexically inside **function a** and function is lexically present in Global Execution Context.
 
 1. **Function c** has access to lexical environment of **function a** which means local memory of a and lexical environment of Global Execution Context. 
-2. The orange box represents local memory + lexical environment of parent. `
-    
+2. The orange box represents local memory + lexical environment of parent. 
     ![Untitled](Untitled%20121.png)
     
     ![Untitled](Untitled%20122.png)
@@ -1212,11 +1194,11 @@ Like ***function c*** is lexically inside **function a** and function is lexical
         
         ![Untitled](Untitled%20125.png)
         
-    3. variables declared with let and const are not stored GEC but some other memory space. They have some separate memory space where they have reserved memory space thus we cannot access the until they are initialized some value.
+    1. variables declared with let and const are ==not stored GEC but some other memory space. They have some separate memory space where they have reserved memory space thus we cannot access the until they are initialized some value.==
         
         ![Untitled](Untitled%20126.png)
         
-    4. Now a is assigned a value of 10.
+    2. Now a is assigned a value of 10.
 
 ### Temporal Dead Zone
 
@@ -1390,22 +1372,21 @@ The whole problem of Illegal Shadowing arises from the fact that the varaible sh
         
     3. After that x is gone out of existence now when we call z, we logging a which was part of x ? what will happen now ?
     4. It will print a still, because of closure y still bounded to its parent’s lexica scope i.e fucntion x.
-- Corner Cases
-    
+  ### Corner Cases
     ![Untitled](Untitled%20148.png)
     
-    1. a is modified after declaring y inside x.
-    2. Will it 7 still or 100. 
-    3. It will be 100 as a inside y is not only value of a i.e 7 but actual reference to a .
-    4. So when a at x changes it does for y’s lexical scope as well.
+    5. a is modified after declaring y inside x.
+    6. Will it 7 still or 100. 
+    7. It will be 100 as a inside y is not only value of a i.e 7 but actual reference to a .
+    8. So when a at x changes it does for y’s lexical scope as well.
     
     ### Another One ( Nested Function )
     
-    1. Further nested, would b be accessible? 
+    9. Further nested, would b be accessible? 
         
         ![Untitled](Untitled%20149.png)
         
-    2. Yes it will be as b will be included in lexical scope of a which is part of lexical scope of y.
+    10. Yes it will be as b will be included in lexical scope of a which is part of lexical scope of y.
     
 
 ### setTimeout + Closures
