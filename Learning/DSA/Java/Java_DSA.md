@@ -1,5 +1,5 @@
-# Java_DSA
-
+```table-of-contents
+```
 # Intro to Programming, Memory Management
 
 1. Computers understand only 0s and 1s so when we want them to perform a specific operation. We cannot directly use 0s and 1s combination as is not possible for humans to do it.
