@@ -6524,7 +6524,7 @@ Unstable Sort
                  // find the max item in the remaining array and swap with correct index
                  int last = arr.length - i - 1;
                  int maxIndex =getMaxIndex(arr,0,last);
-    swap(arr,maxIndex,last);
+                 swap(arr,maxIndex,last);
              }
          }
     
@@ -6549,7 +6549,6 @@ Unstable Sort
     
 
 ## Insertion Sort
-
 Notes
 
 [Handwritten Notes on Insertion Sort.pdf.pdf](Handwritten_Notes_on_Insertion_Sort.pdf.pdf)
@@ -6668,7 +6667,7 @@ Notes
     ![Untitled](Learning/DSA/Java/attachments/Untitled%20269.png)
     
 
-## Merge Sort
+ ## Merge Sort
 
 [Merge Sort.pdf](Merge_Sort.pdf)
 
@@ -7144,7 +7143,7 @@ Notes
     ```
     
 
-### Strings and Strings Builder
+Strings and Strings Builder
 
 [Strings in detail .pdf](Strings_in_detail_.pdf)
 

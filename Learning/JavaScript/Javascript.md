@@ -1157,7 +1157,7 @@ Summary
 
 ![Untitled](Learning/JavaScript/attachments/Untitled%20120.png)
 
-> Wen an EC is created a lexical environment is created. It is nothing but local memory along with Lexical Environment of its parent.
+> When an EC is created a lexical environment is created. It is nothing but local memory along with Lexical Environment of its parent.
 > 
 
 Like ***function c*** is lexically inside **function a** and function is lexically present in Global Execution Context.
@@ -1178,7 +1178,8 @@ Like ***function c*** is lexically inside **function a** and function is lexical
 
 ### Let and Constant Declarations are hoisted
 
-> Its true but its entirely different then the var hoisting. Actually they are in the temporal dead zone for the time being.
+> [!Definition]
+> Its true but its entirely different then the var hoisting. Actually they are in the temporal dead zone for let and const.
 > 
 - Example
     
@@ -1202,13 +1203,17 @@ Like ***function c*** is lexically inside **function a** and function is lexical
 
 ### Temporal Dead Zone
 
-> The time since when it was hoisted to time until it was initialized with a value.
+> The time since when it was hoisted to time until it was initialised with a value.
 > 
 
 ### Reference Error
 
+> [!Definition]
 > Accessing a variable within its temporal dead zone gives rise to a reference error.
 > 
+
+> [!NOTE]
+> - Remember only let and const have temporal dead zones ( TDZs ) while var has none.
 
 > It will also rise when we access a variable not even defined in our code.
 > 
@@ -1226,11 +1231,11 @@ Although error message will be different in both cases.
 > ![Untitled](Learning/JavaScript/attachments/Untitled%20127.png)
 > 
 
-It does not matter if this declaration is done either using var or let 
 
 ![Untitled](Learning/JavaScript/attachments/Untitled%20128.png)
 
-There is no such error in case var declaration and re declaration. 
+> [!NOTE]
+> There is no such error in case var declaration and re declaration. 
 
 > In case of syntax error JS code do not even runs a single line at all.
 > 
@@ -1239,7 +1244,7 @@ In case of Const we have to declare and define variable at same line unlike let 
 
 ![Untitled](Learning/JavaScript/attachments/Untitled%20129.png)
 
-This syntax error demands that initalizer is missing on line 4 where b is declared only.
+This syntax error demands that initialiser is missing on line 4 where b is declared only.
 
 ### Type Error
 
@@ -1256,15 +1261,16 @@ If we try to re assign a value to a constant variable we get Type Error.
 | Recommended to be used always or whenever possible. Specially in cases where we do not want to re assign values to a variable. | Second preference is let wherever possible because of its TDZ, will not run into un expected errors. | least recommended to be used because of how much error prone it can be sometimes. |
 - How to avoid Temporal Dead Zones
     
-    > Always have declarations at top of the code.
-    > 
+> [!Note]
+> Always have declarations at top of the code.
+> 
 
 ### Block Scope and Shadowing
 
 ### Block / Compound Statement
 
+> [!Note]
 > Usually code written in curly brackets.
-> 
 - Why we use it?
     
      1. Block is used to combine multiple statements into one. 
@@ -1285,8 +1291,9 @@ If we try to re assign a value to a constant variable we get Type Error.
 
 ### Block Scope
 
+> [!Definition]
 > The variables we can access in a block.
-> 
+
 
 ![Untitled](Learning/JavaScript/attachments/Untitled%20134.png)
 
@@ -1315,8 +1322,8 @@ If we try to re assign a value to a constant variable we get Type Error.
     
 5. We expect similar behavior in case of constant. 
 
+> [!Note]
 > Shadowing is not only limited to Block Scope, works similar with Functional Scopes as well.
-> 
 
 ### Illegal Shadowing
 
@@ -1338,77 +1345,58 @@ Legal Shadowing
 
 ### Details
 
-The whole problem of Illegal Shadowing arises from the fact that the varaible shadowing should not cross its scope boundary. Like in case of outer let and inner var → var has still GEC while if same var was in function it would have FEC and thus would be legal shadowing. 
+> [!NOTE]
+> The whole problem of Illegal Shadowing arises from the fact that the varaible shadowing should not cross its scope boundary. Like in case of outer let and inner var → var has still GEC while if same var was in function it would have FEC and thus would be legal shadowing. 
+![[Screenshot 2026-01-30 at 11.34.53 AM.png]]
+as you can see it did not produce any error since var now has Functional Execution Context instead of GEC
 
 ### Closures
 
+> [!Definition]
 > Function bundled together with its lexical scope is Closure
-> 
+
 - Example and Definition
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20143.png)
-    
-    1. a is not inside function y so will look into lexical scope of its parent function x.
-    2. It is closure, we can see it as well in browser debugger.
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20144.png)
-    
-    > Inside function y, it forms a closure with variables part of function x’s lexical scope. Thus function y was bind to variables of x’s Lexical Scope.
-    > 
-    
-    > 
-    > 
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20145.png)
-    
+- ![Untitled](Learning/JavaScript/attachments/Untitled%20143.png)
+1. a is not inside function y so will look into lexical scope of its parent function x.
+2. It is closure, we can see it as well in browser debugger.
+![Untitled](Learning/JavaScript/attachments/Untitled%20144.png)
+> [!Note]
+> Inside function y, it forms a closure with variables part of function x’s lexical scope. Thus function y was bind to variables of x’s Lexical Scope.
+
+![Untitled](Learning/JavaScript/attachments/Untitled%20145.png)
 - Example ( Returned Function )
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20146.png)
-    
-    1. If we assign this returned function to some variable and log it, we simply get the function itself.
-    2. Now according to what we learned previously, when x is invoked() it has its FEC and after that line of assigning to z. 
-        
-        ![Untitled](Learning/JavaScript/attachments/Untitled%20147.png)
-        
-    3. After that x is gone out of existence now when we call z, we logging a which was part of x ? what will happen now ?
-    4. It will print a still, because of closure y still bounded to its parent’s lexica scope i.e fucntion x.
-  ### Corner Cases
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20148.png)
-    
-    5. a is modified after declaring y inside x.
-    6. Will it 7 still or 100. 
-    7. It will be 100 as a inside y is not only value of a i.e 7 but actual reference to a .
-    8. So when a at x changes it does for y’s lexical scope as well.
-    
-    ### Another One ( Nested Function )
-    
-    9. Further nested, would b be accessible? 
-        
-        ![Untitled](Learning/JavaScript/attachments/Untitled%20149.png)
-        
-    10. Yes it will be as b will be included in lexical scope of a which is part of lexical scope of y.
-    
+![Untitled](Learning/JavaScript/attachments/Untitled%20146.png)
+1. If we assign this returned function to some variable and log it, we simply get the function itself.
+2. Now according to what we learned previously, when x is invoked() it has its FEC and after that line of assigning to z.         
+![Untitled](Learning/JavaScript/attachments/Untitled%20147.png)
+3. After that x is gone out of existence now when we call z, we logging a which was part of x ? what will happen now ?
+4. It will print a still, because of closure y still bounded to its parent’s lexica scope i.e fucntion x
+### Corner Cases ( Closure )
+![Untitled](Learning/JavaScript/attachments/Untitled%20148.png)
+1. a is modified after declaring y inside x.
+2. Will it 7 still or 100. 
+3. It will be 100 as a inside y is not only value of a i.e 7 but actual reference to a .
+4. So when a at x changes it does for y’s lexical scope as well.    
+### Another One ( Nested Function )    
+1. Further nested, would b be accessible?  
+![Untitled](Learning/JavaScript/attachments/Untitled%20149.png)
+2. Yes it will be as b will be included in lexical scope of a which is part of lexical scope of y. 
 
 ### setTimeout + Closures
 
 1. This function prints 1 after three seconds ( 1000ms = 1s )
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20150.png)
-    
+![Untitled](Learning/JavaScript/attachments/Untitled%20150.png)    
 2. Here Namaste JS will be printed first then it wait 1s to log value of i.e. 1.
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20151.png)
-    
-
+![Untitled](Learning/JavaScript/attachments/Untitled%20151.png)
+> [!Note]
 > JS waits for nothing and just moves on.
-> 
+
 - What happens BTS ?
-    1. setTimeout actually stores this callback function ( which is along with its local environment + lexical scope of parent ) somewhere in the memory attached with timer.
-    2. Then JS moves on to execute other things.
-    3. Once the timer expires setTimeout picks the function again and puts it in the call stack to run it.
-    
-- Example ( Print numbers→ respective after each second )
-    1. This code where we start with 1 till 5 while at each step multiple with i to make sure each element gets printed at its seconds passed. But does it works this way ?
+1. setTimeout actually stores this callback function ( which is along with its local environment + lexical scope of parent ) somewhere in the memory attached with timer.
+   2. Then JS moves on to execute other things.
+  3. Once the timer expires setTimeout picks the function again and puts it in the call stack to run it.
+#### Example ( Print numbers→ respective after each second )
+1. This code where we start with 1 till 5 while at each step multiple with i to make sure each element gets printed at its seconds passed. But does it works this way ?
     
     ![Untitled](Learning/JavaScript/attachments/Untitled%20152.png)
     
@@ -1418,149 +1406,86 @@ The whole problem of Illegal Shadowing arises from the fact that the varaible sh
     
     1. What happens is in first iteration and so on, the setTimeout stores this function with its closure to some place binding timer. All these five copies of same function point to same value of ***i***.
     2. Thus after last iteration reference of ***i*** updates to 6, that is why until 1 second passes loops are already run ( **as JS waits for none** ) and value of ***i*** is set to 6. so it prints values 6, five times.
-    
-    ### Solution with let
-    
-    > Use let instead of var.
-    > 
-    1. ***Let*** has a block scope and in every iteration a new value of ***i*** is assigned to each respective function copy thus now it prints correct values.
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20154.png)
-    
-    ### Solution with var
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20155.png)
-    
-    1. Enclose the setTimeout in other function, now supply i as an argument to this function, which in return produces a new copy and thus setTimeout callack has reference to new value of i and not similar value.
-
+### Solution with let    
+ > Use let instead of var.
+> 
+   1. ***Let*** has a block scope and in every iteration a new value of ***i*** is assigned to each respective function copy thus now it prints correct values.
+   2. Var has Fucntional Sope here and does not have block scope thus it causes this issue.
+![Untitled](Learning/JavaScript/attachments/Untitled%20154.png)    
+### Solution with var
+![Untitled](Learning/JavaScript/attachments/Untitled%20155.png)    
+1. Enclose the setTimeout in other function, now supply i as an argument to this function, which in return produces a new copy and thus setTimeout callack has reference to new value of i and not similar value.
 ### JS Interview ( Closures )
 
 - What is Closure in JS ?
-    
-    [Example and Definition ](Javascript.md) 
-    
-    [Corner Cases ](Javascript.md) 
-    
+[Example and Definition ](Javascript.md) 
+[[#Corner Cases ( Closure )]]
 - Closure Example
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20156.png)
-    
-    1. Inner remembers its local memory and has access to lexical environment of its parent → outer.
-    2. Calling inner directly using outer using double parenthesis.
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20157.png)
-    
+![Untitled](Learning/JavaScript/attachments/Untitled%20156.png)
+1. Inner remembers its local memory and has access to lexical environment of its parent → outer.
+2. Calling inner directly using outer using double parenthesis.    
+![Untitled](Learning/JavaScript/attachments/Untitled%20157.png)
 - What are double ()() parenthesis used for
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20158.png)
-    
-    1. Instead of calling inner we can use double parenthesis to call inner fucntion as its being returned inside outer function.
-    2. We can also do something, like assign outer to a variable and then call it ( its similar to using double parenthesis )
-        
-        ![Untitled](Learning/JavaScript/attachments/Untitled%20159.png)
-        
-    
-- Special Case for Clousure ( Corner Case )
-    
-    [Corner Cases ](Javascript.md) 
-    
+![Untitled](Learning/JavaScript/attachments/Untitled%20158.png)
+  
+   1. Instead of calling inner we can use double parenthesis to call inner fucntion as its being returned inside outer function.
+2. We can also do something, like assign outer to a variable and then call it ( its similar to using double parenthesis )        
+![Untitled](Learning/JavaScript/attachments/Untitled%20159.png)
+- Special Case for Clousure ( Corner Case ) [[#Closure]]
 - Using let ( Block Scope as variable declarator )
-    
-    > Although let is block scope but since its in lexical environment of outer thus is still accessible to inner wherever its used in code.
-    > 
-    > 
-    > ![Untitled](Learning/JavaScript/attachments/Untitled%20160.png)
-    > 
+> Although let is block scope but since its in lexical environment of outer thus is still accessible to inner wherever its used in code.
+ > ![Untitled](Learning/JavaScript/attachments/Untitled%20160.png)
 - Are function parameters closed over
-    
-    > yes since b or fucntion parameter is part of LE of inner’s parent thus can be accessed.
-    > 
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20161.png)
-    
+> yes since b or function parameter is part of [[#Lexical Environment]] of inner’s parent thus can b accessed.
+- ![Untitled](Learning/JavaScript/attachments/Untitled%20161.png)
 - Relation of Scope Chain and Closure ( Does Nesting outer inside other function still works for inner )
-    
-    [Another One ( Nested Function )](Javascript.md) 
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20162.png)
-    
+- [[#Another One ( Nested Function )]] 
+![Untitled](Learning/JavaScript/attachments/Untitled%20162.png)
 - How we used to pass parameter to second parenthesis in double parenthesis
-    
-    We can pass parameter to outer function directly from calling outest using double parenthesis. 
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20163.png)
-    
-- Conflicting names Global variable JS
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20164.png)
-    
-    1. It remains same because of two things
-        1. Block scope of let and reference to outer’s ***a*** is remembered by inner
-        2. Even though ***a*** is again declared but its scope of is still not affecting closured value of ***a*** accessible to inner().
-        3. Although if ***a*** is removed from outer function then it defaults back to global ***a.***
-        
-        [https://www.notion.so](https://www.notion.so)
-        
-- Advantages of Closure
+We can pass parameter to outer function directly from calling outest using double parenthesis.       ![Untitled](Learning/JavaScript/attachments/Untitled%20163.png)
+- Conflicting names Global variable JS    
+![Untitled](Learning/JavaScript/attachments/Untitled%20164.png)
+1. It remains same because of two things
+2. Block scope of let and reference to outer’s ***a*** is remembered by inner
+3. Even though ***a*** is again declared but its scope of is still not affecting closured value of ***a*** accessible to inner().  
+4. Although if ***a*** is removed from outer function then it defaults back to global ***a.***
+5. [https://www.notion.so](https://www.notion.so)    
+#### Advantages of Closure
     1. Module Pattern
     2. Function Currying 
     3. Higher Order Functions ( Memoize, Once )
     4. Data Hiding and Encapsulation
 - Data Hiding and Encapsulation
-    
-    > Limiting the access of data possessed by a function for other functions and part of code.
-    > 
-    - Example
-        
-        ![Untitled](Learning/JavaScript/attachments/Untitled%20165.png)
-        
-        1. In above case anyone can access the counter variable inside code. 
-        2. So what we can do is to enclose it in another function to limit its access from outer variables.
-            
-            ![Untitled](Learning/JavaScript/attachments/Untitled%20166.png)
-            
-        3. Further using Closure to allow outer code to call function and use it keeping in view that they cannot access count variable or modify it specifically. Why ? 
-            1. Because incrementCounter() forms closure with counter() so has access to count, below we are incrementing value of count but we cannot change it other whats expected only because of Closure ( Data Hiding and Encapsulation )
-            
-            ![Untitled](Learning/JavaScript/attachments/Untitled%20167.png)
-            
-        4. If we initialize two variables two call of counter() they both will be separate as new copies for both functions in memory will be created ( FEC ) thus they will have reference to their own count. Separate from each other.
-            
-            ![Untitled](Learning/JavaScript/attachments/Untitled%20168.png)
-            
-    - Is it scalable and efficient in this way to make a counter, what if we also want to use decrement as well
-        
-        No its not, we can use constructor function
-        
-        1. Using constructor function we can assign variables to every instance created for counter function which will be called respectively.
-            
-            ![Untitled](Learning/JavaScript/attachments/Untitled%20169.png)
-            
-- Disadvantages of Closures
-    1. Over consumption of memory is there, The closed over variables sometimes are not garbage collected. Thus creating much closure takes a lot of memory in general. 
-- Garbage Collector
-    
-    > It frees up the un utilized memory, JS is a high level programming so unlike C / C++ where memory is in our control and we decide whether to free memory or not. But in JS garbage collector automatically frees up memory.
-    > 
-    
-     
-    
+> [!Note]
+> Limiting the access of data possessed by a function for other functions and part of code.
+ 
+##### Example
+![Untitled](Learning/JavaScript/attachments/Untitled%20165.png)
+1. In above case anyone can access the counter variable inside code. 
+2. So what we can do is to enclose it in another function to limit its access from outer variables.            
+![Untitled](Learning/JavaScript/attachments/Untitled%20166.png)
+3. Further using Closure to allow outer code to call function and use it keeping in view that they cannot access count variable or modify it specifically. Why ? 
+4. Because incrementCounter() forms closure with counter() so has access to count, below we are incrementing value of count but we cannot change it other whats expected only because of Closure ( Data Hiding and Encapsulation )        
+5. ![Untitled](Learning/JavaScript/attachments/Untitled%20167.png)    
+6. If we initialize two variables two call of counter() they both will be separate as new copies for both functions in memory will be created ( FEC ) thus they will have reference to their own count. Separate from each other.        
+![Untitled](Learning/JavaScript/attachments/Untitled%20168.png)            
+ Is it scalable and efficient in this way to make a counter, what if we also want to use decrement as well
+No its not, we can use constructor function
+7. Using constructor function we can assign variables to every instance created for counter function which will be called respectively.        
+![Untitled](Learning/JavaScript/attachments/Untitled%20169.png) 
+#### Disadvantages of Closures
+1. Over consumption of memory is there, The closed over variables sometimes are not garbage collected. Thus creating much closure takes a lot of memory in general. 
+##### Garbage Collector
+> [!Why ? Because]
+> It frees up the un utilized memory, JS is a high level programming so unlike C / C++ where memory is in our control and we decide whether to free memory or not. But in JS garbage collector automatically frees up memory. 
 - Relation between Garbage Collection, Memory Leaks and Closures
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20170.png)
-    
-    1. Since b forms a closure with x so until y is there ( copy of b ) or until we can all y, x cannot be garbage collected as it can be used by y anywhere in our code.
-    
+![Untitled](Learning/JavaScript/attachments/Untitled%20170.png)
+1. Since b forms a closure with x so until y is there ( copy of b ) or until we can all y, x cannot be garbage collected as it can be used by y anywhere in our code. 
 - Smart GC examples of V8 engine Chrome
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20171.png)
-    
-    1. z is Garbage Collected here smartly as though its part of closure with b but is not being used thus is Garbage Collected. 
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20172.png)
-    
-    ![Untitled](Learning/JavaScript/attachments/Untitled%20172.png)
-    
+![Untitled](Learning/JavaScript/attachments/Untitled%20171.png)
+1. z is Garbage Collected here smartly as though its part of closure with b but is not being used thus is Garbage Collected. 
+![Untitled](Learning/JavaScript/attachments/Untitled%20172.png)   
+![Untitled](Learning/JavaScript/attachments/Untitled%20172.png)
 
 ### **FIRST CLASS FUNCTIONS 🔥ft. Anonymous Functions**
 
