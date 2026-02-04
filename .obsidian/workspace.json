@@ -4,51 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "a6c39635d24d0c35",
+        "id": "03018b817776c22f",
         "type": "tabs",
         "children": [
           {
-            "id": "c320417d1422b91a",
+            "id": "4449805a22fcb75a",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/JavaScript/Javascript.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Javascript"
-            }
-          },
-          {
-            "id": "0d2435d405f20e17",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/JavaScript/Javascript.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Javascript"
-            }
-          },
-          {
-            "id": "0b0d84c418ccaf73",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Stack, GEC, and Scope Chain.excalidraw"
+              "title": "New tab"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -105,8 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 264.5,
-    "collapsed": true
+    "width": 264.5
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -170,13 +138,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/JavaScript/Javascript.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Javascript"
+              "title": "Outline"
             }
           },
           {
@@ -213,52 +180,51 @@
   },
   "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Screenshot 2026-01-30 at 11.34.53 AM.png",
-    "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
-    "Learning/JavaScript/Javascript.md",
-    "Learning/System Design/Networking/Networking.md",
-    "Learning/System Design/Networking/Load Balancing.excalidraw.md",
-    "Learning/System Design/Networking/Application Layer.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/EncodeAndDecodeStrings.excalidraw.md",
     "Learning/Book Reading/Atomic Habbits.md",
+    "Habits+Cheat+Sheet 1.pdf",
+    "Habits+Cheat+Sheet.pdf",
+    "Learning/Freelance/TeacherOn/Requirements Gathering.md",
+    "Screenshot 2026-02-03 at 1.54.38 PM.png",
+    "Screenshot 2026-02-03 at 1.53.40 PM.png",
+    "Screenshot 2026-02-03 at 1.52.26 PM.png",
+    "Pasted image 20260203135149.png",
+    "Learning/Freelance/TeacherOn",
+    "Learning/System Design/API Design/REST.excalidraw.md",
+    "Learning/System Design/API Design/GraphQL.excalidraw.md",
+    "Learning/System Design/API Design/Remote Procedure Call (RPC).excalidraw.md",
+    "Learning/System Design/API Design/Api Types Overview.excalidraw.md",
+    "Learning/System Design/API Design/Untitled.md",
+    "Learning/System Design/API Design",
+    "Learning/DSA/Java/Java_DSA.md",
+    "Learning/DSA/Arrays and Hashing/8-LongestConsecutiveSequence.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/5-TopKFrequentElements.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/6-EncodeAndDecodeStrings.excalidraw.md",
+    "Learning/System Design/Networking/Load Balancing.excalidraw.md",
+    "Learning/System Design/Networking/Network Layer.excalidraw.md",
+    "Learning/System Design/Networking/ComnDeepDives.excalidraw.md",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
+    "Screenshot 2026-01-30 at 11.34.53 AM.png",
+    "Learning/System Design/Networking/Networking.md",
+    "Learning/System Design/Networking/Application Layer.excalidraw.md",
     "Learning/Freelance/Builders Website.md",
     "Learning/System Design/Networking/Transport Layer Protocols.excalidraw.md",
-    "Learning/System Design/Networking/Network Layer.excalidraw.md",
     "Learning/System Design/Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
-    "Learning/System Design/Networking/ComnDeepDives.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/ProductOfArrayExceptSelf.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/Group Anagrams.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/ValidAnagrams.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/7-ProductOfArrayExceptSelf.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/4-Group Anagrams.excalidraw.md",
+    "Learning/DSA/Arrays and Hashing/2-ValidAnagrams.excalidraw.md",
     "Screenshot 2026-01-27 at 9.47.50 AM.png",
     "Learning/DSA/Java/Sorting Algorithms/Merge Sort.excalidraw.md",
-    "Learning/DSA/Java/Java_DSA.md",
     "Learning/DSA/Java/attachments/Merge_Sort.pdf",
     "Screenshot 2026-01-22 at 11.20.17 AM.png",
     "Screenshot 2026-01-22 at 11.19.55 AM.png",
     "Screenshot 2026-01-22 at 11.19.25 AM.png",
     "Screenshot 2026-01-22 at 11.16.54 AM.png",
-    "Screenshot 2026-01-22 at 11.11.54 AM.png",
-    "Screenshot 2026-01-22 at 10.15.32 AM.png",
-    "Learning/DSA/Java/Sorting Algorithms/Cyclic Sort.excalidraw.md",
-    "Learning/DSA/Java/Sorting Algorithms/Selection Sort.excalidraw.md",
-    "Learning/DSA/Java/Sorting Algorithms/Insertion Sort.excalidraw.md",
-    "Learning/DSA/Java/Sorting Algorithms/Bubble Sort.excalidraw.md",
     "Learning/DSA/Java/attachments/Cyclic_Sort.pdf",
     "Learning/DSA/Java/attachments/cyclic_sort_notes.pdf",
-    "Learning/DSA/Arrays and Hashing/TopKFrequentElements.excalidraw.md",
-    "Screenshot 2026-01-20 at 11.08.01 AM.png",
-    "Screenshot 2026-01-20 at 11.05.46 AM.png",
-    "Screenshot 2026-01-20 at 11.00.43 AM.png",
     "Learning/DSA/Java/attachments/Handwritten_Notes_on_Insertion_Sort.pdf.pdf",
     "Learning/DSA/Java/Sorting Algorithms",
     "Learning/DSA/Java/attachments/time_complexity_.pdf",
-    "Learning/DSA/Java/attachments/space_complexity_.pdf",
-    "Learning/DSA/Java/attachments/recursive_algorithm_.pdf",
-    "Learning/DSA/Java/attachments/little_omega.pdf",
-    "Learning/DSA/Java/attachments/little_oh.pdf",
-    "Learning/DSA/Java/attachments/Graphs Hard Problems feaa6fb950bd48b9b8f6dcb00492e85a.md",
-    "conflict-files-obsidian-git.md",
-    "Learning/Freelance/Cargo Bussiness.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

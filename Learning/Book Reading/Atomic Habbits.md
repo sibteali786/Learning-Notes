@@ -1,5 +1,7 @@
 ```table-of-contents
 ```
+## Resources 
+![[Habits+Cheat+Sheet 1.pdf]]
 ## 1 % effect
 - Improving by 1 percent each day can induce 37% improvement over a whole year.
 - Getting worse each day has also the same effect that we may nearly reach zero after a year if we keep following this trajectory.
@@ -133,3 +135,53 @@ like I will exercise for one hour at 5 pm in my local gym.
 > After [CURRENT HABBIT], I will [NEW HABBIT]
 
 like After i finish my work day i will check on my partner / fiance to know how she is doing.
+### Motivation is Overrated: Environment Matters more
+- The kind of environment around us also decides what are we going to do next
+>[!Example] 
+   > If there are biscuits on top of my table where i work, there are major chances i will eat them every once in a while even if i am not hungry.
+
+> [!NOTE]
+> Behaviour is a function of Person in their Environment
+
+- The more obviously available a product is ( or How it is presented to us ) the more likely we are going to try or but it.
+#### How to design our environment for success
+> [!Note]
+> When the cues that spark a habit are subtle or hidden they are most likely to be ignored.
+
+- If we want to make a habit a big part of our life, make the cue big part of our environment.
+> [!Example]
+> If i want to read book every day when i go to bed, book should be next to my pillow not my mobile phone when i get into bed 
+
+#### Context Is Cue
+- We can link a particular habit with a particular context.
+like we can associate our bedroom with sleeping only that way when we go to that room we only sleep, not use phone, not watch television nothing else, just sleep.
+> [!Note]
+> Habits can be easier to change in new environment because we are not fighting against old cues.
+> like: We cannot focus to study in room where we play video games becuase of the cues around us, so we can pick another room or place n our house where we never go and associate a new habit with it.
+
+- If you cannot afford a new environment, make changes in the current one, assign each thing with a specific habit, liek Work Desk, couch with book reading etc.
+> [!NOTE]
+> Whenever possible, try not to mix context of one habit with other.
+> 
+> 
+
+> [!Example]
+> Like, Our phone is one such example it can be used productively and also to binge watch and play video games which make it mishmash of cues
+
+### The Secret of Self Control
+- The cue associated with a particular action gets embedded in our mind such that when we interact with that thing our brain remembers the cue and forces us to perform certain action.
+- Like when i put on my handsfree i always play music because that is what my brain has associated them with, when i will not put them on i wont listen to music.
+- So its not that people with Self Control are some kind of Godly beings they just discipline themself to avoid cues that trigger certain bad habit.
+> [!Note]
+> Best way to get rid of a bad habit is to reduce exposure to the cue which causes it
+- Like If we cannot get some work done, we should place our mobile phone in another room.
+- Its like Inverse of *First Law of Behaviour Change* insead of *making it obvious* we *make it invisible* .
+- We never forget any habit it only fades away for a while unless we make sure that its cue is never visible to us 
+## Chapter: The Second Law ( Make It Attractive)
+### How to make a habit irresistible
+> [!Supernormal Stimuli]
+> Its a heightened version of reality. Like Junk Food for us humans is heightened version of taste.
+> 
+
+- We are filled with things today that exagerate features of things like human body ( modals ), food taste etc that are naturally attractive to us to the point that we are excited to even look at them.
+- The purpose of 2nd Law is to make our habits irresistible.
