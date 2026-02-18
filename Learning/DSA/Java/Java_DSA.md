@@ -4819,7 +4819,7 @@ Previously we learned about Linear Search and pertaining to its Time Complexity 
 
 ## Why Binary Search?
 
-1. Finding max number of comparsions in worst case.
+1. Finding max number of comparsions in worst case. 
     
     ![Untitled](Learning/DSA/Java/attachments/Untitled%20183.png)
     

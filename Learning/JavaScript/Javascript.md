@@ -1101,7 +1101,7 @@ Summary
 - Example
     ![Untitled](Learning/JavaScript/attachments/Untitled%20108.png)
     At Global level we can access any variable using window or simple the variable name itself.![Untitled](Learning/JavaScript/attachments/Untitled%20109.png)
-    Same goes for this at Global level.
+    Same goes for `this` at Global level.
 ### Undefined vs Not Defined
 ![Untitled](Learning/JavaScript/attachments/Untitled%20110.png)
 1. Undefined a special keyword in JS. Before any line is executed, Js engine reserves memory to all variables and the values assigned to variables before execution is undefined.
@@ -1252,9 +1252,9 @@ This syntax error demands that initialiser is missing on line 4 where b is decla
 
 If we try to re assign a value to a constant variable we get Type Error.
 
-| Reference Error | Syntax Error | Type Error |
-| --- | --- | --- |
-| Trying to find / access a variable in a memory space we cannot access. | Violating standard way of performing some action or defining something  | When violating the rule of a specific type. |
+| Reference Error                                                        | Syntax Error                                                           | Type Error                                  |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------- |
+| Trying to find / access a variable in a memory space we cannot access. | Violating standard way of performing some action or defining something | When violating the rule of a specific type. |
 
 | Const | Let  | Var |
 | --- | --- | --- |
@@ -1289,7 +1289,7 @@ If we try to re assign a value to a constant variable we get Type Error.
             
     
 
-### Block Scope
+### Block Scope 
 
 > [!Definition]
 > The variables we can access in a block.
@@ -1458,7 +1458,6 @@ We can pass parameter to outer function directly from calling outest using doubl
 - Data Hiding and Encapsulation
 > [!Note]
 > Limiting the access of data possessed by a function for other functions and part of code.
- 
 ##### Example
 ![Untitled](Learning/JavaScript/attachments/Untitled%20165.png)
 1. In above case anyone can access the counter variable inside code. 
@@ -1547,8 +1546,6 @@ No its not, we can use constructor function
     > The ability of functions to be used as values, be able to passed as an argument to another function, and return function from some function is know as First Class Functions
     > 
 - Arrow Functions
-    
-    
 
 ### **Callback Functions in JS ft. Event Listeners**
 

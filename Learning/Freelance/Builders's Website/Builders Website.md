@@ -1193,3 +1193,13 @@ Designation: _____________________
 ---
 
 _This proposal is confidential and intended only for Asia Group of Companies. Unauthorized distribution is prohibited._
+
+
+
+
+
+### Requirements 
+- Individual Space for source of income from Cargo Businesses so it can be tracked where and how it is spent.
+- Project Separate from main dashboard ( Detaield)
+- Notifications and Comments on individual transaction ( Feature on Dollar).
+- Make an Agreement 

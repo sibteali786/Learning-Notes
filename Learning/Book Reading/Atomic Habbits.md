@@ -185,3 +185,58 @@ like we can associate our bedroom with sleeping only that way when we go to that
 
 - We are filled with things today that exagerate features of things like human body ( modals ), food taste etc that are naturally attractive to us to the point that we are excited to even look at them.
 - The purpose of 2nd Law is to make our habits irresistible.
+### Dopamine Driven Feedback Loop
+- Dopamine is released not only when we experience pleasure but also when we anticipate it.
+- like we have dopamine surge not only when we have sex practically but when we just imagine having sex, or Cocaine addicts have dopamine spike when they see the powder not after they take it.
+- Whenever dopamine rises so does our motivation to do action.
+> [!Note]
+> Its the anticipation of a reward- not the fulfilment of it - that gets us to take action
+- Also
+> [!Note]
+> The reward system that is activated in our brain when we *receive* a reward same when we *anticipate* it.
+- Our brain has far more neural circuitry allocated for *wanting* rewards than for *liking* them.
+### How to use temptation bundling to make our habits more attractive
+- We can associate an already lucrative habit with one that we want, like I will do 10 pushups every time i want to see instagram ? 
+- this has a negative effect but when i would like to see instagram i will do 10 pushups so formula becomes like 
+> [!Formula]
+> After [Habit i need], I will [Habit i want ]
+- We can also associate temptation bundling with habit stacking like 
+> [!Formula]
+> After [CURRENT HABIT], I will [HABIT I NEED]
+> After [HABIT I NEED], I will [HABIT I WANT]
+
+> [!Example]
+> 1. After i pull out my phone, I will do 5 to 10 pushups
+> 2. After i do 5 to 10 pushups, i will check instagram.
+### The Role of Family and Friends in shaping our habits 
+- Being a social animal humans love to have a sense of belonging, since our ancestors always lived in tribes.
+- Why ? because living in tribe and following certain rules of tribe opened opportunities to collaborate, get food, enjoyment, mating etc.
+- We usually follow or blindly follow what our family or friends or culture does and sometimes not even thinking about it but sub consciously we do those things.
+We imitate the habits of three groups
+#### 1. Imitating the close
+> [!Note]
+> Surround ourselves with the people who have the habits we want to have ourself.
+- To make a habit attractive even more 
+Join a culture where
+1. Our desired behaviour is the normal behaviour.
+2. We already have something in common with the group.
+#### 2. Imitating the many
+- The reward of being accepted is often greater than reward of winning an argument, looking smart or finding truth.
+- When changing your habits means fitting in with the tribe, change is ver attractive.
+- When changing your habits means challenging the tribe, change is unattractive.
+#### 3. Imitating the powerful
+- We try to copy the behaviour of successful people because we want to see ourself succeed 
+- High status people enjoy approval, respect and praise of others and it means if a behavior can get us approval, respect and praise we find it attractive.
+
+### How to find and Fix the Causes of your bad habits
+- If we looks closely to any product that is habi forming, we'll find that it does not create a new motivation but rather latches onto the underlying motives of human nature
+> [!Example]
+> Find love and reproduce = Tinder
+> Connect and bond with others = Facebook
+> Win Social acceptance and approval = posting on Instagram
+- The cause of the habit we have is the prediction that precedes it.
+> [!Example]
+> One person when looks at cigarette and gets urge to smoke.
+> Other person hates the smell of it.
+- Craving is the desire to change our internal state.
+- The gap between our current state and the one we desire provides a reason to act.
