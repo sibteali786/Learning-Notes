@@ -240,3 +240,23 @@ Join a culture where
 > Other person hates the smell of it.
 - Craving is the desire to change our internal state.
 - The gap between our current state and the one we desire provides a reason to act.
+#### Reprogram Brain to Enjoy Hard Habits
+- Change sentences from , I have to wake up, I have to do DSA, I have to learn system design... to I get to wake up, I get to do DSA, I get to learn System Design.
+- Rewiring our brain to see benefits of habits instead of their drawbacks is a lighter version to enjoy Hard Habits.
+##### Motivation Ritual
+> [!Definition]
+> Practice associating habits with something we enjoy.
+> - Like listening to a song before gym.
+## Third Law: Make it Easy
+### Walk Slowly but never backwards
+- Start acting instead of just being in motion
+- Being in motion gives us feeling of doing something, we are planning and strategising and learning. 
+- Action on other hand deliver's outcome
+- like I am compiling best resource for learning DSA ( Motion )
+- I practice DSA twice a week ( thats action and delivers results)
+### How long does it take to form a new Habit
+- The more we repeat a behavior or action the more strengthen it gets wired in our brain, tot he level that we can perform it un-consciously without focusing entire attention to it.
+> [!Automaticity]
+> The ability to perform a behavior without thinking about each step
+- It occurs when the non-conscious mind takes over.
+- Th amount of time we spend performing a habit is not as important as the number of times we have performed it. FREQUENCY MATTERS 
