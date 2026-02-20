@@ -255,8 +255,22 @@ Join a culture where
 - like I am compiling best resource for learning DSA ( Motion )
 - I practice DSA twice a week ( thats action and delivers results)
 ### How long does it take to form a new Habit
-- The more we repeat a behavior or action the more strengthen it gets wired in our brain, tot he level that we can perform it un-consciously without focusing entire attention to it.
+- The more we repeat a behavior or action the more strengthen it gets wired in our brain, to the level that we can perform it un-consciously without focusing entire attention to it.
 > [!Automaticity]
 > The ability to perform a behavior without thinking about each step
 - It occurs when the non-conscious mind takes over.
-- Th amount of time we spend performing a habit is not as important as the number of times we have performed it. FREQUENCY MATTERS 
+- Th amount of time we spend performing a habit is not as important as the number of times we have performed it. FREQUENCY MATTERS
+### Law of Least Effort
+> [!Definition]
+> When deciding between two similar options, we will naturally gravitate towards the option that requires least amount of work.
+
+> [!Example]
+> Expanding farm to the east where we can grow same type of crops rather than heading norths where the climate is different.
+
+### How to Achieve more with less effort
+- Reduce Friction to get something new ( form new habit ),  but how ?
+- Practice Environment design that is make new habit cue more obvious and easy to reach 
+- Chose a place for new habit that is along the path of exisiting habits 
+> [!Example]
+> Reading book when you sit on your work desk 
+- Redesign environments or making a new habit easy to do makes it much attractive like if your book is in a book shelf in a room you rarely visit in your whole day, you are never going to read it, but if its on your work table you will definitely read it when you see it,

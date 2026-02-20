@@ -4,19 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "1b4ffb42edf72354",
+        "id": "ab82ae43457de726",
         "type": "tabs",
         "children": [
           {
-            "id": "8430b5bd4622e457",
+            "id": "5da62fc26c966621",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/System Design/API Design/REST.excalidraw.md"
+                "file": "Learning/NestJS/Theory.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "excalidraw-icon",
-              "title": "REST.excalidraw"
+              "icon": "lucide-file",
+              "title": "Theory"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 420.50390243530273
+    "width": 420.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -140,13 +143,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/DSA/Two Pointers/Moving Zeros.excalidraw.md",
+                "file": "Learning/NestJS/Theory.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Moving Zeros.excalidraw"
+              "title": "Outline of Theory"
             }
           },
           {
@@ -181,15 +184,24 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/System Design/API Design/Api Types Overview.excalidraw.md",
+    "Learning/JavaScript/Coding/Flatten.excalidraw.md",
+    "Learning/NestJS/Theory.md",
+    "Learning/NestJS",
+    "Learning/JavaScript/Coding",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/Book Reading/Atomic Habbits.md",
+    "Learning/Book Reading/Reading List.md",
+    "Learning/System Design/API Design/Common API Patterns.excalidraw.md",
     "Learning/System Design/API Design/REST.excalidraw.md",
+    "Learning/System Design/API Design/RateLimitingTechniques.excalidraw.md",
     "Learning/System Design/API Design/Remote Procedure Call (RPC).excalidraw.md",
     "Learning/System Design/API Design/GraphQL.excalidraw.md",
-    "Learning/System Design/API Design/Common API Patterns.excalidraw.md",
+    "Personal/Remote Jobs/List of Companies.md",
+    "Personal/Remote Jobs",
+    "Learning/System Design/API Design/Api Types Overview.excalidraw.md",
     "Personal/Maryam's Things.md",
-    "Learning/Book Reading/Atomic Habbits.md",
     "Learning/DSA/Two Pointers/3Sum.excalidraw.md",
     "Learning/DSA/Two Pointers/Moving Zeros.excalidraw.md",
     "Learning/DSA/Two Pointers/ContainerWithMostWater.excalidraw.md",
@@ -202,7 +214,6 @@
     "Learning/DSA/Binary Search/Intuition.excalidraw.md",
     "Learning/DSA/Java/Java_DSA.md",
     "Learning/DSA/Binary Search/Untitled.base",
-    "Learning/JavaScript/Javascript.md",
     "Learning/DSA/Binary Search",
     "Learning/DSA/Fixed Length Sliding Window/MaximumSumOfSubarrayWithSizeK.excalidraw.md",
     "Learning/DSA/Fixed Length Sliding Window/MaxSumofDistinctSubarraysLengthk.excalidraw.md",
@@ -211,19 +222,11 @@
     "Learning/DSA/Two Pointers/TwoSum.excalidraw.md",
     "Learning/Freelance/Builders's Website/Builders Website.md",
     "Learning/Freelance/Builders's Website",
-    "Learning/DSA/Two Pointers/Drawing 2026-02-13 11.18.42.excalidraw.md",
-    "Learning/DSA/Arrays and Hashing/3-TwoSum.excalidraw.md",
-    "Learning/DSA/Two Pointers",
-    "Learning/DSA/Arrays and Hashing/9-ValidSudoku.excalidraw.md",
     "Pasted Image 20260204132608_305.png",
-    "Habits+Cheat+Sheet 1.pdf",
-    "Habits+Cheat+Sheet.pdf",
-    "Learning/Freelance/TeacherOn/Requirements Gathering.md",
     "Screenshot 2026-02-03 at 1.54.38 PM.png",
     "Screenshot 2026-02-03 at 1.53.40 PM.png",
     "Screenshot 2026-02-03 at 1.52.26 PM.png",
     "Pasted image 20260203135149.png",
-    "Learning/System Design/API Design/Untitled.md",
     "Screenshot 2026-01-30 at 11.34.53 AM.png",
     "Screenshot 2026-01-27 at 9.47.50 AM.png",
     "Screenshot 2026-01-22 at 11.20.17 AM.png",
