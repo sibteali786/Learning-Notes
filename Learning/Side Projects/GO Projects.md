@@ -331,7 +331,7 @@ For example:
     For example, the real `which` command uses this to show: `which: command not found` instead of just `command not found`.
     
 
-![image.png](image.png)
+![image.png](Learning/Devops/DevOps%20a7887e7c18db481aa28390527d882a73/image.png)
 
 ## Step1
 

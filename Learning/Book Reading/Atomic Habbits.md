@@ -267,10 +267,26 @@ Join a culture where
 > [!Example]
 > Expanding farm to the east where we can grow same type of crops rather than heading norths where the climate is different.
 
-### How to Achieve more with less effort
+#### How to Achieve more with less effort
 - Reduce Friction to get something new ( form new habit ),  but how ?
 - Practice Environment design that is make new habit cue more obvious and easy to reach 
 - Chose a place for new habit that is along the path of exisiting habits 
 > [!Example]
 > Reading book when you sit on your work desk 
 - Redesign environments or making a new habit easy to do makes it much attractive like if your book is in a book shelf in a room you rarely visit in your whole day, you are never going to read it, but if its on your work table you will definitely read it when you see it,
+#### Prime The environment for future use
+- Its like preparing for future right now
+- If we want to go to exercise we should prepare our gym cloths, shoes in advance to Gym time.
+- Because that's how we make good habits path of least resistance.
+- For bad habits it can be reversed like if we you use instagram more often then after each use either place your phone where you cannot see it OR uninstall instagram after each use or even remove your instagram account after each use ( i am joking 😂) but these introduce more friction and thus would make it harder for you to use insta again n again.
+### How to Stop Procrastinating by using Two minute rule
+- There are decisive moments in our day to day routine which lead us to performing an action automatically without even thinking 
+- Like at 3:45 pm these days I get up from my Work desk and put on Gym clothes Or i can keep on working. Each choice leads to a different outcome putting on gym cloths -> Exercise , keep working -> no Exercise.
+- Habits are entry point not endpoint, they only lead us to an action the rest we do ourself. Humans love to keep in same state rather than changing their state constantly which requires effort.
+#### Two Minute Rule
+- To get habitual of a thing like Exercise daily ? we can start with the easiest part that put on gym cloths if we do it daily we will go out to gym.
+- To get better at Data Structure and Algorithms, start with the easiest one i will solve 1 question on Monday and 1 on Wednesday each week.
+- The point is to start small and easy so that you get used to show up, ultimately forming a habit.
+> [!Note]
+> Two Minute Rule says
+> When you start a new habit it should take less than 2 minutes to do.
