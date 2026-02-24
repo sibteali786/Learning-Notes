@@ -290,3 +290,12 @@ Join a culture where
 > [!Note]
 > Two Minute Rule says
 > When you start a new habit it should take less than 2 minutes to do.
+### How to make Good Habits Inevitable and Bad Habits impossible
+- Make your bad habits un-reachable or difficult to do by creating something called **Commitment Device**
+> [!Definition]
+> is a choice we make in the present that controls our actions in the future.
+- Example is that after 10 pm we can turn of our internet device so that we do not use internet after 10 and everyone understands its time to sleep.
+#### How to Automate a habit and never think about it again
+- Best way to break a bad habit is to make it impractical to do, Increase the friction until we don't even have the option to act.
+- We can use technology to automate some of our work, which frees up our time that we can spend on our growth.
+- Like Enrolling in automatic savings plan, cutting off internet at 10 pm to go bed early etc.
