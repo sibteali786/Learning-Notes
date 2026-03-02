@@ -299,3 +299,60 @@ Join a culture where
 - Best way to break a bad habit is to make it impractical to do, Increase the friction until we don't even have the option to act.
 - We can use technology to automate some of our work, which frees up our time that we can spend on our growth.
 - Like Enrolling in automatic savings plan, cutting off internet at 10 pm to go bed early etc.
+## 4th Law: Make it Satisfying
+### The cardinal rule of behaviour change
+- When a behaviour is pleasurable it signals our brain that its satisfying thus it should be repeated again.
+- What is rewarded is repeated, what is punished is avoided.
+- The satisfaction should be immediate not like hours after we perform an action.
+#### The mismatch between immediate and delayed rewards
+- We live in a era of delayed return environment.
+- We get rewards long after we make a decision like good job at work ( paycheck in few weeks ), plan for vacation, save now enjoy in retirement etc. 
+- For bad habits usually the immediate outcome is good and enjoyable while long term is dangerous like smoking 
+- Good habits have un-enjoyable immediate outcome but ultimate outcome feels good.
+- Since our brain is used to get instant gratification thus we find bad habits more appealing than good habits
+- based on this new Cardinal Rule of Behavior change is
+> [!Note]
+> What is immediately rewarded is repeated, What is immediately punished is avoided.
+
+#### How to turn instant gratification to our advantage
+- Habits which soley rely to avoid actions are not satisfying at all.
+- Immediate reinforcement can be helpful in such a situation 
+- like when putting money in a savings account label it as something we want like 'Leather Jacket', this way everytime we pass on a purchase we can transfer that amount to this account thinking we are saving for leather jacket.
+### How to Stick with Good habits everyday
+- Paper clip strategy is a way to visually track a habit like moving paper clip from one jar to another as we perform a good action like solving one DSA question or reading 2 to 3 paragraphs of content.
+#### How to keep habits on track
+- Tracking a habit progress or what we call today as streak is a good visual way to know how much progress we made over time performing a particular good habit.
+- It simultaneously makes makes a behaviour obvious, attractive and satisfying.
+##### Benefit 1: Tracking is obvious
+- Recording last action creates a motivation or trigger to initiate next one.
+- Makes us more honest since we can visually see how much progress we have really made.
+##### Benefit 2: Tracking is attractive
+- Progress is best visual motivation of how far we have come in terms of making progress.
+- It inspires us to do more of it.
+##### Benefit 3: Tracking is satisfying
+- Feels staisfying whenever we record another successful instance of our habit.
+
+Trackig habits can be cumbersome as well so a better idea is to stack them at top of another habit 
+> [!Formula]
+> After [CURRENT HABIT], I will [TRACK MY HABIT]
+
+#### How to Recover quickly when our habit breaks down
+- When we miss a day for a good habit its fine unless its not repeated.
+- Showing up on bad days to act on a good habit is more important gain or compounding than showing up on a good day.
+#### Knowing when and when not to track a habit
+- Tracking what is important and relevant is much important than tracking itself 
+- Like doing work that creates impact is more important than working long hours.
+- Just because we can measure something does not means its most important thing in making a habit successful 
+- If we are not motivated by our progress in a habit it means we might be focusing on the wrong thing entirely.
+### How can Accountability Partner can change everything
+- The more local, tangible, concrete and immediate the consequence, the more likely it is to influence our behaviour.
+- An accountability partner can create an immediate cost to inaction. We care deeply about what others think of us, and we do not want others to have lesser opinion of us 
+- A habit contract can be used to add a social cost to any behavior , It makes the costs of violating our promises public and painful.
+### Truth About Talent ( where it genes matter and where not ) 
+ - Our personality traits matter alot in many areas when creating habits.
+ - Its important to know what kinf od personality we have before we make ay habit work since one type of habit is more suitable to one kind of personality than the other.
+ - Pick the right habit and progress is easy pick wrong one life is struggle.
+### How to Pick right habit
+- First step is to follow 3rd Law i.e make it easy: If we picked a habit and its easy its the right one and we are most likely to be successful, if its difficult then its wrong one.
+- Next is in long run ever habit becomes challenging or difficult, thus at some point we need to make sure we are playing right game for our skillset.
+- 
