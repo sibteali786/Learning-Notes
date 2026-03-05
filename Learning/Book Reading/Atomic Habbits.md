@@ -355,4 +355,27 @@ Trackig habits can be cumbersome as well so a better idea is to stack them at to
 ### How to Pick right habit
 - First step is to follow 3rd Law i.e make it easy: If we picked a habit and its easy its the right one and we are most likely to be successful, if its difficult then its wrong one.
 - Next is in long run ever habit becomes challenging or difficult, thus at some point we need to make sure we are playing right game for our skillset.
-- 
+- For this we use a technique is ***Exploration / Exploit tradeoff***.
+> [!Definition]
+> In Begining of a new activity, there should be period of exploration, after initial period of exploration shift focus to best solution we found but keep exploring occasionally. 
+> 
+> If we are wining currently then keep we exploit, exploit and exploit, If we are losing currently then we continue to explore explore and explore.
+- If you cant find the game where you can win create one for you based on your qualities and abilities, create environment which favours you over others.
+### The Goldilock's Rule
+> [!Definition]
+> Human experiences peak motivation when working on tasks that are right on the edge of their current abilities. Not too hard. Not too easy. Just right.
+### How to stay focused when we get bored working on our goals
+- Getting bored when working on our goals or habits is one of greatest problems 
+- When we get used to an action and initial rewards are known to our brain and we resolve most of unknown things in the habit its starts to get boring
+- Why ? because we as human always look for novelty that is why Slot machine are habitual since they produce rewards randomly that cannot be tracked or expected.
+- This is called `Variable Reward` that is it wont create craving it just amplify the cravings we always experience for given habit because it reduces boredom.
+- Falling in the live with boredom gets us a long way ahead since every habit will one day become boring.
+
+### The Downside of Creating Good Habits
+- As a habit becomes automatic, you become less sensitive to feedback.
+- The upside of habits is that we can do things without thinking.
+- The downside of habits is that you get used to doing things a certain way and stop paying attention to little errors.
+> [!Note]
+> Habits + Deliberate Practice = Mastery
+- It is precisely at the moment when you begin to feel like you have mastered a skill - right when things are starting to feel automatic and you are becoming comfortable - that you must avoid slipping into trap of complacency.
+- Reflection and Review allows long term improvement of all habits because it make us aware of our mistakes and helps us consider possible paths for improvements.
