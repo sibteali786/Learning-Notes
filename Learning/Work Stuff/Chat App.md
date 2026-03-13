@@ -5,11 +5,11 @@
 #### Others
 Beside this there are few other items to note down'
 1. Both frontend and backend domain needs to e configured in CORS_ORIGIN env variable of chat app
-2. Eternal Customer backed should have requests to send initSSO request to chat app
+2. External Customer backed should have requests to send initSSO request to chat app
 
 Steps
 1. Make curl request to generate-credentials
-2. Change variables in whatnetplease backend to be taken from .env so that when we deploy backend we have required ALLOWED_DOMAINS from .env, tenantId we sent to create tenant entry in chat database and name of tenant
+2. Change variables in whatsnetplease backend to be taken from .env so that when we deploy backend we have required ALLOWED_DOMAINS from .env, tenantId we sent to create tenant entry in chat database and name of tenant
 	1. This will help us when we will make request from Frontend to integrate whatsnextplease to chat app
 	2. [x] We will later add these variables to AWS SECRETS MANAGER
 - [x] the requets to chat endpoints should be rate limited

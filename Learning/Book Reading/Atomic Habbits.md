@@ -379,3 +379,20 @@ Trackig habits can be cumbersome as well so a better idea is to stack them at to
 > Habits + Deliberate Practice = Mastery
 - It is precisely at the moment when you begin to feel like you have mastered a skill - right when things are starting to feel automatic and you are becoming comfortable - that you must avoid slipping into trap of complacency.
 - Reflection and Review allows long term improvement of all habits because it make us aware of our mistakes and helps us consider possible paths for improvements.
+- Performing an Annual Review in december of every year usually where we ask questions like 
+	- What went well this year ? 
+	- What didn't go so well this year ?
+	- What did I learn ?
+- In Summer we can have Integrity Report which answer questions like 
+	- What are the core values that drive my life and work ? 
+	- How am i living and working with integrity right now ?
+	- How can i set a higher standard in the future ?
+### How To break the beliefs that hold us back
+- When we build a habit and latch on an identity we desire, when working against ourselves our identity creates `Pride` that encourages us to deny our weak spots and prevents us from truly growing.
+> [!Solution]
+> Keep our identity small. i.e The more we let a single belief define us the less capable we are of adapting when life challenges us.
+-  Like I believe `I am a Good Coder` but what happens when coding is no longer valid like nowadays when LLM tools can code better than us ? now people like me are in the era of identity crisis ?
+- The key is to redefine ourself such that we get to keep important aspects of our identity even we our particular roles changes.
+> [!Example]
+ I am a coder becomes I am someone who can quickly learn new technologies, adapt rapid changes and collaborate with others to build things.  
+ 
