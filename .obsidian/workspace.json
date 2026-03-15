@@ -11,10 +11,14 @@
             "id": "6a31d00fa23ff5f2",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Personal/Remote Jobs/List of Companies.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "List of Companies"
             }
           }
         ]
@@ -74,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273
+    "width": 310.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -180,6 +185,9 @@
   },
   "active": "6a31d00fa23ff5f2",
   "lastOpenFiles": [
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/Freelance/Builders's Website/Builders Website.md",
+    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/attachments/Screenshot 2026-03-12 at 11.40.48 AM.png",
     "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
@@ -223,8 +231,6 @@
     "Learning/DSA/Two Pointers/SortColors.excalidraw.md",
     "Learning/System Design/Core Concepts/1-Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
     "Learning/System Design/Core Concepts/3-Data Modelling",
-    "Learning/DSA/Java/Java_DSA.md",
-    "Learning/DSA/Two Pointers/Moving Zeros.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
