@@ -6,12 +6,12 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
-      "LiAudioLines",
-      "LiNetwork",
-      "LiBox",
-      "LiComputer",
-      "LiBookOpenText",
-      "LiFiles"
+      "LiFiles",
+      "LiFileCode",
+      "LiLetterText",
+      "LiChartNetwork",
+      "LiFileSliders",
+      "💰"
     ],
     "recentlyUsedIconsSize": 6,
     "rules": [],
@@ -45,11 +45,5 @@
   "Learning/Slides and PDFs": "LiFileSliders",
   "Learning/Networking": "LiChartNetwork",
   "Learning/Work Stuff/Serial Number Feature.md": "LiLetterText",
-  "Learning/Freelance/attachments": "LiFileCode",
-  "Learning/Book Reading": "LiBookOpenText",
-  "Learning/DSA": "LiComputer",
-  "Learning/Backend Engineering": "LiBox",
-  "Learning/Devops": "LiNetwork",
-  "Learning/System Design": "LiAudioLines",
-  "Learning/System Design/Core Concepts/1-Networking/Attachments": "LiFiles"
+  "Learning/Freelance/attachments": "LiFileCode"
 }

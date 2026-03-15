@@ -1,0 +1,4 @@
+- draggable="true" → makes an element draggable
+- onDragStart → fires when user starts dragging (store what's being dragged). 
+- onDragOver → fires when dragging over a target (must preventDefault to allow drop)
+- onDrop → fires when dropped (read what was dragged, update state)
