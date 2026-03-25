@@ -4,21 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "6ca63cf27b64f9c2",
+        "id": "a5736c24dfb82277",
         "type": "tabs",
         "children": [
           {
-            "id": "42969979131ac032",
+            "id": "19fae44f4078508a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Interview Projects/Dnd Editor.md",
+                "file": "Learning/Book Reading/In distract able.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Dnd Editor"
+              "title": "In distract able"
+            }
+          },
+          {
+            "id": "65546dfb1c2a519a",
+            "type": "leaf",
+            "state": {
+              "type": "webviewer",
+              "state": {
+                "url": "https://obsidian.md/help/cli",
+                "title": "Obsidian CLI - Obsidian Help",
+                "mode": "webview"
+              },
+              "icon": "globe-2",
+              "title": "Obsidian CLI - Obsidian Help"
             }
           }
         ]
@@ -78,7 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 264.5,
+    "width": 310.50390243530273,
     "collapsed": true
   },
   "right": {
@@ -143,13 +157,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cargo Bussiness"
+              "title": "Outline"
             }
           },
           {
@@ -184,54 +197,53 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "42969979131ac032",
+  "active": "19fae44f4078508a",
   "lastOpenFiles": [
-    "Learning/Frontend Interview Preparation/Overview.md",
+    "Learning/System Design/Core Concepts/5-Caching/Cache Architectures.excalidraw.md",
+    "Learning/Book Reading/In distract able.md",
+    "Learning/System Design/Core Concepts/5-Caching/Where To Cache.excalidraw.md",
+    "Screenshot 2026-03-24 at 12.23.37 PM.png",
+    "Screenshot 2026-03-24 at 12.23.26 PM.png",
+    "Screenshot 2026-03-24 at 12.23.13 PM.png",
+    "Screenshot 2026-03-24 at 12.01.10 PM.png",
+    "Screenshot 2026-03-24 at 11.29.11 AM.png",
+    "Learning/System Design/Core Concepts/5-Caching/Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
+    "Screenshot 2026-03-24 at 11.11.45 AM.png",
+    "Screenshot 2026-03-24 at 10.39.36 AM.png",
+    "Screenshot 2026-03-24 at 10.31.34 AM.png",
+    "Screenshot 2026-03-24 at 10.21.56 AM.png",
+    "Learning/System Design/Core Concepts/5-Caching/Intuition.md",
+    "Learning/System Design/Core Concepts/5-Caching",
     "Learning/Frontend Interview Preparation/Interview Projects/Dnd Editor.md",
-    "Learning/Frontend Interview Preparation/Interview Projects",
-    "Screenshot 2026-01-30 at 11.34.53 AM.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/DSA/Stack/ValidParenthesis.excalidraw.md",
+    "Learning/DSA/Stack/1-Intuition.excalidraw.md",
+    "Learning/DSA/Stack/attachments",
+    "Learning/DSA/Stack",
     "Personal/Remote Jobs/List of Companies.md",
-    "Personal/Remote Jobs",
-    "Learning/Work Stuff/Chat Application.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments/Screenshot 2026-03-12 at 12.12.04 PM.png",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments/Screenshot 2026-03-12 at 11.40.48 AM.png",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments/Screenshot 2026-03-12 at 10.50.20 AM.png",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments/Screenshot 2026-03-10 at 11.15.32 AM.png",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments/Screenshot 2026-03-05 at 12.10.39 PM.png",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments/B-Trees.png",
-    "Learning/System Design/Core Concepts/3-Data Modelling/attachments/Wide-Column-Database.png",
-    "Learning/System Design/Core Concepts/3-Data Modelling/attachments/NormaliationVsDenormalization.png",
-    "Learning/System Design/Core Concepts/3-Data Modelling/attachments/Graph-Database.png",
-    "Learning/System Design/Core Concepts/1-Networking/Attachments/Fundamentals+of+Networking+Engineering.pdf",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments",
     "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/3-Data Modelling/attachments",
-    "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
-    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Remote Procedure Call (RPC).excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/RateLimitingTechniques.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/REST.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Transport Layer Protocols.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Networking.md",
-    "Learning/System Design/Core Concepts/1-Networking/Network Layer.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Load Balancing.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/ComnDeepDives.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Attachments",
-    "Learning/System Design/Core Concepts/1-Networking/Application Layer.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing",
-    "Learning/System Design/Core Concepts/3-Data Modelling",
-    "Learning/System Design/Core Concepts/2-API Design",
-    "Learning/System Design/Core Concepts/1-Networking",
-    "Learning/NestJS/Theory.md",
-    "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
-    "Learning/JavaScript/Service Workers/Service Workers & Web Workers.md",
+    "Learning/DSA/Variable Length Sliding Window/1-Intuition_&_Fruit_Into_Basktets.md",
+    "Learning/DSA/Variable Length Sliding Window/LongestRepeatingCharacterReplacement.excalidraw.md",
+    "Learning/DSA/Variable Length Sliding Window/LongestSubstringWithoutRepeatingCharacters.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Overview.md",
+    "Learning/Frontend Interview Preparation/Interview Projects/attachments",
+    "Learning/Frontend Interview Preparation/Interview Projects",
+    "Learning/Freelance/Builders's Website/Builders Website.md",
     "Learning/JavaScript/Coding/useQuery.excalidraw.md",
+    "Learning/Work Stuff/Chat Application.md",
+    "Learning/Work Stuff/Chat App.md",
+    "Learning/Database/Database Design/attachments",
+    "Learning/Book Reading/Atomic Habbits.md",
+    "Learning/Database/Database Design/One-To-Many Relations.excalidraw.md",
+    "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
+    "Learning/Database/Database Design",
+    "Learning/Database",
+    "Learning/DSA/Variable Length Sliding Window",
+    "Learning/System Design/Core Concepts/4-Database Indexing/attachments",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
