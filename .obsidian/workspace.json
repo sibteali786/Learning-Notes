@@ -8,31 +8,39 @@
         "type": "tabs",
         "children": [
           {
-            "id": "19fae44f4078508a",
+            "id": "aca1c932d83b3dfa",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Learning/Book Reading/In distract able.md",
-                "mode": "source",
-                "source": false
+                "file": "Screenshot 2026-03-20 at 3.14.04 AM.png"
               },
-              "icon": "lucide-file",
-              "title": "In distract able"
+              "icon": "lucide-image",
+              "title": "Screenshot 2026-03-20 at 3.14.04 AM"
             }
           },
           {
-            "id": "65546dfb1c2a519a",
+            "id": "7c79d91c10711480",
             "type": "leaf",
             "state": {
-              "type": "webviewer",
+              "type": "excalidraw",
               "state": {
-                "url": "https://obsidian.md/help/cli",
-                "title": "Obsidian CLI - Obsidian Help",
-                "mode": "webview"
+                "file": "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md"
               },
-              "icon": "globe-2",
-              "title": "Obsidian CLI - Obsidian Help"
+              "icon": "excalidraw-icon",
+              "title": "2-Where To Cache.excalidraw"
+            }
+          },
+          {
+            "id": "d065f1766ae90bf5",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "5-Common Issues & Deep Dive.excalidraw"
             }
           }
         ]
@@ -92,8 +100,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273,
-    "collapsed": true
+    "width": 310.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -197,29 +204,33 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "19fae44f4078508a",
+  "active": "aca1c932d83b3dfa",
   "lastOpenFiles": [
-    "Learning/System Design/Core Concepts/5-Caching/Cache Architectures.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-26 at 11.30.21 AM.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-24 at 10.21.56 AM.png",
     "Learning/Book Reading/In distract able.md",
-    "Learning/System Design/Core Concepts/5-Caching/Where To Cache.excalidraw.md",
-    "Screenshot 2026-03-24 at 12.23.37 PM.png",
-    "Screenshot 2026-03-24 at 12.23.26 PM.png",
-    "Screenshot 2026-03-24 at 12.23.13 PM.png",
-    "Screenshot 2026-03-24 at 12.01.10 PM.png",
-    "Screenshot 2026-03-24 at 11.29.11 AM.png",
-    "Learning/System Design/Core Concepts/5-Caching/Intuition.excalidraw.md",
+    "Learning/DSA/Stack/2-DecodeString.excalidraw.md",
+    "Learning/DSA/Stack/ValidParenthesis.excalidraw.md",
+    "Learning/DSA/Stack/1-Intuition.excalidraw.md",
+    "Pasted Image 20260317121120_013.png",
+    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.07.55 AM.png",
+    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.14.55 AM.png",
+    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.12.08 AM.png",
+    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.10.43 AM.png",
+    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-24 at 11.11.45 AM.png",
+    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-24 at 12.01.10 PM.png",
+    "Learning/System Design/Core Concepts/5-Caching/attachment",
     "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
-    "Screenshot 2026-03-24 at 11.11.45 AM.png",
-    "Screenshot 2026-03-24 at 10.39.36 AM.png",
-    "Screenshot 2026-03-24 at 10.31.34 AM.png",
-    "Screenshot 2026-03-24 at 10.21.56 AM.png",
     "Learning/System Design/Core Concepts/5-Caching/Intuition.md",
     "Learning/System Design/Core Concepts/5-Caching",
     "Learning/Frontend Interview Preparation/Interview Projects/Dnd Editor.md",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
     "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/DSA/Stack/ValidParenthesis.excalidraw.md",
-    "Learning/DSA/Stack/1-Intuition.excalidraw.md",
     "Learning/DSA/Stack/attachments",
     "Learning/DSA/Stack",
     "Personal/Remote Jobs/List of Companies.md",
@@ -237,13 +248,9 @@
     "Learning/Work Stuff/Chat Application.md",
     "Learning/Work Stuff/Chat App.md",
     "Learning/Database/Database Design/attachments",
-    "Learning/Book Reading/Atomic Habbits.md",
-    "Learning/Database/Database Design/One-To-Many Relations.excalidraw.md",
-    "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
     "Learning/Database/Database Design",
     "Learning/Database",
     "Learning/DSA/Variable Length Sliding Window",
-    "Learning/System Design/Core Concepts/4-Database Indexing/attachments",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
