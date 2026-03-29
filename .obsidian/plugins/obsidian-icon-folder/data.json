@@ -6,12 +6,12 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiCode",
+      "LiCode2",
       "LiBlocks",
       "LiFiles",
       "LiFileCode",
-      "LiLetterText",
-      "LiChartNetwork",
-      "LiFileSliders"
+      "LiLetterText"
     ],
     "recentlyUsedIconsSize": 6,
     "rules": [],
@@ -46,5 +46,7 @@
   "Learning/Networking": "LiChartNetwork",
   "Learning/Work Stuff/Serial Number Feature.md": "LiLetterText",
   "Learning/Freelance/attachments": "LiFileCode",
-  "Learning/System Design": "LiBlocks"
+  "Learning/System Design": "LiBlocks",
+  "Learning/JavaScript": "LiCode2",
+  "Learning/Go Lang": "LiCode"
 }

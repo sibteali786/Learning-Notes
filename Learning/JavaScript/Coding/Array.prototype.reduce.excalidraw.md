@@ -1,0 +1,148 @@
+---
+
+excalidraw-plugin: parsed
+tags: [excalidraw]
+
+---
+==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
+
+
+# Excalidraw Data
+
+## Text Elements
+Array.prototype.reduce ^WevmH4g1
+
+Specs from mdn ^x20F1Qem
+
+reduce(callbackFn)
+reduce(callbackFn, initialValue) ^2D8ItpnE
+
+Parameters
+
+callbackFn
+
+    A function to execute for each element in the array. Its return value becomes the value of the accumulator parameter on the next invocation of callbackFn. For the last invocation, the return value becomes the return value of reduce(). The function is called with the following arguments:
+
+    accumulator
+
+        The value resulting from the previous call to callbackFn. On the first call, its value is initialValue if the latter is specified; otherwise its value is array[0].
+    currentValue
+
+        The value of the current element. On the first call, its value is array[0] if initialValue is specified; otherwise its value is array[1].
+    currentIndex
+
+        The index position of currentValue in the array. On the first call, its value is 0 if initialValue is specified, otherwise 1.
+    array
+
+        The array reduce() was called upon.
+
+initialValue Optional
+
+    A value to which accumulator is initialized the first time the callback is called. If initialValue is specified, callbackFn starts executing with the first value in the array as currentValue. If initialValue is not specified, accumulator is initialized to the first value in the array, and callbackFn starts executing with the second value in the array as currentValue. In this case, if the array is empty (so that there's no first value to return as accumulator), an error is thrown.
+
+Return value
+
+The value that results from running the "reducer" callback function to completion over the entire array.
+Exceptions
+
+TypeError
+
+    Thrown if the array contains no elements and initialValue is not provided.
+
+ ^SwZfIJl5
+
+Attempt 1 ^KtrTbBRx
+
+Array.prototype.myReduce = function(callbackFn, initialValue) {
+    let accumulator;
+    let currentIndex;  
+    if (!initialValue) {
+        accumulator = this[0]
+        currentIndex = 1
+    }else {
+        accumulator = initialValue
+        currentIndex = 0
+    }
+
+    const len = this.length
+    const originalArr = this
+    let currentValue;
+    
+    for ( let i = currentIndex; i < len; i++) {
+        currentValue = originalArr[i]
+        if (Object.hasOwn(originalArr, i) ) {
+            accumulator = callbackFn.call(thisArg, accumulator, currentValue, i, originalArr) 
+        }
+    }
+
+    return accumulator
+} ^HGT4doMk
+
+%%
+## Drawing
+```compressed-json
+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
+```
+%%

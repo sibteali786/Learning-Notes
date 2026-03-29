@@ -4,43 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "a5736c24dfb82277",
+        "id": "dc19fa3ab2843447",
         "type": "tabs",
         "children": [
           {
-            "id": "aca1c932d83b3dfa",
-            "type": "leaf",
-            "state": {
-              "type": "image",
-              "state": {
-                "file": "Screenshot 2026-03-20 at 3.14.04 AM.png"
-              },
-              "icon": "lucide-image",
-              "title": "Screenshot 2026-03-20 at 3.14.04 AM"
-            }
-          },
-          {
-            "id": "7c79d91c10711480",
+            "id": "d2d5acd16bead12e",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md"
+                "file": "Learning/Database/Database Design/Intro to Database/2-First SQL Query.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "2-Where To Cache.excalidraw"
-            }
-          },
-          {
-            "id": "d065f1766ae90bf5",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "5-Common Issues & Deep Dive.excalidraw"
+              "title": "2-First SQL Query.excalidraw"
             }
           }
         ]
@@ -100,7 +76,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273
+    "width": 310.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -116,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Database/Database Design/Intro to Database/2-First SQL Query.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -126,7 +103,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Cargo Bussiness"
+              "title": "Backlinks for 2-First SQL Query.excalidraw"
             }
           },
           {
@@ -204,53 +181,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aca1c932d83b3dfa",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-26 at 11.30.21 AM.png",
+    "Screenshot 2026-03-29 at 1.45.41 PM.png",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.35.31 PM.png",
     "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.39.15 PM.png",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.42.52 PM.png",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.41.56 PM.png",
+    "Pasted Image 20260317121120_013.png",
+    "Learning/Database/Database Design/Intro to Database/2-First SQL Query.excalidraw.md",
+    "Learning/Database/Database Design/Intro to Database/1-Intro to Database.excalidraw.md",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.28.49 PM.png",
+    "sqlite_online_0.sql",
+    "sqlite_online.sql",
+    "Learning/Database/Database Design/Intro to Database/sqlite_online.sql",
+    "Learning/Database/Database Design/attachments/Sci-Fi-example.png",
+    "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-10 at 12.31.58 AM.png",
+    "Learning/Database/Database Design/attachments/Screenshot 2026-03-10 at 12.32.25 AM.png",
+    "Learning/Database/Database Design/Intro to Database",
+    "Learning/Database/Database Design/Drawing 2026-03-28 15.26.02.excalidraw.md",
+    "Personal/Remote Jobs/List of Companies.md",
+    "Learning/Database/Database Design/One-To-Many Relations.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
+    "Learning/AI&ML Engineering/Ai Adoption/Addy Osmani's Slide deck.md",
+    "Learning/AI&ML Engineering/Drawing 2026-03-27 13.40.44.excalidraw.md",
+    "Learning/AI&ML Engineering/Ai Adoption",
+    "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
+    "Learning/AI&ML Engineering",
+    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
+    "Learning/Book Reading/In distract able.md",
+    "Learning/Freelance/Builders's Website/Creds.md",
     "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-24 at 10.21.56 AM.png",
-    "Learning/Book Reading/In distract able.md",
     "Learning/DSA/Stack/2-DecodeString.excalidraw.md",
     "Learning/DSA/Stack/ValidParenthesis.excalidraw.md",
     "Learning/DSA/Stack/1-Intuition.excalidraw.md",
-    "Pasted Image 20260317121120_013.png",
-    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.07.55 AM.png",
-    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.14.55 AM.png",
-    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.12.08 AM.png",
-    "Learning/DSA/Stack/attachments/Screenshot 2026-03-18 at 11.10.43 AM.png",
-    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-24 at 11.11.45 AM.png",
-    "Learning/System Design/Core Concepts/5-Caching/attachment/Screenshot 2026-03-24 at 12.01.10 PM.png",
     "Learning/System Design/Core Concepts/5-Caching/attachment",
     "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/Intuition.md",
     "Learning/System Design/Core Concepts/5-Caching",
     "Learning/Frontend Interview Preparation/Interview Projects/Dnd Editor.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
     "Learning/DSA/Stack/attachments",
     "Learning/DSA/Stack",
-    "Personal/Remote Jobs/List of Companies.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
-    "Learning/DSA/Variable Length Sliding Window/1-Intuition_&_Fruit_Into_Basktets.md",
-    "Learning/DSA/Variable Length Sliding Window/LongestRepeatingCharacterReplacement.excalidraw.md",
-    "Learning/DSA/Variable Length Sliding Window/LongestSubstringWithoutRepeatingCharacters.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Overview.md",
-    "Learning/Frontend Interview Preparation/Interview Projects/attachments",
-    "Learning/Frontend Interview Preparation/Interview Projects",
-    "Learning/Freelance/Builders's Website/Builders Website.md",
-    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
-    "Learning/Work Stuff/Chat Application.md",
-    "Learning/Work Stuff/Chat App.md",
-    "Learning/Database/Database Design/attachments",
-    "Learning/Database/Database Design",
-    "Learning/Database",
-    "Learning/DSA/Variable Length Sliding Window",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
