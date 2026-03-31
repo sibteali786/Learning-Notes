@@ -21,6 +21,7 @@ const response = await fetch(
 - I am using `-staging` to show it staging environment, since each tenantId is uniquely stored in mongodb for chat application
 - `name` can be whatever you want it to be lets say 'WhatsNextplease Staging'
 - `adminEmail` for now its only a placeholder purpose was or will be to send credentials on this email so that we can keep things secure.
+- https://api.hillcountrycoders10.com
 #### Example
 ```json
 {

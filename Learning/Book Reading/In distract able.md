@@ -61,4 +61,29 @@ a tendency to see the worst aspect of things or believe that the worst will happ
 > [!abstinence]
 > the practice of [restraining](https://www.google.com/search?client=firefox-b-d&hs=WgvU&sca_esv=b67bc7baf628df58&sxsrf=ANbL-n5EimY0BRKgh3v02h5Q2KB_FtH8yw:1774586857274&q=restraining&si=AL3DRZE_xiDg-d6tsHNNJuabyRZWGpHX9C9BZ7nXysfDpV1PdSF5eSu880f2xztuVEEck2JD2bX8QEj-oaJ2AY58KlBYlPd7J8FBhFVMbntw-vTXDOXpIpk%3D&expnd=1&sa=X&ved=2ahUKEwj0yoCao7-TAxXMXUEAHceVOKUQyecJegQIKhAQ) [oneself](https://www.google.com/search?client=firefox-b-d&hs=WgvU&sca_esv=b67bc7baf628df58&sxsrf=ANbL-n5EimY0BRKgh3v02h5Q2KB_FtH8yw:1774586857274&q=oneself&si=AL3DRZGNUIa3xcMRrx6cXoxA7yseR53WEvOYdDZpJJXU7zQx7ImDnKG0Ld0XDDF0WZ9WRsvy7ArVm-yagHwIFN6aT45EpVKZQg%3D%3D&expnd=1&sa=X&ved=2ahUKEwj0yoCao7-TAxXMXUEAHceVOKUQyecJegQIKhAR) from [indulging](https://www.google.com/search?client=firefox-b-d&hs=WgvU&sca_esv=b67bc7baf628df58&sxsrf=ANbL-n5EimY0BRKgh3v02h5Q2KB_FtH8yw:1774586857274&q=indulging&si=AL3DRZF9mDMECe4ehrGDiMmrXKhw8Cs5HluQxGQDUS2j08hQZkOmUvwnDSauQxCmJPAL5-0V142JFgzULpKB5vI4lIDO4LRhze44cjmszt2M5iXS8E6bsOw%3D&expnd=1&sa=X&ved=2ahUKEwj0yoCao7-TAxXMXUEAHceVOKUQyecJegQIKhAS) in something, typically alcohol or sex.
 
+### Reimagine Internal Trigger
+- There are four steps we can perform to handle our intrusive thoughts.
+#### Step1
+- Look for discomfort that precedes the distraction focusing in on the internal trigger.
+means when i look for my phone to use instagram i should think about why am i dong it, what is that feeling internally which forces me to do it ? i.e internal trigger 
+#### Step 2
+- Write down that trigger somewhere, when it happened ( time of the day ).
+#### Step 3
+- Explore our sensations
+like what we do when this internal trigger arises ? do our fingers twirl before we get distracted, or do we get butterflies in our stomach etc.
+
+a technique to avoid this uncomfortable internal trigger 
+##### Stream on a leaf method
+> Imagine siting beside a gently flowing stream. Then imagine there are leaves floating down that stream. Place each thought in your mind on each leaf. It could be a memory, a word, a worry, an image. And let each of those leaves float down that stream swirling away as you sit and just watch.
+
+#### Step 4 
+- We should beware of liminal moments
+like waiting for a web page to load and we use instagram meanwhile, one meeting or task ends and i use instagram or snapchat to spend some time 
+##### How to avoid it -> Ten Minute Rule
+Wait for 10 minutes before you have the urge to do something, if you can successfully surf the urge for 10 minutes you are free to have it, but mostly it wont.
+
+### Reimagine the task at hand
+- If we can create curiosity in our work we can easily introduce fun in our task at hand.
+- Fun allows us to stay focused at task at hand.
+- Fun and play does not have to be pleasureable but help us stay focused by being curious.
 - 

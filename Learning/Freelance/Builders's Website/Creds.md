@@ -19,3 +19,12 @@ su - ali
 ### Test User
 test@user.com
 Password123
+Comand to update VPS
+```txt
+cd /var/www/asia-builders-erp
+git pull
+pnpm install
+pnpm build
+cd apps/api && pnpm migration:run && cd ../..
+pm2 restart all
+```
