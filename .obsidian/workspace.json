@@ -4,19 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "2e7a354638c56e76",
+        "id": "068168c8842e93f3",
         "type": "tabs",
         "children": [
           {
-            "id": "622d0bdc43271e9c",
+            "id": "90ca83b45b47f17c",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md"
+                "file": "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "5-Common Issues & Deep Dive.excalidraw"
+              "title": "Intuition.excalidraw"
+            }
+          },
+          {
+            "id": "9bffe1dafaf2cb08",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "1-Next Greater Element.excalidraw"
             }
           }
         ]
@@ -141,13 +153,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
+                "file": "Learning/Database/Database Design/2-Related Table and More SQL/Keys, Joins.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 5-Common Issues & Deep Dive.excalidraw"
+              "title": "Outline of Keys, Joins.excalidraw"
             }
           },
           {
@@ -182,54 +194,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "622d0bdc43271e9c",
+  "active": "90ca83b45b47f17c",
   "lastOpenFiles": [
+    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/1-Keys, Joins.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/2-Revisit Table and Data Management.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-29 at 1.45.41 PM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.18.09 PM.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.59.07 PM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.30.23 PM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.36.49 PM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-04-01 at 2.20.40 PM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-04-01 at 2.28.35 PM.png",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-04-02 at 2.23.16 PM.png",
+    "Learning/System Design/Core Concepts/6-Sharding/attachments",
+    "Learning/JavaScript/Coding/Promise.all.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack",
+    "Learning/Book Reading/In distract able.md",
+    "Learning/Database/Learnings/Things i learned while working.md",
+    "Learning/Database/Learnings",
+    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding",
+    "Learning/Book Reading/Reading List.md",
+    "Personal/Maryam's Things.md",
+    "Learning/DSA/Stack/3-Longest Valid Parentheses.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
+    "Learning/Freelance/Builders's Website/Builders Website.md",
     "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
-    "Learning/Book Reading/In distract able.md",
-    "Learning/Book Reading/Reading List.md",
-    "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
     "Learning/DSA/Stack/1-ValidParenthesis.excalidraw.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
     "Learning/Work Stuff/Chat Application.md",
     "Learning/Work Stuff/Chat App.md",
-    "Learning/DSA/Stack/Longest Valid Parentheses.excalidraw.md",
     "Personal/Internal Trigger Chart.md",
-    "Learning/DSA/Stack/2-DecodeString.excalidraw.md",
-    "Learning/DSA/Stack/1-Intuition.excalidraw.md",
-    "Personal/Maryam's Things.md",
-    "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
     "Learning/Database/Database Design/2-Related Table and More SQL",
-    "Screenshot 2026-03-29 at 1.45.41 PM.png",
-    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.35.31 PM.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.39.15 PM.png",
-    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.42.52 PM.png",
-    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.41.56 PM.png",
-    "Pasted Image 20260317121120_013.png",
-    "Learning/Database/Database Design/1-Intro to Database/1-Intro to Database.excalidraw.md",
-    "Learning/Database/Database Design/attachments/Screenshot 2026-03-29 at 1.28.49 PM.png",
     "sqlite_online_0.sql",
     "sqlite_online.sql",
     "Learning/Database/Database Design/1-Intro to Database/sqlite_online.sql",
-    "Learning/Database/Database Design/attachments/Sci-Fi-example.png",
-    "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
-    "Learning/Database/Database Design/attachments/Screenshot 2026-03-10 at 12.31.58 AM.png",
     "Learning/Database/Database Design/1-Intro to Database",
-    "Learning/Database/Database Design/Drawing 2026-03-28 15.26.02.excalidraw.md",
-    "Personal/Remote Jobs/List of Companies.md",
-    "Learning/Database/Database Design/One-To-Many Relations.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
-    "Learning/AI&ML Engineering/Ai Adoption/Addy Osmani's Slide deck.md",
-    "Learning/AI&ML Engineering/Drawing 2026-03-27 13.40.44.excalidraw.md",
     "Learning/AI&ML Engineering/Ai Adoption",
-    "Learning/AI&ML Engineering",
-    "Learning/System Design/Core Concepts/5-Caching/attachment",
-    "Learning/System Design/Core Concepts/5-Caching",
-    "Learning/DSA/Stack/attachments",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

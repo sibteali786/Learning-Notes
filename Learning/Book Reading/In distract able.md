@@ -85,5 +85,29 @@ Wait for 10 minutes before you have the urge to do something, if you can success
 ### Reimagine the task at hand
 - If we can create curiosity in our work we can easily introduce fun in our task at hand.
 - Fun allows us to stay focused at task at hand.
-- Fun and play does not have to be pleasureable but help us stay focused by being curious.
-- 
+- Fun and play does not have to be pleasurable but help us stay focused by being curious.
+
+### Reimagine Our temperament
+- We become what we manifest ? 
+- I have heard this many times ? what does it really means . It means that if we think we are powerless, less creative, cannot drive, have less self control and worthless etc this is what we are or become. 
+- We never run out of willpower we just beleive we do to escape reality.
+- We should be self compassionate, talk to our selves as talking to a friend in need not berating our self when we fail something.
+> Chronically
+> in a long lasting or habitual or problematic way
+
+> bristle
+> be covered with or abundant in
+
+### Turn Your Values into Time
+- Timeboxing things allows us to focus on what we want to do becuase as they say
+- If we do not have a plan to do something or a traction how can we distract from it.
+- Create a schedule of things we are going to do, small or large.
+- Divide day into 3 life domains
+1. You
+ 2. Relationships
+ 3. Work
+
+### Control the Inputs Not the outcomes 
+- Schedule time for ourself first, we are at center of three domains of life, If we are not giving time to ourself we won't do justice with other two domains either.
+- Show up when we say, we will. We cannot always control what we get out of time we spend but we can control time we spend.
+- Like we cannot control whom we would meet in our life, who would become our best friend, our life partner but we can control but what our actions can be in all of these situations.
