@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "068168c8842e93f3",
+        "id": "da9ba500ccc4dd20",
         "type": "tabs",
         "children": [
           {
-            "id": "90ca83b45b47f17c",
+            "id": "9e2ad0a1541f597f",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md"
+                "file": "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Intuition.excalidraw"
-            }
-          },
-          {
-            "id": "9bffe1dafaf2cb08",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "1-Next Greater Element.excalidraw"
+              "title": "Introduction.excalidraw"
             }
           }
         ]
@@ -194,30 +182,46 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "90ca83b45b47f17c",
+  "active": "9e2ad0a1541f597f",
   "lastOpenFiles": [
-    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
-    "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md",
-    "Screenshot 2026-04-06 at 11.24.37 AM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/1-Keys, Joins.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL/2-Revisit Table and Data Management.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-29 at 1.45.41 PM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.18.09 PM.png",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code",
+    "Learning/AI&ML Engineering/Claude Code",
+    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
+    "Pasted Image 20260410135553_056.png",
+    "Pasted Image 20260410135216_112.png",
     "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.59.07 PM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.30.23 PM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-03-31 at 1.36.49 PM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-04-01 at 2.20.40 PM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-04-01 at 2.28.35 PM.png",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Screenshot 2026-04-02 at 2.23.16 PM.png",
-    "Learning/System Design/Core Concepts/6-Sharding/attachments",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Screenshot 2026-04-07 at 12.27.11 PM.png",
+    "sharding_modern_databases.svg",
+    "Pasted Image 20260408142148_090.png",
+    "Pasted Image 20260408142103_891.png",
+    "Pasted Image 20260408142126_644.png",
+    "Pasted Image 20260409120508_009.png",
     "Learning/JavaScript/Coding/Promise.all.excalidraw.md",
-    "Learning/DSA/Stack/Monotonic-Stack",
+    "Learning/JavaScript/Coding/Promise.any.excalidraw.md",
     "Learning/Book Reading/In distract able.md",
+    "Learning/Database/Database Design/3-Overview of Database design/attachments",
+    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/2-Daily Temperatures.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/1-Keys, Joins.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Learn SQL on our own.md",
+    "Learning/Database/Database Design/3-Overview of Database design",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Drawing 2026-04-07 14.45.37.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/2-Revisit Table and Data Management.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/attachments",
+    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/attachments",
+    "Learning/DSA/Stack/Monotonic-Stack",
     "Learning/Database/Learnings/Things i learned while working.md",
     "Learning/Database/Learnings",
-    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
     "Learning/System Design/Core Concepts/6-Sharding",
     "Learning/Book Reading/Reading List.md",
     "Personal/Maryam's Things.md",
@@ -225,23 +229,7 @@
     "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
     "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
     "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
-    "Learning/Freelance/Builders's Website/Builders Website.md",
-    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
-    "Learning/DSA/Stack/1-ValidParenthesis.excalidraw.md",
-    "Learning/Work Stuff/Chat Application.md",
-    "Learning/Work Stuff/Chat App.md",
-    "Personal/Internal Trigger Chart.md",
     "Learning/Database/Database Design/2-Related Table and More SQL",
-    "sqlite_online_0.sql",
-    "sqlite_online.sql",
-    "Learning/Database/Database Design/1-Intro to Database/sqlite_online.sql",
-    "Learning/Database/Database Design/1-Intro to Database",
-    "Learning/AI&ML Engineering/Ai Adoption",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

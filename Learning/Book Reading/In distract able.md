@@ -110,4 +110,31 @@ Wait for 10 minutes before you have the urge to do something, if you can success
 ### Control the Inputs Not the outcomes 
 - Schedule time for ourself first, we are at center of three domains of life, If we are not giving time to ourself we won't do justice with other two domains either.
 - Show up when we say, we will. We cannot always control what we get out of time we spend but we can control time we spend.
-- Like we cannot control whom we would meet in our life, who would become our best friend, our life partner but we can control but what our actions can be in all of these situations.
+- Like we cannot control whom we would meet in our life, who would become our best friend, our life partner but we can control but whatour actions can be in all of these situations.
+
+### Schedule Important Relationships
+- Always make sure to schedule time for your love ones, in my case my mother, my friends and my life my everything my dear marii.
+- Having a fixed time make sure we are not giving them residual time out of our whole day. Relationships are important and need specific time to take care of our values as a son, brother, father, Husband and good friend.
+- Having a good loyal friend to talk to and depend on elongates our life by many folds as per research.
+### Sync with stakeholders at work
+- Synching our own schedule with our stakeholders allows them to be aware of what and when we are we available making sure we are not over burdened with extra tasks.
+- Syncing upcoming commitments or schedules with stakeholders makes them aware of what are we gonna do and when giving them confidence. 
+
+## Hack Back External Triggers
+### Ask the critical question
+> [!ubiquity]
+> the fact of appearing everywhere or of being very common.
+"the ubiquity of mobile phones means you don't really need a watch"
+
+
+- The Fogg Model where B = MAT ? 
+- It states that for a behaviour B to occur three things must be present at the same time
+	- M = Motivation,
+	- A = Ability 
+	- T = Trigger
+- To do something motivation is much needed, becuase its the energy to do action.
+- Its found from research people who are distracted from external triggers during a task, they tend subsequently to make for lost time by working fast but cost is higher levels of frustration and stress.
+> [!Critical Question]
+> Is the trigger serving me or am i serving it.
+
+- If a tool is helping for a given task its traction if its otherwise its distraction.
