@@ -4,19 +4,33 @@
     "type": "split",
     "children": [
       {
-        "id": "da9ba500ccc4dd20",
+        "id": "9744d280e00caf63",
         "type": "tabs",
         "children": [
           {
-            "id": "9e2ad0a1541f597f",
+            "id": "7c5ee46e59592b62",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Learning/AI&ML Engineering/Claude Code/Creds.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Creds"
+            }
+          },
+          {
+            "id": "b6072a278b024c7e",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md"
+                "file": "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Cursor/1-Cursor and AI Models Overview.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Introduction.excalidraw"
+              "title": "1-Cursor and AI Models Overview.excalidraw"
             }
           }
         ]
@@ -76,8 +90,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273,
-    "collapsed": true
+    "width": 264.5
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -93,7 +106,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
+                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +116,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2-First SQL Query.excalidraw"
+              "title": "Backlinks for Cargo Bussiness"
             }
           },
           {
@@ -141,13 +154,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Database/Database Design/2-Related Table and More SQL/Keys, Joins.excalidraw.md",
+                "file": "Learning/Freelance/Cargo Bussiness.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Keys, Joins.excalidraw"
+              "title": "Outline of Cargo Bussiness"
             }
           },
           {
@@ -182,54 +195,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "9e2ad0a1541f597f",
+  "active": "7c5ee46e59592b62",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code",
-    "Learning/AI&ML Engineering/Claude Code",
-    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/1-Context Window.excalidraw.md",
+    "Learning/AI&ML Engineering/Claude Code/Creds.md",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Cursor/1-Cursor and AI Models Overview.excalidraw.md",
+    "Pasted Image 20260412131307_305.png",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Cursor",
+    "Pasted Image 20260411225258_681.png",
     "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
-    "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Interview Projects/Dnd Editor.md",
+    "sqlite_online_0.sql",
+    "sqlite_online.sql",
+    "sharding_modern_databases_v2.svg",
+    "sharding_modern_databases.svg",
+    "Screenshot 2026-04-07 at 12.27.11 PM.png",
+    "Screenshot 2026-04-07 at 11.58.25 AM.png",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Personal/Internal Trigger Chart.md",
     "Pasted Image 20260410135553_056.png",
     "Pasted Image 20260410135216_112.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Screenshot 2026-04-06 at 11.24.37 AM.png",
-    "Screenshot 2026-04-07 at 12.27.11 PM.png",
-    "sharding_modern_databases.svg",
-    "Pasted Image 20260408142148_090.png",
-    "Pasted Image 20260408142103_891.png",
-    "Pasted Image 20260408142126_644.png",
-    "Pasted Image 20260409120508_009.png",
-    "Learning/JavaScript/Coding/Promise.all.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise.any.excalidraw.md",
-    "Learning/Book Reading/In distract able.md",
-    "Learning/Database/Database Design/3-Overview of Database design/attachments",
-    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
-    "Learning/DSA/Stack/Monotonic-Stack/2-Daily Temperatures.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL/1-Keys, Joins.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Learn SQL on our own.md",
-    "Learning/Database/Database Design/3-Overview of Database design",
-    "Learning/Database/Database Design/2-Related Table and More SQL/Drawing 2026-04-07 14.45.37.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL/2-Revisit Table and Data Management.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL/attachments",
-    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
-    "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md",
     "Learning/System Design/Core Concepts/6-Sharding/attachments",
-    "Learning/DSA/Stack/Monotonic-Stack",
+    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding",
+    "Learning/System Design/Core Concepts/5-Caching/attachment",
+    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching",
+    "Learning/JavaScript/Coding/Promise.any.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise.all.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
+    "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Interview Projects/attachments",
     "Learning/Database/Learnings/Things i learned while working.md",
     "Learning/Database/Learnings",
-    "Learning/System Design/Core Concepts/6-Sharding",
-    "Learning/Book Reading/Reading List.md",
-    "Personal/Maryam's Things.md",
-    "Learning/DSA/Stack/3-Longest Valid Parentheses.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL",
+    "Learning/Database/Database Design/3-Overview of Database design/attachments",
+    "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/Learn SQL on our own.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/2-Revisit Table and Data Management.excalidraw.md",
+    "Learning/Database/Database Design/2-Related Table and More SQL/1-Keys, Joins.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
