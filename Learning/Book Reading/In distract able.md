@@ -138,3 +138,12 @@ Wait for 10 minutes before you have the urge to do something, if you can success
 > Is the trigger serving me or am i serving it.
 
 - If a tool is helping for a given task its traction if its otherwise its distraction.
+### Hack Back Work Interruptions
+- Use some kind of visual indicator to let others know that you are indistractable so they can wait and do not interrupt.
+- It can be some-kind of headphone, a card board over your monitor or a vest you wear when having a meeting.
+
+### Hack Back Email
+- The time we spend on emails T is a function of number of messages received (n) multiplied by the average time ( t ) spent per message.
+T = nt
+- Schedule office hours to reduce the number of messages received (n), delay when messages are sent as per the recipent's urgency so as to reduce number of more messages (n) you get back.
+- Spend less time on each message. We can label emails according to when each message needs a response. Reply to emails during a scheduled time in our schedule.

@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "da9ba500ccc4dd20",
+        "id": "3c711b6a655d0fb8",
         "type": "tabs",
         "children": [
           {
-            "id": "9e2ad0a1541f597f",
+            "id": "339620e78f57e8fe",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "image",
               "state": {
-                "file": "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md"
+                "file": "Learning/Database/Database Design/attachments/sharding_modern_databases_v2.svg"
               },
-              "icon": "excalidraw-icon",
-              "title": "Introduction.excalidraw"
+              "icon": "lucide-image",
+              "title": "sharding_modern_databases_v2"
             }
           }
         ]
@@ -76,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273,
-    "collapsed": true
+    "width": 310.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,33 +181,41 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "9e2ad0a1541f597f",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
+    "Learning/Database/Database Design/attachments/sharding_modern_databases.svg",
+    "Learning/Database/Database Design/attachments/sharding_modern_databases_v2.svg",
+    "Screenshot 2026-04-07 at 12.27.11 PM.png",
+    "Screenshot 2026-04-07 at 11.58.25 AM.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Pasted Image 20260407123826_882.png",
+    "Pasted Image 20260317121120_013.png",
+    "Learning/Database/Database Design/attachments/Pasted Image 20260410135216_112.png",
+    "Learning/Database/Database Design/attachments/Pasted Image 20260410135553_056.png",
+    "Pasted Image 20260413110200_923.png",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Learning/Database/Database Design/4-Entities-and-Attributes/Intro-and-Keys.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.any.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise",
+    "Learning/Book Reading/In distract able.md",
+    "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
+    "Learning/Database/Database Design/4-Entities-and-Attributes",
+    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
+    "Learning/Backend Engineering/backend.excalidraw.excalidraw",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code",
     "Learning/AI&ML Engineering/Claude Code",
     "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
     "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
     "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
-    "Pasted Image 20260410135553_056.png",
-    "Pasted Image 20260410135216_112.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Screenshot 2026-04-06 at 11.24.37 AM.png",
-    "Screenshot 2026-04-07 at 12.27.11 PM.png",
-    "sharding_modern_databases.svg",
-    "Pasted Image 20260408142148_090.png",
-    "Pasted Image 20260408142103_891.png",
-    "Pasted Image 20260408142126_644.png",
-    "Pasted Image 20260409120508_009.png",
-    "Learning/JavaScript/Coding/Promise.all.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise.any.excalidraw.md",
-    "Learning/Book Reading/In distract able.md",
     "Learning/Database/Database Design/3-Overview of Database design/attachments",
-    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
     "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
     "Learning/DSA/Stack/Monotonic-Stack/2-Daily Temperatures.excalidraw.md",
     "Learning/Database/Database Design/2-Related Table and More SQL/1-Keys, Joins.excalidraw.md",
     "Learning/Database/Database Design/2-Related Table and More SQL/Learn SQL on our own.md",
@@ -216,20 +223,12 @@
     "Learning/Database/Database Design/2-Related Table and More SQL/Drawing 2026-04-07 14.45.37.excalidraw.md",
     "Learning/Database/Database Design/2-Related Table and More SQL/2-Revisit Table and Data Management.excalidraw.md",
     "Learning/Database/Database Design/2-Related Table and More SQL/attachments",
-    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
     "Learning/DSA/Stack/Monotonic-Stack/Intuition.excalidraw.md",
     "Learning/System Design/Core Concepts/6-Sharding/attachments",
     "Learning/DSA/Stack/Monotonic-Stack",
     "Learning/Database/Learnings/Things i learned while working.md",
-    "Learning/Database/Learnings",
-    "Learning/System Design/Core Concepts/6-Sharding",
     "Learning/Book Reading/Reading List.md",
     "Personal/Maryam's Things.md",
-    "Learning/DSA/Stack/3-Longest Valid Parentheses.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototyp.filter.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototype.map.excalidraw.md",
-    "Learning/JavaScript/Coding/Array.prototype.reduce.excalidraw.md",
-    "Learning/Database/Database Design/2-Related Table and More SQL",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
