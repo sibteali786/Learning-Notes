@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CRM · Emailing Module — UI Mockups</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=General+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg-0: #140F2B;
+    --bg-1: #1B1539;
+    --bg-2: #231C46;
+    --bg-3: #2D245B;
+    --bg-4: #382C6E;
+    --line: #452C95;
+    --line-soft: #3A2C73;
+    --accent: #7F56D9;
+    --accent-2: #B797FF;
+    --accent-3: #E1C9FF;
+    --text: #F5F0FF;
+    --text-dim: #A99BD4;
+    --text-mute: #6F618F;
+    --good: #4ADE80;
+    --warn: #FBBF24;
+    --bad: #F87171;
+    --info: #60A5FA;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'General Sans', system-ui, sans-serif;
+    background: var(--bg-0);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 1200px 600px at 10% -10%, rgba(127, 86, 217, 0.25), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 10%, rgba(183, 151, 255, 0.12), transparent 60%),
+      radial-gradient(ellipse 700px 400px at 50% 100%, rgba(127, 86, 217, 0.15), transparent 60%),
+      var(--bg-0);
+    min-height: 100vh;
+    background-attachment: fixed;
+  }
+  .serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .mono  { font-family: 'JetBrains Mono', monospace; }
+
+  /* Panels */
+  .panel {
+    background: linear-gradient(180deg, rgba(45, 36, 91, 0.7), rgba(35, 28, 70, 0.7));
+    border: 1px solid rgba(69, 44, 149, 0.55);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.04) inset,
+      0 30px 60px -30px rgba(0,0,0,0.6);
+  }
+  .panel-soft {
+    background: rgba(25, 21, 38, 0.55);
+    border: 1px solid rgba(69, 44, 149, 0.4);
+    border-radius: 14px;
+  }
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(127, 86, 217, 0.55), transparent); }
+  .hairline { border-color: rgba(127, 86, 217, 0.22); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 10px;
+    font-weight: 500; font-size: 13.5px;
+    transition: all .2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: linear-gradient(180deg, #9B74F0, #6B42C8);
+    color: white;
+    box-shadow: 0 6px 20px -6px rgba(127, 86, 217, 0.7), 0 1px 0 rgba(255,255,255,0.2) inset;
+  }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .btn-ghost {
+    background: rgba(127, 86, 217, 0.1);
+    color: var(--accent-3);
+    border-color: rgba(127, 86, 217, 0.4);
+  }
+  .btn-ghost:hover { background: rgba(127, 86, 217, 0.2); }
+  .btn-icon {
+    width: 36px; height: 36px; padding: 0; justify-content: center;
+    border-radius: 10px;
+    background: rgba(127, 86, 217, 0.08);
+    border: 1px solid rgba(127, 86, 217, 0.3);
+    color: var(--accent-3);
+  }
+  .btn-icon:hover { background: rgba(127, 86, 217, 0.2); }
+
+  /* Chips */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 500;
+    background: rgba(127, 86, 217, 0.15);
+    border: 1px solid rgba(127, 86, 217, 0.35);
+    color: var(--accent-3);
+  }
+  .chip-good { background: rgba(74, 222, 128, 0.12); border-color: rgba(74, 222, 128, 0.35); color: #86EFAC; }
+  .chip-warn { background: rgba(251, 191, 36, 0.12); border-color: rgba(251, 191, 36, 0.35); color: #FCD34D; }
+  .chip-bad  { background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.35); color: #FCA5A5; }
+  .chip-info { background: rgba(96, 165, 250, 0.12); border-color: rgba(96, 165, 250, 0.35); color: #93C5FD; }
+
+  /* Inputs */
+  .input {
+    background: rgba(20, 15, 43, 0.7);
+    border: 1px solid rgba(69, 44, 149, 0.5);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13.5px;
+    outline: none;
+    width: 100%;
+    transition: border .15s;
+  }
+  .input:focus { border-color: var(--accent-2); box-shadow: 0 0 0 3px rgba(183, 151, 255, 0.12); }
+  label.lbl { font-size: 12px; color: var(--text-dim); font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+
+  /* Tables */
+  table.modern { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+  table.modern thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 16px;
+  }
+  table.modern tbody tr {
+    background: rgba(35, 28, 70, 0.6);
+    transition: background .15s;
+  }
+  table.modern tbody tr:hover { background: rgba(56, 44, 110, 0.7); }
+  table.modern tbody td {
+    padding: 14px 16px;
+    font-size: 13.5px;
+    border-top: 1px solid rgba(69, 44, 149, 0.35);
+    border-bottom: 1px solid rgba(69, 44, 149, 0.35);
+  }
+  table.modern tbody td:first-child {
+    border-left: 1px solid rgba(69, 44, 149, 0.35);
+    border-top-left-radius: 12px; border-bottom-left-radius: 12px;
+  }
+  table.modern tbody td:last-child {
+    border-right: 1px solid rgba(69, 44, 149, 0.35);
+    border-top-right-radius: 12px; border-bottom-right-radius: 12px;
+  }
+
+  /* Avatars */
+  .ava {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 12.5px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  /* Tab nav */
+  .tabnav button {
+    position: relative;
+    padding: 14px 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: color .2s;
+  }
+  .tabnav button.active { color: var(--text); }
+  .tabnav button.active::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 2px;
+  }
+  .tabnav button:hover { color: var(--accent-3); }
+
+  /* Sub tabs */
+  .subtab {
+    display: inline-flex;
+    padding: 4px;
+    background: rgba(20, 15, 43, 0.6);
+    border: 1px solid rgba(69, 44, 149, 0.45);
+    border-radius: 12px;
+  }
+  .subtab button {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 9px;
+    border: 0;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .subtab button.active {
+    background: linear-gradient(180deg, rgba(127, 86, 217, 0.5), rgba(127, 86, 217, 0.25));
+    color: white;
+    box-shadow: 0 2px 8px -2px rgba(127, 86, 217, 0.5);
+  }
+
+  /* Drawer */
+  .drawer-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(10, 6, 24, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 50;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .drawer-backdrop.open { display: flex; }
+  .drawer {
+    background: linear-gradient(180deg, #2D245B, #1E1740);
+    border: 1px solid rgba(127, 86, 217, 0.45);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.8);
+  }
+  .drawer::-webkit-scrollbar { width: 8px; }
+  .drawer::-webkit-scrollbar-track { background: transparent; }
+  .drawer::-webkit-scrollbar-thumb { background: rgba(127, 86, 217, 0.4); border-radius: 4px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-1); }
+  ::-webkit-scrollbar-thumb { background: rgba(127, 86, 217, 0.4); border-radius: 5px; }
+
+  /* Misc */
+  .grid-lines {
+    background-image:
+      linear-gradient(rgba(127, 86, 217, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127, 86, 217, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .checkbox {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid rgba(127, 86, 217, 0.6);
+    background: rgba(20, 15, 43, 0.6);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .checkbox.checked {
+    background: linear-gradient(180deg, #9B74F0, #6B42C8);
+    border-color: var(--accent-2);
+  }
+  .checkbox.checked::after {
+    content: '✓'; color: white; font-size: 12px; font-weight: 700;
+  }
+
+  /* Progress ring helper */
+  .ring-bg { stroke: rgba(127, 86, 217, 0.2); }
+  .ring-fg { stroke: url(#ringGrad); stroke-linecap: round; }
+
+  /* Screen label pill */
+  .screen-label {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+    background: linear-gradient(90deg, rgba(127, 86, 217, 0.25), rgba(127, 86, 217, 0.05));
+    border: 1px solid rgba(127, 86, 217, 0.4);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--accent-3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+  }
+  .screen-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 8px var(--accent-2); }
+
+  /* Section numbering */
+  .section-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 88px; line-height: 1;
+    background: linear-gradient(180deg, rgba(183, 151, 255, 0.9), rgba(127, 86, 217, 0.2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Fake sidebar for app frame */
+  .app-sidebar-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+  .app-sidebar-item.active {
+    background: linear-gradient(90deg, rgba(127, 86, 217, 0.35), rgba(127, 86, 217, 0.05));
+    color: white;
+    border-left: 2px solid var(--accent-2);
+    padding-left: 12px;
+  }
+
+  /* Toggle */
+  .toggle {
+    width: 36px; height: 20px; border-radius: 999px;
+    background: rgba(127, 86, 217, 0.25);
+    position: relative; cursor: pointer; transition: background .2s;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: white; transition: transform .2s;
+  }
+  .toggle.on { background: linear-gradient(90deg, #9B74F0, #6B42C8); }
+  .toggle.on::after { transform: translateX(16px); }
+
+  /* Filter pill */
+  .filter-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px;
+    background: rgba(20, 15, 43, 0.7);
+    border: 1px dashed rgba(127, 86, 217, 0.5);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .filter-pill:hover { border-style: solid; color: var(--accent-3); }
+  .filter-pill.active {
+    border-style: solid;
+    background: rgba(127, 86, 217, 0.2);
+    color: white;
+    border-color: var(--accent-2);
+  }
+
+  /* Animated shimmer for progress */
+  @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+  .shimmer {
+    background: linear-gradient(90deg, rgba(127, 86, 217, 0.2), rgba(183, 151, 255, 0.5), rgba(127, 86, 217, 0.2));
+    background-size: 400px 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  /* Kbd */
+  kbd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    padding: 2px 6px;
+    background: rgba(20, 15, 43, 0.8);
+    border: 1px solid rgba(127, 86, 217, 0.4);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    color: var(--text-dim);
+  }
+
+  /* Compose button fab-like */
+  .compose-cta {
+    background: linear-gradient(135deg, #B797FF, #7F56D9);
+    color: white;
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 10px 30px -8px rgba(127, 86, 217, 0.7);
+    display: inline-flex; align-items: center; gap: 10px;
+    cursor: pointer;
+  }
+  .compose-cta:hover { filter: brightness(1.1); }
+
+  /* Rich text toolbar icon */
+  .rt-btn {
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 7px;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .rt-btn:hover { background: rgba(127, 86, 217, 0.2); color: white; }
+
+  /* HTML builder canvas preview */
+  .email-preview {
+    background: white;
+    color: #222;
+    border-radius: 8px;
+    min-height: 400px;
+    font-family: Georgia, serif;
+  }
+
+  /* Status bar */
+  .statusbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 10px;
+    background: rgba(20, 15, 43, 0.6);
+    border: 1px solid rgba(127, 86, 217, 0.3);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Marquee style section header */
+  h2.serif-heading {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  h2.serif-heading em {
+    font-style: italic;
+    background: linear-gradient(90deg, #E1C9FF, #7F56D9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* small icon wrap */
+  .i-wrap { width: 18px; height: 18px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP INTRO ============ -->
+<div class="max-w-[1440px] mx-auto px-8 pt-14 pb-10">
+  <div class="flex items-center gap-3 mb-4">
+    <div class="screen-label"><span class="dot"></span>UI Spec · Emailing Module</div>
+    <span class="text-[var(--text-mute)] text-xs mono">v1.0 · 9 screens · 3 drawers</span>
+  </div>
+  <h1 class="serif text-[84px] leading-[0.9] mb-4 max-w-4xl">
+    A mailing suite,<br>
+    <span class="italic" style="background:linear-gradient(90deg,#E1C9FF,#7F56D9);-webkit-background-clip:text;background-clip:text;color:transparent;">crafted for velocity.</span>
+  </h1>
+  <p class="text-[var(--text-dim)] max-w-2xl text-[15px] leading-relaxed">
+    A complete visual specification for the CRM email module — Inbox, Compose, Bulk Sends, Contact Lists,
+    Templates &amp; Newsletters. Built on the existing purple theme, refined into something you'll want to use every day.
+  </p>
+</div>
+
+<!-- ============ APP FRAME START ============ -->
+<div class="max-w-[1440px] mx-auto px-8 pb-20">
+  <!-- Fake app chrome -->
+  <div class="panel overflow-hidden">
+    <div class="flex">
+      <!-- Sidebar -->
+      <aside class="w-[220px] border-r border-[rgba(127,86,217,0.25)] p-5 flex flex-col gap-1 bg-[rgba(20,15,43,0.35)]">
+        <div class="flex items-center gap-2 mb-6 px-2">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#B797FF,#7F56D9);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M4 4h16v16H4z M4 4l8 8 8-8"/></svg>
+          </div>
+          <div class="serif text-xl">Hillcrest<span class="italic">CRM</span></div>
+        </div>
+        <div class="text-[10px] uppercase tracking-widest text-[var(--text-mute)] px-3 mb-2">Workspace</div>
+        <div class="app-sidebar-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+          Dashboard
+        </div>
+        <div class="app-sidebar-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="7" r="3"/></svg>
+          Clients
+        </div>
+        <div class="app-sidebar-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          Pipeline
+        </div>
+        <div class="app-sidebar-item active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg>
+          Emailing
+        </div>
+        <div class="app-sidebar-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+          Analytics
+        </div>
+        <div class="app-sidebar-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9 1.65 1.65 0 004.27 7.18l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.6 1.65 1.65 0 0010 3.09V3a2 2 0 014 0v.09A1.65 1.65 0 0015 4.6a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.36.14.69.38.95.68.26.3.42.66.45 1.03 0 0 0 .06 0 .09a2 2 0 010 4c-.37.03-.73.19-1.03.45-.3.26-.54.59-.68.95z"/></svg>
+          Settings
+        </div>
+        <div class="mt-auto panel-soft p-3 mt-6">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="ava" style="background:linear-gradient(135deg,#9B74F0,#6B42C8);">JM</div>
+            <div>
+              <div class="text-[12.5px] font-medium text-white leading-tight">Jordan M.</div>
+              <div class="text-[10px] text-[var(--text-mute)]">Sales Rep</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="flex-1 min-w-0">
+        <!-- Top bar -->
+        <div class="flex items-center justify-between px-8 py-5 border-b border-[rgba(127,86,217,0.25)]">
+          <div>
+            <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-1">Emailing</div>
+            <div class="serif text-3xl">Mail <span class="italic" style="color:var(--accent-2);">studio</span></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="statusbar"><span class="w-1.5 h-1.5 rounded-full bg-[var(--good)] inline-block"></span> Gmail · Twilio · Resend online</div>
+            <button class="btn-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
+            </button>
+            <button class="compose-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Compose
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs row -->
+        <div class="px-8 border-b border-[rgba(127,86,217,0.25)]">
+          <div class="tabnav flex gap-8" id="mainTabs">
+            <button class="active" data-tab="inbox">Inbox</button>
+            <button data-tab="email">Email</button>
+            <button data-tab="bulk">Bulk Email</button>
+            <button data-tab="templates">Templates</button>
+          </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- TAB 1 — INBOX                                                  -->
+        <!-- ============================================================= -->
+        <section data-panel="inbox" class="p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <div class="screen-label mb-3"><span class="dot"></span>Screen 1.1 — Unified Inbox</div>
+              <h2 class="serif-heading">Every thread, <em>one surface.</em></h2>
+            </div>
+          </div>
+
+          <!-- Account switcher + service tabs -->
+          <div class="flex items-center gap-4 mb-5 flex-wrap">
+            <div class="subtab">
+              <button class="active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-block mr-1.5 align-[-2px]"><path d="M4 4h16v16H4z M4 4l8 8 8-8"/></svg>
+                Gmail
+              </button>
+              <button>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-block mr-1.5 align-[-2px]"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                Twilio
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mr-1">Accounts</span>
+              <div class="flex -space-x-2">
+                <div class="ava ring-2 ring-[#2D245B]" style="background:linear-gradient(135deg,#F87171,#B91C1C);">JM</div>
+                <div class="ava ring-2 ring-[#2D245B]" style="background:linear-gradient(135deg,#60A5FA,#1D4ED8);">SL</div>
+                <div class="ava ring-2 ring-[#2D245B]" style="background:linear-gradient(135deg,#34D399,#047857);">AT</div>
+              </div>
+              <button class="btn btn-ghost ml-2" onclick="openDrawer('addAccount')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Add account
+              </button>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <div class="flex items-center gap-2">
+              <div class="statusbar">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                243 threads · 12 unread
+              </div>
+            </div>
+          </div>
+
+          <!-- Multilayer search bar -->
+          <div class="panel-soft p-4 mb-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="flex-1 flex items-center gap-3 bg-[rgba(20,15,43,0.7)] border border-[rgba(69,44,149,0.5)] rounded-xl px-4 py-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input class="flex-1 bg-transparent outline-none text-[14px] placeholder:text-[var(--text-mute)]" placeholder="Search by sender, subject, body, date, label…" value="from:acme subject:proposal">
+                <kbd>⌘ K</kbd>
+              </div>
+              <button class="btn-icon" title="Filters">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+              </button>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[11px] uppercase tracking-widest text-[var(--text-mute)]">Filter:</span>
+              <div class="filter-pill active">From: <b class="text-white ml-1">acme.com</b><span class="ml-1">×</span></div>
+              <div class="filter-pill active">Subject contains: <b class="text-white ml-1">proposal</b><span class="ml-1">×</span></div>
+              <div class="filter-pill">Has attachment</div>
+              <div class="filter-pill">Unread only</div>
+              <div class="filter-pill">Date range</div>
+              <div class="filter-pill">+ Add filter</div>
+            </div>
+          </div>
+
+          <!-- Inbox table -->
+          <div class="panel-soft overflow-hidden">
+            <table class="modern">
+              <thead>
+                <tr>
+                  <th style="width:40px;"></th>
+                  <th>Sender</th>
+                  <th>Subject &amp; preview</th>
+                  <th style="width:120px;">Client</th>
+                  <th style="width:90px;">Date</th>
+                  <th style="width:200px;text-align:right;">Quick actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- row 1 -->
+                <tr>
+                  <td><div class="checkbox checked"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#F59E0B,#B45309);">MR</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Maya Reyes</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">maya@acme.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-medium text-white">Re: Q4 Proposal — revised figures attached</div>
+                    <div class="text-[12px] text-[var(--text-dim)] truncate max-w-[420px]">Hi Jordan, thanks for the quick turnaround. I've looped in our CFO for the pricing section and…</div>
+                    <div class="flex gap-1.5 mt-1.5">
+                      <span class="chip chip-info">Proposal</span>
+                      <span class="chip">📎 2</span>
+                    </div>
+                  </td>
+                  <td><a class="text-[var(--accent-2)] hover:underline text-[12.5px]">Acme Corp</a></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Today · 10:42</td>
+                  <td>
+                    <div class="flex justify-end gap-1">
+                      <button class="btn-icon" title="Reply">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 015 5v2"/></svg>
+                      </button>
+                      <button class="btn-icon" title="Add as Activity" style="color:#86EFAC;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                      </button>
+                      <button class="btn-icon" title="Compose" onclick="openDrawer('compose')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- row 2 -->
+                <tr>
+                  <td><div class="checkbox"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#60A5FA,#1D4ED8);">DK</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Daniel Kim</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">d.kim@northstar.io</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-medium text-white">Intro call availability next week?</div>
+                    <div class="text-[12px] text-[var(--text-dim)] truncate max-w-[420px]">Happy to chat. I've got Tue 2–4pm or Thu morning open — send an invite and we'll…</div>
+                    <div class="flex gap-1.5 mt-1.5">
+                      <span class="chip chip-good">Lead</span>
+                      <span class="chip">Gmail</span>
+                    </div>
+                  </td>
+                  <td><a class="text-[var(--accent-2)] hover:underline text-[12.5px]">Northstar</a></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Today · 09:18</td>
+                  <td>
+                    <div class="flex justify-end gap-1">
+                      <button class="btn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 015 5v2"/></svg></button>
+                      <button class="btn-icon" style="color:#86EFAC;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+                      <button class="btn-icon" onclick="openDrawer('compose')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- row 3 -->
+                <tr>
+                  <td><div class="checkbox"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#34D399,#047857);">LS</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Lena Sørensen</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">+45 ••• 4421 · SMS</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-medium text-white">SMS: "Confirmed for Thursday, thanks!"</div>
+                    <div class="text-[12px] text-[var(--text-dim)] truncate max-w-[420px]">Short reply thread with 4 messages</div>
+                    <div class="flex gap-1.5 mt-1.5">
+                      <span class="chip chip-warn">Twilio SMS</span>
+                    </div>
+                  </td>
+                  <td><a class="text-[var(--accent-2)] hover:underline text-[12.5px]">Fjord Labs</a></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Yesterday</td>
+                  <td>
+                    <div class="flex justify-end gap-1">
+                      <button class="btn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 015 5v2"/></svg></button>
+                      <button class="btn-icon" style="color:#86EFAC;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+                      <button class="btn-icon" onclick="openDrawer('compose')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- row 4 -->
+                <tr>
+                  <td><div class="checkbox"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#F472B6,#BE185D);">RG</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Rohan Gupta</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">rohan@paperback.co</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="font-medium text-[var(--text-dim)]">[read] Thanks for the demo — following up internally</div>
+                    <div class="text-[12px] text-[var(--text-dim)] truncate max-w-[420px]">Just looping back — our team really liked the walkthrough. Needs VP sign-off before…</div>
+                  </td>
+                  <td><a class="text-[var(--accent-2)] hover:underline text-[12.5px]">Paperback</a></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Mar 28</td>
+                  <td>
+                    <div class="flex justify-end gap-1">
+                      <button class="btn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 015 5v2"/></svg></button>
+                      <button class="btn-icon" style="color:#86EFAC;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+                      <button class="btn-icon" onclick="openDrawer('compose')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex items-center justify-between mt-4 text-[12px] text-[var(--text-dim)]">
+            <div>Showing 4 of 243</div>
+            <div class="flex items-center gap-1">
+              <button class="btn-icon">‹</button>
+              <div class="px-3 py-1 rounded-lg bg-[rgba(127,86,217,0.25)] text-white">1</div>
+              <div class="px-3 py-1 rounded-lg">2</div>
+              <div class="px-3 py-1 rounded-lg">3</div>
+              <div class="px-3 py-1 rounded-lg">…</div>
+              <div class="px-3 py-1 rounded-lg">25</div>
+              <button class="btn-icon">›</button>
+            </div>
+          </div>
+
+          <!-- Note on this screen -->
+          <div class="mt-8 flex gap-4 items-start panel-soft p-5">
+            <div class="section-num">01</div>
+            <div>
+              <div class="text-[11px] uppercase tracking-widest text-[var(--accent-2)] mb-1">Screen notes</div>
+              <div class="text-white font-medium mb-1">Inbox: service &amp; account switcher + multilayer search</div>
+              <div class="text-[13px] text-[var(--text-dim)] leading-relaxed max-w-3xl">
+                Service switch (Gmail / Twilio) lives top-left as a segmented control. Stacked avatars show the
+                connected accounts for the selected service — clicking <b>Add account</b> opens the <b>Add Account drawer</b>
+                (drawer mockup below), which runs the passport OAuth flow in a new window. The pill-based filter
+                row lets users stack filters like chips; each filter is removable. Quick actions per row:
+                <b>Reply</b>, <b>Add as Activity</b> (records thread against the linked client), and <b>Compose</b>.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 2 — EMAIL                                                  -->
+        <!-- ============================================================= -->
+        <section data-panel="email" class="p-8 hidden">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <div class="screen-label mb-3"><span class="dot"></span>Screen 2.1 — Clients &amp; Contacts</div>
+              <h2 class="serif-heading">Reach out, <em>one click away.</em></h2>
+            </div>
+          </div>
+
+          <!-- Service + entity toggles -->
+          <div class="flex items-center gap-4 mb-5 flex-wrap">
+            <div class="subtab">
+              <button class="active">Clients</button>
+              <button>Contacts</button>
+            </div>
+            <div class="subtab">
+              <button class="active">Gmail</button>
+              <button>Twilio</button>
+              <button>Resend</button>
+            </div>
+            <div class="flex-1"></div>
+            <div class="statusbar"><span class="w-1.5 h-1.5 rounded-full bg-[var(--accent-2)] inline-block"></span> 4 selected</div>
+            <button class="btn btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+              Select all
+            </button>
+            <button class="btn btn-primary" onclick="openDrawer('compose')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z M4 4l8 8 8-8"/></svg>
+              Email selected (4)
+            </button>
+          </div>
+
+          <!-- Filter bar -->
+          <div class="panel-soft p-4 mb-5">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="flex-1 flex items-center gap-3 bg-[rgba(20,15,43,0.7)] border border-[rgba(69,44,149,0.5)] rounded-xl px-4 py-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input class="flex-1 bg-transparent outline-none text-[14px] placeholder:text-[var(--text-mute)]" placeholder="Search clients by name, company, email…">
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="filter-pill active">Assigned to me</div>
+              <div class="filter-pill">Status: Lead</div>
+              <div class="filter-pill">Research: Done</div>
+              <div class="filter-pill">Last contacted &lt; 7d</div>
+              <div class="filter-pill">+ Add filter</div>
+            </div>
+          </div>
+
+          <!-- Client table -->
+          <div class="panel-soft overflow-hidden">
+            <table class="modern">
+              <thead>
+                <tr>
+                  <th style="width:40px;"><div class="checkbox"></div></th>
+                  <th>Client</th>
+                  <th>Company</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Last contact</th>
+                  <th style="width:140px;text-align:right;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="checkbox checked"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#F59E0B,#B45309);">MR</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Maya Reyes</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">VP Operations</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-[var(--text-dim)]">Acme Corp</td>
+                  <td class="text-[var(--text-dim)]">maya@acme.com</td>
+                  <td class="text-[var(--text-dim)] mono text-[12px]">+1 ••• 3301</td>
+                  <td><span class="chip chip-good">Lead</span></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Today</td>
+                  <td class="text-right">
+                    <button class="btn btn-ghost" onclick="openDrawer('compose')">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z M4 4l8 8 8-8"/></svg>
+                      Send
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="checkbox checked"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#60A5FA,#1D4ED8);">DK</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Daniel Kim</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">Product Lead</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-[var(--text-dim)]">Northstar</td>
+                  <td class="text-[var(--text-dim)]">d.kim@northstar.io</td>
+                  <td class="text-[var(--text-dim)] mono text-[12px]">+1 ••• 8802</td>
+                  <td><span class="chip chip-info">Qualified</span></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Yesterday</td>
+                  <td class="text-right"><button class="btn btn-ghost" onclick="openDrawer('compose')">Send</button></td>
+                </tr>
+                <tr>
+                  <td><div class="checkbox checked"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#34D399,#047857);">LS</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Lena Sørensen</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">Founder</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-[var(--text-dim)]">Fjord Labs</td>
+                  <td class="text-[var(--text-dim)]">lena@fjord.dk</td>
+                  <td class="text-[var(--text-dim)] mono text-[12px]">+45 ••• 4421</td>
+                  <td><span class="chip chip-warn">Follow-up</span></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">3d ago</td>
+                  <td class="text-right"><button class="btn btn-ghost" onclick="openDrawer('compose')">Send</button></td>
+                </tr>
+                <tr>
+                  <td><div class="checkbox checked"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#F472B6,#BE185D);">RG</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Rohan Gupta</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">Eng Manager</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-[var(--text-dim)]">Paperback</td>
+                  <td class="text-[var(--text-dim)]">rohan@paperback.co</td>
+                  <td class="text-[var(--text-dim)] mono text-[12px]">+1 ••• 2215</td>
+                  <td><span class="chip chip-info">Qualified</span></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">Mar 28</td>
+                  <td class="text-right"><button class="btn btn-ghost" onclick="openDrawer('compose')">Send</button></td>
+                </tr>
+                <tr>
+                  <td><div class="checkbox"></div></td>
+                  <td>
+                    <div class="flex items-center gap-3">
+                      <div class="ava" style="background:linear-gradient(135deg,#A78BFA,#6D28D9);">TE</div>
+                      <div>
+                        <div class="font-medium text-white leading-tight">Tomás Esparza</div>
+                        <div class="text-[11px] text-[var(--text-mute)]">Head of Growth</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-[var(--text-dim)]">Brio Studio</td>
+                  <td class="text-[var(--text-dim)]">tomas@brio.studio</td>
+                  <td class="text-[var(--text-dim)] mono text-[12px]">+34 ••• 7715</td>
+                  <td><span class="chip">Cold</span></td>
+                  <td class="text-[var(--text-dim)] text-[12px]">2w ago</td>
+                  <td class="text-right"><button class="btn btn-ghost" onclick="openDrawer('compose')">Send</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-8 flex gap-4 items-start panel-soft p-5">
+            <div class="section-num">02</div>
+            <div>
+              <div class="text-[11px] uppercase tracking-widest text-[var(--accent-2)] mb-1">Screen notes</div>
+              <div class="text-white font-medium mb-1">Email tab: clients / contacts with multi-select</div>
+              <div class="text-[13px] text-[var(--text-dim)] leading-relaxed max-w-3xl">
+                Two entity tabs (<b>Clients</b> / <b>Contacts</b>) at top. The service selector picks which connected account will send.
+                Each row has a <b>Send</b> button (opens <b>Compose drawer</b> pre-filled with recipient). Multi-select exposes the
+                top-bar <b>Email selected</b> CTA which opens the same drawer with N recipients and template picker visible.
+                All sends record an activity on the linked client automatically.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 3 — BULK EMAIL                                             -->
+        <!-- ============================================================= -->
+        <section data-panel="bulk" class="p-8 hidden">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <div class="screen-label mb-3"><span class="dot"></span>Screen 3.1 — Bulk Email</div>
+              <h2 class="serif-heading">Broadcast, <em>with precision.</em></h2>
+            </div>
+            <div class="subtab">
+              <button class="active" onclick="switchBulk('lists')">Contact lists</button>
+              <button onclick="switchBulk('jobs')">Bulk jobs</button>
+            </div>
+          </div>
+
+          <!-- SUB TAB A: LISTS -->
+          <div data-bulk="lists">
+            <div class="flex items-center gap-3 mb-5 flex-wrap">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] uppercase tracking-widest text-[var(--text-mute)]">Service</span>
+                <div class="subtab">
+                  <button class="active">Gmail</button>
+                  <button>Twilio</button>
+                  <button>Resend</button>
+                </div>
+              </div>
+              <div class="flex-1"></div>
+              <button class="btn btn-ghost">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                New list
+              </button>
+              <button class="btn btn-primary" onclick="openDrawer('bulkCompose')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z M4 4l8 8 8-8"/></svg>
+                Send bulk to selected
+              </button>
+            </div>
+
+            <!-- List cards as table -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+              <!-- list card -->
+              <div class="panel-soft p-5 relative overflow-hidden cursor-pointer hover:border-[var(--accent-2)] transition-all" style="border:1px solid var(--accent-2);">
+                <div class="absolute top-4 right-4"><div class="checkbox checked"></div></div>
+                <div class="text-[10px] uppercase tracking-widest text-[var(--accent-2)] mb-2">List · 247 contacts</div>
+                <div class="serif text-2xl mb-2">Enterprise <em>Q2 outreach</em></div>
+                <div class="text-[12.5px] text-[var(--text-dim)] mb-4 leading-relaxed">Decision-makers at 50+ seat SaaS companies we qualified during ShopTalk '26.</div>
+                <div class="flex -space-x-2 mb-3">
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:linear-gradient(135deg,#F59E0B,#B45309);width:26px;height:26px;font-size:10px;">MR</div>
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:linear-gradient(135deg,#60A5FA,#1D4ED8);width:26px;height:26px;font-size:10px;">DK</div>
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:linear-gradient(135deg,#34D399,#047857);width:26px;height:26px;font-size:10px;">LS</div>
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:rgba(127,86,217,0.4);width:26px;height:26px;font-size:10px;">+244</div>
+                </div>
+                <div class="divider mb-3"></div>
+                <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                  <span>Updated 2d ago</span>
+                  <span class="mono">owner: jordan</span>
+                </div>
+              </div>
+
+              <div class="panel-soft p-5 relative">
+                <div class="absolute top-4 right-4"><div class="checkbox"></div></div>
+                <div class="text-[10px] uppercase tracking-widest text-[var(--accent-2)] mb-2">List · 112 contacts</div>
+                <div class="serif text-2xl mb-2">Newsletter <em>subscribers</em></div>
+                <div class="text-[12.5px] text-[var(--text-dim)] mb-4 leading-relaxed">Opt-ins from the website form and ebook downloads.</div>
+                <div class="flex -space-x-2 mb-3">
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:linear-gradient(135deg,#F472B6,#BE185D);width:26px;height:26px;font-size:10px;">RG</div>
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:linear-gradient(135deg,#A78BFA,#6D28D9);width:26px;height:26px;font-size:10px;">TE</div>
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:rgba(127,86,217,0.4);width:26px;height:26px;font-size:10px;">+110</div>
+                </div>
+                <div class="divider mb-3"></div>
+                <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                  <span>Updated 1w ago</span>
+                  <span class="mono">owner: marta</span>
+                </div>
+              </div>
+
+              <div class="panel-soft p-5 relative">
+                <div class="absolute top-4 right-4"><div class="checkbox"></div></div>
+                <div class="text-[10px] uppercase tracking-widest text-[var(--accent-2)] mb-2">List · 38 contacts</div>
+                <div class="serif text-2xl mb-2">Dormant <em>accounts</em></div>
+                <div class="text-[12.5px] text-[var(--text-dim)] mb-4 leading-relaxed">Clients with no activity in 90+ days — win-back campaign target.</div>
+                <div class="flex -space-x-2 mb-3">
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:linear-gradient(135deg,#FB923C,#C2410C);width:26px;height:26px;font-size:10px;">OK</div>
+                  <div class="ava ring-2 ring-[#1B1539]" style="background:rgba(127,86,217,0.4);width:26px;height:26px;font-size:10px;">+37</div>
+                </div>
+                <div class="divider mb-3"></div>
+                <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                  <span>Updated 3w ago</span>
+                  <span class="mono">owner: jordan</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4 items-start panel-soft p-5">
+              <div class="section-num">03</div>
+              <div>
+                <div class="text-[11px] uppercase tracking-widest text-[var(--accent-2)] mb-1">Screen notes</div>
+                <div class="text-white font-medium mb-1">Bulk Email: list picker as cards</div>
+                <div class="text-[13px] text-[var(--text-dim)] leading-relaxed max-w-3xl">
+                  Lists render as selectable cards (rather than a dense row table) because users are typically picking <em>one</em>
+                  to send to. Each card shows name, description, count, owner, and 3 avatar previews. Select one (or multiple)
+                  then hit the top-right <b>Send bulk to selected</b> — opens the <b>Bulk Compose drawer</b> where you choose service
+                  account, template/newsletter, and any overrides.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB TAB B: JOBS -->
+          <div data-bulk="jobs" class="hidden">
+            <!-- Metric cards -->
+            <div class="grid grid-cols-4 gap-4 mb-6">
+              <div class="panel-soft p-5">
+                <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-2">Sent · 30d</div>
+                <div class="serif text-5xl">12,847</div>
+                <div class="text-[11px] text-[var(--good)] mt-1">▲ 18% vs prev</div>
+              </div>
+              <div class="panel-soft p-5">
+                <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-2">Success rate</div>
+                <div class="serif text-5xl">97.4<span class="text-2xl text-[var(--text-dim)]">%</span></div>
+                <div class="text-[11px] text-[var(--good)] mt-1">334 bounced</div>
+              </div>
+              <div class="panel-soft p-5">
+                <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-2">Open rate</div>
+                <div class="serif text-5xl">42.1<span class="text-2xl text-[var(--text-dim)]">%</span></div>
+                <div class="text-[11px] text-[var(--text-dim)] mt-1">industry avg 21%</div>
+              </div>
+              <div class="panel-soft p-5">
+                <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-2">Failed</div>
+                <div class="serif text-5xl" style="color:#FCA5A5;">47</div>
+                <div class="text-[11px] text-[var(--bad)] mt-1">retry available</div>
+              </div>
+            </div>
+
+            <!-- Jobs table -->
+            <div class="panel-soft overflow-hidden">
+              <table class="modern">
+                <thead>
+                  <tr>
+                    <th>Job</th>
+                    <th>List</th>
+                    <th>Service</th>
+                    <th>Template</th>
+                    <th>Progress</th>
+                    <th>Started</th>
+                    <th style="width:120px;text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="font-medium text-white">#BLK-2041</div>
+                      <div class="text-[11px] text-[var(--text-mute)]">Q2 launch announcement</div>
+                    </td>
+                    <td class="text-[var(--text-dim)]">Enterprise Q2</td>
+                    <td><span class="chip chip-info">Gmail</span></td>
+                    <td class="text-[var(--text-dim)]">Product update</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-32 h-1.5 bg-[rgba(127,86,217,0.2)] rounded-full overflow-hidden">
+                          <div class="h-full rounded-full shimmer" style="width:64%;"></div>
+                        </div>
+                        <span class="text-[11px] text-[var(--text-dim)] mono">158/247</span>
+                      </div>
+                      <span class="chip chip-info mt-1">Running</span>
+                    </td>
+                    <td class="text-[var(--text-dim)] text-[12px]">3m ago</td>
+                    <td class="text-right"><button class="btn btn-ghost">Pause</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="font-medium text-white">#BLK-2040</div>
+                      <div class="text-[11px] text-[var(--text-mute)]">Weekly newsletter · wk15</div>
+                    </td>
+                    <td class="text-[var(--text-dim)]">Newsletter subs</td>
+                    <td><span class="chip chip-info">Resend</span></td>
+                    <td class="text-[var(--text-dim)]">Weekly dispatch</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-32 h-1.5 bg-[rgba(127,86,217,0.2)] rounded-full overflow-hidden">
+                          <div class="h-full rounded-full bg-[var(--good)]" style="width:100%;"></div>
+                        </div>
+                        <span class="text-[11px] text-[var(--text-dim)] mono">112/112</span>
+                      </div>
+                      <span class="chip chip-good mt-1">Complete</span>
+                    </td>
+                    <td class="text-[var(--text-dim)] text-[12px]">2h ago</td>
+                    <td class="text-right"><button class="btn btn-ghost">View</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="font-medium text-white">#BLK-2039</div>
+                      <div class="text-[11px] text-[var(--text-mute)]">Win-back campaign</div>
+                    </td>
+                    <td class="text-[var(--text-dim)]">Dormant accounts</td>
+                    <td><span class="chip chip-info">Gmail</span></td>
+                    <td class="text-[var(--text-dim)]">Comeback offer</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-32 h-1.5 bg-[rgba(127,86,217,0.2)] rounded-full overflow-hidden">
+                          <div class="h-full rounded-full" style="width:79%;background:linear-gradient(90deg,var(--good),#FCA5A5);"></div>
+                        </div>
+                        <span class="text-[11px] text-[var(--text-dim)] mono">30/38</span>
+                      </div>
+                      <div class="flex gap-1 mt-1">
+                        <span class="chip chip-good">30 sent</span>
+                        <span class="chip chip-bad">8 failed</span>
+                      </div>
+                    </td>
+                    <td class="text-[var(--text-dim)] text-[12px]">Yesterday</td>
+                    <td class="text-right">
+                      <button class="btn btn-primary">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+                        Retry 8
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="font-medium text-white">#BLK-2038</div>
+                      <div class="text-[11px] text-[var(--text-mute)]">Partnership intro blast</div>
+                    </td>
+                    <td class="text-[var(--text-dim)]">Partners list</td>
+                    <td><span class="chip chip-info">Twilio</span></td>
+                    <td class="text-[var(--text-dim)]">—</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-32 h-1.5 bg-[rgba(127,86,217,0.2)] rounded-full overflow-hidden">
+                          <div class="h-full rounded-full bg-[var(--bad)]" style="width:12%;"></div>
+                        </div>
+                        <span class="text-[11px] text-[var(--text-dim)] mono">6/48</span>
+                      </div>
+                      <span class="chip chip-bad mt-1">Failed · rate limit</span>
+                    </td>
+                    <td class="text-[var(--text-dim)] text-[12px]">2d ago</td>
+                    <td class="text-right">
+                      <button class="btn btn-primary">Retry all</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-6 flex gap-4 items-start panel-soft p-5">
+              <div class="section-num">04</div>
+              <div>
+                <div class="text-[11px] uppercase tracking-widest text-[var(--accent-2)] mb-1">Screen notes</div>
+                <div class="text-white font-medium mb-1">Bulk jobs: live status &amp; retry</div>
+                <div class="text-[13px] text-[var(--text-dim)] leading-relaxed max-w-3xl">
+                  Auto-refreshing via websocket/polling. Four KPI cards up top. Job rows show a slim progress bar with live counts and
+                  color-state (purple running, green done, red failed, gradient partial). Failure reasons appear as a tooltip on the
+                  red chip. <b>Retry</b> appears contextually — retries only the failed portion of a partial job, or the full batch for
+                  a failed job.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 4 — TEMPLATES                                              -->
+        <!-- ============================================================= -->
+        <section data-panel="templates" class="p-8 hidden">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <div class="screen-label mb-3"><span class="dot"></span>Screen 4.1 — Templates &amp; Lists</div>
+              <h2 class="serif-heading">Build once, <em>send forever.</em></h2>
+            </div>
+            <div class="subtab">
+              <button class="active" onclick="switchTpl('lists')">Contact lists</button>
+              <button onclick="switchTpl('templates')">Templates &amp; Newsletters</button>
+            </div>
+          </div>
+
+          <!-- SUB A: CONTACT LISTS -->
+          <div data-tpl="lists">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="flex-1 flex items-center gap-3 bg-[rgba(20,15,43,0.7)] border border-[rgba(69,44,149,0.5)] rounded-xl px-4 py-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input class="flex-1 bg-transparent outline-none text-[14px] placeholder:text-[var(--text-mute)]" placeholder="Search lists by name, description, owner…">
+              </div>
+              <button class="btn btn-primary" onclick="openDrawer('newList')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                New list
+              </button>
+            </div>
+
+            <div class="panel-soft overflow-hidden">
+              <table class="modern">
+                <thead>
+                  <tr>
+                    <th>List name</th>
+                    <th>Description</th>
+                    <th>Members</th>
+                    <th>Owner</th>
+                    <th>Last updated</th>
+                    <th style="width:120px;text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="font-medium text-white">Enterprise Q2 outreach</div></td>
+                    <td class="text-[var(--text-dim)] max-w-xs truncate">Decision-makers at 50+ seat SaaS from ShopTalk '26</td>
+                    <td><span class="chip">247</span></td>
+                    <td class="text-[var(--text-dim)]">Jordan M.</td>
+                    <td class="text-[var(--text-dim)] text-[12px]">2d ago</td>
+                    <td class="text-right"><button class="btn btn-ghost">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="font-medium text-white">Newsletter subscribers</div></td>
+                    <td class="text-[var(--text-dim)] max-w-xs truncate">Opt-ins from website and ebook downloads</td>
+                    <td><span class="chip">112</span></td>
+                    <td class="text-[var(--text-dim)]">Marta V.</td>
+                    <td class="text-[var(--text-dim)] text-[12px]">1w ago</td>
+                    <td class="text-right"><button class="btn btn-ghost">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="font-medium text-white">Dormant accounts</div></td>
+                    <td class="text-[var(--text-dim)] max-w-xs truncate">No activity 90+ days — win-back target</td>
+                    <td><span class="chip">38</span></td>
+                    <td class="text-[var(--text-dim)]">Jordan M.</td>
+                    <td class="text-[var(--text-dim)] text-[12px]">3w ago</td>
+                    <td class="text-right"><button class="btn btn-ghost">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="font-medium text-white">VIP partners</div></td>
+                    <td class="text-[var(--text-dim)] max-w-xs truncate">Strategic integration partners &amp; reseller contacts</td>
+                    <td><span class="chip">24</span></td>
+                    <td class="text-[var(--text-dim)]">Jordan M.</td>
+                    <td class="text-[var(--text-dim)] text-[12px]">1mo ago</td>
+                    <td class="text-right"><button class="btn btn-ghost">Edit</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB B: TEMPLATES -->
+          <div data-tpl="templates" class="hidden">
+            <div class="flex items-center gap-3 mb-5">
+              <div class="subtab">
+                <button class="active">All</button>
+                <button>Templates</button>
+                <button>Newsletters</button>
+              </div>
+              <div class="flex-1"></div>
+              <button class="btn btn-ghost" onclick="openDrawer('newTemplate')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                Import HTML/PDF/PPT
+              </button>
+              <button class="btn btn-primary" onclick="openDrawer('newTemplate')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                New template
+              </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+              <!-- template cards -->
+              <div class="panel-soft p-0 overflow-hidden group cursor-pointer hover:border-[var(--accent-2)] transition-all">
+                <div class="h-40 bg-white relative overflow-hidden">
+                  <div class="absolute inset-0 p-4 text-xs font-serif text-gray-800">
+                    <div class="h-6 bg-purple-900 w-1/3 rounded mb-2"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1 w-4/5"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-2 w-3/5"></div>
+                    <div class="h-8 bg-purple-600 w-1/4 rounded mb-2"></div>
+                    <div class="h-2 bg-gray-200 rounded mb-1"></div>
+                    <div class="h-2 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                  <div class="absolute top-2 right-2"><span class="chip chip-info">Newsletter</span></div>
+                </div>
+                <div class="p-4">
+                  <div class="font-medium text-white mb-1">Weekly dispatch</div>
+                  <div class="text-[11.5px] text-[var(--text-dim)] mb-2">Our ongoing newsletter — product tips, industry news.</div>
+                  <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                    <span>Used 28×</span>
+                    <span class="mono">HTML</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-soft p-0 overflow-hidden cursor-pointer hover:border-[var(--accent-2)] transition-all">
+                <div class="h-40 bg-white relative overflow-hidden">
+                  <div class="absolute inset-0 p-4">
+                    <div class="h-3 bg-gray-800 w-2/3 rounded mb-2"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1 w-4/5"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1 w-3/5"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-3 w-3/4"></div>
+                    <div class="flex gap-1 mb-2">
+                      <div class="h-5 bg-gray-900 w-16 rounded"></div>
+                      <div class="h-5 bg-gray-200 w-16 rounded"></div>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                  <div class="absolute top-2 right-2"><span class="chip chip-good">Template</span></div>
+                </div>
+                <div class="p-4">
+                  <div class="font-medium text-white mb-1">Cold outreach — intro</div>
+                  <div class="text-[11.5px] text-[var(--text-dim)] mb-2">Short, personalized first-touch with a soft CTA.</div>
+                  <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                    <span>Used 164×</span>
+                    <span class="mono">Text</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-soft p-0 overflow-hidden cursor-pointer hover:border-[var(--accent-2)] transition-all">
+                <div class="h-40 bg-gradient-to-br from-amber-50 to-rose-100 relative overflow-hidden">
+                  <div class="absolute inset-0 p-4">
+                    <div class="h-8 bg-rose-900 w-2/5 rounded mb-2"></div>
+                    <div class="h-10 bg-white/60 rounded mb-2"></div>
+                    <div class="h-2 bg-gray-400 rounded mb-1 w-4/5"></div>
+                    <div class="h-2 bg-gray-400 rounded mb-1 w-3/5"></div>
+                    <div class="h-6 bg-rose-600 w-20 rounded mt-2"></div>
+                  </div>
+                  <div class="absolute top-2 right-2"><span class="chip chip-info">Newsletter</span></div>
+                </div>
+                <div class="p-4">
+                  <div class="font-medium text-white mb-1">Product update — Q2</div>
+                  <div class="text-[11.5px] text-[var(--text-dim)] mb-2">Announcement template with hero image and CTA.</div>
+                  <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                    <span>Used 3×</span>
+                    <span class="mono">HTML</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-soft p-0 overflow-hidden cursor-pointer hover:border-[var(--accent-2)] transition-all">
+                <div class="h-40 bg-white relative overflow-hidden">
+                  <div class="absolute inset-0 p-4">
+                    <div class="h-3 bg-gray-800 w-1/2 rounded mb-3"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1 w-5/6"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-3 w-2/3"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1"></div>
+                    <div class="h-2 bg-gray-300 rounded mb-1 w-3/4"></div>
+                    <div class="h-5 bg-emerald-600 w-24 rounded mt-2"></div>
+                  </div>
+                  <div class="absolute top-2 right-2"><span class="chip chip-good">Template</span></div>
+                </div>
+                <div class="p-4">
+                  <div class="font-medium text-white mb-1">Follow-up · no reply</div>
+                  <div class="text-[11.5px] text-[var(--text-dim)] mb-2">Gentle bump after 5 days of silence.</div>
+                  <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                    <span>Used 89×</span>
+                    <span class="mono">Text</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel-soft p-0 overflow-hidden cursor-pointer hover:border-[var(--accent-2)] transition-all">
+                <div class="h-40 bg-slate-900 relative overflow-hidden">
+                  <div class="absolute inset-0 p-4">
+                    <div class="h-3 bg-purple-400 w-1/3 rounded mb-2"></div>
+                    <div class="h-6 bg-white w-4/5 rounded mb-2"></div>
+                    <div class="h-2 bg-gray-500 rounded mb-1 w-5/6"></div>
+                    <div class="h-2 bg-gray-500 rounded mb-1 w-2/3"></div>
+                    <div class="h-8 bg-purple-500 w-28 rounded mt-3"></div>
+                  </div>
+                  <div class="absolute top-2 right-2"><span class="chip chip-info">Newsletter</span></div>
+                </div>
+                <div class="p-4">
+                  <div class="font-medium text-white mb-1">Webinar invite · dark</div>
+                  <div class="text-[11.5px] text-[var(--text-dim)] mb-2">High-contrast invite with event details and RSVP.</div>
+                  <div class="flex items-center justify-between text-[11px] text-[var(--text-mute)]">
+                    <span>Used 12×</span>
+                    <span class="mono">HTML</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- add new tile -->
+              <div class="panel-soft p-0 overflow-hidden cursor-pointer border-dashed flex items-center justify-center h-[260px] hover:border-[var(--accent-2)] transition-all" style="border-style:dashed;" onclick="openDrawer('newTemplate')">
+                <div class="text-center">
+                  <div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background:rgba(127,86,217,0.2);border:1px solid rgba(127,86,217,0.4);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E1C9FF" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  </div>
+                  <div class="font-medium text-white">Create new</div>
+                  <div class="text-[11px] text-[var(--text-dim)] mt-1">Template or newsletter</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 flex gap-4 items-start panel-soft p-5">
+            <div class="section-num">05</div>
+            <div>
+              <div class="text-[11px] uppercase tracking-widest text-[var(--accent-2)] mb-1">Screen notes</div>
+              <div class="text-white font-medium mb-1">Templates: cards with live previews</div>
+              <div class="text-[13px] text-[var(--text-dim)] leading-relaxed max-w-3xl">
+                Templates and newsletters share one grid, filtered by type. Each card shows a real thumbnail preview
+                (rendered from the HTML) so users recognize at a glance. Usage count + format badge help find what
+                works. Clicking the dashed <b>Create new</b> tile opens the <b>Template Builder drawer</b>, which supports
+                HTML paste, file upload (HTML/PDF/PPT/JPEG → auto-converted to HTML), or a simple subject/body editor.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DRAWER MOCKUPS (shown as static below frame too) ============ -->
+<div class="max-w-[1440px] mx-auto px-8 pb-20">
+  <div class="flex items-center gap-3 mb-4">
+    <div class="screen-label"><span class="dot"></span>Drawers</div>
+  </div>
+  <h2 class="serif-heading mb-8">The drawers, <em>up close.</em></h2>
+
+  <!-- Compose drawer static -->
+  <div class="mb-10">
+    <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-3">Drawer A · Compose (Gmail-style)</div>
+    <div class="panel overflow-hidden">
+      <!-- drawer content -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(127,86,217,0.3)]">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#B797FF,#7F56D9);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div>
+            <div class="serif text-xl leading-none">New message</div>
+            <div class="text-[11px] text-[var(--text-mute)] mt-0.5">Draft saved · 2s ago</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn-icon" title="Minimize"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg></button>
+          <button class="btn-icon" title="Expand"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></button>
+          <button class="btn-icon" title="Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+
+      <div class="px-6 py-5 space-y-4">
+        <!-- From -->
+        <div class="flex items-center gap-4 pb-3 border-b hairline">
+          <div class="w-16 text-[11px] text-[var(--text-mute)] uppercase tracking-widest">From</div>
+          <div class="flex-1 flex items-center gap-2">
+            <div class="ava" style="background:linear-gradient(135deg,#9B74F0,#6B42C8);width:28px;height:28px;font-size:11px;">JM</div>
+            <span class="text-[13.5px]">Jordan M. &lt;jordan@hillcountry.com&gt;</span>
+            <span class="chip chip-info ml-1">Gmail</span>
+            <button class="text-[12px] text-[var(--accent-2)] hover:underline ml-2">change</button>
+          </div>
+        </div>
+
+        <!-- To -->
+        <div class="flex items-start gap-4 pb-3 border-b hairline">
+          <div class="w-16 text-[11px] text-[var(--text-mute)] uppercase tracking-widest pt-2">To</div>
+          <div class="flex-1 flex flex-wrap items-center gap-1.5">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(127,86,217,0.2)] border border-[rgba(127,86,217,0.5)] text-[12px]">
+              <div class="w-4 h-4 rounded-full" style="background:linear-gradient(135deg,#F59E0B,#B45309);"></div>
+              Maya Reyes
+              <span class="text-[10px] text-[var(--text-mute)]">&lt;maya@acme.com&gt;</span>
+              <span class="text-[var(--text-mute)] cursor-pointer">×</span>
+            </div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[rgba(127,86,217,0.2)] border border-[rgba(127,86,217,0.5)] text-[12px]">
+              <div class="w-4 h-4 rounded-full" style="background:linear-gradient(135deg,#60A5FA,#1D4ED8);"></div>
+              Daniel Kim
+              <span class="text-[10px] text-[var(--text-mute)]">&lt;d.kim@northstar.io&gt;</span>
+              <span class="text-[var(--text-mute)] cursor-pointer">×</span>
+            </div>
+            <input class="flex-1 min-w-[180px] bg-transparent outline-none text-[13px] py-1 placeholder:text-[var(--text-mute)]" placeholder="Add recipient…">
+            <button class="text-[12px] text-[var(--accent-2)] hover:underline ml-2">Cc</button>
+            <button class="text-[12px] text-[var(--accent-2)] hover:underline">Bcc</button>
+          </div>
+        </div>
+
+        <!-- Subject -->
+        <div class="flex items-center gap-4 pb-3 border-b hairline">
+          <div class="w-16 text-[11px] text-[var(--text-mute)] uppercase tracking-widest">Subject</div>
+          <input class="flex-1 bg-transparent outline-none text-[15px] font-medium" value="Following up on our Q2 proposal">
+        </div>
+
+        <!-- Body -->
+        <div>
+          <!-- rich text toolbar -->
+          <div class="flex items-center gap-1 pb-2 border-b hairline">
+            <div class="rt-btn"><b>B</b></div>
+            <div class="rt-btn"><i>I</i></div>
+            <div class="rt-btn"><u>U</u></div>
+            <div class="w-px h-4 bg-[rgba(127,86,217,0.3)] mx-1"></div>
+            <div class="rt-btn">≡</div>
+            <div class="rt-btn">•</div>
+            <div class="rt-btn">1.</div>
+            <div class="w-px h-4 bg-[rgba(127,86,217,0.3)] mx-1"></div>
+            <div class="rt-btn" title="Link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+            <div class="rt-btn" title="Image"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+            <div class="rt-btn" title="Code"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+            <div class="flex-1"></div>
+            <div class="text-[11px] text-[var(--text-mute)] mono mr-2">142 / 1,000 words</div>
+          </div>
+          <div class="py-4 text-[14px] leading-relaxed text-[var(--text)] min-h-[200px]">
+            Hi Maya,<br><br>
+            Thanks for the call yesterday — really enjoyed the chat. As promised, attached is the revised
+            Q2 proposal with the pricing tier we discussed, plus a one-pager for your CFO.<br><br>
+            A few quick highlights:<br>
+            • Onboarding in under 2 weeks<br>
+            • Dedicated CSM for the first 90 days<br>
+            • Month-to-month option for the first quarter<br><br>
+            Let me know if you'd like to jump on a quick call to walk through any of it.<br><br>
+            Best,<br>
+            Jordan
+          </div>
+        </div>
+
+        <!-- Attachments -->
+        <div class="flex gap-2 flex-wrap">
+          <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(20,15,43,0.6)] border border-[rgba(127,86,217,0.3)] text-[12px]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+            <span>Q2-proposal-acme.pdf</span>
+            <span class="text-[10px] text-[var(--text-mute)]">2.4 MB</span>
+            <span class="text-[var(--text-mute)] cursor-pointer">×</span>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(20,15,43,0.6)] border border-[rgba(127,86,217,0.3)] text-[12px]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6"/></svg>
+            <span>one-pager.pdf</span>
+            <span class="text-[10px] text-[var(--text-mute)]">780 KB</span>
+            <span class="text-[var(--text-mute)] cursor-pointer">×</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-[rgba(127,86,217,0.3)] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <button class="btn-icon" title="Attach"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
+          <button class="btn-icon" title="Template"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></button>
+          <button class="btn-icon" title="Emoji"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg></button>
+          <button class="btn-icon" title="Schedule"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></button>
+          <div class="w-px h-6 bg-[rgba(127,86,217,0.3)] mx-1"></div>
+          <select class="input" style="width:auto;padding:7px 12px;font-size:12px;">
+            <option>No template</option>
+            <option>Cold outreach — intro</option>
+            <option>Follow-up · no reply</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost">Save draft</button>
+          <button class="btn btn-primary">
+            Send
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Account drawer -->
+  <div class="mb-10">
+    <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-3">Drawer B · Add Account (OAuth via Passport)</div>
+    <div class="panel overflow-hidden max-w-3xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(127,86,217,0.3)]">
+        <div>
+          <div class="serif text-xl">Connect an account</div>
+          <div class="text-[11px] text-[var(--text-mute)] mt-0.5">Authenticate securely — we never store passwords.</div>
+        </div>
+        <button class="btn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="px-6 py-6">
+        <label class="lbl">Step 1 · Choose service</label>
+        <div class="grid grid-cols-3 gap-3 mt-3 mb-6">
+          <div class="panel-soft p-5 cursor-pointer" style="border:1px solid var(--accent-2);">
+            <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center" style="background:linear-gradient(135deg,#EA4335,#C5221F);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M4 4h16v16H4z M4 4l8 8 8-8"/></svg>
+            </div>
+            <div class="font-medium text-white">Gmail</div>
+            <div class="text-[11px] text-[var(--text-dim)] mt-1">OAuth 2.0 · read/send</div>
+            <div class="mt-3"><span class="chip chip-good">Selected</span></div>
+          </div>
+          <div class="panel-soft p-5 cursor-pointer">
+            <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center" style="background:linear-gradient(135deg,#F22F46,#B81C34);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="font-medium text-white">Twilio</div>
+            <div class="text-[11px] text-[var(--text-dim)] mt-1">SMS &amp; SendGrid</div>
+          </div>
+          <div class="panel-soft p-5 cursor-pointer">
+            <div class="w-10 h-10 rounded-lg mb-3 flex items-center justify-center" style="background:linear-gradient(135deg,#000000,#333333);">
+              <span class="text-white font-bold">R</span>
+            </div>
+            <div class="font-medium text-white">Resend</div>
+            <div class="text-[11px] text-[var(--text-dim)] mt-1">Transactional</div>
+          </div>
+        </div>
+
+        <label class="lbl">Step 2 · Account label (optional)</label>
+        <input class="input mt-2 mb-6" placeholder="e.g. Personal, Sales team, Outbound">
+
+        <div class="panel-soft p-4 mb-6 flex items-start gap-3" style="background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.3);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" stroke-width="2" class="flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <div class="text-[12.5px] text-[var(--text-dim)] leading-relaxed">
+            Clicking <b>Connect</b> opens a new Google window. You'll sign in and authorize HillcrestCRM to
+            read &amp; send mail. Tokens are stored encrypted — you can revoke access anytime.
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-ghost">Cancel</button>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M10 14L21 3M21 14v7H3V3h7"/></svg>
+            Connect Gmail
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Compose drawer -->
+  <div class="mb-10">
+    <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-3">Drawer C · Bulk Compose (with service, sender, template)</div>
+    <div class="panel overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(127,86,217,0.3)]">
+        <div>
+          <div class="serif text-xl">Send bulk campaign</div>
+          <div class="text-[11px] text-[var(--text-mute)] mt-0.5">Review &amp; confirm before launch</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="statusbar"><span class="w-1.5 h-1.5 rounded-full bg-[var(--accent-2)] inline-block"></span> 247 recipients · Enterprise Q2</div>
+          <button class="btn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-[1fr,320px]">
+        <!-- LEFT: compose -->
+        <div class="px-6 py-5 space-y-4 border-r border-[rgba(127,86,217,0.25)]">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="lbl">Service</label>
+              <select class="input mt-1.5">
+                <option>Gmail · jordan@hillcountry.com</option>
+                <option>Resend · transactional</option>
+                <option>Twilio SendGrid</option>
+              </select>
+            </div>
+            <div>
+              <label class="lbl">Template / Newsletter</label>
+              <select class="input mt-1.5">
+                <option>Product update — Q2</option>
+                <option>Weekly dispatch</option>
+                <option>Cold outreach — intro</option>
+                <option>— none (write fresh) —</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="lbl">List</label>
+            <div class="mt-1.5 flex items-center gap-2 px-3 py-2 rounded-lg bg-[rgba(20,15,43,0.7)] border border-[rgba(69,44,149,0.5)]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E1C9FF" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+              <span class="text-[13.5px] font-medium">Enterprise Q2 outreach</span>
+              <span class="chip">247 contacts</span>
+              <div class="flex-1"></div>
+              <button class="text-[12px] text-[var(--accent-2)] hover:underline">change</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="lbl">Subject</label>
+            <input class="input mt-1.5" value="Introducing our Q2 product lineup">
+          </div>
+
+          <div>
+            <label class="lbl">Body</label>
+            <div class="mt-1.5 rounded-lg bg-[rgba(20,15,43,0.7)] border border-[rgba(69,44,149,0.5)]">
+              <div class="flex items-center gap-1 p-2 border-b border-[rgba(127,86,217,0.25)]">
+                <div class="rt-btn"><b>B</b></div>
+                <div class="rt-btn"><i>I</i></div>
+                <div class="rt-btn"><u>U</u></div>
+                <div class="w-px h-4 bg-[rgba(127,86,217,0.3)] mx-1"></div>
+                <div class="rt-btn">•</div>
+                <div class="rt-btn">1.</div>
+                <div class="rt-btn">🔗</div>
+                <div class="flex-1"></div>
+                <div class="text-[11px] text-[var(--text-mute)] mono mr-2">merge tags: {{firstName}} {{company}}</div>
+              </div>
+              <div class="p-4 text-[13.5px] leading-relaxed min-h-[160px]">
+                Hi <span class="px-1.5 py-0.5 rounded bg-[rgba(127,86,217,0.3)] text-[var(--accent-2)] mono text-[11px]">{{firstName}}</span>,<br><br>
+                We just shipped a few things we think <span class="px-1.5 py-0.5 rounded bg-[rgba(127,86,217,0.3)] text-[var(--accent-2)] mono text-[11px]">{{company}}</span> will love. Here's a quick tour of the Q2 lineup…
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="lbl">Attachments</label>
+            <div class="mt-1.5 border-2 border-dashed border-[rgba(127,86,217,0.4)] rounded-lg p-5 text-center text-[12.5px] text-[var(--text-dim)]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2" class="mx-auto mb-2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Drag files here or <span class="text-[var(--accent-2)] cursor-pointer">browse</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: preview & schedule -->
+        <div class="px-5 py-5 bg-[rgba(20,15,43,0.4)]">
+          <label class="lbl">Live preview</label>
+          <div class="mt-2 rounded-lg bg-white text-gray-800 p-4 text-[11px] min-h-[280px] font-serif">
+            <div class="text-[10px] text-gray-500 mb-2">from jordan@hillcountry.com</div>
+            <div class="font-bold text-[13px] mb-3">Introducing our Q2 product lineup</div>
+            <div class="leading-relaxed">
+              Hi <b>Maya</b>,<br><br>
+              We just shipped a few things we think <b>Acme Corp</b> will love. Here's a quick tour of the Q2 lineup…
+            </div>
+            <button class="mt-3 bg-purple-700 text-white px-3 py-1.5 rounded text-[10px]">View release notes →</button>
+          </div>
+
+          <div class="mt-5">
+            <label class="lbl">Schedule</label>
+            <div class="flex items-center gap-2 mt-2 text-[12px]">
+              <div class="toggle"></div>
+              <span class="text-[var(--text-dim)]">Send later</span>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <label class="lbl">Throttle</label>
+            <div class="mt-2 text-[11.5px] text-[var(--text-dim)]">50 / hour <span class="text-[var(--text-mute)]">(~5h total)</span></div>
+            <div class="mt-2 w-full h-1.5 bg-[rgba(127,86,217,0.2)] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:35%;background:linear-gradient(90deg,var(--accent),var(--accent-2));"></div>
+            </div>
+          </div>
+
+          <div class="mt-6 panel-soft p-3 text-[11px] text-[var(--text-dim)] leading-relaxed">
+            <b class="text-[var(--accent-2)]">Activity logging</b><br>
+            Each send will be recorded as an activity on the matched client record.
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-[rgba(127,86,217,0.3)] flex items-center justify-between">
+        <div class="text-[12px] text-[var(--text-dim)]">
+          Launching to <b class="text-white">247 contacts</b> via <b class="text-white">Gmail</b>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost">Save draft</button>
+          <button class="btn btn-ghost">Send test to me</button>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            Launch campaign
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New List drawer -->
+  <div class="mb-10">
+    <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-3">Drawer D · New Contact List</div>
+    <div class="panel overflow-hidden max-w-5xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(127,86,217,0.3)]">
+        <div>
+          <div class="serif text-xl">New contact list</div>
+          <div class="text-[11px] text-[var(--text-mute)] mt-0.5">Filter, pick, and label. Lists are reusable across campaigns.</div>
+        </div>
+        <button class="btn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
+
+      <div class="grid grid-cols-[1fr,320px]">
+        <div class="px-6 py-5 border-r border-[rgba(127,86,217,0.25)]">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex-1 flex items-center gap-3 bg-[rgba(20,15,43,0.7)] border border-[rgba(69,44,149,0.5)] rounded-xl px-4 py-2.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input class="flex-1 bg-transparent outline-none text-[13px] placeholder:text-[var(--text-mute)]" placeholder="Search clients &amp; contacts…">
+            </div>
+            <div class="subtab">
+              <button class="active">Clients</button>
+              <button>Contacts</button>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mb-4 flex-wrap">
+            <div class="filter-pill active">Status: Lead</div>
+            <div class="filter-pill">Research: Done</div>
+            <div class="filter-pill">Industry: SaaS</div>
+            <div class="filter-pill">Region: NA</div>
+            <div class="filter-pill">+ filter</div>
+          </div>
+
+          <div class="panel-soft overflow-hidden max-h-[380px] overflow-y-auto">
+            <table class="modern">
+              <thead><tr><th style="width:32px;"></th><th>Name</th><th>Company</th><th>Email</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><div class="checkbox checked"></div></td><td class="text-white">Maya Reyes</td><td class="text-[var(--text-dim)]">Acme Corp</td><td class="text-[var(--text-dim)]">maya@acme.com</td><td><span class="chip chip-good">Lead</span></td></tr>
+                <tr><td><div class="checkbox checked"></div></td><td class="text-white">Daniel Kim</td><td class="text-[var(--text-dim)]">Northstar</td><td class="text-[var(--text-dim)]">d.kim@northstar.io</td><td><span class="chip chip-info">Qualified</span></td></tr>
+                <tr><td><div class="checkbox"></div></td><td class="text-white">Lena Sørensen</td><td class="text-[var(--text-dim)]">Fjord Labs</td><td class="text-[var(--text-dim)]">lena@fjord.dk</td><td><span class="chip chip-warn">Follow-up</span></td></tr>
+                <tr><td><div class="checkbox checked"></div></td><td class="text-white">Rohan Gupta</td><td class="text-[var(--text-dim)]">Paperback</td><td class="text-[var(--text-dim)]">rohan@paperback.co</td><td><span class="chip chip-info">Qualified</span></td></tr>
+                <tr><td><div class="checkbox"></div></td><td class="text-white">Tomás Esparza</td><td class="text-[var(--text-dim)]">Brio Studio</td><td class="text-[var(--text-dim)]">tomas@brio.studio</td><td><span class="chip">Cold</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="px-5 py-5 bg-[rgba(20,15,43,0.4)]">
+          <label class="lbl">List name</label>
+          <input class="input mt-1.5" value="Enterprise Q2 outreach">
+
+          <label class="lbl mt-4 block">Description</label>
+          <textarea class="input mt-1.5" rows="4">Decision-makers at 50+ seat SaaS companies we qualified during ShopTalk '26.</textarea>
+
+          <div class="mt-5 panel-soft p-4">
+            <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-1">Selected</div>
+            <div class="serif text-4xl">3 <span class="text-[var(--text-dim)] text-xl">contacts</span></div>
+          </div>
+
+          <div class="mt-5 flex flex-col gap-2">
+            <button class="btn btn-primary justify-center">Save list</button>
+            <button class="btn btn-ghost justify-center">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template builder drawer -->
+  <div>
+    <div class="text-[11px] uppercase tracking-widest text-[var(--text-mute)] mb-3">Drawer E · Template / Newsletter Builder</div>
+    <div class="panel overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(127,86,217,0.3)]">
+        <div>
+          <div class="serif text-xl">Template builder</div>
+          <div class="text-[11px] text-[var(--text-mute)] mt-0.5">Paste HTML, upload a file, or write from scratch</div>
+        </div>
+        <div class="subtab">
+          <button class="active">Template</button>
+          <button>Newsletter</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-[420px,1fr]">
+        <div class="px-6 py-5 border-r border-[rgba(127,86,217,0.25)] space-y-4">
+          <div>
+            <label class="lbl">Name</label>
+            <input class="input mt-1.5" value="Cold outreach — intro v3">
+          </div>
+          <div>
+            <label class="lbl">Description</label>
+            <textarea class="input mt-1.5" rows="2">Short, personalized first-touch with a soft CTA.</textarea>
+          </div>
+          <div>
+            <label class="lbl">Build method</label>
+            <div class="grid grid-cols-3 gap-2 mt-2">
+              <div class="panel-soft p-3 text-center cursor-pointer" style="border:1px solid var(--accent-2);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E1C9FF" stroke-width="2" class="mx-auto mb-1"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+                <div class="text-[11px] text-white">Paste HTML</div>
+              </div>
+              <div class="panel-soft p-3 text-center cursor-pointer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2" class="mx-auto mb-1"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <div class="text-[11px] text-[var(--text-dim)]">Upload file</div>
+              </div>
+              <div class="panel-soft p-3 text-center cursor-pointer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A99BD4" stroke-width="2" class="mx-auto mb-1"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <div class="text-[11px] text-[var(--text-dim)]">Write text</div>
+              </div>
+            </div>
+            <div class="text-[10.5px] text-[var(--text-mute)] mt-2">Uploads: HTML, PDF, PPT, JPG — auto-converted to HTML email.</div>
+          </div>
+
+          <div>
+            <label class="lbl">HTML source</label>
+            <div class="mt-1.5 rounded-lg bg-[#0F0B22] border border-[rgba(69,44,149,0.5)] p-3 font-mono text-[11px] text-[#B797FF] h-[240px] overflow-auto">
+<span style="color:#6F618F;">&lt;!-- HillcrestCRM template --&gt;</span><br>
+<span style="color:#A99BD4;">&lt;div</span> <span style="color:#FCD34D;">style</span>=<span style="color:#86EFAC;">"font-family:Georgia,serif;padding:24px;"</span><span style="color:#A99BD4;">&gt;</span><br>
+&nbsp;&nbsp;<span style="color:#A99BD4;">&lt;h1&gt;</span>Hi {{firstName}},<span style="color:#A99BD4;">&lt;/h1&gt;</span><br>
+&nbsp;&nbsp;<span style="color:#A99BD4;">&lt;p&gt;</span>I was looking at what {{company}}<br>
+&nbsp;&nbsp;is doing and wanted to reach out…<span style="color:#A99BD4;">&lt;/p&gt;</span><br>
+&nbsp;&nbsp;<span style="color:#A99BD4;">&lt;a</span> <span style="color:#FCD34D;">href</span>=<span style="color:#86EFAC;">"{{bookingLink}}"</span><span style="color:#A99BD4;">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Grab 15 minutes<br>
+&nbsp;&nbsp;<span style="color:#A99BD4;">&lt;/a&gt;</span><br>
+<span style="color:#A99BD4;">&lt;/div&gt;</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="lbl">Merge tags available</label>
+            <div class="flex gap-1.5 flex-wrap mt-2">
+              <span class="chip mono">{{firstName}}</span>
+              <span class="chip mono">{{lastName}}</span>
+              <span class="chip mono">{{company}}</span>
+              <span class="chip mono">{{senderName}}</span>
+              <span class="chip mono">{{bookingLink}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 bg-[rgba(20,15,43,0.4)]">
+          <div class="flex items-center justify-between mb-3">
+            <label class="lbl">Live preview</label>
+            <div class="subtab">
+              <button class="active">Desktop</button>
+              <button>Mobile</button>
+            </div>
+          </div>
+          <div class="email-preview p-8">
+            <h1 style="font-size:28px;color:#2D245B;margin-bottom:16px;">Hi Maya,</h1>
+            <p style="font-size:15px;color:#555;line-height:1.6;margin-bottom:12px;">
+              I was looking at what <b>Acme Corp</b> is doing in the fulfillment space and wanted to reach out.
+              We've helped similar teams cut onboarding time by about 40%.
+            </p>
+            <p style="font-size:15px;color:#555;line-height:1.6;margin-bottom:24px;">
+              Would you have 15 minutes next week to see if there's a fit?
+            </p>
+            <a style="display:inline-block;background:#6B42C8;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+              Grab 15 minutes →
+            </a>
+            <div style="margin-top:40px;padding-top:20px;border-top:1px solid #eee;font-size:12px;color:#999;">
+              Jordan Martinez · HillcrestCRM<br>
+              Reply STOP to unsubscribe
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-[rgba(127,86,217,0.3)] flex items-center justify-between">
+        <div class="text-[12px] text-[var(--text-dim)]">Auto-saved · 3s ago</div>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost">Send test</button>
+          <button class="btn btn-primary">Save template</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer note -->
+<div class="max-w-[1440px] mx-auto px-8 pb-16">
+  <div class="divider mb-8"></div>
+  <div class="flex items-start justify-between gap-8">
+    <div>
+      <div class="serif text-3xl mb-2">Design tokens <span class="italic" style="color:var(--accent-2);">used throughout</span></div>
+      <div class="text-[13px] text-[var(--text-dim)] max-w-xl leading-relaxed">Built on your existing palette (<span class="mono">#231C46 · #2D245B · #452C95 · #7F56D9 · #B797FF · #E1C9FF</span>) with added depth via gradients, glass panels, and Instrument Serif for editorial headings paired with General Sans for UI.</div>
+    </div>
+    <div class="flex gap-2">
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#140F2B;"></div>
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#231C46;"></div>
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#2D245B;"></div>
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#452C95;"></div>
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#7F56D9;"></div>
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#B797FF;"></div>
+      <div class="w-12 h-12 rounded-lg border border-white/10" style="background:#E1C9FF;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('#mainTabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#mainTabs button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('[data-panel]').forEach(p => {
+        p.classList.toggle('hidden', p.dataset.panel !== tab);
+      });
+    });
+  });
+
+  function switchBulk(which) {
+    document.querySelectorAll('[data-bulk]').forEach(p => {
+      p.classList.toggle('hidden', p.dataset.bulk !== which);
+    });
+    document.querySelectorAll('[data-panel="bulk"] .subtab button').forEach((b,i) => {
+      b.classList.toggle('active', (i === 0 && which === 'lists') || (i === 1 && which === 'jobs'));
+    });
+  }
+  function switchTpl(which) {
+    document.querySelectorAll('[data-tpl]').forEach(p => {
+      p.classList.toggle('hidden', p.dataset.tpl !== which);
+    });
+    document.querySelectorAll('[data-panel="templates"] .subtab button').forEach((b,i) => {
+      b.classList.toggle('active', (i === 0 && which === 'lists') || (i === 1 && which === 'templates'));
+    });
+  }
+
+  // checkbox toggles
+  document.querySelectorAll('.checkbox').forEach(cb => {
+    cb.addEventListener('click', () => cb.classList.toggle('checked'));
+  });
+
+  // filter pill toggles
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.addEventListener('click', () => p.classList.toggle('active'));
+  });
+
+  // drawer (placeholder — drawers shown inline below frame, openDrawer just scrolls)
+  function openDrawer(which) {
+    document.querySelector('.panel').nextElementSibling?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+
+</body>
+</html>
