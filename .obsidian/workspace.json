@@ -4,39 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "8dedba5aff6d0628",
+        "id": "fdd6ae3eff87b0ac",
         "type": "tabs",
         "children": [
           {
-            "id": "786cf24ba9a0fd74",
+            "id": "1c94de5e10a298dc",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
-                "bFile": "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
-                "aRef": ""
+                "file": "Learning/Book Reading/In distract able.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: 3-Largest Rectangle in histogram.excalidraw"
-            }
-          },
-          {
-            "id": "c79657fc0f037b02",
-            "type": "leaf",
-            "state": {
-              "type": "split-diff-view",
-              "state": {
-                "aFile": ".obsidian/workspace.json",
-                "bFile": ".obsidian/workspace.json",
-                "aRef": ""
-              },
-              "icon": "diff",
-              "title": "Diff: workspace.json"
+              "icon": "lucide-file",
+              "title": "In distract able"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -93,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273,
-    "collapsed": true
+    "width": 310.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -199,7 +183,7 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "c79657fc0f037b02",
+  "active": "1c94de5e10a298dc",
   "lastOpenFiles": [
     "Pasted Image 20260412131307_305.png",
     "Pasted Image 20260411225258_681.png",

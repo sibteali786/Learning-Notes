@@ -154,3 +154,8 @@ T = nt
 - Schedule time for Group chat in your calendar
 - Be selective of whom to add and whom not to in Group Chat.
 - use only for quick things, ephermal things and not for deep conversations, that is what calls are for.
+### Hack back Meetings
+- Calling a meeting should be harder -> share agenda and brief document explaining what was done already
+- Problem Solving, Brainstorming should be done individually first and then a meeting can be called. This allows each individual to come up with their own version of idea that otherwise might be suppressed by the dominant member voice.
+- Meetings should be device free so members are fully present in the conversation and just there physically.
+- Only one laptop per meeting if there is a presentation otherwise pen and paper are at most the things there should be.

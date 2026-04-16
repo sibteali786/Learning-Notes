@@ -42,11 +42,23 @@
   "Learning/Networking/Networking-Basics.pdf": "LiNetwork",
   "Learning/Work Stuff/Chat App.md": "LiMessageCircle",
   "Learning/Work Stuff": "💰",
-  "Learning/Slides and PDFs": "LiFileSliders",
+  "Learning/Slides and PDFs": {
+    "iconName": "LiFileSliders",
+    "iconColor": "#c00c0c"
+  },
   "Learning/Networking": "LiChartNetwork",
   "Learning/Work Stuff/Serial Number Feature.md": "LiLetterText",
   "Learning/Freelance/attachments": "LiFileCode",
-  "Learning/System Design": "LiBlocks",
-  "Learning/JavaScript": "LiCode2",
-  "Learning/Go Lang": "LiCode"
+  "Learning/System Design": {
+    "iconName": "LiBlocks",
+    "iconColor": "#15a217"
+  },
+  "Learning/JavaScript": {
+    "iconName": "LiCode2",
+    "iconColor": "#efd41f"
+  },
+  "Learning/Go Lang": {
+    "iconName": "LiCode",
+    "iconColor": "#33a7e1"
+  }
 }
