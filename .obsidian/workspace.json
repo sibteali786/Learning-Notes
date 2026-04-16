@@ -4,21 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "b1ed9c03dfc5b125",
+        "id": "98c24be3c7c58619",
         "type": "tabs",
         "children": [
           {
-            "id": "e43107531d6820d9",
+            "id": "9c83c0eefb631b74",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/Work Stuff/HCC-Email-Controller/1-Planning.md",
-                "mode": "source",
-                "source": false
+                "file": "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/1-Cursor and AI Models Overview.excalidraw.md"
               },
-              "icon": "lucide-file",
-              "title": "1-Planning"
+              "icon": "excalidraw-icon",
+              "title": "1-Cursor and AI Models Overview.excalidraw"
             }
           }
         ]
@@ -78,7 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 264.5
+    "width": 310.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -94,7 +92,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +102,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Cargo Bussiness"
+              "title": "Backlinks for 2-First SQL Query.excalidraw"
             }
           },
           {
@@ -142,13 +140,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Database/Database Design/2-Related Table and More SQL/Keys, Joins.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cargo Bussiness"
+              "title": "Outline of Keys, Joins.excalidraw"
             }
           },
           {
@@ -185,52 +183,52 @@
   },
   "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Pasted Image 20260411225258_681.png",
-    "Learning/DSA/LinkedList/OverView_Intuition.excalidraw.md",
     "text.html",
     "emailing_module_handoff.docx",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/1-Cursor and AI Models Overview.excalidraw.md",
     "Learning/Work Stuff/HCC-Email-Controller/1-Planning.md",
     "Learning/Work Stuff/HCC-Email-Controller",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/attachments/Pasted Image 20260412131307_305.png",
-    "Pasted Image 20260413110200_923.png",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/attachments/Pasted Image 20260411225258_681.png",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/attachments/Pasted Image 20260415143557_430.png",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/attachments/Pasted Image 20260412131307_305.png",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/attachments/Pasted Image 20260411225258_681.png",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/attachments",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/2-Inline-Edits.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/1-Context Window.excalidraw.md",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Learning/System Design/Core Concepts/6-Sharding/attachments/Pasted Image 20260409120508_009.png",
-    "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise/Promise.any.excalidraw.md",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/1-Cursor and AI Models Overview.excalidraw.md",
+    "Learning/System Design/Core Concepts/7-Consistent-Hashing/ConsistentHashing.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
+    "Pasted Image 20260416110323_813.png",
+    "Learning/System Design/Core Concepts/7-Consistent-Hashing",
+    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.allSettled.excalidraw.md",
     "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise",
+    "Learning/Book Reading/In distract able.md",
+    "Pasted Image 20260412131307_305.png",
+    "Pasted Image 20260411225258_681.png",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Introduction.excalidraw.md",
+    "conflict-files-obsidian-git.md",
+    "Learning/DSA/LinkedList/OverView_Intuition.excalidraw.md",
+    "Learning/DSA/LinkedList/Drawing 2026-02-17 12.47.54.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
+    "Personal/Maryam's Things.md",
+    "Learning/Database/Database Design/4-Entities-and-Attributes/Intro-and-Keys.excalidraw.md",
     "Learning/Database/Database Design/attachments/sharding_modern_databases_v2.svg",
     "Learning/Database/Database Design/attachments/sharding_modern_databases.svg",
-    "Learning/Database/Database Design/attachments/Pasted Image 20260414141219_004.png",
-    "Learning/Database/Database Design/attachments/Pasted Image 20260410135553_056.png",
-    "Learning/Database/Database Design/4-Entities-and-Attributes/Intro-and-Keys.excalidraw.md",
-    "Learning/Database/Database Design/4-Entities-and-Attributes",
-    "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise.any.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise.all.excalidraw.md",
-    "Excalidraw/Drawing 2026-02-17 13.50.42.excalidraw.md",
-    "Excalidraw",
-    "conflict-files-obsidian-git.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/Cursor/Untitled",
-    "Learning/AI&ML Engineering/Claude Code/Creds.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor",
-    "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
-    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Interview Projects/Dnd Editor.md",
-    "sqlite_online_0.sql",
-    "Personal/Internal Trigger Chart.md",
-    "Learning/System Design/Core Concepts/6-Sharding/4-Sharding in System Design Interviews.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/3-Sharding Challenges.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/2-How To Shard Your Data.excalidraw.md",
+    "Screenshot 2026-04-07 at 12.27.11 PM.png",
+    "Screenshot 2026-04-07 at 11.58.25 AM.png",
     "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.any.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise",
+    "Learning/Database/Database Design/4-Entities-and-Attributes",
+    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
+    "Learning/Backend Engineering/backend.excalidraw.excalidraw",
+    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code",
+    "Learning/AI&ML Engineering/Claude Code",
+    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
