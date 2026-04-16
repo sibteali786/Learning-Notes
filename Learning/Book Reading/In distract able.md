@@ -147,3 +147,10 @@ Wait for 10 minutes before you have the urge to do something, if you can success
 T = nt
 - Schedule office hours to reduce the number of messages received (n), delay when messages are sent as per the recipent's urgency so as to reduce number of more messages (n) you get back.
 - Spend less time on each message. We can label emails according to when each message needs a response. Reply to emails during a scheduled time in our schedule.
+
+### Hack Back Group Chat
+- Real time communication channels should be used sparingly not actively.
+- Get in to talk about work, be quick and then get out do not get stuck for long conversations.
+- Schedule time for Group chat in your calendar
+- Be selective of whom to add and whom not to in Group Chat.
+- use only for quick things, ephermal things and not for deep conversations, that is what calls are for.
