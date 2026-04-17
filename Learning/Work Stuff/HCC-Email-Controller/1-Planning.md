@@ -797,3 +797,344 @@ Also shared text.html which exaplains what feature is needed
 details are provided in the emailing_module_handoff.docx
 ![[emailing_module_handoff.docx]]
 ![[text.html]]
+
+# How does the emailing system works in hcc-admin-v2
+## Flow Overview
+
+- `src/app/(pages)/Mailing/page.js` renders tabbed views (`Inbox`, `Gmail`, `Email Templates`) via `MailingComp`.
+- `src/components/mailingComp/index.jsx` mounts `MailingTable` when `picklistName === "Gmail"`.
+- `src/components/subcomponents/tables/mailingTable.jsx` is where users trigger:
+    - Single send (`Send Mail` button per row → `mailingDrawer.jsx`)
+    - Bulk send (`Email All` button → `bulkEmialDrawer.jsx`)
+
+## Single Email Send
+
+- Trigger path:
+    - `MailingTable` → `handleSendMail(id, email)` opens `SendEmailViaGmail` drawer with selected recipient email.
+- UI/API logic:
+    - In `src/components/subcomponents/drawers/mailingDrawer.jsx`:
+        - Loads templates from `GET ${apiPath.prodPath}/api/appGmail/templates`
+        - On submit, builds `FormData` with:
+            - `to`, `subject`, `body`, `templateId`, `templateData`, `attachments[]`
+        - Sends request to:
+            - `POST ${apiPath.devPath}/api/appGmail/send/${id}`
+
+### Full URL used for single-send API
+
+From `src/utils/routes.js`:
+
+- `apiPath.devPath = http://localhost:8080`
+
+So single-send endpoint resolves to:
+
+- `POST http://localhost:8080/api/appGmail/send/:userId`
+
+Template fetch in the same drawer uses:
+
+- `apiPath.prodPath = http://localhost:3001`
+- `GET http://localhost:3001/api/appGmail/templates`
+
+---
+
+## Bulk Email Send
+
+- Trigger path:
+    - `MailingTable` → `bulkEmail()` opens `SendBulkEmailViaGmail`.
+- UI/API logic:
+    - In `src/components/subcomponents/drawers/bulkEmialDrawer.jsx`:
+        - Pre-fills recipients from `newClients.map(client => client.email)` via `GmailToField`
+        - Loads templates from `GET ${apiPath.prodPath}/api/appGmail/templates`
+        - Loads contacts from `GET ${apiPath.prodPath}/api/contacts`
+        - On submit, builds `FormData` with:
+            - `recipients` (JSON array), `subject`, `body`, `templateId` (optional), `templateData`, `attachments[]`
+        - Sends request to:
+            - `POST ${apiPath.prodPath3}/api/bulkEmail/sendBulkEmail/${id}`
+
+### Full URLs used for bulk flow
+
+From `src/utils/routes.js`:
+
+- `apiPath.prodPath = http://localhost:3001`
+- `apiPath.prodPath3 = https://api-hccbackendcrm.com`
+
+Resolved URLs:
+
+- `GET http://localhost:3001/api/appGmail/templates`
+- `GET http://localhost:3001/api/contacts`
+- `POST https://api-hccbackendcrm.com/api/bulkEmail/sendBulkEmail/:userId`
+
+---
+
+## Related Supporting Endpoints in Same Flow
+
+`src/components/subcomponents/tables/mailingTable.jsx` also fetches the mailing list and client details:
+
+- `GET ${apiPath.prodPath}/api/clients/allNewLeads`  
+    → `http://localhost:3001/api/clients/allNewLeads`
+- `GET ${apiPath.prodPath}/api/clients/client/${id}`  
+    → `http://localhost:3001/api/clients/client/:clientId`
+
+`src/components/mailingComp/index.jsx` also has Google auth shortcut:
+
+- `window.location.assign("https://api-hccbackendcrm.com/auth/google")`
+
+## Important Note (current config behavior)
+
+Your single and bulk send currently use different backends:
+
+- Single send posts to `http://localhost:8080` (`devPath`)
+- Bulk send posts to `https://api-hccbackendcrm.com` (`prodPath3`)
+- Template/contact/list endpoints mostly hit `http://localhost:3001` (`prodPath`)
+
+
+# How templates are used today ( hcc-admin-v2 )
+
+### 1) Fetch template list (source service)
+
+Both drawers fetch template options from:
+
+- `GET ${apiPath.prodPath}/api/appGmail/templates`
+- With current `routes.js`, that is: `GET http://localhost:3001/api/appGmail/templates`
+
+Used in:
+
+- `src/components/subcomponents/drawers/mailingDrawer.jsx`
+- `src/components/subcomponents/drawers/bulkEmialDrawer.jsx`
+
+The response is mapped into dropdown options containing `id`, `name`, etc.
+
+---
+
+### 2) User picks a template in UI
+
+- Single email (`mailingDrawer.jsx`) uses `react-select`; chosen option stored in `templateId` object (`{ value, label, ... }`)
+- Bulk email (`bulkEmialDrawer.jsx`) uses native `<select>`; chosen value wrapped as `{ value: ... }`
+
+---
+
+### 3) Send request includes template reference
+
+On submit, both drawers append to `FormData`:
+
+- `templateId` (the selected template identifier)
+- `templateData` (custom JSON with title/body/sender/company fields)
+
+So backend receives both:
+
+- a template lookup key (`templateId`)
+- and override/context payload (`templateData`)
+
+---
+
+### 4) Send happens on different backend(s)
+
+- Single email posts to:
+    - `POST ${apiPath.devPath}/api/appGmail/send/${id}`
+    - currently `http://localhost:8080/api/appGmail/send/:userId`
+- Bulk email posts to:
+    - `POST ${apiPath.prodPath3}/api/bulkEmail/sendBulkEmail/${id}`
+    - currently `https://api-hccbackendcrm.com/api/bulkEmail/sendBulkEmail/:userId`
+
+So yes: templates are fetched from `prodPath` (`localhost:3001`) and then used by send APIs on `devPath` (`localhost:8080`) and `prodPath3` (`api-hccbackendcrm.com`).
+
+## Practical implication
+
+This only works reliably if template IDs are recognized across those services (shared DB/data sync).  
+If not shared, you can see issues like:
+
+- template selected successfully in UI,
+- but send service cannot resolve that `templateId` and falls back or fails.
+
+
+
+# How single email is sent (Gmail) -> HCC-adam-backend
+
+- Route is registered in `index.js` as `app.use("/api/appGmail", appGmailRouter)`, so send endpoint is:
+    - `POST /api/appGmail/send/:id`
+- In `routes/emailRouter.js`, this route uses `multer`:
+    - `upload.array("attachments")` (optional file attachments)
+    - handler: `sendEmail` from `controllers/emailControllers.js`
+- `:id` is the sender user ID (the app user whose Gmail creds are used).
+- `sendEmail` does:
+    1. Reads `to`, `subject`, `body`, `templateId`, `templateData` from request body.
+    2. Finds user by `req.params.id`.
+    3. Builds Gmail OAuth client via `createGmailClient(user)`:
+        - Uses user’s `emailCredentials.refreshToken`
+        - Uses env `GMAIL_CLIENT_ID` + `GMAIL_CLIENT_SECRET`
+        - Refreshes access token and saves it back on user if changed.
+    4. Builds MIME email (HTML body + optional attachments).
+    5. Sends with Gmail API: `gmail.users.messages.send({ userId: "me", requestBody: { raw } })`.
+
+So this is true Gmail API sending (not SMTP), authenticated per selected user.
+
+---
+
+## How templates are used for sending
+
+There are two template concepts in code now:
+
+### 1) File-based HTML templates used by `sendEmail`
+
+- In `sendEmail`, if `templateId` is provided, it reads:
+    - `templates/${templateId}.html`
+- It then does placeholder replacement with `templateData`:
+    - `{{ key }}` in HTML gets replaced by `templateData[key]`.
+- If template read fails, it falls back to raw `body`.
+
+Current available HTML files in repo:
+
+- `templates/professional.html`
+- `templates/modern.html`
+- `templates/minimal.html`
+
+And `GET /api/appGmail/templates` returns these template IDs as static metadata (`professional`, `modern`, `minimal`).
+
+### 2) DB-backed templates (`EmailTemplate` model)
+
+- `models/emailTemplateModel.js` + `controllers/emailTemplateController.js` support CRUD on Mongo templates via `/api/emailTemplate/...`.
+- These DB templates are not used by `sendEmail` currently.
+- `sendEmail` does not query `EmailTemplate`; it only reads local HTML file by `templateId`.
+
+---
+
+## How to reference template in request
+
+For `POST /api/appGmail/send/:id`, send multipart/form-data (since attachments may be included):
+
+- `to`: recipient email
+- `subject`: email subject
+- `body`: fallback/custom HTML or text
+- `templateId`: e.g. `professional` (maps to `templates/professional.html`)
+- `templateData`: JSON string (important: stringified JSON), e.g.
+    - `{"name":"Ali","company":"HCC"}`
+
+Attachments go in `attachments` field (multiple allowed).
+
+Example payload idea:
+
+- `templateId=professional`
+- `templateData={"name":"John Doe","meetingDate":"2026-04-20"}`
+- Then placeholders like `{{name}}` and `{{meetingDate}}` in HTML are replaced.
+
+
+# Bulk Email Flow emailControllerAuth 
+
+Bulk email sending here is queue-based, and recipient/template choice is mostly client-driven.
+
+## End-to-end flow
+
+- Client calls `POST /api/bulkEmail/sendBulkEmail/:id` with `recipients`, `subject`, `body`, optional `templateId`, optional `templateData`, optional attachments.
+- Controller (`sendBulkEmail`) reads those fields and enqueues a bulk job via `addBulkEmailJob(...)`.
+- Service stores a `BulkJob` record (`status: queued`) and adds a Bull queue job (`send-bulk-email`).
+- Queue worker processes recipients in batches and calls `sendEmail(...)` per recipient.
+- `sendEmail` decides template vs raw body, builds MIME (HTML + optional attachments), and sends via Gmail API.
+
+```12:16:src/routes/bulkEmailRoutes.js
+router.get('/getBulkEmailJobs/:id', getBulkEmailJobs);
+router.get('/getBulkEmailStatus/:id', getBulkEmailStatus);
+router.get('/getQueueStats', getQueueStats);
+router.post('/sendBulkEmail/:id',upload.array("attachments"), sendBulkEmail);
+```
+
+```66:69:src/index.js
+initializeQueue(bulkEmailQueue);
+app.use('/auth', authRoutes);
+app.use('/api/bulkEmail', bulkEmailRouter);
+```
+
+## Routes used for bulk email
+
+With base mount from `index.js`, effective routes are:
+
+- `POST /api/bulkEmail/sendBulkEmail/:id` -> queue a new bulk campaign
+- `GET /api/bulkEmail/getBulkEmailJobs/:id` -> list jobs
+- `GET /api/bulkEmail/getBulkEmailStatus/:id` -> get one job status (but see note below)
+- `GET /api/bulkEmail/getQueueStats` -> queue stats
+
+## How contacts are chosen
+
+Contacts are **not auto-selected in backend**.  
+The backend sends to exactly what frontend passes in `recipients`:
+
+```21:36:src/controllers/bulkEmailControllers.js
+let { recipients, subject, body, templateData, templateId } = req.body;
+if (typeof recipients === "string"){
+  recipients = JSON.parse(recipients);
+}
+...
+const jobResult = await addBulkEmailJob(
+  recipients,
+  subject,
+  body,
+  userId,
+  templateId,
+  templateData,
+  files
+);
+```
+
+Then worker iterates that array:
+
+```22:29:src/services/bulkEmailService.js
+for (let i = 0; i < recipients.length; i += batchSize){
+  const batch = recipients.slice(i, i + batchSize);
+  for (const recipient of batch) {
+    await sendEmail(recipient, subject, body, templateId, templateData, userId, files);
+    results.push({ email: recipient, status: 'sent' });
+```
+
+## Which template is used + default behavior
+
+Template selection is based on `templateId` sent by client.
+
+- If `templateId` exists: reads `src/templates/${templateId}.html` and interpolates variables from `templateData`.
+- If `templateId` missing or template read fails: falls back to raw `body` as email HTML.
+
+```67:76:src/services/gmailService.js
+let emailBody = body;
+if (templateId) {
+  try {
+    const templatePath = path.join(__dirname, "../templates", `${templateId}.html`);
+    const templateContent = await fs.readFile(templatePath, "utf8");
+    emailBody = processTemplate(templateContent, templateData || {});
+  } catch (error) {
+    console.error("Error reading template:", error);
+    emailBody = body;
+  }
+}
+```
+
+So yes: there is a practical **default/fallback** (`body`) when no template is used.
+
+## Template format
+
+Templates are plain HTML files with placeholders using double-curly syntax, e.g. `{{title}}`, `{{recipientName}}`, `{{companyName}}`.
+
+Current template files in `src/templates/`:
+
+- `professional.html`
+- `modern.html`
+- `minimal.html`
+
+Interpolation logic is simple key replacement:
+
+```44:50:src/services/gmailService.js
+const processTemplate = (template, data) => {
+  let processedTemplate = template;
+  for (const [key, value] of Object.entries(data)) {
+    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+    processedTemplate = processedTemplate.replace(regex, value);
+  }
+  return processedTemplate;
+};
+```
+
+Important nuance: this supports flat keys well. Nested placeholders like `{{socialLinks.twitter}}` in `modern.html` are only replaced if `templateData` contains a key literally named `"socialLinks.twitter"` (not nested object traversal).
+
+## Quick observations (possible issues)
+
+- `getBulkEmailStatus` expects `req.params.jobId`, but route uses `:id` -> likely mismatch.
+- `getQueueStats` calls `bulkEmailService.getQueueStats()` but `bulkEmailService` isn’t imported in that controller.
+- In worker, `templateData = JSON.parse(templateData)` assumes string; if already object/null this can break.
+
+If you want, I can next give you a concrete API request payload example (including `templateData`) that matches your current implementation.
