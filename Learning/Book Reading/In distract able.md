@@ -162,3 +162,10 @@ T = nt
 ### Hack Back Your Desktop
 - Desktop clutter takes a heavy psychological toll on our attention. If we are having multiple files on desktop which are un-arranged makes our brain think more when we look at it to open a simple file
 - Disable notifications of desktop, use Do not disturb feature that would stop any kind of notification from any apps.
+### Hack Back Online Articles
+
+> [!"Strewn"] 
+> (pronounced /struːn/) is the past participle of the verb "strew," meaning ==to scatter or spread things untidily over a surface==. It often describes a scene covered with scattered items (e.g., "clothes were strewn across the floor").
+
+- Multichannel Multitasking means listen to audio book while exercising.
+- Use app like pocket to save online articles when you see one and read it or listen when you are walking, jogging or exercising.
