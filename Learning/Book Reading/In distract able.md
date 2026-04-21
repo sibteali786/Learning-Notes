@@ -159,3 +159,6 @@ T = nt
 - Problem Solving, Brainstorming should be done individually first and then a meeting can be called. This allows each individual to come up with their own version of idea that otherwise might be suppressed by the dominant member voice.
 - Meetings should be device free so members are fully present in the conversation and just there physically.
 - Only one laptop per meeting if there is a presentation otherwise pen and paper are at most the things there should be.
+### Hack Back Your Desktop
+- Desktop clutter takes a heavy psychological toll on our attention. If we are having multiple files on desktop which are un-arranged makes our brain think more when we look at it to open a simple file
+- Disable notifications of desktop, use Do not disturb feature that would stop any kind of notification from any apps.

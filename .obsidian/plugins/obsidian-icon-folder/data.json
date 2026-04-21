@@ -6,12 +6,12 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiDatabase",
       "LiCode",
       "LiCode2",
       "LiBlocks",
       "LiFiles",
-      "LiFileCode",
-      "LiLetterText"
+      "LiFileCode"
     ],
     "recentlyUsedIconsSize": 6,
     "rules": [],
@@ -60,5 +60,9 @@
   "Learning/Go Lang": {
     "iconName": "LiCode",
     "iconColor": "#33a7e1"
+  },
+  "Learning/Database": {
+    "iconName": "LiDatabase",
+    "iconColor": "#0c08e2"
   }
 }
