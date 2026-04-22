@@ -169,3 +169,10 @@ T = nt
 
 - Multichannel Multitasking means listen to audio book while exercising.
 - Use app like pocket to save online articles when you see one and read it or listen when you are walking, jogging or exercising.
+
+### Hack Back News Feed
+- Social media scrolling forces us to spend as much more time as we can
+- Taking back control requires techniques like 
+	- pre load urls that take to only required places like message tab in linkedin, your own profile in X / twitter and replacing Facebook feeds with a quote etc.
+- 
+ 

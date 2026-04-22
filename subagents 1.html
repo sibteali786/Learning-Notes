@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans, system-ui, sans-serif); padding: 4px 0 20px; background: transparent; color: var(--color-text-primary, #1a1a18); }
+  .lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--color-text-tertiary, #73726c); margin: 0 0 8px; }
+  .card { background: var(--color-background-primary, #fff); border: 0.5px solid var(--color-border-tertiary, rgba(0,0,0,0.15)); border-radius: 12px; padding: 13px 15px; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+  .p-purple { background: #EEEDFE; color: #3C3489; }
+  .p-teal   { background: #E1F5EE; color: #085041; }
+  .p-amber  { background: #FAEEDA; color: #633806; }
+  .p-green  { background: #EAF3DE; color: #27500A; }
+  .p-red    { background: #FCEBEB; color: #791F1F; }
+  .p-coral  { background: #FAECE7; color: #712B13; }
+  .p-blue   { background: #E6F1FB; color: #0C447C; }
+  @media (prefers-color-scheme: dark) {
+    .p-purple { background: #26215C; color: #CECBF6; }
+    .p-teal   { background: #04342C; color: #9FE1CB; }
+    .p-amber  { background: #412402; color: #FAC775; }
+    .p-green  { background: #173404; color: #C0DD97; }
+    .p-red    { background: #501313; color: #F7C1C1; }
+    .p-coral  { background: #4A1B0C; color: #F5C4B3; }
+    .p-blue   { background: #042C53; color: #B5D4F4; }
+  }
+  .mono { font-family: var(--font-mono, monospace); font-size: 11px; background: var(--color-background-secondary, #f5f4f0); border: 0.5px solid var(--color-border-secondary, rgba(0,0,0,0.3)); border-radius: 4px; padding: 1px 6px; color: var(--color-text-secondary, #5c5b57); }
+  .row2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .row3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+  .ttl { font-size: 13px; font-weight: 500; color: var(--color-text-primary, #1a1a18); margin: 0 0 3px; }
+  .sub { font-size: 12px; color: var(--color-text-secondary, #5c5b57); margin: 0; line-height: 1.5; }
+  .ex  { font-size: 11px; color: var(--color-text-tertiary, #73726c); font-style: italic; margin-top: 5px; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary, rgba(0,0,0,0.15)); margin: 14px 0; }
+  .tip-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 7px; }
+  .tip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color-border-primary, rgba(0,0,0,0.4)); flex-shrink: 0; margin-top: 6px; }
+  .info-bar { background: var(--color-background-info, #e6f1fb); border: 0.5px solid var(--color-border-info, #185fa5); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: var(--color-text-info, #0c447c); margin-bottom: 10px; }
+  .warn-bar { background: var(--color-background-warning, #faeeda); border: 0.5px solid var(--color-border-warning, #854f0b); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: var(--color-text-warning, #633806); margin-bottom: 10px; }
+  .danger-bar { background: var(--color-background-danger, #fcebeb); border: 0.5px solid var(--color-border-danger, #a32d2d); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: var(--color-text-danger, #791f1f); margin-bottom: 10px; }
+  .scope-table { border: 0.5px solid var(--color-border-tertiary, rgba(0,0,0,0.15)); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .scope-row { display: grid; grid-template-columns: 100px 1fr 160px; gap: 0; font-size: 12px; }
+  .scope-row > div { padding: 7px 10px; border-bottom: 0.5px solid var(--color-border-tertiary, rgba(0,0,0,0.15)); color: var(--color-text-secondary, #5c5b57); }
+  .scope-row > div:not(:last-child) { border-right: 0.5px solid var(--color-border-tertiary, rgba(0,0,0,0.15)); }
+  .scope-hdr > div { font-size: 11px; font-weight: 500; background: var(--color-background-secondary, #f5f4f0); color: var(--color-text-primary, #1a1a18); }
+  .pitfall-row { display: flex; gap: 8px; align-items: flex-start; padding: 7px 10px; background: var(--color-background-secondary, #f5f4f0); border-radius: 8px; margin-bottom: 5px; }
+  .pitfall-tag { font-size: 11px; font-weight: 500; color: var(--color-text-danger, #791f1f); flex-shrink: 0; min-width: 170px; padding-top: 1px; }
+  .pitfall-desc { font-size: 12px; color: var(--color-text-secondary, #5c5b57); line-height: 1.4; }
+  .quote-bar { border-left: 2px solid var(--color-border-secondary, rgba(0,0,0,0.3)); padding: 8px 12px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<p class="lbl">What sub-agents are</p>
+<div class="info-bar">Each sub-agent gets its own isolated context window. Work it does never pollutes the main thread. It runs, returns a result, done. Context shard + isolated expertise without the cost of one giant compacted window.</div>
+
+<div class="divider"></div>
+
+<p class="lbl">Two scopes — same as commands and CLAUDE.md</p>
+<div class="scope-table">
+  <div class="scope-row scope-hdr"><div>Scope</div><div>Location</div><div>Invoke</div></div>
+  <div class="scope-row">
+    <div><span class="pill p-purple">Project</span></div>
+    <div><span class="mono">.claude/agents/</span> — git-tracked, team-shared</div>
+    <div>mention by name in prompt</div>
+  </div>
+  <div class="scope-row" style="border-bottom:none">
+    <div><span class="pill p-teal">User</span></div>
+    <div><span class="mono">~/.claude/agents/</span> — personal, all projects</div>
+    <div>mention by name in prompt</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<p class="lbl">File format</p>
+<div class="card" style="margin-bottom:14px">
+  <pre style="font-family:var(--font-mono,monospace);font-size:11px;color:var(--color-text-secondary,#5c5b57);line-height:1.6;margin:0">---
+name: code-reviewer
+description: Expert code review. Use immediately after writing or modifying code.
+tools: Read, Grep, Glob, Bash   # omit to inherit all tools from main agent
+---
+
+You are a senior code reviewer. When invoked:
+1. Run git diff to see recent changes
+2. Review for quality, security, error handling
+3. Return findings grouped by: Critical / Warning / Suggestion</pre>
+</div>
+
+<div class="divider"></div>
+
+<p class="lbl">Steve's agents in practice</p>
+<div class="row3" style="margin-bottom:14px">
+  <div class="card">
+    <p class="ttl">Junior engineer</p>
+    <p class="sub">Reads the plan and questions everything that's unclear. Surfaces assumptions, edge cases, tech debt. Returns a list of questions. Steve reads them — often reveals his own blind spots.</p>
+    <p class="ex">"You are a junior engineer. Ask all the questions."</p>
+  </div>
+  <div class="card">
+    <p class="ttl">Frontend architect</p>
+    <p class="sub">Answers the junior's questions with architectural context. Second opinion on design decisions without polluting the main planning thread.</p>
+    <p class="ex">Previous version of himself — "very surreal"</p>
+  </div>
+  <div class="card">
+    <p class="ttl">Copyeditor (user-level)</p>
+    <p class="sub">Fixes typos across all projects while knowing TypeScript keywords aren't typos. Lives in user scope — applies everywhere.</p>
+    <p class="ex">"thanks to everyone who sent typo PRs"</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<p class="lbl">Common multi-agent roles</p>
+<div class="row2" style="margin-bottom:14px">
+  <div class="card">
+    <p class="ttl">Architect / Planner</p>
+    <p class="sub">High-level design. Run on Opus. Produces plan — never writes code directly. Outputs PLAN.md.</p>
+    <span class="pill p-purple" style="margin-top:6px;display:inline-block">Opus</span>
+  </div>
+  <div class="card">
+    <p class="ttl">Builder / Developer</p>
+    <p class="sub">Translates plan into code. Run on Sonnet for cost efficiency. Executes only what Architect defined.</p>
+    <span class="pill p-teal" style="margin-top:6px;display:inline-block">Sonnet</span>
+  </div>
+  <div class="card">
+    <p class="ttl">Validator / Tester</p>
+    <p class="sub">Reviews Builder's output in a clean context — no pre-existing bias. Runs tests, scrutinizes quality. Built-in unbiased peer review.</p>
+    <span class="pill p-amber" style="margin-top:6px;display:inline-block">fresh context</span>
+  </div>
+  <div class="card">
+    <p class="ttl">Non-technical user</p>
+    <p class="sub">Read-only. Web search only. No code execution, no file edits. Simulates product feedback perspective.</p>
+    <span class="pill p-blue" style="margin-top:6px;display:inline-block">restricted tools</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<p class="lbl">Real-world pitfalls — this feature is days old</p>
+<div class="warn-bar">Steve's take: "I have never had it pick one on its own just yet — and honestly I don't want it to." Always name the agent explicitly.</div>
+<div class="pitfall-row"><span class="pitfall-tag">Won't auto-activate</span><span class="pitfall-desc">Unless you mention the agent by name, it probably won't fire. Description-based delegation is unreliable. Name it explicitly every time.</span></div>
+<div class="pitfall-row"><span class="pitfall-tag">Context lost on reject</span><span class="pitfall-desc">Decline a draft → that agent's context is gone. Main agent spins up a fresh copy. Those tokens are gone too.</span></div>
+<div class="pitfall-row"><span class="pitfall-tag">Black box execution</span><span class="pitfall-desc">No mid-stream visibility. No clarifying questions mid-task. You wait for a lump-sum result and accept or reject it.</span></div>
+<div class="pitfall-row"><span class="pitfall-tag">Token + time bloat</span><span class="pitfall-desc">Each agent = another context window. Serialized (not parallelized) by default — it runs them one at a time. Rate limits hit 4–5x faster with fleets.</span></div>
+<div class="pitfall-row"><span class="pitfall-tag">Too many chefs</span><span class="pitfall-desc">Overlapping agent roles cause ping-ponging. Keep roles distinct and non-overlapping. 3–4 agents is the right starting point.</span></div>
+<div class="pitfall-row" style="margin-bottom:14px"><span class="pitfall-tag">Verbose auto-prompts</span><span class="pitfall-desc">/agents wizard generates bloated system prompts. They eat context and still don't guarantee activation. Trim manually after generating.</span></div>
+
+<div class="divider"></div>
+
+<p class="lbl">Git worktrees — for true parallelization</p>
+<div class="card" style="margin-bottom:14px">
+  <p class="ttl" style="margin-bottom:6px">What they are</p>
+  <p class="sub">Multiple working directories from one repo — separate branches, same filesystem, no conflicts. Each Claude instance runs in its own worktree. Tool: <span class="mono">git worktree add</span>. GUI: <strong>Crystal</strong> app (Electron, open source, actively improving).</p>
+  <div class="divider" style="margin:10px 0"></div>
+  <p class="ttl" style="margin-bottom:6px">Steve's honest take</p>
+  <p class="sub">He stopped using them. "I'm still the main thread, I'm still blocking." Reviewing 4 parallel code streams in parallel doesn't make you 4x faster — you're still the bottleneck. They also hit rate limits 4–5x faster and leave behind directories to clean up.</p>
+</div>
+
+<div class="divider"></div>
+
+<p class="lbl">Best practices — start here</p>
+<div class="tip-row"><div class="tip-dot"></div><p class="sub" style="margin:0">Start with 3–4 agents max. Clear non-overlapping roles. Add more as you understand the system.</p></div>
+<div class="tip-row"><div class="tip-dot"></div><p class="sub" style="margin:0">Always name the agent explicitly — don't rely on auto-delegation. "Use the junior-engineer agent to review this plan."</p></div>
+<div class="tip-row"><div class="tip-dot"></div><p class="sub" style="margin:0">Restrict tools per agent. Test engineer gets Playwright. Architect gets read-only + markdown. No agent touches .eslintrc except the one you designate.</p></div>
+<div class="tip-row"><div class="tip-dot"></div><p class="sub" style="margin:0">Use shared files (<span class="mono">PLAN.md</span>, <span class="mono">QUESTIONS.md</span>) for handoffs — agents can write to and read from them for persistent coordination.</p></div>
+<div class="tip-row"><div class="tip-dot"></div><p class="sub" style="margin:0">Version control project agents in <span class="mono">.claude/agents/</span> — team benefits from and improves them over time.</p></div>
+<div class="tip-row"><div class="tip-dot"></div><p class="sub" style="margin:0">The real value isn't speed — it's isolated context and the ability to get an unbiased second opinion without polluting the main thread.</p></div>
+
+</body>
+</html>
