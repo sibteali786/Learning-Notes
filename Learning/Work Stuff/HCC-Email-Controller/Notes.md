@@ -18,3 +18,21 @@ curl -X POST "https://7344-175-107-227-114.ngrok-free.app/api/bulkEmail/sendBulk
   --form-string 'service=sendgrid'
 ```
 here userId after bulkemail and ngrok url should be repalced 
+
+
+curl command to send emails bulk or single
+```bash
+curl -X POST "https://0342-175-107-227-114.ngrok-free.app/api/bulkEmail/sendBulkEmail/67b4d619aec4b8fb086eee7b"   --form-string 'recipients=["sibteali786@gmail.com","ssibteali.ce41ceme@ce.ceme.edu.pk"]'   --form-string 'subject=Bulk test SendGrid (2 recipients)'   --form-string 'body=<p>Bulk send test to two addresses.</p>'   --form-string 'service=sendgrid'
+```
+
+### Primary db in mongodb
+`Contacts`
+
+
+### Run redis locally to avoid mixing curl commands results
+```bash
+docker compose -f docker-compose.redis-local.yml up -d
+```
+
+
+
