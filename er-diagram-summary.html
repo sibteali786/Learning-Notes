@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>E-R Diagrams – Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161921;
+    --surface2: #1e2330;
+    --border: #2a3040;
+    --accent: #4f8ef7;
+    --accent2: #f7c948;
+    --accent3: #5de8a0;
+    --accent4: #f76e6e;
+    --text: #e2e8f0;
+    --muted: #7a8499;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; padding: 40px 24px; }
+
+  .page { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  /* ── Title ── */
+  .title-block { display: flex; align-items: flex-end; gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  .title-block h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+  .title-block h1 span { color: var(--accent); }
+  .tag { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 4px; text-transform: uppercase; }
+  .tag-blue { background: #1a2d4f; color: var(--accent); border: 1px solid #2a4a7f; }
+  .tag-green { background: #0e2e1e; color: var(--accent3); border: 1px solid #1a5035; }
+  .tag-yellow { background: #2e2510; color: var(--accent2); border: 1px solid #5c4a20; }
+  .tag-red { background: #2e1010; color: var(--accent4); border: 1px solid #5c2020; }
+
+  /* ── Section label ── */
+  .section-label { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+
+  /* ── Cards ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .card-title { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; font-family: var(--mono); }
+
+  /* ── What is E-R ── */
+  .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .what-item { background: var(--surface2); border-radius: 8px; padding: 14px 16px; border-left: 3px solid var(--accent); }
+  .what-item h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
+  .what-item p { font-size: 0.82rem; color: #a0aabf; line-height: 1.55; }
+
+  /* ── Entity table ── */
+  .entity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .entity-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .entity-box .ename { font-family: var(--mono); font-size: 0.8rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .entity-box .field { font-family: var(--mono); font-size: 0.7rem; color: #7a8499; line-height: 1.7; }
+  .entity-box .pk { color: var(--accent3); }
+  .entity-box .fk { color: var(--accent2); }
+
+  /* ── Relationship sentences ── */
+  .rel-list { display: flex; flex-direction: column; gap: 8px; }
+  .rel-row { display: flex; align-items: center; gap: 10px; background: var(--surface2); padding: 10px 14px; border-radius: 8px; font-size: 0.84rem; }
+  .rel-subj { color: var(--accent); font-family: var(--mono); font-weight: 600; }
+  .rel-verb { color: var(--muted); font-style: italic; }
+  .rel-obj { color: var(--accent3); font-family: var(--mono); font-weight: 600; }
+
+  /* ── ER Diagram SVG ── */
+  .diagram-wrap { overflow-x: auto; }
+  svg { font-family: var(--mono); }
+
+  /* ── Cardinality comparison ── */
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .card-item { background: var(--surface2); border-radius: 8px; padding: 16px; text-align: center; }
+  .card-item .notation { font-family: var(--mono); font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+  .card-item .cname { font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; }
+  .card-item .cex { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── Iteration flow ── */
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+  .flow-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 0.8rem; text-align: center; min-width: 120px; }
+  .flow-step strong { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 4px; }
+  .flow-arrow { color: var(--muted); font-size: 1.2rem; padding: 0 6px; }
+
+  /* ── Tips ── */
+  .tip-list { display: flex; flex-direction: column; gap: 8px; }
+  .tip { display: flex; gap: 10px; align-items: flex-start; font-size: 0.83rem; color: #a0aabf; line-height: 1.55; }
+  .tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+  /* ── Real world ── */
+  .rw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rw-item { background: var(--surface2); border-radius: 8px; padding: 14px; border-left: 3px solid var(--accent2); }
+  .rw-item h4 { font-size: 0.85rem; font-weight: 700; color: var(--accent2); margin-bottom: 6px; }
+  .rw-item p { font-size: 0.8rem; color: #a0aabf; line-height: 1.55; }
+
+  /* highlight row */
+  .highlight-row { background: #1a2d4f; border: 1px solid #2a4a7f; border-radius: 8px; padding: 12px 16px; font-size: 0.83rem; color: #c5d8ff; display: flex; gap: 10px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Title -->
+  <div class="title-block">
+    <h1>E-R <span>Diagrams</span></h1>
+    <span class="tag tag-blue">Database Design</span>
+    <span class="tag tag-green">Crow's Foot</span>
+    <span class="tag tag-yellow">Schema</span>
+  </div>
+
+  <!-- 1. What is it -->
+  <div class="card">
+    <div class="card-title">① What Is an E-R Diagram?</div>
+    <div class="what-grid">
+      <div class="what-item">
+        <h3>Definition</h3>
+        <p>Graphical representation of <strong>entities</strong> (tables) and their <strong>relationships</strong>. Describes data <em>structure</em>, not data itself — a table with 10M rows is still one box.</p>
+      </div>
+      <div class="what-item" style="border-color: var(--accent3);">
+        <h3>Components</h3>
+        <p><strong>Boxes</strong> = entities (tables)<br><strong>Lines</strong> = relationships<br><strong>Crow's Foot symbols</strong> = cardinality (how many)</p>
+      </div>
+      <div class="what-item" style="border-color: var(--accent2);">
+        <h3>Notation Used</h3>
+        <p><strong>Information Engineering / Crow's Foot</strong> notation. Industry standard for relational DB design. Other types: Chen, UML, IDEF1X.</p>
+      </div>
+      <div class="what-item" style="border-color: var(--accent4);">
+        <h3>Purpose</h3>
+        <p>Not just visual — it's a <strong>contract</strong> between designers, developers, and stakeholders. Errors caught here cost 10× less to fix than in code.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Entities -->
+  <div class="card">
+    <div class="card-title">② The Sci-Fi Collective — Entities</div>
+    <div class="section-label" style="margin-bottom:12px;">Key: <span style="color:var(--accent3)">PK</span> &nbsp;|&nbsp; <span style="color:var(--accent2)">FK</span></div>
+    <div class="entity-grid">
+      <div class="entity-box">
+        <div class="ename">user</div>
+        <div class="field"><span class="pk">✦ email</span><br>username<br>password<br>first_name<br>last_name<br>phone_number<br>last_login_time</div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">product</div>
+        <div class="field"><span class="pk">✦ code</span><br>name<br>description<br>manufacturer<br>photo<br>price<br>cost<br>inventory_quantity</div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">payment_method</div>
+        <div class="field"><span class="pk">✦ payment_id</span><br>name<br>card_number<br>expiry_date<br><span class="fk">◆ email (→ user)</span><br>billing_address</div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">purchase</div>
+        <div class="field"><span class="pk">✦ purchase_id</span><br>total_price<br>purchase_time<br>product_price<br>product_quantity<br><span class="fk">◆ email (→ user)</span><br><span class="fk">◆ payment_id</span></div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">review</div>
+        <div class="field"><span class="pk">✦ review_id</span><br>review_text<br>review_time<br><span class="fk">◆ email (→ user)</span><br><span class="fk">◆ code (→ product)</span></div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">purchase_product</div>
+        <div class="field"><span class="fk">◆ purchase_id</span><br><span class="fk">◆ code</span><br><em style="color:#5a6378;font-size:0.68rem">junction / bridge table</em></div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">user_address</div>
+        <div class="field"><span class="fk">◆ email (→ user)</span><br>street_address<br>city / state<br>postal_code</div>
+      </div>
+      <div class="entity-box">
+        <div class="ename">billing_address</div>
+        <div class="field"><span class="fk">◆ payment_id</span><br>street_address<br>city / state<br>postal_code</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Relationship sentences -->
+  <div class="card">
+    <div class="card-title">③ Synthesized Relationships (Plain English First)</div>
+    <div class="rel-list">
+      <div class="rel-row"><span class="rel-subj">user</span><span class="rel-verb">makes →</span><span class="rel-obj">purchases</span><span class="tag tag-blue" style="margin-left:auto">1 : Many</span></div>
+      <div class="rel-row"><span class="rel-subj">user</span><span class="rel-verb">writes →</span><span class="rel-obj">reviews</span><span class="tag tag-blue" style="margin-left:auto">1 : Many</span></div>
+      <div class="rel-row"><span class="rel-subj">product</span><span class="rel-verb">has →</span><span class="rel-obj">reviews</span><span class="tag tag-blue" style="margin-left:auto">1 : Many</span></div>
+      <div class="rel-row"><span class="rel-subj">user</span><span class="rel-verb">maintains →</span><span class="rel-obj">payment_methods</span><span class="tag tag-blue" style="margin-left:auto">1 : Many</span></div>
+      <div class="rel-row"><span class="rel-subj">purchase</span><span class="rel-verb">contains →</span><span class="rel-obj">products</span><span class="tag tag-yellow" style="margin-left:auto">Many : Many</span></div>
+      <div class="rel-row"><span class="rel-subj">payment_method</span><span class="rel-verb">used in →</span><span class="rel-obj">purchase</span><span class="tag tag-green" style="margin-left:auto">newly added ✦</span></div>
+    </div>
+    <div class="highlight-row" style="margin-top:12px">
+      💡 <span>The <strong>payment_method → purchase</strong> link was discovered during stakeholder review — an online order can't be billed without it. Always validate with devs/stakeholders!</span>
+    </div>
+  </div>
+
+  <!-- 4. E-R Diagram SVG -->
+  <div class="card">
+    <div class="card-title">④ Final E-R Diagram (Crow's Foot)</div>
+    <div class="diagram-wrap">
+      <svg width="880" height="340" viewBox="0 0 880 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background nodes -->
+        <!-- user -->
+        <rect x="10" y="130" width="130" height="40" rx="8" fill="#1e2330" stroke="#4f8ef7" stroke-width="1.5"/>
+        <text x="75" y="155" text-anchor="middle" fill="#4f8ef7" font-size="13" font-weight="700">user</text>
+
+        <!-- payment_method -->
+        <rect x="10" y="20" width="165" height="40" rx="8" fill="#1e2330" stroke="#5de8a0" stroke-width="1.5"/>
+        <text x="92" y="45" text-anchor="middle" fill="#5de8a0" font-size="13" font-weight="700">payment_method</text>
+
+        <!-- purchase -->
+        <rect x="300" y="20" width="130" height="40" rx="8" fill="#1e2330" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="365" y="45" text-anchor="middle" fill="#f7c948" font-size="13" font-weight="700">purchase</text>
+
+        <!-- review -->
+        <rect x="300" y="210" width="130" height="40" rx="8" fill="#1e2330" stroke="#f76e6e" stroke-width="1.5"/>
+        <text x="365" y="235" text-anchor="middle" fill="#f76e6e" font-size="13" font-weight="700">review</text>
+
+        <!-- product -->
+        <rect x="570" y="130" width="130" height="40" rx="8" fill="#1e2330" stroke="#b794f4" stroke-width="1.5"/>
+        <text x="635" y="155" text-anchor="middle" fill="#b794f4" font-size="13" font-weight="700">product</text>
+
+        <!-- purchase_product -->
+        <rect x="450" y="20" width="170" height="40" rx="8" fill="#1e2330" stroke="#fc8c54" stroke-width="1.5"/>
+        <text x="535" y="45" text-anchor="middle" fill="#fc8c54" font-size="13" font-weight="700">purchase_product</text>
+
+        <!-- user_address -->
+        <rect x="10" y="250" width="140" height="40" rx="8" fill="#1e2330" stroke="#4f8ef7" stroke-width="1"/>
+        <text x="80" y="275" text-anchor="middle" fill="#4f8ef7" font-size="12">user_address</text>
+
+        <!-- billing_address -->
+        <rect x="720" y="20" width="150" height="40" rx="8" fill="#1e2330" stroke="#5de8a0" stroke-width="1"/>
+        <text x="795" y="45" text-anchor="middle" fill="#5de8a0" font-size="12">billing_address</text>
+
+        <!-- Lines -->
+        <!-- user → payment_method (1:M) -->
+        <line x1="92" y1="130" x2="92" y2="60" stroke="#5de8a0" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="50" y="98" fill="#5de8a0" font-size="10">1</text>
+        <text x="98" y="70" fill="#5de8a0" font-size="10">M</text>
+
+        <!-- user → purchase (1:M) -->
+        <line x1="140" y1="150" x2="300" y2="40" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="190" y="85" fill="#f7c948" font-size="10">1:M</text>
+
+        <!-- payment_method → purchase (newly added) -->
+        <line x1="175" y1="40" x2="300" y2="40" stroke="#f76e6e" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="220" y="32" fill="#f76e6e" font-size="10">new ★</text>
+
+        <!-- purchase → purchase_product (1:M) -->
+        <line x1="430" y1="40" x2="450" y2="40" stroke="#fc8c54" stroke-width="1.5"/>
+        <text x="437" y="32" fill="#fc8c54" font-size="10">M:M</text>
+
+        <!-- purchase_product → product (M:1) -->
+        <line x1="620" y1="40" x2="635" y2="130" stroke="#fc8c54" stroke-width="1.5"/>
+
+        <!-- user → review (1:M) -->
+        <line x1="140" y1="165" x2="300" y2="215" stroke="#f76e6e" stroke-width="1.5"/>
+        <text x="185" y="205" fill="#f76e6e" font-size="10">1:M</text>
+
+        <!-- product → review (1:M) -->
+        <line x1="600" y1="170" x2="430" y2="220" stroke="#f76e6e" stroke-width="1.5"/>
+        <text x="510" y="210" fill="#f76e6e" font-size="10">1:M</text>
+
+        <!-- user → user_address (1:M) -->
+        <line x1="75" y1="170" x2="75" y2="250" stroke="#4f8ef7" stroke-width="1.5"/>
+        <text x="52" y="215" fill="#4f8ef7" font-size="10">1:M</text>
+
+        <!-- payment_method → billing_address (1:1) -->
+        <line x1="620" y1="40" x2="720" y2="40" stroke="#5de8a0" stroke-width="1.5"/>
+        <text x="660" y="32" fill="#5de8a0" font-size="10">1:1</text>
+
+        <!-- purchase → user (1:M) label -->
+        <text x="310" y="120" fill="#7a8499" font-size="10" transform="rotate(-35,310,120)">contains products</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 5. Cardinality cheatsheet -->
+  <div class="card">
+    <div class="card-title">⑤ Crow's Foot Cardinality Cheatsheet</div>
+    <div class="card-grid">
+      <div class="card-item">
+        <div class="notation" style="color:var(--accent)">——|</div>
+        <div class="cname">One (mandatory)</div>
+        <div class="cex">Each purchase is made by exactly 1 user</div>
+      </div>
+      <div class="card-item">
+        <div class="notation" style="color:var(--accent3)">——O</div>
+        <div class="cname">Zero or One (optional)</div>
+        <div class="cex">A user may or may not have a billing address</div>
+      </div>
+      <div class="card-item">
+        <div class="notation" style="color:var(--accent2)">——&lt;</div>
+        <div class="cname">Many (crow's foot)</div>
+        <div class="cex">A user can make many purchases</div>
+      </div>
+      <div class="card-item">
+        <div class="notation" style="color:var(--accent4)">O——&lt;</div>
+        <div class="cname">Zero or Many</div>
+        <div class="cex">A user may write zero or many reviews</div>
+      </div>
+      <div class="card-item">
+        <div class="notation" style="color:#b794f4">||——||</div>
+        <div class="cname">One and Only One</div>
+        <div class="cex">purchase ↔ billing_address (exact 1:1)</div>
+      </div>
+      <div class="card-item">
+        <div class="notation" style="color:#fc8c54">O&lt;——&lt;O</div>
+        <div class="cname">Many to Many</div>
+        <div class="cex">purchase ↔ product (resolved via purchase_product bridge table)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Design iteration flow -->
+  <div class="card">
+    <div class="card-title">⑥ Design Iteration Process</div>
+    <div class="flow">
+      <div class="flow-step"><strong>Gather Requirements</strong>Rules from stakeholders</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>Write Sentences</strong>Subject + Verb + Object</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>Draft E-R</strong>Entities + Lines (no attrs)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>Test & Review</strong>Check with stakeholders</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>Refine</strong>Add missing relations</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--accent3)"><strong>Final E-R</strong>With cardinality + attrs</div>
+    </div>
+  </div>
+
+  <!-- 7. Real world examples -->
+  <div class="card">
+    <div class="card-title">⑦ Real-World Analogies</div>
+    <div class="rw-grid">
+      <div class="rw-item">
+        <h4>Many-to-Many → Bridge Table</h4>
+        <p>Amazon: 1 order can have 10 products; 1 product can appear in 1M orders. The <code>order_item</code> table bridges them — just like <code>purchase_product</code> here.</p>
+      </div>
+      <div class="rw-item">
+        <h4>Stakeholder Discovery</h4>
+        <p>Like the payment_method→purchase link, Uber Eats discovered during review that every order needs a linked wallet/card — added after initial draft, before a single line of SQL was written.</p>
+      </div>
+      <div class="rw-item">
+        <h4>1:M — User & Payment Methods</h4>
+        <p>Netflix: you can save multiple cards but each card belongs to only your account. One user → many payment methods.</p>
+      </div>
+      <div class="rw-item">
+        <h4>E-R as a Contract</h4>
+        <p>WhatsNextPlease: defining the task↔user↔tenant schema upfront prevents FK constraint bugs in Prisma migrations mid-sprint.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Interview tips -->
+  <div class="card">
+    <div class="card-title">⑧ Interview / Practical Tips</div>
+    <div class="tip-list">
+      <div class="tip"><span class="tip-icon">🎯</span><span>Always start with <strong>plain English sentences</strong> (Subject → Verb → Object) before drawing any lines.</span></div>
+      <div class="tip"><span class="tip-icon">🔗</span><span><strong>Many-to-many</strong> relationships always need a <strong>bridge/junction table</strong> in relational DBs (e.g., <code>purchase_product</code>).</span></div>
+      <div class="tip"><span class="tip-icon">🧪</span><span>Test every relationship with sample data — if you can't find a row that violates the rule, the cardinality is likely correct.</span></div>
+      <div class="tip"><span class="tip-icon">👥</span><span>Stakeholder walk-throughs are mandatory — they'll always catch something (like the billing→purchase link).</span></div>
+      <div class="tip"><span class="tip-icon">🗃️</span><span>Skip attributes in draft diagrams. Only add them once entity relationships are confirmed — it reduces noise during iteration.</span></div>
+      <div class="tip"><span class="tip-icon">⚠️</span><span>Crow's Foot notation reads both directions: "A user can make <em>zero or many</em> purchases; a purchase is made by <em>one and only one</em> user."</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

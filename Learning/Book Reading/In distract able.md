@@ -174,5 +174,12 @@ T = nt
 - Social media scrolling forces us to spend as much more time as we can
 - Taking back control requires techniques like 
 	- pre load urls that take to only required places like message tab in linkedin, your own profile in X / twitter and replacing Facebook feeds with a quote etc.
+
+## Prevent Distraction with Pacts
+
+### Power of Pre-commitment
+- Pre-commitment reduces the chances of us getting distracted
+- They help us stick to decisions we have made in advance.
+- This should always be used after first 3 ( internal, external trigger and traction) are applied.
 - 
- 
+
