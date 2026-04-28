@@ -159,3 +159,27 @@ T = nt
 - Problem Solving, Brainstorming should be done individually first and then a meeting can be called. This allows each individual to come up with their own version of idea that otherwise might be suppressed by the dominant member voice.
 - Meetings should be device free so members are fully present in the conversation and just there physically.
 - Only one laptop per meeting if there is a presentation otherwise pen and paper are at most the things there should be.
+### Hack Back Your Desktop
+- Desktop clutter takes a heavy psychological toll on our attention. If we are having multiple files on desktop which are un-arranged makes our brain think more when we look at it to open a simple file
+- Disable notifications of desktop, use Do not disturb feature that would stop any kind of notification from any apps.
+### Hack Back Online Articles
+
+> [!"Strewn"] 
+> (pronounced /struːn/) is the past participle of the verb "strew," meaning ==to scatter or spread things untidily over a surface==. It often describes a scene covered with scattered items (e.g., "clothes were strewn across the floor").
+
+- Multichannel Multitasking means listen to audio book while exercising.
+- Use app like pocket to save online articles when you see one and read it or listen when you are walking, jogging or exercising.
+
+### Hack Back News Feed
+- Social media scrolling forces us to spend as much more time as we can
+- Taking back control requires techniques like 
+	- pre load urls that take to only required places like message tab in linkedin, your own profile in X / twitter and replacing Facebook feeds with a quote etc.
+
+## Prevent Distraction with Pacts
+
+### Power of Pre-commitment
+- Pre-commitment reduces the chances of us getting distracted
+- They help us stick to decisions we have made in advance.
+- This should always be used after first 3 ( internal, external trigger and traction) are applied.
+- 
+

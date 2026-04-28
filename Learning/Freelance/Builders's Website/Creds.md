@@ -28,3 +28,11 @@ pnpm build
 cd apps/api && pnpm migration:run && cd ../..
 pm2 restart all
 ```
+
+
+
+
+### passowrd for seed plan
+Admin@1234
+admin@asiabuilders.com
+accounts@asiabuilders.com
