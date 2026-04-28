@@ -35,4 +35,7 @@ docker compose -f docker-compose.redis-local.yml up -d
 ```
 
 
-
+### query fro users
+```sql
+db.users.find({email:"akhan@hillcountrycoders.com"}, {_id: 1, firstName: 1, secondName: 1, email: 1, assignedto: 1}).limit(10)
+```

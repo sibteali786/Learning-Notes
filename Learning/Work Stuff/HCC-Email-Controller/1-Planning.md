@@ -219,6 +219,7 @@ file structure for hcc-admin-v2
 ```txt
 .
 ├── components.json
+├── hcc-development-plan.md
 ├── jsconfig.json
 ├── next.config.mjs
 ├── package.json
@@ -394,6 +395,7 @@ file structure for hcc-admin-v2
 │   │   │   │   ├── empOpen.jsx
 │   │   │   │   ├── mailingDrawer.jsx
 │   │   │   │   ├── mailOpen.jsx
+│   │   │   │   ├── newContactListDrawer.jsx
 │   │   │   │   ├── picklist.jsx
 │   │   │   │   ├── purchaseSale.jsx
 │   │   │   │   ├── purchaseSaleList.jsx
@@ -402,7 +404,8 @@ file structure for hcc-admin-v2
 │   │   │   │   ├── shareWithDrawer.jsx
 │   │   │   │   ├── style.scss
 │   │   │   │   ├── taskDrawer.jsx
-│   │   │   │   └── taskOpen.jsx
+│   │   │   │   ├── taskOpen.jsx
+│   │   │   │   └── templateBuilderDrawer.jsx
 │   │   │   ├── dropdowns
 │   │   │   │   └── ZipcodesDropdown.jsx
 │   │   │   ├── employeeTabs
@@ -415,9 +418,11 @@ file structure for hcc-admin-v2
 │   │   │   │   ├── EmployeeFile.js
 │   │   │   │   └── taskFile.js
 │   │   │   ├── tables
+│   │   │   │   ├── bulkJobsTable.jsx
 │   │   │   │   ├── businessListingsTable.jsx
 │   │   │   │   ├── clientResearchTable.jsx
 │   │   │   │   ├── clientTable.jsx
+│   │   │   │   ├── contactListsTable.jsx
 │   │   │   │   ├── emailTemplateTable.jsx
 │   │   │   │   ├── employeeTable.jsx
 │   │   │   │   ├── fileTable.jsx
@@ -426,7 +431,8 @@ file structure for hcc-admin-v2
 │   │   │   │   ├── picklistTable.jsx
 │   │   │   │   ├── purchaseSaleTable.jsx
 │   │   │   │   ├── saleslistTable.jsx
-│   │   │   │   └── taskTable.jsx
+│   │   │   │   ├── taskTable.jsx
+│   │   │   │   └── templatesTable.jsx
 │   │   │   └── taskTabs
 │   │   │       ├── style.scss
 │   │   │       ├── subTasks.jsx
@@ -496,7 +502,7 @@ file structure for hcc-admin-v2
 │       └── routes.js
 └── tailwind.config.js
 
-61 directories, 217 files
+61 directories, 223 files
 ```
 
 for HCC-adam-backend
@@ -550,6 +556,9 @@ for HCC-adam-backend
 │   ├── index.js
 │   ├── resolver.js
 │   └── schema.js
+├── helpers
+│   ├── clientQueryHelpers.js
+│   └── researchWorkflow.js
 ├── index.js
 ├── middleware
 │   ├── auth.js
@@ -557,6 +566,7 @@ for HCC-adam-backend
 │   ├── errorHandler.js
 │   ├── logger.js
 │   ├── performance.js
+│   ├── requireRole.js
 │   ├── upload.js
 │   └── validateNote.js
 ├── models
@@ -624,10 +634,13 @@ for HCC-adam-backend
 │   ├── productsRoutes.js
 │   ├── purchaseServiceRouter.js
 │   ├── quoteRequestRouter.js
-│   ├── servicesListRouter.js                                                                                                           │   ├── statusRouter.js
+│   ├── servicesListRouter.js
+│   ├── statusRouter.js
 │   ├── taskCategoryRouter.js
-│   ├── taskPriorityRouter.js                                                                                                           │   ├── taskRouter.js
-│   ├── taskStatusRouter.js                                                                                                             │   ├── territoryRoutes.js
+│   ├── taskPriorityRouter.js
+│   ├── taskRouter.js
+│   ├── taskStatusRouter.js
+│   ├── territoryRoutes.js
 │   ├── userRoutes.js
 │   ├── userTypesRouter.js
 │   ├── webContactLeads.js
@@ -655,7 +668,7 @@ for HCC-adam-backend
 │   └── generatePresignedUrl.js
 └── vercel.json
 
-12 directories, 144 files
+13 directories, 147 files
 ```
 
 for emailControllerAuth
