@@ -11,10 +11,14 @@
             "id": "4cb1f3767c7afd7c",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "split-diff-view",
+              "state": {
+                "aFile": ".obsidian/workspace.json",
+                "bFile": ".obsidian/workspace.json",
+                "aRef": ""
+              },
+              "icon": "diff",
+              "title": "Diff: workspace.json"
             }
           }
         ]
@@ -182,6 +186,7 @@
   },
   "active": "4cb1f3767c7afd7c",
   "lastOpenFiles": [
+    "conflict-files-obsidian-git.md",
     "Learning/System Design/Technolgies/Realtime Udpates/deepseek_html_20260428_300d1d.html",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
     "Learning/System Design/Technolgies/Realtime Udpates",
