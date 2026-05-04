@@ -181,5 +181,11 @@ T = nt
 - Pre-commitment reduces the chances of us getting distracted
 - They help us stick to decisions we have made in advance.
 - This should always be used after first 3 ( internal, external trigger and traction) are applied.
-- 
+
+### Effort Pacts
+- Remote work introduced many problems such as less acountability
+- since in office settings we are bound with fact that someone / our colleagues  can see / observe us we try to stay focused to do some work
+- Similar things can aceived by scheduling time with people on apps like FocusMate etc.
+- Apps like SelfControl and Forest can help us achieve less distraction with enforced techniques.
+
 
