@@ -39,3 +39,7 @@ docker compose -f docker-compose.redis-local.yml up -d
 ```sql
 db.users.find({email:"akhan@hillcountrycoders.com"}, {_id: 1, firstName: 1, secondName: 1, email: 1, assignedto: 1}).limit(10)
 ```
+user for reference
+```
+67b4d619aec4b8fb086eee7b
+```
