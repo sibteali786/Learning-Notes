@@ -185,7 +185,7 @@ T = nt
 ### Effort Pacts
 - Remote work introduced many problems such as less acountability
 - since in office settings we are bound with fact that someone / our colleagues  can see / observe us we try to stay focused to do some work
-- Similar things can aceived by scheduling time with people on apps like FocusMate etc.
+- Similar things can achieved by scheduling time with people on apps like FocusMate etc.
 - Apps like SelfControl and Forest can help us achieve less distraction with enforced techniques.
 
 ### Price Pact
@@ -193,5 +193,11 @@ T = nt
 - So it works best when we can remove external triggers that lead to distraction.
 - works best when distraction is temporary
 - Learn to be self compassionate before price pact, its a must to be kind to yourself.
+
+### Pact with Identity
+- We tend to greatly align our behaviour with how we see ourselves.
+- We can prevent a distraction by staying in line with our identity. Like we can go to gym daily by believing that we are active 
+- Its also called as becoming a noun. Because by assigning ourself one we increase the likelihood of following through with behaviours with what we call ourself.
+
 
 
