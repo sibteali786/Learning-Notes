@@ -199,5 +199,13 @@ T = nt
 - We can prevent a distraction by staying in line with our identity. Like we can go to gym daily by believing that we are active 
 - Its also called as becoming a noun. Because by assigning ourself one we increase the likelihood of following through with behaviours with what we call ourself.
 
+## How to make our workplace  indistractable
+### Distraction is a sign of disfunction
+- workplace distraction has much deeper root causes, question is why we get distracted in first place ? 
+- High `Job Strain` , where employees are expected to meet high expectations but lacked the ability to control the outcomes.
+- `Effort Reward Imbalance` where workers do not see much return for their hard work, be it through increased pay or recognition.
+- Tech overuse at a workplace is a sign of dysfunctional company culture
+- The more tech we use, mobile, laptop , emails to be always available the more disfunctional our workplace is.
+
 
 

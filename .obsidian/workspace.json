@@ -4,19 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "2725b4e11e8cf756",
+        "id": "7088027b985e56eb",
         "type": "tabs",
         "children": [
           {
-            "id": "67c52acc366fc0db",
+            "id": "d69cbad63bb91d5d",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/JavaScript/Coding/EventEmitter/EventEmitter.excalidraw.md"
+                "file": "Learning/Book Reading/In distract able.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "EventEmitter.excalidraw"
+              "icon": "lucide-file",
+              "title": "In distract able"
             }
           }
         ]
@@ -76,7 +88,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.50390243530273
+    "width": 232.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,20 +194,24 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "d69cbad63bb91d5d",
   "lastOpenFiles": [
-    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/evals-html.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Evals.excalidraw.md",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Resources.md",
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/Side Projects/Peer-to-Peer Network Drone/What More.excalidraw.md",
+    "Learning/Side Projects/Peer-to-Peer Network Drone/Learning and Overview.excalidraw.md",
+    "Learning/System Design/Technolgies/Realtime Udpates/deepseek_html_20260428_300d1d.html",
     "Learning/JavaScript/Coding/EventEmitter/EventEmitter.excalidraw.md",
+    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
     "Learning/Book Reading/In distract able.md",
     "Learning/Database/Database Design/5-Relationships/1-ERD-Diagrams.excalidraw.md",
     "Learning/Database/Database Design/5-Relationships/er-diagram-summary.html",
     "Learning/Database/Database Design/5-Relationships/ERD Diagrams.md",
     "Learning/DSA/LinkedList/Remove Nth Node From End of List.excalidraw.md",
     "Learning/DSA/LinkedList/3-Reorder_List.excalidraw.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
     "Learning/JavaScript/Coding/Caching",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Resources.md",
-    "Learning/System Design/Technolgies/Realtime Udpates/deepseek_html_20260428_300d1d.html",
     "conflict-files-obsidian-git.md",
     "Learning/Freelance/Aesthetic Industry/Untitled.md",
     "Learning/Freelance/Aesthetic Industry",
@@ -214,11 +231,6 @@
     "Learning/JavaScript/Coding/Async Map/async-map.excalidraw.md",
     "Learning/JavaScript/Coding/Promise/Promise.allSettled.excalidraw.md",
     "Learning/JavaScript/Coding/Array Methods/Array.prototype.map.excalidraw.md",
-    "Learning/JavaScript/Coding/Async Map",
-    "Learning/JavaScript/Coding/Array Methods/Array.prototyp.filter.excalidraw.md",
-    "Learning/Freelance/Builders's Website/Builders Website.md",
-    "Learning/Work Stuff/Chat App.md",
-    "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
     "Pasted Image 20260423111902_446.png",
     "Pasted Image 20260422143401_737.png",
     "Pasted Image 20260421142442_731.png",
