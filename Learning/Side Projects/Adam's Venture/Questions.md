@@ -1,0 +1,3 @@
+- Why not use gRPC insetead of SSE for server to server communication with supported paltform.
+- Can we create a common interface so that user does not have to deal with different forms of UI for different providers 
+- Multi tenant architecture 
