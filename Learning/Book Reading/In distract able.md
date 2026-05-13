@@ -207,5 +207,8 @@ T = nt
 - Tech overuse at a workplace is a sign of dysfunctional company culture
 - The more tech we use, mobile, laptop , emails to be always available the more disfunctional our workplace is.
 
+### Fixing Distraction is a test of Company Culture
+- A workplace where people cannot talk openly without having fear of being judged or fired, such people have no psychological safety.
+- Knowing your voice matters is crucial in allowing team members to open about issues and their concerns making them less distractive at work and more happy.
 
 
