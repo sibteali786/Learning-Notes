@@ -181,5 +181,34 @@ T = nt
 - Pre-commitment reduces the chances of us getting distracted
 - They help us stick to decisions we have made in advance.
 - This should always be used after first 3 ( internal, external trigger and traction) are applied.
-- 
+
+### Effort Pacts
+- Remote work introduced many problems such as less acountability
+- since in office settings we are bound with fact that someone / our colleagues  can see / observe us we try to stay focused to do some work
+- Similar things can achieved by scheduling time with people on apps like FocusMate etc.
+- Apps like SelfControl and Forest can help us achieve less distraction with enforced techniques.
+
+### Price Pact
+- It adds a cost to getting distracted which works for short timed habits like gym, writing or working on a project but without an external trigger that we cannot control.
+- So it works best when we can remove external triggers that lead to distraction.
+- works best when distraction is temporary
+- Learn to be self compassionate before price pact, its a must to be kind to yourself.
+
+### Pact with Identity
+- We tend to greatly align our behaviour with how we see ourselves.
+- We can prevent a distraction by staying in line with our identity. Like we can go to gym daily by believing that we are active 
+- Its also called as becoming a noun. Because by assigning ourself one we increase the likelihood of following through with behaviours with what we call ourself.
+
+## How to make our workplace  indistractable
+### Distraction is a sign of disfunction
+- workplace distraction has much deeper root causes, question is why we get distracted in first place ? 
+- High `Job Strain` , where employees are expected to meet high expectations but lacked the ability to control the outcomes.
+- `Effort Reward Imbalance` where workers do not see much return for their hard work, be it through increased pay or recognition.
+- Tech overuse at a workplace is a sign of dysfunctional company culture
+- The more tech we use, mobile, laptop , emails to be always available the more disfunctional our workplace is.
+
+### Fixing Distraction is a test of Company Culture
+- A workplace where people cannot talk openly without having fear of being judged or fired, such people have no psychological safety.
+- Knowing your voice matters is crucial in allowing team members to open about issues and their concerns making them less distractive at work and more happy.
+
 

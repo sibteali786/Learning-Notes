@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Laminar Setup — Observability</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; margin-top: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.7; }
+  .kw { color: #7c6fff; }
+  .fn { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm { color: #555; }
+  .obj { color: #f87171; }
+
+  .step-list { display: flex; flex-direction: column; gap: 10px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { background: #7c6fff; color: #fff; font-size: 11px; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-body .s-title { font-size: 13px; font-weight: 700; color: #e0e0e0; }
+  .step-body .s-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.8; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 600; }
+
+  .footer { text-align: center; color: #444; font-size: 11px; }
+  .footer span { margin: 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">OBSERVABILITY SETUP</div>
+    <h1>Laminar + OTEL Tracing</h1>
+    <div class="sub">Instrument your agent once → see every span, prompt, output, and tool call.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 Tracing is to agents what <strong>console.log on steroids</strong> is to regular code — every step, every span, in one dashboard.</div>
+    <div class="note">Goes hand-in-hand with evals: run an eval → follow its trace → pinpoint exactly where to improve.</div>
+  </div>
+
+  <!-- What is a Trace -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">WHAT GETS TRACED</span>
+    <div class="cards">
+      <div class="card" style="border:1px solid #7c6fff44;">
+        <div class="icon">📡</div>
+        <div class="title" style="color:#7c6fff;">Span</div>
+        <div class="desc">One unit of work — e.g. <code>AI generateText</code> or <code>doGenerate</code>. Has input, output, attributes, events.</div>
+      </div>
+      <div class="card" style="border:1px solid #60a5fa44;">
+        <div class="icon">🔗</div>
+        <div class="title" style="color:#60a5fa;">Trace</div>
+        <div class="desc">The full tree of spans for one agent run. Simple now (1 call), complex later (multi-turn + tools).</div>
+      </div>
+      <div class="card" style="border:1px solid #10b98144;">
+        <div class="icon">🧑‍⚖️</div>
+        <div class="title" style="color:#10b981;">Dashboard</div>
+        <div class="desc">Laminar UI shows traces, eval scores, avg scores over time. View evals and traces in one place.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Setup Steps -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">SETUP — 3 STEPS</span>
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="s-title">Install &amp; Import</div>
+          <div class="s-desc">Add <code>@lmnr-ai/lmnr</code> and pull in <code>Laminar</code> + <code>getTracer</code></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="s-title">Initialize at app top</div>
+          <div class="s-desc">Call <code>Laminar.initialize({ projectApiKey: process.env.LMNR_PROJECT_API_KEY })</code> — that's it.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="s-title">Enable telemetry on AI SDK</div>
+          <div class="s-desc">Pass <code>experimental_telemetry: { isEnabled: true, tracer: getTracer() }</code> to your <code>generateText</code> call.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">CODE — run.ts</span>
+<pre><span class="cm">// 1. Import</span>
+<span class="kw">import</span> { <span class="fn">Laminar</span>, <span class="fn">getTracer</span> } <span class="kw">from</span> <span class="str">'@lmnr-ai/lmnr'</span>;
+
+<span class="cm">// 2. Initialize (top of file)</span>
+<span class="fn">Laminar</span>.<span class="fn">initialize</span>({
+  projectApiKey: process.env.<span class="obj">LMNR_PROJECT_API_KEY</span>
+});
+
+<span class="cm">// 3. Enable telemetry on your AI SDK call</span>
+<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">generateText</span>({
+  model,
+  messages,
+  tools,
+  experimental_telemetry: {
+    isEnabled: <span class="kw">true</span>,
+    tracer: <span class="fn">getTracer</span>()   <span class="cm">// wires up OTEL spans automatically</span>
+  }
+});</pre>
+  </div>
+
+  <!-- Flush Warning -->
+  <div class="warn">
+    <strong>⚠️ Traces not showing up?</strong> → Call <code>await Laminar.flush()</code> before your process exits.<br/>
+    <span style="color:#aaa; font-size:11px; margin-top:4px; display:block;">
+      Laminar (like all analytics tools) <strong>batches events</strong> and sends on an interval. If your process ends first, those events never ship. <code>flush()</code> forces an immediate send — classic race condition fix.
+    </span>
+  </div>
+
+  <!-- Offline vs Online evals note -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">EVALS IN LAMINAR DASHBOARD</span>
+    <div class="grid2">
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#f59e0b;">✅ What we use the dashboard for</div>
+        <div class="g-body">
+          Viewing offline eval results<br>
+          Checking avg scores over runs<br>
+          Following trace trees per eval<br>
+          Spotting which span to fix
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#0f1f1a;">
+        <div class="g-title" style="color:#f87171;">❌ What we skip (for now)</div>
+        <div class="g-body">
+          Online evaluators in dashboard<br>
+          — Python only right now<br>
+          — Only needed at massive scale<br>
+          — Collect data now, run offline later
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLI Commands -->
+  <div>
+    <div style="font-size:11px; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:10px;">CLI WORKFLOW (going forward)</div>
+    <div class="pills">
+      <span class="pill" style="background:#7c6fff22; color:#7c6fff; border:1px solid #7c6fff;">npm run build</span>
+      <span class="pill" style="background:#60a5fa22; color:#60a5fa; border:1px solid #60a5fa;">npm install -g</span>
+      <span class="pill" style="background:#10b98122; color:#10b981; border:1px solid #10b981;">agi</span>
+    </div>
+    <div style="font-size:11px; color:#555; margin-top:8px;">Drop the <code>tsx</code> approach. <code>agi</code> handles .env, build, and run cleanly. Next lesson makes it conversational.</div>
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; color:#93c5fd; border:1px solid #60a5fa44; border-radius:10px;">
+    <strong>WNP scenario:</strong> On WhatsNextPlease, once you add multi-tenant tool calls (create task, assign user, update project), Laminar traces will show you the exact span where the agent picked the wrong tool or extracted a bad param — without digging through raw logs.
+  </div>
+
+  <div class="footer">
+    Stack: <span style="color:#7c6fff;">@lmnr-ai/lmnr</span> · <span style="color:#60a5fa;">OpenTelemetry (OTEL)</span> · <span style="color:#10b981;">Vercel AI SDK</span> · <span style="color:#f59e0b;">Laminar Dashboard</span>
+  </div>
+
+</div>
+</body>
+</html>

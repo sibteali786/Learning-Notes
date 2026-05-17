@@ -4879,7 +4879,7 @@ public class Main {
 
 ### Order Agnostic Binary Search
 
-> The one where we are unsware of if the input array is sorted in asceding or descending order.
+> The one where we are unware of if the input array is sorted in asceding or descending order.
 > 
 - For descending order
     

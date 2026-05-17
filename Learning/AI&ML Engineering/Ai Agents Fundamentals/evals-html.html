@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Single Turn Evals</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Header */
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  /* Core insight */
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .main strong { color: #e9d5ff; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  /* Section */
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  /* Cards row */
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  /* Scenario box */
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; margin-top: 12px; }
+
+  /* Two-col grid */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.8; }
+
+  /* Analogy row */
+  .analogy { display: flex; gap: 12px; }
+  .analogy-card { flex: 1; border-radius: 10px; padding: 12px; }
+  .analogy-card .a-label { font-weight: 700; font-size: 12px; margin-bottom: 6px; }
+  .analogy-card .a-desc { font-size: 12px; color: #aaa; }
+
+  /* Pills */
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 600; }
+
+  /* Eval category rows */
+  .cat-row { display: flex; align-items: center; gap: 12px; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+  .cat-tag { color: #000; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; min-width: 76px; text-align: center; flex-shrink: 0; }
+  .cat-desc { font-size: 12px; color: #aaa; }
+  .cat-desc strong { color: #fff; }
+
+  /* Scorer bars */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-label { color: #aaa; font-size: 12px; width: 180px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 8px; background: #222; border-radius: 10px; }
+  .bar-fill { height: 8px; border-radius: 10px; }
+  .bar-val { font-size: 12px; font-weight: 700; width: 50px; text-align: right; }
+
+  /* Hill climb */
+  .hc-steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
+  .hc-step { background: #1a2a3a; border: 1px solid #60a5fa44; border-radius: 8px; padding: 6px 12px; color: #e0e0e0; }
+  .hc-arrow { color: #60a5fa; }
+
+  /* Data sources section */
+  .ds-label { font-size: 11px; color: #888; letter-spacing: 1px; font-weight: 700; margin-bottom: 10px; }
+
+  /* Footer */
+  .footer { text-align: center; color: #444; font-size: 11px; }
+  .footer span { margin: 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">AI AGENT DEVELOPMENT</div>
+    <h1>Single Turn Evals</h1>
+    <div class="sub">Measure. Compare. Improve. Don't fly blind.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">
+      💡 <strong>Tests = Pass/Fail (deterministic)</strong> &nbsp;|&nbsp; <strong>Evals = Score/Measure (non-deterministic)</strong>
+    </div>
+    <div class="note">LLMs aren't deterministic even at temp=0 — GPU kernel-level load introduces randomness regardless of seed</div>
+  </div>
+
+  <!-- Why Evals -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">WHY EVALS</span>
+    <div class="cards">
+      <div class="card" style="border:1px solid #7c6fff44;">
+        <div class="icon">🎲</div>
+        <div class="title" style="color:#7c6fff;">Non-determinism</div>
+        <div class="desc">Same input → different output. Traditional tests don't cut it.</div>
+      </div>
+      <div class="card" style="border:1px solid #f59e0b44;">
+        <div class="icon">📉</div>
+        <div class="title" style="color:#f59e0b;">Silent Regression</div>
+        <div class="desc">Prompt/model/tool changes can silently degrade behavior.</div>
+      </div>
+      <div class="card" style="border:1px solid #10b98144;">
+        <div class="icon">🚀</div>
+        <div class="title" style="color:#10b981;">Deploy Confidence</div>
+        <div class="desc">90% eval score = ship it. 40% = do not ship.</div>
+      </div>
+      <div class="card" style="border:1px solid #60a5fa44;">
+        <div class="icon">🔍</div>
+        <div class="title" style="color:#60a5fa;">Debugging</div>
+        <div class="desc">Tracing + evals = understand exactly WHY it failed.</div>
+      </div>
+    </div>
+    <div class="scenario" style="background:#2a1f4a; color:#c084fc;">
+      <strong>Real scenario:</strong> Scott's co-founder typed the same prompt — worked perfectly for Scott 10x in a row, crashed immediately for co-founder. No evals = no clue why. Turned out to be non-determinism they weren't measuring.
+    </div>
+  </div>
+
+  <!-- Analogy -->
+  <div class="analogy">
+    <div class="analogy-card" style="background:#0d2137; border:1px solid #60a5fa44;">
+      <div class="a-label" style="color:#60a5fa;">🧪 Single-Turn ≈ Unit Test</div>
+      <div class="a-desc">One input/output pair. Did the agent pick the right tool? Extract correct args? Refuse when appropriate?</div>
+    </div>
+    <div class="analogy-card" style="background:#0d2637; border:1px solid #10b98144;">
+      <div class="a-label" style="color:#10b981;">🌐 Full-Run ≈ E2E Test</div>
+      <div class="a-desc">Complete task execution end to end. How many steps, tool calls, and what's the final outcome?</div>
+    </div>
+  </div>
+
+  <!-- Offline vs Online -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">OFFLINE vs ONLINE EVALS</span>
+    <div class="grid2">
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#f59e0b;">⚡ Offline (build this first)</div>
+        <div class="g-body">
+          ✓ Fixed dataset, run locally<br>
+          ✓ Fast dev feedback loop<br>
+          ✓ Great for CI regression blocking<br>
+          ✓ Cheap to run many times<br>
+          — Curated scenarios only
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#0f1f1a;">
+        <div class="g-title" style="color:#10b981;">🌍 Online (advanced / production)</div>
+        <div class="g-body">
+          ✓ Real user traffic<br>
+          ✓ Catches unexpected edge cases<br>
+          ✓ LLM-as-judge scoring<br>
+          — Expensive (sample &lt;1% of traffic)<br>
+          — Thumbs up/down collection loop
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Sources -->
+  <div>
+    <div class="ds-label">DATA SOURCES FOR EVALS</div>
+    <div class="pills">
+      <span class="pill" style="background:#7c6fff22; color:#7c6fff; border:1px solid #7c6fff;">🧪 Synthetic — start here</span>
+      <span class="pill" style="background:#10b98122; color:#10b981; border:1px solid #10b981;">📊 Production Logs</span>
+      <span class="pill" style="background:#f59e0b22; color:#f59e0b; border:1px solid #f59e0b;">🪲 Edge Case Mining</span>
+      <span class="pill" style="background:#f8717122; color:#f87171; border:1px solid #f87171;">🔴 Red Teaming</span>
+      <span class="pill" style="background:#60a5fa22; color:#60a5fa; border:1px solid #60a5fa;">🤖 LLM-Generated ⚠️ bias risk</span>
+    </div>
+    <div style="font-size:11px; color:#555; margin-top:8px;">Best datasets combine all. Start synthetic → layer in production failures over time.</div>
+  </div>
+
+  <!-- Eval Categories -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">EVAL CATEGORIES</span>
+    <div class="cat-row" style="background:#0f2019;">
+      <span class="cat-tag" style="background:#10b981;">GOLDEN</span>
+      <div class="cat-desc">Must select <strong>exactly</strong> the expected tools. Zero ambiguity. Binary pass/fail. Highest confidence signal.</div>
+    </div>
+    <div class="cat-row" style="background:#1a1505;">
+      <span class="cat-tag" style="background:#f59e0b;">SECONDARY</span>
+      <div class="cat-desc">Likely selects certain tools but flexibility allowed. Scored via <strong>F1 (precision + recall)</strong> for partial credit.</div>
+    </div>
+    <div class="cat-row" style="background:#1a0a0a; margin-bottom:0;">
+      <span class="cat-tag" style="background:#f87171;">NEGATIVE</span>
+      <div class="cat-desc">Must <strong>NOT</strong> select forbidden tools. Tests the agent doesn't over-reach or hallucinate tool use.</div>
+    </div>
+  </div>
+
+  <!-- Scorers -->
+  <div>
+    <div class="ds-label">SCORERS (EVALUATOR FUNCTIONS)</div>
+    <div class="bar-row">
+      <div class="bar-label">toolsSelected</div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%; background:#10b981;"></div></div>
+      <div class="bar-val" style="color:#10b981;">binary</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">toolsAvoided</div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%; background:#f87171;"></div></div>
+      <div class="bar-val" style="color:#f87171;">binary</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">toolSelectionScore (F1)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:75%; background:#7c6fff;"></div></div>
+      <div class="bar-val" style="color:#7c6fff;">0 → 1</div>
+    </div>
+    <div style="font-size:11px; color:#555; margin-top:6px;">F1 = harmonic mean of precision (no extra tools) and recall (no missing tools)</div>
+  </div>
+
+  <!-- Hill Climbing -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">HILL CLIMBING LOOP</span>
+    <div class="hc-steps">
+      <span class="hc-step">Run Evals</span><span class="hc-arrow">→</span>
+      <span class="hc-step">Get Baseline</span><span class="hc-arrow">→</span>
+      <span class="hc-step">Make a Change</span><span class="hc-arrow">→</span>
+      <span class="hc-step">Re-run Evals</span><span class="hc-arrow">→</span>
+      <span class="hc-step">Score ↑? Keep it</span><span class="hc-arrow">→</span>
+      <span class="hc-step">Score ↓? Revert</span>
+    </div>
+    <div class="scenario" style="background:#0d1f2d; color:#93c5fd; margin-top:12px;">
+      <strong>WNP scenario:</strong> Change a task routing tool description → run evals → score jumps 72% → 85% → keep it. No vibes, pure data. Every change is justified.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Tools:
+    <span style="color:#7c6fff;">Laminar</span> (eval runner) ·
+    <span style="color:#60a5fa;">OpenTelemetry</span> (tracing) ·
+    <span style="color:#f59e0b;">LLM-as-Judge</span> (quality scoring)
+  </div>
+
+</div>
+</body>
+</html>
