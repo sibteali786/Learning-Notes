@@ -30,8 +30,33 @@
               "icon": "lucide-file",
               "title": "Concerns"
             }
+          },
+          {
+            "id": "c9c0c1e55ac944ff",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -193,10 +218,21 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "dcd5395f866ce3a1",
+  "active": "c9c0c1e55ac944ff",
   "lastOpenFiles": [
-    "Learning/Side Projects/HospitalityOS/Resources.md",
     "Learning/Side Projects/HospitalityOS/Concerns.md",
+    "conflict-files-obsidian-git.md",
+    "Personal/Remote Jobs/Remote Resource.md",
+    "Learning/Work Stuff/Chat App/Summaries.md",
+    "Learning/Work Stuff/Chat App/Chat App.md",
+    "Learning/Work Stuff/Chat App",
+    "Learning/Side Projects/Wafa/Multi-Platform/Resources.md",
+    "Learning/Side Projects/Wafa/Multi-Platform",
+    "Learning/Side Projects/Resources/Info.md",
+    "Learning/Side Projects/Resources",
+    "Learning/Side Projects/Adam's Venture/Questions.md",
+    "Learning/Side Projects/Adam's Venture",
+    "Learning/Side Projects/HospitalityOS/Resources.md",
     "~$_PMS_Developer_Handout.docx",
     "text.html",
     "subagents 1.html",
@@ -227,20 +263,9 @@
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/5-claude-hooks.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/Resources.md",
     "Learning/Side Projects/HospitalityOS",
-    "Learning/Freelance/Cargo Bussiness",
     "Learning/Freelance/Builders's Website/Builders Website.md",
     "Learning/DSA/Binary Search/CeilingOfaNumber.excalidraw.md",
     "Learning/DSA/Java/Java_DSA.md",
-    "Learning/DSA/Binary Search/Overview.excalidraw.md",
-    "Learning/DSA/Binary Search/Intuition.excalidraw.md",
-    "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md",
-    "Learning/Book Reading/In distract able.md",
-    "Personal/Internal Trigger Chart.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/2-Laminar setup/laminar-setup.html",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/evals-html.html",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/2-Laminar setup",
-    "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/Open Source/Git Contributions.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
