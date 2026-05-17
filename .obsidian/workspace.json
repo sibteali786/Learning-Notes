@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "5d0081fc6f58d22b",
+        "id": "e74936555faf1f18",
         "type": "tabs",
         "children": [
           {
             "id": "6ab3d65874a7c3c0",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "split-diff-view",
+              "state": {
+                "aFile": ".obsidian/workspace.json",
+                "bFile": ".obsidian/workspace.json",
+                "aRef": ""
+              },
+              "icon": "diff",
+              "title": "Diff: workspace.json"
             }
           }
         ]
@@ -181,7 +185,24 @@
   },
   "active": "6ab3d65874a7c3c0",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/5-Agent Loop/2-agent-loop-impl.html",
+    "Learning/Side Projects/HospitalityOS/Resources.md",
+    "Learning/Work Stuff/HCC-Email-Controller/1-Planning.md",
+    "conflict-files-obsidian-git.md",
+    "Learning/Side Projects/Peer-to-Peer Network Drone/What More.excalidraw.md",
+    "Learning/Side Projects/HospitalityOS",
+    "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md",
+    "Learning/JavaScript/Coding/jquery",
+    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
+    "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
+    "Learning/JavaScript/Coding/Caching",
+    "Learning/Freelance/Cargo Bussiness/Cargo Bussiness.md",
+    "Learning/Freelance/Cargo Bussiness",
+    "Learning/Freelance/Aesthetic Industry/Untitled.md",
+    "Learning/Freelance/Aesthetic Industry",
+    "Learning/Database/Database Design/5-Relationships/ch5-relationships-summary.html",
+    "Learning/DSA/LinkedList/5-Swap Nodes in Pairs.excalidraw.md",
+    "Learning/DSA/LinkedList/4-Remove Nth Node From End of List.excalidraw.md",
+    "Learning/DSA/Binary Search/Overview.excalidraw.md",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/2-Laminar setup/laminar-setup.html",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/5-Agent Loop/1-agent-loop-summary.html",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/4-Running Evaluators/2-running-evals-summary.html",
