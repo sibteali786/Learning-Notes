@@ -11,52 +11,15 @@
             "id": "dcd5395f866ce3a1",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Side Projects/HospitalityOS/Concerns.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Database/Database Design/6-Normalization/ch6-normalization-implementation.html"
               },
-              "icon": "lucide-file",
-              "title": "Concerns"
-            }
-          },
-          {
-            "id": "c9c0c1e55ac944ff",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "conflict-files-obsidian-git.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "conflict-files-obsidian-git"
+              "icon": "code-glyph",
+              "title": "ch6-normalization-implementation"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -218,9 +181,11 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "c9c0c1e55ac944ff",
+  "active": "dcd5395f866ce3a1",
   "lastOpenFiles": [
     "Learning/Side Projects/HospitalityOS/Concerns.md",
+    "Learning/Database/Database Design/6-Normalization/ch6-normalization-implementation.html",
+    "Learning/Database/Database Design/6-Normalization",
     "conflict-files-obsidian-git.md",
     "Personal/Remote Jobs/Remote Resource.md",
     "Learning/Work Stuff/Chat App/Summaries.md",
@@ -247,7 +212,6 @@
     "Pasted Image 20260419205204_621.png",
     "Pasted Image 20260413110200_923.png",
     "Pasted Image 20260407123826_882.png",
-    "AI_PMS_Developer_Handout.docx",
     "Learning/AI&ML Engineering/UsefullTools/Overview.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/1-Cursor and AI Models Overview.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/2-Inline-Edits.excalidraw.md",
@@ -262,10 +226,8 @@
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/6-Subagents.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/5-claude-hooks.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/Resources.md",
-    "Learning/Side Projects/HospitalityOS",
     "Learning/Freelance/Builders's Website/Builders Website.md",
     "Learning/DSA/Binary Search/CeilingOfaNumber.excalidraw.md",
-    "Learning/DSA/Java/Java_DSA.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

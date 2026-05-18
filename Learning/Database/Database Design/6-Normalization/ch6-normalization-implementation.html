@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch6 – Normalization & Implementation | Grokking RDB Design</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&display=swap');
+:root {
+  --bg: #0b0e16;
+  --s1: #131720;
+  --s2: #1a2030;
+  --s3: #222840;
+  --border: #2c3550;
+  --accent: #58a6ff;
+  --green: #3ddc84;
+  --yellow: #f0c040;
+  --red: #ff6b6b;
+  --purple: #bb86fc;
+  --orange: #ffaa55;
+  --teal: #44d4c8;
+  --text: #dde4f0;
+  --muted: #6b7999;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Fraunces', serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;padding:36px 20px;}
+.page{max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+
+.title-row{display:flex;align-items:flex-end;gap:14px;border-bottom:1px solid var(--border);padding-bottom:18px;flex-wrap:wrap;}
+.title-row h1{font-family:var(--serif);font-size:2rem;font-weight:900;letter-spacing:-0.5px;}
+.title-row h1 em{font-style:italic;color:var(--accent);}
+.pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;}
+.pill-blue{background:#0d2040;color:var(--accent);border:1px solid #1a3a6a;}
+.pill-green{background:#0a2518;color:var(--green);border:1px solid #1a4030;}
+.pill-yellow{background:#2a1e00;color:var(--yellow);border:1px solid #4a3800;}
+.pill-red{background:#2a0a0a;color:var(--red);border:1px solid #4a1a1a;}
+.pill-purple{background:#1e0a30;color:var(--purple);border:1px solid #3a1a5a;}
+.pill-orange{background:#2a1400;color:var(--orange);border:1px solid #4a2800;}
+.pill-teal{background:#0a2020;color:var(--teal);border:1px solid #1a4040;}
+
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.card-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;}
+.slabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+
+.info{background:var(--s2);border-radius:8px;padding:13px 15px;}
+.info h3{font-size:0.82rem;font-weight:700;margin-bottom:6px;}
+.info p,.info li{font-size:0.75rem;color:#a0aabf;line-height:1.65;}
+.info ul{padding-left:14px;}
+.info li{margin-bottom:3px;}
+.info.b-accent{border-left:3px solid var(--accent);}
+.info.b-green{border-left:3px solid var(--green);}
+.info.b-yellow{border-left:3px solid var(--yellow);}
+.info.b-red{border-left:3px solid var(--red);}
+.info.b-purple{border-left:3px solid var(--purple);}
+.info.b-orange{border-left:3px solid var(--orange);}
+.info.b-teal{border-left:3px solid var(--teal);}
+
+.hl{background:#0d1e35;border:1px solid #1a3a6a;border-radius:8px;padding:11px 14px;font-size:0.77rem;color:#c5d8ff;display:flex;gap:10px;align-items:flex-start;line-height:1.6;}
+.hl.g{background:#0a1e12;border-color:#1a3a20;color:#b5e8c8;}
+.hl.y{background:#1e1800;border-color:#3a2c00;color:#f5dc90;}
+.hl.r{background:#1e0808;border-color:#3a1010;color:#ffb5b5;}
+.hl.p{background:#12081e;border-color:#2a1050;color:#ddb5ff;}
+
+code{font-family:var(--mono);font-size:0.72rem;background:#0d1828;color:var(--accent);padding:1px 5px;border-radius:3px;}
+pre{background:#0d1828;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.72rem;line-height:1.7;overflow-x:auto;color:#c5d8ff;}
+pre .kw{color:var(--purple);}
+pre .tb{color:var(--green);}
+pre .cn{color:var(--yellow);}
+pre .cm{color:var(--muted);}
+pre .vl{color:var(--orange);}
+
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+.flow-step{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:0.74rem;min-width:105px;text-align:center;}
+.flow-step strong{display:block;font-size:0.78rem;color:var(--accent);margin-bottom:3px;}
+.flow-arrow{color:var(--muted);font-size:1.1rem;padding:0 4px;}
+
+.tbl{width:100%;border-collapse:collapse;font-size:0.74rem;}
+.tbl th{background:var(--s3);color:var(--muted);padding:8px 12px;text-align:left;text-transform:uppercase;letter-spacing:1px;font-size:10px;}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--border);color:#c5d0e8;vertical-align:top;line-height:1.6;}
+.tbl tr:last-child td{border-bottom:none;}
+
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;}
+.badge-g{background:#0a2518;color:var(--green);border:1px solid #1a4030;}
+.badge-r{background:#2a0a0a;color:var(--red);border:1px solid #4a1a1a;}
+.badge-y{background:#2a1e00;color:var(--yellow);border:1px solid #4a3800;}
+
+.tips{display:flex;flex-direction:column;gap:8px;}
+.tip{display:flex;gap:10px;align-items:flex-start;font-size:0.77rem;color:#a0aabf;line-height:1.6;}
+.tip-icon{flex-shrink:0;font-size:1rem;margin-top:1px;}
+
+.nf-box{background:var(--s2);border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border);}
+.nf-box .nf-label{font-size:1.2rem;font-weight:700;margin-bottom:6px;}
+.nf-box .nf-name{font-size:0.8rem;font-weight:700;margin-bottom:4px;}
+.nf-box .nf-desc{font-size:0.7rem;color:var(--muted);line-height:1.5;}
+
+.constraint-block{background:var(--s2);border-radius:8px;padding:14px 16px;border-top:3px solid var(--accent);}
+.constraint-block.g{border-color:var(--green);}
+.constraint-block.y{border-color:var(--yellow);}
+.constraint-block.r{border-color:var(--red);}
+.constraint-block.p{border-color:var(--purple);}
+.constraint-block.o{border-color:var(--orange);}
+.constraint-block.t{border-color:var(--teal);}
+.constraint-block h3{font-size:0.85rem;font-weight:700;margin-bottom:6px;}
+.constraint-block p,.constraint-block li{font-size:0.74rem;color:#a0aabf;line-height:1.65;}
+.constraint-block ul{padding-left:14px;margin-top:4px;}
+
+.ref-row{display:flex;align-items:center;gap:10px;background:var(--s2);padding:10px 14px;border-radius:8px;font-size:0.77rem;}
+.ref-action{color:var(--yellow);font-weight:700;min-width:90px;}
+.ref-desc{color:#a0aabf;flex:1;line-height:1.55;}
+.ref-use{color:var(--green);font-size:0.7rem;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ① Title -->
+<div class="title-row">
+  <h1>Ch6 – <em>Normalization &amp; Implementation</em></h1>
+  <span class="pill pill-blue">BCNF</span>
+  <span class="pill pill-green">Normal Forms</span>
+  <span class="pill pill-yellow">Constraints</span>
+  <span class="pill pill-purple">SQL DDL</span>
+  <span class="pill pill-orange">Referential Integrity</span>
+</div>
+
+<!-- ② Objectives -->
+<div class="card">
+  <div class="card-title">① Chapter Objectives</div>
+  <div class="g3">
+    <div class="info b-accent"><h3>Normalize Your Design</h3><p>Apply BCNF rules to eliminate redundancy, multivalued columns, partial dependencies, and transitive dependencies from all tables.</p></div>
+    <div class="info b-yellow"><h3>Implement the Design</h3><p>Translate the final E-R diagram into SQL <code>CREATE TABLE</code> statements with proper data types and constraint definitions.</p></div>
+    <div class="info b-green"><h3>Apply Constraints</h3><p>Use NOT NULL, PRIMARY KEY, FOREIGN KEY, UNIQUE, DEFAULT, and CHECK constraints to enforce data integrity at the database level.</p></div>
+  </div>
+  <div class="hl" style="margin-top:12px">📦 <span>SQL scripts for MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, and Oracle available at <code>github.com/Neo-Hao/grokking-relational-database-design</code> → <code>chapter_06/</code></span></div>
+</div>
+
+<!-- ③ What is Normalization -->
+<div class="card">
+  <div class="card-title">② What Is Normalization?</div>
+  <div class="g2" style="margin-bottom:12px">
+    <div class="info b-accent">
+      <h3>Definition</h3>
+      <p><strong>Normalization</strong> is the process of organizing a database to <strong>minimize redundancy and dependency</strong> while maximizing data integrity and consistency. It breaks the DB into smaller, more manageable tables — each representing a single entity or concept.</p>
+      <p style="margin-top:7px">Primary goal: <strong>strengthen data integrity</strong>.</p>
+    </div>
+    <div class="info b-yellow">
+      <h3>Normal Forms — Nested Dolls</h3>
+      <p>Normal forms are hierarchical and sequential — each builds on the previous:</p>
+      <ul style="margin-top:6px">
+        <li><strong>1NF</strong> → no multivalued columns</li>
+        <li><strong>2NF</strong> → all columns depend on the full PK</li>
+        <li><strong>3NF</strong> → no transitive dependencies</li>
+        <li><strong>BCNF</strong> → stricter 3NF (covers edge cases)</li>
+        <li><em>4NF, 5NF, 6NF</em> — beyond book scope (multivalued/join deps)</li>
+      </ul>
+      <p style="margin-top:6px">In practice: <strong>achieve BCNF = fully normalized</strong>.</p>
+    </div>
+  </div>
+  <div class="slabel">Key Hierarchy: Superkey → Candidate Key → Primary Key</div>
+  <div class="g3" style="margin-bottom:12px">
+    <div class="info b-purple"><h3>Superkey</h3><p>A set of one or more columns that can uniquely identify a row. <em>May contain unnecessary columns.</em></p></div>
+    <div class="info b-accent"><h3>Candidate Key</h3><p>A <strong>minimal superkey</strong> — a superkey with no unnecessary columns. A table can have multiple candidate keys.</p></div>
+    <div class="info b-green"><h3>Primary Key</h3><p>One candidate key <strong>chosen</strong> as the definitive row identifier. Every table must have exactly one.</p></div>
+  </div>
+  <div class="flow" style="margin-bottom:12px">
+    <div class="flow-step"><strong>BCNF checklist</strong>Has a PK</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-step"><strong>1NF</strong>No multivalued cols</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-step"><strong>2NF</strong>All cols dep on full key</div>
+    <div class="flow-arrow">+</div>
+    <div class="flow-step"><strong>3NF</strong>No transitive deps</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--green)"><strong>✅ BCNF</strong>Fully normalized</div>
+  </div>
+  <div class="hl r">⚠️ <span>A table not meeting one or more BCNF guidelines causes <strong>update anomalies, deletion anomalies, and insertion anomalies</strong>. Remember the single-table disaster from Ch1 where product and customer data were combined?</span></div>
+</div>
+
+<!-- ④ Rule 1: Primary Key -->
+<div class="card">
+  <div class="card-title">③ BCNF Rule 1 — Always Has a Primary Key</div>
+  <div class="g2">
+    <div class="info b-accent">
+      <h3>Rule</h3>
+      <p>Every table in BCNF <strong>must have a primary key</strong>. Without one, you cannot uniquely identify rows, enforce referential integrity, or link tables reliably.</p>
+      <p style="margin-top:7px">Check the E-R diagram from Ch5 — every entity has a PK. If any table is missing one, <strong>stop and assign a PK before proceeding</strong>.</p>
+    </div>
+    <div class="info b-green">
+      <h3>Sci-Fi Collective Status</h3>
+      <p>✅ All 8 tables have primary keys:</p>
+      <ul style="margin-top:5px">
+        <li><code>user</code> → <code>email</code></li>
+        <li><code>product</code> → <code>code</code></li>
+        <li><code>payment_method</code> → <code>payment_id</code></li>
+        <li><code>purchase</code> → <code>purchase_id</code></li>
+        <li><code>review</code> → <code>review_id</code></li>
+        <li><code>purchase_product</code> → <code>purchase_id + code</code> (composite)</li>
+        <li><code>user_address</code> → <code>email</code> (weak entity)</li>
+        <li><code>billing_address</code> → <code>payment_id</code> (weak entity)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ Rule 2: No Multivalued Columns (1NF) -->
+<div class="card">
+  <div class="card-title">④ BCNF Rule 2 — No Multivalued Columns (1NF)</div>
+  <div class="g2">
+    <div>
+      <div class="info b-red" style="margin-bottom:10px">
+        <h3>What Is a Multivalued Column?</h3>
+        <p>A column that holds <strong>multiple values in a single cell</strong>. Example: a <code>course</code> column in <code>course_registration</code> that stores a list like <em>"Math, Physics, History"</em> in one row.</p>
+        <p style="margin-top:6px">Problems: difficult querying, data redundancy, inconsistency, update/deletion anomalies.</p>
+      </div>
+      <div class="info b-yellow" style="margin-bottom:10px">
+        <h3>Who Decides if It's Multivalued?</h3>
+        <p>The <strong>users of the application</strong> decide. A column is multivalued if users consider each stored item an indivisible unit of value.</p>
+        <p style="margin-top:6px">✅ <em>phone number</em> → multivalued if multiple phones stored per row (each number is indivisible to users).<br>✅ <em>email address</em> storing one email per row → NOT multivalued (users don't care about username@domain split).</p>
+      </div>
+      <div class="info b-green">
+        <h3>Fix Pattern</h3>
+        <p>Redesign the column to hold only a single value per row. Usually this means moving the multivalued column into a <strong>separate table</strong> to prevent redundancy.</p>
+      </div>
+    </div>
+    <div>
+      <div class="slabel">Example Fix: course_registration</div>
+      <pre><span class="cm">-- BEFORE: multivalued column (violation)</span>
+<span class="kw">course_registration</span>
+student_id | name    | course
+-----------|---------|------------------
+1          | Alice   | Math, Physics
+2          | Bob     | History
+
+<span class="cm">-- AFTER: split into two tables</span>
+<span class="kw">student</span>
+student_id | name
+-----------|--------
+1          | Alice
+2          | Bob
+
+<span class="kw">course_registration</span>
+student_id | course
+-----------|--------
+1          | Math
+1          | Physics
+2          | History</pre>
+      <div class="hl g" style="margin-top:8px">✅ <span>Sci-Fi Collective has <strong>no multivalued columns</strong>. All columns were designed to hold single values per row from the start.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ Rule 3: Functional Dependency -->
+<div class="card">
+  <div class="card-title">⑤ BCNF Rule 3 — All Columns Dependent on Key Only (2NF + Functional Dependency)</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info b-accent" style="margin-bottom:10px">
+        <h3>What Is Functional Dependency?</h3>
+        <p>Given a value of column A, if there is always a <strong>unique corresponding value</strong> of column B → <strong>A functionally determines B</strong> (B is functionally dependent on A).</p>
+        <p style="margin-top:6px">Notation: <code>A → B</code></p>
+        <p style="margin-top:6px"><strong>Directional!</strong> <code>employee_id → employee_name</code> does NOT mean <code>employee_name → employee_id</code> (two employees could share a name).</p>
+      </div>
+      <div class="info b-yellow">
+        <h3>BCNF Requirement</h3>
+        <p>All columns must be functionally dependent on the <strong>primary key and only the primary key</strong>. If any column depends on something else, the table violates BCNF.</p>
+        <p style="margin-top:6px">Fix: break the table into two (or more) tables — each containing only columns dependent on its key. Link via FK where needed.</p>
+      </div>
+    </div>
+    <div>
+      <div class="slabel">Example: Bad product table</div>
+      <pre><span class="cm">-- VIOLATION: supplier_contact depends on</span>
+<span class="cm">-- supplier_name, NOT on product_id</span>
+<span class="kw">product</span>
+product_id → product_name, supplier_name, category
+supplier_name → supplier_contact  <span class="cm">← violation!</span></pre>
+      <pre style="margin-top:8px"><span class="cm">-- FIX: split into two tables</span>
+<span class="kw">product</span>(product_id PK, product_name, category,
+         supplier_id FK)
+<span class="kw">supplier</span>(supplier_id PK, supplier_name,
+          supplier_contact)</pre>
+    </div>
+  </div>
+
+  <div class="slabel">Sci-Fi Collective: Normalizing the purchase Table</div>
+  <div class="g2" style="margin-bottom:12px">
+    <div>
+      <div class="info b-red" style="margin-bottom:10px">
+        <h3>Problem Found in purchase</h3>
+        <p>The <code>purchase</code> table had <strong>two functional dependencies</strong>:</p>
+        <pre style="margin-top:6px;font-size:0.68rem">purchase_id → total_price, purchase_time,
+             payment_id, email
+purchase_id + code → product_quantity,
+                     product_price</pre>
+        <p style="margin-top:6px"><code>product_quantity</code> and <code>product_price</code> depend on <strong>both</strong> purchase_id AND product code — not on purchase_id alone. <strong>BCNF violation.</strong></p>
+        <p style="margin-top:6px">Trying to insert one receipt's multiple products → impossible (can't repeat the PK).</p>
+      </div>
+      <div class="info b-green">
+        <h3>Fix: Move to purchase_product</h3>
+        <p>Move <code>product_quantity</code> and <code>product_price</code> to the <code>purchase_product</code> junction table (composite PK: <code>purchase_id + code</code>).</p>
+        <p style="margin-top:6px">Also add <code>product_name</code> to <code>purchase_product</code> — <strong>even though it exists in product table</strong>. Why?</p>
+        <p style="margin-top:6px">Product prices and names <em>can change over time</em>. A receipt from 6 months ago must reflect the <strong>price and name at time of purchase</strong>, not today's values.</p>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- BEFORE: purchase table (violation)</span>
+<span class="kw">purchase</span>(purchase_id PK, total_price,
+  purchase_time, email FK, payment_id FK,
+  product_price, product_quantity) <span class="cm">← wrong!</span>
+
+<span class="cm">-- AFTER: two clean tables</span>
+<span class="kw">purchase</span>(
+  purchase_id PK,
+  total_price,
+  purchase_time,
+  email FK → user,
+  payment_id FK → payment_method
+)
+
+<span class="kw">purchase_product</span>(
+  purchase_id PK+FK → purchase,
+  code        PK+FK → product,
+  product_price     <span class="cm">← snapshot at time of sale</span>
+  product_quantity,
+  product_name      <span class="cm">← snapshot at time of sale</span>
+)</pre>
+      <div class="hl y" style="margin-top:8px">💡 <span>Storing <code>product_price</code> and <code>product_name</code> in <code>purchase_product</code> is intentional denormalization for <strong>historical accuracy</strong>. A receipt must never change even if the product's current price does.</span></div>
+    </div>
+  </div>
+
+  <div class="hl p">🔬 <span><strong>BCNF Edge Cases (advanced):</strong> (1) If a non-PK column depends on only <em>part</em> of a composite PK → violates 2NF. (2) If a non-PK column depends on another non-PK column that depends on PK → 3NF but not BCNF. (3) If a column depends on an alternate candidate key → still in BCNF. Rarely encountered in practice.</span></div>
+</div>
+
+<!-- ⑦ Rule 4: Transitive Dependency -->
+<div class="card">
+  <div class="card-title">⑥ BCNF Rule 4 — No Transitive Dependency (3NF)</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info b-red" style="margin-bottom:10px">
+        <h3>What Is Transitive Dependency?</h3>
+        <p>When a <strong>non-key column depends on another non-key column</strong>, which itself depends on the PK. A chain: <code>PK → col_A → col_B</code>.</p>
+        <p style="margin-top:6px"><strong>Problems:</strong> data redundancy, update anomalies (must update same value in every row), insertion/deletion anomalies.</p>
+      </div>
+      <div class="info b-yellow" style="margin-bottom:10px">
+        <h3>Classic Example: employee Table</h3>
+        <pre style="font-size:0.68rem">employee_id → department_id → department_name
+<span class="cm">-- department_name transitively depends on</span>
+<span class="cm">-- employee_id via department_id</span></pre>
+        <p style="margin-top:6px">If you rename a department, you must update every single row for all employees in that department. Miss one → inconsistency.</p>
+      </div>
+      <div class="info b-green">
+        <h3>Fix Pattern</h3>
+        <p>Break the table into two tables — each containing columns directly dependent on its own key. Link via FK.</p>
+        <pre style="font-size:0.68rem;margin-top:6px">employee(employee_id PK, name, dept_id FK)
+department(dept_id PK, department_name)</pre>
+      </div>
+    </div>
+    <div>
+      <div class="info b-red" style="margin-bottom:10px">
+        <h3>Sci-Fi Collective: The 3-Table Cycle Problem</h3>
+        <p>After normalization, the <code>purchase</code> table had two FKs: <code>email</code> (→ user) and <code>payment_id</code> (→ payment_method).</p>
+        <p style="margin-top:6px">But <code>payment_method</code> already has <code>email</code> as its own FK → user.</p>
+        <p style="margin-top:6px">This creates a <strong>transitive chain</strong>:</p>
+        <pre style="font-size:0.68rem;margin-top:5px">purchase → user (direct via email FK)
+purchase → payment_method → user (indirect)
+<span class="cm">= transitive dependency + cycle in E-R!</span></pre>
+        <p style="margin-top:6px">⚠️ <strong>Signal:</strong> If you have 3 tables connected in a cycle using 3 relationships, you likely have a transitive dependency.</p>
+      </div>
+      <div class="info b-green">
+        <h3>Fix: Remove email from purchase</h3>
+        <p>Remove the direct <code>email</code> FK from <code>purchase</code>. The user is still reachable via: <code>purchase → payment_method → user</code>.</p>
+        <p style="margin-top:6px"><strong>Trade-off:</strong> Normalization is the correct move here, but it may slow down queries that need user info from purchase. This is revisited in <strong>Ch7 (Denormalization)</strong>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="hl">📐 <span><strong>Rule of thumb:</strong> If you need only N relationships to connect N tables, but you're using N+1 (forming a cycle) → investigate for transitive dependency. In theory, 3 tables need only 2 relationships.</span></div>
+</div>
+
+<!-- ⑧ Final Normalized E-R -->
+<div class="card">
+  <div class="card-title">⑦ Final Normalized E-R Diagram Snapshot</div>
+  <div class="slabel">Changes from Ch5 → Ch6</div>
+  <div class="g3" style="margin-bottom:12px">
+    <div class="info b-green"><h3>purchase_product — Updated</h3><p>Added <code>product_price DECIMAL(7,2)</code>, <code>product_quantity INT</code>, <code>product_name VARCHAR(100)</code> (moved from purchase + added name for receipt accuracy).</p></div>
+    <div class="info b-red"><h3>purchase — Updated</h3><p>Removed <code>product_price</code>, <code>product_quantity</code>. Also removed <code>email</code> FK (transitive dep fix). Now only: <code>purchase_id, total_price, purchase_time, payment_id</code>.</p></div>
+    <div class="info b-yellow"><h3>All Other Tables</h3><p>No changes needed — all passed BCNF checks. No multivalued columns, no partial dependencies, no transitive dependencies found.</p></div>
+  </div>
+  <div class="hl g">✅ <span>After removing <code>email</code> from <code>purchase</code>, all tables satisfy all 4 BCNF requirements. Database is fully normalized and ready for SQL implementation.</span></div>
+</div>
+
+<!-- ⑨ Implementation - Constraints Overview -->
+<div class="card">
+  <div class="card-title">⑧ Implementation — SQL Constraints Overview</div>
+  <div class="info b-accent" style="margin-bottom:14px">
+    <h3>What Are Constraints?</h3>
+    <p>SQL rules applied to columns (or tables) to ensure <strong>data accuracy and reliability</strong>. They enforce data integrity and can be defined during or after table creation. When applied, developers <em>must</em> follow your design — the DB engine enforces it automatically.</p>
+  </div>
+  <div class="g3">
+    <div class="constraint-block"><h3>NOT NULL</h3><p>Column cannot accept NULL values. Applied to critical business data like usernames, emails, passwords.</p></div>
+    <div class="constraint-block g"><h3>PRIMARY KEY</h3><p>Unique + NOT NULL on PK column(s). No duplicate rows, no NULL PKs. Can be composite.</p></div>
+    <div class="constraint-block y"><h3>FOREIGN KEY</h3><p>Enforces referential integrity. Prevents orphan rows. Links child to parent table via PK reference.</p></div>
+    <div class="constraint-block r"><h3>UNIQUE</h3><p>All values in a column (or column combo) must be distinct. For non-PK columns that must be unique.</p></div>
+    <div class="constraint-block p"><h3>DEFAULT</h3><p>Sets a default value when none is provided. Handy for timestamps, numeric placeholders, optional fields.</p></div>
+    <div class="constraint-block o"><h3>CHECK</h3><p>Validates data against a custom condition. Enforces ranges, formats, allowed value lists.</p></div>
+  </div>
+  <div class="hl y" style="margin-top:12px">💡 <span><strong>Naming constraints is a best practice</strong> (not required). Named constraints: (1) communicate purpose clearly, (2) produce helpful error messages on violation, (3) avoid confusing auto-generated names that vary across RDBMSs, (4) are essential when you may need to restructure or migrate the DB. Exception: NOT NULL and DEFAULT are usually left unnamed as they're part of column definitions.</span></div>
+</div>
+
+<!-- ⑩ NOT NULL -->
+<div class="card">
+  <div class="card-title">⑨ NOT NULL Constraint</div>
+  <div class="g2">
+    <div>
+      <div class="info b-accent" style="margin-bottom:10px">
+        <h3>When to Use</h3>
+        <ul>
+          <li>Columns with critical business data (username, email, password)</li>
+          <li>Legal/compliance columns (date of birth in financial apps)</li>
+          <li>Foreign keys in mandatory relationships (min cardinality = 1)</li>
+          <li>Columns used in aggregations/analytics</li>
+        </ul>
+        <p style="margin-top:6px">Note: PRIMARY KEY already implies NOT NULL — don't add it to PK columns.</p>
+      </div>
+      <div class="info b-yellow">
+        <h3>Sci-Fi Collective: user Table</h3>
+        <p>6 columns need NOT NULL: <code>username</code>, <code>email</code> (PK = implicit), <code>password</code>, <code>first_name</code>, <code>last_name</code>, <code>last_login_time</code>.</p>
+        <p style="margin-top:5px"><code>phone_number</code> is optional → nullable.</p>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- MySQL, MariaDB, SQLite</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">user</span> (
+  email         <span class="cn">VARCHAR</span>(320) <span class="kw">PRIMARY KEY</span>,
+  username      <span class="cn">VARCHAR</span>(30)  <span class="kw">NOT NULL</span>,
+  password      <span class="cn">VARCHAR</span>(20)  <span class="kw">NOT NULL</span>,
+  first_name    <span class="cn">VARCHAR</span>(50)  <span class="kw">NOT NULL</span>,
+  last_name     <span class="cn">VARCHAR</span>(50)  <span class="kw">NOT NULL</span>,
+  phone_number  <span class="cn">VARCHAR</span>(15),  <span class="cm">-- nullable</span>
+  last_login_time <span class="cn">TIMESTAMP</span>  <span class="kw">NOT NULL</span>
+);</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ⑪ PRIMARY KEY -->
+<div class="card">
+  <div class="card-title">⑩ PRIMARY KEY Constraint</div>
+  <div class="g2">
+    <div>
+      <div class="info b-green" style="margin-bottom:10px">
+        <h3>What It Does</h3>
+        <ul>
+          <li>Prevents duplicate rows with same PK value</li>
+          <li>Guarantees no NULL in PK column</li>
+          <li>Implicit NOT NULL — no need to add separately</li>
+        </ul>
+      </div>
+      <div class="info b-yellow">
+        <h3>Composite Primary Key</h3>
+        <p>When PK spans multiple columns (e.g., <code>purchase_product</code>), define it <strong>separately</strong> from column definitions using <code>CONSTRAINT … PRIMARY KEY (col1, col2)</code>.</p>
+        <p style="margin-top:6px">Each column in a composite PK must have <code>NOT NULL</code> explicitly.</p>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- Simple PK (inline)</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">user</span> (
+  email <span class="cn">VARCHAR</span>(320) <span class="kw">PRIMARY KEY</span>,
+  ...
+);
+
+<span class="cm">-- Named PK (best practice for migratable DBs)</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">user</span> (
+  email <span class="cn">VARCHAR</span>(320),
+  ...,
+  <span class="kw">CONSTRAINT</span> <span class="vl">pk_user</span>
+    <span class="kw">PRIMARY KEY</span> (email)
+);
+
+<span class="cm">-- Composite PK</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">purchase_product</span> (
+  purchase_id  <span class="cn">INT</span>          <span class="kw">NOT NULL</span>,
+  code         <span class="cn">CHAR</span>(12)     <span class="kw">NOT NULL</span>,
+  product_price <span class="cn">DECIMAL</span>(7,2) <span class="kw">NOT NULL</span>,
+  product_quantity <span class="cn">INT</span>      <span class="kw">NOT NULL</span>,
+  product_name <span class="cn">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> <span class="vl">pk_purchase_product</span>
+    <span class="kw">PRIMARY KEY</span> (purchase_id, code)
+);</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ⑫ FOREIGN KEY + Referential Actions -->
+<div class="card">
+  <div class="card-title">⑪ FOREIGN KEY Constraint &amp; Referential Actions</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info b-yellow" style="margin-bottom:10px">
+        <h3>What It Does</h3>
+        <p>Enforces <strong>referential integrity</strong> — prevents inserting a FK value that doesn't exist in the parent table. The table with the FK = <strong>child table</strong>. The referenced table = <strong>parent table</strong>.</p>
+        <p style="margin-top:6px">FK in a <strong>mandatory relationship</strong> (min cardinality = 1) must also be <code>NOT NULL</code>.</p>
+      </div>
+      <div class="info b-accent">
+        <h3>Syntax Options</h3>
+        <p>Define inline during <code>CREATE TABLE</code>, or add afterward with <code>ALTER TABLE ADD CONSTRAINT</code>.</p>
+        <p style="margin-top:5px">⚠️ SQLite does NOT support <code>ALTER TABLE ADD CONSTRAINT</code> — must define inline.</p>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- MySQL, MariaDB</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">review</span> (
+  review_id   <span class="cn">INT</span>          <span class="kw">PRIMARY KEY</span>,
+  review_text <span class="cn">TEXT</span>         <span class="kw">NOT NULL</span>,
+  review_time <span class="cn">TIMESTAMP</span>    <span class="kw">NOT NULL</span>,
+  email       <span class="cn">VARCHAR</span>(320) <span class="kw">NOT NULL</span>,
+  code        <span class="cn">CHAR</span>(12)     <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> <span class="vl">fk_user_review</span>
+    <span class="kw">FOREIGN KEY</span> (email)
+    <span class="kw">REFERENCES</span> <span class="tb">user</span>(email),
+  <span class="kw">CONSTRAINT</span> <span class="vl">fk_product_review</span>
+    <span class="kw">FOREIGN KEY</span> (code)
+    <span class="kw">REFERENCES</span> <span class="tb">product</span>(code)
+);</pre>
+    </div>
+  </div>
+
+  <div class="slabel">Referential Actions — What Happens When Parent Row Changes?</div>
+  <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+    <div class="ref-row">
+      <span class="ref-action">RESTRICT / NO ACTION</span>
+      <span class="ref-desc"><strong>Default.</strong> Block DELETE/UPDATE on parent if child rows exist. Maintains integrity by preventing orphan rows.</span>
+      <span class="ref-use"><span class="badge badge-y">default</span></span>
+    </div>
+    <div class="ref-row">
+      <span class="ref-action">CASCADE</span>
+      <span class="ref-desc"><strong>DELETE CASCADE:</strong> deleting parent row auto-deletes all child rows. <strong>UPDATE CASCADE:</strong> updating parent PK auto-updates all child FKs. Keeps link intact.</span>
+      <span class="ref-use"><span class="badge badge-g">most common</span></span>
+    </div>
+    <div class="ref-row">
+      <span class="ref-action">SET NULL</span>
+      <span class="ref-desc">Deleting parent row sets child FK to NULL (child row preserved). Use when relationship is non-essential or child data must be kept for records. ⚠️ Can create orphan rows / complicate queries.</span>
+      <span class="ref-use"><span class="badge badge-r">use with care</span></span>
+    </div>
+  </div>
+  <div class="slabel">Sci-Fi Collective: payment_method with CASCADE</div>
+  <pre><span class="cm">-- If user changes email or deletes account → cascade to payment_method</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">payment_method</span> (
+  payment_id  <span class="cn">INT</span>          <span class="kw">PRIMARY KEY</span>,
+  name        <span class="cn">VARCHAR</span>(30)  <span class="kw">NOT NULL</span>,
+  card_number <span class="cn">CHAR</span>(16)     <span class="kw">NOT NULL</span>,
+  expiry_date <span class="cn">CHAR</span>(4)      <span class="kw">NOT NULL</span>,
+  email       <span class="cn">VARCHAR</span>(320) <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> <span class="vl">fk_payment_method_user</span>
+    <span class="kw">FOREIGN KEY</span> (email) <span class="kw">REFERENCES</span> <span class="tb">user</span>(email)
+    <span class="kw">ON DELETE CASCADE</span>
+    <span class="kw">ON UPDATE CASCADE</span>
+);</pre>
+</div>
+
+<!-- ⑬ UNIQUE -->
+<div class="card">
+  <div class="card-title">⑫ UNIQUE Constraint</div>
+  <div class="g2">
+    <div>
+      <div class="info b-red" style="margin-bottom:10px">
+        <h3>When to Use</h3>
+        <p>When a <strong>non-PK column</strong> (or combination) must contain all distinct values — duplicates make no real-world sense.</p>
+        <p style="margin-top:6px">Examples: Social Security Number, username, phone number, email in a non-PK context, (product_name + manufacturer) combo.</p>
+      </div>
+      <div class="info b-yellow">
+        <h3>Sci-Fi Collective Cases</h3>
+        <ul>
+          <li><code>username</code> in user → must be unique</li>
+          <li><code>phone_number</code> in user → must be unique</li>
+          <li><code>(name, manufacturer)</code> in product → combo must be unique</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- Single column UNIQUE</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">user</span> (
+  email         <span class="cn">VARCHAR</span>(320) <span class="kw">PRIMARY KEY</span>,
+  username      <span class="cn">VARCHAR</span>(30)  <span class="kw">NOT NULL</span>,
+  phone_number  <span class="cn">VARCHAR</span>(15),
+  ...,
+  <span class="kw">CONSTRAINT</span> <span class="vl">unq_username</span>
+    <span class="kw">UNIQUE</span>(username),
+  <span class="kw">CONSTRAINT</span> <span class="vl">unq_phone_number</span>
+    <span class="kw">UNIQUE</span>(phone_number)
+);
+
+<span class="cm">-- Multi-column UNIQUE (combo must be unique)</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">product</span> (
+  code         <span class="cn">CHAR</span>(12)     <span class="kw">PRIMARY KEY</span>,
+  name         <span class="cn">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+  manufacturer <span class="cn">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+  ...,
+  <span class="kw">CONSTRAINT</span> <span class="vl">unq_name_manufacturer</span>
+    <span class="kw">UNIQUE</span>(name, manufacturer)
+);</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ⑭ DEFAULT -->
+<div class="card">
+  <div class="card-title">⑬ DEFAULT Constraint</div>
+  <div class="g2">
+    <div>
+      <div class="info b-purple" style="margin-bottom:10px">
+        <h3>When to Use</h3>
+        <ul>
+          <li>Timestamp columns (row creation/modification time)</li>
+          <li>Numeric columns used in aggregations</li>
+          <li>Optional columns that need a placeholder</li>
+        </ul>
+        <p style="margin-top:6px">⚠️ DEFAULT does not prevent NULL insertion — still add NOT NULL if NULLs are problematic.</p>
+      </div>
+      <div class="info b-yellow">
+        <h3>UTC Time Zone Warning</h3>
+        <p><code>CURRENT_TIMESTAMP</code> behavior varies by RDBMS:</p>
+        <ul style="margin-top:5px">
+          <li><strong>MySQL/MariaDB</strong> → stores UTC by default ✅</li>
+          <li><strong>PostgreSQL</strong> → use <code>TIMESTAMP WITH TIME ZONE</code> to get UTC ✅</li>
+          <li><strong>SQLite/SQL Server</strong> → check manual or ask AI assistant</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- MySQL/MariaDB/SQLite</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">purchase</span> (
+  purchase_id  <span class="cn">INT</span>            <span class="kw">PRIMARY KEY</span>,
+  total_price  <span class="cn">DECIMAL</span>(13,2)  <span class="kw">NOT NULL</span>,
+  purchase_time <span class="cn">TIMESTAMP</span>     <span class="kw">NOT NULL</span>
+               <span class="kw">DEFAULT</span> <span class="vl">CURRENT_TIMESTAMP</span>,
+  payment_id   <span class="cn">INT</span>            <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> <span class="vl">fk_payment_method_purchase</span>
+    <span class="kw">FOREIGN KEY</span> (payment_id)
+    <span class="kw">REFERENCES</span> <span class="tb">payment_method</span>(payment_id)
+);
+
+<span class="cm">-- PostgreSQL (explicit UTC)</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">purchase</span> (
+  purchase_id  <span class="cn">INT</span>                       <span class="kw">PRIMARY KEY</span>,
+  total_price  <span class="cn">DECIMAL</span>(13,2)              <span class="kw">NOT NULL</span>,
+  purchase_time <span class="cn">TIMESTAMP WITH TIME ZONE</span>  <span class="kw">NOT NULL</span>
+               <span class="kw">DEFAULT</span> <span class="vl">CURRENT_TIMESTAMP</span>,
+  payment_id   <span class="cn">INT</span>                       <span class="kw">NOT NULL</span>,
+  ...
+);</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ⑮ CHECK -->
+<div class="card">
+  <div class="card-title">⑭ CHECK Constraint</div>
+  <div class="g2">
+    <div>
+      <div class="info b-orange" style="margin-bottom:10px">
+        <h3>When to Use</h3>
+        <ul>
+          <li>Enforce data ranges (e.g., age 0–120)</li>
+          <li>Validate allowed values (e.g., US state names)</li>
+          <li>Enforce complex business logic that other constraints can't handle</li>
+        </ul>
+      </div>
+      <div class="info b-yellow">
+        <h3>Sci-Fi Collective: state column</h3>
+        <p>Both <code>user_address</code> and <code>billing_address</code> have a <code>state</code> column. Valid values = exactly 50 US state names. Use <code>CHECK … IN (…)</code> to enforce this at DB level, taking the burden off front/backend devs.</p>
+        <p style="margin-top:6px">Add via <code>ALTER TABLE</code> after creation (since the list is long).</p>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- MySQL, MariaDB, PostgreSQL, Oracle</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">user_address</span> (
+  email         <span class="cn">VARCHAR</span>(320) <span class="kw">PRIMARY KEY</span>,
+  street_address <span class="cn">VARCHAR</span>(255),
+  address_line_optional <span class="cn">VARCHAR</span>(100),
+  city          <span class="cn">CHAR</span>(100)   <span class="kw">NOT NULL</span>,
+  state         <span class="cn">VARCHAR</span>(20) <span class="kw">NOT NULL</span>,
+  postal_code   <span class="cn">CHAR</span>(5)     <span class="kw">NOT NULL</span>
+);
+
+<span class="cm">-- Add constraint after (50 values is long)</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">user_address</span>
+  <span class="kw">ADD CONSTRAINT</span> <span class="vl">chk_state</span>
+  <span class="kw">CHECK</span> (state <span class="kw">IN</span> (
+    <span class="vl">'Alabama'</span>, <span class="vl">'Alaska'</span>, <span class="vl">'Arizona'</span>, <span class="vl">'Arkansas'</span>,
+    <span class="vl">'California'</span>, ..., <span class="vl">'Wyoming'</span>
+  ));</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ⑯ Constraints Summary Table -->
+<div class="card">
+  <div class="card-title">⑮ Constraints Decision Table</div>
+  <table class="tbl">
+    <thead><tr><th>Constraint</th><th>Prevents</th><th>When to Use</th><th>Name It?</th><th>Sci-Fi Example</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill pill-blue">NOT NULL</span></td><td>NULL values</td><td>Critical business columns, mandatory FK cols</td><td>Usually not (inline)</td><td><code>username</code>, <code>password</code>, <code>email</code> in <code>review</code></td></tr>
+      <tr><td><span class="pill pill-green">PRIMARY KEY</span></td><td>Duplicates + NULLs in PK</td><td>Every table — always</td><td>Yes if DB may be migrated</td><td><code>pk_user</code>, <code>pk_purchase_product</code></td></tr>
+      <tr><td><span class="pill pill-yellow">FOREIGN KEY</span></td><td>Orphan rows, broken references</td><td>All inter-table relationships</td><td>Yes — always</td><td><code>fk_user_review</code>, <code>fk_payment_method_user</code></td></tr>
+      <tr><td><span class="pill pill-red">UNIQUE</span></td><td>Duplicate non-PK values</td><td>Non-PK columns that must be distinct</td><td>Yes</td><td><code>unq_username</code>, <code>unq_name_manufacturer</code></td></tr>
+      <tr><td><span class="pill pill-purple">DEFAULT</span></td><td>Missing values on insert</td><td>Timestamps, numeric accumulators, optional fields</td><td>Usually not (inline)</td><td><code>purchase_time DEFAULT CURRENT_TIMESTAMP</code></td></tr>
+      <tr><td><span class="pill pill-orange">CHECK</span></td><td>Invalid values</td><td>Ranges, allowed-value lists, format rules</td><td>Yes</td><td><code>chk_state</code> for US state names</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ⑰ Tips -->
+<div class="card">
+  <div class="card-title">⑯ Interview / Practical Tips</div>
+  <div class="tips">
+    <div class="tip"><span class="tip-icon">🎯</span><span>BCNF = the practical target for full normalization. It subsumes 1NF, 2NF, and 3NF. Achieve BCNF on all tables → done.</span></div>
+    <div class="tip"><span class="tip-icon">🔗</span><span><strong>Functional dependency is directional.</strong> <code>employee_id → name</code> does NOT imply <code>name → employee_id</code>. Always check both directions.</span></div>
+    <div class="tip"><span class="tip-icon">🔄</span><span><strong>3-table cycle = red flag.</strong> If 3 tables are connected in a cycle via 3 relationships, investigate for transitive dependency. Theory says 3 tables only need 2 relationships.</span></div>
+    <div class="tip"><span class="tip-icon">🧾</span><span><strong>Snapshot pattern:</strong> Store <code>product_price</code> and <code>product_name</code> in <code>purchase_product</code> even though they exist in <code>product</code>. Receipts must be immutable — prices and names change over time.</span></div>
+    <div class="tip"><span class="tip-icon">🏷️</span><span><strong>Always name constraints</strong> (except NOT NULL and DEFAULT). Named constraints = readable schema + helpful error messages + portable across RDBMSs.</span></div>
+    <div class="tip"><span class="tip-icon">⚡</span><span>CASCADE is your best friend for user account management — if a user deletes their account, CASCADE deletes their payment methods, addresses, reviews, and purchases automatically.</span></div>
+    <div class="tip"><span class="tip-icon">⚠️</span><span>SET NULL is a last resort — creates orphan rows and complicates queries expecting non-null FKs. Use only when child data must survive parent deletion for recordkeeping.</span></div>
+    <div class="tip"><span class="tip-icon">🕐</span><span>Always use <code>TIMESTAMP WITH TIME ZONE</code> in PostgreSQL for UTC timestamps. MySQL/MariaDB store UTC by default, but always verify with your specific RDBMS manual.</span></div>
+    <div class="tip"><span class="tip-icon">🔒</span><span>Constraints shift data integrity responsibility from application code to the DB engine. Even if a developer bypasses the API and writes directly to the DB, constraints still hold.</span></div>
+  </div>
+</div>
+
+<!-- ⑱ Recap -->
+<div class="card">
+  <div class="card-title">⑰ Chapter Recap</div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="info b-accent"><h3>Normalization Summary</h3><p>Breaking DB into smaller tables each representing one entity/concept. Target: BCNF. Process: check each table against 4 rules, identify violations, revise design.</p></div>
+      <div class="info b-yellow"><h3>4 BCNF Requirements</h3><ul><li>Has a primary key</li><li>No multivalued columns</li><li>All columns dependent on key only</li><li>No transitive dependency</li></ul></div>
+      <div class="info b-red"><h3>Sci-Fi Changes Made</h3><ul><li>Moved <code>product_price</code>, <code>product_quantity</code> → <code>purchase_product</code></li><li>Added <code>product_name</code> to <code>purchase_product</code> (snapshot)</li><li>Removed <code>email</code> FK from <code>purchase</code> (transitive dep)</li></ul></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="info b-green"><h3>Constraints Summary</h3><ul><li>NOT NULL + PRIMARY KEY = data presence &amp; uniqueness</li><li>FOREIGN KEY = referential integrity (+ CASCADE/SET NULL)</li><li>UNIQUE = non-PK uniqueness</li><li>DEFAULT = auto-fill on insert</li><li>CHECK = custom validation rules</li></ul></div>
+      <div class="info b-purple"><h3>Naming Best Practice</h3><p>Name all constraints that might need to be referenced, restructured, or migrated: PKs, FKs, UNIQUEs, CHECKs. Leave NOT NULL and DEFAULT unnamed (inline is fine).</p></div>
+      <div class="hl g">✅ <span>Next: <strong>Chapter 7 — Security &amp; Optimization</strong>. Revisits the <code>email</code> removal from <code>purchase</code> — normalization was correct, but query performance implications and denormalization trade-offs are discussed.</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
