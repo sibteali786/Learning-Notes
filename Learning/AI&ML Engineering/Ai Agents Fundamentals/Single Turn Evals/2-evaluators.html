@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eval Scorers</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  .scorer-card { border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .scorer-card:last-child { margin-bottom: 0; }
+  .sc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .sc-name { font-size: 14px; font-weight: 800; font-family: monospace; }
+  .sc-tag { border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; }
+  .sc-desc { font-size: 12px; color: #aaa; margin-bottom: 8px; }
+  .sc-logic { background: #12121f; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #a5f3a5; font-family: monospace; line-height: 1.7; }
+  .kw { color: #7c6fff; }
+  .fn { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm { color: #555; }
+  .num { color: #10b981; }
+
+  .why-box { background: #1e1b3a; border-radius: 8px; padding: 10px 12px; font-size: 12px; margin-top: 8px; }
+  .why-box .label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; margin-top: 12px; }
+
+  .footer { text-align: center; color: #444; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">EVAL SCORERS</div>
+    <h1>Turning Qualitative → Quantitative</h1>
+    <div class="sub">Scorers are assertions that return a 0–1 score. They are the eval equivalent of unit test assertions.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 Tool calls = <strong>structured JSON</strong> → scoreable with plain code (deterministic).<br/>Agent text output = <strong>language</strong> → needs another LLM or human to score (non-deterministic).</div>
+    <div class="note">This is why single-turn tool selection evals are easier than multi-turn output evals. JSON is code-testable. Language is not.</div>
+  </div>
+
+  <!-- Scorers -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">THE 3 SCORERS</span>
+
+    <!-- toolSelectionScore -->
+    <div class="scorer-card" style="background:#1a1a2e; border:1px solid #7c6fff44;">
+      <div class="sc-header">
+        <span class="sc-name" style="color:#7c6fff;">toolSelectionScore</span>
+        <span class="sc-tag" style="background:#7c6fff22; color:#7c6fff; border:1px solid #7c6fff;">F1 Score → 0.0–1.0</span>
+      </div>
+      <div class="sc-desc">Did the agent pick the right tools? Partial credit via F1 — balances precision (no extra tools) and recall (no missing tools). Not binary.</div>
+      <div class="sc-logic">
+<span class="cm">// pseudo-logic</span>
+hits    = expected.filter(t => selected.includes(t))
+score   = <span class="fn">f1</span>(precision: hits/selected.length, recall: hits/expected.length)
+<span class="cm">// 1.0 = perfect match | 0.5 = partial | 0.0 = totally wrong</span>
+      </div>
+      <div class="why-box">
+        <div class="label" style="color:#7c6fff;">WHY F1 AND NOT EXACT MATCH?</div>
+        <div style="color:#aaa;">Exact match penalises equally whether you missed 1 tool or 5. F1 scales gracefully — a near-miss still gets partial credit, making it a better signal for iterative improvement.</div>
+      </div>
+    </div>
+
+    <!-- toolsSelected -->
+    <div class="scorer-card" style="background:#1a1a2e; border:1px solid #10b98144;">
+      <div class="sc-header">
+        <span class="sc-name" style="color:#10b981;">toolsSelected</span>
+        <span class="sc-tag" style="background:#10b98122; color:#10b981; border:1px solid #10b981;">Binary → 0 or 1</span>
+      </div>
+      <div class="sc-desc">Did the agent call <em>all</em> expected tools, in the right order? No partial credit — all or nothing. Used for golden test cases.</div>
+      <div class="sc-logic">
+<span class="cm">// pseudo-logic</span>
+score = expected.every((t, i) => selected[i] === t) ? <span class="num">1</span> : <span class="num">0</span>
+<span class="cm">// order matters here</span>
+      </div>
+    </div>
+
+    <!-- toolsAvoided -->
+    <div class="scorer-card" style="background:#1a1a2e; border:1px solid #f8717144;">
+      <div class="sc-header">
+        <span class="sc-name" style="color:#f87171;">toolsAvoided</span>
+        <span class="sc-tag" style="background:#f8717122; color:#f87171; border:1px solid #f87171;">Binary → 0 or 1</span>
+      </div>
+      <div class="sc-desc">Did the agent stay away from forbidden tools? One wrong pick = immediate 0. Used for negative test cases. Zero tolerance.</div>
+      <div class="sc-logic">
+<span class="cm">// pseudo-logic</span>
+score = forbidden.some(t => selected.includes(t)) ? <span class="num">0</span> : <span class="num">1</span>
+<span class="cm">// any forbidden tool selected → instant fail</span>
+      </div>
+      <div class="why-box">
+        <div class="label" style="color:#f87171;">EXAMPLE NEGATIVE CASE</div>
+        <div style="color:#aaa;">Prompt: <em>"Tell me a joke about programming."</em> → agent has file/bash tools available but should call none of them. If it calls <code>run_command</code>, score = 0.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- When to use which -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">WHICH SCORER FOR WHICH CATEGORY</span>
+    <div class="grid2">
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#10b981;">GOLDEN cases</div>
+        <div class="g-body">
+          Use <code>toolsSelected</code> (binary)<br/>
+          Must hit exact tools in exact order<br/>
+          Zero ambiguity — full pass or full fail
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#7c6fff;">SECONDARY cases</div>
+        <div class="g-body">
+          Use <code>toolSelectionScore</code> (F1)<br/>
+          Partial credit acceptable<br/>
+          Flexibility in tool choice — measure how close
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#1a0a0a;">
+        <div class="g-title" style="color:#f87171;">NEGATIVE cases</div>
+        <div class="g-body">
+          Use <code>toolsAvoided</code> (binary)<br/>
+          Must call zero forbidden tools<br/>
+          One bad call = immediate 0
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#0f1f1a;">
+        <div class="g-title" style="color:#60a5fa;">MULTI-TURN (future)</div>
+        <div class="g-body">
+          Output is text, not JSON<br/>
+          Can't score with code alone<br/>
+          Needs LLM-as-judge or human review
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario -->
+  <div style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; padding:12px 14px; font-size:12px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> Prompt = <em>"Create a task and assign it to Ali."</em><br/>
+    Expected = <code>[list_users, create_task]</code> (look up user ID first, then create).<br/>
+    Agent picks <code>[create_task]</code> only → <code>toolsSelected</code> = 0, <code>toolSelectionScore</code> ≈ 0.67 (got 1 of 2, in wrong order). Signal: agent needs better context about needing a user ID before task creation.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Scorer types: <span style="color:#7c6fff;">toolSelectionScore (F1)</span> · <span style="color:#10b981;">toolsSelected (binary)</span> · <span style="color:#f87171;">toolsAvoided (binary)</span>
+  </div>
+
+</div>
+</body>
+</html>

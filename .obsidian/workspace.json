@@ -4,35 +4,34 @@
     "type": "split",
     "children": [
       {
-        "id": "31e6c5474b60a49d",
+        "id": "908304155ad0655e",
         "type": "tabs",
         "children": [
           {
-            "id": "dcd5395f866ce3a1",
+            "id": "c252a952f674bc97",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md"
+                "file": "Learning/Database/Fundamentals of Database Engineering.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "Jqeury.css.excalidraw"
-            }
-          },
-          {
-            "id": "0062f2a6e9032b3f",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/JavaScript/Coding/jquery/Jquery.class.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Jquery.class.excalidraw"
+              "icon": "lucide-file",
+              "title": "Fundamentals of Database Engineering"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -89,8 +88,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 308.50390243530273,
-    "collapsed": true
+    "width": 308.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -195,10 +193,13 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "3e9b58bb00f55305",
+  "active": "c252a952f674bc97",
   "lastOpenFiles": [
-    "Learning/JavaScript/Coding/jquery/Jquery.class.excalidraw.md",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals/2-evaluators.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals/1-executors.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals",
     "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md",
+    "Learning/JavaScript/Coding/jquery/Jquery.class.excalidraw.md",
     "Learning/Database/Database Design/6-Normalization/ch6-normalization-implementation.html",
     "Learning/Side Projects/HospitalityOS/Concerns.md",
     "Learning/Database/Database Design/6-Normalization",
@@ -216,8 +217,6 @@
     "Learning/Side Projects/HospitalityOS/Resources.md",
     "~$_PMS_Developer_Handout.docx",
     "text.html",
-    "subagents 1.html",
-    "subagents.html",
     "Screenshot 2026-04-19 at 11.03.25 PM.png",
     "Screenshot 2026-04-19 at 10.38.26 PM.png",
     "Pasted Image 20260423111902_446.png",
@@ -242,7 +241,6 @@
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/6-Subagents.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/5-claude-hooks.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/Resources.md",
-    "Learning/Freelance/Builders's Website/Builders Website.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

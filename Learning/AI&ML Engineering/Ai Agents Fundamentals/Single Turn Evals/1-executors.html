@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eval Executor Setup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  .step-list { display: flex; flex-direction: column; gap: 10px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { background: #60a5fa; color: #000; font-size: 11px; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body .s-title { font-size: 13px; font-weight: 700; color: #e0e0e0; }
+  .step-body .s-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.8; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw  { color: #7c6fff; }
+  .fn  { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm  { color: #555; }
+  .obj { color: #f87171; }
+  .num { color: #10b981; }
+
+  .tool-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tool-table th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 10px; text-align: left; font-size: 11px; letter-spacing: 0.5px; }
+  .tool-table td { padding: 8px 10px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .tool-table td:first-child { color: #60a5fa; font-weight: 600; white-space: nowrap; }
+  .tool-table tr:hover td { background: #ffffff05; }
+
+  .tag { display: inline-block; border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; }
+
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; margin-top: 12px; }
+
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+  .flow-box { background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 8px; padding: 7px 12px; color: #e0e0e0; }
+  .flow-arrow { color: #7c6fff; font-size: 16px; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+
+  .footer { text-align: center; color: #444; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">SINGLE TURN EVALS</div>
+    <h1>Eval Data + Executors</h1>
+    <div class="sub">Mock tools → feed data → run one turn → score tool selection. TDD for AI.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 An <strong>executor</strong> = a dynamic <code>run()</code> function that takes eval data as input and returns what tools the agent picked.</div>
+    <div class="note">You don't need working tools to eval. The agent only sees descriptions — so just mock those. Like TDD: write the test before the function exists.</div>
+  </div>
+
+  <!-- What is Eval Data -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">EVAL DATA SHAPE</span>
+    <div class="cards">
+      <div class="card" style="border:1px solid #7c6fff44;">
+        <div class="icon">📥</div>
+        <div class="title" style="color:#7c6fff;">data (input)</div>
+        <div class="desc">The user prompt fed to the agent. E.g. "read this file, write that file, delete this file."</div>
+      </div>
+      <div class="card" style="border:1px solid #10b98144;">
+        <div class="icon">🎯</div>
+        <div class="title" style="color:#10b981;">target (expected)</div>
+        <div class="desc">The tool(s) we expect the agent to call in response. This is the ground truth.</div>
+      </div>
+      <div class="card" style="border:1px solid #f59e0b44;">
+        <div class="icon">🏷️</div>
+        <div class="title" style="color:#f59e0b;">category</div>
+        <div class="desc"><span class="tag" style="background:#10b98122;color:#10b981;border:1px solid #10b981;">golden</span> must-solve &nbsp; <span class="tag" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b;">secondary</span> nice-to-have &nbsp; <span class="tag" style="background:#f8717122;color:#f87171;border:1px solid #f87171;">negative</span> must-avoid</div>
+      </div>
+    </div>
+    <div class="scenario" style="background:#2a1f4a; color:#c084fc;">
+      <strong>Example:</strong> data = <em>"Can you start the dev server?"</em> → target = <code>run_command</code> → category = <strong>secondary</strong> (no context given, agent might not know the command — cool if it figures it out, not critical if it doesn't).
+    </div>
+  </div>
+
+  <!-- Mocked Tools -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">MOCKED TOOL DEFINITIONS</span>
+    <div style="color:#aaa; font-size:12px; margin-bottom:10px;">No <code>execute()</code> needed — agent only sees <code>description</code> + <code>parameters</code>. That's all that matters for tool selection evals.</div>
+    <table class="tool-table">
+      <thead>
+        <tr><th>Tool</th><th>Description</th><th>Key Param(s)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>read_file</td><td>Read the contents of a file at the specified path</td><td>path: string</td></tr>
+        <tr><td>write_file</td><td>Write given content to the file at the given path</td><td>path, content: string</td></tr>
+        <tr><td>list_files</td><td>List all the files in a directory</td><td>directory: string</td></tr>
+        <tr><td>delete_file</td><td>Delete a file at the given path</td><td>path: string</td></tr>
+        <tr><td>run_command</td><td>Execute a shell command and return its output</td><td>command: string</td></tr>
+      </tbody>
+    </table>
+    <div class="scenario" style="background:#0d1f2d; color:#93c5fd; margin-top:12px;">
+      <strong>Why mock?</strong> Real tools hit the file system, make it slow, and require everything to be wired up. Evals only care about <em>did the agent pick the right tool</em> — not whether the tool actually ran.
+    </div>
+  </div>
+
+  <!-- Executor Flow -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">SINGLE TURN EXECUTOR — FLOW</span>
+    <div class="flow" style="margin-bottom:14px;">
+      <span class="flow-box">eval data in</span><span class="flow-arrow">→</span>
+      <span class="flow-box">buildMessages()</span><span class="flow-arrow">→</span>
+      <span class="flow-box">dynamically build tool set</span><span class="flow-arrow">→</span>
+      <span class="flow-box">generateText()</span><span class="flow-arrow">→</span>
+      <span class="flow-box">extract toolCalls</span><span class="flow-arrow">→</span>
+      <span class="flow-box">return { toolCalls, toolNames, toolsSelected }</span>
+    </div>
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="s-title">buildMessages(data)</div>
+          <div class="s-desc">Formats system prompt + user prompt into a <code>messages[]</code> array. Last message must be <strong>role: user</strong> or the model won't respond.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="s-title">Dynamic tool set from data.tools</div>
+          <div class="s-desc">Loops over the tool names in eval data → looks up mock definition → calls <code>tool({ description, parameters })</code>. No execute needed.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="s-title">generateText with maxSteps=1</div>
+          <div class="s-desc"><code>stopWhen: stepCountIs(1)</code> — single turn only. Model defaults to <code>o1-mini</code>; temperature omitted for reasoning models (undefined = omitted in JSON stringify over wire).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="s-title">Return structured result</div>
+          <div class="s-desc"><code>toolCalls</code> (name + args), <code>toolNames</code> (string[]), <code>toolsSelected</code> (boolean — did it pick anything at all?).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">CODE — executor.ts (skeleton)</span>
+<pre><span class="cm">// Mock tool definitions (no execute)</span>
+<span class="kw">const</span> toolDefinitions = {
+  read_file:    <span class="fn">tool</span>({ description: <span class="str">'Read the contents of a file at the specified path'</span>, parameters: z.object({ path: z.string() }) }),
+  write_file:   <span class="fn">tool</span>({ description: <span class="str">'Write given content to the file at the given path'</span>,   parameters: z.object({ path: z.string(), content: z.string() }) }),
+  run_command:  <span class="fn">tool</span>({ description: <span class="str">'Execute a shell command and return its output'</span>,        parameters: z.object({ command: z.string() }) }),
+  <span class="cm">// ...list_files, delete_file</span>
+};
+
+<span class="cm">// Single turn executor</span>
+<span class="kw">export const</span> <span class="fn">singleTurnExecutor</span> = <span class="kw">async</span> (data: EvalData) => {
+  <span class="kw">const</span> messages = <span class="fn">buildMessages</span>(data);
+
+  <span class="cm">// Dynamically build tool set from eval data</span>
+  <span class="kw">const</span> tools: ToolSet = {};
+  <span class="kw">for</span> (<span class="kw">const</span> toolName <span class="kw">of</span> data.tools) {
+    <span class="kw">const</span> def = toolDefinitions[toolName];
+    <span class="kw">if</span> (def) tools[toolName] = def;
+  }
+
+  <span class="kw">const</span> { toolCalls } = <span class="kw">await</span> <span class="fn">generateText</span>({
+    model: data.model ?? <span class="fn">openai</span>(<span class="str">'o1-mini'</span>),
+    messages,
+    tools,
+    stopWhen: <span class="fn">stepCountIs</span>(<span class="num">1</span>),
+    temperature: data.config?.temperature ?? <span class="kw">undefined</span>, <span class="cm">// omitted for reasoning models</span>
+  });
+
+  <span class="kw">const</span> calls      = toolCalls.<span class="fn">map</span>(tc => ({ toolName: tc.toolName, args: tc.args ?? {} }));
+  <span class="kw">const</span> toolNames  = toolCalls.<span class="fn">map</span>(tc => tc.toolName);
+
+  <span class="kw">return</span> { toolCalls: calls, toolNames, toolsSelected: toolNames.length > <span class="num">0</span> };
+};</pre>
+  </div>
+
+  <!-- messages[] tip -->
+  <div class="warn">
+    <strong>⚠️ messages[] rule:</strong> Last message must always be <code>role: "user"</code>. If the last message is <code>role: "assistant"</code>, the model thinks it's waiting on you and returns nothing.<br/>
+    <span style="color:#aaa; font-size:11px; margin-top:4px; display:block;">You can fake an entire conversation history in <code>messages[]</code> to prime the agent to any state — great for testing "what does the agent do after 3 back-and-forths?"</span>
+  </div>
+
+  <!-- Trade-offs -->
+  <div class="section" style="border:2px solid #f87171; background:#f8717112;">
+    <span class="section-label" style="background:#f87171; color:#000;">TRADE-OFFS OF THIS APPROACH</span>
+    <div class="grid2">
+      <div class="grid2-card" style="background:#1a0a0a;">
+        <div class="g-title" style="color:#10b981;">✅ Pros</div>
+        <div class="g-body">
+          One executor handles all experiments<br/>
+          Data can supply model/config per test case<br/>
+          No need for real tools to exist yet<br/>
+          Fast — no file system or network calls
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#1a0a0a;">
+        <div class="g-title" style="color:#f87171;">❌ Cons</div>
+        <div class="g-body">
+          Options in data (category, model) won't exist in live/production data<br/>
+          Needs human annotation before live data can be used in offline evals<br/>
+          One executor might get too complex as system grows
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario -->
+  <div style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; padding:12px 14px; font-size:12px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> Mock <code>create_task</code>, <code>assign_user</code>, <code>list_projects</code> tool definitions with just descriptions + Zod schemas. Run evals against prompts like "create a task for Ali in the dev project" → score whether the agent picks <code>create_task</code> with <code>list_projects</code> first. No DB, no API calls needed.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Concepts: <span style="color:#7c6fff;">Eval Data</span> · <span style="color:#60a5fa;">Executor</span> · <span style="color:#10b981;">Mock Tools</span> · <span style="color:#f59e0b;">messages[] API</span> · <span style="color:#f87171;">stopWhen: stepCountIs(1)</span>
+  </div>
+
+</div>
+</body>
+</html>
