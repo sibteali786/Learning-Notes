@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch7 – Security & Optimization | Grokking RDB Design</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&display=swap');
+:root{
+  --bg:#0c0f18;--s1:#141820;--s2:#1c2235;--s3:#232a40;
+  --border:#2e3654;--accent:#5ba3ff;--green:#42e08a;
+  --yellow:#f2c645;--red:#ff7070;--purple:#c490ff;
+  --orange:#ffb060;--teal:#48ddd0;--pink:#ff80c0;
+  --text:#dde6f5;--muted:#6d7ca0;
+  --mono:'IBM Plex Mono',monospace;--serif:'Fraunces',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);padding:36px 20px;}
+.page{max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:24px;}
+
+/* title */
+.title-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:18px;}
+.title-row h1{font-family:var(--serif);font-size:2rem;font-weight:900;letter-spacing:-.5px;}
+.title-row h1 em{font-style:italic;color:var(--accent);}
+
+/* pills */
+.pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;}
+.pb{background:#0d2042;color:var(--accent);border:1px solid #1a3a70;}
+.pg{background:#0a2618;color:var(--green);border:1px solid #1a4032;}
+.py{background:#2a2000;color:var(--yellow);border:1px solid #4a3800;}
+.pr{background:#2a0a0a;color:var(--red);border:1px solid #4a1a1a;}
+.pp{background:#1e0a32;color:var(--purple);border:1px solid #3c1a60;}
+.po{background:#2a1500;color:var(--orange);border:1px solid #4a2a00;}
+.pt{background:#0a2022;color:var(--teal);border:1px solid #1a4040;}
+.pk{background:#2a0818;color:var(--pink);border:1px solid #4a1830;}
+
+/* cards */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.card-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;}
+.slabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;}
+
+/* grids */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+
+/* info boxes */
+.info{background:var(--s2);border-radius:8px;padding:13px 15px;}
+.info h3{font-size:.82rem;font-weight:700;margin-bottom:6px;}
+.info p,.info li{font-size:.75rem;color:#a2afc5;line-height:1.65;}
+.info ul{padding-left:14px;}
+.info li{margin-bottom:3px;}
+.info.ba{border-left:3px solid var(--accent);}
+.info.bg{border-left:3px solid var(--green);}
+.info.by{border-left:3px solid var(--yellow);}
+.info.br{border-left:3px solid var(--red);}
+.info.bp{border-left:3px solid var(--purple);}
+.info.bo{border-left:3px solid var(--orange);}
+.info.bt{border-left:3px solid var(--teal);}
+.info.bk{border-left:3px solid var(--pink);}
+
+/* highlight rows */
+.hl{background:#0d2040;border:1px solid #1c3a6e;border-radius:8px;padding:11px 14px;font-size:.77rem;color:#c8daff;display:flex;gap:10px;align-items:flex-start;line-height:1.6;}
+.hl.g{background:#0a1e14;border-color:#1a3a22;color:#b8e8c4;}
+.hl.y{background:#1e1800;border-color:#3a2c00;color:#f0dc90;}
+.hl.r{background:#1e0808;border-color:#3a1010;color:#ffb8b8;}
+.hl.p{background:#120820;border-color:#2a1050;color:#ddb8ff;}
+.hl.o{background:#1e1000;border-color:#3a2000;color:#ffd090;}
+
+/* code */
+code{font-family:var(--mono);font-size:.72rem;background:#0d1830;color:var(--accent);padding:1px 5px;border-radius:3px;}
+pre{background:#0d1830;border:1px solid var(--border);border-radius:8px;padding:14px;font-size:.71rem;line-height:1.75;overflow-x:auto;color:#c8daff;}
+pre .kw{color:var(--purple);}
+pre .tb{color:var(--green);}
+pre .cn{color:var(--yellow);}
+pre .cm{color:var(--muted);}
+pre .vl{color:var(--orange);}
+pre .st{color:var(--teal);}
+
+/* flow */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+.fstep{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:.74rem;min-width:110px;text-align:center;}
+.fstep strong{display:block;font-size:.78rem;color:var(--accent);margin-bottom:3px;}
+.farrow{color:var(--muted);font-size:1.1rem;padding:0 4px;}
+
+/* compare rows */
+.crow{display:flex;align-items:flex-start;gap:10px;background:var(--s2);padding:11px 14px;border-radius:8px;font-size:.77rem;}
+.clabel{font-weight:700;min-width:130px;flex-shrink:0;}
+.cdesc{color:#a2afc5;flex:1;line-height:1.6;}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:.73rem;}
+.tbl th{background:var(--s3);color:var(--muted);padding:8px 12px;text-align:left;text-transform:uppercase;letter-spacing:1px;font-size:10px;}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--border);color:#c5d0e8;vertical-align:top;line-height:1.6;}
+.tbl tr:last-child td{border-bottom:none;}
+
+/* tips */
+.tips{display:flex;flex-direction:column;gap:8px;}
+.tip{display:flex;gap:10px;align-items:flex-start;font-size:.77rem;color:#a2afc5;line-height:1.6;}
+.tip-i{flex-shrink:0;font-size:.95rem;margin-top:1px;}
+
+/* enc badge */
+.enc{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;text-transform:uppercase;}
+.enc-g{background:#0a2618;color:var(--green);border:1px solid #1a4032;}
+.enc-b{background:#0d2042;color:var(--accent);border:1px solid #1a3a70;}
+.enc-r{background:#2a0a0a;color:var(--red);border:1px solid #4a1a1a;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ① Title -->
+<div class="title-row">
+  <h1>Ch7 – <em>Security &amp; Optimization</em></h1>
+  <span class="pill pb">Security</span>
+  <span class="pill pg">Encryption</span>
+  <span class="pill py">RBAC</span>
+  <span class="pill pp">Indexing</span>
+  <span class="pill po">Denormalization</span>
+  <span class="pill pt">Storage</span>
+</div>
+
+<!-- ② Objectives -->
+<div class="card">
+  <div class="card-title">① Chapter Objectives</div>
+  <div class="g4">
+    <div class="info ba"><h3>Security</h3><p>Evaluate and strengthen database security via integrity checks and confidentiality controls (access control + encryption).</p></div>
+    <div class="info bt"><h3>Storage Efficiency</h3><p>Go beyond normalization — remove redundant tables, consolidate categorical data, use surrogate keys + UNIQUE constraints.</p></div>
+    <div class="info bp"><h3>Indexing</h3><p>Apply standard and full-text indexes to speed up sorting, searching, and exact-match queries. Collaborate with backend devs.</p></div>
+    <div class="info bo"><h3>Denormalization</h3><p>Intentionally introduce redundancy to boost query performance for frequent, costly multi-table joins.</p></div>
+  </div>
+  <div class="hl" style="margin-top:12px">📦 <span>This is the <strong>final completed design</strong> for The Sci-Fi Collective. SQL scripts for MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, Oracle at <code>github.com/Neo-Hao/grokking-relational-database-design</code> → <code>chapter_07/</code></span></div>
+</div>
+
+<!-- ③ Security: Integrity -->
+<div class="card">
+  <div class="card-title">② Security — Integrity</div>
+  <div class="g2">
+    <div>
+      <div class="info ba" style="margin-bottom:10px">
+        <h3>What Is Integrity?</h3>
+        <p>Maintaining the <strong>accuracy, completeness, and trustworthiness</strong> of data. Reviewing integrity means checking that every column, table, and relationship is designed and implemented properly following the principles from Ch4–Ch6:</p>
+        <ul style="margin-top:6px">
+          <li>Every column has the correct data type</li>
+          <li>Every table has a primary key</li>
+          <li>Foreign keys maintain relationships between tables</li>
+          <li>Constraints are based on requirements analysis</li>
+        </ul>
+      </div>
+      <div class="info br">
+        <h3>Why Integrity Matters for Security</h3>
+        <p>Missing FK constraints allow <strong>orphan records</strong> — rows in a child table referencing nonexistent parent rows. These make the database complex to manage and create <strong>gaps attackers can exploit</strong>.</p>
+        <p style="margin-top:6px">Database design involves multiple iterations — FK constraints are easy to forget. Always review before going to production.</p>
+      </div>
+    </div>
+    <div>
+      <div class="slabel">Example: Missing FK on book table</div>
+      <pre><span class="cm">-- WRONG: no FK constraint on book.author_id</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">book</span> (
+  book_id   <span class="cn">INT</span>          <span class="kw">PRIMARY KEY</span>,
+  title     <span class="cn">VARCHAR</span>(200) <span class="kw">NOT NULL</span>,
+  author_id <span class="cn">INT</span>          <span class="kw">NOT NULL</span>
+  <span class="cm">-- ← nothing prevents orphan records!</span>
+);
+
+<span class="cm">-- CORRECT: FK enforces referential integrity</span>
+<span class="kw">CREATE TABLE</span> <span class="tb">book</span> (
+  book_id   <span class="cn">INT</span>          <span class="kw">PRIMARY KEY</span>,
+  title     <span class="cn">VARCHAR</span>(200) <span class="kw">NOT NULL</span>,
+  author_id <span class="cn">INT</span>          <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> <span class="vl">fk_author_id</span>
+    <span class="kw">FOREIGN KEY</span> (author_id)
+    <span class="kw">REFERENCES</span> <span class="tb">author</span>(author_id)
+);</pre>
+      <div class="hl r" style="margin-top:8px">⚠️ <span>E-R diagrams don't show FK constraints — it's easy to forget them during SQL implementation. Always cross-check your CREATE TABLE statements against the E-R diagram.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ Security: Confidentiality — Access Control -->
+<div class="card">
+  <div class="card-title">③ Security — Confidentiality: Access Control</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info ba" style="margin-bottom:10px">
+        <h3>What Is Confidentiality?</h3>
+        <p>Protecting information from unauthorized access. Ensures data is accessed only by <strong>authorized people and processes</strong>. Two approaches: <strong>Access Control</strong> + <strong>Encryption</strong>.</p>
+      </div>
+      <div class="info by" style="margin-bottom:10px">
+        <h3>MAC — Mandatory Access Control</h3>
+        <p>Like a strict school with rigid rules. A <strong>central authority</strong> assigns sensitivity classifications to tables/rows (e.g., public, sensitive, confidential). Users get clearance levels. If your clearance doesn't match the data's classification → access denied. <strong>No exceptions.</strong></p>
+        <p style="margin-top:6px">Sensitivity classifications must be configured manually. Very strict — suitable for highly regulated environments.</p>
+      </div>
+      <div class="info bg">
+        <h3>RBAC — Role-Based Access Control</h3>
+        <p>More flexible and user-friendly. <strong>Permissions are assigned to roles</strong>, users are assigned to roles. Like VIP vs bar vs general access in a club. Used by most web applications.</p>
+        <p style="margin-top:6px">Steps: (1) Create role → (2) Grant permissions to role → (3) Create user → (4) Assign role to user.</p>
+        <p style="margin-top:6px">⚠️ MySQL 8.0+: must also run <code>ALTER USER … DEFAULT ROLE …</code> to enable role by default.</p>
+      </div>
+    </div>
+    <div>
+      <div class="slabel">Sci-Fi Collective RBAC — 3 Roles</div>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px">
+        <div class="crow"><span class="clabel" style="color:var(--green)">USER role</span><span class="cdesc">SELECT on product. INSERT on purchase, purchase_product, review. (View + buy products, submit reviews)</span></div>
+        <div class="crow"><span class="clabel" style="color:var(--accent)">ANALYST role</span><span class="cdesc">SELECT on all 4 tables. (View-only for statistical analysis)</span></div>
+        <div class="crow"><span class="clabel" style="color:var(--red)">ADMIN role</span><span class="cdesc">SELECT + INSERT + UPDATE + DELETE on all 4 tables. (Full control)</span></div>
+      </div>
+      <pre><span class="cm">-- MySQL/MariaDB — USER role example</span>
+<span class="kw">CREATE ROLE</span> standard_user; <span class="cm">-- not 'user' (reserved)</span>
+<span class="kw">GRANT SELECT ON</span> db.product <span class="kw">TO</span> standard_user;
+<span class="kw">GRANT INSERT ON</span> db.purchase <span class="kw">TO</span> standard_user;
+<span class="kw">GRANT INSERT ON</span> db.purchase_product <span class="kw">TO</span> standard_user;
+<span class="kw">GRANT INSERT ON</span> db.review <span class="kw">TO</span> standard_user;
+
+<span class="kw">CREATE USER</span> <span class="st">'morpheus'</span><span class="kw">@'%'</span> <span class="kw">IDENTIFIED BY</span> <span class="st">'password'</span>;
+<span class="kw">GRANT</span> standard_user <span class="kw">TO</span> <span class="st">'morpheus'</span><span class="kw">@'%'</span>;
+
+<span class="cm">-- ANALYST (MySQL 8.0+ needs DEFAULT ROLE)</span>
+<span class="kw">CREATE ROLE</span> analyst;
+<span class="kw">GRANT SELECT ON</span> db.product <span class="kw">TO</span> analyst;
+<span class="cm">-- ... GRANT SELECT on all 4 tables ...</span>
+<span class="kw">CREATE USER</span> <span class="st">'smith'</span><span class="kw">@'%'</span> <span class="kw">IDENTIFIED BY</span> <span class="st">'password'</span>;
+<span class="kw">GRANT</span> analyst <span class="kw">TO</span> <span class="st">'smith'</span><span class="kw">@'%'</span>;
+<span class="kw">ALTER USER</span> <span class="st">'smith'</span><span class="kw">@'%' DEFAULT ROLE</span> analyst;</pre>
+      <div class="hl y" style="margin-top:8px">💡 <span>Use <code>'username'@'%'</code> to allow connections from any host. Replace <code>%</code> with a specific IP for tighter security in production.</span></div>
+    </div>
+  </div>
+  <div class="hl">📌 <span>Access control is performed by both database <strong>designers</strong> and <strong>administrators</strong> throughout the software development lifecycle. It's worthy of its own book — this chapter covers the fundamentals for designers.</span></div>
+</div>
+
+<!-- ⑤ Security: Encryption -->
+<div class="card">
+  <div class="card-title">④ Security — Confidentiality: Encryption</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info br" style="margin-bottom:10px">
+        <h3>One-Way Encryption (Hashing)</h3>
+        <p><strong>Irreversible.</strong> Input → fixed-size hash string. Cannot recover original data from hash. Used for <strong>passwords</strong> — people reuse passwords everywhere, so plain-text storage is catastrophic if DB is breached.</p>
+        <p style="margin-top:6px"><strong>Salting:</strong> concatenate password + random salt before hashing. Defeats brute-force and rainbow-table attacks.</p>
+        <p style="margin-top:6px"><strong>Auth flow:</strong> login → hash(input + salt) → compare to stored hash → match = authenticated.</p>
+        <p style="margin-top:6px"><strong>Algorithms:</strong> bcrypt, PBKDF2, SHA-512</p>
+      </div>
+      <div class="info bg">
+        <h3>Symmetric Encryption (Reversible)</h3>
+        <p><strong>Reversible.</strong> Same key used for encryption + decryption. Used for sensitive data that <strong>needs to be reused</strong> in original form (e.g., credit card numbers).</p>
+        <p style="margin-top:6px"><strong>Key security is critical</strong> — if attacker gets the key, all encrypted data is exposed. Never store the key in the same DB as the encrypted data. Store via: environment variables, key management service (KMS), hardware security module (HSM).</p>
+        <p style="margin-top:6px"><strong>Algorithms:</strong> AES-128/192/256, Triple DES (3DES), Blowfish</p>
+        <p style="margin-top:6px">⚠️ <strong>Never use symmetric encryption for passwords</strong> — use one-way hashing instead.</p>
+      </div>
+    </div>
+    <div>
+      <div class="slabel">Comparison: One-Way vs Symmetric</div>
+      <table class="tbl" style="margin-bottom:12px">
+        <thead><tr><th></th><th>One-Way (Hashing)</th><th>Symmetric</th></tr></thead>
+        <tbody>
+          <tr><td>Reversible?</td><td><span class="enc enc-r">NO</span></td><td><span class="enc enc-g">YES</span></td></tr>
+          <tr><td>Use case</td><td>Passwords</td><td>Credit cards, sensitive PII</td></tr>
+          <tr><td>Key needed?</td><td>No (+ salt)</td><td>Yes — keep secret!</td></tr>
+          <tr><td>Stronger?</td><td>Generally stronger</td><td>Weaker if key leaked</td></tr>
+          <tr><td>Examples</td><td>bcrypt, SHA-512, PBKDF2</td><td>AES-256, 3DES, Blowfish</td></tr>
+        </tbody>
+      </table>
+      <div class="slabel">Sci-Fi Collective: Schema Changes for Encryption</div>
+      <div class="info by" style="margin-bottom:8px">
+        <h3>password column → CHAR(60)</h3>
+        <p>bcrypt outputs 40-byte binary. Base64-encoded → <strong>60-byte ASCII string</strong>. Change from <code>VARCHAR(20)</code> to <code>CHAR(60)</code>.</p>
+        <pre style="margin-top:6px"><span class="kw">ALTER TABLE</span> <span class="tb">user</span>
+  <span class="kw">MODIFY COLUMN</span> password <span class="cn">CHAR</span>(60);</pre>
+      </div>
+      <div class="info bg">
+        <h3>card_number + expiry_date → CHAR(45)</h3>
+        <p>AES-256 with IV (16-byte block + 16-byte IV = 32-byte input). Base64-encoded output ≈ <strong>45-byte ASCII string</strong>. Both columns updated to <code>CHAR(45)</code>.</p>
+        <pre style="margin-top:6px"><span class="kw">ALTER TABLE</span> <span class="tb">payment_method</span>
+  <span class="kw">MODIFY COLUMN</span> card_number  <span class="cn">CHAR</span>(45),
+  <span class="kw">MODIFY COLUMN</span> expiry_date  <span class="cn">CHAR</span>(45);</pre>
+      </div>
+    </div>
+  </div>
+  <div class="hl p">🔐 <span><strong>AES-256 detail:</strong> Operates on 16-byte blocks. Uses an Initialization Vector (IV) — a non-secret 16-byte binary sequence — as extra input to enhance security. When IV is used, plain text + IV = 32 bytes input. Shorter inputs (like expiry_date) are padded to 16 bytes. Base64 encoding converts binary → ASCII for storage in CHAR columns.</span></div>
+</div>
+
+<!-- ⑥ Storage Considerations -->
+<div class="card">
+  <div class="card-title">⑤ Storage Considerations — Beyond Normalization</div>
+  <div class="hl" style="margin-bottom:14px">💰 <span>Storage cost dropped from ~$250/MB in the 1970s to ~$0.00001/MB today. But storage optimization is still valuable for <strong>scalable apps with millions of users or exponential growth</strong>. Beyond normalization: check for redundant tables and categorical data columns.</span></div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info br" style="margin-bottom:10px">
+        <h3>Problem: Redundant Tables</h3>
+        <p><code>user_address</code> and <code>billing_address</code> had <strong>nearly identical columns</strong> — only the PK differed. A user and their payment method likely share the same address, so storing it twice is wasteful.</p>
+        <p style="margin-top:6px"><strong>Question to ask:</strong> "Are there any redundant or almost-redundant tables?"</p>
+      </div>
+      <div class="info bg" style="margin-bottom:10px">
+        <h3>Fix: Consolidate into address Table</h3>
+        <p>Create a single <code>address</code> table. Both <code>user</code> and <code>payment_method</code> point to it via FK (<code>address_id</code>).</p>
+        <p style="margin-top:6px"><strong>PK choice:</strong> A composite PK from all columns is bad — drags performance and forces all columns into parent tables. Use a <strong>surrogate key</strong> (<code>address_id INT AUTO_INCREMENT</code>) + <strong>UNIQUE constraint</strong> on all non-key columns to prevent duplicate addresses.</p>
+      </div>
+      <div class="info by">
+        <h3>Min Cardinality Relaxation</h3>
+        <p>Relationship from <code>user</code> → <code>address</code>: min = 0. Users register without providing address. <code>address_id</code> in <code>user</code> table starts as <code>NULL</code> by default (no NOT NULL).</p>
+        <p style="margin-top:6px">Relationship from <code>payment_method</code> → <code>address</code>: min = 1. Payment method must always have an address. <code>address_id</code> in <code>payment_method</code> uses NOT NULL.</p>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm">-- New address table with surrogate PK</span>
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> <span class="tb">address</span> (
+  address_id             <span class="cn">INT AUTO_INCREMENT</span>  <span class="kw">PRIMARY KEY</span>,
+  street_address         <span class="cn">VARCHAR</span>(255) <span class="kw">NOT NULL</span>,
+  address_line_optional  <span class="cn">VARCHAR</span>(100),
+  city                   <span class="cn">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+  state                  <span class="cn">VARCHAR</span>(20)  <span class="kw">NOT NULL</span>,
+  postal_code            <span class="cn">CHAR</span>(5)     <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> <span class="vl">unique_address_constraint</span>
+    <span class="kw">UNIQUE</span> (street_address, address_line_optional,
+            postal_code, city, state)
+);
+
+<span class="cm">-- payment_method: address_id NOT NULL (mandatory)</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">payment_method</span>
+  <span class="kw">ADD COLUMN</span> address_id <span class="cn">INT</span> <span class="kw">NOT NULL</span>;
+<span class="kw">ALTER TABLE</span> <span class="tb">payment_method</span>
+  <span class="kw">ADD CONSTRAINT</span> <span class="vl">fk_address_payment_method</span>
+  <span class="kw">FOREIGN KEY</span> (address_id)
+  <span class="kw">REFERENCES</span> <span class="tb">address</span>(address_id);
+
+<span class="cm">-- user: address_id NULL (optional, min=0)</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">user</span>
+  <span class="kw">ADD COLUMN</span> address_id <span class="cn">INT NULL</span>;
+<span class="kw">ALTER TABLE</span> <span class="tb">user</span>
+  <span class="kw">ADD CONSTRAINT</span> <span class="vl">fk_address_user</span>
+  <span class="kw">FOREIGN KEY</span> (address_id)
+  <span class="kw">REFERENCES</span> <span class="tb">address</span>(address_id);</pre>
+      <div class="hl y" style="margin-top:8px">⚠️ <span>NULL FK = optional relationship. A NULL <code>address_id</code> in <code>user</code> means "no address yet." Be extra cautious with NULL handling in JOIN queries on these tables.</span></div>
+    </div>
+  </div>
+
+  <div class="slabel">Categorical Data — state column Redundancy</div>
+  <div class="g2">
+    <div class="info br">
+      <h3>Problem: Repetitive Categorical Data</h3>
+      <p>With millions of users and only 50 US states + DC = 51 distinct values, the <code>state</code> column in <code>address</code> stores the same strings millions of times. Massive redundancy.</p>
+      <p style="margin-top:6px"><strong>Question to ask:</strong> "Is there a column with a lot of redundant data from a small fixed set of values?"</p>
+    </div>
+    <div class="info bg">
+      <h3>Fix: Extract to state Table</h3>
+      <p>Move <code>state</code> into a new <code>state</code> table. PK = state abbreviation (<code>CHAR(2)</code> — all abbreviations are same length = good PK). Link to <code>address</code> via 1:M relationship.</p>
+      <p style="margin-top:6px">Relax min cardinality from <code>state</code> → <code>address</code> to 0 (to enable data entry — same pattern as Ch5).</p>
+      <p style="margin-top:6px"><em>Real-world benefit:</em> updating a state name requires changing only 1 row in <code>state</code>, not millions in <code>address</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ Indexing -->
+<div class="card">
+  <div class="card-title">⑥ Indexing — Making Data Retrieval Fast</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info ba" style="margin-bottom:10px">
+        <h3>What Is an Index?</h3>
+        <p>Additional data structures that provide <strong>fast access to rows</strong> based on values in one or more columns. Implemented with <strong>B-trees</strong> — self-balancing tree that maintains sorted data, supports search/insert/delete in <strong>O(log n)</strong> time.</p>
+        <p style="margin-top:6px">When an index is created: DB scans the table, records indexed column values + pointers to rows → stored in B-tree structure for fast future lookups.</p>
+      </div>
+      <div class="info by" style="margin-bottom:10px">
+        <h3>Standard Index — When to Use</h3>
+        <ul>
+          <li>Columns used in <code>ORDER BY</code> (sorting)</li>
+          <li>Columns used in <code>WHERE</code> (exact-match filtering)</li>
+          <li>Foreign key columns (NOT auto-indexed)</li>
+          <li>Frequently queried non-PK columns</li>
+        </ul>
+        <p style="margin-top:6px">Note: <strong>Primary keys are auto-indexed</strong>. Don't create manual indexes on PKs.</p>
+      </div>
+      <div class="info bp">
+        <h3>Full-Text Index — When to Use</h3>
+        <ul>
+          <li>Keyword searching (partial word match)</li>
+          <li>Fuzzy searching (typos/misspellings)</li>
+          <li>Natural language queries on text columns</li>
+        </ul>
+        <p style="margin-top:6px">Tokenizes each word/term → stores each token in a lookup table. Much faster than <code>LIKE '%keyword%'</code>.</p>
+        <p style="margin-top:6px">⚠️ <strong>Syntax varies significantly</strong> across RDBMSs — always check the manual or ask an AI assistant.</p>
+      </div>
+    </div>
+    <div>
+      <div class="slabel">Standard Index Examples (movie table)</div>
+      <pre><span class="cm">-- Index single column (sorting/search)</span>
+<span class="kw">CREATE INDEX</span> <span class="vl">idx_rating</span> <span class="kw">ON</span> <span class="tb">movie</span> (rating);
+
+<span class="cm">-- Index single column (date)</span>
+<span class="kw">CREATE INDEX</span> <span class="vl">idx_date</span> <span class="kw">ON</span> <span class="tb">movie</span> (date);
+
+<span class="cm">-- Composite index (sort by both cols together)</span>
+<span class="kw">CREATE INDEX</span> <span class="vl">idx_combo</span> <span class="kw">ON</span> <span class="tb">movie</span> (rating, date);</pre>
+      <div class="slabel" style="margin-top:10px">Full-Text Index — MySQL vs PostgreSQL</div>
+      <pre><span class="cm">-- MySQL / MariaDB</span>
+<span class="kw">CREATE FULLTEXT INDEX</span> <span class="vl">ft_idx_title</span>
+  <span class="kw">ON</span> <span class="tb">movie</span> (title);
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tb">movie</span>
+  <span class="kw">WHERE MATCH</span>(title) <span class="kw">AGAINST</span>(<span class="st">'exciting'</span>
+  <span class="kw">IN NATURAL LANGUAGE MODE</span>);
+
+<span class="cm">-- PostgreSQL (different approach)</span>
+<span class="kw">ALTER TABLE</span> <span class="tb">movie</span>
+  <span class="kw">ADD COLUMN</span> tsv_title <span class="cn">TSVECTOR</span>;
+<span class="kw">UPDATE</span> <span class="tb">movie</span>
+  <span class="kw">SET</span> tsv_title = to_tsvector(<span class="st">'english'</span>, title);
+<span class="kw">CREATE INDEX</span> <span class="vl">gin_idx_title</span>
+  <span class="kw">ON</span> <span class="tb">movie</span> <span class="kw">USING</span> gin(tsv_title);</pre>
+    </div>
+  </div>
+
+  <div class="slabel">Sci-Fi Collective: 3 Indexing Decisions</div>
+  <div class="g3" style="margin-bottom:12px">
+    <div class="info bg">
+      <h3>product.name — Full-Text</h3>
+      <p>Users search products by name keyword. <code>LIKE '%text%'</code> is too slow at scale. Use full-text index for keyword + partial matching.</p>
+      <pre style="margin-top:6px"><span class="kw">CREATE FULLTEXT INDEX</span>
+  <span class="vl">ft_idx_name</span>
+  <span class="kw">ON</span> <span class="tb">product</span> (name);</pre>
+    </div>
+    <div class="info ba">
+      <h3>review.code — Standard</h3>
+      <p>Users frequently check reviews for a specific product (exact <code>code</code> match). FK columns are NOT auto-indexed → manual index needed.</p>
+      <pre style="margin-top:6px"><span class="kw">CREATE INDEX</span> <span class="vl">idx_code</span>
+  <span class="kw">ON</span> <span class="tb">review</span> (code);</pre>
+    </div>
+    <div class="info by">
+      <h3>payment_method.email — Standard</h3>
+      <p>Users frequently select a payment method by their email (exact match). FK column → not auto-indexed → manual standard index needed.</p>
+      <pre style="margin-top:6px"><span class="kw">CREATE INDEX</span> <span class="vl">idx_email</span>
+  <span class="kw">ON</span> <span class="tb">payment_method</span> (email);</pre>
+    </div>
+  </div>
+
+  <div class="hl">🤝 <span><strong>Collaboration is key.</strong> DB designers must work closely with backend engineers to identify indexing opportunities. Backend devs contribute: query knowledge, performance bottlenecks, application logic. DB designers contribute: schema structure, optimal index design, query execution plans. Also use empirical data from <strong>query performance metrics and logs</strong> once in production.</span></div>
+</div>
+
+<!-- ⑧ Denormalization -->
+<div class="card">
+  <div class="card-title">⑦ Denormalization — Intentional Redundancy for Performance</div>
+  <div class="g2" style="margin-bottom:14px">
+    <div>
+      <div class="info br" style="margin-bottom:10px">
+        <h3>What Is Denormalization?</h3>
+        <p>A <strong>last-resort optimization</strong> technique that <strong>intentionally introduces redundancy</strong> to improve query performance for frequent, expensive multi-table joins.</p>
+        <p style="margin-top:6px">You deliberately violate BCNF to make the DB faster. Rare, but sometimes the right call.</p>
+      </div>
+      <div class="info by" style="margin-bottom:10px">
+        <h3>2-Step Process</h3>
+        <p><strong>1.</strong> Identify queries that are executed <em>frequently</em> and require joining <em>more than two tables</em>.</p>
+        <p style="margin-top:6px"><strong>2.</strong> Duplicate some columns across the involved tables to reduce the number of joins required.</p>
+      </div>
+      <div class="info br">
+        <h3>The Risks — Handle With Care</h3>
+        <ul>
+          <li>Compromises data integrity if not managed meticulously</li>
+          <li>Redundant data means multiple tables need updates on any change</li>
+          <li>INSERT/UPDATE/DELETE heavy workloads can negate performance gains</li>
+          <li>Controversial — requires team buy-in and thorough documentation</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="info ba" style="margin-bottom:10px">
+        <h3>Music App Example — 3-Table Join Problem</h3>
+        <p>Tables: <code>artist</code> → <code>album</code> → <code>song</code> (1:M each). Frequent query: "Top songs for artist X." Requires joining all 3 tables even though <code>album</code> contributes no output data.</p>
+        <p style="margin-top:6px">Fix: Add <code>artist_id</code> FK directly to <code>song</code>. Now <code>artist</code> joins directly to <code>song</code> — skipping <code>album</code>. Introduces transitive dependency in <code>song</code> table → BCNF violation → deliberate denormalization.</p>
+      </div>
+      <pre><span class="cm">-- BEFORE: 3-table join (slow)</span>
+<span class="kw">SELECT</span> artist.artist_name, song.song_title
+<span class="kw">FROM</span> <span class="tb">artist</span>
+<span class="kw">INNER JOIN</span> <span class="tb">album</span> <span class="kw">ON</span> artist.artist_id = album.artist_id
+<span class="kw">INNER JOIN</span> <span class="tb">song</span>  <span class="kw">ON</span> album.album_id = song.album_id
+<span class="kw">WHERE</span> artist.artist_name = <span class="st">'Nebula Nova'</span>
+<span class="kw">ORDER BY</span> album.album_id, song.song_id <span class="kw">LIMIT</span> 5;
+
+<span class="cm">-- AFTER: 2-table join (fast, denormalized)</span>
+<span class="kw">SELECT</span> artist.artist_name, song.song_title
+<span class="kw">FROM</span> <span class="tb">artist</span>
+<span class="kw">INNER JOIN</span> <span class="tb">song</span> <span class="kw">ON</span> artist.artist_id = song.artist_id
+<span class="kw">WHERE</span> artist.artist_name = <span class="st">'Nebula Nova'</span>
+<span class="kw">ORDER BY</span> song.song_id <span class="kw">LIMIT</span> 5;</pre>
+    </div>
+  </div>
+
+  <div class="slabel">Sci-Fi Collective: Restoring user → purchase Direct Link</div>
+  <div class="g2" style="margin-bottom:12px">
+    <div class="info br">
+      <h3>The Problem (from Ch6 normalization)</h3>
+      <p>In Ch6, we removed <code>email</code> FK from <code>purchase</code> to eliminate transitive dependency. Now the path from purchase to user goes: <code>purchase → payment_method → user</code> (3 tables).</p>
+      <p style="margin-top:6px">But in an online store, users frequently check their orders/receipts. This query runs constantly:</p>
+      <pre style="margin-top:6px"><span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tb">purchase</span>
+<span class="kw">INNER JOIN</span> <span class="tb">payment_method</span>
+  <span class="kw">ON</span> purchase.payment_method_id =
+     payment_method.payment_method_id
+<span class="kw">INNER JOIN</span> <span class="tb">user</span>
+  <span class="kw">ON</span> purchase.user_id = user.user_id
+<span class="kw">WHERE</span> user.email = <span class="st">'cat@humor.com'</span>;</pre>
+      <p style="margin-top:6px"><code>payment_method</code> contributes no output data but must be joined to link user → purchase. Expensive at scale.</p>
+    </div>
+    <div class="info bg">
+      <h3>The Fix: Restore email FK in purchase</h3>
+      <p>Add <code>email</code> back to <code>purchase</code> → reintroduces transitive dependency (<code>purchase_id → payment_id → email</code>). Deliberate BCNF violation.</p>
+      <p style="margin-top:6px"><strong>Cost-benefit analysis passed because:</strong></p>
+      <ul style="margin-top:5px">
+        <li>Sci-Fi Collective doesn't allow email changes → no update anomaly risk</li>
+        <li>Purchases require existing accounts → no insertion anomaly risk</li>
+        <li>High-frequency query → performance gain is real and significant</li>
+        <li>No deletion anomalies expected</li>
+      </ul>
+      <div class="hl g" style="margin-top:8px">✅ <span>This is a <strong>perfect denormalization scenario</strong> — real performance gain with minimal integrity risk due to specific business rules (no email changes allowed).</span></div>
+    </div>
+  </div>
+
+  <div class="hl o">📋 <span><strong>Denormalization checklist before proceeding:</strong> (1) Is the query executed frequently? (2) Does it join 3+ tables? (3) Does the middle table contribute no output? (4) Are INSERT/UPDATE/DELETE anomalies manageable given business rules? (5) Have you done a thorough cost-benefit analysis? (6) Have you documented the decision and got team buy-in?</span></div>
+</div>
+
+<!-- ⑨ Index Type Decision Table -->
+<div class="card">
+  <div class="card-title">⑧ Index Type Decision Table</div>
+  <table class="tbl">
+    <thead><tr><th>Query Type</th><th>Index Type</th><th>Example Query</th><th>Syntax</th></tr></thead>
+    <tbody>
+      <tr><td>Sorting (<code>ORDER BY</code>)</td><td><span class="pill pb">Standard</span></td><td><code>ORDER BY rating DESC LIMIT 30</code></td><td><code>CREATE INDEX idx_rating ON movie(rating)</code></td></tr>
+      <tr><td>Exact match (<code>WHERE =</code>)</td><td><span class="pill pb">Standard</span></td><td><code>WHERE code = '23356'</code></td><td><code>CREATE INDEX idx_code ON review(code)</code></td></tr>
+      <tr><td>FK column lookup</td><td><span class="pill pb">Standard</span></td><td><code>WHERE email = 'x@y.com'</code></td><td><code>CREATE INDEX idx_email ON payment_method(email)</code></td></tr>
+      <tr><td>Multi-column sort</td><td><span class="pill pb">Composite</span></td><td><code>ORDER BY date DESC, rating DESC</code></td><td><code>CREATE INDEX idx_combo ON movie(rating, date)</code></td></tr>
+      <tr><td>Keyword / partial search</td><td><span class="pill pp">Full-Text</span></td><td><code>MATCH(name) AGAINST('text')</code></td><td><code>CREATE FULLTEXT INDEX ft_idx ON product(name)</code></td></tr>
+      <tr><td>Primary key lookup</td><td><span class="pill pg">Auto</span></td><td><code>WHERE movie_id = 5</code></td><td>No action needed — PKs are auto-indexed</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ⑩ Final E-R Changes Summary -->
+<div class="card">
+  <div class="card-title">⑨ Final E-R Diagram Changes (Ch7 vs Ch6)</div>
+  <div class="g3">
+    <div class="info br"><h3>Removed</h3><ul><li><code>user_address</code> table (dropped)</li><li><code>billing_address</code> table (dropped)</li><li><code>address</code> attribute from <code>payment_method</code> (was VARCHAR)</li><li><code>state</code> column from <code>address</code> (moved to state table)</li></ul></div>
+    <div class="info bg"><h3>Added</h3><ul><li><code>address</code> table (surrogate PK + UNIQUE constraint)</li><li><code>state</code> table (PK = abbreviation CHAR(2))</li><li><code>address_id</code> FK in <code>user</code> (nullable)</li><li><code>address_id</code> FK in <code>payment_method</code> (NOT NULL)</li><li><code>email</code> FK restored to <code>purchase</code> (denormalization)</li></ul></div>
+    <div class="info by"><h3>Column Data Type Changes</h3><ul><li><code>user.password</code>: <code>VARCHAR(20)</code> → <code>CHAR(60)</code> (bcrypt hash)</li><li><code>payment_method.card_number</code>: <code>CHAR(16)</code> → <code>CHAR(45)</code> (AES-256 + Base64)</li><li><code>payment_method.expiry_date</code>: <code>CHAR(4)</code> → <code>CHAR(45)</code> (AES-256 + Base64)</li></ul></div>
+  </div>
+</div>
+
+<!-- ⑪ Tips -->
+<div class="card">
+  <div class="card-title">⑩ Interview / Practical Tips</div>
+  <div class="tips">
+    <div class="tip"><span class="tip-i">🔒</span><span><strong>Never store passwords in plain text.</strong> Always use one-way hashing (bcrypt/SHA-512). Update your schema column to accommodate the hash size — bcrypt = CHAR(60).</span></div>
+    <div class="tip"><span class="tip-i">🔑</span><span><strong>Symmetric key storage is critical.</strong> Never store the encryption key in the same DB as the encrypted data. Use env variables, KMS, or HSM.</span></div>
+    <div class="tip"><span class="tip-i">👥</span><span><strong>Always use RBAC, not individual permissions.</strong> Role name can't be a SQL reserved word — use <code>standard_user</code> not <code>user</code>. On MySQL 8.0+, explicitly set <code>DEFAULT ROLE</code> after assigning.</span></div>
+    <div class="tip"><span class="tip-i">🗃️</span><span><strong>Nearly-identical tables = merge them.</strong> Two tables differing only by PK can often be consolidated with a surrogate PK + UNIQUE constraint on all non-key columns.</span></div>
+    <div class="tip"><span class="tip-i">📊</span><span><strong>Categorical columns with few distinct values = separate table.</strong> 51 US states stored millions of times = wasted space. Extract to a reference table, link via FK.</span></div>
+    <div class="tip"><span class="tip-i">⚡</span><span><strong>FK columns are NOT auto-indexed.</strong> Always manually create indexes on FK columns used in frequent WHERE or JOIN conditions.</span></div>
+    <div class="tip"><span class="tip-i">🔍</span><span><strong>LIKE '%keyword%' = table scan.</strong> Use full-text indexes for keyword/partial/fuzzy searching. Syntax varies by RDBMS — check the manual.</span></div>
+    <div class="tip"><span class="tip-i">⚠️</span><span><strong>Denormalization = last resort.</strong> Only after normalization + storage optimization + indexing have failed to meet performance requirements. Document the decision, get team buy-in, and monitor after implementing.</span></div>
+    <div class="tip"><span class="tip-i">📈</span><span><strong>Heavy INSERT/UPDATE/DELETE can negate denormalization gains.</strong> If your bottleneck is write-heavy, denormalization may hurt. Re-evaluate when workload patterns change.</span></div>
+    <div class="tip"><span class="tip-i">🤝</span><span><strong>Index placement requires backend collaboration.</strong> DB designers don't know all query patterns. Work with backend devs + use production query logs to find real bottlenecks.</span></div>
+  </div>
+</div>
+
+<!-- ⑫ Recap -->
+<div class="card">
+  <div class="card-title">⑪ Chapter Recap</div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="info ba"><h3>Security Summary</h3><ul><li>Integrity: verify all FKs and constraints are implemented, not just designed</li><li>RBAC: assign permissions to roles, assign roles to users</li><li>One-way encryption for passwords (bcrypt → CHAR(60))</li><li>Symmetric encryption for reusable sensitive data (AES-256 → CHAR(45))</li></ul></div>
+      <div class="info bt"><h3>Storage Summary</h3><ul><li>Check for nearly-identical tables → consolidate with surrogate key + UNIQUE</li><li>Check for high-redundancy categorical columns → extract to reference table</li><li>NULL FK = optional relationship (be careful with JOIN queries)</li></ul></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="info bp"><h3>Indexing Summary</h3><ul><li>Standard index: ORDER BY, WHERE exact match, FK columns</li><li>Full-text index: keyword, partial, fuzzy text search</li><li>PKs auto-indexed; FKs are NOT</li><li>Collaborate with backend devs + use query logs</li></ul></div>
+      <div class="info bo"><h3>Denormalization Summary</h3><ul><li>Deliberate BCNF violation for performance</li><li>Use only for frequent queries joining 3+ tables</li><li>Must weigh anomaly risk against performance gain</li><li>Document thoroughly, get team buy-in, monitor post-deployment</li></ul></div>
+      <div class="hl g">🎉 <span>This is the <strong>final completed database design</strong> for The Sci-Fi Collective. The full journey: Requirements → Entities → Relationships → Normalization → Constraints → Security → Storage → Indexing → Denormalization.</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

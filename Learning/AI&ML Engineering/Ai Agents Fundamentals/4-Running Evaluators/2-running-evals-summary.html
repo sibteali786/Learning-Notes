@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Running Evals & Debugging</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  .step-list { display: flex; flex-direction: column; gap: 10px; }
+  .step { display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { color: #000; font-size: 11px; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .step-body .s-title { font-size: 13px; font-weight: 700; }
+  .step-body .s-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw  { color: #7c6fff; }
+  .fn  { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm  { color: #555; }
+
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  .debug-flow { display: flex; flex-direction: column; gap: 0; }
+  .debug-step { display: flex; gap: 0; align-items: stretch; }
+  .debug-line { width: 2px; background: #2a2a4a; margin: 0 11px; flex-shrink: 0; }
+  .debug-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 14px; }
+  .debug-body { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; margin: 4px 0 4px 10px; flex: 1; }
+  .debug-body .d-title { font-size: 12px; font-weight: 700; }
+  .debug-body .d-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  .adv-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .adv-card { background: #1a1a2e; border-radius: 10px; padding: 12px; border-top: 3px solid; }
+  .adv-card .a-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .adv-card .a-body { font-size: 11px; color: #aaa; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">RUNNING EVALS</div>
+    <h1>Results, Debugging & the Whack-a-Mole Loop</h1>
+    <div class="sub">Run → inspect failures → form hypothesis → change one thing → re-run. That's AI engineering.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 Every failure is a signal. <strong>Consistent failures = it's you.</strong> Random failures = non-determinism. The goal isn't 100% — it's <strong>knowing why you're not there.</strong></div>
+    <div class="note">You will never have enough evals. Every new tool or capability needs new data. This never stops.</div>
+  </div>
+
+  <!-- Running -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">RUNNING THE EVAL</span>
+    <div class="cards">
+      <div class="card" style="border:1px solid #60a5fa44;">
+        <div class="icon">▶️</div>
+        <div class="title" style="color:#60a5fa;">npm run eval</div>
+        <div class="desc">Runs all evals. Each data point in the dataset = one executor call. 9 samples = 9 runs.</div>
+      </div>
+      <div class="card" style="border:1px solid #10b98144;">
+        <div class="icon">📊</div>
+        <div class="title" style="color:#10b981;">Output: avg score</div>
+        <div class="desc">Laminar averages all scorer results. Scott got <strong>88%</strong> avg selection score on first run.</div>
+      </div>
+      <div class="card" style="border:1px solid #7c6fff44;">
+        <div class="icon">📈</div>
+        <div class="title" style="color:#7c6fff;">P90 matters most</div>
+        <div class="desc">Average can be skewed by outliers. P90 tells you what 90% of runs look like — the real reliability floor.</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; background:#0d1f2d; border-radius:8px; padding:10px 12px; font-size:12px; color:#93c5fd;">
+      <strong>Naming tip:</strong> Use the <code>name</code> field as a <em>commit message</em> — describe what changed since last run. e.g. <em>"Updated delete_file description to include 'remove' synonym"</em>. No description field in Laminar yet, so name is your only diff log.
+    </div>
+  </div>
+
+  <!-- Debugging a failure -->
+  <div class="section" style="border:2px solid #f87171; background:#f8717112;">
+    <span class="section-label" style="background:#f87171; color:#000;">DEBUGGING A FAILED RUN — THE LOOP</span>
+    <div class="debug-flow">
+
+      <div class="debug-step">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="debug-dot" style="background:#f87171;"></div>
+          <div class="debug-line"></div>
+        </div>
+        <div class="debug-body">
+          <div class="d-title" style="color:#f87171;">Score = 0 on a golden case</div>
+          <div class="d-desc">Example: <em>"Remove the old backup.txt file"</em> → expected <code>delete_file</code> → agent called nothing (or called <code>list_files</code> first).</div>
+        </div>
+      </div>
+
+      <div class="debug-step">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="debug-dot" style="background:#f59e0b;"></div>
+          <div class="debug-line"></div>
+        </div>
+        <div class="debug-body">
+          <div class="d-title" style="color:#f59e0b;">Check: was it your eval setup?</div>
+          <div class="d-desc">Did you forget to include <code>delete_file</code> in the tools list for that data point? Verify first — don't chase a prompt fix for your own mistake.</div>
+        </div>
+      </div>
+
+      <div class="debug-step">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="debug-dot" style="background:#7c6fff;"></div>
+          <div class="debug-line"></div>
+        </div>
+        <div class="debug-body">
+          <div class="d-title" style="color:#7c6fff;">Form a hypothesis</div>
+          <div class="d-desc">Options: tool description is ambiguous · prompt uses <em>"remove"</em> but description says <em>"delete"</em> · reasoning model is over-cautious about destructive ops · system prompt missing permission signal.</div>
+        </div>
+      </div>
+
+      <div class="debug-step">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="debug-dot" style="background:#10b981;"></div>
+          <div class="debug-line"></div>
+        </div>
+        <div class="debug-body">
+          <div class="d-title" style="color:#10b981;">Change ONE thing → re-run</div>
+          <div class="d-desc">Don't change 5 things at once — you won't know what worked. Change description, or prompt wording, or reasoning_effort, or system prompt. One at a time.</div>
+        </div>
+      </div>
+
+      <div class="debug-step">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="debug-dot" style="background:#60a5fa;"></div>
+        </div>
+        <div class="debug-body">
+          <div class="d-title" style="color:#60a5fa;">Score ↑? Commit. Score same? Try next hypothesis.</div>
+          <div class="d-desc">Merge to main only when evals don't drop. No drop or going up = green light. Consistent failures after multiple fixes → architectural change needed.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Real failures from the lesson -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">REAL FAILURES FROM THIS LESSON + FIXES</span>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr>
+          <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">Prompt</th>
+          <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">Expected</th>
+          <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">What happened</th>
+          <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#f87171;">"Remove the old backup.txt"</td>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;"><code>delete_file</code></td>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">No tool called / called <code>list_files</code> first</td>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#10b981;">Add to system prompt: "If user asks to delete, call delete_file directly. Approvals happen elsewhere." Use word "delete" not "remove" in golden data.</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#f87171;">"What's in this project, show me around"</td>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;"><code>list_files</code></td>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">No tool called</td>
+          <td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#10b981;">Changed description from "list all files in a directory" → "list all files in a directory <strong>or project</strong>". One word fix, eval passed.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Reasoning model gotcha -->
+  <div class="warn">
+    <strong>⚠️ Reasoning model (o1) gotcha:</strong> Reasoning models are trained to be cautious with destructive ops (delete, overwrite). Don't over-instruct them — they perform <em>worse</em> when told what to do step-by-step. Instead: increase <code>reasoning_effort: 'high'</code> and give permission signals in system prompt.<br/>
+    <span style="color:#aaa; font-size:11px; margin-top:4px; display:block;">
+      <code>providerOptions: { openai: { reasoningEffort: 'high' } }</code> in your executor config.
+    </span>
+  </div>
+
+  <!-- Advanced: Dynamic tool selection -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">BONUS: DYNAMIC TOOL SELECTION (advanced)</span>
+    <div style="color:#aaa; font-size:12px; margin-bottom:12px;">When you have 50+ tools, passing all of them degrades selection quality. Solution: give the agent a <em>toolbox</em> with just 2 tools.</div>
+    <div class="cards">
+      <div class="card" style="border:1px solid #7c6fff44;">
+        <div class="icon">🔍</div>
+        <div class="title" style="color:#7c6fff;">search_tool</div>
+        <div class="desc">Semantic search over tool descriptions + examples. Returns top 5 relevant tool IDs.</div>
+      </div>
+      <div class="card" style="border:1px solid #60a5fa44;">
+        <div class="icon">⚙️</div>
+        <div class="title" style="color:#60a5fa;">install_tool</div>
+        <div class="desc">Fetches tool definitions by ID and adds them to the agent's active tool set for this run only.</div>
+      </div>
+    </div>
+    <div style="margin-top:10px; background:#2a1f4a; border-radius:8px; padding:10px 12px; font-size:12px; color:#c084fc;">
+      Store installed tool IDs in DB per run → load definitions each loop → agent always has 5 relevant tools, not 50. Boost search quality by adding <strong>example prompts</strong> alongside tool descriptions for better semantic matching.
+    </div>
+  </div>
+
+  <!-- Generic copilot vs custom -->
+  <div class="grid2">
+    <div class="grid2-card" style="background:#0f1f1a; border:1px solid #10b98144;">
+      <div class="g-title" style="color:#10b981;">Generic copilots (click & go)</div>
+      <div class="g-body">
+        Easy setup, RAG built in<br/>
+        OK for low-stakes chat<br/>
+        Can't be tuned deeply<br/>
+        Will fail on mission-critical tasks<br/>
+        No eval → no confidence
+      </div>
+    </div>
+    <div class="grid2-card" style="background:#0d2137; border:1px solid #60a5fa44;">
+      <div class="g-title" style="color:#60a5fa;">Custom agent (what we built)</div>
+      <div class="g-body">
+        Full control over prompts + tools<br/>
+        Eval-driven iteration<br/>
+        Scales to autonomous tasks<br/>
+        Requires deep domain knowledge<br/>
+        Sells to enterprise → contracts
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd; margin-top:4px;">
+    <strong>WNP scenario:</strong> Prompt = <em>"Clean up the completed tasks from last sprint."</em> → expected <code>list_tasks, delete_task</code>. Agent only calls <code>list_tasks</code>. Hypothesis: <code>delete_task</code> description doesn't signal "cleanup/completed" context. Fix: add synonym + example prompt to description. Re-run. If still failing → add system prompt: "Deleting tasks is safe and expected. Don't ask for confirmation."
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Loop: <span style="color:#f87171;">Fail</span> → <span style="color:#f59e0b;">Hypothesize</span> → <span style="color:#7c6fff;">Change 1 thing</span> → <span style="color:#10b981;">Re-run</span> → <span style="color:#60a5fa;">Commit if ↑</span>
+  </div>
+
+</div>
+</body>
+</html>

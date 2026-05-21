@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "908304155ad0655e",
+        "id": "42b4ab283594d08a",
         "type": "tabs",
         "children": [
           {
-            "id": "c252a952f674bc97",
+            "id": "9b31869a3f6512ce",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Database/Database Design/7-Security and Peformance/ch7-security-optimization.html"
               },
-              "icon": "lucide-file",
-              "title": "Fundamentals of Database Engineering"
+              "icon": "code-glyph",
+              "title": "ch7-security-optimization"
             }
           }
         ]
@@ -193,30 +181,37 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "c252a952f674bc97",
+  "active": "9b31869a3f6512ce",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals/2-evaluators.html",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals/1-executors.html",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals",
-    "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md",
+    "Learning/Database/Database Design/7-Security and Peformance/ch7-security-optimization.html",
+    "Learning/Database/Database Design/7-Security and Peformance",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/4-Running Evaluators/2-running-evals-summary.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/4-Running Evaluators/1-eval-run.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/4-Running Evaluators/Drawing 2026-05-20 21.56.16.excalidraw.md",
+    "Screenshot 2026-05-20 at 9.56.44 PM.png",
+    "Learning/DSA/Binary Search/Apple Harvest (Koko eating banana).excalidraw.md",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Single Turn Evals/Untitled",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/4-Running Evaluators",
+    "Learning/DSA/Binary Search/1-CeilingOfaNumber.excalidraw.md",
+    "Learning/DSA/Binary Search/Overview.excalidraw.md",
     "Learning/JavaScript/Coding/jquery/Jquery.class.excalidraw.md",
+    "Learning/Database/Database Design/5-Relationships/ch5-relationships-summary.html",
+    "Learning/Database/Database Design/5-Relationships/1-ERD-Diagrams.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering.md",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/3-Single Turn Evals/2-evaluators.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/3-Single Turn Evals/1-executors.html",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/3-Single Turn Evals",
+    "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md",
     "Learning/Database/Database Design/6-Normalization/ch6-normalization-implementation.html",
     "Learning/Side Projects/HospitalityOS/Concerns.md",
-    "Learning/Database/Database Design/6-Normalization",
     "conflict-files-obsidian-git.md",
     "Personal/Remote Jobs/Remote Resource.md",
     "Learning/Work Stuff/Chat App/Summaries.md",
     "Learning/Work Stuff/Chat App/Chat App.md",
-    "Learning/Work Stuff/Chat App",
     "Learning/Side Projects/Wafa/Multi-Platform/Resources.md",
-    "Learning/Side Projects/Wafa/Multi-Platform",
     "Learning/Side Projects/Resources/Info.md",
-    "Learning/Side Projects/Resources",
     "Learning/Side Projects/Adam's Venture/Questions.md",
-    "Learning/Side Projects/Adam's Venture",
     "Learning/Side Projects/HospitalityOS/Resources.md",
-    "~$_PMS_Developer_Handout.docx",
-    "text.html",
     "Screenshot 2026-04-19 at 11.03.25 PM.png",
     "Screenshot 2026-04-19 at 10.38.26 PM.png",
     "Pasted Image 20260423111902_446.png",
@@ -226,7 +221,6 @@
     "Pasted Image 20260419211429_220.png",
     "Pasted Image 20260419205204_621.png",
     "Pasted Image 20260413110200_923.png",
-    "Pasted Image 20260407123826_882.png",
     "Learning/AI&ML Engineering/UsefullTools/Overview.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/1-Cursor and AI Models Overview.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/2-Inline-Edits.excalidraw.md",
@@ -235,12 +229,6 @@
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/5-Cursor-Rules.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/2-Cursor/6-MCP-Overview.excalidraw.md",
     "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/1-Session-Management.excalidraw.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/2-Claude.md.excalidraw.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/3-References and Files.excalidraw.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/4-Claude-Commands.excalidraw.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/6-Subagents.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/5-claude-hooks.excalidraw.md",
-    "Learning/AI&ML Engineering/Claude Code/Intro-Claude Code/3-Claude/Resources.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
