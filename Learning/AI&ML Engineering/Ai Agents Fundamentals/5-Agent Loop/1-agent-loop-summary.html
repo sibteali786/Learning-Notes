@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Agent Loop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw  { color: #7c6fff; }
+  .fn  { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm  { color: #555; }
+  .num { color: #10b981; }
+  .obj { color: #f87171; }
+
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  /* Comparison table */
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 12px; text-align: left; font-size: 11px; }
+  .cmp td { padding: 9px 12px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .cmp td:first-child { color: #e0e0e0; font-weight: 700; white-space: nowrap; }
+  .cmp tr:hover td { background: #ffffff05; }
+
+  /* Agency spectrum */
+  .spectrum { display: flex; flex-direction: column; gap: 6px; }
+  .spec-row { display: flex; align-items: center; gap: 10px; }
+  .spec-label { font-size: 12px; color: #aaa; width: 160px; flex-shrink: 0; }
+  .spec-bar-wrap { flex: 1; background: #12121f; border-radius: 10px; height: 10px; }
+  .spec-bar { height: 10px; border-radius: 10px; }
+  .spec-tag { font-size: 11px; font-weight: 700; width: 80px; text-align: right; flex-shrink: 0; }
+
+  /* Loop flow */
+  .loop-box { background: #12121f; border: 1px solid #2a2a3f; border-radius: 12px; padding: 16px; }
+  .loop-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .loop-num { background: #7c6fff; color: #fff; font-size: 11px; font-weight: 800; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .loop-text { font-size: 12px; color: #e0e0e0; }
+  .loop-branch { margin-left: 32px; display: flex; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .branch-box { border-radius: 8px; padding: 6px 10px; font-size: 12px; }
+
+  /* Stop conditions */
+  .stop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stop-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; }
+  .stop-card .s-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .stop-card .s-body { font-size: 12px; color: #aaa; }
+
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">AGENT FUNDAMENTALS</div>
+    <h1>The Agent Loop</h1>
+    <div class="sub">What separates an agent from a single LLM call — and why while(true) is the right answer.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 An agent loop = a <strong>while loop where the LLM decides when to stop.</strong><br/>You only intervene to cap cost, handle errors, or enforce safety limits.</div>
+    <div class="note">If the number of steps is known → use a workflow. If unknown → use an agent. Most business problems are workflows. Agents shine at general, open-ended tasks.</div>
+  </div>
+
+  <!-- LLM vs Workflow vs Agent -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">LLM vs WORKFLOW vs AGENT</span>
+    <table class="cmp">
+      <thead>
+        <tr><th>Type</th><th>Who controls flow?</th><th>Steps known?</th><th>Best for</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🤖 LLM call</td>
+          <td>Nobody — one shot</td>
+          <td>Always 1</td>
+          <td>Simple Q&A, text gen, classification</td>
+        </tr>
+        <tr>
+          <td>🔗 Workflow</td>
+          <td>You (deterministic)</td>
+          <td>Yes, fixed</td>
+          <td>Known business processes — email → summarise → route</td>
+        </tr>
+        <tr>
+          <td>🌀 Agent</td>
+          <td>LLM (autonomous)</td>
+          <td>No, discovered at runtime</td>
+          <td>Open-ended tasks, multi-step tool use, general assistants</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px; background:#2a1f4a; border-radius:8px; padding:10px 12px; font-size:12px; color:#c084fc;">
+      <strong>Real scenario:</strong> "Update the port in the config file" = workflow (read → parse → modify → write, always the same 4 steps). "Find all files that import the auth module" = agent (unknown depth, discovered recursively).
+    </div>
+  </div>
+
+  <!-- Agency Spectrum -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">THE AGENCY SPECTRUM</span>
+    <div class="spectrum">
+      <div class="spec-row">
+        <div class="spec-label">Pure LLM</div>
+        <div class="spec-bar-wrap"><div class="spec-bar" style="width:10%;background:#555;"></div></div>
+        <div class="spec-tag" style="color:#555;">No agency</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Single tool call</div>
+        <div class="spec-bar-wrap"><div class="spec-bar" style="width:30%;background:#60a5fa;"></div></div>
+        <div class="spec-tag" style="color:#60a5fa;">Low</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Fixed iterations (N cap)</div>
+        <div class="spec-bar-wrap"><div class="spec-bar" style="width:55%;background:#f59e0b;"></div></div>
+        <div class="spec-tag" style="color:#f59e0b;">Medium</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Full loop (LLM stops)</div>
+        <div class="spec-bar-wrap"><div class="spec-bar" style="width:80%;background:#10b981;"></div></div>
+        <div class="spec-tag" style="color:#10b981;">High</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-label">Multi-agent + spawning</div>
+        <div class="spec-bar-wrap"><div class="spec-bar" style="width:100%;background:#f87171;"></div></div>
+        <div class="spec-tag" style="color:#f87171;">Full autonomy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The Loop -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">THE LOOP — HOW IT WORKS</span>
+    <div class="loop-box">
+      <div class="loop-row"><div class="loop-num">1</div><div class="loop-text">Send <code>messages[]</code> to LLM — full conversation history every time</div></div>
+      <div class="loop-row"><div class="loop-num">2</div><div class="loop-text">LLM responds — either <strong>text only</strong> or <strong>tool call(s)</strong></div></div>
+      <div class="loop-branch">
+        <div class="branch-box" style="background:#0f2019; color:#10b981; border:1px solid #10b98144;">✅ No tool calls → <strong>break</strong>. Task done, respond to user.</div>
+        <div class="branch-box" style="background:#1a1205; color:#f59e0b; border:1px solid #f59e0b44;">🔧 Tool calls → execute each tool, append results to messages[]</div>
+      </div>
+      <div class="loop-row"><div class="loop-num">3</div><div class="loop-text">Append LLM response + tool results to <code>messages[]</code> → loop back to step 1</div></div>
+      <div class="loop-row"><div class="loop-num">4</div><div class="loop-text">Repeat until LLM stops calling tools <em>or</em> a stop condition fires</div></div>
+    </div>
+    <pre style="margin-top:12px;">
+<span class="kw">while</span> (<span class="kw">true</span>) {
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">llm.generate</span>(messages);
+  messages.<span class="fn">push</span>(response);                       <span class="cm">// always append</span>
+
+  <span class="kw">if</span> (response.finishReason !== <span class="str">'tool-calls'</span>) <span class="kw">break</span>; <span class="cm">// done</span>
+
+  <span class="kw">for</span> (<span class="kw">const</span> call <span class="kw">of</span> response.toolCalls) {
+    <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">executeTool</span>(call);
+    messages.<span class="fn">push</span>(<span class="fn">toolResult</span>(result));             <span class="cm">// feed results back</span>
+  }
+  <span class="cm">// LLM sees new messages → decides next action</span>
+}</pre>
+  </div>
+
+  <!-- Stop Conditions -->
+  <div class="section" style="border:2px solid #f87171; background:#f8717112;">
+    <span class="section-label" style="background:#f87171; color:#000;">STOP CONDITIONS — NEVER LET IT RUN FOREVER</span>
+    <div class="stop-grid">
+      <div class="stop-card" style="border-left:3px solid #10b981;">
+        <div class="s-title" style="color:#10b981;">✅ Natural — finishReason: "stop"</div>
+        <div class="s-body">LLM returns text, no tool calls. Decided it's done. Ideal case — no intervention needed.</div>
+      </div>
+      <div class="stop-card" style="border-left:3px solid #f59e0b;">
+        <div class="s-title" style="color:#f59e0b;">🔢 Max iterations</div>
+        <div class="s-body">Hard cap e.g. 20 loops. Safety net against infinite tool call chains. Always add this.</div>
+      </div>
+      <div class="stop-card" style="border-left:3px solid #60a5fa;">
+        <div class="s-title" style="color:#60a5fa;">📏 Token limit</div>
+        <div class="s-body"><code>finishReason: "length"</code>. Context window full. Compact or stop — covered in context management lesson.</div>
+      </div>
+      <div class="stop-card" style="border-left:3px solid #f87171;">
+        <div class="s-title" style="color:#f87171;">❌ Error threshold</div>
+        <div class="s-body">3 consecutive tool failures → stop. Don't feed repeated errors to LLM — it's a waste of tokens and money.</div>
+      </div>
+      <div class="stop-card" style="border-left:3px solid #7c6fff;">
+        <div class="s-title" style="color:#7c6fff;">👤 User intervention</div>
+        <div class="s-body">Ctrl+C in terminal. Cancel button in UI. Always give humans an escape hatch regardless of infra.</div>
+      </div>
+      <div class="stop-card" style="border-left:3px solid #c084fc;">
+        <div class="s-title" style="color:#c084fc;">💰 Cost / token budget</div>
+        <div class="s-body">Track token usage per loop. Stop if spend exceeds threshold. Critical for long-running autonomous agents.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streaming -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">STREAMING — streamText vs generateText</span>
+    <div class="cards">
+      <div class="card" style="border:1px solid #55555566;">
+        <div class="icon">⏳</div>
+        <div class="title" style="color:#aaa;">generateText</div>
+        <div class="desc">Buffers everything. You wait. Then the whole response jump-scares you at once. Bad UX for anything &gt;2s.</div>
+      </div>
+      <div class="card" style="border:1px solid #60a5fa44;">
+        <div class="icon">⚡</div>
+        <div class="title" style="color:#60a5fa;">streamText</div>
+        <div class="desc">Tokens stream as generated. User sees output immediately. Feels responsive even during long tool chains.</div>
+      </div>
+    </div>
+    <pre style="margin-top:12px;">
+<span class="kw">const</span> result = <span class="fn">streamText</span>({ model, messages, tools });
+
+<span class="kw">for await</span> (<span class="kw">const</span> chunk <span class="kw">of</span> result.fullStream) {
+  <span class="kw">if</span> (chunk.type === <span class="str">'text-delta'</span>)  callbacks.<span class="fn">onToken</span>(chunk.text);  <span class="cm">// stream to UI</span>
+  <span class="kw">if</span> (chunk.type === <span class="str">'tool-call'</span>)   toolCalls.<span class="fn">push</span>(chunk);          <span class="cm">// collect for execution</span>
+}</pre>
+  </div>
+
+  <!-- When NOT to use agents -->
+  <div class="warn">
+    <strong>⚠️ Don't default to agents.</strong> Most business workflows are deterministic — same steps every time. Use an LLM inside a workflow node instead. Agents are for <em>unknown</em> step counts and <em>undefined</em> paths. Over-agenting = unpredictable behavior + higher cost + harder to eval.
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> "Set up the new dev project, create the initial tasks, and assign them to the team." → agent needs to: <code>list_users</code> → <code>create_project</code> → <code>create_task × N</code> → <code>assign_user × N</code>. Number of tasks/users unknown at call time. Can't hardcode steps. Agent loop reads each result and decides the next tool call — loop runs until no more tool calls.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Pattern: <span style="color:#7c6fff;">while(true)</span> · <span style="color:#10b981;">messages[] append</span> · <span style="color:#f59e0b;">finishReason check</span> · <span style="color:#60a5fa;">streamText</span> · <span style="color:#f87171;">stop conditions</span>
+  </div>
+
+</div>
+</body>
+</html>
