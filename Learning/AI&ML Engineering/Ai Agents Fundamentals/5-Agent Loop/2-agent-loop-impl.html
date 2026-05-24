@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Agent Loop Implementation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; margin-top: 10px; }
+  .kw  { color: #7c6fff; }
+  .fn  { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm  { color: #555; }
+  .num { color: #10b981; }
+  .obj { color: #f87171; }
+
+  /* Message roles */
+  .msg-flow { display: flex; flex-direction: column; gap: 6px; }
+  .msg-row { display: flex; align-items: flex-start; gap: 10px; }
+  .msg-role { font-size: 11px; font-weight: 800; border-radius: 6px; padding: 3px 8px; flex-shrink: 0; min-width: 80px; text-align: center; margin-top: 2px; }
+  .msg-content { background: #1a1a2e; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #aaa; flex: 1; }
+  .msg-content strong { color: #e0e0e0; }
+  .msg-arrow { color: #444; font-size: 18px; text-align: center; padding-left: 36px; }
+
+  /* Loop steps */
+  .loop-steps { display: flex; flex-direction: column; gap: 0; }
+  .ls-row { display: flex; gap: 0; }
+  .ls-left { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; }
+  .ls-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .ls-line { width: 2px; flex: 1; min-height: 10px; }
+  .ls-body { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; margin: 3px 0 3px 8px; flex: 1; }
+  .ls-title { font-size: 13px; font-weight: 700; }
+  .ls-desc { font-size: 12px; color: #aaa; margin-top: 3px; }
+  .ls-branch { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .branch { border-radius: 8px; padding: 5px 10px; font-size: 12px; }
+
+  /* Chunk types */
+  .chunk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .chunk-card { background: #1a1a2e; border-radius: 8px; padding: 12px; }
+  .chunk-card .c-type { font-size: 12px; font-weight: 800; font-family: monospace; margin-bottom: 4px; }
+  .chunk-card .c-desc { font-size: 12px; color: #aaa; }
+  .chunk-card .c-action { font-size: 11px; margin-top: 6px; border-radius: 6px; padding: 3px 8px; display: inline-block; }
+
+  /* Pitfalls */
+  .pitfall-list { display: flex; flex-direction: column; gap: 8px; }
+  .pitfall { display: flex; gap: 10px; align-items: flex-start; background: #1a1a2e; border-radius: 8px; padding: 10px 12px; }
+  .p-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .p-title { font-size: 12px; font-weight: 700; color: #f87171; }
+  .p-desc { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  .cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cb-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; }
+  .cb-card .cb-fn { font-family: monospace; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .cb-card .cb-desc { font-size: 12px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">AGENT LOOP — IMPLEMENTATION</div>
+    <h1>Building run.ts from Scratch</h1>
+    <div class="sub">streamText + messages[] + tool execution + callbacks = a working conversational agent.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 The <strong>messages[] array IS the agent's memory.</strong><br/>Whatever is in it = truth. Whatever isn't = never happened. You can fake, manipulate, or surgically remove anything.</div>
+    <div class="note">The LLM doesn't store state. It only sees what you put in messages[]. Every loop iteration = fresh LLM call with a growing array.</div>
+  </div>
+
+  <!-- messages[] structure -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">MESSAGES[] — THE 4 ROLES</span>
+    <div class="msg-flow">
+      <div class="msg-row">
+        <div class="msg-role" style="background:#7c6fff22;color:#7c6fff;border:1px solid #7c6fff;">system</div>
+        <div class="msg-content">Hidden instructions, personality, context. <strong>Always first. Never shown to user.</strong> Gets less critical as reasoning models improve.</div>
+      </div>
+      <div class="msg-arrow">↓</div>
+      <div class="msg-row">
+        <div class="msg-role" style="background:#60a5fa22;color:#60a5fa;border:1px solid #60a5fa;">user</div>
+        <div class="msg-content">User's message. <strong>If last message in array = user → LLM responds.</strong> If last = assistant → LLM waits. Always end with user to trigger response.</div>
+      </div>
+      <div class="msg-arrow">↓</div>
+      <div class="msg-row">
+        <div class="msg-role" style="background:#10b98122;color:#10b981;border:1px solid #10b981;">assistant</div>
+        <div class="msg-content">LLM's response — text and/or tool calls. <strong>Must be pushed back into messages[]</strong> or LLM won't remember it said anything.</div>
+      </div>
+      <div class="msg-arrow">↓</div>
+      <div class="msg-row">
+        <div class="msg-role" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b;">tool</div>
+        <div class="msg-content">Tool execution results. Must include <strong>toolCallId</strong> to match the original request. All tool results must be strings. <strong>OpenAI errors if next message after tool-call isn't a tool result.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loop Steps -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">THE LOOP — STEP BY STEP</span>
+    <div class="loop-steps">
+
+      <div class="ls-row">
+        <div class="ls-left"><div class="ls-dot" style="background:#7c6fff;"></div><div class="ls-line" style="background:#2a2a4a;"></div></div>
+        <div class="ls-body">
+          <div class="ls-title" style="color:#7c6fff;">Setup messages[]</div>
+          <div class="ls-desc"><code>filterCompatibleMessages()</code> strips UI-only objects from history. Then: <code>[system, ...history, user]</code>. UI sees rich objects; LLM only sees what's compatible.</div>
+        </div>
+      </div>
+
+      <div class="ls-row">
+        <div class="ls-left"><div class="ls-dot" style="background:#60a5fa;"></div><div class="ls-line" style="background:#2a2a4a;"></div></div>
+        <div class="ls-body">
+          <div class="ls-title" style="color:#60a5fa;">Call streamText (no await)</div>
+          <div class="ls-desc">Same args as generateText — model, messages, tools, telemetry. Returns an async iterable, not a promise. Tokens flow as generated.</div>
+        </div>
+      </div>
+
+      <div class="ls-row">
+        <div class="ls-left"><div class="ls-dot" style="background:#f59e0b;"></div><div class="ls-line" style="background:#2a2a4a;"></div></div>
+        <div class="ls-body">
+          <div class="ls-title" style="color:#f59e0b;">for await chunk of result.fullStream</div>
+          <div class="ls-desc">Each chunk has a <code>type</code>. Handle two types — text-delta and tool-call. Wrap in try/catch; collect streamError to handle gracefully.</div>
+          <div class="ls-branch" style="margin-top:8px;">
+            <div class="branch" style="background:#0d1f1a;color:#10b981;border:1px solid #10b98144;"><strong>text-delta</strong> → append to currentText + callbacks.onToken()</div>
+            <div class="branch" style="background:#1a1205;color:#f59e0b;border:1px solid #f59e0b44;"><strong>tool-call</strong> → push {toolCallId, toolName, args} to toolCalls[] + callbacks.onToolCallStart()</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ls-row">
+        <div class="ls-left"><div class="ls-dot" style="background:#f87171;"></div><div class="ls-line" style="background:#2a2a4a;"></div></div>
+        <div class="ls-body">
+          <div class="ls-title" style="color:#f87171;">Check finishReason</div>
+          <div class="ls-desc">await result.finishReason — waits for stream to fully complete before checking.</div>
+          <div class="ls-branch" style="margin-top:8px;">
+            <div class="branch" style="background:#0f2019;color:#10b981;border:1px solid #10b98144;">≠ "tool-calls" OR toolCalls.length === 0 → <strong>push responseMessages → break</strong></div>
+            <div class="branch" style="background:#1a1205;color:#f59e0b;border:1px solid #f59e0b44;">=== "tool-calls" → push responseMessages → execute tools → loop again</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ls-row">
+        <div class="ls-left"><div class="ls-dot" style="background:#c084fc;"></div><div class="ls-line" style="background:#2a2a4a;"></div></div>
+        <div class="ls-body">
+          <div class="ls-title" style="color:#c084fc;">Execute tools → push results</div>
+          <div class="ls-desc">For each toolCall: <code>executeTool(name, args)</code> → push <code>{role:"tool", content:[{type:"tool-result", toolCallId, toolName, output:{type:"text", value:result}}]}</code>. Result MUST be a string.</div>
+        </div>
+      </div>
+
+      <div class="ls-row">
+        <div class="ls-left"><div class="ls-dot" style="background:#60a5fa;"></div></div>
+        <div class="ls-body">
+          <div class="ls-title" style="color:#60a5fa;">Loop back → LLM sees new messages</div>
+          <div class="ls-desc">Only thing that changed = messages[]. LLM sees tool results, decides next action. This continues until no tool calls or a stop condition fires.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">CORE LOOP — run.ts</span>
+<pre>
+<span class="cm">// messages[] bootstrap</span>
+<span class="kw">const</span> messages: ModelMessage[] = [
+  { role: <span class="str">'system'</span>,    content: SYSTEM_PROMPT },
+  ...workingHistory,              <span class="cm">// filtered conversation so far</span>
+  { role: <span class="str">'user'</span>, content: userMessage }
+];
+
+<span class="kw">while</span> (<span class="kw">true</span>) {
+  <span class="kw">const</span> result = <span class="fn">streamText</span>({ model, messages, tools }); <span class="cm">// no await</span>
+  <span class="kw">const</span> toolCalls: ToolCallInfo[] = [];
+  <span class="kw">let</span> currentText = <span class="str">''</span>;
+
+  <span class="kw">for await</span> (<span class="kw">const</span> chunk <span class="kw">of</span> result.fullStream) {
+    <span class="kw">if</span> (chunk.type === <span class="str">'text-delta'</span>)  { currentText += chunk.text; callbacks.<span class="fn">onToken</span>(chunk.text); }
+    <span class="kw">if</span> (chunk.type === <span class="str">'tool-call'</span>)   { toolCalls.<span class="fn">push</span>({ toolCallId: chunk.toolCallId, toolName: chunk.toolName, args: chunk.input }); }
+  }
+
+  <span class="kw">const</span> finishReason = <span class="kw">await</span> result.finishReason;
+
+  <span class="cm">// BREAK CASE 1: done — no tool calls needed</span>
+  <span class="kw">if</span> (finishReason !== <span class="str">'tool-calls'</span> || toolCalls.length === <span class="num">0</span>) {
+    messages.<span class="fn">push</span>(...(await result.response).messages);
+    <span class="kw">break</span>;
+  }
+
+  <span class="cm">// Tool calls path — push assistant message first</span>
+  messages.<span class="fn">push</span>(...(await result.response).messages);
+
+  <span class="cm">// Execute each tool, push result back</span>
+  <span class="kw">for</span> (<span class="kw">const</span> tc <span class="kw">of</span> toolCalls) {
+    <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">executeTool</span>(tc.toolName, tc.args);
+    messages.<span class="fn">push</span>({
+      role: <span class="str">'tool'</span>,
+      content: [{ type: <span class="str">'tool-result'</span>, toolCallId: tc.toolCallId, toolName: tc.toolName, output: { type: <span class="str">'text'</span>, value: res } }]
+    });
+  }
+  <span class="cm">// loop continues — LLM sees new messages on next iteration</span>
+}</pre>
+  </div>
+
+  <!-- toolCallId importance -->
+  <div class="warn">
+    <strong>⚠️ toolCallId is sacred.</strong> The LLM generates it. You must echo it back exactly in the tool result. Wrong/missing ID = OpenAI API error. It's how the LLM matches "I asked you to do X" with "here's the result of X" when multiple tools run in parallel.
+  </div>
+
+  <!-- Callbacks -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">CALLBACKS — UI BRIDGE</span>
+    <div style="color:#aaa;font-size:12px;margin-bottom:10px;">The loop is pure logic. It doesn't know about any UI. Callbacks are the hook that lets the terminal/browser react to events.</div>
+    <div class="cb-grid">
+      <div class="cb-card" style="border-left:3px solid #60a5fa;">
+        <div class="cb-fn" style="color:#60a5fa;">onToken(text)</div>
+        <div class="cb-desc">Streams each text token to the terminal as generated. This is the "typing" effect.</div>
+      </div>
+      <div class="cb-card" style="border-left:3px solid #f59e0b;">
+        <div class="cb-fn" style="color:#f59e0b;">onToolCallStart(name, args)</div>
+        <div class="cb-desc">Shows tool name + spinner in UI. User knows agent is doing work, not frozen.</div>
+      </div>
+      <div class="cb-card" style="border-left:3px solid #10b981;">
+        <div class="cb-fn" style="color:#10b981;">onToolCallEnd(name, result)</div>
+        <div class="cb-desc">Stops spinner. Optionally show result preview (careful — raw JSON = bad UX for non-devs).</div>
+      </div>
+      <div class="cb-card" style="border-left:3px solid #7c6fff;">
+        <div class="cb-fn" style="color:#7c6fff;">onComplete(fullResponse)</div>
+        <div class="cb-desc">Loop is done. Final full response string. Used to persist, display summary, etc.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pitfalls -->
+  <div class="section" style="border:2px solid #f87171; background:#f8717112;">
+    <span class="section-label" style="background:#f87171; color:#000;">COMMON PITFALLS</span>
+    <div class="pitfall-list">
+      <div class="pitfall">
+        <div class="p-icon">♾️</div>
+        <div><div class="p-title">Infinite loop</div><div class="p-desc">Model keeps calling tools. Add <code>maxIterations</code> counter as safety net — always.</div></div>
+      </div>
+      <div class="pitfall">
+        <div class="p-icon">👻</div>
+        <div><div class="p-title">Forgetting to push assistant message before tool results</div><div class="p-desc">Must push <code>responseMessages.messages</code> first, then push tool results. OpenAI requires tool result to immediately follow the tool call that requested it.</div></div>
+      </div>
+      <div class="pitfall">
+        <div class="p-icon">🔤</div>
+        <div><div class="p-title">Tool result isn't a string</div><div class="p-desc">Everything returned to the LLM must be a string. JSON objects are fine — <code>JSON.stringify()</code> them. Raw objects will break or get ignored.</div></div>
+      </div>
+      <div class="pitfall">
+        <div class="p-icon">🎭</div>
+        <div><div class="p-title">UI messages in LLM messages[]</div><div class="p-desc">Rich UI objects (spinners, status cards, approvals) must be stripped via <code>filterCompatibleMessages()</code> before sending to LLM. LLM will error on unknown message shapes.</div></div>
+      </div>
+      <div class="pitfall">
+        <div class="p-icon">🔀</div>
+        <div><div class="p-title">Not aborting tool calls gracefully</div><div class="p-desc">To abort a tool call: just don't push it into messages[]. LLM never knew it asked. No error thrown — the array is the truth.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WNP Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> User says "Set up the Q3 project and assign all senior devs to it."<br/>
+    Loop iteration 1 → LLM calls <code>list_users(role:"senior")</code> → result: [Ali, Sara, Omar]<br/>
+    Loop iteration 2 → LLM calls <code>create_project("Q3")</code> → result: projectId=42<br/>
+    Loop iteration 3 → LLM calls <code>assign_user</code> × 3 in parallel → all results pushed with matching toolCallIds<br/>
+    Loop iteration 4 → finishReason = "stop" → LLM responds: "Done! Q3 project created and 3 devs assigned." → break.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Key: <span style="color:#7c6fff;">messages[] = truth</span> · <span style="color:#60a5fa;">streamText chunks</span> · <span style="color:#10b981;">finishReason check</span> · <span style="color:#f59e0b;">toolCallId matching</span> · <span style="color:#f87171;">always push before looping</span>
+  </div>
+
+</div>
+</body>
+</html>
