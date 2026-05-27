@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Multi-Turn Evals</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; margin-top: 10px; }
+  .kw  { color: #7c6fff; }
+  .fn  { color: #60a5fa; }
+  .str { color: #f59e0b; }
+  .cm  { color: #555; }
+  .num { color: #10b981; }
+
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 12px; text-align: left; font-size: 11px; }
+  .cmp td { padding: 9px 12px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .cmp td:first-child { color: #e0e0e0; font-weight: 700; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  .tag { display: inline-block; border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; }
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  /* Failures grid */
+  .fail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fail-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; border-left: 3px solid #f87171; }
+  .fail-card .f-title { font-size: 12px; font-weight: 700; color: #f87171; }
+  .fail-card .f-desc { font-size: 12px; color: #aaa; margin-top: 3px; }
+
+  /* Judge pros/cons */
+  .judge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .judge-card { background: #1a1a2e; border-radius: 8px; padding: 12px; }
+  .judge-card .j-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .judge-card .j-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  /* Rubric */
+  .rubric-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .rubric-score { font-size: 12px; font-weight: 800; width: 40px; flex-shrink: 0; text-align: center; border-radius: 6px; padding: 2px 0; }
+  .rubric-bar { flex: 1; height: 8px; background: #12121f; border-radius: 10px; }
+  .rubric-fill { height: 8px; border-radius: 10px; }
+  .rubric-desc { font-size: 12px; color: #aaa; width: 200px; flex-shrink: 0; }
+
+  /* Evaluator pills */
+  .eval-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .eval-pill { border-radius: 8px; padding: 8px 12px; font-size: 12px; }
+  .eval-pill .ep-name { font-weight: 700; font-size: 12px; font-family: monospace; }
+  .eval-pill .ep-type { font-size: 11px; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">EVALS — LEVEL 2</div>
+    <h1>Multi-Turn Evals</h1>
+    <div class="sub">Stop checking individual steps. Start checking whether the agent actually got the job done.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 <strong>Single-turn:</strong> "Did you pick the right tool?" &nbsp;|&nbsp; <strong>Multi-turn:</strong> "Did you finish the task?"<br/>Multi-turn = run the full loop, mock the tools, judge the output with another LLM.</div>
+    <div class="note">Users don't care what order you called tools in. They care that the job got done correctly. That's what multi-turn evals measure.</div>
+  </div>
+
+  <!-- Single vs Multi comparison -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">SINGLE-TURN vs MULTI-TURN</span>
+    <table class="cmp">
+      <thead><tr><th></th><th>Single-Turn</th><th>Multi-Turn</th></tr></thead>
+      <tbody>
+        <tr><td>Tests</td><td>One step decision</td><td>Full task completion</td></tr>
+        <tr><td>Executor runs</td><td>1 LLM call, stop</td><td>Full agent loop until done</td></tr>
+        <tr><td>Tools</td><td>Mocked — never executed</td><td>Mocked — executed with fake results</td></tr>
+        <tr><td>Scorer type</td><td>Deterministic (F1, binary)</td><td>Deterministic + LLM-as-judge</td></tr>
+        <tr><td>Analogy</td><td>Unit test</td><td>E2E test</td></tr>
+        <tr><td>User-facing?</td><td>Dev signal only</td><td>Simulates real user experience</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- What single-turn misses -->
+  <div class="section" style="border:2px solid #f87171; background:#f8717112;">
+    <span class="section-label" style="background:#f87171; color:#000;">WHAT SINGLE-TURN EVALS MISS</span>
+    <div class="fail-grid">
+      <div class="fail-card">
+        <div class="f-title">✅ Right tool #1, ❌ Wrong tool #2</div>
+        <div class="f-desc">First call correct but next decision breaks. Only visible across multiple steps.</div>
+      </div>
+      <div class="fail-card">
+        <div class="f-title">🔄 Stuck in a loop</div>
+        <div class="f-desc">Agent calls same tool repeatedly after seeing its result. Infinite loop detected only over full run.</div>
+      </div>
+      <div class="fail-card">
+        <div class="f-title">🤷 Gives up too early</div>
+        <div class="f-desc">Vague prompt + granular tools = too much work. Agent lies "can't do this" instead of trying.</div>
+      </div>
+      <div class="fail-card">
+        <div class="f-title">🤯 Misinterprets tool results</div>
+        <div class="f-desc">Tool returns base64 image. Can agent decode meaning? Can only test by feeding result back.</div>
+      </div>
+      <div class="fail-card">
+        <div class="f-title">♾️ Doesn't know when to stop</div>
+        <div class="f-desc">Has all info needed but keeps calling tools. Early AGI problem — still happens on complex tasks.</div>
+      </div>
+      <div class="fail-card">
+        <div class="f-title">📉 Quality of final response</div>
+        <div class="f-desc">Tool calls were perfect but the summary to the user was wrong or incomplete. Single-turn can't catch this.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LLM as Judge -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">LLM-AS-JUDGE</span>
+    <div style="color:#aaa; font-size:12px; margin-bottom:12px;">Agent output is text. You can't <code>===</code> text. You need intelligence to judge intelligence. Enter: another LLM.</div>
+    <div class="judge-grid">
+      <div class="judge-card" style="border-top:3px solid #10b981;">
+        <div class="j-title" style="color:#10b981;">✅ Why it works</div>
+        <div class="j-body">
+          Semantic understanding — "file contains 'hello'" = "content: hello"<br/>
+          Handles natural language variation<br/>
+          Criteria defined in plain English<br/>
+          Catches nuance regex never could
+        </div>
+      </div>
+      <div class="judge-card" style="border-top:3px solid #f87171;">
+        <div class="j-title" style="color:#f87171;">❌ Limitations</div>
+        <div class="j-body">
+          Expensive — 1 eval = 1+ LLM calls<br/>
+          Non-deterministic — same output, different scores<br/>
+          Model bias toward verbose/formal answers<br/>
+          Gaming — smart models can satisfy judge without being correct
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:10px; background:#2a1f4a; border-radius:8px; padding:10px 12px; font-size:12px; color:#c084fc;">
+      <strong>Gaming risk:</strong> Don't hint at what "good" looks like in judge criteria. Models trained on goal-achievement will optimize for the judge, not actual quality. Like the Mom Test in product research — don't bias the interviewer.
+    </div>
+  </div>
+
+  <!-- Making judge reliable -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">MAKING THE JUDGE RELIABLE</span>
+
+    <div style="font-size:11px; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:8px;">SCORING RUBRIC (define what each number means)</div>
+    <div class="rubric-row"><div class="rubric-score" style="background:#10b98133;color:#10b981;">10</div><div class="rubric-bar"><div class="rubric-fill" style="width:100%;background:#10b981;"></div></div><div class="rubric-desc">Fully addresses task using tool results correctly</div></div>
+    <div class="rubric-row"><div class="rubric-score" style="background:#60a5fa33;color:#60a5fa;">7–9</div><div class="rubric-bar"><div class="rubric-fill" style="width:80%;background:#60a5fa;"></div></div><div class="rubric-desc">Mostly correct, minor issues</div></div>
+    <div class="rubric-row"><div class="rubric-score" style="background:#f59e0b33;color:#f59e0b;">4–6</div><div class="rubric-bar"><div class="rubric-fill" style="width:50%;background:#f59e0b;"></div></div><div class="rubric-desc">Partially addresses task</div></div>
+    <div class="rubric-row" style="margin-bottom:0;"><div class="rubric-score" style="background:#f8717133;color:#f87171;">1–3</div><div class="rubric-bar"><div class="rubric-fill" style="width:20%;background:#f87171;"></div></div><div class="rubric-desc">Mostly incorrect or irrelevant</div></div>
+
+    <pre style="margin-top:14px;"><span class="cm">// Structured output schema for judge — force a number, not prose</span>
+<span class="kw">const</span> judgeSchema = z.object({
+  score:  z.number().<span class="fn">min</span>(<span class="num">1</span>).<span class="fn">max</span>(<span class="num">10</span>),
+  reason: z.string()
+});
+
+<span class="cm">// Judge call — use stronger model than the agent</span>
+<span class="kw">const</span> judgment = <span class="kw">await</span> <span class="fn">generateObject</span>({
+  model: <span class="fn">openai</span>(<span class="str">'o1'</span>),           <span class="cm">// stronger than agent's gpt-4o-mini</span>
+  schema: judgeSchema,
+  prompt: <span class="str">`Task: ${task}
+Tool results: ${JSON.stringify(mockResults)}
+Agent response: ${agentOutput}
+Did the agent correctly use the tool results to address the task?`</span>
+});</pre>
+  </div>
+
+  <!-- Data strategy -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">TEST DATA STRUCTURE</span>
+    <div class="grid2" style="margin-bottom:12px;">
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#f59e0b;">Fresh task</div>
+        <div class="g-body">Single user prompt. Agent starts from scratch. Good for testing full task completion from zero context.</div>
+      </div>
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#c084fc;">Mid-conversation (primed)</div>
+        <div class="g-body">Pre-filled messages[] with fake history. Test follow-up handling. Leave off on a user message — LLM takes over from there.</div>
+      </div>
+    </div>
+    <pre><span class="cm">// Each test case shape</span>
+{
+  <span class="str">"prompt"</span>: <span class="str">"Read config and report the DB host"</span>,
+  <span class="str">"tools"</span>: [<span class="str">"readFile"</span>, <span class="str">"writeFile"</span>],
+  <span class="str">"mockTools"</span>: {
+    <span class="str">"readFile"</span>: { <span class="str">"result"</span>: <span class="str">"DB_HOST=localhost\nDB_PORT=5432"</span> },
+    <span class="str">"writeFile"</span>: { <span class="str">"result"</span>: <span class="str">"Successfully wrote 45 chars"</span> }
+  },
+  <span class="str">"expectedToolOrder"</span>: [<span class="str">"readFile"</span>],          <span class="cm">// deterministic scorer</span>
+  <span class="str">"forbiddenTools"</span>: [<span class="str">"deleteFile"</span>],            <span class="cm">// deterministic scorer</span>
+  <span class="str">"originalTask"</span>: <span class="str">"Read config and report DB host"</span>  <span class="cm">// fed to judge</span>
+}</pre>
+  </div>
+
+  <!-- Combined evaluators -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">COMBINED EVALUATORS — MULTI-TURN</span>
+    <div style="color:#aaa; font-size:12px; margin-bottom:12px;">Mix deterministic scorers (cheap, fast) with LLM judge (expensive, semantic). Average or weight them.</div>
+    <div class="eval-row">
+      <div class="eval-pill" style="background:#10b98122; border:1px solid #10b98144; flex:1;">
+        <div class="ep-name" style="color:#10b981;">toolOrderCorrect</div>
+        <div class="ep-type" style="color:#555;">Binary · deterministic</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">Did tools execute in expected sequence?</div>
+      </div>
+      <div class="eval-pill" style="background:#f8717122; border:1px solid #f8717144; flex:1;">
+        <div class="ep-name" style="color:#f87171;">toolsAvoided</div>
+        <div class="ep-type" style="color:#555;">Binary · deterministic</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">Were forbidden tools never called?</div>
+      </div>
+      <div class="eval-pill" style="background:#7c6fff22; border:1px solid #7c6fff44; flex:1;">
+        <div class="ep-name" style="color:#7c6fff;">llmJudge</div>
+        <div class="ep-type" style="color:#555;">1–10 score · non-deterministic</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">Did final response make sense given task + tool results?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost warning -->
+  <div class="warn">
+    <strong>⚠️ LLM judge cost creep:</strong> 1000 evals × judge call = LLM costs can exceed your actual product usage costs. Use open-source models (Llama, Mistral) hosted on your own infra for judges. Same intelligence, fraction of the cost. Alternatively: run deterministic scorers always, LLM judge only on failures.
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP scenario — primed mid-conversation eval:</strong><br/>
+    Pre-fill: user asked to "set up Q3 project" → agent created it → user follow-up: "now assign the senior devs"<br/>
+    Mock: <code>list_users</code> returns [Ali, Sara] · <code>assign_user</code> returns "success"<br/>
+    Expected order: <code>[list_users, assign_user, assign_user]</code> · forbidden: <code>[delete_task]</code><br/>
+    Judge prompt: "Given the task was to assign senior devs to Q3, and the agent got [Ali, Sara] from list_users, does the response correctly confirm both were assigned?" → score 9/10.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Scorers: <span style="color:#10b981;">toolOrderCorrect</span> · <span style="color:#f87171;">toolsAvoided</span> · <span style="color:#7c6fff;">llmJudge (structured output)</span> · Use stronger model as judge · Mock tool results for determinism
+  </div>
+
+</div>
+</body>
+</html>
