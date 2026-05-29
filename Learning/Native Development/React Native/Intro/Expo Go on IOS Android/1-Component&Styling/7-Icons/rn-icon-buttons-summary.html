@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Icon Buttons</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+    --brand-red:#ee6055;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--red),var(--amber));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* TABLE */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+
+  /* LIVE PREVIEW */
+  .rn-preview{background:#f5f5f5;border-radius:8px;overflow:hidden;border:1px solid var(--border);max-width:320px;}
+  .rn-item{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .rn-item.todo{background:#fff;border-bottom:2px solid #1a759f;}
+  .rn-item.done{background:#eee;border-bottom:2px solid #eee;}
+  .rn-left{display:flex;align-items:center;gap:8px;flex:1;}
+  .rn-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+  .rn-icon.todo{border:2px solid #1a759f;color:#1a759f;}
+  .rn-icon.done{background:#aaa;color:#fff;border:none;}
+  .rn-text{font-family:'DM Sans',sans-serif;font-size:15px;}
+  .rn-text.todo{color:#1a1a1a;font-weight:200;}
+  .rn-text.done{color:grey;font-weight:200;text-decoration:line-through;text-decoration-color:grey;}
+  .rn-del{font-size:18px;padding:4px;}
+  .rn-del.todo{color:#ee6055;}
+  .rn-del.done{color:grey;}
+
+  /* INSTALL EXPLAINER */
+  .install-compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:10px;}
+  .ic-head{background:var(--surf2);padding:8px 12px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);}
+  .ic-body{padding:10px 12px;font-size:12.5px;color:#94a3b8;border-right:1px solid var(--border);}
+  .ic-body:last-child{border-right:none;}
+
+  /* SVG comparison */
+  .svg-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px;}
+  .svg-table th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .svg-table td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .svg-table tr:last-child td{border-bottom:none;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🎯</div>
+  <div>
+    <h1>RN v3 — Icon Buttons</h1>
+    <p>Kadi Kraman · @expo/vector-icons · hitSlop · npx expo install · SVG gotcha</p>
+  </div>
+  <div class="badge">Chapter 5.5</div>
+</div>
+
+
+<!-- 1. NPX EXPO INSTALL -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>npx expo install — Why Not yarn/npm?</h2>
+    <span class="pill bg-cyan">Key Concept</span>
+  </div>
+  <div class="cb">
+    <div class="install-compare">
+      <div>
+        <div class="ic-head" style="color:var(--red)">yarn add / npm install</div>
+        <div class="ic-body">Installs <strong>latest</strong> version of the package. May be incompatible with your current Expo SDK + React Native version. Can crash your app silently.</div>
+      </div>
+      <div>
+        <div class="ic-head" style="color:var(--green)">npx expo install ✓</div>
+        <div class="ic-body">Checks known SDK-compatible versions first, then calls your package manager. Still uses yarn/npm/pnpm — detects which via your <strong>lockfile</strong>.</div>
+      </div>
+    </div>
+
+    <div class="code" style="margin-top:10px">
+<span class="fn">npx expo install</span> <span class="str">@expo/vector-icons</span>
+<span class="cm"># output: "Installing 1 SDK 51 compatible native module using yarn"</span>
+<span class="cm"># → your lockfile = yarn.lock? uses yarn. pnpm-lock? uses pnpm. etc.</span>
+    </div>
+
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> Like using <code style="font-family:JetBrains Mono,monospace">pip install</code> with a <code style="font-family:JetBrains Mono,monospace">requirements.txt</code> pinned version vs blindly installing latest. Expo SDK is a version contract — native modules must match.
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Expo Go bonus:</strong> Because Expo Go is a pre-built sandbox, <code style="font-family:JetBrains Mono,monospace">@expo/vector-icons</code> is already bundled inside it. No native rebuild required — install and it just works.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. SVG GOTCHA -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--red)"></div>
+    <h2>SVG on Mobile — Performance Gotcha</h2>
+    <span class="pill bg-red">Warning</span>
+  </div>
+  <div class="cb">
+    <table class="svg-table">
+      <thead><tr><th>Format</th><th>Web</th><th>React Native</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">SVG</td>
+          <td style="color:#94a3b8">Ideal — scalable, tiny</td>
+          <td style="color:var(--red)">Expensive on Android especially. 1000 SVGs can crawl the app.</td>
+          <td style="color:var(--amber)">Use sparingly</td>
+        </tr>
+        <tr>
+          <td class="mono">PNG (@2x/@3x)</td>
+          <td style="color:#94a3b8">OK</td>
+          <td style="color:var(--green)">Preferred for general images — lightweight to render</td>
+          <td style="color:var(--green)">Default choice</td>
+        </tr>
+        <tr>
+          <td class="mono">Vector Icons</td>
+          <td style="color:#94a3b8">Icon fonts</td>
+          <td style="color:var(--green)">Optimized for tab bars, icon buttons — fine at scale</td>
+          <td style="color:var(--green)">✓ What we use</td>
+        </tr>
+        <tr>
+          <td class="mono">expo-image</td>
+          <td style="color:#94a3b8">—</td>
+          <td style="color:var(--cyan)">Also renders SVGs — Expo's performant image component</td>
+          <td style="color:var(--cyan)">Alternative</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="warn" style="margin-top:10px">
+      ⚠️ <strong>SVG ≠ free on native.</strong> Each SVG is a full render tree on Android. Coming from web, this surprises everyone. Use <code style="font-family:JetBrains Mono,monospace">react-native-svg</code> when you need SVG, but keep count low.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. REPLACE DELETE WITH ICON -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>Replace Delete Button with Icon</h2>
+    <span class="pill bg-violet">Step 1</span>
+  </div>
+  <div class="cb">
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">Add red to theme.ts:</p>
+    <div class="code">
+<span class="add">+ colorRed: "#ee6055",</span>
+    </div>
+
+    <p style="color:var(--muted);font-size:12px;margin-top:12px;margin-bottom:6px">Update ShoppingListItem.tsx — replace entire button block:</p>
+    <div class="code">
+<span class="cm">// OLD — text button with styles</span>
+<span class="del">- &lt;TouchableOpacity style={[styles.button, ...]}&gt;</span>
+<span class="del">-   &lt;Text style={styles.buttonText}&gt;Delete&lt;/Text&gt;</span>
+<span class="del">- &lt;/TouchableOpacity&gt;</span>
+
+<span class="cm">// NEW — icon button, much cleaner</span>
+<span class="add">+ import AntDesign from "@expo/vector-icons/AntDesign";</span>
+
+<span class="kw">&lt;TouchableOpacity</span> <span class="prop">hitSlop</span>={<span class="num">20</span>} <span class="prop">onPress</span>={handleDelete}<span class="kw">&gt;</span>
+  <span class="kw">&lt;AntDesign</span>
+    <span class="prop">name</span>=<span class="str">"close-circle"</span>
+    <span class="prop">size</span>={<span class="num">24</span>}
+    <span class="prop">color</span>={isCompleted ? theme.<span class="fn">colorGrey</span> : theme.<span class="fn">colorRed</span>}
+  <span class="kw">/&gt;</span>
+<span class="kw">&lt;/TouchableOpacity&gt;</span>
+
+<span class="cm">// Also: remove button, buttonText, completedButton styles</span>
+<span class="cm">// Increase paddingHorizontal from 8 → 18 for breathing room</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. LEFT ICON + LAYOUT -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>Left Side Check/Circle Icon</h2>
+    <span class="pill bg-green">Step 2</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <div class="code">
+<span class="add">+ import Entypo from "@expo/vector-icons/Entypo";</span>
+
+<span class="cm">// Wrap left side in a row View</span>
+<span class="kw">&lt;View</span> <span class="prop">style</span>={styles.row}<span class="kw">&gt;</span>
+  <span class="kw">&lt;Entypo</span>
+    <span class="prop">name</span>={isCompleted ? <span class="str">"check"</span> : <span class="str">"circle"</span>}
+    <span class="prop">size</span>={<span class="num">24</span>}
+    <span class="prop">color</span>={isCompleted ? theme.<span class="fn">colorGrey</span> : theme.<span class="fn">colorCerulean</span>}
+  <span class="kw">/&gt;</span>
+  <span class="kw">&lt;Text</span> <span class="prop">style</span>={[styles.itemText, ...]}<span class="kw">&gt;</span>{name}<span class="kw">&lt;/Text&gt;</span>
+<span class="kw">&lt;/View&gt;</span>
+
+<span class="cm">// new "row" style</span>
+<span class="prop">row</span>: { <span class="prop">flexDirection</span>: <span class="str">"row"</span>, <span class="prop">flex</span>: <span class="num">1</span>, <span class="prop">alignItems</span>: <span class="str">"center"</span> },
+<span class="cm">// itemText gets: marginLeft: 8, flex: 1</span>
+        </div>
+      </div>
+
+      <!-- preview -->
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:8px">Final result preview</p>
+        <div class="rn-preview">
+          <div class="rn-item todo">
+            <div class="rn-left">
+              <div class="rn-icon todo">○</div>
+              <span class="rn-text todo">Coffee</span>
+            </div>
+            <span class="rn-del todo">⊗</span>
+          </div>
+          <div class="rn-item done">
+            <div class="rn-left">
+              <div class="rn-icon done">✓</div>
+              <span class="rn-text done">Tea</span>
+            </div>
+            <span class="rn-del done">⊗</span>
+          </div>
+          <div class="rn-item done">
+            <div class="rn-left">
+              <div class="rn-icon done">✓</div>
+              <span class="rn-text done">Milk</span>
+            </div>
+            <span class="rn-del done">⊗</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. HITSLOP -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>hitSlop — Bigger Tap Area for Small Icons</h2>
+    <span class="pill bg-amber">UX Tip</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">Problem</div>
+        <p>A 24px icon is hard to tap accurately on mobile. Users miss it and get frustrated — especially one-handed or on small screens.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">hitSlop={20} ✓</div>
+        <p>Extends the pressable area by 20px on all sides <em>without changing the visual size</em>. The icon stays 24px but taps register in a ~64px area.</p>
+      </div>
+    </div>
+    <div class="code" style="margin-top:10px">
+<span class="cm">// number — same on all sides</span>
+<span class="kw">&lt;TouchableOpacity</span> <span class="prop">hitSlop</span>={<span class="num">20</span>}<span class="kw">&gt;</span>
+
+<span class="cm">// object — fine-tune per side</span>
+<span class="kw">&lt;TouchableOpacity</span> <span class="prop">hitSlop</span>={{ <span class="prop">top</span>: <span class="num">20</span>, <span class="prop">bottom</span>: <span class="num">20</span>, <span class="prop">left</span>: <span class="num">10</span>, <span class="prop">right</span>: <span class="num">10</span> }}<span class="kw">&gt;</span>
+    </div>
+    <div class="star">
+      ★ <strong>Real-world rule:</strong> Apple HIG recommends minimum 44×44pt tap target. Google Material says 48×48dp. A 24px icon with <code style="font-family:JetBrains Mono,monospace">hitSlop=20</code> gives you ~64px — safely above both.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">npx expo install</span>
+      <span class="tag bg-violet">AntDesign</span>
+      <span class="tag bg-green">Entypo</span>
+      <span class="tag bg-amber">hitSlop</span>
+      <span class="tag bg-pink">colorRed #ee6055</span>
+      <span class="tag bg-red">SVG cost on Android</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

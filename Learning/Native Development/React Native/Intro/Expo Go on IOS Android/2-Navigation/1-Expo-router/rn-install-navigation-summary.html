@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Install Navigation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* FILE TREE */
+  .filetree{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2.1;}
+  .ft-dir{color:var(--cyan);}
+  .ft-file{color:var(--text);}
+  .ft-new{color:var(--green);}
+  .ft-muted{color:var(--muted);}
+  .ft-url{color:var(--amber);}
+  .indent{padding-left:18px;display:block;}
+  .indent2{padding-left:36px;display:block;}
+
+  /* STEPS */
+  .steps{counter-reset:step;}
+  .step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;}
+  .step-num{background:var(--violet);color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .step-body{flex:1;}
+  .step-body .title{font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;margin-bottom:4px;color:var(--text);}
+  .step-body p{color:#94a3b8;font-size:12.5px;}
+
+  /* DEEP LINK DIAGRAM */
+  .dl-flow{display:flex;align-items:center;gap:0;margin-top:8px;flex-wrap:wrap;}
+  .dl-box{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;text-align:center;flex:1;min-width:100px;}
+  .dl-arrow{font-size:14px;color:var(--muted);padding:0 4px;flex-shrink:0;}
+
+  /* NAV TYPES */
+  .nav-types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+  .nav-type{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;}
+  .nav-type .icon{font-size:22px;margin-bottom:4px;}
+  .nav-type .name{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);font-weight:700;}
+  .nav-type .desc{color:#94a3b8;font-size:11px;margin-top:3px;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🗺️</div>
+  <div>
+    <h1>RN v3 — Install Navigation</h1>
+    <p>Kadi Kraman · Expo Router · File-system routing · _layout · Deep linking · Scheme</p>
+  </div>
+  <div class="badge">Chapter 6.1</div>
+</div>
+
+
+<!-- 1. EXPO ROUTER CONCEPT -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>Expo Router — Mental Model</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">Built on React Navigation</div>
+        <p>Expo Router wraps React Navigation. Screen options, hooks, and styling props from React Navigation docs all apply — check both docs.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">File-system routing</div>
+        <p>Same idea as Next.js — file names = routes. But mobile adds extra navigation types that web doesn't have.</p>
+      </div>
+    </div>
+
+    <!-- mobile nav types -->
+    <div class="nav-types">
+      <div class="nav-type">
+        <div class="icon">📚</div>
+        <div class="name">Stack</div>
+        <div class="desc">Push/pop screens. Back button. Most common.</div>
+      </div>
+      <div class="nav-type">
+        <div class="icon">⬆️</div>
+        <div class="name">Modal</div>
+        <div class="desc">Slides up from bottom. Dismissable.</div>
+      </div>
+      <div class="nav-type">
+        <div class="icon">📑</div>
+        <div class="name">Tabs</div>
+        <div class="desc">Bottom tab bar. Persistent navigation.</div>
+      </div>
+    </div>
+
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> Think of the file system as your routing config file — but instead of writing <code style="font-family:JetBrains Mono,monospace">{ path: '/products/:id' }</code> in a router object, you just name the file <code style="font-family:JetBrains Mono,monospace">[productId].tsx</code>. The framework infers everything else.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. FILE → URL MAPPING -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>File System → Route Mapping</h2>
+    <span class="pill bg-violet">Reference</span>
+  </div>
+  <div class="cb">
+    <div class="filetree">
+<span class="ft-dir">app/</span>
+<span class="indent"><span class="ft-file">index.tsx</span>         <span class="ft-url">→  /</span>                  <span class="ft-muted">(root)</span></span>
+<span class="indent"><span class="ft-file">home.tsx</span>          <span class="ft-url">→  /home</span></span>
+<span class="indent"><span class="ft-dir">products/</span></span>
+<span class="indent2"><span class="ft-file">index.tsx</span>       <span class="ft-url">→  /products</span>        <span class="ft-muted">(folder index, no "index" in URL)</span></span>
+<span class="indent2"><span class="ft-new">[productId].tsx</span> <span class="ft-url">→  /products/123</span>   <span class="ft-muted">(dynamic route)</span></span>
+<span class="indent"><span class="ft-new">_layout.tsx</span>       <span class="ft-url">→  layout for this folder</span>  <span class="ft-muted">(1 per folder, not a route)</span></span>
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 <code style="font-family:JetBrains Mono,monospace">_layout.tsx</code> is special — it's not a screen, it wraps all sibling screens and defines how they're displayed (Stack, Tabs, Modal). Exactly one allowed per folder.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. 6-STEP SETUP -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>6-Step Setup Walkthrough</h2>
+    <span class="pill bg-green">Setup</span>
+  </div>
+  <div class="cb">
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="title">Install libraries</div>
+          <div class="code" style="margin-top:4px">
+<span class="fn">npx expo install</span> <span class="str">expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar</span>
+          </div>
+          <p style="margin-top:6px;font-size:12px;color:var(--muted)"><code style="font-family:JetBrains Mono,monospace">react-native-safe-area-context</code> — handles iOS notch/Android cutout safe zones. Expo Router wraps screens in it automatically.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="title">Change entry point in package.json</div>
+          <div class="code" style="margin-top:4px">
+<span class="del">- "main": "expo/AppEntry.js"</span>
+<span class="add">+ "main": "expo-router/entry"</span>
+          </div>
+          <p style="margin-top:6px;font-size:12px;color:var(--muted)">This switches the JS entry point from the bare <code style="font-family:JetBrains Mono,monospace">App.tsx</code> to the <code style="font-family:JetBrains Mono,monospace">app/</code> folder that Expo Router manages.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="title">Add scheme to app.json</div>
+          <div class="code" style="margin-top:4px">
+<span class="add">+ "scheme": "taskly"</span>   <span class="cm">// enables deep links: taskly://some-screen</span>
+          </div>
+          <p style="margin-top:6px;font-size:12px;color:var(--muted)">Required because Expo Router has built-in deep linking. Without a scheme, the router can't register intent listeners on the device.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="title">Move App.tsx → app/index.tsx</div>
+          <div class="code" style="margin-top:4px">
+<span class="cm"># create app/ folder</span>
+<span class="cm"># rename App.tsx → index.tsx</span>
+<span class="cm"># move to app/index.tsx</span>
+<span class="cm"># update any relative imports (../theme → ../../theme etc.)</span>
+          </div>
+          <p style="margin-top:6px;font-size:12px;color:var(--muted)">The root route <em>must</em> be named <code style="font-family:JetBrains Mono,monospace">index.tsx</code>. All other screens can use descriptive names.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="title">Restart bundler with cache reset</div>
+          <div class="code" style="margin-top:4px">
+<span class="fn">npx expo start</span> <span class="prop">--reset-cache</span>
+          </div>
+          <div class="warn" style="margin-top:6px">
+            ⚠️ <strong>PluginError?</strong> If you see <code style="font-family:JetBrains Mono,monospace">Failed to resolve plugin for "expo-router"</code> — you either skipped step 1 or didn't reset cache. Always use <code style="font-family:JetBrains Mono,monospace">--reset-cache</code> after structural changes.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="title">Create app/_layout.tsx</div>
+          <div class="code" style="margin-top:4px">
+<span class="kw">import</span> { Stack } <span class="kw">from</span> <span class="str">"expo-router"</span>;
+
+<span class="cm">// default export — not named export (Expo Router convention)</span>
+<span class="kw">export default function</span> <span class="fn">Layout</span>() {
+  <span class="kw">return</span> (
+    <span class="kw">&lt;Stack&gt;</span>
+      <span class="cm">// name = file name; title overrides ugly "index" default</span>
+      <span class="kw">&lt;Stack.Screen</span> <span class="prop">name</span>=<span class="str">"index"</span> <span class="prop">options</span>={{ <span class="prop">title</span>: <span class="str">"Shopping list"</span> }} <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/Stack&gt;</span>
+  );
+}
+          </div>
+          <p style="margin-top:6px;font-size:12px;color:var(--muted)">Without this, screens still render (default stack), but the header title will just say "index". Layout files always use <code style="font-family:JetBrains Mono,monospace">export default</code> — unlike regular components.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. DEEP LINKING -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>Scheme & Deep Linking Explained</h2>
+    <span class="pill bg-amber">Concept</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:10px">How an intent reaches your app from a URL:</p>
+    <div class="dl-flow">
+      <div class="dl-box" style="color:var(--cyan)">URL fired<br/><code style="font-size:11px">taskly://home</code></div>
+      <div class="dl-arrow">→</div>
+      <div class="dl-box" style="color:var(--muted)">OS broadcasts intent<br/>"who handles taskly://"?</div>
+      <div class="dl-arrow">→</div>
+      <div class="dl-box" style="color:var(--violet)">All apps check<br/>their registered scheme</div>
+      <div class="dl-arrow">→</div>
+      <div class="dl-box" style="color:var(--green)">Your app says<br/>"that's me!" → opens</div>
+    </div>
+
+    <hr class="div"/>
+    <div class="two-col" style="margin-top:4px">
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">Basic deep linking (this course)</div>
+        <p>Uses <code>taskly://</code> scheme. Works app-to-app or from browser. Easy to set up. Covered in intermediate course.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">Universal links (advanced)</div>
+        <p>Uses HTTPS URLs like <code>https://taskly.com/home</code>. Requires hosting a verification file + registering an associated domain. iOS + Android supported.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. KEY DISTINCTIONS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>Key Distinctions to Remember</h2>
+    <span class="pill bg-pink">Interview Tips</span>
+  </div>
+  <div class="cb">
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">export default</div>
+        <p>Layouts and screens use <code>export default</code>. Regular components use named exports. Different rule for routing files.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">_layout ≠ screen</div>
+        <p>Layout files wrap screens — they don't create a route. Exactly one per folder. Filename must start with <code>_</code>.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">index is mandatory</div>
+        <p>Root entry point must be <code>index.tsx</code>. Other screens can be named anything. Without index Expo Router can't boot.</p>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Shortcut:</strong> If you use <code style="font-family:JetBrains Mono,monospace">npx create-expo-app</code> with the <em>default</em> template (not blank), Expo Router + safe area context + all of this is already wired up. We did it manually to understand what's happening under the hood.
+    </div>
+    <div class="tags">
+      <span class="tag bg-cyan">expo-router</span>
+      <span class="tag bg-violet">_layout.tsx</span>
+      <span class="tag bg-green">safe-area-context</span>
+      <span class="tag bg-amber">scheme: taskly</span>
+      <span class="tag bg-pink">export default</span>
+      <span class="tag bg-red">--reset-cache</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

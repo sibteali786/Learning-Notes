@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — React Components</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}.type{color:var(--amber);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1810;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* FILE TREE */
+  .filetree{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2;}
+  .ft-dir{color:var(--cyan);}
+  .ft-file{color:var(--text);}
+  .ft-new{color:var(--green);}
+  .ft-indent{padding-left:20px;display:block;}
+
+  /* FLOW */
+  .flow{display:flex;align-items:center;gap:0;margin-top:10px;}
+  .fstep{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;text-align:center;flex:1;min-width:0;}
+  .fstep .sn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:2px;}
+  .farrow{font-size:16px;color:var(--muted);flex-shrink:0;padding:0 4px;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🧱</div>
+  <div>
+    <h1>RN v3 — React Components</h1>
+    <p>Kadi Kraman · Extracting components · TypeScript Props · no-unused-styles · StyleSheet deep dive</p>
+  </div>
+  <div class="badge">Chapter 5.3</div>
+</div>
+
+
+<!-- 1. WHY EXTRACT COMPONENTS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>Why Extract Components</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">Problem — Everything in App.tsx</div>
+        <p>One file grows massive as the app scales. Logic, styles, and markup become impossible to maintain or reason about.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">Solution — Component per concern</div>
+        <p>Each UI piece lives in its own file under <code>components/</code>. Reusable, independently testable, and easy to refactor.</p>
+      </div>
+    </div>
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> Like splitting a monolith into services — <code style="font-family:JetBrains Mono,monospace">App.tsx</code> becomes an orchestrator that just composes components, not a giant file holding every implementation detail.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. FILE STRUCTURE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>Project Structure After Refactor</h2>
+    <span class="pill bg-violet">Structure</span>
+  </div>
+  <div class="cb">
+    <div class="filetree">
+<span class="ft-dir">taskly/</span>
+<span class="ft-indent"><span class="ft-new">components/</span></span>
+<span class="ft-indent"><span class="ft-indent"><span class="ft-new">ShoppingListItem.tsx  ← NEW</span></span></span>
+<span class="ft-indent"><span class="ft-file">App.tsx              ← slimmed down</span></span>
+<span class="ft-indent"><span class="ft-file">theme.ts</span></span>
+<span class="ft-indent"><span class="ft-file">eslint.config.js</span></span>
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Convention:</strong> File name matches the exported component name exactly — <code style="font-family:JetBrains Mono,monospace">ShoppingListItem.tsx</code> exports <code style="font-family:JetBrains Mono,monospace">ShoppingListItem</code>. Makes auto-imports and search trivial.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. COMPONENT + PROPS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>Creating the Component with TypeScript Props</h2>
+    <span class="pill bg-green">Step by Step</span>
+  </div>
+  <div class="cb">
+    <div class="code">
+<span class="cm">// components/ShoppingListItem.tsx</span>
+<span class="kw">import</span> { TouchableOpacity, View, Alert, StyleSheet, Text } <span class="kw">from</span> <span class="str">"react-native"</span>;
+<span class="kw">import</span> { theme } <span class="kw">from</span> <span class="str">"../theme"</span>;
+
+<span class="cm">// TypeScript: define the shape of props</span>
+<span class="kw">type</span> <span class="type">Props</span> = {
+  <span class="prop">name</span>: <span class="type">string</span>;        <span class="cm">// required — no ? = mandatory</span>
+  <span class="cm">// name?: string;   // optional — add ? to allow omitting</span>
+};
+
+<span class="cm">// Named export (not default) — modern convention</span>
+<span class="kw">export function</span> <span class="fn">ShoppingListItem</span>({ <span class="prop">name</span> }: <span class="type">Props</span>) {
+  <span class="kw">const</span> <span class="fn">handleDelete</span> = () => {
+    <span class="fn">Alert</span>.<span class="fn">alert</span>(
+      <span class="str">`Are you sure you want to delete </span><span class="kw">${name}</span><span class="str">?`</span>,  <span class="cm">// template literal with prop</span>
+      <span class="str">"It will be gone for good"</span>,
+      [
+        { <span class="prop">text</span>: <span class="str">"Yes"</span>, <span class="prop">onPress</span>: () => console.<span class="fn">log</span>(<span class="str">"Ok, deleting."</span>), <span class="prop">style</span>: <span class="str">"destructive"</span> },
+        { <span class="prop">text</span>: <span class="str">"Cancel"</span>, <span class="prop">style</span>: <span class="str">"cancel"</span> },
+      ],
+    );
+  };
+
+  <span class="kw">return</span> (
+    <span class="kw">&lt;View</span> <span class="prop">style</span>={styles.itemContainer}<span class="kw">&gt;</span>
+      <span class="kw">&lt;Text</span> <span class="prop">style</span>={styles.itemText}<span class="kw">&gt;</span>{name}<span class="kw">&lt;/Text&gt;</span>   <span class="cm">// render prop in JSX</span>
+      <span class="kw">&lt;TouchableOpacity</span> <span class="prop">onPress</span>={handleDelete} <span class="prop">style</span>={styles.button} <span class="prop">activeOpacity</span>={<span class="num">0.8</span>}<span class="kw">&gt;</span>
+        <span class="kw">&lt;Text</span> <span class="prop">style</span>={styles.buttonText}<span class="kw">&gt;</span>Delete<span class="kw">&lt;/Text&gt;</span>
+      <span class="kw">&lt;/TouchableOpacity&gt;</span>
+    <span class="kw">&lt;/View&gt;</span>
+  );
+}
+    </div>
+
+    <hr class="div"/>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">Consuming in App.tsx — now just 3 lines:</p>
+    <div class="code">
+<span class="kw">import</span> { ShoppingListItem } <span class="kw">from</span> <span class="str">"./components/ShoppingListItem"</span>;
+
+<span class="cm">// Same component, different data — no copy-paste</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>=<span class="str">"Coffee"</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>=<span class="str">"Tea"</span>    <span class="kw">/&gt;</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>=<span class="str">"Milk"</span>   <span class="kw">/&gt;</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. PROPS DEEP DIVE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>TypeScript Props — Required vs Optional</h2>
+    <span class="pill bg-amber">TypeScript</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">Required prop (no ?)</div>
+        <p>TypeScript errors if caller omits it. Use for data the component <em>cannot render without</em>.</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);margin-top:8px;">
+          <span style="color:var(--amber)">type</span> Props = { <span style="color:var(--pink)">name</span>: <span style="color:var(--amber)">string</span>; }
+        </div>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">Optional prop (with ?)</div>
+        <p>Caller can omit it. Component must handle <code>undefined</code>. Use for non-critical data like subtitle, icon, etc.</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);margin-top:8px;">
+          <span style="color:var(--amber)">type</span> Props = { <span style="color:var(--pink)">name</span>?: <span style="color:var(--amber)">string</span>; }
+        </div>
+      </div>
+    </div>
+    <div class="star">
+      ★ <strong>First TypeScript in the course.</strong> It's lightweight — just annotate the <code style="font-family:JetBrains Mono,monospace">type Props</code> object and destructure it. All JS is valid TS, so there's no steep learning curve here.
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. NO-UNUSED-STYLES PLUGIN -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>eslint-plugin-react-native · no-unused-styles</h2>
+    <span class="pill bg-pink">DX Tooling</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:8px">After refactoring, styles from App.tsx may still exist but no longer be used. This plugin red-underlines them automatically.</p>
+
+    <div class="code">
+<span class="cm"># install</span>
+<span class="fn">yarn add -D</span> <span class="str">eslint-plugin-react-native</span>
+    </div>
+
+    <p style="color:var(--muted);font-size:12px;margin-top:10px;margin-bottom:6px">Add to <code style="font-family:JetBrains Mono,monospace">.eslintrc.js</code> (legacy) or <code style="font-family:JetBrains Mono,monospace">eslint.config.js</code> (flat):</p>
+    <div class="code">
+<span class="cm">// .eslintrc.js</span>
+<span class="kw">module.exports</span> = {
+  extends: [<span class="str">"expo"</span>, <span class="str">"prettier"</span>],
+  plugins: [<span class="str">"prettier"</span>, <span class="add">"react-native"</span>],
+  rules: {
+    <span class="str">"prettier/prettier"</span>: <span class="str">"error"</span>,
+    <span class="add">"react-native/no-unused-styles": "error",</span>
+  },
+};
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Why it matters during refactors:</strong> When you move styles from <code style="font-family:JetBrains Mono,monospace">App.tsx</code> to a child component, you inevitably leave dead styles behind. Without this rule, they silently bloat the file. With it, you get red underlines immediately — safe to delete.
+    </div>
+  </div>
+</div>
+
+
+<!-- 6. STYLESHEET.CREATE DEEP DIVE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--red)"></div>
+    <h2>StyleSheet.create — Full Truth</h2>
+    <span class="pill bg-red">Myth Busting</span>
+  </div>
+  <div class="cb">
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">Production</div>
+        <p>Just creates a plain JS object. No optimization, no deduplication, no native bridging magic whatsoever.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">Development</div>
+        <p>Validates style prop names are valid. Leftover from early RN days when invalid styles crashed native renderers.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">Utility methods</div>
+        <p><code>StyleSheet.flatten()</code> · <code>StyleSheet.absoluteFill</code> · <code>StyleSheet.absoluteFillObject</code> — these are the only useful bits.</p>
+      </div>
+    </div>
+
+    <hr class="div"/>
+    <p style="font-family:Syne,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">absoluteFill vs absoluteFillObject</p>
+    <div class="code">
+<span class="cm">// absoluteFill — ready-to-use style prop (StyleSheet.absoluteFill is a StyleProp)</span>
+<span class="kw">&lt;View</span> <span class="prop">style</span>={[StyleSheet.<span class="fn">absoluteFill</span>, { <span class="prop">backgroundColor</span>: <span class="str">"pink"</span> }]}<span class="kw">/&gt;</span>
+
+<span class="cm">// absoluteFillObject — raw object you can spread + override</span>
+<span class="kw">&lt;View</span> <span class="prop">style</span>={{ ...StyleSheet.<span class="fn">absoluteFillObject</span>, <span class="prop">backgroundColor</span>: <span class="str">"pink"</span> }}<span class="kw">/&gt;</span>
+
+<span class="cm">// Both = { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }</span>
+<span class="cm">// Use when you need a full-screen overlay layer (modals, loaders, backgrounds)</span>
+    </div>
+
+    <div class="warn" style="margin-top:10px">
+      ⚠️ <strong>Render order matters:</strong> Kadi demonstrated that elements render in JSX order — a component placed later in JSX renders <em>on top</em>. Important to know when using <code style="font-family:JetBrains Mono,monospace">absoluteFill</code> overlays.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">components/</span>
+      <span class="tag bg-violet">type Props</span>
+      <span class="tag bg-green">named export</span>
+      <span class="tag bg-amber">no-unused-styles</span>
+      <span class="tag bg-pink">template literals</span>
+      <span class="tag bg-red">absoluteFill</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

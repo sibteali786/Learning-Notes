@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — TextInput</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}.type{color:var(--amber);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* PROPS TABLE */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+
+  /* FLOW */
+  .flow{display:flex;align-items:center;gap:0;margin-top:10px;flex-wrap:nowrap;}
+  .fstep{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;text-align:center;flex:1;min-width:0;}
+  .fstep .sn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:2px;}
+  .farrow{font-size:16px;color:var(--muted);flex-shrink:0;padding:0 4px;}
+
+  /* PHONE MOCK */
+  .phone{background:#f5f5f5;border-radius:10px;overflow:hidden;border:1px solid var(--border);max-width:240px;padding-top:8px;}
+  .phone-input{margin:8px 10px;border:2px solid #ddd;border-radius:50px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:#999;background:#fff;}
+  .phone-item{padding:12px 10px;border-bottom:2px solid #1a759f;background:#fff;display:flex;align-items:center;justify-content:space-between;margin:0 4px;}
+  .phone-item-text{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:200;color:#1a1a1a;}
+  .phone-item-icon{color:#ee6055;font-size:14px;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">⌨️</div>
+  <div>
+    <h1>RN v3 — TextInput</h1>
+    <p>Kadi Kraman · TextInput · useState · onSubmitEditing · keyboardType</p>
+  </div>
+  <div class="badge">Chapter 7.1</div>
+</div>
+
+
+<!-- 1. WEB vs RN FORMS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>No &lt;form&gt; in React Native</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">Web — form-based</div>
+        <p>Inputs grouped in <code>&lt;form&gt;</code>. Submit fires <code>onSubmit</code> with an event object. <code>e.target.value</code> to read input.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">React Native — individual</div>
+        <p>No form element. Each input managed separately with <code>useState</code>. Submit = <code>onSubmitEditing</code> callback on the input itself.</p>
+      </div>
+    </div>
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> Web forms are like a checkout cart with a single "Pay" button. RN inputs are like individual cashiers — each one independently tracked and submitted. More control, more wiring.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. TEXTINPUT BASICS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>TextInput — The Core Setup</h2>
+    <span class="pill bg-violet">Step 1</span>
+  </div>
+  <div class="cb">
+    <div class="warn">
+      ⚠️ <strong>TextInput has zero default styling.</strong> Drop it in unstyled and it's completely invisible — no border, no background, no height. Always add at minimum <code style="font-family:JetBrains Mono,monospace">borderWidth</code> + <code style="font-family:JetBrains Mono,monospace">borderColor</code> to see it.
+    </div>
+
+    <div class="code" style="margin-top:10px">
+<span class="kw">&lt;TextInput</span>
+  <span class="prop">value</span>={value}
+  <span class="prop">onChangeText</span>={setValue}          <span class="cm">// gives you the string directly (not an event)</span>
+  <span class="prop">placeholder</span>=<span class="str">"E.g Coffee"</span>
+  <span class="prop">returnKeyType</span>=<span class="str">"done"</span>              <span class="cm">// changes bottom-right keyboard button label</span>
+  <span class="prop">onSubmitEditing</span>={handleSubmit}     <span class="cm">// fires when user taps done/return</span>
+  <span class="prop">style</span>={styles.textInput}
+<span class="kw">/&gt;</span>
+    </div>
+
+    <hr class="div"/>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">Styles for the textInput:</p>
+    <div class="code">
+<span class="prop">textInput</span>: {
+  <span class="prop">borderColor</span>:      theme.<span class="fn">colorLightGrey</span>,
+  <span class="prop">borderWidth</span>:      <span class="num">2</span>,
+  <span class="prop">padding</span>:          <span class="num">12</span>,
+  <span class="prop">fontSize</span>:         <span class="num">18</span>,
+  <span class="prop">borderRadius</span>:     <span class="num">50</span>,         <span class="cm">// pill shape</span>
+  <span class="prop">marginHorizontal</span>: <span class="num">12</span>,
+  <span class="prop">marginBottom</span>:     <span class="num">12</span>,
+},
+<span class="cm">// Also: remove justifyContent:"center" from container, add paddingTop: 12</span>
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>onChange vs onChangeText:</strong> <code style="font-family:JetBrains Mono,monospace">onChange</code> gives a synthetic event (like web). <code style="font-family:JetBrains Mono,monospace">onChangeText</code> gives you the string directly — use this 99% of the time. Same shorthand pattern: <code style="font-family:JetBrains Mono,monospace">onChangeText={setValue}</code> not <code style="font-family:JetBrains Mono,monospace">onChangeText={(v) => setValue(v)}</code>.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. KEYBOARD PROPS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>Keyboard Control Props</h2>
+    <span class="pill bg-amber">Reference</span>
+  </div>
+  <div class="cb">
+    <table class="tbl">
+      <thead><tr><th>Prop</th><th>Purpose</th><th>Example values</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="mono">keyboardType</td>
+          <td style="color:#94a3b8">Controls which keyboard layout opens</td>
+          <td class="mono" style="color:var(--green)">"default" · "numeric" · "email-address" · "phone-pad"</td>
+        </tr>
+        <tr>
+          <td class="mono">returnKeyType</td>
+          <td style="color:#94a3b8">Changes label on the bottom-right keyboard button</td>
+          <td class="mono" style="color:var(--green)">"done" · "go" · "search" · "next" · "send"</td>
+        </tr>
+        <tr>
+          <td class="mono">autoCapitalize</td>
+          <td style="color:#94a3b8">Controls automatic capitalization</td>
+          <td class="mono" style="color:var(--green)">"none" · "sentences" · "words" · "characters"</td>
+        </tr>
+        <tr>
+          <td class="mono">autoComplete</td>
+          <td style="color:#94a3b8">Enables native autofill suggestions</td>
+          <td class="mono" style="color:var(--green)">"email" · "password" · "name" · "off"</td>
+        </tr>
+        <tr>
+          <td class="mono">autoCorrect</td>
+          <td style="color:#94a3b8">Toggle spell-check corrections</td>
+          <td class="mono" style="color:var(--green)">true · false</td>
+        </tr>
+        <tr>
+          <td class="mono">onSubmitEditing</td>
+          <td style="color:#94a3b8">Fires when done/return key is pressed — replaces form onSubmit</td>
+          <td class="mono" style="color:var(--cyan)">() => handleSubmit()</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="star" style="margin-top:10px">
+      ★ <strong>Keyboard is input-controlled:</strong> Unlike web where keyboard is an OS concern, in RN the TextInput's props directly control which keyboard opens. Set <code style="font-family:JetBrains Mono,monospace">keyboardType="numeric"</code> even for a text field used for phone numbers — the OS shows the numeric pad immediately on focus.
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. FULL STATE + SUBMIT FLOW -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>Complete index.tsx — useState + handleSubmit</h2>
+    <span class="pill bg-green">Step 2 & 3</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">TypeScript type + initial data:</p>
+        <div class="code">
+<span class="kw">type</span> <span class="type">ShoppingListItemType</span> = {
+  <span class="prop">id</span>:   <span class="type">string</span>;
+  <span class="prop">name</span>: <span class="type">string</span>;
+};
+
+<span class="kw">const</span> initialList: <span class="type">ShoppingListItemType</span>[] = [
+  { <span class="prop">id</span>: <span class="str">"1"</span>, <span class="prop">name</span>: <span class="str">"Coffee"</span> },
+  { <span class="prop">id</span>: <span class="str">"2"</span>, <span class="prop">name</span>: <span class="str">"Tea"</span>    },
+  { <span class="prop">id</span>: <span class="str">"3"</span>, <span class="prop">name</span>: <span class="str">"Milk"</span>   },
+];
+        </div>
+
+        <p style="color:var(--muted);font-size:12px;margin-top:12px;margin-bottom:6px">State + handleSubmit:</p>
+        <div class="code">
+<span class="kw">const</span> [shoppingList, setShoppingList] = <span class="fn">useState</span>(initialList);
+<span class="kw">const</span> [value, setValue]               = <span class="fn">useState</span>&lt;<span class="type">string</span>&gt;();
+
+<span class="kw">const</span> <span class="fn">handleSubmit</span> = () => {
+  <span class="kw">if</span> (value) {
+    <span class="kw">const</span> newList = [
+      {
+        <span class="prop">id</span>:   <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toISOString</span>(),  <span class="cm">// unique per ms</span>
+        <span class="prop">name</span>: value,
+      },
+      ...shoppingList,  <span class="cm">// new item prepended</span>
+    ];
+    <span class="fn">setShoppingList</span>(newList);
+    <span class="fn">setValue</span>(<span class="kw">undefined</span>);  <span class="cm">// clear input</span>
+  }
+};
+        </div>
+      </div>
+
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">JSX — map over state:</p>
+        <div class="code">
+<span class="kw">&lt;View</span> <span class="prop">style</span>={styles.container}<span class="kw">&gt;</span>
+  <span class="kw">&lt;TextInput</span>
+    <span class="prop">value</span>={value}
+    <span class="prop">onChangeText</span>={setValue}
+    <span class="prop">placeholder</span>=<span class="str">"E.g Coffee"</span>
+    <span class="prop">returnKeyType</span>=<span class="str">"done"</span>
+    <span class="prop">onSubmitEditing</span>={handleSubmit}
+    <span class="prop">style</span>={styles.textInput}
+  <span class="kw">/&gt;</span>
+  {shoppingList.<span class="fn">map</span>((item) => (
+    <span class="kw">&lt;ShoppingListItem</span>
+      <span class="prop">key</span>={item.id}
+      <span class="prop">name</span>={item.name}
+    <span class="kw">/&gt;</span>
+  ))}
+<span class="kw">&lt;/View&gt;</span>
+        </div>
+
+        <!-- Phone preview -->
+        <p style="color:var(--muted);font-size:12px;margin-top:10px;margin-bottom:6px">Result preview</p>
+        <div class="phone">
+          <div class="phone-input">E.g Coffee</div>
+          <div class="phone-item">
+            <span class="phone-item-text">Coffee</span>
+            <span class="phone-item-icon">⊗</span>
+          </div>
+          <div class="phone-item">
+            <span class="phone-item-text">Tea</span>
+            <span class="phone-item-icon">⊗</span>
+          </div>
+          <div class="phone-item">
+            <span class="phone-item-text">Milk</span>
+            <span class="phone-item-icon">⊗</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="div"/>
+
+    <!-- Submit flow -->
+    <p style="font-family:Syne,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Submit flow</p>
+    <div class="flow">
+      <div class="fstep"><span class="sn">TYPE</span><div style="color:var(--cyan)">onChangeText</div><div style="color:var(--muted);font-size:11px">→ setValue()</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep"><span class="sn">PRESS DONE</span><div style="color:var(--violet)">onSubmitEditing</div><div style="color:var(--muted);font-size:11px">→ handleSubmit()</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep"><span class="sn">PREPEND</span><div style="color:var(--green)">setShoppingList</div><div style="color:var(--muted);font-size:11px">new item at [0]</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep"><span class="sn">CLEAR</span><div style="color:var(--amber)">setValue(undefined)</div><div style="color:var(--muted);font-size:11px">input resets</div></div>
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>ID strategy:</strong> <code style="font-family:JetBrains Mono,monospace">new Date().toISOString()</code> is unique within a millisecond — fine for local device state. For production or sync'd data, use <code style="font-family:JetBrains Mono,monospace">uuid</code> or <code style="font-family:JetBrains Mono,monospace">nanoid</code>.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">TextInput</span>
+      <span class="tag bg-violet">onChangeText</span>
+      <span class="tag bg-green">onSubmitEditing</span>
+      <span class="tag bg-amber">returnKeyType</span>
+      <span class="tag bg-pink">keyboardType</span>
+      <span class="tag bg-red">no default styling</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Modal + Bottom Tabs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+    --cerulean:#1a759f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--violet),var(--pink));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+  .note{background:#1a1a2e;border-left:3px solid var(--violet);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .note strong{color:var(--violet);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* MODAL POSITION DIAGRAM */
+  .modal-diagram{display:flex;gap:16px;align-items:flex-start;margin-top:10px;flex-wrap:wrap;}
+  .md-col{flex:1;min-width:160px;}
+  .md-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+  .screen-box{border-radius:6px;padding:8px 10px;border:1px solid;font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+  .screen-box.root{background:rgba(110,231,247,.06);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .screen-box.tab{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .screen-box.modal-ok{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .screen-box.modal-bad{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.3);color:var(--red);}
+  .indent{margin-left:16px;}
+
+  /* TAB BAR PREVIEW */
+  .tab-preview{background:#f0f0f0;border-radius:10px;overflow:hidden;border:1px solid var(--border);max-width:300px;}
+  .tab-screen{background:#fff;padding:24px 12px;text-align:center;font-family:'DM Sans',sans-serif;font-size:13px;color:#666;min-height:80px;display:flex;align-items:center;justify-content:center;}
+  .tab-bar{background:#f8f8f8;border-top:1px solid #ddd;display:flex;}
+  .tab-item{flex:1;padding:8px 4px;text-align:center;font-family:'DM Sans',sans-serif;font-size:10px;}
+  .tab-item .icon{font-size:18px;display:block;margin-bottom:2px;}
+  .tab-item.active{color:var(--cerulean);}
+  .tab-item.inactive{color:#999;}
+
+  /* ANIMATION TABLE */
+  .anim-tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .anim-tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .anim-tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .anim-tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+
+  /* CHAPTER DIVIDER */
+  .chapter-divider{display:flex;align-items:center;gap:12px;margin:20px 0 14px;}
+  .chapter-divider .line{flex:1;height:1px;background:var(--border);}
+  .chapter-divider .label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🗂️</div>
+  <div>
+    <h1>RN v3 — Modal + Bottom Tabs</h1>
+    <p>Kadi Kraman · Chapters 6.3 & 6.4 · presentation modal · Tabs · tabBarIcon · tintColor</p>
+  </div>
+  <div class="badge">Ch. 6.3 + 6.4</div>
+</div>
+
+
+<!-- ─────── CHAPTER 6.3 — MODAL ─────── -->
+<div class="chapter-divider">
+  <div class="line"></div>
+  <div class="label">Chapter 6.3 — Modal Navigation</div>
+  <div class="line"></div>
+</div>
+
+<!-- 1. MODAL CONCEPT -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>What is a Modal Screen</h2>
+    <span class="pill bg-violet">Concept</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:10px">A modal renders <em>on top</em> of existing content. On iOS it slides up from the bottom and can be dismissed by dragging down. On Android it looks like a regular stack screen (platform default).</p>
+
+    <!-- position gotcha diagram -->
+    <div class="two-col">
+      <div>
+        <div class="md-title" style="color:var(--green)">✓ Modal defined at top-level (works)</div>
+        <div class="screen-box root">_layout.tsx (root)</div>
+        <div class="indent">
+          <div class="screen-box tab">index</div>
+          <div class="screen-box tab">counter</div>
+          <div class="screen-box modal-ok">idea (modal) ✓</div>
+        </div>
+        <p style="color:#94a3b8;font-size:11.5px;margin-top:6px">Modal is adjacent to siblings — renders over all of them.</p>
+      </div>
+      <div>
+        <div class="md-title" style="color:var(--red)">✗ Modal inside tab (broken)</div>
+        <div class="screen-box root">_layout.tsx (root)</div>
+        <div class="indent">
+          <div class="screen-box tab">Tabs navigator</div>
+          <div class="indent">
+            <div class="screen-box modal-bad">screen (modal) ✗</div>
+          </div>
+        </div>
+        <p style="color:#94a3b8;font-size:11.5px;margin-top:6px">Can't render over its own parent navigator — modal is trapped inside the tab.</p>
+      </div>
+    </div>
+
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> A modal defined inside a tab is like trying to open a popup that covers the browser window from inside an iframe — it's constrained by its parent. Define modals at the highest layout level they need to cover.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. MODAL CODE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>Adding presentation: modal</h2>
+    <span class="pill bg-pink">Code</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:6px">One prop change in <code style="font-family:JetBrains Mono,monospace">_layout.tsx</code> — no new files needed:</p>
+    <div class="code">
+<span class="kw">&lt;Stack&gt;</span>
+  <span class="kw">&lt;Stack.Screen</span> <span class="prop">name</span>=<span class="str">"index"</span>   <span class="prop">options</span>={{ <span class="prop">title</span>: <span class="str">"Shopping list"</span> }} <span class="kw">/&gt;</span>
+  <span class="kw">&lt;Stack.Screen</span>
+    <span class="prop">name</span>=<span class="str">"counter"</span>
+    <span class="prop">options</span>={{ <span class="prop">title</span>: <span class="str">"Counter"</span>, <span class="add">presentation: "modal"</span> }}
+  <span class="kw">/&gt;</span>
+  <span class="kw">&lt;Stack.Screen</span>
+    <span class="prop">name</span>=<span class="str">"idea"</span>
+    <span class="prop">options</span>={{ <span class="prop">title</span>: <span class="str">"My idea"</span>, <span class="add">presentation: "modal"</span> }}
+  <span class="kw">/&gt;</span>
+<span class="kw">&lt;/Stack&gt;</span>
+    </div>
+
+    <hr class="div"/>
+    <p style="font-family:Syne,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Animation options</p>
+    <table class="anim-tbl">
+      <thead><tr><th>Value</th><th>Behavior</th><th>Android default?</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">"modal"</td><td style="color:#94a3b8">Slide up from bottom (iOS). Stack slide on Android.</td><td style="color:var(--muted)">Stack look</td></tr>
+        <tr><td class="mono">"fade_from_bottom"</td><td style="color:#94a3b8">Fade in from bottom. Works on both platforms.</td><td style="color:var(--green)">Consistent</td></tr>
+        <tr><td class="mono">"transparent"</td><td style="color:#94a3b8">Background shows through. Use for custom alert dialogs.</td><td style="color:var(--cyan)">Custom UI</td></tr>
+        <tr><td class="mono">custom</td><td style="color:#94a3b8">Fully custom animations supported via animation prop</td><td style="color:var(--muted)">Advanced</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note" style="margin-top:10px">
+      💡 <strong>Custom alert trick from transcript:</strong> Use <code style="font-family:JetBrains Mono,monospace">presentation: "transparentModal"</code> + a small centered View with your custom UI inside. Replaces the need for <code style="font-family:JetBrains Mono,monospace">Alert.alert()</code> when you need full styling control.
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>File-system routing reminder:</strong> You don't need to define screens in <code style="font-family:JetBrains Mono,monospace">_layout.tsx</code> for them to exist — files in <code style="font-family:JetBrains Mono,monospace">app/</code> auto-become screens. You only define them in the layout when you need to add options like <code style="font-family:JetBrains Mono,monospace">presentation</code> or a custom <code style="font-family:JetBrains Mono,monospace">title</code>.
+    </div>
+  </div>
+</div>
+
+
+<!-- ─────── CHAPTER 6.4 — BOTTOM TABS ─────── -->
+<div class="chapter-divider">
+  <div class="line"></div>
+  <div class="label">Chapter 6.4 — Bottom Tabs</div>
+  <div class="line"></div>
+</div>
+
+<!-- 3. TABS SETUP -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>Stack → Tabs: One Word Change</h2>
+    <span class="pill bg-cyan">Setup</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:#94a3b8;font-size:12.5px;margin-bottom:6px">The entire conversion is swapping <code style="font-family:JetBrains Mono,monospace">Stack</code> → <code style="font-family:JetBrains Mono,monospace">Tabs</code> and <code style="font-family:JetBrains Mono,monospace">Stack.Screen</code> → <code style="font-family:JetBrains Mono,monospace">Tabs.Screen</code>:</p>
+        <div class="code">
+<span class="del">- import { Stack } from "expo-router";</span>
+<span class="add">+ import { Tabs } from "expo-router";</span>
+
+<span class="del">- &lt;Stack&gt;</span>
+<span class="add">+ &lt;Tabs&gt;</span>
+<span class="del">-   &lt;Stack.Screen name="index" ... /&gt;</span>
+<span class="add">+   &lt;Tabs.Screen name="index" ... /&gt;</span>
+<span class="del">- &lt;/Stack&gt;</span>
+<span class="add">+ &lt;/Tabs&gt;</span>
+        </div>
+        <div class="tip" style="margin-top:10px">
+          💡 <strong>Link and useRouter still work</strong> with tabs — you can navigate programmatically or via Link even when tabs are present. Just less necessary since the bar handles it.
+        </div>
+      </div>
+
+      <!-- tab bar preview -->
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:8px">Result preview</p>
+        <div class="tab-preview">
+          <div class="tab-screen">Shopping List Content</div>
+          <div class="tab-bar">
+            <div class="tab-item active">
+              <span class="icon">≡</span>
+              Shopping list
+            </div>
+            <div class="tab-item inactive">
+              <span class="icon">⏱</span>
+              Counter
+            </div>
+            <div class="tab-item inactive">
+              <span class="icon">💡</span>
+              My idea
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. TAB ICONS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>Tab Bar Icons + Global Tint Color</h2>
+    <span class="pill bg-green">Step 2</span>
+  </div>
+  <div class="cb">
+    <div class="code">
+<span class="kw">import</span> Feather      <span class="kw">from</span> <span class="str">"@expo/vector-icons/Feather"</span>;
+<span class="kw">import</span> AntDesign   <span class="kw">from</span> <span class="str">"@expo/vector-icons/AntDesign"</span>;
+<span class="kw">import</span> FontAwesome5 <span class="kw">from</span> <span class="str">"@expo/vector-icons/FontAwesome5"</span>;
+<span class="kw">import</span> { theme }    <span class="kw">from</span> <span class="str">"../theme"</span>;
+
+<span class="cm">// Global active tint — set once, applies to ALL tabs</span>
+<span class="kw">&lt;Tabs</span> <span class="prop">screenOptions</span>={{ <span class="prop">tabBarActiveTintColor</span>: theme.<span class="fn">colorCerulean</span> }}<span class="kw">&gt;</span>
+
+  <span class="kw">&lt;Tabs.Screen</span> <span class="prop">name</span>=<span class="str">"index"</span> <span class="prop">options</span>={{
+    <span class="prop">title</span>: <span class="str">"Shopping list"</span>,
+    <span class="prop">tabBarIcon</span>: ({ <span class="prop">color</span>, <span class="prop">size</span> }) =&gt; (
+      <span class="kw">&lt;Feather</span> <span class="prop">name</span>=<span class="str">"list"</span> <span class="prop">size</span>={size} <span class="prop">color</span>={color} <span class="kw">/&gt;</span>
+    ),
+  }} <span class="kw">/&gt;</span>
+
+  <span class="kw">&lt;Tabs.Screen</span> <span class="prop">name</span>=<span class="str">"counter"</span> <span class="prop">options</span>={{
+    <span class="prop">title</span>: <span class="str">"Counter"</span>,
+    <span class="prop">tabBarIcon</span>: ({ <span class="prop">color</span>, <span class="prop">size</span> }) =&gt; (
+      <span class="kw">&lt;AntDesign</span> <span class="prop">name</span>=<span class="str">"clockcircle"</span> <span class="prop">size</span>={size} <span class="prop">color</span>={color} <span class="kw">/&gt;</span>
+    ),
+  }} <span class="kw">/&gt;</span>
+
+  <span class="kw">&lt;Tabs.Screen</span> <span class="prop">name</span>=<span class="str">"idea"</span> <span class="prop">options</span>={{
+    <span class="prop">title</span>: <span class="str">"My idea"</span>,
+    <span class="prop">tabBarIcon</span>: ({ <span class="prop">color</span>, <span class="prop">size</span> }) =&gt; (
+      <span class="kw">&lt;FontAwesome5</span> <span class="prop">name</span>=<span class="str">"lightbulb"</span> <span class="prop">size</span>={size} <span class="prop">color</span>={color} <span class="kw">/&gt;</span>
+    ),
+  }} <span class="kw">/&gt;</span>
+
+<span class="kw">&lt;/Tabs&gt;</span>
+    </div>
+
+    <hr class="div"/>
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">tabBarIcon prop</div>
+        <p>A function returning any React element. Receives <code>color</code>, <code>size</code>, <code>focused</code>. Must pass <code>color</code> + <code>size</code> through to the icon for tinting to work.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">tabBarActiveTintColor</div>
+        <p>Set on <code>screenOptions</code> of the <code>&lt;Tabs&gt;</code> container — applies globally to all tabs. Change one value to retheme all icons + labels.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">tabBarInactiveTintColor</div>
+        <p>Optional companion prop — controls the grayed-out color for inactive tabs. Defaults to system grey if omitted.</p>
+      </div>
+    </div>
+
+    <div class="warn" style="margin-top:10px">
+      ⚠️ <strong>Don't hardcode icon color.</strong> If you pass a fixed color like <code style="font-family:JetBrains Mono,monospace">color="blue"</code> instead of the prop-injected <code style="font-family:JetBrains Mono,monospace">color</code>, the active/inactive tinting won't work — icon stays fixed while label changes.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-violet">presentation:"modal"</span>
+      <span class="tag bg-pink">transparentModal</span>
+      <span class="tag bg-cyan">Tabs</span>
+      <span class="tag bg-green">tabBarIcon</span>
+      <span class="tag bg-amber">tabBarActiveTintColor</span>
+      <span class="tag bg-red">modal must be top-level</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

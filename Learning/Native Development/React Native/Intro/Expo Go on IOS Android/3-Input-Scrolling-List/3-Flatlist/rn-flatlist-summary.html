@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — FlatList</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--green),var(--amber));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* COMPARE TABLE */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+
+  /* VIRTUALIZATION DIAGRAM */
+  .virt-diagram{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .virt-col{flex:1;min-width:160px;}
+  .virt-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+  .virt-phone{background:#f0f0f0;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+  .virt-screen{height:160px;overflow:hidden;position:relative;}
+  .virt-item{padding:8px 10px;border-bottom:1px solid #e0e0e0;font-family:'JetBrains Mono',monospace;font-size:11px;}
+  .virt-item.rendered{background:#fff;color:#333;}
+  .virt-item.mounted{background:rgba(52,211,153,.15);color:#1a4731;}
+  .virt-item.unmounted{background:rgba(248,113,113,.07);color:#aaa;text-decoration:line-through;}
+  .virt-item.viewport{border-left:3px solid var(--cyan);}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">⚡</div>
+  <div>
+    <h1>RN v3 — FlatList</h1>
+    <p>Kadi Kraman · Virtualization · renderItem · ListHeaderComponent · ListEmptyComponent</p>
+  </div>
+  <div class="badge">Chapter 7.3</div>
+</div>
+
+
+<!-- 1. WHEN TO USE WHAT -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>ScrollView vs FlatList — When to Use Which</h2>
+    <span class="pill bg-cyan">Decision Rule</span>
+  </div>
+  <div class="cb">
+    <table class="tbl">
+      <thead><tr><th>Situation</th><th>Use</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="color:#94a3b8">Mixed content (text, images, sections) that might overflow</td>
+          <td class="mono" style="color:var(--cyan)">ScrollView</td>
+          <td style="color:#94a3b8">Renders everything at once — fine for short, heterogeneous content</td>
+        </tr>
+        <tr>
+          <td style="color:#94a3b8">Array of items mapped to identical-shaped rows</td>
+          <td class="mono" style="color:var(--green)">FlatList ✓</td>
+          <td style="color:#94a3b8">Virtualizes rendering — only mounts visible items. Essential for 20+ items.</td>
+        </tr>
+        <tr>
+          <td style="color:#94a3b8">Full-screen list (Instagram feed, chat, shopping list)</td>
+          <td class="mono" style="color:var(--green)">FlatList ✓</td>
+          <td style="color:#94a3b8">ScrollView + .map() renders all 1000 items immediately — sluggish UI</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="star">
+      ★ <strong>Kadi's rule from transcript:</strong> "If you have an array of items you map over, you should <em>not</em> use a ScrollView." FlatList is the correct tool whenever data is array-shaped, regardless of list length — for correctness and future-proofing.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. HOW VIRTUALIZATION WORKS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>How Virtualization Works</h2>
+    <span class="pill bg-violet">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:#94a3b8;font-size:12.5px;margin-bottom:10px">FlatList tracks the visible window and only <strong style="color:var(--text)">mounts items near the viewport</strong>. Items far above/below are unmounted to save memory.</p>
+
+        <div class="virt-diagram">
+          <div class="virt-col">
+            <div class="virt-title" style="color:var(--red)">ScrollView + .map()</div>
+            <div class="virt-phone">
+              <div class="virt-screen">
+                <div class="virt-item rendered">Item 1 (rendered)</div>
+                <div class="virt-item rendered">Item 2 (rendered)</div>
+                <div class="virt-item rendered">Item 3 (rendered)</div>
+                <div class="virt-item rendered">Item 4 (rendered)</div>
+                <div class="virt-item rendered">... 996 more</div>
+              </div>
+            </div>
+            <p style="color:var(--red);font-size:11px;margin-top:4px">All 1000 mounted at once</p>
+          </div>
+          <div class="virt-col">
+            <div class="virt-title" style="color:var(--green)">FlatList ✓</div>
+            <div class="virt-phone">
+              <div class="virt-screen">
+                <div class="virt-item viewport mounted">Item 1 ← visible</div>
+                <div class="virt-item viewport mounted">Item 2 ← visible</div>
+                <div class="virt-item viewport mounted">Item 3 ← visible</div>
+                <div class="virt-item mounted">Item 4 (buffer)</div>
+                <div class="virt-item unmounted">Item 5+ (unmounted)</div>
+              </div>
+            </div>
+            <p style="color:var(--green);font-size:11px;margin-top:4px">~129/1000 mounted at a time</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="mini">
+          <div class="lbl" style="color:var(--amber)">From the transcript — live demo</div>
+          <p>Kadi tested 1,000 items. Only <strong style="color:var(--amber)">129 rendered at initial load</strong>. As you scroll, more are mounted and off-screen ones are unmounted. This is the entire value of FlatList over ScrollView.</p>
+        </div>
+        <div class="tip" style="margin-top:10px">
+          💡 <strong>renderItem is the key:</strong> FlatList can virtualize because it calls <code>renderItem</code> on-demand per item, rather than rendering everything at once like <code>.map()</code>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. FLATLIST API -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>FlatList — Complete API for This Chapter</h2>
+    <span class="pill bg-green">Code</span>
+  </div>
+  <div class="cb">
+    <div class="code">
+<span class="del">- import { ..., ScrollView } from "react-native";</span>
+<span class="add">+ import { ..., FlatList, View, Text } from "react-native";</span>
+
+<span class="kw">&lt;FlatList</span>
+  <span class="cm">// ─── Data ───────────────────────────────────────────</span>
+  <span class="prop">data</span>={shoppingList}                 <span class="cm">// your array</span>
+  <span class="prop">renderItem</span>={({ <span class="prop">item</span> }) =&gt; (        <span class="cm">// called per visible item</span>
+    <span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>={item.name} <span class="kw">/&gt;</span>
+  )}
+  <span class="cm">// keyExtractor not needed — data has .id field</span>
+
+  <span class="cm">// ─── Slots ──────────────────────────────────────────</span>
+  <span class="prop">ListHeaderComponent</span>={              <span class="cm">// not a function — avoids remount!</span>
+    <span class="kw">&lt;TextInput</span>
+      <span class="prop">value</span>={value}
+      <span class="prop">onChangeText</span>={setValue}
+      <span class="prop">placeholder</span>=<span class="str">"E.g Coffee"</span>
+      <span class="prop">returnKeyType</span>=<span class="str">"done"</span>
+      <span class="prop">onSubmitEditing</span>={handleSubmit}
+      <span class="prop">style</span>={styles.textInput}
+    <span class="kw">/&gt;</span>
+  }
+  <span class="prop">ListEmptyComponent</span>={
+    <span class="kw">&lt;View</span> <span class="prop">style</span>={styles.listEmptyContainer}<span class="kw">&gt;</span>
+      <span class="kw">&lt;Text</span><span class="kw">&gt;</span>Your shopping list is empty<span class="kw">&lt;/Text&gt;</span>
+    <span class="kw">&lt;/View&gt;</span>
+  }
+
+  <span class="cm">// ─── Inherited from ScrollView ──────────────────────</span>
+  <span class="prop">style</span>={styles.container}
+  <span class="prop">contentContainerStyle</span>={styles.contentContainer}
+  <span class="prop">stickyHeaderIndices</span>={[<span class="num">0</span>]}
+<span class="kw">/&gt;</span>
+    </div>
+
+    <hr class="div"/>
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">data + renderItem</div>
+        <p>Core props. <code>renderItem</code> receives <code>{ item, index, separators }</code>. Destructure <code>item</code> for the row data.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">keyExtractor</div>
+        <p>Optional if your objects have <code>.id</code> or <code>.key</code> — auto-used. Only needed when objects use a different unique field.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">Bonus built-ins</div>
+        <p><code>onRefresh</code> (pull-to-refresh), <code>scrollToIndex()</code>, <code>ListFooterComponent</code>, <code>numColumns</code> for grid layouts.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. THE REMOUNT GOTCHA -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--red)"></div>
+    <h2>Critical Gotcha — ListHeaderComponent as JSX, Not Function</h2>
+    <span class="pill bg-red">Trap</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">❌ Wrong — function wrapper</div>
+        <p>Every state change re-creates the component → TextInput unmounts → <strong>keyboard disappears</strong> mid-typing.</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--red);margin-top:6px;background:#0a0d14;padding:6px 8px;border-radius:4px;">
+          ListHeaderComponent={() => &lt;TextInput ... /&gt;}
+        </div>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">✓ Correct — JSX directly</div>
+        <p>Stable reference → TextInput stays mounted → keyboard stays open.</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--green);margin-top:6px;background:#0a0d14;padding:6px 8px;border-radius:4px;">
+          ListHeaderComponent={&lt;TextInput ... /&gt;}
+        </div>
+      </div>
+    </div>
+    <div class="star" style="margin-top:10px">
+      ★ <strong>Same rule applies to ListEmptyComponent and ListFooterComponent.</strong> Pass JSX elements directly, not arrow functions returning JSX — unless the component truly needs to be re-created on each render for a reason.
+    </div>
+
+    <div class="tags" style="margin-top:12px">
+      <span class="tag bg-cyan">FlatList</span>
+      <span class="tag bg-violet">renderItem</span>
+      <span class="tag bg-green">ListHeaderComponent</span>
+      <span class="tag bg-amber">ListEmptyComponent</span>
+      <span class="tag bg-pink">keyExtractor</span>
+      <span class="tag bg-red">no function wrapper</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

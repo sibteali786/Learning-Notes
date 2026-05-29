@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Mark as Completed</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--green),var(--amber));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}.type{color:var(--amber);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* PREVIEW */
+  .rn-preview{background:#f5f5f5;border-radius:8px;overflow:hidden;border:1px solid var(--border);max-width:320px;}
+  .rn-item{padding:14px 10px;display:flex;align-items:center;justify-content:space-between;}
+  .rn-item.todo{background:#fff;border-bottom:2px solid #1a759f;}
+  .rn-item.done{background:#eee;border-bottom:2px solid #eee;}
+  .rn-text{font-family:'DM Sans',sans-serif;font-size:15px;}
+  .rn-text.todo{color:#1a1a1a;font-weight:200;}
+  .rn-text.done{color:grey;font-weight:200;text-decoration:line-through;text-decoration-color:grey;}
+  .rn-btn{padding:6px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif;}
+  .rn-btn.todo{background:#000;color:#fff;}
+  .rn-btn.done{background:grey;color:#fff;}
+
+  /* STYLE ARRAY DIAGRAM */
+  .style-diagram{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .sd-box{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;text-align:center;}
+  .sd-op{color:var(--muted);font-size:13px;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">✅</div>
+  <div>
+    <h1>RN v3 — Mark as Completed</h1>
+    <p>Kadi Kraman · Style arrays · Conditional styles · Optional boolean props</p>
+  </div>
+  <div class="badge">Chapter 5.4</div>
+</div>
+
+
+<!-- 1. KEY CONCEPT — STYLE ARRAYS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>The Core Trick — Style Arrays</h2>
+    <span class="pill bg-cyan">Key Concept</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:10px">The <code style="font-family:JetBrains Mono,monospace">style</code> prop accepts either a single object <em>or an array</em>. Arrays merge left-to-right — later entries override earlier ones. <code style="font-family:JetBrains Mono,monospace">undefined</code> entries are silently skipped.</p>
+
+    <div class="style-diagram">
+      <div class="sd-box" style="color:var(--cyan)">styles.base</div>
+      <span class="sd-op">+</span>
+      <div class="sd-box" style="color:var(--violet)">isCompleted<br/>? styles.completed<br/>: undefined</div>
+      <span class="sd-op">=</span>
+      <div class="sd-box" style="color:var(--green)">Merged<br/>final style</div>
+    </div>
+
+    <div class="code" style="margin-top:12px">
+<span class="cm">// ✓ single style</span>
+<span class="prop">style</span>={styles.itemContainer}
+
+<span class="cm">// ✓ array — last value wins on conflicts</span>
+<span class="prop">style</span>={[styles.itemContainer, styles.completedContainer]}
+
+<span class="cm">// ✓ conditional — undefined is safe, just ignored</span>
+<span class="prop">style</span>={[styles.itemContainer, isCompleted ? styles.completedContainer : <span class="kw">undefined</span>]}
+    </div>
+
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> Like CSS specificity but explicit — base styles first, overrides second. Same pattern as <code style="font-family:JetBrains Mono,monospace">Object.assign({}, defaults, overrides)</code> in plain JS. No class selectors needed.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. THEME UPDATE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>theme.ts Update</h2>
+    <span class="pill bg-violet">Step 1</span>
+  </div>
+  <div class="cb">
+    <div class="code">
+<span class="cm">// theme.ts</span>
+<span class="kw">export const</span> theme = {
+  <span class="prop">colorCerulean</span>:  <span class="str">"#1a759f"</span>,
+  <span class="prop">colorWhite</span>:     <span class="str">"#fff"</span>,
+  <span class="prop">colorBlack</span>:     <span class="str">"#000"</span>,
+<span class="add">+ colorGrey:      "grey",    // system grey — no hex needed</span>
+<span class="add">+ colorLightGrey: "#eee",   // Kadi's go-to light grey</span>
+};
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 <code style="font-family:JetBrains Mono,monospace">"grey"</code> (the CSS named color) works directly — no hex lookup needed. RN accepts all standard CSS color names.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. COMPONENT CHANGES -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>ShoppingListItem.tsx — Full Changes</h2>
+    <span class="pill bg-green">Step 2</span>
+  </div>
+  <div class="cb">
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">Props update — add optional boolean:</p>
+    <div class="code">
+<span class="kw">type</span> <span class="type">Props</span> = {
+  <span class="prop">name</span>:         <span class="type">string</span>;
+<span class="add">+ isCompleted?: boolean;   // optional — defaults to undefined (falsy)</span>
+};
+
+<span class="kw">export function</span> <span class="fn">ShoppingListItem</span>({ <span class="prop">name</span>, <span class="add">isCompleted</span> }: <span class="type">Props</span>) {
+    </div>
+
+    <hr class="div"/>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">JSX — apply conditional style arrays to all 3 elements:</p>
+    <div class="code">
+<span class="cm">// 1. Container</span>
+<span class="kw">&lt;View</span> <span class="prop">style</span>={[
+  styles.itemContainer,
+  isCompleted ? styles.completedContainer : <span class="kw">undefined</span>,
+]}<span class="kw">&gt;</span>
+
+<span class="cm">// 2. Text</span>
+<span class="kw">&lt;Text</span> <span class="prop">style</span>={[
+  styles.itemText,
+  isCompleted ? styles.completedText : <span class="kw">undefined</span>,
+]}<span class="kw">&gt;</span>{name}<span class="kw">&lt;/Text&gt;</span>
+
+<span class="cm">// 3. Button</span>
+<span class="kw">&lt;TouchableOpacity</span> <span class="prop">style</span>={[
+  styles.button,
+  isCompleted ? styles.completedButton : <span class="kw">undefined</span>,
+]}<span class="kw">&gt;</span>
+    </div>
+
+    <hr class="div"/>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">New styles to add at the bottom of StyleSheet.create:</p>
+    <div class="code">
+<span class="prop">completedContainer</span>: {
+  <span class="prop">backgroundColor</span>:  theme.<span class="fn">colorLightGrey</span>,
+  <span class="prop">borderBottomColor</span>: theme.<span class="fn">colorLightGrey</span>,  <span class="cm">// hides cerulean line</span>
+},
+<span class="prop">completedText</span>: {
+  <span class="prop">color</span>:                theme.<span class="fn">colorGrey</span>,
+  <span class="prop">textDecorationLine</span>:  <span class="str">"line-through"</span>,
+  <span class="prop">textDecorationColor</span>: theme.<span class="fn">colorGrey</span>,
+},
+<span class="prop">completedButton</span>: {
+  <span class="prop">backgroundColor</span>: theme.<span class="fn">colorGrey</span>,  <span class="cm">// greys out the delete button</span>
+},
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. BOOLEAN PROP SHORTHAND + PREVIEW -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>Boolean Prop Shorthand + Live Preview</h2>
+    <span class="pill bg-amber">JSX Tip</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:#94a3b8;font-size:12.5px;margin-bottom:8px">For boolean props, <code style="font-family:JetBrains Mono,monospace">= true</code> can be omitted:</p>
+        <div class="code">
+<span class="cm">// verbose — works but redundant</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">isCompleted</span>={<span class="kw">true</span>} <span class="kw">/&gt;</span>
+
+<span class="cm">// shorthand — preferred ✓</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">isCompleted</span> <span class="kw">/&gt;</span>
+
+<span class="cm">// App.tsx usage</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>=<span class="str">"Coffee"</span> <span class="kw">/&gt;</span>           <span class="cm">// todo</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>=<span class="str">"Tea"</span> <span class="prop">isCompleted</span> <span class="kw">/&gt;</span>  <span class="cm">// done</span>
+<span class="kw">&lt;ShoppingListItem</span> <span class="prop">name</span>=<span class="str">"Milk"</span> <span class="prop">isCompleted</span> <span class="kw">/&gt;</span> <span class="cm">// done</span>
+        </div>
+        <div class="warn" style="margin-top:10px">
+          ⚠️ <strong>Only works for booleans = true.</strong> Can't use shorthand for false, strings, numbers, or objects — those always need <code style="font-family:JetBrains Mono,monospace">={value}</code>.
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:8px">Result preview</p>
+        <div class="rn-preview">
+          <div class="rn-item todo">
+            <span class="rn-text todo">Coffee</span>
+            <div class="rn-btn todo">Delete</div>
+          </div>
+          <div class="rn-item done">
+            <span class="rn-text done">Tea</span>
+            <div class="rn-btn done">Delete</div>
+          </div>
+          <div class="rn-item done">
+            <span class="rn-text done">Milk</span>
+            <div class="rn-btn done">Delete</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. PATTERN SUMMARY -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>Conditional Styling Pattern — Cheatsheet</h2>
+    <span class="pill bg-pink">Reference</span>
+  </div>
+  <div class="cb">
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">style array</div>
+        <p>Pass an array to <code>style</code>. Merges objects, last wins. Replaces need for className concatenation from web.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">undefined is safe</div>
+        <p>Falsy items in a style array are silently ignored. Enables clean <code>condition ? style : undefined</code> pattern.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">3 elements, 1 prop</div>
+        <p>Apply <code>isCompleted</code> override to container, text, and button independently — each controls its own visual state.</p>
+      </div>
+    </div>
+    <div class="star" style="margin-top:10px">
+      ★ <strong>Scalable pattern:</strong> Add more visual states (e.g. <code style="font-family:JetBrains Mono,monospace">isUrgent</code>, <code style="font-family:JetBrains Mono,monospace">isSelected</code>) without any conditional JSX branching — just extend the style array with another ternary. No duplicated markup.
+    </div>
+    <div class="tags">
+      <span class="tag bg-cyan">style array</span>
+      <span class="tag bg-violet">isCompleted?:boolean</span>
+      <span class="tag bg-green">textDecorationLine</span>
+      <span class="tag bg-amber">boolean shorthand</span>
+      <span class="tag bg-pink">colorLightGrey #eee</span>
+      <span class="tag bg-red">undefined = ignored</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

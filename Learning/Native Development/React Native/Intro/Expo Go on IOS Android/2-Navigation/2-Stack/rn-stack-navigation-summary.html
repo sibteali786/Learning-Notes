@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Stack Navigation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
+    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
+    --green:#34d399;--amber:#fbbf24;--red:#f87171;
+    --text:#e2e8f0;--muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--cyan),var(--violet));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
+  .str{color:var(--green);}.num{color:var(--amber);}
+  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .note{background:#1a1a2e;border-left:3px solid var(--violet);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .note strong{color:var(--violet);}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* STACK DIAGRAM */
+  .stack-vis{display:flex;flex-direction:column-reverse;gap:4px;max-width:260px;}
+  .stack-card{border-radius:6px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;border:1px solid;}
+  .stack-card.s1{background:rgba(110,231,247,.06);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .stack-card.s2{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .stack-card.s3{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .stack-label{font-size:10px;opacity:.6;margin-bottom:2px;display:block;}
+
+  /* NAV METHODS TABLE */
+  .nav-tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .nav-tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .nav-tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .nav-tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+
+  /* PUSH vs NAVIGATE vs REPLACE */
+  .method-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;}
+  .method-card{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .method-card .name{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin-bottom:5px;}
+  .method-card p{color:#94a3b8;font-size:12px;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">📚</div>
+  <div>
+    <h1>RN v3 — Stack Navigation</h1>
+    <p>Kadi Kraman · Link · useRouter · push vs navigate vs replace · Platform UI</p>
+  </div>
+  <div class="badge">Chapter 6.2</div>
+</div>
+
+
+<!-- 1. HOW STACK WORKS -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>How a Stack Works</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:#94a3b8;font-size:12.5px;margin-bottom:10px">Each new screen renders <em>on top</em> of the previous. Going back pops the top screen off. The first screen is always at the bottom.</p>
+        <div class="stack-vis">
+          <div class="stack-card s1"><span class="stack-label">BOTTOM</span>index.tsx → /</div>
+          <div class="stack-card s2"><span class="stack-label">PUSHED</span>counter.tsx → /counter</div>
+          <div class="stack-card s3"><span class="stack-label">TOP (active)</span>idea.tsx → /idea</div>
+        </div>
+        <p style="color:var(--muted);font-size:11.5px;margin-top:8px">← goBack() removes top card, reveals card below</p>
+      </div>
+      <div>
+        <div class="mini">
+          <div class="lbl" style="color:var(--amber)">3 ways to go back</div>
+          <p>1. <strong>Swipe from left edge</strong> (iOS gesture)<br/>2. <strong>Header back button</strong> (auto-added by Stack)<br/>3. <strong>Android system back</strong> button / gesture</p>
+        </div>
+        <div class="note" style="margin-top:10px">
+          🎨 <strong>Platform-specific by design:</strong> iOS uses slide-from-right + left-aligned back button. Android uses bottom-up animation + left-aligned title. This is intentional — apps should feel native to their platform.
+        </div>
+      </div>
+    </div>
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> A stack of browser tabs you can't reorder — each <code style="font-family:JetBrains Mono,monospace">navigate()</code> opens a new tab on top, each <code style="font-family:JetBrains Mono,monospace">goBack()</code> closes the current tab and returns to the previous one.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. NEW FILES -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>New Screen Files</h2>
+    <span class="pill bg-violet">Setup</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:4px">app/counter.tsx</p>
+        <div class="code">
+<span class="kw">export default function</span> <span class="fn">CounterScreen</span>() {
+  <span class="kw">return</span> (
+    <span class="kw">&lt;View</span> <span class="prop">style</span>={styles.container}<span class="kw">&gt;</span>
+      <span class="kw">&lt;Text</span> <span class="prop">style</span>={styles.text}<span class="kw">&gt;</span>Counter<span class="kw">&lt;/Text&gt;</span>
+    <span class="kw">&lt;/View&gt;</span>
+  );
+}
+        </div>
+      </div>
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:4px">app/idea.tsx</p>
+        <div class="code">
+<span class="kw">export default function</span> <span class="fn">IdeaScreen</span>() {
+  <span class="kw">return</span> (
+    <span class="kw">&lt;View</span> <span class="prop">style</span>={styles.container}<span class="kw">&gt;</span>
+      <span class="kw">&lt;Text</span> <span class="prop">style</span>={styles.text}<span class="kw">&gt;</span>Idea<span class="kw">&lt;/Text&gt;</span>
+    <span class="kw">&lt;/View&gt;</span>
+  );
+}
+        </div>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 Screens are <code style="font-family:JetBrains Mono,monospace">export default</code> (routing files). Note the shared pattern: <code style="font-family:JetBrains Mono,monospace">flex: 1</code> + <code style="font-family:JetBrains Mono,monospace">justifyContent: "center"</code> + <code style="font-family:JetBrains Mono,monospace">alignItems: "center"</code> for a centered placeholder — keep it as your screen template.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. THREE WAYS TO NAVIGATE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>3 Ways to Navigate</h2>
+    <span class="pill bg-green">Core API</span>
+  </div>
+  <div class="cb">
+    <table class="nav-tbl">
+      <thead>
+        <tr><th>#</th><th>Method</th><th>When to use</th><th>Code</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--cyan);font-weight:700">1</td>
+          <td class="mono">&lt;Link&gt;</td>
+          <td style="color:#94a3b8">Declarative links in JSX — like an <code style="font-family:JetBrains Mono,monospace">&lt;a&gt;</code> tag. Simple tappable text/element.</td>
+          <td class="mono" style="color:var(--green)">href="/counter"</td>
+        </tr>
+        <tr>
+          <td style="color:var(--violet);font-weight:700">2</td>
+          <td class="mono">useRouter</td>
+          <td style="color:#94a3b8">Programmatic — inside event handlers, callbacks, after async operations.</td>
+          <td class="mono" style="color:var(--green)">router.navigate("/idea")</td>
+        </tr>
+        <tr>
+          <td style="color:var(--amber);font-weight:700">3</td>
+          <td class="mono">Header buttons</td>
+          <td style="color:#94a3b8">Free — Stack auto-injects back button in header. No code needed.</td>
+          <td style="color:var(--muted)">auto-injected by Stack</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="div"/>
+
+    <p style="color:var(--muted);font-size:12px;margin-bottom:6px">Method 1 — Link component in index.tsx:</p>
+    <div class="code">
+<span class="kw">import</span> { Link } <span class="kw">from</span> <span class="str">"expo-router"</span>;
+
+<span class="kw">&lt;Link</span>
+  <span class="prop">href</span>=<span class="str">"/counter"</span>
+  <span class="prop">style</span>={{ <span class="prop">textAlign</span>: <span class="str">"center"</span>, <span class="prop">marginBottom</span>: <span class="num">18</span>, <span class="prop">fontSize</span>: <span class="num">24</span> }}
+<span class="kw">&gt;</span>
+  Go to /counter
+<span class="kw">&lt;/Link&gt;</span>
+    </div>
+
+    <p style="color:var(--muted);font-size:12px;margin-top:12px;margin-bottom:6px">Method 2 — useRouter hook in counter.tsx:</p>
+    <div class="code">
+<span class="kw">import</span> { useRouter } <span class="kw">from</span> <span class="str">"expo-router"</span>;
+
+<span class="kw">const</span> router = <span class="fn">useRouter</span>();
+
+<span class="kw">&lt;TouchableOpacity</span> <span class="prop">onPress</span>={() => router.<span class="fn">navigate</span>(<span class="str">"/idea"</span>)}<span class="kw">&gt;</span>
+  <span class="kw">&lt;Text&gt;</span>Go to /idea<span class="kw">&lt;/Text&gt;</span>
+<span class="kw">&lt;/TouchableOpacity&gt;</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. PUSH vs NAVIGATE vs REPLACE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>router.push vs .navigate vs .replace</h2>
+    <span class="pill bg-amber">Critical Distinction</span>
+  </div>
+  <div class="cb">
+    <div class="method-grid">
+      <div class="method-card">
+        <div class="name" style="color:var(--green)">router.push()</div>
+        <p>Always adds a new screen on top of the stack — even if that screen is already in the stack. Guarantees forward navigation.</p>
+      </div>
+      <div class="method-card">
+        <div class="name" style="color:var(--cyan)">router.navigate()</div>
+        <p>Smart — if the target screen already exists in the stack, goes <em>back</em> to it instead of adding a duplicate. Can go backwards.</p>
+      </div>
+      <div class="method-card">
+        <div class="name" style="color:var(--violet)">router.replace()</div>
+        <p>Replaces the current screen with the new one. No back button to the replaced screen. Good for auth flows (login → home).</p>
+      </div>
+    </div>
+
+    <div class="star" style="margin-top:12px">
+      ★ <strong>The gotcha with navigate():</strong> Stack is <code style="font-family:JetBrains Mono,monospace">index → idea → counter</code>. Calling <code style="font-family:JetBrains Mono,monospace">router.navigate("/idea")</code> from counter goes <em>back</em> to the existing idea screen — it doesn't push a new one. Use <code style="font-family:JetBrains Mono,monospace">push()</code> if you always want to go forward.
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Rule of thumb:</strong> Tappable links in JSX → <code style="font-family:JetBrains Mono,monospace">&lt;Link&gt;</code>. Triggered after an event (form submit, async result, condition) → <code style="font-family:JetBrains Mono,monospace">useRouter</code>. Auth redirect → <code style="font-family:JetBrains Mono,monospace">replace()</code>.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">&lt;Link href&gt;</span>
+      <span class="tag bg-violet">useRouter</span>
+      <span class="tag bg-green">router.push</span>
+      <span class="tag bg-amber">router.navigate</span>
+      <span class="tag bg-pink">router.replace</span>
+      <span class="tag bg-red">platform-specific UI</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

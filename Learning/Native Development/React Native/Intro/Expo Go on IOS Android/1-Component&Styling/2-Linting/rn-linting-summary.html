@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Linting</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:      #0e1117;
+    --surface: #161b25;
+    --surf2:   #1e2535;
+    --border:  #2a3347;
+    --cyan:    #6ee7f7;
+    --violet:  #a78bfa;
+    --pink:    #f472b6;
+    --green:   #34d399;
+    --amber:   #fbbf24;
+    --red:     #f87171;
+    --text:    #e2e8f0;
+    --muted:   #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    padding: 32px 24px; max-width: 860px; margin: 0 auto; line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .hicon {
+    width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .header h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+  .header p  { color: var(--muted); font-size: 13px; }
+  .badge {
+    margin-left: auto; background: var(--surf2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--amber);
+    white-space: nowrap;
+  }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .card-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .card-header .bar { width: 4px; height: 18px; border-radius: 2px; flex-shrink: 0; }
+  .card-header h2 { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  .pill { margin-left: auto; font-size: 11px; border-radius: 20px; padding: 2px 8px; font-weight: 500; border: 1px solid; }
+  .card-body { padding: 14px 16px; }
+
+  /* CODE */
+  .code { background: #0a0d14; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.75; overflow-x: auto; margin-top: 8px; }
+  .cm  { color: #4a5568; }
+  .kw  { color: var(--violet); }
+  .fn  { color: var(--cyan); }
+  .str { color: var(--green); }
+  .add { color: var(--green); }
+  .del { color: var(--red); }
+  .hl  { background: rgba(110,231,247,.07); display: block; }
+
+  /* MINI CARDS */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr;     gap: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .mini { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; }
+  .mini .lbl { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+  .mini p { color: #94a3b8; font-size: 12.5px; }
+
+  /* FLOW */
+  .flow { display: flex; align-items: center; gap: 0; margin-top: 10px; }
+  .fstep { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; text-align: center; flex: 1; min-width: 0; }
+  .fstep .sn { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); display: block; margin-bottom: 2px; }
+  .farrow { font-size: 16px; color: var(--muted); flex-shrink: 0; padding: 0 4px; }
+
+  /* CALLOUTS */
+  .star { background: #1a1f2e; border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 12.5px; color: #cbd5e1; }
+  .star strong { color: var(--amber); }
+  .tip  { background: #111a17; border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 12.5px; color: #cbd5e1; }
+  .tip  strong { color: var(--green); }
+  .warn { background: #1a1810; border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 12.5px; color: #cbd5e1; }
+  .warn strong { color: var(--red); }
+
+  /* TAG PILLS */
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag  { border-radius: 4px; padding: 3px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500; border: 1px solid; }
+  .bg-cyan   { background: rgba(110,231,247,.08); border-color: rgba(110,231,247,.3); color: var(--cyan); }
+  .bg-violet { background: rgba(167,139,250,.08); border-color: rgba(167,139,250,.3); color: var(--violet); }
+  .bg-green  { background: rgba(52,211,153,.08);  border-color: rgba(52,211,153,.3);  color: var(--green); }
+  .bg-amber  { background: rgba(251,191,36,.08);  border-color: rgba(251,191,36,.3);  color: var(--amber); }
+  .bg-pink   { background: rgba(244,114,182,.08); border-color: rgba(244,114,182,.3); color: var(--pink); }
+  .bg-red    { background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.3); color: var(--red); }
+
+  /* TABLE */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .tbl th { background: var(--surf2); font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .tbl td { padding: 8px 10px; border-bottom: 1px solid #1e2535; color: #94a3b8; vertical-align: top; }
+  .tbl tr:last-child td { border-bottom: none; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); }
+
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🧹</div>
+  <div>
+    <h1>RN v3 — Linting Setup</h1>
+    <p>Kadi Kraman · ESLint + Prettier · Optional but highly recommended</p>
+  </div>
+  <div class="badge">SDK 53+ · Flat Config</div>
+</div>
+
+
+<!-- 1. WHY LINT -->
+<div class="card">
+  <div class="card-header">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>What & Why</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="card-body">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">ESLint — Static Analysis</div>
+        <p>Reads your code <em>without running it</em> and flags common bugs, unused vars, bad patterns. Like a strict code reviewer that never sleeps.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">Prettier — Auto Formatter</div>
+        <p>Enforces consistent style (quotes, spacing, brackets) automatically. You stop arguing about formatting; the tool decides.</p>
+      </div>
+    </div>
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> ESLint is the compiler warning you about logic errors. Prettier is the office style guide enforced by a robot — no more PR comments like "use single quotes."
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. ESLINT SETUP -->
+<div class="card">
+  <div class="card-header">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>ESLint Setup</h2>
+    <span class="pill bg-violet">Step 1</span>
+  </div>
+  <div class="card-body">
+    <p style="color:#94a3b8; font-size:12.5px; margin-bottom:8px">One command — Expo handles everything since SDK 51:</p>
+    <div class="code">
+<span class="fn">npx expo lint</span>   <span class="cm"># installs deps + creates config file</span>
+    </div>
+
+    <div class="two-col" style="margin-top:12px">
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">SDK ≤ 52 output</div>
+        <p>Creates <span style="font-family:JetBrains Mono,monospace; color:var(--text)">.eslintrc.js</span> — legacy config format</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">SDK 53+ output ✓</div>
+        <p>Creates <span style="font-family:JetBrains Mono,monospace; color:var(--text)">eslint.config.js</span> — new Flat Config format (ESLint 8)</p>
+      </div>
+    </div>
+
+    <hr class="div"/>
+    <p style="color:#94a3b8; font-size:12.5px; margin-bottom:6px">Run linting:</p>
+    <div class="code">
+<span class="fn">yarn lint</span>        <span class="cm"># show errors</span>
+<span class="fn">yarn lint --fix</span>  <span class="cm"># auto-fix all fixable issues</span>
+    </div>
+
+    <div class="tip">
+      💡 <strong>Tip:</strong> ESLint errors/warnings <em>don't</em> stop your app from running — they're advisory. E.g. adding <code style="font-family:JetBrains Mono,monospace">const blah = ""</code> triggers an "unused variable" warning but the app still runs fine.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. PRETTIER SETUP -->
+<div class="card">
+  <div class="card-header">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>Prettier Setup</h2>
+    <span class="pill bg-green">Step 2</span>
+  </div>
+  <div class="card-body">
+    <p style="color:#94a3b8; font-size:12.5px; margin-bottom:8px">Install 3 packages:</p>
+    <div class="code">
+<span class="cm"># yarn</span>
+<span class="fn">yarn add -D</span> <span class="str">prettier eslint-config-prettier eslint-plugin-prettier</span>
+
+<span class="cm"># npm / pnpm / bun</span>
+<span class="fn">npx expo install</span> <span class="str">-- --save-dev prettier eslint-config-prettier eslint-plugin-prettier</span>
+    </div>
+
+    <hr class="div"/>
+    <p style="color:#94a3b8; font-size:12.5px; margin-bottom:6px">Then wire it into <span style="font-family:JetBrains Mono,monospace; color:var(--text)">eslint.config.js</span> (SDK 53+ Flat Config):</p>
+    <div class="code">
+<span class="cm">// eslint.config.js</span>
+<span class="kw">const</span> { defineConfig } = <span class="fn">require</span>(<span class="str">'eslint/config'</span>);
+<span class="kw">const</span> expoConfig    = <span class="fn">require</span>(<span class="str">'eslint-config-expo/flat'</span>);
+<span class="add">+const prettierPlugin = require('eslint-plugin-prettier/recommended');</span>
+
+<span class="kw">module.exports</span> = <span class="fn">defineConfig</span>([
+  expoConfig,
+<span class="add">+ prettierPlugin,</span>
+  { ignores: [<span class="str">'dist/*'</span>] },
+]);
+    </div>
+
+    <hr class="div"/>
+    <p style="color:#94a3b8; font-size:12.5px; margin-bottom:6px">Legacy <span style="font-family:JetBrains Mono,monospace; color:var(--text)">.eslintrc.js</span> (SDK ≤ 52):</p>
+    <div class="code">
+<span class="kw">module.exports</span> = {
+  extends: [<span class="str">'expo'</span>, <span class="str">'prettier'</span>],
+  plugins: [<span class="str">'prettier'</span>],
+  rules: { <span class="str">'prettier/prettier'</span>: <span class="str">'error'</span> },
+};
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. HOW IT FLOWS -->
+<div class="card">
+  <div class="card-header">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>How ESLint + Prettier Work Together</h2>
+    <span class="pill bg-amber">Flow</span>
+  </div>
+  <div class="card-body">
+    <div class="flow">
+      <div class="fstep">
+        <span class="sn">WRITE</span>
+        <div style="color:var(--text); font-weight:600">Your Code</div>
+        <div style="color:var(--muted); font-size:11px">.tsx / .ts</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fstep">
+        <span class="sn">ANALYZE</span>
+        <div style="color:var(--cyan); font-weight:600">ESLint</div>
+        <div style="color:var(--muted); font-size:11px">logic errors</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fstep">
+        <span class="sn">FORMAT</span>
+        <div style="color:var(--violet); font-weight:600">Prettier</div>
+        <div style="color:var(--muted); font-size:11px">style errors</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fstep">
+        <span class="sn">FIX</span>
+        <div style="color:var(--green); font-weight:600">--fix flag</div>
+        <div style="color:var(--muted); font-size:11px">auto-resolves</div>
+      </div>
+    </div>
+    <div class="star" style="margin-top:12px">
+      ★ <strong>Key insight:</strong> Prettier errors surface via ESLint (the plugin bridges them). So <code style="font-family:JetBrains Mono,monospace">yarn lint --fix</code> fixes <em>both</em> logic-fixable issues AND all formatting in one shot.
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. QUICK REFERENCE -->
+<div class="card">
+  <div class="card-header">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>Quick Reference</h2>
+    <span class="pill bg-pink">Cheatsheet</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl">
+      <thead>
+        <tr><th>Topic</th><th>Detail</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">npx expo lint</td>
+          <td style="color:#94a3b8">Bootstrap ESLint from scratch</td>
+          <td style="color:var(--green)">SDK 51+ built-in</td>
+        </tr>
+        <tr>
+          <td class="mono">eslint.config.js</td>
+          <td style="color:#94a3b8">New Flat Config format</td>
+          <td style="color:var(--amber)">SDK 53+ only</td>
+        </tr>
+        <tr>
+          <td class="mono">.eslintrc.js</td>
+          <td style="color:#94a3b8">Legacy config format</td>
+          <td style="color:var(--muted)">SDK ≤ 52</td>
+        </tr>
+        <tr>
+          <td class="mono">yarn lint</td>
+          <td style="color:#94a3b8">Show all lint + format errors</td>
+          <td style="color:var(--muted)">Doesn't stop app</td>
+        </tr>
+        <tr>
+          <td class="mono">yarn lint --fix</td>
+          <td style="color:#94a3b8">Auto-fix everything fixable</td>
+          <td style="color:var(--green)">✨ Prettier auto-fixed</td>
+        </tr>
+        <tr>
+          <td class="mono">prettier.config.js</td>
+          <td style="color:#94a3b8">Override default rules (e.g. single quotes)</td>
+          <td style="color:var(--muted)">Optional</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warn" style="margin-top:10px">
+      ⚠️ <strong>Default Prettier uses double quotes.</strong> If your codebase uses single quotes, create a <code style="font-family:JetBrains Mono,monospace">prettier.config.js</code> with <code style="font-family:JetBrains Mono,monospace">singleQuote: true</code> — otherwise <code style="font-family:JetBrains Mono,monospace">--fix</code> will convert everything to double quotes.
+    </div>
+
+    <div class="tags" style="margin-top:12px">
+      <span class="tag bg-cyan">eslint-config-expo</span>
+      <span class="tag bg-violet">eslint-plugin-prettier</span>
+      <span class="tag bg-green">eslint-config-prettier</span>
+      <span class="tag bg-amber">prettier</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

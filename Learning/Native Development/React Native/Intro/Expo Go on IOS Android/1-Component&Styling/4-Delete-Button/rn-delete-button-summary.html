@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Delete Button</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:#0e1117; --surface:#161b25; --surf2:#1e2535; --border:#2a3347;
+    --cyan:#6ee7f7; --violet:#a78bfa; --pink:#f472b6;
+    --green:#34d399; --amber:#fbbf24; --red:#f87171;
+    --text:#e2e8f0; --muted:#64748b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+
+  /* HEADER */
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--red),var(--violet));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+
+  /* CARD */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+
+  /* CODE */
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;} .kw{color:var(--violet);} .fn{color:var(--cyan);}
+  .str{color:var(--green);} .num{color:var(--amber);}
+  .add{color:var(--green);} .del{color:var(--red);opacity:.6;}
+  .prop{color:var(--pink);}
+
+  /* GRIDS */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+  /* MINI */
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
+
+  /* CALLOUTS */
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .danger{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .danger strong{color:var(--red);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+
+  /* TAGS */
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+
+  /* TABLE */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+
+  /* FLOW */
+  .flow{display:flex;align-items:center;gap:0;margin-top:10px;}
+  .fstep{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;text-align:center;flex:1;min-width:0;}
+  .fstep .sn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:2px;}
+  .farrow{font-size:16px;color:var(--muted);flex-shrink:0;padding:0 4px;}
+
+  /* PREVIEW */
+  .rn-preview{background:#fff;border-radius:8px;overflow:hidden;border:1px solid var(--border);max-width:320px;}
+  .rn-item{padding:16px 8px;border-bottom:2px solid #1a759f;display:flex;align-items:center;justify-content:space-between;}
+  .rn-text{color:#1a1a1a;font-size:17px;font-weight:200;font-family:'DM Sans',sans-serif;}
+  .rn-btn{background:#000;padding:8px;border-radius:6px;}
+  .rn-btn-text{color:#fff;font-weight:700;font-size:11px;letter-spacing:1px;font-family:'DM Sans',sans-serif;text-transform:uppercase;}
+
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🗑️</div>
+  <div>
+    <h1>RN v3 — Delete Button</h1>
+    <p>Kadi Kraman · Touchables · Pressable · Alert · theme.ts update</p>
+  </div>
+  <div class="badge">Chapter 5.2</div>
+</div>
+
+
+<!-- 1. BUTTON COMPONENTS OVERVIEW -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>3 Ways to Make a Button</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">Button ❌ avoid</div>
+        <p>Built-in but renders a <em>platform-native</em> button you can't style at all. Only useful for quick local tests — never in production.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">TouchableOpacity ✓</div>
+        <p>Wraps any element as a pressable. Automatically dims opacity on press. <code>activeOpacity</code> prop to tune the dim level (default is intense → use <code>0.8</code>).</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">Pressable ✓ new-gen</div>
+        <p>More powerful — <code>onPressIn</code>, <code>onPressOut</code>, <code>onHoverIn/Out</code>, dynamic styles based on pressed state. Use when you need custom press feedback.</p>
+      </div>
+    </div>
+
+    <div class="star">
+      ★ <strong>Rule of thumb:</strong> Use <code style="font-family:JetBrains Mono,monospace">TouchableOpacity</code> for 90% of buttons (simple, readable). Reach for <code style="font-family:JetBrains Mono,monospace">Pressable</code> only when you need to change the button's <em>visual appearance</em> during the press (e.g. background color change, scale animation).
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Pressable extra props from transcript:</strong> <code style="font-family:JetBrains Mono,monospace">onHoverIn</code> · <code style="font-family:JetBrains Mono,monospace">onHoverOut</code> · <code style="font-family:JetBrains Mono,monospace">onPressIn</code> · <code style="font-family:JetBrains Mono,monospace">onPressOut</code> — useful for desktop/web targets via React Native Web.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. BUILD THE BUTTON -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>Build the Delete Button</h2>
+    <span class="pill bg-violet">Step 1</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">1. Add colorBlack to theme.ts</p>
+        <div class="code">
+<span class="cm">// theme.ts</span>
+<span class="kw">export const</span> theme = {
+  <span class="prop">colorCerulean</span>: <span class="str">"#1a759f"</span>,
+  <span class="prop">colorWhite</span>:    <span class="str">"#fff"</span>,
+<span class="add">+ colorBlack:    "#000",</span>
+};
+        </div>
+
+        <p style="color:var(--muted);font-size:12px;margin-bottom:6px;margin-top:12px">2. Add TouchableOpacity + styles</p>
+        <div class="code">
+<span class="cm">// itemContainer — add flex layout</span>
+<span class="prop">flexDirection</span>:  <span class="str">"row"</span>,
+<span class="prop">alignItems</span>:     <span class="str">"center"</span>,
+<span class="prop">justifyContent</span>: <span class="str">"space-between"</span>,
+
+<span class="cm">// button style</span>
+<span class="prop">backgroundColor</span>: theme.<span class="fn">colorBlack</span>,
+<span class="prop">padding</span>:         <span class="num">8</span>,
+<span class="prop">borderRadius</span>:    <span class="num">6</span>,
+
+<span class="cm">// buttonText style</span>
+<span class="prop">color</span>:           theme.<span class="fn">colorWhite</span>,
+<span class="prop">fontWeight</span>:      <span class="str">"bold"</span>,
+<span class="prop">textTransform</span>:   <span class="str">"uppercase"</span>,
+<span class="prop">letterSpacing</span>:   <span class="num">1</span>,
+        </div>
+      </div>
+
+      <!-- live preview -->
+      <div>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:8px">Live result preview</p>
+        <div class="rn-preview">
+          <div class="rn-item">
+            <span class="rn-text">Coffee</span>
+            <div class="rn-btn"><span class="rn-btn-text">Delete</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <p style="color:var(--muted);font-size:11.5px; margin-bottom:4px">Spacing convention from transcript:</p>
+          <div class="tags">
+            <span class="tag bg-amber">even numbers only</span>
+            <span class="tag bg-amber">2·4·8·12·16·24</span>
+            <span class="tag bg-green">borderRadius: 6 default</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. ALERT CONFIRMATION -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--red)"></div>
+    <h2>Alert Confirmation Dialog</h2>
+    <span class="pill bg-red">Step 2</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:8px"><code style="font-family:JetBrains Mono,monospace">Alert.alert(title, message, buttons[])</code> — 3 arguments. Platform renders native dialog automatically.</p>
+    <div class="code">
+<span class="kw">import</span> { Alert } <span class="kw">from</span> <span class="str">"react-native"</span>;
+
+<span class="kw">const</span> <span class="fn">handleDelete</span> = () => {
+  <span class="fn">Alert</span>.<span class="fn">alert</span>(
+    <span class="str">"Are you sure you want to delete this?"</span>,  <span class="cm">// title</span>
+    <span class="str">"It will be gone for good"</span>,               <span class="cm">// subtitle</span>
+    [
+      {
+        <span class="prop">text</span>:    <span class="str">"Yes"</span>,
+        <span class="prop">onPress</span>: () => console.<span class="fn">log</span>(<span class="str">"Ok, deleting."</span>),
+        <span class="prop">style</span>:   <span class="str">"destructive"</span>,  <span class="cm">// iOS red text</span>
+      },
+      { <span class="prop">text</span>: <span class="str">"Cancel"</span>, <span class="prop">style</span>: <span class="str">"cancel"</span> },
+    ],
+  );
+};
+
+<span class="cm">// In JSX — clean handler reference (no wrapper arrow needed)</span>
+<span class="kw">&lt;TouchableOpacity</span> <span class="prop">onPress</span>={handleDelete} <span class="kw">/&gt;</span>
+    </div>
+
+    <hr class="div"/>
+    <p style="font-family:Syne,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Alert.alert — 3rd arg button styles</p>
+    <table class="tbl">
+      <thead><tr><th>style value</th><th>Behavior</th><th>Platform</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">"destructive"</td><td style="color:#94a3b8">Renders text in red — signals danger action</td><td style="color:var(--cyan)">iOS only (Android ignores)</td></tr>
+        <tr><td class="mono">"cancel"</td><td style="color:#94a3b8">Bold text, positioned as cancel action</td><td style="color:var(--green)">iOS + Android</td></tr>
+        <tr><td class="mono">undefined</td><td style="color:#94a3b8">Default button styling</td><td style="color:var(--green)">Both</td></tr>
+      </tbody>
+    </table>
+
+    <div class="star">
+      ★ <strong>Platform difference:</strong> Alert renders a native iOS sheet vs an Android Material dialog — same code, totally different look. This is RN's platform adaptation in action. To fully customize: build a full-screen modal with <code style="font-family:JetBrains Mono,monospace">transparent</code> background instead.
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. FLEX LAYOUT FOR ROW -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>Side-by-Side Layout Pattern</h2>
+    <span class="pill bg-amber">Flex Recap</span>
+  </div>
+  <div class="cb">
+    <p style="color:#94a3b8;font-size:12.5px;margin-bottom:8px">To put text left + button right inside <code style="font-family:JetBrains Mono,monospace">itemContainer</code>:</p>
+    <div class="flow">
+      <div class="fstep">
+        <span class="sn">1</span>
+        <div style="color:var(--cyan);font-weight:600">flexDirection</div>
+        <div style="color:var(--muted);font-size:11px">"row"</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fstep">
+        <span class="sn">2</span>
+        <div style="color:var(--violet);font-weight:600">justifyContent</div>
+        <div style="color:var(--muted);font-size:11px">"space-between"</div>
+      </div>
+      <div class="farrow">→</div>
+      <div class="fstep">
+        <span class="sn">3</span>
+        <div style="color:var(--green);font-weight:600">alignItems</div>
+        <div style="color:var(--muted);font-size:11px">"center"</div>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 Remember: RN defaults to <code style="font-family:JetBrains Mono,monospace">flexDirection: column</code>, so without step 1 the button stacks <em>below</em> the text instead of beside it.
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. FUNCTION CONVENTION -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>Kadi's Function Convention</h2>
+    <span class="pill bg-pink">Style Guide</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">Components → function declaration</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);margin-top:6px">
+          <span style="color:var(--violet)">export default</span> <span style="color:var(--cyan)">function</span> App() { ... }
+        </div>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">Handlers inside → arrow functions</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);margin-top:6px">
+          <span style="color:var(--violet)">const</span> handleDelete = () => { ... }
+        </div>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Clean onPress shorthand:</strong> If <code style="font-family:JetBrains Mono,monospace">handleDelete</code> takes no args, write <code style="font-family:JetBrains Mono,monospace">onPress={handleDelete}</code> not <code style="font-family:JetBrains Mono,monospace">onPress={() => handleDelete()}</code> — the extra arrow is unnecessary noise.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">TouchableOpacity</span>
+      <span class="tag bg-violet">Pressable</span>
+      <span class="tag bg-red">Alert.alert</span>
+      <span class="tag bg-amber">activeOpacity</span>
+      <span class="tag bg-green">space-between</span>
+      <span class="tag bg-pink">destructive style</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

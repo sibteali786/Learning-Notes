@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Components & Styling</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:     #0e1117; --surface: #161b25; --surf2: #1e2535; --border: #2a3347;
+    --cyan:   #6ee7f7; --violet: #a78bfa;  --pink:  #f472b6;
+    --green:  #34d399; --amber:  #fbbf24;  --red:   #f87171;
+    --text:   #e2e8f0; --muted:  #64748b;
+    --cerulean: #1a759f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 32px 24px; max-width: 900px; margin: 0 auto; line-height: 1.6; }
+
+  /* HEADER */
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .hicon { width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0; background: linear-gradient(135deg, var(--violet), var(--pink)); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .header h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+  .header p { color: var(--muted); font-size: 13px; }
+  .badge { margin-left: auto; background: var(--surf2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--amber); white-space: nowrap; }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .ch { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .ch .bar { width: 4px; height: 18px; border-radius: 2px; flex-shrink: 0; }
+  .ch h2 { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  .pill { margin-left: auto; font-size: 11px; border-radius: 20px; padding: 2px 8px; font-weight: 500; border: 1px solid; }
+  .cb { padding: 14px 16px; }
+
+  /* CODE */
+  .code { background: #0a0d14; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; overflow-x: auto; margin-top: 8px; }
+  .cm { color: #4a5568; } .kw { color: var(--violet); } .fn { color: var(--cyan); }
+  .str { color: var(--green); } .num { color: var(--amber); }
+  .add { color: var(--green); } .del { color: var(--red); opacity: .7; }
+  .prop { color: var(--pink); }
+
+  /* GRIDS */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr;     gap: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* MINI */
+  .mini { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; }
+  .mini .lbl { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+  .mini p { color: #94a3b8; font-size: 12.5px; }
+  .mini code { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text); background: #0a0d14; padding: 1px 5px; border-radius: 3px; }
+
+  /* CALLOUTS */
+  .star { background: #1a1f2e; border-left: 3px solid var(--amber);  border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 12.5px; color: #cbd5e1; }
+  .star strong { color: var(--amber); }
+  .danger { background: #1a1113; border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 12.5px; color: #cbd5e1; }
+  .danger strong { color: var(--red); }
+  .tip { background: #111a17; border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 10px; font-size: 12.5px; color: #cbd5e1; }
+  .tip strong { color: var(--green); }
+
+  /* TAG PILLS */
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .tag  { border-radius: 4px; padding: 3px 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: 500; border: 1px solid; }
+  .bg-cyan   { background: rgba(110,231,247,.08); border-color: rgba(110,231,247,.3); color: var(--cyan); }
+  .bg-violet { background: rgba(167,139,250,.08); border-color: rgba(167,139,250,.3); color: var(--violet); }
+  .bg-green  { background: rgba(52,211,153,.08);  border-color: rgba(52,211,153,.3);  color: var(--green); }
+  .bg-amber  { background: rgba(251,191,36,.08);  border-color: rgba(251,191,36,.3);  color: var(--amber); }
+  .bg-pink   { background: rgba(244,114,182,.08); border-color: rgba(244,114,182,.3); color: var(--pink); }
+  .bg-red    { background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.3); color: var(--red); }
+
+  /* TABLE */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .tbl th { background: var(--surf2); font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .tbl td { padding: 8px 10px; border-bottom: 1px solid #1e2535; color: #94a3b8; vertical-align: top; }
+  .tbl tr:last-child td { border-bottom: none; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); }
+
+  /* COMPONENT VISUAL */
+  .rn-preview { background: #fff; border-radius: 8px; padding: 0; overflow: hidden; border: 1px solid var(--border); max-width: 280px; }
+  .rn-item { padding: 16px 8px; border-bottom: 2px solid var(--cerulean); }
+  .rn-item-text { color: #1a1a1a; font-size: 17px; font-weight: 200; font-family: 'DM Sans', sans-serif; }
+
+  /* FLEX DIFF TABLE */
+  .web-rn { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 10px; }
+  .whead { background: var(--surf2); padding: 8px 12px; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); }
+  .wcol  { padding: 10px 12px; font-size: 12px; color: #94a3b8; border-right: 1px solid var(--border); }
+  .wcol:last-child { border-right: none; }
+  .wcol .row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #1e2535; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+  .wcol .row:last-child { border-bottom: none; }
+  .wcol .row .key { color: var(--muted); }
+  .wcol .row .val-web { color: var(--amber); } .wcol .row .val-rn { color: var(--green); }
+
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hicon">🧩</div>
+  <div>
+    <h1>RN v3 — Components & Styling</h1>
+    <p>Kadi Kraman · View · Text · StyleSheet · theme.ts · Display Points</p>
+  </div>
+  <div class="badge">Chapter 5.1</div>
+</div>
+
+
+<!-- 1. CORE PRIMITIVES -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--cyan)"></div>
+    <h2>Core Primitives — View & Text</h2>
+    <span class="pill bg-cyan">Concept</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">View ≈ &lt;div&gt;</div>
+        <p>Container for positioning and styling. "Views all the way down" — you can nest as many as you want, same as divs. <em>Never renders visible content itself.</em></p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">Text ≈ &lt;p&gt; but stricter</div>
+        <p>ALL text in RN <strong style="color:var(--red)">must</strong> be inside a <code>&lt;Text&gt;</code> component. Raw strings outside Text crash the app — no exceptions.</p>
+      </div>
+    </div>
+
+    <div class="danger">
+      🚨 <strong>Common crash — falsy render trap:</strong><br/>
+      <code style="font-family:JetBrains Mono,monospace">{arr.length &amp;&amp; &lt;Text&gt;items&lt;/Text&gt;}</code> — when <code>arr.length === 0</code>, React Native renders the <strong>number 0</strong> on screen, which is outside a Text → instant crash.<br/>
+      <strong>Fix:</strong> always use a boolean: <code style="font-family:JetBrains Mono,monospace">{arr.length &gt; 0 &amp;&amp; &lt;Text&gt;...&lt;/Text&gt;}</code>
+    </div>
+
+    <div class="star" style="margin-top:10px">
+      ★ <strong>Real-world analogy:</strong> Web lets you put text anywhere in the DOM. RN is like a strict type system for UI — every piece of text needs to be "typed" as a <code style="font-family:JetBrains Mono,monospace">&lt;Text&gt;</code> node, otherwise the native renderer doesn't know what font/size/color to use on iOS vs Android.
+    </div>
+  </div>
+</div>
+
+
+<!-- 2. STYLING SYSTEM -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--violet)"></div>
+    <h2>Styling System</h2>
+    <span class="pill bg-violet">Core Concept</span>
+  </div>
+  <div class="cb">
+    <div class="three-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--cyan)">Syntax</div>
+        <p>Plain JS objects — camelCase props. CSS knowledge transfers directly. No <code>.css</code> files, no Sass, no CSS modules built-in.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">Units</div>
+        <p>No <code>px</code>, <code>em</code>, <code>rem</code>. Everything is <strong style="color:var(--amber)">display points</strong>, which scale with device pixel ratio (e.g. 3× on modern iPhones).</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--pink)">No Global Styles</div>
+        <p>Can't style "all Text elements" like CSS selectors. Pattern: shared <code>theme.ts</code> file + <code>StyleSheet</code> per component.</p>
+      </div>
+    </div>
+
+    <!-- display points explainer -->
+    <hr class="div"/>
+    <p style="font-family:Syne,sans-serif; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:8px">Display Points vs Pixels</p>
+    <div class="code">
+<span class="cm">// 1 display point on a 3× device = 3×3 = 9 physical pixels</span>
+<span class="fn">PixelRatio</span>.<span class="fn">get</span>()  <span class="cm">// iOS Simulator → 3  |  old Android → 1  |  high-end Android → 3.5</span>
+
+<span class="cm">// Practical implication for images:</span>
+<span class="cm">// High pixel ratio device needs larger source images to look crisp</span>
+<span class="cm">// Use @2x / @3x suffixed assets just like React Native recommends</span>
+    </div>
+
+    <div class="star">
+      ★ <strong>Real-world analogy:</strong> Same as CSS <code>rem</code> being relative to root font size — display points are "logical pixels" relative to device density. A <code>borderBottomWidth: 1</code> looks the same physical size on every device, regardless of screen resolution.
+    </div>
+  </div>
+</div>
+
+
+<!-- 3. FLEXBOX DIFFERENCES -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>Flexbox — Web vs React Native</h2>
+    <span class="pill bg-amber">Gotchas</span>
+  </div>
+  <div class="cb">
+    <div class="web-rn">
+      <div>
+        <div class="whead" style="color:var(--amber)">🌐 Web CSS Default</div>
+        <div class="wcol">
+          <div class="row"><span class="key">display</span><span class="val-web">block (must add flex)</span></div>
+          <div class="row"><span class="key">flexDirection</span><span class="val-web">row</span></div>
+          <div class="row"><span class="key">alignContent</span><span class="val-web">stretch</span></div>
+          <div class="row"><span class="key">flexShrink</span><span class="val-web">1</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="whead" style="color:var(--green)">📱 React Native Default</div>
+        <div class="wcol">
+          <div class="row"><span class="key">display</span><span class="val-rn">flex always ✓</span></div>
+          <div class="row"><span class="key">flexDirection</span><span class="val-rn">column ⚠️</span></div>
+          <div class="row"><span class="key">alignContent</span><span class="val-rn">flex-start</span></div>
+          <div class="row"><span class="key">flexShrink</span><span class="val-rn">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="danger" style="margin-top:10px">
+      ⚠️ <strong>Biggest gotcha:</strong> <code style="font-family:JetBrains Mono,monospace">flexDirection</code> defaults to <strong>column</strong> not row. Coming from web, side-by-side layouts will stack vertically and confuse you until you add <code style="font-family:JetBrains Mono,monospace">flexDirection: 'row'</code> explicitly.
+    </div>
+  </div>
+</div>
+
+
+<!-- 4. BUILD THE COMPONENT -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>Build the Shopping List Item</h2>
+    <span class="pill bg-green">Step-by-Step</span>
+  </div>
+  <div class="cb">
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p style="color:var(--muted); font-size:12px; margin-bottom:6px">Step 1 — Inline styles (quick prototype)</p>
+        <div class="code">
+<span class="kw">&lt;View</span> <span class="prop">style</span>={{
+  <span class="prop">paddingVertical</span>: <span class="num">16</span>,
+  <span class="prop">paddingHorizontal</span>: <span class="num">8</span>,
+  <span class="prop">borderBottomColor</span>: <span class="str">"#1a759f"</span>,
+  <span class="prop">borderBottomWidth</span>: <span class="num">1</span>,
+}}<span class="kw">&gt;</span>
+  <span class="kw">&lt;Text</span> <span class="prop">style</span>={{
+    <span class="prop">fontSize</span>: <span class="num">18</span>,
+    <span class="prop">fontWeight</span>: <span class="str">"200"</span>
+  }}<span class="kw">&gt;</span>Coffee<span class="kw">&lt;/Text&gt;</span>
+<span class="kw">&lt;/View&gt;</span>
+        </div>
+
+        <p style="color:var(--muted); font-size:12px; margin-bottom:6px; margin-top:12px">Step 2 — Move to StyleSheet (convention)</p>
+        <div class="code">
+<span class="kw">const</span> styles = <span class="fn">StyleSheet</span>.<span class="fn">create</span>({
+  <span class="prop">itemContainer</span>: {
+    <span class="prop">paddingVertical</span>: <span class="num">16</span>,
+    <span class="prop">paddingHorizontal</span>: <span class="num">8</span>,
+    <span class="prop">borderBottomColor</span>: <span class="str">"#1a759f"</span>,
+    <span class="prop">borderBottomWidth</span>: <span class="num">1</span>,
+  },
+  <span class="prop">itemText</span>: {
+    <span class="prop">fontSize</span>: <span class="num">18</span>,
+    <span class="prop">fontWeight</span>: <span class="str">"200"</span>,
+  },
+});
+        </div>
+      </div>
+
+      <!-- Preview -->
+      <div>
+        <p style="color:var(--muted); font-size:12px; margin-bottom:8px">Result preview</p>
+        <div class="rn-preview">
+          <div class="rn-item">
+            <span class="rn-item-text">Coffee</span>
+          </div>
+          <div style="padding:16px 8px; border-bottom:2px solid #e2e8f0;">
+            <span style="color:#1a1a1a; font-size:17px; font-weight:200; font-family:'DM Sans',sans-serif; opacity:.35">Next item...</span>
+          </div>
+        </div>
+        <p style="color:var(--muted); font-size:11px; margin-top:6px">Cerulean <span style="display:inline-block;width:10px;height:10px;background:#1a759f;border-radius:2px;vertical-align:middle"></span> <code style="font-family:JetBrains Mono,monospace">#1a759f</code> border</p>
+        <div class="tip" style="margin-top:10px">
+          💡 <strong>paddingHorizontal / paddingVertical</strong> are RN shorthands not in CSS. Saves writing paddingLeft + paddingRight every time.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 5. THEME FILE PATTERN -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--pink)"></div>
+    <h2>Shared theme.ts Pattern</h2>
+    <span class="pill bg-pink">Best Practice</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div>
+        <p style="color:var(--muted); font-size:12px; margin-bottom:6px">New file: <code style="font-family:JetBrains Mono,monospace">theme.ts</code></p>
+        <div class="code">
+<span class="cm">// theme.ts — root level</span>
+<span class="kw">export const</span> theme = {
+  <span class="prop">colorCerulean</span>: <span class="str">"#1a759f"</span>,
+  <span class="prop">colorWhite</span>:    <span class="str">"#fff"</span>,
+  <span class="cm">// production: add spacing, fontSizes</span>
+  <span class="cm">// spacing12: 12, spacing16: 16, ...</span>
+};
+        </div>
+      </div>
+      <div>
+        <p style="color:var(--muted); font-size:12px; margin-bottom:6px">Consume in StyleSheet</p>
+        <div class="code">
+<span class="kw">import</span> { theme } <span class="kw">from</span> <span class="str">"./theme"</span>;
+
+<span class="cm">// before: "#1a759f" scattered everywhere</span>
+<span class="cm">// after:</span>
+<span class="prop">borderBottomColor</span>: theme.<span class="fn">colorCerulean</span>,
+<span class="prop">backgroundColor</span>:   theme.<span class="fn">colorWhite</span>,
+        </div>
+      </div>
+    </div>
+
+    <div class="star">
+      ★ <strong>Why it matters:</strong> RN has no CSS variables or global stylesheets. Rebrand the whole app (e.g. cerulean → teal) by changing <em>one line</em> in <code style="font-family:JetBrains Mono,monospace">theme.ts</code> instead of grep-replacing hex values across 30 files. Same principle as design tokens in a design system.
+    </div>
+  </div>
+</div>
+
+
+<!-- 6. STYLESHEET.CREATE -->
+<div class="card">
+  <div class="ch">
+    <div class="bar" style="background:var(--amber)"></div>
+    <h2>StyleSheet.create — What it Actually Does</h2>
+    <span class="pill bg-amber">Common Misconception</span>
+  </div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--red)">What people think</div>
+        <p>Some optimization magic that pre-processes styles at compile time or sends them to native once.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">What it actually does</div>
+        <p>Validates that your style props are valid TypeScript types. That's it. Mostly a dev-time type checker, not a runtime optimizer.</p>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Convention:</strong> Every UI file has its <code style="font-family:JetBrains Mono,monospace">StyleSheet.create({...})</code> at the <em>bottom</em> of the file. Think of it as CSS modules — scoped to that file, co-located with the component.
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">View</span>
+      <span class="tag bg-violet">Text</span>
+      <span class="tag bg-green">StyleSheet.create</span>
+      <span class="tag bg-amber">theme.ts</span>
+      <span class="tag bg-pink">display points</span>
+      <span class="tag bg-red">falsy render trap</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
