@@ -4,31 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c32b264c0ab48b08",
+        "id": "5d0081fc6f58d22b",
         "type": "tabs",
         "children": [
           {
-            "id": "7e375fbec472f6dd",
+            "id": "d71ab47bc770d627",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/AI&ML Engineering/Hallmark/Portfolio/Audit Response.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Audit Response"
+              "title": "New tab"
             }
           }
         ]
@@ -51,7 +37,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": true
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -152,13 +138,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/1-Delete-Complete/rn-delete-complete-summary.html",
+                "file": "Learning/Database/Database Design/2-Related Table and More SQL/Keys, Joins.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of rn-delete-complete-summary"
+              "title": "Outline of Keys, Joins.excalidraw"
             }
           },
           {
@@ -193,54 +179,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "7e375fbec472f6dd",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/NestJS/Theory.md",
-    "Learning/AI&ML Engineering/Hallmark/Portfolio/Audit Response.md",
-    "Learning/AI&ML Engineering/Hallmark/Portfolio",
-    "Learning/AI&ML Engineering/Hallmark",
+    "Learning/JavaScript/Coding/Deep Clone/Drawing 2026-06-01 09.59.44.excalidraw.md",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/xg3g8QJ39g-5.0~4qicn98.nms.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/xWkdHJANtnnJ.0924~mp8cjscf.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/trFqhoLyS8Wc.00it8g3sdt1x9.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/oN2SYdSRofO2.06hwhk74kynd2.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/hvS08f3bK-45.0hc8ls~qrzxj1.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/f0CknSRcOhe-.0d8fl2pjepvtt.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/dUY3kHsn3c4O.0aj_9xbjxmzsl.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/ZS8xUcLSzgnn.0tv93afqil.jc.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/YcI3UiF1ye_u.0es2c86y0gknj.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments/L9DTCrHV_4vT.15qagx_k41or_.svg",
+    "Learning/System Design/Technolgies/Realtime Udpates/realtime-updates-summary.html",
+    "Learning/System Design/Technolgies/Realtime Udpates/attachments",
+    "Learning/System Design/Technolgies/Realtime Udpates",
+    "Learning/System Design/Technolgies",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/1-Delete-Complete/rn-delete-complete-summary.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/3-Input-Scrolling-List/3-Flatlist/rn-flatlist-summary.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/1-Delete-Complete",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/3-Input-Scrolling-List/1-TextInput/rn-textinput-summary.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/3-Input-Scrolling-List/3-Flatlist",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/3-Input-Scrolling-List/2-ScrollView",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/2-Navigation/4-Nested/rn-modal-tabs-summary.html",
-    "Screenshot 2026-05-25 at 10.26.44 AM.png",
-    "Learning/JavaScript/Coding/getElementBy../getElementByStyle.excalidraw.md",
-    "Learning/DSA/Binary Search/3-Searching in rotated sorted array.excalidraw.md",
+    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/2-Navigation/3-Tabs-and-BottomTabs/rn-modal-tabs-summary.html",
+    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/2-Navigation/2-Stack/rn-stack-navigation-summary.html",
+    "Learning/AI&ML Engineering/Hallmark/Portfolio/Audit Response.md",
+    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/Freelance/Builders's Website/Builders Website.md",
+    "Learning/DSA/Binary Search/4-Split larest sum.excalidraw.md",
     "Learning/DSA/Binary Search/2-Apple Harvest (Koko eating banana).excalidraw.md",
+    "Learning/DSA/Binary Search/3-Searching in rotated sorted array.excalidraw.md",
+    "Learning/JavaScript/Coding/Deep Clone/deepclone.md",
+    "Learning/JavaScript/Coding/EventEmitter/EventEmitter.excalidraw.md",
+    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
+    "Learning/JavaScript/Coding/getElementBy../getElementByStyle.excalidraw.md",
     "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
-    "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
-    "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
     "Learning/Side Projects/Tutorsloom/Routes i am finding.md",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Pasted image 20260519145255.png",
-    "Pasted Image 20260423111902_446.png",
-    "Pasted Image 20260422143401_737.png",
-    "Pasted Image 20260421142442_731.png",
-    "Pasted Image 20260421133445_179.png",
-    "Pasted Image 20260421114219_869.png",
-    "Pasted Image 20260419205204_621.png",
-    "Pasted Image 20260407123826_882.png",
-    "Learning/Work Stuff/Chat Application.md",
-    "Learning/Work Stuff/Chat App/Summaries.md",
-    "Learning/Work Stuff/Chat App/Chat App.md",
-    "Learning/Side Projects/HospitalityOS/Missing Items/Items.md",
     "Learning/Side Projects/HospitalityOS/concerns/Timezones.md",
     "Learning/Side Projects/HospitalityOS/concerns/Service Resilliency.md",
     "Learning/Side Projects/HospitalityOS/concerns/Multi-tenancy.md",
     "Learning/Side Projects/HospitalityOS/concerns/GraphQL.md",
     "Learning/Side Projects/HospitalityOS/concerns/Apollo Client.md",
-    "Learning/Side Projects/HospitalityOS/Resources.md",
-    "Learning/Side Projects/HospitalityOS/Concerns.md",
-    "conflict-files-obsidian-git.md",
-    "Learning/Side Projects/HospitalityOS/Resources.md",
-    "Learning/Work Stuff/HCC-Email-Controller/1-Planning.md",
-    "Learning/Side Projects/Peer-to-Peer Network Drone/What More.excalidraw.md",
-    "Learning/JavaScript/Coding/jquery/Jqeury.css.excalidraw.md",
-    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
+    "Learning/Side Projects/HospitalityOS/Missing Items/Items.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
+    "Learning/DSA/Binary Search/Apple Harvest (Koko eating banana).excalidraw.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/DSA/Java/Java_DSA.md",
+    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
