@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LLM-as-Judge Implementation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; margin-top: 10px; }
+  .kw { color: #7c6fff; } .fn { color: #60a5fa; } .str { color: #f59e0b; } .cm { color: #555; } .num { color: #10b981; }
+
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 12px; text-align: left; font-size: 11px; }
+  .cmp td { padding: 9px 12px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .cmp td:first-child { color: #e0e0e0; font-weight: 700; white-space: nowrap; }
+
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; }
+  .card { background: #1a1a2e; border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px; }
+  .card .icon { font-size: 20px; margin-bottom: 4px; }
+  .card .title { font-weight: 700; font-size: 13px; }
+  .card .desc { color: #aaa; font-size: 12px; margin-top: 4px; }
+
+  .rubric-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .rubric-score { font-size: 12px; font-weight: 800; width: 42px; flex-shrink: 0; text-align: center; border-radius: 6px; padding: 3px 0; }
+  .rubric-bar { flex: 1; height: 8px; background: #12121f; border-radius: 10px; }
+  .rubric-fill { height: 8px; border-radius: 10px; }
+  .rubric-desc { font-size: 12px; color: #aaa; width: 220px; flex-shrink: 0; }
+
+  .history-box { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #aaa; }
+  .history-box .h-title { color: #f59e0b; font-weight: 700; font-size: 11px; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .h-step { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+  .h-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  .trick-box { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 10px; padding: 12px 14px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">LLM-AS-JUDGE</div>
+    <h1>generateObject + LLM Judge</h1>
+    <div class="sub">Force structured output from the judge. Score reliably. Avoid prose chaos.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 <strong>generateText</strong> = blank page → unpredictable string.<br/><strong>generateObject</strong> = form to fill → guaranteed JSON matching your Zod schema.</div>
+    <div class="note">Tool call inputs were already structured outputs — generateObject is just the official version of that old hack.</div>
+  </div>
+
+  <!-- generateText vs generateObject -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">generateText vs generateObject</span>
+    <table class="cmp">
+      <thead><tr><th></th><th>generateText</th><th>generateObject</th></tr></thead>
+      <tbody>
+        <tr><td>Returns</td><td>Free-form string</td><td>Typed object matching Zod schema</td></tr>
+        <tr><td>Parsing</td><td>Manual — may fail, vary, add preamble</td><td>Automatic — guaranteed shape</td></tr>
+        <tr><td>Schema</td><td>None</td><td>Required — defines the contract</td></tr>
+        <tr><td>Use case</td><td>Chat, summaries, explanations</td><td>Scores, classifications, structured data</td></tr>
+        <tr><td>Eval use</td><td>Agent output (what we're judging)</td><td>Judge output (what we're scoring with)</td></tr>
+        <tr><td>Equivalent to</td><td>—</td><td>Tool call input schema, never executed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- History: the hack -->
+  <div class="history-box">
+    <div class="h-title">📜 BEFORE generateObject EXISTED — THE HACK</div>
+    <div class="h-step"><div class="h-dot" style="background:#f59e0b;"></div><div>Developers needed structured output. LLMs only returned text.</div></div>
+    <div class="h-step"><div class="h-dot" style="background:#f59e0b;"></div><div>Solution: define a fake tool with input schema. No <code>execute()</code>. Just grab the structured args the LLM passed in.</div></div>
+    <div class="h-step"><div class="h-dot" style="background:#10b981;"></div><div><strong>generateObject</strong> is the official, clean version of that same pattern. Same concept, no hacks.</div></div>
+  </div>
+
+  <!-- Judge Schema -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">JUDGE SCHEMA + IMPLEMENTATION</span>
+    <pre>
+<span class="cm">// Schema — forces judge to return a number + reason, never prose</span>
+<span class="kw">const</span> judgeSchema = z.object({
+  score:  z.number().<span class="fn">min</span>(<span class="num">1</span>).<span class="fn">max</span>(<span class="num">10</span>).<span class="fn">describe</span>(<span class="str">"Score from 1-10 where 10 is perfect"</span>),
+  reason: z.string().<span class="fn">describe</span>(<span class="str">"Brief explanation for the score"</span>)
+});
+
+<span class="kw">export async function</span> <span class="fn">llmJudge</span>(output: MultiTurnResult, target: MultiTurnTarget) {
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">generateObject</span>({
+    model:             <span class="fn">openai</span>(<span class="str">'gpt-4o'</span>),   <span class="cm">// stronger than agent model</span>
+    schema:            judgeSchema,
+    schemaName:        <span class="str">'evaluation'</span>,
+    schemaDescription: <span class="str">'Evaluation of an AI agent response'</span>,
+    providerOptions:   { openai: { reasoningEffort: <span class="str">'high'</span> } },
+    messages: [
+      { role: <span class="str">'system'</span>, content: <span class="cm">/* rubric — see below */</span> },
+      { role: <span class="str">'user'</span>,   content: <span class="str">`Task: ${target.originalTask}
+Tools called: ${JSON.stringify(output.toolCallOrder)}
+Tool results: ${JSON.stringify(target.mockToolResults)}
+Agent response: ${output.text}`</span> }
+    ]
+  });
+
+  <span class="kw">return</span> result.object.score / <span class="num">10</span>; <span class="cm">// convert 1-10 → 0-1 range</span>
+}</pre>
+  </div>
+
+  <!-- Rubric -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">SCORING RUBRIC (system prompt)</span>
+    <div class="rubric-row"><div class="rubric-score" style="background:#10b98133;color:#10b981;">10</div><div class="rubric-bar"><div class="rubric-fill" style="width:100%;background:#10b981;"></div></div><div class="rubric-desc">Fully addresses task using tool results correctly</div></div>
+    <div class="rubric-row"><div class="rubric-score" style="background:#60a5fa33;color:#60a5fa;">7–9</div><div class="rubric-bar"><div class="rubric-fill" style="width:80%;background:#60a5fa;"></div></div><div class="rubric-desc">Mostly correct, minor issues</div></div>
+    <div class="rubric-row"><div class="rubric-score" style="background:#f59e0b33;color:#f59e0b;">4–6</div><div class="rubric-bar"><div class="rubric-fill" style="width:50%;background:#f59e0b;"></div></div><div class="rubric-desc">Partially addresses the task</div></div>
+    <div class="rubric-row" style="margin-bottom:0;"><div class="rubric-score" style="background:#f8717133;color:#f87171;">1–3</div><div class="rubric-bar"><div class="rubric-fill" style="width:20%;background:#f87171;"></div></div><div class="rubric-desc">Mostly incorrect or irrelevant</div></div>
+    <div style="margin-top:10px; font-size:11px; color:#555;">Why 1–10 not 0–1? LLMs struggle with floating point precision in structured outputs. Use integers, divide by 10 yourself.</div>
+  </div>
+
+  <!-- Key design decisions -->
+  <div class="cards">
+    <div class="card" style="border:1px solid #7c6fff44;">
+      <div class="icon">💬</div>
+      <div class="title" style="color:#7c6fff;">Ask for a reason</div>
+      <div class="desc">Forces the model to think before scoring. On non-reasoning models this alone dramatically improves score quality. Less critical on o1/o3 but still good practice.</div>
+    </div>
+    <div class="card" style="border:1px solid #10b98144;">
+      <div class="icon">🧠</div>
+      <div class="title" style="color:#10b981;">Stronger model as judge</div>
+      <div class="desc">Judge must be at least as capable as the agent. Use GPT-4o or o1 to judge a gpt-4o-mini agent. Same model = blind spots overlap.</div>
+    </div>
+    <div class="card" style="border:1px solid #f59e0b44;">
+      <div class="icon">⚡</div>
+      <div class="title" style="color:#f59e0b;">reasoningEffort: high</div>
+      <div class="desc">Tells reasoning models to think deeply before judging. Default is low/medium. For evals where accuracy matters, always set high.</div>
+    </div>
+  </div>
+
+  <!-- Warning -->
+  <div class="warn">
+    <strong>⚠️ Don't tip off the judge.</strong> If your rubric hints at what "good" looks like in too much detail, smart models optimize for the rubric instead of actual quality. Keep criteria outcome-focused ("addresses the task") not method-focused ("mentions all 3 tool calls by name").
+  </div>
+
+  <!-- Trick box -->
+  <div class="trick-box">
+    <div style="font-size:11px; color:#7c6fff; font-weight:700; letter-spacing:1px; margin-bottom:6px;">WHAT THE JUDGE RECEIVES (user message)</div>
+    <div style="font-size:12px; color:#aaa; line-height:1.9;">
+      ✦ <strong style="color:#e0e0e0;">originalTask</strong> — what the user asked for<br/>
+      ✦ <strong style="color:#e0e0e0;">toolCallOrder</strong> — what tools the agent actually called<br/>
+      ✦ <strong style="color:#e0e0e0;">mockToolResults</strong> — what those tools returned (known, deterministic)<br/>
+      ✦ <strong style="color:#e0e0e0;">output.text</strong> — what the agent said to the user<br/>
+      → Judge decides: <em>given all of this, was the response correct?</em>
+    </div>
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd; margin-top:4px;">
+    <strong>WNP scenario:</strong> Task = "Who are the senior devs on the Q3 project?" · <code>list_users</code> returned [Ali, Sara] · Agent responded "The senior devs are Ali and Sara." → judge score: 10/10 (used tool result, directly answered). Agent responded "I found some users in the system." → judge score: 4/10 (vague, didn't use results to answer). Same tool call, very different quality — only LLM judge catches this.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Key: <span style="color:#7c6fff;">generateObject</span> · <span style="color:#10b981;">judgeSchema (Zod)</span> · <span style="color:#60a5fa;">1–10 ÷ 10</span> · <span style="color:#f59e0b;">reason field = better scores</span> · <span style="color:#f87171;">stronger model as judge</span>
+  </div>
+
+</div>
+</body>
+</html>

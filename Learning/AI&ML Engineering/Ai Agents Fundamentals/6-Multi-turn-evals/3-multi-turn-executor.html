@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Multi-Turn Executor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; margin-top: 10px; }
+  .kw { color: #7c6fff; } .fn { color: #60a5fa; } .str { color: #f59e0b; } .cm { color: #555; } .num { color: #10b981; }
+
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 12px; text-align: left; font-size: 11px; }
+  .cmp td { padding: 9px 12px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .cmp td:first-child { color: #e0e0e0; font-weight: 700; white-space: nowrap; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  /* Steps flow */
+  .step-flow { display: flex; flex-direction: column; gap: 0; }
+  .sf-row { display: flex; gap: 0; }
+  .sf-left { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+  .sf-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .sf-line { width: 2px; flex: 1; min-height: 8px; }
+  .sf-body { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; margin: 3px 0 3px 8px; flex: 1; }
+  .sf-title { font-size: 13px; font-weight: 700; }
+  .sf-desc { font-size: 12px; color: #aaa; margin-top: 3px; }
+
+  /* Return shape */
+  .return-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ret-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; }
+  .ret-card .r-key { font-size: 12px; font-weight: 700; font-family: monospace; }
+  .ret-card .r-type { font-size: 11px; margin-top: 2px; }
+  .ret-card .r-desc { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  .flow-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; margin-bottom: 10px; }
+  .fh-box { background: #1a2a3a; border: 1px solid #60a5fa44; border-radius: 8px; padding: 5px 11px; }
+  .fh-arr { color: #60a5fa; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">MULTI-TURN EVALS</div>
+    <h1>multiTurnWithMocks Executor</h1>
+    <div class="sub">Run the full agent loop against mocked tools. Collect every step. Feed it all to the judge.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 Multi-turn executor = the <strong>run function</strong>, but without streaming — using Vercel AI SDK's internal loop (<code>stopWhen</code>) so you don't rebuild it, then manually inspecting <code>result.steps</code> to collect what the judge needs.</div>
+    <div class="note">Tools are mocked with fixed return values. You never hit the real file system. The agent still runs its full reasoning loop — it just gets fake results back.</div>
+  </div>
+
+  <!-- Single vs Multi executor comparison -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">SINGLE-TURN vs MULTI-TURN EXECUTOR</span>
+    <table class="cmp">
+      <thead><tr><th></th><th>singleTurnWithMocks</th><th>multiTurnWithMocks</th></tr></thead>
+      <tbody>
+        <tr><td>Loop</td><td>1 call, forced stop</td><td>Full agent loop via <code>stopWhen: stepCountIs(N)</code></td></tr>
+        <tr><td>Tools executed?</td><td>Never — descriptions only</td><td>Yes — but return mock values</td></tr>
+        <tr><td>Uses streamText?</td><td>No</td><td>No — generateText + steps inspection</td></tr>
+        <tr><td>Collects steps?</td><td>No — one turn</td><td>Yes — <code>result.steps[]</code> maps every iteration</td></tr>
+        <tr><td>Judge-ready output?</td><td>toolCalls + toolNames</td><td>text + steps + toolsUsed + toolCallOrder</td></tr>
+        <tr><td>Config</td><td>model, tools</td><td>model, tools, maxSteps, pre-filled messages</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Flow -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">EXECUTOR FLOW</span>
+    <div class="flow-h">
+      <span class="fh-box">data in</span><span class="fh-arr">→</span>
+      <span class="fh-box">buildMockedTools()</span><span class="fh-arr">→</span>
+      <span class="fh-box">build messages[]</span><span class="fh-arr">→</span>
+      <span class="fh-box">generateText loop</span><span class="fh-arr">→</span>
+      <span class="fh-box">inspect result.steps</span><span class="fh-arr">→</span>
+      <span class="fh-box">return MultiTurnResult</span>
+    </div>
+    <div class="step-flow">
+      <div class="sf-row">
+        <div class="sf-left"><div class="sf-dot" style="background:#7c6fff;"></div><div class="sf-line" style="background:#2a2a4a;"></div></div>
+        <div class="sf-body">
+          <div class="sf-title" style="color:#7c6fff;">buildMockedTools(data.mockTools)</div>
+          <div class="sf-desc">Creates real tool objects with <code>execute()</code> functions that return the fixed mock values from the eval data. Same descriptions as real tools — agent can't tell the difference.</div>
+        </div>
+      </div>
+      <div class="sf-row">
+        <div class="sf-left"><div class="sf-dot" style="background:#60a5fa;"></div><div class="sf-line" style="background:#2a2a4a;"></div></div>
+        <div class="sf-body">
+          <div class="sf-title" style="color:#60a5fa;">Build messages[] — two modes</div>
+          <div class="sf-desc">
+            <strong>Fresh prompt:</strong> <code>[{role:"system", content:SYSTEM_PROMPT}, {role:"user", content:data.prompt}]</code><br/>
+            <strong>Pre-filled:</strong> <code>data.messages ?? [...]</code> — use existing history to test mid-conversation behavior.
+          </div>
+        </div>
+      </div>
+      <div class="sf-row">
+        <div class="sf-left"><div class="sf-dot" style="background:#10b981;"></div><div class="sf-line" style="background:#2a2a4a;"></div></div>
+        <div class="sf-body">
+          <div class="sf-title" style="color:#10b981;">generateText with stopWhen: stepCountIs(N)</div>
+          <div class="sf-desc">AI SDK runs the full agent loop internally. <code>maxSteps</code> comes from eval data or defaults to 20. No custom loop needed — SDK handles it. Returns <code>result.steps[]</code> for inspection.</div>
+        </div>
+      </div>
+      <div class="sf-row">
+        <div class="sf-left"><div class="sf-dot" style="background:#f59e0b;"></div><div class="sf-line" style="background:#2a2a4a;"></div></div>
+        <div class="sf-body">
+          <div class="sf-title" style="color:#f59e0b;">Inspect result.steps[] — collect for judge</div>
+          <div class="sf-desc">Each step has <code>toolCalls[]</code> (what the agent asked to call) and <code>toolResults[]</code> (mock responses). Map over all steps to build ordered lists. One step can have parallel tool calls.</div>
+        </div>
+      </div>
+      <div class="sf-row">
+        <div class="sf-left"><div class="sf-dot" style="background:#c084fc;"></div></div>
+        <div class="sf-body">
+          <div class="sf-title" style="color:#c084fc;">Return MultiTurnResult</div>
+          <div class="sf-desc">Everything the judge needs: final text, step-by-step trace, unique tools used, and full call order. See shape below.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">CODE — multiTurnWithMocks</span>
+<pre>
+<span class="kw">export async function</span> <span class="fn">multiTurnWithMocks</span>(data: MultiTurnEvalData): Promise&lt;MultiTurnResult&gt; {
+  <span class="kw">const</span> tools   = <span class="fn">buildMockedTools</span>(data.mockTools);
+  <span class="kw">const</span> messages = data.messages ?? [
+    { role: <span class="str">'system'</span>, content: SYSTEM_PROMPT },
+    { role: <span class="str">'user'</span>,   content: data.prompt! }
+  ];
+
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">generateText</span>({
+    model:    <span class="fn">openai</span>(data.config?.model ?? <span class="str">'gpt-4o-mini'</span>),
+    messages, tools,
+    stopWhen: <span class="fn">stepCountIs</span>(data.config?.maxSteps ?? <span class="num">20</span>)
+  });
+
+  <span class="kw">const</span> allToolCalls: string[] = [];
+
+  <span class="kw">const</span> steps = result.steps.<span class="fn">map</span>(step => {
+    <span class="kw">const</span> stepToolCalls = (step.toolCalls ?? []).<span class="fn">map</span>(tc => {
+      allToolCalls.<span class="fn">push</span>(tc.toolName);               <span class="cm">// track order globally</span>
+      <span class="kw">return</span> { toolName: tc.toolName, args: tc.args ?? {} };
+    });
+    <span class="kw">const</span> stepToolResults = (step.toolResults ?? []).<span class="fn">map</span>(tr => ({
+      toolName: tr.toolName,
+      result:   <span class="str">'result'</span> <span class="kw">in</span> tr ? tr.result : <span class="kw">null</span>
+    }));
+    <span class="kw">return</span> {
+      toolCalls:   stepToolCalls.length   > <span class="num">0</span> ? stepToolCalls   : <span class="kw">undefined</span>,
+      toolResults: stepToolResults.length > <span class="num">0</span> ? stepToolResults : <span class="kw">undefined</span>,
+      text:        step.text || <span class="kw">undefined</span>
+    };
+  });
+
+  <span class="kw">return</span> {
+    text:          result.text,
+    steps,
+    toolsUsed:     [...<span class="kw">new</span> Set(allToolCalls)], <span class="cm">// deduplicated</span>
+    toolCallOrder: allToolCalls                    <span class="cm">// full ordered list (with repeats)</span>
+  };
+}</pre>
+  </div>
+
+  <!-- Return shape -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">MultiTurnResult SHAPE — WHAT THE JUDGE RECEIVES</span>
+    <div class="return-grid">
+      <div class="ret-card" style="border-left:3px solid #10b981;">
+        <div class="r-key" style="color:#10b981;">text</div>
+        <div class="r-type" style="color:#555;">string</div>
+        <div class="r-desc">Agent's final response to the user. This is what the judge reads and scores.</div>
+      </div>
+      <div class="ret-card" style="border-left:3px solid #7c6fff;">
+        <div class="r-key" style="color:#7c6fff;">steps[]</div>
+        <div class="r-type" style="color:#555;">Step[]</div>
+        <div class="r-desc">Full iteration trace. Each step: toolCalls, toolResults, text. Enables step-level debugging.</div>
+      </div>
+      <div class="ret-card" style="border-left:3px solid #60a5fa;">
+        <div class="r-key" style="color:#60a5fa;">toolCallOrder</div>
+        <div class="r-type" style="color:#555;">string[] (with repeats)</div>
+        <div class="r-desc">Ordered list of every tool called. Used by <code>toolOrderCorrect</code> scorer. E.g. ["list_users", "assign_user", "assign_user"]</div>
+      </div>
+      <div class="ret-card" style="border-left:3px solid #f59e0b;">
+        <div class="r-key" style="color:#f59e0b;">toolsUsed</div>
+        <div class="r-type" style="color:#555;">string[] (deduplicated)</div>
+        <div class="r-desc">Unique tools called. Used by <code>toolsAvoided</code> scorer. Set deduplication handles parallel + repeated calls.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why not stream -->
+  <div class="grid2">
+    <div class="grid2-card" style="background:#0f1f1a; border:1px solid #10b98144;">
+      <div class="g-title" style="color:#10b981;">Why generateText not streamText?</div>
+      <div class="g-body">No UI to stream to in evals. We only care about the final result + steps. streamText complicates collection with no benefit here.</div>
+    </div>
+    <div class="grid2-card" style="background:#0d2137; border:1px solid #60a5fa44;">
+      <div class="g-title" style="color:#60a5fa;">Why use SDK loop not manual?</div>
+      <div class="g-body">We already built the loop manually in run.ts — no need to duplicate. SDK's <code>stopWhen</code> + <code>result.steps</code> give us everything for free.</div>
+    </div>
+  </div>
+
+  <!-- Warning -->
+  <div class="warn">
+    <strong>⚠️ allToolCalls vs toolsUsed:</strong> <code>allToolCalls</code> keeps duplicates and order — critical for <code>toolOrderCorrect</code> scorer. <code>toolsUsed</code> is a <code>new Set()</code> — used for <code>toolsAvoided</code>. Don't mix them up. If agent calls <code>list_users</code> twice, order array has it twice; set has it once.
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> Prompt = "Assign all senior devs to Q3 project"<br/>
+    Mock: <code>list_users</code> → "[Ali, Sara]" · <code>assign_user</code> → "success"<br/>
+    Agent runs: step 1 → <code>list_users()</code> · step 2 → <code>assign_user(Ali)</code> + <code>assign_user(Sara)</code> parallel · step 3 → text response<br/>
+    Result: <code>toolCallOrder: ["list_users","assign_user","assign_user"]</code> · <code>toolsUsed: ["list_users","assign_user"]</code> · text: "Done — Ali and Sara assigned to Q3" → judge score: 10/10.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Key: <span style="color:#7c6fff;">buildMockedTools</span> · <span style="color:#10b981;">generateText + stopWhen</span> · <span style="color:#60a5fa;">result.steps inspection</span> · <span style="color:#f59e0b;">toolCallOrder (ordered) vs toolsUsed (set)</span>
+  </div>
+
+</div>
+</body>
+</html>
