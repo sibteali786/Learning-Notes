@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JS Internals — Session Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --text: #c9d1e0;
+    --muted: #5a6380;
+    --accent-yellow: #f5c542;
+    --accent-cyan: #38d9f5;
+    --accent-purple: #a78bfa;
+    --accent-green: #4ade80;
+    --accent-red: #f87171;
+    --accent-orange: #fb923c;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-display);
+    min-height: 100vh;
+    padding: 48px 24px;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .header-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+  }
+  .header h1 span { color: var(--accent-yellow); }
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    font-family: var(--font-mono);
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .card.yellow::before { background: var(--accent-yellow); }
+  .card.cyan::before   { background: var(--accent-cyan); }
+  .card.purple::before { background: var(--accent-purple); }
+  .card.green::before  { background: var(--accent-green); }
+  .card.red::before    { background: var(--accent-red); }
+  .card.orange::before { background: var(--accent-orange); }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .badge.yellow { background: #f5c54220; color: var(--accent-yellow); }
+  .badge.cyan   { background: #38d9f520; color: var(--accent-cyan); }
+  .badge.purple { background: #a78bfa20; color: var(--accent-purple); }
+  .badge.green  { background: #4ade8020; color: var(--accent-green); }
+  .badge.red    { background: #f8717120; color: var(--accent-red); }
+  .badge.orange { background: #fb923c20; color: var(--accent-orange); }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-family: var(--font-mono);
+  }
+
+  /* CODE BLOCK */
+  .code {
+    background: #0a0c11;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .c-kw  { color: #a78bfa; }
+  .c-fn  { color: #38d9f5; }
+  .c-str { color: #4ade80; }
+  .c-num { color: #fb923c; }
+  .c-cmt { color: #3d4560; }
+  .c-key { color: #f5c542; }
+  .c-ok  { color: #4ade80; }
+  .c-err { color: #f87171; }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* COMPARISON TABLE */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .compare-table th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+  .compare-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #1a1e2a;
+    color: var(--text);
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: #1a1e2a; }
+  .tick  { color: var(--accent-green); }
+  .cross { color: var(--accent-red); }
+
+  /* PILL */
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .flow-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+  }
+  .flow-arrow { color: var(--muted); font-size: 18px; }
+
+  /* INSIGHT BOX */
+  .insight {
+    background: #1a1e2a;
+    border-left: 3px solid var(--accent-yellow);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 14px;
+  }
+  .insight strong { color: var(--accent-yellow); }
+
+  /* RULE BOX */
+  .rule-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 10px;
+    color: var(--muted);
+  }
+  .rule-box span { color: var(--accent-cyan); font-weight: 700; }
+
+  /* KEY POINTS LIST */
+  .kp { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .kp-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+  .kp-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  /* SECTION ROW */
+  .section { display: flex; flex-direction: column; gap: 16px; }
+
+  /* SYMBOL ORDER VISUAL */
+  .order-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    align-items: center;
+  }
+  .order-item {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .footer-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-tag">// session notes · js internals</div>
+    <h1>JS Hidden <span>Mechanics</span></h1>
+    <p>Object.getOwnPropertySymbols · WeakMap · Descriptors · Symbols · Circular Refs</p>
+  </div>
+
+  <!-- ROW 1: Symbols overview -->
+  <div class="section">
+    <div class="section-label">// 01 — Symbols</div>
+    <div class="grid-2">
+      <div class="card yellow">
+        <div class="card-title">Symbol() <span class="badge yellow">PRIMITIVE</span></div>
+        <div class="card-desc">Always unique. Even same description ≠ same symbol.</div>
+        <div class="code"><span class="c-kw">const</span> <span class="c-key">a</span> = <span class="c-fn">Symbol</span>(<span class="c-str">'id'</span>);
+<span class="c-kw">const</span> <span class="c-key">b</span> = <span class="c-fn">Symbol</span>(<span class="c-str">'id'</span>);
+a === b  <span class="c-cmt">// false — always</span></div>
+        <div class="kp">
+          <div class="kp-item"><div class="kp-dot" style="background:var(--accent-yellow)"></div><span>Hidden from <code>JSON.stringify</code>, <code>for...in</code>, <code>Object.keys</code></span></div>
+          <div class="kp-item"><div class="kp-dot" style="background:var(--accent-yellow)"></div><span>Collision-free keys when multiple libs touch same object</span></div>
+          <div class="kp-item"><div class="kp-dot" style="background:var(--accent-yellow)"></div><span>Cannot be cloned — the reference IS the identity</span></div>
+        </div>
+      </div>
+
+      <div class="card cyan">
+        <div class="card-title">Well-Known Symbols <span class="badge cyan">BUILT-IN HOOKS</span></div>
+        <div class="card-desc">Hook into JS engine behaviour on your custom classes.</div>
+        <div class="code"><span class="c-cmt">// Make class iterable</span>
+[<span class="c-fn">Symbol.iterator</span>]() { ... }
+
+<span class="c-cmt">// Control type coercion</span>
+[<span class="c-fn">Symbol.toPrimitive</span>](hint) { ... }
+
+<span class="c-cmt">// Override instanceof</span>
+[<span class="c-fn">Symbol.hasInstance</span>](obj) { ... }</div>
+        <div class="insight"><strong>Real use:</strong> Range class with Symbol.iterator works in <code>for...of</code>, spread, destructuring automatically.</div>
+      </div>
+    </div>
+
+    <!-- Symbol property order -->
+    <div class="card purple">
+      <div class="card-title">Property Ordering Rules <span class="badge purple">ALWAYS</span></div>
+      <div class="card-desc">JS engine follows a strict order — symbols always last.</div>
+      <div class="order-row">
+        <div class="order-item" style="background:#fb923c20;color:var(--accent-orange);">1. Integer indices ↑</div>
+        <div class="flow-arrow">→</div>
+        <div class="order-item" style="background:#38d9f520;color:var(--accent-cyan);">2. String keys (insertion order)</div>
+        <div class="flow-arrow">→</div>
+        <div class="order-item" style="background:#a78bfa20;color:var(--accent-purple);">3. Symbols (insertion order)</div>
+      </div>
+      <div class="code" style="margin-top:14px;"><span class="c-fn">Reflect</span>.<span class="c-fn">ownKeys</span>(obj)
+<span class="c-cmt">// ['1','2','z','a', Symbol(s1), Symbol(s2)]</span>
+<span class="c-cmt">//  ──integers──  ──strings──  ──symbols──</span></div>
+      <div class="rule-box">Use <span>Reflect.ownKeys()</span> to get ALL — integers + strings + symbols together.</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: getOwnPropertySymbols + getOwnPropertyDescriptors -->
+  <div class="section">
+    <div class="section-label">// 02 — Object Property APIs</div>
+    <div class="grid-2">
+      <div class="card orange">
+        <div class="card-title">getOwnPropertySymbols() <span class="badge orange">VISIBILITY</span></div>
+        <div class="card-desc">The only way to see symbol-keyed properties.</div>
+        <div class="code"><span class="c-fn">Object</span>.<span class="c-fn">keys</span>(obj)     <span class="c-cmt">// ❌ misses symbols</span>
+<span class="c-kw">for</span>...<span class="c-kw">in</span>           <span class="c-cmt">// ❌ misses symbols</span>
+<span class="c-fn">JSON</span>.<span class="c-fn">stringify</span>(obj) <span class="c-cmt">// ❌ misses symbols</span>
+
+<span class="c-fn">Object</span>.<span class="c-fn">getOwnPropertySymbols</span>(obj)
+<span class="c-cmt">// ✅ [Symbol(id), Symbol(secret)]</span></div>
+      </div>
+
+      <div class="card green">
+        <div class="card-title">getOwnPropertyDescriptors() <span class="badge green">METADATA</span></div>
+        <div class="card-desc">Returns full descriptor — not just value, but the hidden flags.</div>
+        <div class="code">{ value, writable, enumerable, configurable }
+<span class="c-cmt">// OR accessor descriptor:</span>
+{ <span class="c-key">get</span>() {}, <span class="c-key">set</span>(v) {}, enumerable, configurable }</div>
+        <div class="insight"><strong>Why it matters:</strong> Spread <code>{ ...obj }</code> silently drops getters/setters and non-enumerable props. Descriptors preserve everything.</div>
+        <div class="code" style="margin-top:10px;"><span class="c-cmt">// True clone preserving getters</span>
+<span class="c-fn">Object</span>.<span class="c-fn">defineProperties</span>(
+  {},
+  <span class="c-fn">Object</span>.<span class="c-fn">getOwnPropertyDescriptors</span>(source)
+);</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: WeakMap / WeakSet -->
+  <div class="section">
+    <div class="section-label">// 03 — Weak Collections</div>
+    <div class="card cyan">
+      <div class="card-title">WeakMap & WeakSet — The GC-Safe Alternative <span class="badge cyan">MEMORY</span></div>
+      <div class="card-desc">Don't prevent garbage collection. Keys must be objects.</div>
+      <div class="grid-2" style="margin-top:4px;">
+        <div>
+          <table class="compare-table">
+            <thead><tr><th></th><th>Map / Set</th><th>WeakMap / WeakSet</th></tr></thead>
+            <tbody>
+              <tr><td>Key types</td><td>Anything</td><td>Objects only</td></tr>
+              <tr><td>Prevents GC</td><td><span class="tick">✓ yes</span></td><td><span class="cross">✗ no (safe)</span></td></tr>
+              <tr><td>Iterable</td><td><span class="tick">✓</span></td><td><span class="cross">✗</span></td></tr>
+              <tr><td>.size</td><td><span class="tick">✓</span></td><td><span class="cross">✗</span></td></tr>
+              <tr><td>Best for</td><td>Data you manage</td><td>Metadata on objects you don't own</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="code"><span class="c-cmt">// ❌ Map — memory leak</span>
+<span class="c-kw">const</span> cache = <span class="c-kw">new</span> <span class="c-fn">Map</span>();
+cache.<span class="c-fn">set</span>(domNode, data);
+<span class="c-cmt">// domNode removed — Map still holds ref</span>
+
+<span class="c-cmt">// ✅ WeakMap — GC safe</span>
+<span class="c-kw">const</span> cache = <span class="c-kw">new</span> <span class="c-fn">WeakMap</span>();
+cache.<span class="c-fn">set</span>(domNode, data);
+<span class="c-cmt">// domNode removed → entry vanishes</span></div>
+          <div class="rule-box"><span>Rule:</span> Key is an object you don't own? → Weak variant. Need iteration or primitives? → Map/Set.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: hasOwnProperty + Circular Reference -->
+  <div class="section">
+    <div class="section-label">// 04 — Circular Reference Detection</div>
+    <div class="grid-2">
+      <div class="card red">
+        <div class="card-title">hasOwnProperty — Safe Pattern <span class="badge red">GOTCHA</span></div>
+        <div class="card-desc">Three ways, only two are correct.</div>
+        <table class="compare-table">
+          <thead><tr><th>Method</th><th>Safe?</th><th>Correct target?</th></tr></thead>
+          <tbody>
+            <tr><td><code>obj.hasOwnProperty(k)</code></td><td><span class="cross">✗ overridable</span></td><td><span class="tick">✓</span></td></tr>
+            <tr><td><code>Object.hasOwnProperty(k)</code></td><td><span class="tick">✓</span></td><td><span class="cross">✗ wrong target</span></td></tr>
+            <tr><td><code>Object.prototype.hasOwnProperty.call(obj,k)</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+            <tr><td><code>Object.hasOwn(obj, k)</code></td><td><span class="tick">✓ ES2022</span></td><td><span class="tick">✓ preferred</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card purple">
+        <div class="card-title">Circular Ref Detection <span class="badge purple">ALGORITHM</span></div>
+        <div class="card-desc">DFS + WeakSet to track visited objects.</div>
+        <div class="flow">
+          <div class="flow-box">visit node</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">in WeakSet?</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box" style="color:var(--accent-red)">true ← circular</div>
+        </div>
+        <div class="flow" style="margin-top:4px;">
+          <div class="flow-box">not seen</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">add to WeakSet</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">recurse children</div>
+        </div>
+        <div class="insight"><strong>Why WeakSet not Set:</strong> Detection is temporary metadata on objects we don't own. WeakSet entries freed when function exits. Set would hold refs longer than needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Symbol deep clone row -->
+  <div class="section">
+    <div class="section-label">// 05 — Symbol Cloning</div>
+    <div class="card yellow">
+      <div class="card-title">Can you deep clone a Symbol? <span class="badge yellow">NO — BY DESIGN</span></div>
+      <div class="grid-2" style="margin-top:8px;">
+        <div>
+          <div class="card-desc">Cloning creates a NEW symbol → original refs break.</div>
+          <table class="compare-table">
+            <thead><tr><th>Method</th><th>Symbols?</th></tr></thead>
+            <tbody>
+              <tr><td><code>structuredClone()</code></td><td><span class="cross">✗ dropped</span></td></tr>
+              <tr><td><code>JSON.parse/stringify</code></td><td><span class="cross">✗ dropped</span></td></tr>
+              <tr><td><code>{ ...spread }</code></td><td><span class="cross">✗ dropped</span></td></tr>
+              <tr><td><code>Object.defineProperties + getOwnPropertyDescriptors</code></td><td><span class="tick">✓ same ref</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code"><span class="c-kw">const</span> <span class="c-key">ID</span> = <span class="c-fn">Symbol</span>(<span class="c-str">'id'</span>);
+<span class="c-kw">const</span> obj = { [<span class="c-key">ID</span>]: <span class="c-num">42</span> };
+
+<span class="c-cmt">// ❌ clone creates new Symbol internally</span>
+<span class="c-cmt">// original ID ref can't reach it</span>
+
+<span class="c-cmt">// ✅ Copy SAME symbol reference</span>
+<span class="c-fn">Object</span>.<span class="c-fn">defineProperties</span>(
+  {},
+  <span class="c-fn">Object</span>.<span class="c-fn">getOwnPropertyDescriptors</span>(obj)
+);
+<span class="c-cmt">// cloned[ID] === 42 ✓</span></div>
+      </div>
+      <div class="insight"><strong>Mental model:</strong> Symbols aren't data to clone — they're keys/identities to share. Same reason you don't clone a WeakMap key.</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-tag">// js internals session — Ali</div>
+    <div class="footer-pills">
+      <span class="pill" style="background:#f5c54220;color:var(--accent-yellow);">Symbol</span>
+      <span class="pill" style="background:#38d9f520;color:var(--accent-cyan);">WeakMap</span>
+      <span class="pill" style="background:#a78bfa20;color:var(--accent-purple);">Descriptors</span>
+      <span class="pill" style="background:#4ade8020;color:var(--accent-green);">hasOwn</span>
+      <span class="pill" style="background:#f8717120;color:var(--accent-red);">Circular Refs</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
