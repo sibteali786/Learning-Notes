@@ -6,49 +6,34 @@
 <title>RN v3 — Delete & Complete</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
-  :root{
-    --bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;
-    --cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;
-    --green:#34d399;--amber:#fbbf24;--red:#f87171;
-    --text:#e2e8f0;--muted:#64748b;
-  }
+  :root{--bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;--cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;--green:#34d399;--amber:#fbbf24;--red:#f87171;--text:#e2e8f0;--muted:#64748b;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
-
   .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
-  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--red),var(--green));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--red),var(--violet));display:flex;align-items:center;justify-content:center;font-size:20px;}
   .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
   .header p{color:var(--muted);font-size:13px;}
   .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
-
   .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
   .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
   .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
   .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
   .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
   .cb{padding:14px 16px;}
-
   .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
-  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}
-  .str{color:var(--green);}.num{color:var(--amber);}
-  .add{color:var(--green);}.del{color:var(--red);opacity:.6;}
-  .prop{color:var(--pink);}.type{color:var(--amber);}
-
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}.str{color:var(--green);}.num{color:var(--amber);}.add{color:var(--green);}.del{color:var(--red);opacity:.6;}.prop{color:var(--pink);}.type{color:var(--amber);}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-
   .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
   .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
   .mini p{color:#94a3b8;font-size:12.5px;}
   .mini code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);background:#0a0d14;padding:1px 5px;border-radius:3px;}
-
   .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
   .star strong{color:var(--amber);}
   .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
   .tip strong{color:var(--green);}
   .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
   .warn strong{color:var(--red);}
-
   .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
   .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
   .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
@@ -57,219 +42,216 @@
   .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
   .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
   .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
-
-  /* SORT DIAGRAM */
-  .sort-grid{display:flex;flex-direction:column;gap:4px;margin-top:10px;max-width:320px;}
-  .sort-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;border:1px solid;}
-  .sort-item.todo{background:rgba(110,231,247,.05);border-color:rgba(110,231,247,.3);color:var(--cyan);}
-  .sort-item.done{background:rgba(100,116,139,.06);border-color:rgba(100,116,139,.3);color:var(--muted);text-decoration:line-through;}
-  .sort-divider{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:4px 0 2px;}
-
-  /* TYPE DIFF */
-  .type-block{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;}
-
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+  .chapter-divider{display:flex;align-items:center;gap:12px;margin:20px 0 14px;}
+  .chapter-divider .line{flex:1;height:1px;background:var(--border);}
+  .chapter-divider .label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);white-space:nowrap;}
   hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
-  <div class="hicon">✅</div>
+  <div class="hicon">⚡</div>
   <div>
-    <h1>RN v3 — Delete & Complete</h1>
-    <p>Kadi Kraman · Callback props · filter · map toggle · timestamp sort · Pressable</p>
+    <h1>RN v3 — Delete &amp; Complete</h1>
+    <p>Kadi Kraman · Callback props · filter · map toggle · sort by timestamp · long text</p>
   </div>
   <div class="badge">Chapter 8</div>
 </div>
 
-
-<!-- 1. TYPE EVOLUTION -->
+<!-- DATA MODEL -->
 <div class="card">
-  <div class="ch">
-    <div class="bar" style="background:var(--cyan)"></div>
-    <h2>ShoppingListItemType — Final Shape</h2>
-    <span class="pill bg-cyan">Data Model</span>
-  </div>
+  <div class="ch"><div class="bar" style="background:var(--cyan)"></div><h2>Updated Type</h2><span class="pill bg-cyan">Data Model</span></div>
   <div class="cb">
-    <div class="type-block">
+    <div class="code">
 <span class="kw">type</span> <span class="type">ShoppingListItemType</span> = {
-  <span class="prop">id</span>:                    <span class="type">string</span>;   <span class="cm">// ISO timestamp — unique per ms</span>
+  <span class="prop">id</span>:                    <span class="type">string</span>;
   <span class="prop">name</span>:                  <span class="type">string</span>;
-  <span class="add">completedAtTimestamp?: number;  // undefined = todo, Date.now() = done</span>
-  <span class="add">lastUpdatedTimestamp:  number;  // set on add AND toggle — drives sort order</span>
+<span class="add">+ completedAtTimestamp?: number;   // undefined = not done | Date.now() = done</span>
+<span class="add">+ lastUpdatedTimestamp:  number;   // mandatory — drives sort order</span>
 };
     </div>
-    <div class="star">
-      ★ <strong>Why number not boolean for completedAt?</strong> A number timestamp doubles as both a boolean flag (<code style="font-family:JetBrains Mono,monospace">Boolean(ts)</code> = isCompleted) AND as sort key for ordering completed items by recency — one field, two jobs.
+    <div class="two-col" style="margin-top:10px">
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">Why number not boolean?</div>
+        <p>A number timestamp lets us sort completed items by <em>when</em> they were done. A boolean only tells you done/not-done — no ordering info.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">lastUpdatedTimestamp</div>
+        <p>Set on create AND every toggle. Keeps incomplete items ordered by most-recent interaction, not just creation time.</p>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- DELETE -->
+<div class="chapter-divider"><div class="line"></div><div class="label">Delete</div><div class="line"></div></div>
 
-<!-- 2. DELETE -->
 <div class="card">
-  <div class="ch">
-    <div class="bar" style="background:var(--red)"></div>
-    <h2>Delete — filter() Pattern</h2>
-    <span class="pill bg-red">Feature 1</span>
-  </div>
+  <div class="ch"><div class="bar" style="background:var(--red)"></div><h2>handleDelete — filter</h2><span class="pill bg-red">index.tsx</span></div>
   <div class="cb">
     <div class="two-col" style="align-items:start">
       <div>
-        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">ShoppingListItem.tsx — add prop:</p>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:5px">ShoppingListItem.tsx — add prop:</p>
         <div class="code">
 <span class="kw">type</span> <span class="type">Props</span> = {
-  <span class="prop">name</span>:     <span class="type">string</span>;
-  <span class="prop">isCompleted</span>?: <span class="type">boolean</span>;
-<span class="add">+ onDelete: () => void;  // mandatory</span>
+  ...
+<span class="add">+ onDelete: () => void;</span>
 };
 
-<span class="cm">// swap console.log with prop call</span>
-<span class="del">- onPress: () => console.log("Ok, deleting."),</span>
-<span class="add">+ onPress: () => onDelete(),</span>
+<span class="cm">// Alert Yes button:</span>
+{ <span class="prop">text</span>: <span class="str">"Yes"</span>, <span class="prop">onPress</span>: onDelete,
+  <span class="prop">style</span>: <span class="str">"destructive"</span> }
         </div>
       </div>
       <div>
-        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">index.tsx — handler:</p>
+        <p style="color:var(--muted);font-size:12px;margin-bottom:5px">index.tsx — implementation:</p>
         <div class="code">
-<span class="kw">const</span> <span class="fn">handleDelete</span> = (<span class="prop">id</span>: <span class="type">string</span>) => {
-  <span class="kw">const</span> newList = shoppingList
-    .<span class="fn">filter</span>((item) => item.id !== id);
-  <span class="fn">setShoppingList</span>(newList);
+<span class="kw">const</span> <span class="fn">handleDelete</span> = (id: <span class="type">string</span>) => {
+  <span class="fn">setShoppingList</span>(
+    shoppingList.<span class="fn">filter</span>(
+      (item) => item.id !== id
+    )
+  );
 };
 
-<span class="cm">// in renderItem — pass ID before component</span>
+<span class="cm">// Pass into FlatList renderItem:</span>
 <span class="prop">onDelete</span>={() => <span class="fn">handleDelete</span>(item.id)}
         </div>
-        <div class="tip" style="margin-top:8px">
-          💡 <strong>ID pre-binding pattern:</strong> <code style="font-family:JetBrains Mono,monospace">onDelete={() => handleDelete(item.id)}</code> — the component doesn't know its own ID, the parent closes over it. Clean separation.
-        </div>
       </div>
+    </div>
+    <div class="star">
+      ★ <strong>Pattern:</strong> Parent owns state. Child gets a <em>callback</em> prop — it doesn't know about state, it just calls the function. Parent decides what to do. Clean separation of concerns.
     </div>
   </div>
 </div>
 
+<!-- TOGGLE -->
+<div class="chapter-divider"><div class="line"></div><div class="label">Toggle Complete</div><div class="line"></div></div>
 
-<!-- 3. TOGGLE COMPLETE -->
 <div class="card">
-  <div class="ch">
-    <div class="bar" style="background:var(--green)"></div>
-    <h2>Toggle Complete — map() + Pressable Pattern</h2>
-    <span class="pill bg-green">Feature 2</span>
-  </div>
+  <div class="ch"><div class="bar" style="background:var(--green)"></div><h2>handleToggleComplete — map</h2><span class="pill bg-green">index.tsx</span></div>
   <div class="cb">
-    <div class="two-col" style="align-items:start">
-      <div>
-        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">ShoppingListItem.tsx — swap View → Pressable:</p>
-        <div class="code">
-<span class="cm">// add to Props type</span>
-<span class="add">+ onToggleComplete: () => void;</span>
-
-<span class="cm">// outer container</span>
-<span class="del">- &lt;View style={[styles.itemContainer, ...]} &gt;</span>
-<span class="add">+ &lt;Pressable</span>
-<span class="add">+   style={[styles.itemContainer, ...]}</span>
-<span class="add">+   onPress={onToggleComplete}</span>
-<span class="add">+ &gt;</span>
-        </div>
-      </div>
-      <div>
-        <p style="color:var(--muted);font-size:12px;margin-bottom:6px">index.tsx — toggle handler:</p>
-        <div class="code">
-<span class="kw">const</span> <span class="fn">handleToggleComplete</span> = (<span class="prop">id</span>: <span class="type">string</span>) => {
+    <div class="code">
+<span class="kw">const</span> <span class="fn">handleToggleComplete</span> = (id: <span class="type">string</span>) => {
   <span class="kw">const</span> newList = shoppingList.<span class="fn">map</span>((item) => {
-    <span class="kw">if</span> (item.id === id) {
-      <span class="kw">return</span> {
-        ...item,
-        <span class="prop">completedAtTimestamp</span>: item.completedAtTimestamp
-          ? <span class="kw">undefined</span>       <span class="cm">// already done → undo</span>
-          : <span class="fn">Date</span>.<span class="fn">now</span>(),   <span class="cm">// not done → mark done</span>
-        <span class="prop">lastUpdatedTimestamp</span>: <span class="fn">Date</span>.<span class="fn">now</span>(),
-      };
-    }
-    <span class="kw">return</span> item;
+    <span class="kw">if</span> (item.id !== id) <span class="kw">return</span> item;   <span class="cm">// leave others untouched</span>
+    <span class="kw">return</span> {
+      ...item,
+      <span class="prop">lastUpdatedTimestamp</span>: Date.<span class="fn">now</span>(),
+      <span class="prop">completedAtTimestamp</span>: item.completedAtTimestamp
+        ? <span class="kw">undefined</span>    <span class="cm">// was done → undo</span>
+        : Date.<span class="fn">now</span>(),    <span class="cm">// was not done → mark done</span>
+    };
   });
   <span class="fn">setShoppingList</span>(newList);
 };
 
-<span class="cm">// in renderItem</span>
-<span class="prop">onToggleComplete</span>={() => <span class="fn">handleToggleComplete</span>(item.id)}
-<span class="prop">isCompleted</span>={<span class="fn">Boolean</span>(item.completedAtTimestamp)}
-        </div>
-      </div>
-    </div>
+<span class="cm">// ShoppingListItem prop — add:</span>
+<span class="prop">onToggleComplete</span>: () => <span class="type">void</span>;
 
-    <div class="warn" style="margin-top:10px">
-      ⚠️ <strong>Use map() not filter() for toggle.</strong> You want to keep all items and mutate one — <code style="font-family:JetBrains Mono,monospace">filter()</code> removes items, <code style="font-family:JetBrains Mono,monospace">map()</code> transforms them. Return the item unchanged for all non-matching IDs.
+<span class="cm">// Wrap outer View as Pressable (full-row tap):</span>
+<span class="del">- &lt;View style={[styles.itemContainer, ...]}&gt;</span>
+<span class="add">+ &lt;Pressable onPress={onToggleComplete} style={[styles.itemContainer, ...]}&gt;</span>
+
+<span class="cm">// Pass isCompleted dynamically:</span>
+<span class="prop">isCompleted</span>={<span class="fn">Boolean</span>(item.completedAtTimestamp)}
+<span class="prop">onToggleComplete</span>={() => <span class="fn">handleToggleComplete</span>(item.id)}
+    </div>
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>filter vs map:</strong> Use <code>filter</code> to <em>remove</em> items. Use <code>map</code> to <em>update</em> items in place. Both return new arrays without mutating state.
     </div>
   </div>
 </div>
 
+<!-- UI POLISH -->
+<div class="chapter-divider"><div class="line"></div><div class="label">UI Polish</div><div class="line"></div></div>
 
-<!-- 4. SORT ORDER -->
 <div class="card">
-  <div class="ch">
-    <div class="bar" style="background:var(--violet)"></div>
-    <h2>orderShoppingList() — Sort Logic</h2>
-    <span class="pill bg-violet">Feature 3</span>
-  </div>
+  <div class="ch"><div class="bar" style="background:var(--violet)"></div><h2>Check Icon + Long Text Fix</h2><span class="pill bg-violet">ShoppingListItem.tsx</span></div>
   <div class="cb">
-    <div class="two-col" style="align-items:start">
-      <div>
-        <p style="color:#94a3b8;font-size:12.5px;margin-bottom:8px">4 ordering rules, evaluated in priority:</p>
+    <div class="code">
+<span class="kw">import</span> Entypo <span class="kw">from</span> <span class="str">"@expo/vector-icons/Entypo"</span>;
 
-        <div class="sort-grid">
-          <div class="sort-divider">📋 Incomplete (top)</div>
-          <div class="sort-item todo">☐ Milk  <span style="color:var(--muted);font-size:10px">newest first</span></div>
-          <div class="sort-item todo">☐ Sugar <span style="color:var(--muted);font-size:10px">lastUpdated desc</span></div>
-          <div class="sort-item todo">☐ Coffee</div>
-          <div class="sort-divider">✓ Complete (bottom)</div>
-          <div class="sort-item done">✓ Tea   <span style="color:var(--muted);font-size:10px">completedAt desc</span></div>
-          <div class="sort-item done">✓ Bread</div>
-        </div>
+<span class="cm">// Wrap icon + text in a flex row</span>
+<span class="kw">&lt;View</span> <span class="prop">style</span>={styles.row}<span class="kw">&gt;</span>
+  <span class="kw">&lt;Entypo</span>
+    <span class="prop">name</span>={isCompleted ? <span class="str">"check"</span> : <span class="str">"circle"</span>}
+    <span class="prop">size</span>={<span class="num">24</span>}
+    <span class="prop">color</span>={isCompleted ? theme.<span class="fn">colorGrey</span> : theme.<span class="fn">colorCerulean</span>}
+  <span class="kw">/&gt;</span>
+  <span class="kw">&lt;Text</span>
+    <span class="prop">style</span>={[styles.itemText, isCompleted ? styles.completedText : <span class="kw">undefined</span>]}
+    <span class="add">numberOfLines={1}</span>  <span class="cm">// truncate with ellipsis, never overflow</span>
+  <span class="kw">&gt;</span>{name}<span class="kw">&lt;/Text&gt;</span>
+<span class="kw">&lt;/View&gt;</span>
+
+<span class="cm">// New styles:</span>
+<span class="prop">row</span>:      { <span class="prop">flexDirection</span>: <span class="str">"row"</span>, <span class="prop">flex</span>: <span class="num">1</span>, <span class="prop">gap</span>: <span class="num">8</span>, <span class="prop">alignItems</span>: <span class="str">"center"</span> },
+<span class="prop">itemText</span>: { ..., <span class="add">flex: 1</span> },  <span class="cm">// fills remaining width, pushes delete icon to edge</span>
+    </div>
+    <div class="two-col" style="margin-top:10px">
+      <div class="mini">
+        <div class="lbl" style="color:var(--amber)">numberOfLines={1}</div>
+        <p>Truncates to 1 line with <code>…</code>. A 50-word item won't break layout. Works with any number of lines.</p>
       </div>
-      <div>
-        <div class="code">
-<span class="kw">function</span> <span class="fn">orderShoppingList</span>(list) {
-  <span class="kw">return</span> list.<span class="fn">sort</span>((a, b) => {
-    <span class="cm">// both done → most recently completed first</span>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">flex: 1 on text</div>
+        <p>"Fill available space." Kadi's tip: whenever something overflows in RN, <code>flex: 1</code> on the text/row is usually the fix.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SORT -->
+<div class="chapter-divider"><div class="line"></div><div class="label">Sort Order</div><div class="line"></div></div>
+
+<div class="card">
+  <div class="ch"><div class="bar" style="background:var(--amber)"></div><h2>orderShoppingList — Sort by Timestamp</h2><span class="pill bg-amber">Array.sort</span></div>
+  <div class="cb">
+    <div class="code">
+<span class="kw">const</span> <span class="fn">orderShoppingList</span> = (list: <span class="type">ShoppingListItemType</span>[]) => {
+  <span class="kw">return</span> [...list].<span class="fn">sort</span>((a, b) => {
+    <span class="cm">// both complete → most recently completed first</span>
     <span class="kw">if</span> (a.completedAtTimestamp && b.completedAtTimestamp)
-      <span class="kw">return</span> b.completedAtTimestamp - a.completedAtTimestamp;
-
-    <span class="cm">// a done, b not → a goes below (positive = a after b)</span>
-    <span class="kw">if</span> (a.completedAtTimestamp && !b.completedAtTimestamp)
-      <span class="kw">return</span> <span class="num">1</span>;
-
-    <span class="cm">// a not done, b done → a goes above (negative = a before b)</span>
-    <span class="kw">if</span> (!a.completedAtTimestamp && b.completedAtTimestamp)
-      <span class="kw">return</span> <span class="num">-1</span>;
-
-    <span class="cm">// both incomplete → most recently updated first</span>
-    <span class="kw">if</span> (!a.completedAtTimestamp && !b.completedAtTimestamp)
       <span class="kw">return</span> b.lastUpdatedTimestamp - a.lastUpdatedTimestamp;
-
-    <span class="kw">return</span> <span class="num">0</span>;
+    <span class="cm">// a done, b not → b (incomplete) first</span>
+    <span class="kw">if</span> (a.completedAtTimestamp && !b.completedAtTimestamp) <span class="kw">return</span> <span class="num">1</span>;
+    <span class="cm">// b done, a not → a (incomplete) first</span>
+    <span class="kw">if</span> (!a.completedAtTimestamp && b.completedAtTimestamp) <span class="kw">return</span> -<span class="num">1</span>;
+    <span class="cm">// both incomplete → most recently touched first</span>
+    <span class="kw">return</span> b.lastUpdatedTimestamp - a.lastUpdatedTimestamp;
   });
-}
+};
 
-<span class="cm">// pass result directly to FlatList</span>
+<span class="cm">// In FlatList:</span>
 <span class="prop">data</span>={<span class="fn">orderShoppingList</span>(shoppingList)}
-        </div>
-      </div>
     </div>
-
-    <div class="star">
-      ★ <strong>sort() return value rule:</strong> positive number → a after b. Negative → a before b. Zero → equal. Subtracting two timestamps gives this naturally — <code style="font-family:JetBrains Mono,monospace">b - a</code> = newest first (descending), <code style="font-family:JetBrains Mono,monospace">a - b</code> = oldest first.
+    <hr class="div"/>
+    <table class="tbl">
+      <thead><tr><th>Scenario</th><th>Return</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td style="color:#94a3b8">Both completed</td><td class="mono">b.ts - a.ts</td><td style="color:var(--green)">More recently completed goes first</td></tr>
+        <tr><td style="color:#94a3b8">A done, B not</td><td class="mono">+1</td><td style="color:var(--cyan)">B (incomplete) moves above A</td></tr>
+        <tr><td style="color:#94a3b8">B done, A not</td><td class="mono">-1</td><td style="color:var(--cyan)">A (incomplete) moves above B</td></tr>
+        <tr><td style="color:#94a3b8">Both incomplete</td><td class="mono">b.ts - a.ts</td><td style="color:var(--green)">Most recently interacted with goes first</td></tr>
+      </tbody>
+    </table>
+    <div class="star" style="margin-top:10px">
+      ★ <strong>Why timestamp subtraction works:</strong> <code>sort</code> just needs positive/negative/zero. Subtracting two timestamps gives that automatically — no conditionals for relative ordering within a group.
     </div>
-
     <div class="tags" style="margin-top:10px">
-      <span class="tag bg-red">filter() for delete</span>
-      <span class="tag bg-green">map() for toggle</span>
-      <span class="tag bg-cyan">Pressable whole row</span>
-      <span class="tag bg-violet">completedAtTimestamp</span>
-      <span class="tag bg-amber">lastUpdatedTimestamp</span>
-      <span class="tag bg-pink">sort() b-a = newest first</span>
+      <span class="tag bg-cyan">onDelete prop</span>
+      <span class="tag bg-violet">onToggleComplete prop</span>
+      <span class="tag bg-green">filter (delete)</span>
+      <span class="tag bg-amber">map (toggle)</span>
+      <span class="tag bg-pink">numberOfLines={1}</span>
+      <span class="tag bg-red">completedAtTimestamp</span>
     </div>
   </div>
 </div>
