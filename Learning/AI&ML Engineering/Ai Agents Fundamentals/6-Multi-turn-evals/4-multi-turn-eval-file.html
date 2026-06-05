@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Multi-Turn Eval — Final Wiring</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw { color: #7c6fff; } .fn { color: #60a5fa; } .str { color: #f59e0b; } .cm { color: #555; } .num { color: #10b981; }
+
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 12px; text-align: left; font-size: 11px; }
+  .cmp td { padding: 9px 12px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .cmp td:first-child { color: #e0e0e0; font-weight: 700; white-space: nowrap; }
+
+  /* Test case cards */
+  .tc-card { border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .tc-card:last-child { margin-bottom: 0; }
+  .tc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .tc-num { font-size: 11px; font-weight: 800; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tc-title { font-size: 13px; font-weight: 700; }
+  .tc-tag { font-size: 11px; font-weight: 700; border-radius: 20px; padding: 2px 9px; margin-left: auto; }
+
+  .tc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+  .tc-block { background: #12121f; border-radius: 8px; padding: 8px 10px; }
+  .tc-block .tb-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .tc-block .tb-val { color: #aaa; font-family: monospace; line-height: 1.7; }
+
+  /* Evaluator row */
+  .ev-row { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+  .ev-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; flex: 1; min-width: 140px; }
+  .ev-card .e-name { font-size: 12px; font-weight: 800; font-family: monospace; }
+  .ev-card .e-type { font-size: 11px; margin-top: 2px; }
+  .ev-card .e-desc { font-size: 11px; color: #aaa; margin-top: 5px; line-height: 1.6; }
+  .ev-card .e-null { font-size: 11px; color: #555; margin-top: 4px; font-style: italic; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  /* Mock tool anatomy */
+  .mock-anatomy { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; }
+  .ma-title { font-size: 11px; font-weight: 700; color: #888; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .ma-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .ma-key { color: #f59e0b; font-family: monospace; font-weight: 700; min-width: 110px; flex-shrink: 0; }
+  .ma-desc { color: #aaa; }
+  .ma-note { color: #10b981; font-size: 11px; }
+
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .why-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; }
+  .why-card .w-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .why-card .w-body { font-size: 12px; color: #aaa; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">MULTI-TURN EVALS</div>
+    <h1>Wiring It All Together</h1>
+    <div class="sub">Dataset + Executor + 3 Evaluators → evaluate(). The eval file is the thinnest layer — all the hard work is already done.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 The eval file is a <strong>thin wiring layer</strong>. It imports the executor, the evaluators, and the dataset — and hands them to <code>evaluate()</code>. The complexity lives elsewhere.</div>
+    <div class="note">Writing the mock dataset is the highest-value activity. It forces you to think through exactly what your agent should and shouldn't do — before a single line of agent code is written.</div>
+  </div>
+
+  <!-- Mock tool anatomy -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">MOCK TOOL ANATOMY (per tool)</span>
+    <div class="mock-anatomy">
+      <div class="ma-title">EACH TOOL IN mockTools NEEDS 3 FIELDS</div>
+      <div class="ma-row">
+        <div class="ma-key">"description"</div>
+        <div><div class="ma-desc">What the LLM sees to decide if it should call this tool. <strong>This is what you're evaluating.</strong></div><div class="ma-note">→ Change this to improve tool selection evals.</div></div>
+      </div>
+      <div class="ma-row">
+        <div class="ma-key">"parameters"</div>
+        <div><div class="ma-desc">Schema the agent uses to construct arguments. Must match real tool's shape.</div><div class="ma-note">→ Wrong schema = agent can't form valid call.</div></div>
+      </div>
+      <div class="ma-row" style="margin-bottom:0;">
+        <div class="ma-key">"mockReturn"</div>
+        <div><div class="ma-desc">The fixed string returned when execute() fires. Agent reasons over this as if it were real.</div><div class="ma-note">→ Change this to test how agent handles edge cases (empty, error, partial data).</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 test cases -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">THE 3 TEST CASES — agent-multiturn.json</span>
+
+    <!-- Case 1 -->
+    <div class="tc-card" style="background:#1a1a2e; border:1px solid #10b98144;">
+      <div class="tc-header">
+        <div class="tc-num" style="background:#10b981; color:#000;">1</div>
+        <div class="tc-title" style="color:#10b981;">Fresh Task — Tool Preference</div>
+        <span class="tc-tag" style="background:#10b98122; color:#10b981; border:1px solid #10b981;">task-completion</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-block">
+          <div class="tb-label" style="color:#60a5fa;">PROMPT</div>
+          <div class="tb-val">"Read package.json and tell me the project name"</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#10b981;">EXPECTED ORDER</div>
+          <div class="tb-val">["readFile"]</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#f87171;">FORBIDDEN</div>
+          <div class="tb-val">["shell"] — could do <code>cat</code> but should prefer readFile</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#f59e0b;">MOCK RETURN</div>
+          <div class="tb-val">{"name":"ai-agent-course","version":"1.0.0",...}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:8px;">Tests tool category preference. If agent keeps using <code>shell cat</code>, fix: add "Always use readFile over shell for reading" to system prompt or tool description.</div>
+    </div>
+
+    <!-- Case 2 -->
+    <div class="tc-card" style="background:#1a1a2e; border:1px solid #60a5fa44;">
+      <div class="tc-header">
+        <div class="tc-num" style="background:#60a5fa; color:#000;">2</div>
+        <div class="tc-title" style="color:#60a5fa;">Mid-Conversation — Sequential Dependency</div>
+        <span class="tc-tag" style="background:#60a5fa22; color:#60a5fa; border:1px solid #60a5fa;">conversation-continuation</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-block">
+          <div class="tb-label" style="color:#60a5fa;">PRE-FILLED MESSAGES</div>
+          <div class="tb-val">user: "I'm working on Node.js…" → assistant: "Happy to help!" → user: "List src/ then read main entry"</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#10b981;">EXPECTED ORDER</div>
+          <div class="tb-val">["listFiles", "readFile"] — must see index.ts from step 1 before reading it in step 2</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#f59e0b;">listFiles RETURN</div>
+          <div class="tb-val">"index.ts\nApp.tsx\ncomponents/\nutils/"</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#f59e0b;">readFile RETURN</div>
+          <div class="tb-val">"import {App} from './App';\nconsole.log(...);\nApp.run();"</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:8px;">Tests multi-step reasoning: agent must use listFiles result to determine which file to read next. Can't know index.ts without step 1.</div>
+    </div>
+
+    <!-- Case 3 -->
+    <div class="tc-card" style="background:#1a1a2e; border:1px solid #f8717144; margin-bottom:0;">
+      <div class="tc-header">
+        <div class="tc-num" style="background:#f87171; color:#000;">3</div>
+        <div class="tc-title" style="color:#f87171;">Negative — Avoid Shell for File Ops</div>
+        <span class="tc-tag" style="background:#f8717122; color:#f87171; border:1px solid #f87171;">negative</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-block">
+          <div class="tb-label" style="color:#60a5fa;">PROMPT</div>
+          <div class="tb-val">"What files are in the src directory?"</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#10b981;">EXPECTED ORDER</div>
+          <div class="tb-val">["listFiles"]</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#f87171;">FORBIDDEN</div>
+          <div class="tb-val">["shell"] — <code>ls src/</code> works but agent should use listFiles</div>
+        </div>
+        <div class="tc-block">
+          <div class="tb-label" style="color:#f59e0b;">MOCK RETURN</div>
+          <div class="tb-val">"index.ts\nApp.tsx\ncomponents/"</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:8px;">Same task solvable two ways. Tests that agent prefers the specific tool over the generic bash escape hatch.</div>
+    </div>
+  </div>
+
+  <!-- 3 evaluators -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">THE 3 EVALUATORS</span>
+    <div class="ev-row">
+      <div class="ev-card" style="border-top:3px solid #10b981;">
+        <div class="e-name" style="color:#10b981;">toolOrder</div>
+        <div class="e-type" style="color:#555;">Binary · deterministic</div>
+        <div class="e-desc">Did tools fire in the expected sequence? Catches step 2 correct but step 1 wrong.</div>
+        <div class="e-null">No target → return 1 (skip)</div>
+      </div>
+      <div class="ev-card" style="border-top:3px solid #f87171;">
+        <div class="e-name" style="color:#f87171;">toolsAvoided</div>
+        <div class="e-type" style="color:#555;">Binary · deterministic</div>
+        <div class="e-desc">Were all forbidden tools never called? Zero tolerance — one forbidden call = 0.</div>
+        <div class="e-null">No forbiddenTools → return 1 (skip)</div>
+      </div>
+      <div class="ev-card" style="border-top:3px solid #7c6fff;">
+        <div class="e-name" style="color:#7c6fff;">outputQuality</div>
+        <div class="e-type" style="color:#555;">0–1 float · LLM judge</div>
+        <div class="e-desc">Did the final response correctly answer the task given the mock tool results? Semantic, not deterministic.</div>
+        <div class="e-null">No target → return 1 (skip)</div>
+      </div>
+    </div>
+    <pre style="margin-top:12px;">
+<span class="fn">evaluate</span>({
+  data:     dataset,
+  executor: async (data) => <span class="fn">multiTurnWithMocks</span>(data),
+  evaluators: {
+    toolOrder:     (output, target) => !target ? <span class="num">1</span> : <span class="fn">toolOrderCorrect</span>(output, target),
+    toolsAvoided:  (output, target) => !target?.forbiddenTools?.length ? <span class="num">1</span> : <span class="fn">toolsAvoided</span>(output, target),
+    outputQuality: <span class="kw">async</span> (output, target) => !target ? <span class="num">1</span> : <span class="fn">llmJudge</span>(output, target),
+  },
+  config:    { projectApiKey: process.env.<span class="obj">LMNR_API_KEY</span> },
+  groupName: <span class="str">'agent-multiturn'</span>
+});</pre>
+  </div>
+
+  <!-- Why mock -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">WHY MOCK TOOLS IN EVALS</span>
+    <div class="why-grid">
+      <div class="why-card" style="border-left:3px solid #10b981;">
+        <div class="w-title" style="color:#10b981;">✅ Reproducibility</div>
+        <div class="w-body">Real file system changes between runs. Same mock = same result every run. Evals stay deterministic.</div>
+      </div>
+      <div class="why-card" style="border-left:3px solid #60a5fa;">
+        <div class="w-title" style="color:#60a5fa;">✅ Speed + Safety</div>
+        <div class="w-body">No I/O, no network, no accidental deletes. Evals run fast and can't cause side effects.</div>
+      </div>
+      <div class="why-card" style="border-left:3px solid #f59e0b;">
+        <div class="w-title" style="color:#f59e0b;">✅ Edge cases on demand</div>
+        <div class="w-body">Change <code>mockReturn</code> to "file not found" or "permission denied" to test failure paths without breaking anything real.</div>
+      </div>
+      <div class="why-card" style="border-left:3px solid #f87171;">
+        <div class="w-title" style="color:#f87171;">⚠️ Tradeoff</div>
+        <div class="w-body">Not testing real tool implementations. That's what unit tests are for. Evals test <em>decision-making</em>, not tool code.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Golden data tip -->
+  <div class="warn">
+    <strong>💡 Online eval → golden dataset pipeline:</strong> Thumbs up on a live conversation = add to golden dataset. Thumbs down = add to failures dataset, run targeted evals, fix, re-run. That's the production eval flywheel. Building it is a billion-dollar business.
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP test case idea:</strong> Mock a mid-conversation: user set up Q3 project → agent created it → user: "now add the backend tasks from last sprint". Mock <code>list_tasks(sprint:"last")</code> → returns [Task A, Task B, Task C]. Expected order: <code>[list_tasks, create_task × 3]</code>. Forbidden: <code>[delete_task]</code>. Judge criteria: "Did agent correctly create all 3 tasks from the sprint result?" — if agent only creates 2, judge scores low even though tool calls ran.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Files: <span style="color:#7c6fff;">agent-multiturn.json</span> · <span style="color:#60a5fa;">agent-multiturn.eval.ts</span> · Evaluators: <span style="color:#10b981;">toolOrder</span> · <span style="color:#f87171;">toolsAvoided</span> · <span style="color:#7c6fff;">outputQuality (LLM judge)</span>
+  </div>
+
+</div>
+</body>
+</html>
