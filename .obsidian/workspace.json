@@ -13,10 +13,10 @@
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/1-rn-layout-animation.html"
+                "file": "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/3-rn-push-notifications.html"
               },
               "icon": "code-glyph",
-              "title": "1-rn-layout-animation"
+              "title": "3-rn-push-notifications"
             }
           }
         ]
@@ -76,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 375.5,
-    "collapsed": true
+    "width": 375.5
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,13 +181,14 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "21abf9ed2e8995f1",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/2-rn-haptics.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/3-LayoutAnimation/rn-layout-animation-summary.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/1-rn-layout-animation.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions",
+    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/3-rn-push-notifications.html",
+    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/2-rn-haptics.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/Resources.md",
+    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/3-LayoutAnimation/rn-layout-animation-summary.html",
+    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/3-LayoutAnimation",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/2-Data-Persistance/rn-data-persistence-summary.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/1-Delete-Complete/rn-delete-complete-summary.html",
@@ -209,7 +209,6 @@
     "Learning/System Design/Patterns/Realtime Udpates/attachments/YcI3UiF1ye_u.0es2c86y0gknj.svg",
     "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Learning/System Design/Patterns/Realtime Udpates/realtime-updates-summary.html",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments",
     "Learning/JavaScript/Coding/Deep Clone/deepclone.md",
     "Learning/DSA/Binary Search/5-Kth smallest element in a sorted matrix.md",
     "Learning/DSA/Binary Search/4-Split larest sum.excalidraw.md",

@@ -1,3 +1,7 @@
+
+```table-of-contents
+```
+
 ## Animations
 https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/introduction/
 https://docs.swmansion.com/react-native-reanimated/
@@ -23,3 +27,7 @@ https://docs.expo.dev/versions/latest/sdk/svg/
 ## TailwindCss like in React Native
 https://www.nativewind.dev/
 
+## Push
+https://docs.expo.dev/push-notifications/overview/
+### Send Push Notifications
+https://docs.expo.dev/push-notifications/sending-notifications/
