@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>File System Tools</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw { color: #7c6fff; } .fn { color: #60a5fa; } .str { color: #f59e0b; } .cm { color: #555; } .num { color: #10b981; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  /* Tool anatomy */
+  .tool-block { border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .tool-block:last-child { margin-bottom: 0; }
+  .tb-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .tb-icon { font-size: 20px; }
+  .tb-name { font-size: 15px; font-weight: 800; font-family: monospace; }
+  .tb-tag { font-size: 11px; font-weight: 700; border-radius: 20px; padding: 2px 9px; margin-left: auto; }
+
+  .field-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .field-key { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; width: 100px; flex-shrink: 0; padding-top: 1px; }
+  .field-val { font-size: 12px; color: #aaa; flex: 1; }
+  .field-val code { color: #f59e0b; background: #12121f; padding: 1px 5px; border-radius: 4px; }
+
+  /* Error handling table */
+  .err-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .err-table th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 10px; text-align: left; font-size: 11px; }
+  .err-table td { padding: 8px 10px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .err-table td:first-child { font-family: monospace; color: #f87171; white-space: nowrap; }
+
+  /* Use case pills */
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 600; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">FILE SYSTEM TOOLS</div>
+    <h1>readFile + writeFile</h1>
+    <div class="sub">Tools are just functions — but what they return is meant for an LLM to reason over, not for code to consume. That changes how you write them.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 A regular function throws errors and returns data. A <strong>tool</strong> returns human-readable strings — including on errors — so the LLM can understand what happened and decide what to do next.</div>
+    <div class="note">File system access is the single most powerful capability you can give an agent. readFile alone lets a coding agent understand an entire codebase.</div>
+  </div>
+
+  <!-- Why files matter (compact) -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">WHY FILES MATTER FOR AGENTS</span>
+    <div class="pills">
+      <span class="pill" style="background:#7c6fff22;color:#7c6fff;border:1px solid #7c6fff;">📖 Context loading (read codebase)</span>
+      <span class="pill" style="background:#10b98122;color:#10b981;border:1px solid #10b981;">🧠 Persistent memory (scratchpad.md)</span>
+      <span class="pill" style="background:#60a5fa22;color:#60a5fa;border:1px solid #60a5fa;">📊 State tracking (progress.json)</span>
+      <span class="pill" style="background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b;">🗂️ External working memory (large data)</span>
+      <span class="pill" style="background:#f8717122;color:#f87171;border:1px solid #f87171;">🔗 Inter-agent communication</span>
+      <span class="pill" style="background:#c084fc22;color:#c084fc;border:1px solid #c084fc;">📋 Audit trail logging</span>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:#555;">CLAUDE.md and cursor rules are just markdown files the agent reads to configure itself. If you took away every tool and left only readFile + writeFile, a coding agent could still help you write code.</div>
+  </div>
+
+  <!-- readFile -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">readFile</span>
+
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">description</div>
+      <div class="field-val">"Read the <strong>full</strong> contents of a file at the given path. Use this <strong>always</strong> to read a file." — adding "always" nudges tool preference over shell <code>cat</code>.</div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">inputSchema</div>
+      <div class="field-val"><code>path: z.string().describe("The path to the file to read")</code></div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">returns</div>
+      <div class="field-val">File contents as UTF-8 string on success. Readable error string on failure — never throws.</div>
+    </div>
+
+    <pre style="margin-top:10px;">
+<span class="fn">execute</span>: <span class="kw">async</span> ({ path: filePath }) => {
+  <span class="kw">try</span> {
+    <span class="kw">return await</span> fs.<span class="fn">readFile</span>(filePath, <span class="str">'utf-8'</span>);
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">if</span> (err.code === <span class="str">'ENOENT'</span>) <span class="kw">return</span> <span class="str">`Error: File not found: ${filePath}`</span>;
+    <span class="kw">return</span> <span class="str">`Error reading file: ${err.message}`</span>;
+  }
+}</pre>
+
+    <table class="err-table" style="margin-top:10px;">
+      <thead><tr><th>Error code</th><th>LLM sees</th><th>Expected agent response</th></tr></thead>
+      <tbody>
+        <tr><td>ENOENT</td><td>"File not found: ./foo.ts"</td><td>Call listFiles to discover what exists, or ask user for correct path</td></tr>
+        <tr><td>EACCES</td><td>"Error reading file: permission denied"</td><td>Try different path or report to user</td></tr>
+        <tr><td>other</td><td>"Error reading file: [native message]"</td><td>Reason over native Node.js message to decide next step</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- writeFile -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">writeFile</span>
+
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">description</div>
+      <div class="field-val">"Write content to a file at the specified path. <strong>Creates the file if it does not exist and will overwrite it if it does.</strong>" — be explicit about overwrite behavior or agent panics.</div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">inputSchema</div>
+      <div class="field-val"><code>path: z.string()</code> · <code>content: z.string().describe("The content to write to the file")</code></div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">returns</div>
+      <div class="field-val">"Successfully wrote <em>N</em> characters to <em>path</em>" — character count confirms full write, not partial.</div>
+    </div>
+
+    <pre style="margin-top:10px;">
+<span class="fn">execute</span>: <span class="kw">async</span> ({ path: filePath, content }) => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> dir = path.<span class="fn">dirname</span>(filePath);
+    <span class="kw">await</span> fs.<span class="fn">mkdir</span>(dir, { recursive: <span class="kw">true</span> });   <span class="cm">// auto-create parent dirs</span>
+    <span class="kw">await</span> fs.<span class="fn">writeFile</span>(filePath, content, <span class="str">'utf-8'</span>);
+    <span class="kw">return</span> <span class="str">`Successfully wrote ${content.length} characters to ${filePath}`</span>;
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">return</span> <span class="str">`Error writing file: ${err.message}`</span>;
+  }
+}</pre>
+
+    <div style="background:#0d2137; border-radius:8px; padding:10px 12px; font-size:12px; color:#93c5fd; margin-top:10px;">
+      <strong>mkdir recursive: true</strong> — if path is <code>./output/reports/q3.md</code> and neither folder exists, it creates both automatically. No extra "create directory" tool needed.
+    </div>
+  </div>
+
+  <!-- Tool vs function design -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">TOOL DESIGN vs REGULAR FUNCTION DESIGN</span>
+    <div class="grid2">
+      <div class="grid2-card" style="background:#1a0a0a; border:1px solid #f8717144;">
+        <div class="g-title" style="color:#f87171;">Regular function</div>
+        <div class="g-body">
+          Throws on error → calling code catches<br/>
+          Returns typed data → code processes<br/>
+          ENOENT = exception, caller handles<br/>
+          Doesn't suggest next steps<br/>
+          Error message for developers
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#0f1f1a; border:1px solid #10b98144;">
+        <div class="g-title" style="color:#10b981;">Agent tool</div>
+        <div class="g-body">
+          Never throws → returns error string<br/>
+          Returns string → LLM reads and reasons<br/>
+          ENOENT = "File not found: path" string<br/>
+          Can suggest: "you should list files next"<br/>
+          Error message for an LLM
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Atomicity warning -->
+  <div class="warn">
+    <strong>⚠️ Atomic tools = more steps = more error surface.</strong> A 99% accurate agent over 20 steps is less than 82% accurate end-to-end. As your agent matures, combine related operations: instead of writeFile + listFiles separately, make a tool that writes and verifies in one call. Fewer steps = fewer failure points.
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> Agent needs to export a project report. writeFile returns "Successfully wrote 2,847 characters to ./exports/Q3-report.md". Agent sees the character count, knows it wasn't truncated, and responds to user: "Done — full report saved to exports/Q3-report.md." Without the count, agent might call readFile to verify, adding an unnecessary step.
+  </div>
+
+  <!-- listFiles -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">listFiles</span>
+
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">description</div>
+      <div class="field-val">"List all files and directories in the specified <strong>directory</strong> path." — not a file path. Default is <code>"."</code> so agent doesn't need to ask user when no path given.</div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">inputSchema</div>
+      <div class="field-val"><code>directory: z.string().default(".")</code> — default makes it optional without z.union(null). Agent skips follow-up question.</div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">returns</div>
+      <div class="field-val">Formatted string with <code>[dir]</code> / <code>[file]</code> prefixes joined by newline. Not raw JSON — LLM reads language, not brackets.</div>
+    </div>
+
+    <pre>
+<span class="fn">execute</span>: <span class="kw">async</span> ({ directory }) => {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> entries = <span class="kw">await</span> fs.<span class="fn">readdir</span>(directory, { withFileTypes: <span class="kw">true</span> });
+    <span class="kw">const</span> items = entries.<span class="fn">map</span>(e => <span class="str">`${e.isDirectory() ? '[dir]' : '[file]'} ${e.name}`</span>);
+    <span class="kw">return</span> items.length > <span class="num">0</span>
+      ? items.<span class="fn">join</span>(<span class="str">'\n'</span>)
+      : <span class="str">`Directory ${directory} is empty`</span>;
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">if</span> (err.code === <span class="str">'ENOENT'</span>) <span class="kw">return</span> <span class="str">`Error: Directory not found: ${directory}`</span>;
+    <span class="kw">return</span> <span class="str">`Error listing directory: ${err.message}`</span>;
+  }
+}</pre>
+    <div style="background:#1a1a2e; border-radius:8px; padding:10px 12px; font-size:12px; color:#aaa; margin-top:10px;">
+      <strong style="color:#7c6fff;">withFileTypes: true</strong> — distinguishes <code>[dir]</code> from <code>[file]</code>. Without it, <code>index.py</code> and <code>index.js</code> look identical. LLM needs type to reason about what to do next.<br/>
+      <strong style="color:#555; font-size:11px;">Token efficiency:</strong> 100 entries as JSON = hundreds of wasted bracket/colon tokens. Formatted string = clean, dense, readable.
+    </div>
+  </div>
+
+  <!-- deleteFile -->
+  <div class="section" style="border:2px solid #f87171; background:#f8717112;">
+    <span class="section-label" style="background:#f87171; color:#000;">deleteFile</span>
+
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">description</div>
+      <div class="field-val">"Delete a file at the specified path. Use with caution as <strong>this is irreversible and cannot be recovered from.</strong>" — explicit warning trains cautious models to hesitate/confirm before calling.</div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">inputSchema</div>
+      <div class="field-val"><code>path: z.string().describe("The path to the file to delete")</code></div>
+    </div>
+    <div class="field-row">
+      <div class="field-key" style="color:#888;">fs method</div>
+      <div class="field-val"><code>fs.unlink()</code> not <code>fs.rm()</code> — unlink handles symbolic links safely. Removes the link without affecting the target file/dir it points to.</div>
+    </div>
+
+    <pre>
+<span class="fn">execute</span>: <span class="kw">async</span> ({ path: filePath }) => {
+  <span class="kw">try</span> {
+    <span class="kw">await</span> fs.<span class="fn">unlink</span>(filePath);     <span class="cm">// safe for symlinks too</span>
+    <span class="kw">return</span> <span class="str">`Successfully deleted ${filePath}`</span>;
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">if</span> (err.code === <span class="str">'ENOENT'</span>) <span class="kw">return</span> <span class="str">`Error: File not found: ${filePath}`</span>;
+    <span class="kw">return</span> <span class="str">`Error deleting file: ${err.message}`</span>;
+  }
+}</pre>
+  </div>
+
+  <!-- index.ts registration -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">tools/index.ts — REGISTRATION</span>
+    <pre>
+<span class="kw">import</span> { readFile, writeFile, listFiles, deleteFile } <span class="kw">from</span> <span class="str">'./file.ts'</span>;
+
+<span class="cm">// All tools for the agent loop</span>
+<span class="kw">export const</span> tools = { readFile, writeFile, listFiles, deleteFile };
+
+<span class="cm">// Named exports for selective use in evals (import just what you need)</span>
+<span class="kw">export</span> { readFile, writeFile, listFiles, deleteFile } <span class="kw">from</span> <span class="str">'./file.ts'</span>;
+
+<span class="cm">// Tool set — pass all file tools as one pack to evaluate() or sub-agents</span>
+<span class="kw">export const</span> fileTools = { readFile, writeFile, listFiles, deleteFile };</pre>
+    <div style="background:#1a1a2e; border-radius:8px; padding:10px 12px; font-size:12px; color:#aaa; margin-top:10px;">
+      Three export shapes: <strong style="color:#60a5fa;">tools</strong> (all tools for agent loop) · <strong style="color:#7c6fff;">named exports</strong> (pick individual tools for evals) · <strong style="color:#f59e0b;">fileTools set</strong> (group for sub-agents or restricted evals that should only have file access).
+    </div>
+  </div>
+
+  <!-- Optional fields tip -->
+  <div class="warn">
+    <strong>⚠️ Making schema fields optional in strict mode:</strong> You can't just leave a field out — use <code>z.union([z.string(), z.literal(null)])</code>. Or use <code>.default(".")</code> like listFiles does — the default tells the agent it can skip asking the user, while still satisfying the strict schema requirement.
+  </div>
+
+  <!-- Complete summary table -->
+  <div>
+    <div style="font-size:11px; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:8px;">ALL 4 TOOLS AT A GLANCE</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr>
+        <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">Tool</th>
+        <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">fs method</th>
+        <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">Key design decision</th>
+        <th style="background:#1a1a2e;color:#888;padding:8px 10px;text-align:left;font-size:11px;">Returns on success</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#10b981;font-weight:700;">readFile</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;"><code>readFile(path, utf-8)</code></td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">ENOENT handled specifically</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">File contents as string</td></tr>
+        <tr><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#60a5fa;font-weight:700;">writeFile</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;"><code>mkdir(recursive) + writeFile</code></td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">Auto-creates parent dirs</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">"Wrote N chars to path"</td></tr>
+        <tr><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#7c6fff;font-weight:700;">listFiles</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;"><code>readdir(dir, {withFileTypes})</code></td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">[dir]/[file] formatted string, not JSON</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">"[dir] src\n[file] index.ts\n..."</td></tr>
+        <tr><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#f87171;font-weight:700;">deleteFile</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;"><code>unlink(path)</code></td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">unlink over rm — symlink safe</td><td style="padding:8px 10px;border-top:1px solid #1e1e2e;color:#aaa;">"Successfully deleted path"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Design decisions -->
+  <div class="section" style="border:2px solid #c084fc; background:#c084fc12;">
+    <span class="section-label" style="background:#c084fc; color:#000;">DESIGN DECISIONS</span>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:4px;">Why 4 separate tools, not one tool({ operation: "read|write|..." })?</div>
+        <div style="font-size:12px;color:#aaa;">Clearer intent per tool → better LLM descriptions → simpler schemas → easier permission control (allow readFile, block deleteFile). One generic tool means ambiguous descriptions and one schema trying to cover all cases.</div>
+      </div>
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:4px;">Why return errors as strings instead of throwing?</div>
+        <div style="font-size:12px;color:#aaa;">Throwing crashes the agent loop or causes unpredictable behavior. A string error lets the agent <em>read what went wrong</em> and decide: try a different path, call listFiles to explore, or tell the user. The agent is the error handler — not your catch block.</div>
+      </div>
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;">
+        <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:4px;">Why auto-create parent directories in writeFile?</div>
+        <div style="font-size:12px;color:#aaa;">Requiring the agent to manually mkdir each level before writing is tedious and error-prone — that's 2–3 extra tool calls per write. <code>mkdir({ recursive: true })</code> matches how every developer expects file writes to work.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Common patterns -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">COMMON AGENT PATTERNS</span>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;border-top:3px solid #10b981;">
+        <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:6px;">Read → Modify → Write</div>
+        <div style="font-size:11px;color:#aaa;font-family:monospace;line-height:1.8;">readFile("config.json")<br/>→ parse + modify<br/>→ writeFile("config.json", updated)</div>
+      </div>
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;border-top:3px solid #7c6fff;">
+        <div style="font-size:12px;font-weight:700;color:#7c6fff;margin-bottom:6px;">Explore → Drill Down → Read</div>
+        <div style="font-size:11px;color:#aaa;font-family:monospace;line-height:1.8;">listFiles("src/")<br/>→ listFiles("src/components/")<br/>→ readFile("Button.tsx")</div>
+      </div>
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;border-top:3px solid #f59e0b;">
+        <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:6px;">Write → Verify (paranoid)</div>
+        <div style="font-size:11px;color:#aaa;font-family:monospace;line-height:1.8;">writeFile("output.txt", content)<br/>→ readFile("output.txt")<br/>→ confirm matches expected</div>
+      </div>
+
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;border-top:3px solid #60a5fa;">
+        <div style="font-size:12px;font-weight:700;color:#60a5fa;margin-bottom:6px;">Scratch Pad (temp memory)</div>
+        <div style="font-size:11px;color:#aaa;font-family:monospace;line-height:1.8;">writeFile("/tmp/scratch.json", big)<br/>→ readFile (chunks as needed)<br/>→ process → deleteFile cleanup</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd; margin-top:4px;">
+    <strong>WNP scenario:</strong> Agent asked to "archive completed Q3 tasks to a report file then clean up". Flow: <code>listFiles("./exports")</code> → sees [file] Q3-tasks.json → <code>readFile("./exports/Q3-tasks.json")</code> → generates summary → <code>writeFile("./exports/Q3-archive.md", summary)</code> → "Wrote 1,204 chars" → <code>deleteFile("./exports/Q3-tasks.json")</code> → "Successfully deleted". All 4 tools, all returning readable strings the agent reasons over at each step.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    All tools: <span style="color:#e0e0e0;">never throw</span> · <span style="color:#e0e0e0;">return strings</span> · <span style="color:#e0e0e0;">designed for LLM reasoning</span> · Export as <span style="color:#f59e0b;">tools</span> (agent) · <span style="color:#7c6fff;">fileTools</span> (evals/sub-agents) · named (selective)
+  </div>
+
+</div>
+</body>
+</html>
