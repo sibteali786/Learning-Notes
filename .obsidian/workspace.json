@@ -41,7 +41,8 @@
               "title": "New tab"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -206,6 +207,7 @@
   "active": "2f8ff697b2091fca",
   "lastOpenFiles": [
     "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md",
+    "Learning/DSA/Binary Search/Smallest Divisor Given Threshold.excalidraw.md",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/Resources.md",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/3-rn-push-notifications.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/2-rn-haptics.html",
@@ -250,7 +252,6 @@
     "Learning/JavaScript/Coding/EventEmitter/EventEmitter.excalidraw.md",
     "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
     "Learning/JavaScript/Coding/getElementBy../getElementByStyle.excalidraw.md",
-    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
