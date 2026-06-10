@@ -1,0 +1,147 @@
+---
+
+excalidraw-plugin: parsed
+tags: [excalidraw]
+
+---
+==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
+
+
+# Excalidraw Data
+
+## Text Elements
+quantities = [8, 12, 5]
+weights = [2, 3, 1]  # kg per item
+maxBoxes = 6
+maxWeightPerBox = 20  # kg ^OBWKH038
+
+1. What is minimum possible capacity ? 
+We need at min 1 item in a box 
+2. What is max capacity for a box ?
+it can be max(quantities) so the largest number of items in a box is maxCapacity
+since if we can accomodate 12 items in a box then we do not need any bigger box
+capcacity. ^MTFqNC53
+
+min capacity = 1 (smallest meaningful box — holds at least 1 item)
+max capacity = max(quantities) (if one box holds all items of the largest product, you'd never need bigger)
+
+That's your search range: 1 to max(quantities)
+
+Now the key question before pseudocode:
+Given a fixed capacity c, how many boxes does one product need?
+Product has q items, w kg per item, maxWeightPerBox limit.
+
+Items that fit per box = min(c, floor(maxWeightPerBox / w))
+Boxes needed = ceil(q / itemsPerBox)
+
+With that, how would brute force find the minimum valid capacity?
+Write the pseudocode! ^gDEy96qp
+
+lets say q = 10, w = 2 and maxWeightPerBox = 16 with fixed capacity of 6
+so ItemsFitPerBox = min( 6, floor(16,2)) = min(6, 8) = 6
+BoxesNeeded = ceil(10/6) = ceil(1.666) = 2 ^zXSgPxBW
+
+quantities = [8, 12, 5]
+weights = [2, 3, 1]  # kg per item
+maxBoxes = 6
+maxWeightPerBox = 20  # kg ^MsaxIxu8
+
+1 -> 12 ^39juXq3q
+
+function minimumShippingCapacity(quantities, weights, maxBoxes, maxWeightPerBox):
+    minCapacity = 1
+    maxCapacity = Math.max(...quantities)
+
+    for capacity = minCapacity to maxCapacity:
+        boxesNeeded = getBoxesNeeded(quantities, weights, maxWeightPerBox, capacity)
+        if boxesNeeded <= maxBoxes: 
+            return capacity
+
+function getBoxesNeeded(quantities, weights, maxWeightPerBox, capacity):
+    boxesNeeded = 0
+    // since no of values in quantities == weights
+    for i = 0 to quantities.length - 1:
+        maxItemsPerBox = Math.floor(maxWeightPerBox/weights[i])
+        itemsFitPerBox = Math.min(capacity, maxItemsPerBox)
+        boxesNeeded += Math.ceil(quantities[i]/itemsFitPerBox)
+    
+       return boxesNeeded     ^bcIpiO7f
+
+Time Complexity
+- since its one outer Loop for a range let say M while each inner loop runs for N values of quantities or weights so O(M*N) 
+
+Space Complexity
+- is constant since we only use variables ^F5nVH5Hx
+
+%%
+## Drawing
+```compressed-json
+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
+```
+%%

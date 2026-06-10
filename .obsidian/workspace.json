@@ -4,43 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "ec2332fa189ed1ff",
+        "id": "e51ec9e2719fe2b3",
         "type": "tabs",
         "children": [
           {
-            "id": "e71cb08d3e9b0c0a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Resources"
-            }
-          },
-          {
-            "id": "5dfb96f253d517af",
+            "id": "f95742da413288b3",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/System Design/Practice/Bitly/Drawing 2026-06-09 09.58.20.excalidraw.md"
+                "file": "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Drawing 2026-06-09 09.58.20.excalidraw"
+              "title": "6-Smallest Divisor Given Threshold.excalidraw"
+            }
+          },
+          {
+            "id": "a2c34b053d3276ca",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "7-Minimum Shipping Capacity.excalidraw"
             }
           }
         ],
@@ -101,8 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 308.50390243530273,
-    "collapsed": true
+    "width": 308.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -207,10 +194,19 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "5dfb96f253d517af",
+  "active": "a2c34b053d3276ca",
   "lastOpenFiles": [
+    "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md",
+    "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md",
+    "Learning/DSA/Binary Search/Overview.excalidraw.md",
+    "Learning/JavaScript/Coding/Hooks/useDefault.excalidraw.md",
+    "Learning/JavaScript/Coding/Hooks/useBoolean.excalidraw.md",
+    "Learning/JavaScript/Coding/Deep Clone/js-prerequisites.html",
+    "Learning/JavaScript/Coding/Deep Clone/DeepCloneII.excalidraw.md",
+    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
+    "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
-    "Learning/System Design/Practice/Bitly/Drawing 2026-06-09 09.58.20.excalidraw.md",
+    "Learning/JavaScript/Coding/Hooks",
     "Learning/System Design/Practice/Bitly",
     "Learning/System Design/Practice",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/7-File Tools/1-file-tools.html",
@@ -218,16 +214,12 @@
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/Evals.excalidraw.md",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/7-File Tools/1-file-tools-read-write.html",
     "Learning/Book Reading/Reading List.md",
-    "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md",
     "Learning/DSA/Binary Search/Smallest Divisor Given Threshold.excalidraw.md",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/Resources.md",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/3-rn-push-notifications.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/2-rn-haptics.html",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/1-rn-layout-animation.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/4-User-Experience-Enhance/3-LayoutAnimation/rn-layout-animation-summary.html",
     "Learning/DSA/Binary Search/5-Kth smallest element in a sorted matrix.md",
-    "Learning/JavaScript/Coding/Deep Clone/DeepCloneII.excalidraw.md",
     "Learning/JavaScript/Coding/Deep Clone/deepclone.md",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
     "Learning/Freelance/Wnp/Untitled.md",
@@ -250,11 +242,6 @@
     "Learning/System Design/Patterns/Realtime Udpates/attachments/YcI3UiF1ye_u.0es2c86y0gknj.svg",
     "Learning/System Design/Patterns/Realtime Udpates/attachments/L9DTCrHV_4vT.15qagx_k41or_.svg",
     "Learning/DSA/Binary Search/4-Split larest sum.excalidraw.md",
-    "Learning/JavaScript/Coding/Deep Clone/Drawing 2026-06-01 09.59.44.excalidraw.md",
-    "Learning/AI&ML Engineering/Hallmark/Portfolio/Audit Response.md",
-    "Learning/Freelance/Builders's Website/Builders Website.md",
-    "Learning/DSA/Binary Search/2-Apple Harvest (Koko eating banana).excalidraw.md",
-    "Learning/DSA/Binary Search/3-Searching in rotated sorted array.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
