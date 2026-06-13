@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Web Search + Context Management</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw { color: #7c6fff; } .fn { color: #60a5fa; } .str { color: #f59e0b; } .cm { color: #555; } .num { color: #10b981; }
+
+  .cmp { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cmp th { background: #1a1a2e; color: #888; font-weight: 700; padding: 8px 12px; text-align: left; font-size: 11px; }
+  .cmp td { padding: 9px 12px; border-top: 1px solid #1e1e2e; color: #aaa; vertical-align: top; }
+  .cmp td:first-child { color: #e0e0e0; font-weight: 700; white-space: nowrap; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  /* Token visual */
+  .token-bar { height: 28px; border-radius: 8px; display: flex; overflow: hidden; margin-top: 8px; }
+  .tb-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+
+  /* Context strategy cards */
+  .strat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .strat-card { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; border-top: 3px solid; }
+  .strat-card .s-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .strat-card .s-pros { font-size: 11px; color: #10b981; line-height: 1.7; }
+  .strat-card .s-cons { font-size: 11px; color: #f87171; line-height: 1.7; margin-top: 4px; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  .flow-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+  .fh-box { background: #1a2a3a; border: 1px solid #60a5fa44; border-radius: 8px; padding: 5px 11px; }
+  .fh-arr { color: #60a5fa; }
+
+  /* U-shape recall diagram */
+  .u-shape { background: #12121f; border-radius: 10px; padding: 14px; text-align: center; }
+  .u-bars { display: flex; gap: 3px; align-items: flex-end; justify-content: center; height: 60px; }
+  .u-bar { border-radius: 3px 3px 0 0; flex: 1; max-width: 18px; }
+  .u-labels { display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">WEB SEARCH + CONTEXT MANAGEMENT</div>
+    <h1>Grounding + Token Budgets</h1>
+    <div class="sub">Give the agent current knowledge. Then stop the context window from eating you alive.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 Web search solves the <strong>knowledge cutoff</strong> problem. Context management solves the <strong>token bloat</strong> problem web search causes. They always arrive together.</div>
+    <div class="note">Every web search result adds ~1,000–3,000 tokens. An agent that searches 5 times per task burns 5–15K tokens per run — before conversation history.</div>
+  </div>
+
+  <!-- Native vs Tool-based -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">TWO APPROACHES TO WEB SEARCH</span>
+    <table class="cmp">
+      <thead><tr><th></th><th>Native / Provider Tool</th><th>Tool-Based (API)</th></tr></thead>
+      <tbody>
+        <tr><td>How</td><td>One line: <code>openai.tools.webSearch({})</code>. Runs on OpenAI servers.</td><td>Implement as a function tool. Calls Exa, Tavily, Bing, etc. Runs on your server.</td></tr>
+        <tr><td>Model lock-in</td><td>Yes — only works with that provider's models</td><td>No — works with any tool-calling model</td></tr>
+        <tr><td>Control</td><td>Low — their algorithm, their sources</td><td>Full — custom sources, ranking, filters</td></tr>
+        <tr><td>Cost</td><td>Provider-managed (incentivized to overuse)</td><td>Pay per search API call</td></tr>
+        <tr><td>Best for</td><td>Getting started fast, learning</td><td>Production, custom requirements</td></tr>
+        <tr><td>We use</td><td>✅ OpenAI native — simplest for now</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <pre style="margin-top:10px;"><span class="cm">// Native tool — one line. OpenAI runs it, we get results back.</span>
+<span class="kw">export const</span> webSearch = openai.tools.<span class="fn">webSearch</span>({});</pre>
+    <div style="background:#2a1f4a; border-radius:8px; padding:10px 12px; font-size:12px; color:#c084fc; margin-top:10px;">
+      <strong>Parallel search pattern (deep research):</strong> Agent opens multiple search tabs simultaneously — each a parallel tool call. Waits for all results, picks the best branches to drill into. This is how ChatGPT Deep Research works under the hood.
+    </div>
+  </div>
+
+  <!-- Token anatomy -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">TOKENS + CONTEXT WINDOW</span>
+    <div style="font-size:12px; color:#aaa; margin-bottom:10px;">~3.5 characters = 1 token in English. Everything in messages[] costs tokens.</div>
+
+    <div class="token-bar">
+      <div class="tb-seg" style="width:15%;background:#7c6fff;color:#fff;">System</div>
+      <div class="tb-seg" style="width:10%;background:#60a5fa;color:#000;">Tools defs</div>
+      <div class="tb-seg" style="width:20%;background:#10b981;color:#000;">Chat history</div>
+      <div class="tb-seg" style="width:30%;background:#f59e0b;color:#000;">Tool results</div>
+      <div class="tb-seg" style="width:15%;background:#f87171;color:#000;">Output</div>
+      <div class="tb-seg" style="flex:1;background:#2a2a3a;color:#555;">…budget</div>
+    </div>
+    <div style="font-size:11px;color:#555;margin-top:6px;">All bars eat from the same window. Tool results (especially web search) are the biggest culprit.</div>
+
+    <div class="grid2" style="margin-top:12px;">
+      <div class="grid2-card" style="background:#1f1a0d;">
+        <div class="g-title" style="color:#f59e0b;">Token costs (rough)</div>
+        <div class="g-body">
+          Avg code file: ~500 tokens<br/>
+          Web search result: ~1K–3K tokens<br/>
+          10-exchange chat: ~5K tokens<br/>
+          Tool definitions: ~500–1K tokens<br/>
+          Output 3–4× more expensive than input
+        </div>
+      </div>
+      <div class="grid2-card" style="background:#1a0a0a;">
+        <div class="g-title" style="color:#f87171;">Why limits exist</div>
+        <div class="g-body">
+          Attention = O(n²) — every token attends to every token. Double context = 4× compute.<br/>
+          At 360K/400K tokens you're already seeing accuracy degradation before hitting the hard limit.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lost in the middle -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">THE "LOST IN THE MIDDLE" PROBLEM</span>
+    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+      <div class="u-shape" style="flex:1; min-width:200px;">
+        <div style="font-size:11px; color:#888; margin-bottom:8px; font-weight:700;">MODEL RECALL BY POSITION</div>
+        <div class="u-bars">
+          <div class="u-bar" style="height:95%;background:#10b981;"></div>
+          <div class="u-bar" style="height:80%;background:#10b981;"></div>
+          <div class="u-bar" style="height:55%;background:#f59e0b;"></div>
+          <div class="u-bar" style="height:35%;background:#f87171;"></div>
+          <div class="u-bar" style="height:30%;background:#f87171;"></div>
+          <div class="u-bar" style="height:35%;background:#f87171;"></div>
+          <div class="u-bar" style="height:55%;background:#f59e0b;"></div>
+          <div class="u-bar" style="height:80%;background:#10b981;"></div>
+          <div class="u-bar" style="height:95%;background:#10b981;"></div>
+        </div>
+        <div class="u-labels"><span>Start</span><span>Middle</span><span>End</span></div>
+      </div>
+      <div style="flex:2; min-width:200px; font-size:12px; color:#aaa;">
+        Models recall beginning and end well — both have fewer competing tokens. The middle is heavily influenced by tokens on both sides, making it harder to attend to. A 1M token context window sounds great but accuracy at 800K tokens is terrible in practice. <strong style="color:#e0e0e0;">Bigger window ≠ better performance.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context strategies -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">6 CONTEXT MANAGEMENT STRATEGIES</span>
+    <div class="strat-grid">
+
+      <div class="strat-card" style="border-color:#10b981;">
+        <div class="s-title" style="color:#10b981;">✦ Compaction / Summarize</div>
+        <div class="s-pros">✓ Conversation continues forever<br/>✓ Preserves key info<br/>✓ Graceful degradation</div>
+        <div class="s-cons">✗ Costs tokens to summarize<br/>✗ Loses nuance & detail</div>
+      </div>
+
+      <div class="strat-card" style="border-color:#60a5fa;">
+        <div class="s-title" style="color:#60a5fa;">Sliding Window / Evict</div>
+        <div class="s-pros">✓ Simple, predictable<br/>✓ No summarization cost<br/>✓ Count tokens not messages</div>
+        <div class="s-cons">✗ Old context = gone forever<br/>✗ Can break mid-task loops<br/>✗ Tool call state issues</div>
+      </div>
+
+      <div class="strat-card" style="border-color:#7c6fff;">
+        <div class="s-title" style="color:#7c6fff;">Sub-agents</div>
+        <div class="s-pros">✓ Each task = fresh window<br/>✓ Parent sees results only<br/>✓ Clean separation</div>
+        <div class="s-cons">✗ Coordination overhead<br/>✗ Results need summarizing too<br/>✗ More complex arch</div>
+      </div>
+
+      <div class="strat-card" style="border-color:#c084fc;">
+        <div class="s-title" style="color:#c084fc;">RAG (Vector Search)</div>
+        <div class="s-pros">✓ Infinite history<br/>✓ Only retrieves relevant bits<br/>✓ Cross-conversation search</div>
+        <div class="s-cons">✗ Vector DB required<br/>✗ May miss context<br/>✗ Added infra</div>
+      </div>
+
+      <div class="strat-card" style="border-color:#f59e0b;">
+        <div class="s-title" style="color:#f59e0b;">Start Fresh</div>
+        <div class="s-pros">✓ Dead simple<br/>✓ Clean slate<br/>✓ No accumulated confusion</div>
+        <div class="s-cons">✗ Bad UX<br/>✗ Manual context transfer<br/>✗ Loses conversation flow</div>
+      </div>
+
+      <div class="strat-card" style="border-color:#f87171;">
+        <div class="s-title" style="color:#f87171;">✦ Prevent Bloat First</div>
+        <div class="s-pros">✓ Best first line of defence<br/>✓ No extra infra<br/>✓ Truncate / format efficiently</div>
+        <div class="s-cons">✗ Hard to know what's "waste"<br/>✗ Requires eval to measure<br/>✗ Manual discipline</div>
+      </div>
+
+    </div>
+    <div style="margin-top:10px; font-size:11px; color:#555; text-align:center;">✦ = what we're implementing (compaction + prevent bloat)</div>
+  </div>
+
+  <!-- RAG explained -->
+  <div style="background:#1e1b3a; border:1px solid #7c6fff44; border-radius:10px; padding:14px;">
+    <div style="font-size:11px; color:#7c6fff; font-weight:700; letter-spacing:1px; margin-bottom:8px;">RAG — THE OPEN BOOK TEST ANALOGY</div>
+    <div class="flow-h" style="margin-bottom:8px;">
+      <span class="fh-box">User query</span><span class="fh-arr">→</span>
+      <span class="fh-box">Vectorize query</span><span class="fh-arr">→</span>
+      <span class="fh-box">Find nearest vectors in DB</span><span class="fh-arr">→</span>
+      <span class="fh-box">Inject relevant chunks into context</span><span class="fh-arr">→</span>
+      <span class="fh-box">LLM answers</span>
+    </div>
+    <div style="font-size:12px; color:#aaa;">Instead of reading the whole textbook, the student reads the question → checks the <strong style="color:#e0e0e0;">glossary (vector DB)</strong> → turns to only that page → answers. Tokens = you'd never load a whole textbook into RAM when you only need page 47.</div>
+  </div>
+
+  <!-- Web Search Implementation -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">IMPLEMENTATION — 3 FILES, ~5 LINES TOTAL</span>
+    <div style="font-size:12px;color:#aaa;margin-bottom:10px;">Native tool = zero implementation. Just wrap it so it fits your tool composition pattern.</div>
+    <pre>
+<span class="cm">// webSearch.ts — entire file</span>
+<span class="kw">import</span> { openai } <span class="kw">from</span> <span class="str">'@ai-sdk/openai'</span>;
+<span class="kw">export const</span> webSearch = openai.tools.<span class="fn">webSearch</span>({}); <span class="cm">// runs on OpenAI servers, not yours</span>
+
+<span class="cm">// tools/index.ts — add to exports</span>
+<span class="kw">import</span> { webSearch } <span class="kw">from</span> <span class="str">'./webSearch.ts'</span>;
+<span class="kw">export const</span> tools = { readFile, writeFile, listFiles, deleteFile, webSearch };
+<span class="kw">export</span> { webSearch } <span class="kw">from</span> <span class="str">'./webSearch.ts'</span>;</pre>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+      <div style="background:#1a1a2e;border-radius:8px;padding:10px 12px;border-left:3px solid #10b981;">
+        <div style="font-size:12px;font-weight:700;color:#10b981;margin-bottom:4px;">Other OpenAI native tools available</div>
+        <div style="font-size:12px;color:#aaa;line-height:1.8;">
+          <code>codeInterpreter</code> — run Python/JS strings<br/>
+          <code>fileSearch</code> — search OpenAI-stored files<br/>
+          <code>imageGeneration</code> — DALL-E<br/>
+          <code>localShell</code> — suggests shell commands (doesn't run them)<br/>
+          <code>webSearchPreview</code> — experimental version
+        </div>
+      </div>
+      <div style="background:#1a1a2e;border-radius:8px;padding:10px 12px;border-left:3px solid #f59e0b;">
+        <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:4px;">Behaviour to watch</div>
+        <div style="font-size:12px;color:#aaa;line-height:1.8;">
+          OpenAI's description likely says "use freely" — agent can fire 20+ searches on a simple query.<br/>
+          Always say <em>"only use one web search"</em> in prompt when testing. Eval for over-searching.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning -->
+  <div class="warn">
+    <strong>⚠️ Don't build your own web search tool in production.</strong> Use Exa, Tavily, Bing API, or the provider's native tool. Building your own is a fun exercise — then stop. The crawling, deduplication, ranking, and freshness problems are solved problems. Use the solutions.
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd;">
+    <strong>WNP scenario:</strong> Agent searching for "latest IFRS 16 amendments" opens 3 parallel web searches (different query angles). Each returns ~2K tokens. After 4 loops of tool results, context is 12K tokens heavier. Apply compaction: summarize earlier tool results into 200-token bullet points, replace raw results. Context stays lean, conversation continues. Without this, 20 searches = 40K+ tokens of garbage sitting in the window slowing inference and costing money.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Web search: <span style="color:#7c6fff;">Native (openai.tools.webSearch)</span> vs <span style="color:#60a5fa;">Tool-based (Exa/Tavily)</span> · Context: <span style="color:#10b981;">Compaction (we build)</span> · <span style="color:#f87171;">Prevent bloat (always)</span>
+  </div>
+
+</div>
+</body>
+</html>

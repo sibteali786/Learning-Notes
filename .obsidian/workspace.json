@@ -4,31 +4,43 @@
     "type": "split",
     "children": [
       {
-        "id": "e51ec9e2719fe2b3",
+        "id": "1a4fb8e24e17a69e",
         "type": "tabs",
         "children": [
           {
-            "id": "f95742da413288b3",
+            "id": "b9a86299815cd80b",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "html-view",
               "state": {
-                "file": "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md"
+                "file": "Learning/Frontend Interview Preparation/Preparation/graphql-summary.html"
               },
-              "icon": "excalidraw-icon",
-              "title": "6-Smallest Divisor Given Threshold.excalidraw"
+              "icon": "code-glyph",
+              "title": "graphql-summary"
             }
           },
           {
-            "id": "a2c34b053d3276ca",
+            "id": "42d5904133c4a27a",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md"
+                "file": "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "7-Minimum Shipping Capacity.excalidraw"
+              "title": "Models.excalidraw"
+            }
+          },
+          {
+            "id": "7179fc33a1033337",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Overview"
             }
           }
         ],
@@ -194,8 +206,30 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "a2c34b053d3276ca",
+  "active": "42d5904133c4a27a",
   "lastOpenFiles": [
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
+    "Learning/Database/Database Design/5-Relationships/ch5-relationships-summary.html",
+    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Preparation/graphql-summary.html",
+    "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
+    "Learning/Database/Database Design/5-Relationships/1-ERD-Diagrams.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Preparation/NestJS-Graphql.html",
+    "Learning/Frontend Interview Preparation/Preparation/Drawing 2026-06-11 10.00.21.excalidraw.md",
+    "graphql-summary.html",
+    "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
+    "Learning/System Design/Practice/Bitly/Bit.ly.excalidraw",
+    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
+    "Learning/Book Reading/Reading List.md",
+    "Learning/DSA/LinkedList/Drawing 2026-06-12 10.29.06.excalidraw.md",
+    "Screenshot 2026-06-12 at 10.29.31 AM.png",
+    "Screenshot 2026-06-12 at 10.29.20 AM.png",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/1-web-search-context.html",
+    "Learning/Frontend Interview Preparation/Preparation",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
+    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/2-compaction.html",
     "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md",
     "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md",
     "Learning/DSA/Binary Search/Overview.excalidraw.md",
@@ -204,33 +238,13 @@
     "Learning/JavaScript/Coding/Deep Clone/js-prerequisites.html",
     "Learning/JavaScript/Coding/Deep Clone/DeepCloneII.excalidraw.md",
     "Learning/JavaScript/Coding/useQuery.excalidraw.md",
-    "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
     "Learning/JavaScript/Coding/Hooks",
-    "Learning/System Design/Practice/Bitly",
-    "Learning/System Design/Practice",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/7-File Tools/1-file-tools.html",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/Evals.excalidraw.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/7-File Tools/1-file-tools-read-write.html",
-    "Learning/Book Reading/Reading List.md",
     "Learning/DSA/Binary Search/Smallest Divisor Given Threshold.excalidraw.md",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/Resources.md",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/3-rn-push-notifications.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/2-rn-haptics.html",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/1-rn-layout-animation.html",
     "Learning/DSA/Binary Search/5-Kth smallest element in a sorted matrix.md",
     "Learning/JavaScript/Coding/Deep Clone/deepclone.md",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
-    "Learning/Freelance/Wnp/Untitled.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/7-File Tools/Drawing 2026-06-05 21.03.03.excalidraw.md",
-    "Personal/Maryam's Things.md",
-    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
-    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Learning/System Design/Patterns/Realtime Udpates/attachments/xg3g8QJ39g-5.0~4qicn98.nms.svg",
     "Learning/System Design/Patterns/Realtime Udpates/attachments/xWkdHJANtnnJ.0924~mp8cjscf.svg",
     "Learning/System Design/Patterns/Realtime Udpates/attachments/trFqhoLyS8Wc.00it8g3sdt1x9.svg",
@@ -239,9 +253,6 @@
     "Learning/System Design/Patterns/Realtime Udpates/attachments/f0CknSRcOhe-.0d8fl2pjepvtt.svg",
     "Learning/System Design/Patterns/Realtime Udpates/attachments/dUY3kHsn3c4O.0aj_9xbjxmzsl.svg",
     "Learning/System Design/Patterns/Realtime Udpates/attachments/ZS8xUcLSzgnn.0tv93afqil.jc.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/YcI3UiF1ye_u.0es2c86y0gknj.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/L9DTCrHV_4vT.15qagx_k41or_.svg",
-    "Learning/DSA/Binary Search/4-Split larest sum.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

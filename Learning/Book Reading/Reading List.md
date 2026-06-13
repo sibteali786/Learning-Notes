@@ -4,3 +4,6 @@
 - The Happiness Trap
 ## List by Talha Ashraf
 https://talhaashraf.com/books
+
+### Operating System Book
+Operating System Concepts, by Silberschatz

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 2 — NestJS + GraphQL Session Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2333;
+    --border:    #30363d;
+    --accent:    #e05c2a;
+    --accent2:   #58a6ff;
+    --accent3:   #3fb950;
+    --warn:      #d29922;
+    --error:     #f85149;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --code-bg:   #0d1117;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+
+  .page { max-width: 960px; margin: 0 auto; }
+
+  /* ── HERO ── */
+  .hero {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    margin-bottom: 40px;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(224,92,42,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 560px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .hero-stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .hero-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card p { color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media(max-width: 680px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .kw  { color: #ff7b72; }
+  .dec { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .fn  { color: #79c0ff; }
+  .cm  { color: #8b949e; font-style: italic; }
+  .num { color: #f2cc60; }
+  .type{ color: #ffa657; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 28px; margin-bottom: 32px; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 8px; top: 8px; bottom: 8px;
+    width: 1px; background: var(--border);
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-dot {
+    position: absolute;
+    left: -24px; top: 4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-dot.green  { background: var(--accent3); }
+  .tl-dot.blue   { background: var(--accent2); }
+  .tl-dot.yellow { background: var(--warn); }
+  .tl-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .tl-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .tl-body  { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  /* ── COMPARISON TABLE ── */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-green  { background: rgba(63,185,80,0.15);  color: var(--accent3); }
+  .badge-orange { background: rgba(224,92,42,0.15);  color: var(--accent);  }
+  .badge-blue   { background: rgba(88,166,255,0.15); color: var(--accent2); }
+  .badge-yellow { background: rgba(210,153,34,0.15); color: var(--warn);    }
+  .badge-red    { background: rgba(248,81,73,0.15);  color: var(--error);   }
+
+  /* ── GOTCHA CARDS ── */
+  .gotcha {
+    border-left: 3px solid var(--error);
+    background: rgba(248,81,73,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .gotcha-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--error);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .gotcha p { color: var(--muted); font-size: 13px; }
+
+  /* ── INSIGHT CARDS ── */
+  .insight {
+    border-left: 3px solid var(--accent2);
+    background: rgba(88,166,255,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .insight-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+  .insight p { color: var(--muted); font-size: 13px; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .flow-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 32px;
+  }
+  .flow-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent2);
+    flex-shrink: 0;
+  }
+  .flow-connector {
+    width: 1px; height: 24px;
+    background: var(--border);
+  }
+  .flow-content {
+    padding: 4px 0 24px;
+    flex: 1;
+  }
+  .flow-content strong { font-size: 13px; display: block; margin-bottom: 3px; }
+  .flow-content span { font-size: 12px; color: var(--muted); }
+
+  /* ── PROGRESS ── */
+  .progress-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 10px;
+  }
+  .progress-label { font-size: 13px; min-width: 180px; }
+  .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; background: var(--accent3); }
+  .progress-pct  { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); min-width: 36px; text-align: right; }
+
+  mb32 { display: block; margin-bottom: 32px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Inventeer Prep · Day 2</div>
+    <h1>NestJS + <span>GraphQL</span><br>Session Summary</h1>
+    <p class="hero-sub">E-Commerce Order API — built from scratch using Code First approach. Covered DI, entities, queries, field resolvers, mutations, validation, and guards.</p>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-val">7</span><span class="hero-stat-label">Tasks completed</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">6</span><span class="hero-stat-label">Key patterns</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">5</span><span class="hero-stat-label">Bugs caught</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">✓</span><span class="hero-stat-label">Working API</span></div>
+    </div>
+  </div>
+
+  <!-- WHAT WE BUILT -->
+  <div class="section-title">What We Built</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">📦 E-Commerce Order API — File Structure</div>
+    <pre><span class="cm">src/
+├── app.module.ts          </span><span class="cm">← GraphQLModule wired here</span>
+<span class="cm">├── main.ts                </span><span class="cm">← ValidationPipe registered globally</span>
+<span class="cm">└── orders/
+    ├── orders.module.ts   </span><span class="cm">← Feature boundary (providers: [Resolver, Service])</span>
+<span class="cm">    ├── orders.resolver.ts </span><span class="cm">← @Query, @Mutation, @ResolveField</span>
+<span class="cm">    ├── orders.service.ts  </span><span class="cm">← @Injectable business logic</span>
+<span class="cm">    ├── order.entity.ts    </span><span class="cm">← @ObjectType — GraphQL output type</span>
+<span class="cm">    ├── order-item.entity.ts</span><span class="cm">← @ObjectType — nested type</span>
+<span class="cm">    ├── auth/
+    │   └── auth.guard.ts  </span><span class="cm">← CanActivate guard</span>
+<span class="cm">    └── dto/
+        └── create-order.input.ts </span><span class="cm">← @InputType + class-validator</span></pre>
+  </div>
+
+  <!-- APOLLO vs NESTJS MAPPING -->
+  <div class="section-title">Apollo Standalone → NestJS Mapping</div>
+  <div class="card" style="margin-bottom:32px;">
+    <table>
+      <tr><th>Apollo Standalone (Day 1)</th><th>NestJS Code First (Day 2)</th><th>Purpose</th></tr>
+      <tr><td><code>typeDefs</code> SDL string</td><td><span class="badge badge-blue">@ObjectType()</span> + <span class="badge badge-blue">@Field()</span></td><td>Define output type</td></tr>
+      <tr><td><code>input</code> type in SDL</td><td><span class="badge badge-blue">@InputType()</span> + <span class="badge badge-blue">@Field()</span></td><td>Define input type</td></tr>
+      <tr><td><code>resolvers.Query</code> object</td><td><span class="badge badge-blue">@Query()</span> method</td><td>Read data</td></tr>
+      <tr><td><code>resolvers.Mutation</code> object</td><td><span class="badge badge-blue">@Mutation()</span> method</td><td>Write data</td></tr>
+      <tr><td><code>Task.assignee</code> resolver</td><td><span class="badge badge-blue">@ResolveField()</span> method</td><td>Resolve nested field</td></tr>
+      <tr><td><code>context.isAuthenticated</code> check</td><td><span class="badge badge-blue">@UseGuards(AuthGuard)</span></td><td>Auth protection</td></tr>
+      <tr><td>Manual <code>args</code> param</td><td><span class="badge badge-blue">@Args('input')</span> decorator</td><td>Extract resolver arguments</td></tr>
+    </table>
+  </div>
+
+  <!-- KEY PATTERNS -->
+  <div class="section-title">Key Patterns Learned</div>
+
+  <!-- DI -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">🔄 Dependency Injection (DI) Pattern</div>
+    <div class="grid-2" style="margin-bottom:0; gap:20px;">
+      <div>
+        <div style="font-size:11px; color:var(--error); font-family:'JetBrains Mono',monospace; margin-bottom:6px;">❌ WITHOUT DI</div>
+        <pre><span class="kw">class</span> <span class="type">OrdersResolver</span> {
+  service = <span class="kw">new</span> <span class="fn">OrdersService</span>()
+  <span class="cm">// tightly coupled</span>
+  <span class="cm">// hard to test</span>
+  <span class="cm">// can't swap implementation</span>
+}</pre>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--accent3); font-family:'JetBrains Mono',monospace; margin-bottom:6px;">✅ WITH DI</div>
+        <pre><span class="dec">@Injectable</span>()
+<span class="kw">class</span> <span class="type">OrdersService</span> { }
+
+<span class="dec">@Resolver</span>(() => <span class="type">Order</span>)
+<span class="kw">class</span> <span class="type">OrdersResolver</span> {
+  <span class="fn">constructor</span>(
+    <span class="kw">private</span> svc: <span class="type">OrdersService</span>
+  ) {} <span class="cm">// NestJS injects it</span>
+}</pre>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding:12px; background:var(--surface2); border-radius:8px; font-size:12px; color:var(--muted);">
+      <strong style="color:var(--text);">How it works:</strong> NestJS reads TypeScript type metadata via <code>reflect-metadata</code>. It finds <code>OrdersService</code> registered in <code>providers[]</code>, instantiates it once, and injects it wherever requested. You never call <code>new</code> manually.
+    </div>
+  </div>
+
+  <!-- SCALARS -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">🔢 GraphQL Scalars — When to Use What</div>
+    <table style="margin-bottom:0;">
+      <tr><th>GraphQL Scalar</th><th>NestJS Import</th><th>Use for</th><th>Example</th></tr>
+      <tr><td><code>String</code></td><td>default — no import</td><td>Text, IDs as strings</td><td>name, status</td></tr>
+      <tr><td><code>Int</code></td><td><code>Int</code> from <code>@nestjs/graphql</code></td><td>Whole numbers only</td><td>quantity, count</td></tr>
+      <tr><td><code>Float</code></td><td><code>Float</code> from <code>@nestjs/graphql</code></td><td>Decimals / money</td><td>price, total</td></tr>
+      <tr><td><code>Boolean</code></td><td>default — no import</td><td>Flags</td><td>isActive, isPaid</td></tr>
+    </table>
+  </div>
+
+  <!-- FIELD RESOLVER + N+1 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">🔗 Field Resolver + The N+1 Problem</div>
+    <p style="margin-bottom:12px; color:var(--muted); font-size:13px;">A field resolver is needed when a parent type holds a <strong style="color:var(--text);">reference ID</strong> but the client expects a <strong style="color:var(--text);">full object</strong>.</p>
+    <pre><span class="dec">@ResolveField</span>(<span class="str">'orderItems'</span>, () => [<span class="type">OrderItem</span>])
+<span class="fn">orderItems</span>(<span class="dec">@Parent</span>() order: <span class="type">Order</span>) {
+  <span class="kw">const</span> ids = order.orderItemIds;  <span class="cm">// IDs from parent</span>
+  <span class="kw">return</span> <span class="kw">this</span>.orderService.<span class="fn">findItemsByIds</span>(ids);
+}</pre>
+    <div style="margin-top:12px; padding:12px; background:rgba(248,81,73,0.06); border:1px solid rgba(248,81,73,0.2); border-radius:8px;">
+      <div style="font-size:12px; color:var(--error); font-weight:600; margin-bottom:6px;">⚠️ N+1 Problem — Interview Essential</div>
+      <table style="margin-bottom:0; font-size:12px;">
+        <tr><th>Orders</th><th>DB calls without fix</th><th>With DataLoader</th></tr>
+        <tr><td>2</td><td style="color:var(--warn);">3 calls</td><td style="color:var(--accent3);">2 calls</td></tr>
+        <tr><td>10</td><td style="color:var(--warn);">11 calls</td><td style="color:var(--accent3);">2 calls</td></tr>
+        <tr><td>100</td><td style="color:var(--error);">101 calls</td><td style="color:var(--accent3);">2 calls</td></tr>
+      </table>
+      <p style="margin-top:8px; font-size:12px; color:var(--muted);">Fix in production: <strong style="color:var(--text);">DataLoader</strong> — batches all item ID lookups across all orders into a single DB query.</p>
+    </div>
+  </div>
+
+  <!-- REQUEST LIFECYCLE -->
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">⚡ NestJS Request Lifecycle</div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">1</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>Middleware</strong><span>Logging, CORS, cookie parsing</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle" style="color:var(--error); border-color:var(--error);">2</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>Guards <span class="badge badge-orange">@UseGuards</span></strong><span>Is the user allowed? Auth check lives here. Returns true/false.</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">3</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>Interceptors</strong><span>Transform request/response, logging, caching</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle" style="color:var(--warn); border-color:var(--warn);">4</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>Pipes <span class="badge badge-yellow">ValidationPipe</span></strong><span>Validate + transform input. Bad data rejected HERE — never reaches service.</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle" style="color:var(--accent3); border-color:var(--accent3);">5</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>Resolver / Controller</strong><span>Your @Query / @Mutation methods</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle" style="color:var(--accent3); border-color:var(--accent3);">6</div></div>
+        <div class="flow-content"><strong>Service</strong><span>Business logic, DB calls — only reached if all above pass</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUGS & GOTCHAS -->
+  <div class="section-title">Bugs Caught & Gotchas</div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Wrong @Query import package</div>
+    <p>Imported <code>@Query</code> from <code>@nestjs/common</code> instead of <code>@nestjs/graphql</code>. Always check the package — NestJS has similar decorator names across packages.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Array @Field missing explicit type</div>
+    <p><code>@Field()</code> alone doesn't work for arrays. Must explicitly declare: <code>@Field(() => [String])</code> or <code>@Field(() => [OrderItem])</code>. GraphQL needs to know the item type.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Class declaration order matters — TDZ</div>
+    <p>Used <code>CreateOrderItemInput</code> inside <code>CreateOrderInput</code> before declaring it. Classes are NOT hoisted — they sit in the Temporal Dead Zone like <code>let/const</code>. Decorators execute at load time so they see <code>undefined</code>. Always declare dependencies first.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Int vs Float for price</div>
+    <p>Used <code>Int</code> for <code>price</code> field. <code>Int</code> = whole numbers only. Price needs <code>Float</code> for decimals like <code>999.99</code>.</p>
+  </div>
+
+  <div class="gotcha" style="margin-bottom:32px;">
+    <div class="gotcha-title">🐛 GqlExecutionContext in Guards</div>
+    <p>In REST guards you'd use <code>context.switchToHttp().getRequest()</code>. In GraphQL this returns <code>undefined</code>. Must use <code>GqlExecutionContext.create(context)</code> to unwrap the GraphQL context.</p>
+  </div>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section-title">Key Insights</div>
+
+  <div class="insight">
+    <div class="insight-title">💡 ValidationPipe is just metadata enforcement</div>
+    <p><code>@IsNotEmpty()</code> and <code>@Min()</code> decorators do nothing by themselves — they only attach metadata. <code>ValidationPipe</code> reads and enforces that metadata. Without it, empty strings pass through silently.</p>
+  </div>
+
+  <div class="insight">
+    <div class="insight-title">💡 Field resolver is only needed when parent holds a reference ID</div>
+    <p>If you embed full objects in the parent directly, no field resolver needed. Field resolvers exist to resolve IDs → full objects, simulating a real DB join across separate tables.</p>
+  </div>
+
+  <div class="insight" style="margin-bottom:32px;">
+    <div class="insight-title">💡 DTO = security boundary, not just validation</div>
+    <p>DTOs with <code>whitelist: true</code> strip fields the client sends that you didn't declare. This prevents mass-assignment attacks — clients can't inject unexpected fields into your service layer.</p>
+  </div>
+
+  <!-- PRODUCTION TIPS -->
+  <div class="section-title">Production Tips for Inventeer</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">🚀 ValidationPipe — Always Use These Options</div>
+    <pre><span class="fn">app</span>.<span class="fn">useGlobalPipes</span>(<span class="kw">new</span> <span class="fn">ValidationPipe</span>({
+  whitelist: <span class="kw">true</span>,             <span class="cm">// strip unknown fields (security)</span>
+  forbidNonWhitelisted: <span class="kw">true</span>,  <span class="cm">// throw if unknown fields sent</span>
+  transform: <span class="kw">true</span>,             <span class="cm">// auto-cast payload to DTO class</span>
+}));</pre>
+    <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+      <div style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+        <span class="badge badge-green">whitelist</span>
+        <span style="color:var(--muted);">Prevents mass-assignment attacks — client can't inject undeclared fields</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+        <span class="badge badge-blue">transform</span>
+        <span style="color:var(--muted);">Auto-converts plain JSON payload into typed DTO class instances</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+        <span class="badge badge-orange">DI Scopes</span>
+        <span style="color:var(--muted);">Use <code>Scope.REQUEST</code> for services that hold per-user state — prevents data leaking between requests</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="section-title">Day 2 Completion</div>
+  <div class="card" style="margin-bottom:40px;">
+    <div class="progress-row"><span class="progress-label">GraphQLModule setup</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">Module + DI pattern</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">@ObjectType entities</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">@Query — getOrders</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">@ResolveField + N+1 concept</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">@InputType + class-validator</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">@Mutation — createOrder</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">Guards + request lifecycle</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+  </div>
+
+  <!-- NEXT -->
+  <div class="section-title">Up Next — Day 3</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">🗄️ PostgreSQL + Prisma</div>
+      <p>Replace mock data with real DB. Migrations, schema, Prisma client queries.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔗 Real Relations</div>
+      <p>Orders ↔ OrderItems as actual DB foreign keys. See N+1 problem for real.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🧩 DataLoader</div>
+      <p>Batch field resolver DB calls. Fix the N+1 problem properly.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

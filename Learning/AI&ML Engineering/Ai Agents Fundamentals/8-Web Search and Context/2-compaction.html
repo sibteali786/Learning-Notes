@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Context Compaction</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; padding: 28px 20px; line-height: 1.5; }
+  .wrap { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+  .header { text-align: center; }
+  .header .eyebrow { font-size: 11px; color: #7c6fff; letter-spacing: 2px; font-weight: 700; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-top: 4px; }
+  .header .sub { color: #888; font-size: 13px; margin-top: 6px; }
+
+  .insight { background: #1e1b3a; border: 1px solid #7c6fff44; border-radius: 12px; padding: 14px; text-align: center; }
+  .insight .main { font-size: 13px; color: #c4b5fd; }
+  .insight .note { color: #666; font-size: 12px; margin-top: 6px; }
+
+  .section { border-radius: 12px; padding: 16px; }
+  .section-label { display: inline-block; color: #fff; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+
+  pre { background: #12121f; border: 1px solid #2a2a3f; border-radius: 10px; padding: 14px; font-size: 12px; color: #a5f3a5; overflow-x: auto; line-height: 1.8; }
+  .kw { color: #7c6fff; } .fn { color: #60a5fa; } .str { color: #f59e0b; } .cm { color: #555; } .num { color: #10b981; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid2-card { border-radius: 8px; padding: 12px; }
+  .grid2-card .g-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .grid2-card .g-body { font-size: 12px; color: #aaa; line-height: 1.9; }
+
+  /* Flow steps */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .f-row { display: flex; gap: 0; }
+  .f-left { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+  .f-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .f-line { width: 2px; flex: 1; min-height: 8px; }
+  .f-body { background: #1a1a2e; border-radius: 8px; padding: 10px 12px; margin: 3px 0 3px 8px; flex: 1; }
+  .f-title { font-size: 13px; font-weight: 700; }
+  .f-desc { font-size: 12px; color: #aaa; margin-top: 3px; }
+
+  /* Token bar */
+  .token-bar { height: 30px; border-radius: 8px; display: flex; overflow: hidden; }
+  .tb-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+
+  .warn { background: #1a1205; border: 1px solid #f59e0b44; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #fcd34d; }
+  .warn strong { color: #f59e0b; }
+  .scenario { border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .footer { text-align: center; color: #444; font-size: 11px; }
+
+  .tag { display: inline-block; border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+
+  /* Compacted messages visual */
+  .msg-before { display: flex; flex-direction: column; gap: 4px; }
+  .msg-after  { display: flex; flex-direction: column; gap: 4px; }
+  .msg-pill { border-radius: 6px; padding: 5px 10px; font-size: 11px; }
+  .arrow-down { text-align: center; color: #7c6fff; font-size: 20px; margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">CONTEXT MANAGEMENT</div>
+    <h1>Context Compaction</h1>
+    <div class="sub">When the context window fills up, summarize history and keep going — indefinitely.</div>
+  </div>
+
+  <!-- Core Insight -->
+  <div class="insight">
+    <div class="main">💡 Compaction = run another LLM to <strong>summarize the conversation so far</strong>, then swap the detailed history with a 2-message seed. Agent continues with headroom restored.</div>
+    <div class="note">Token counting is intentionally approximate — ~3.75 chars/token. Exact tokenization is async, model-specific, and expensive. Close enough beats perfect here.</div>
+  </div>
+
+  <!-- The 80% threshold explained -->
+  <div class="section" style="border:2px solid #f59e0b; background:#f59e0b12;">
+    <span class="section-label" style="background:#f59e0b; color:#000;">THE 80% THRESHOLD — WHY NOT 100%</span>
+    <div style="margin-bottom:10px;">
+      <div class="token-bar">
+        <div class="tb-seg" style="width:80%;background:#10b981;color:#000;">Used history (80%)</div>
+        <div class="tb-seg" style="width:20%;background:#f59e0b;color:#000;">Headroom (20%)</div>
+      </div>
+      <div style="font-size:11px;color:#555;margin-top:6px;">The remaining 20% must cover: new user message + tool calls + tool results + assistant response + estimation error margin</div>
+    </div>
+    <div style="font-size:12px;color:#aaa;">You can tune this. 90% = fly closer to the sun. 70% = more headroom, compact more often. Default 80% is a practical balance. Change <code>DEFAULT_THRESHOLD</code> and everything adjusts.</div>
+  </div>
+
+  <!-- Compaction flow -->
+  <div class="section" style="border:2px solid #7c6fff; background:#7c6fff12;">
+    <span class="section-label" style="background:#7c6fff;">COMPACTION FLOW — BEFORE EACH TURN</span>
+    <div class="flow">
+      <div class="f-row">
+        <div class="f-left"><div class="f-dot" style="background:#60a5fa;"></div><div class="f-line" style="background:#2a2a4a;"></div></div>
+        <div class="f-body">
+          <div class="f-title" style="color:#60a5fa;">estimateMessagesTokens(messages)</div>
+          <div class="f-desc">Sum up tokens across all messages using the ~3.75 chars/token approximation. Fast, free, good enough.</div>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-left"><div class="f-dot" style="background:#f59e0b;"></div><div class="f-line" style="background:#2a2a4a;"></div></div>
+        <div class="f-body">
+          <div class="f-title" style="color:#f59e0b;">isOverThreshold(total, contextWindow, 0.8)?</div>
+          <div class="f-desc"><code>total > contextWindow * 0.8</code>. If yes → compact. If no → proceed normally.</div>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-left"><div class="f-dot" style="background:#c084fc;"></div><div class="f-line" style="background:#2a2a4a;"></div></div>
+        <div class="f-body">
+          <div class="f-title" style="color:#c084fc;">Filter system messages out</div>
+          <div class="f-desc">System prompt is NOT summarized — it's added fresh on every turn. Only user/assistant/tool messages get compacted.</div>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-left"><div class="f-dot" style="background:#7c6fff;"></div><div class="f-line" style="background:#2a2a4a;"></div></div>
+        <div class="f-body">
+          <div class="f-title" style="color:#7c6fff;">messagesToText() → generateText(summarizationPrompt + text)</div>
+          <div class="f-desc">Convert the messages array to a plain text blob (no JSON brackets). Feed to a cheaper model with a summarization system prompt. One-shot — no loop needed.</div>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-left"><div class="f-dot" style="background:#10b981;"></div></div>
+        <div class="f-body">
+          <div class="f-title" style="color:#10b981;">Return 2-message "seed" → replace workingHistory</div>
+          <div class="f-desc">user: "[CONVERSATION SUMMARY] …summary… continue from here" + assistant: "I've reviewed the summary, ready to continue." Ends on assistant so agent doesn't re-respond immediately.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Before / After visual -->
+  <div class="section" style="border:2px solid #10b981; background:#10b98112;">
+    <span class="section-label" style="background:#10b981; color:#000;">BEFORE vs AFTER COMPACTION</span>
+    <div class="grid2">
+      <div>
+        <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:6px;">BEFORE (N messages, ~320K tokens)</div>
+        <div class="msg-before">
+          <div class="msg-pill" style="background:#7c6fff22;color:#7c6fff;">system: SYSTEM_PROMPT</div>
+          <div class="msg-pill" style="background:#60a5fa22;color:#60a5fa;">user: "Can you help me…"</div>
+          <div class="msg-pill" style="background:#10b98122;color:#10b981;">assistant: [tool call]</div>
+          <div class="msg-pill" style="background:#f59e0b22;color:#f59e0b;">tool: [search results 2K tokens]</div>
+          <div class="msg-pill" style="background:#10b98122;color:#10b981;">assistant: "Here's what I found…"</div>
+          <div class="msg-pill" style="background:#60a5fa22;color:#60a5fa;">user: "Now do this…"</div>
+          <div style="color:#555;font-size:11px;text-align:center;padding:4px;">… 200 more messages …</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#888;font-weight:700;margin-bottom:6px;">AFTER (2 messages, ~800 tokens)</div>
+        <div class="msg-after">
+          <div class="msg-pill" style="background:#7c6fff22;color:#7c6fff;">system: SYSTEM_PROMPT (added fresh)</div>
+          <div class="msg-pill" style="background:#60a5fa22;color:#60a5fa;">user: "[SUMMARY] We discussed X, decided Y, currently working on Z… please continue."</div>
+          <div class="msg-pill" style="background:#10b98122;color:#10b981;">assistant: "I've reviewed the summary and I'm ready to continue. How can I help?"</div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#555;">Ends on assistant → no immediate re-response from LLM when loop resumes.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="section" style="border:2px solid #60a5fa; background:#60a5fa12;">
+    <span class="section-label" style="background:#60a5fa; color:#000;">KEY CODE — 3 FILES</span>
+<pre>
+<span class="cm">// modelLimits.ts</span>
+<span class="kw">export function</span> <span class="fn">isOverThreshold</span>(total: <span class="kw">number</span>, ctxWindow: <span class="kw">number</span>, threshold = <span class="num">0.8</span>) {
+  <span class="kw">return</span> total >= ctxWindow * threshold;
+}
+<span class="kw">export function</span> <span class="fn">calculateUsagePercentage</span>(total: <span class="kw">number</span>, ctxWindow: <span class="kw">number</span>) {
+  <span class="kw">return</span> (total / ctxWindow) * <span class="num">100</span>;
+}
+
+<span class="cm">// compaction.ts — compactConversation()</span>
+<span class="kw">const</span> conversationMessages = messages.<span class="fn">filter</span>(m => m.role !== <span class="str">'system'</span>); <span class="cm">// skip system</span>
+<span class="kw">const</span> text = <span class="fn">messagesToText</span>(conversationMessages);                        <span class="cm">// plain text, no JSON</span>
+<span class="kw">const</span> { text: summary } = <span class="kw">await</span> <span class="fn">generateText</span>({
+  model: <span class="fn">openai</span>(model),
+  prompt: SUMMARIZATION_PROMPT + text   <span class="cm">// one-shot, not a loop</span>
+});
+<span class="kw">return</span> [
+  { role: <span class="str">'user'</span>,      content: <span class="str">`[CONVERSATION SUMMARY]\n${summary}\n\nPlease continue.`</span> },
+  { role: <span class="str">'assistant'</span>, content: <span class="str">"I've reviewed the summary and I'm ready to continue."</span> }
+];
+
+<span class="cm">// run.ts — pre-loop compaction check</span>
+<span class="kw">const</span> modelLimits = <span class="fn">getModelLimits</span>(MODEL_NAME);
+<span class="kw">const</span> preCheck = <span class="fn">estimateMessagesTokens</span>(messages);
+<span class="kw">if</span> (<span class="fn">isOverThreshold</span>(preCheck.total, modelLimits.contextWindow)) {
+  workingHistory = <span class="kw">await</span> <span class="fn">compactConversation</span>(workingHistory, MODEL_NAME);
+}
+<span class="cm">// call reportTokenUsage() after every messages.push()</span></pre>
+  </div>
+
+  <!-- Trade-offs -->
+  <div class="grid2">
+    <div class="grid2-card" style="background:#0f2019;border:1px solid #10b98144;">
+      <div class="g-title" style="color:#10b981;">✅ What compaction preserves</div>
+      <div class="g-body">
+        Overall goal and intent<br/>
+        Key decisions made<br/>
+        Important facts mentioned<br/>
+        Pending tasks/questions
+      </div>
+    </div>
+    <div class="grid2-card" style="background:#1a0a0a;border:1px solid #f8717144;">
+      <div class="g-title" style="color:#f87171;">❌ What compaction loses</div>
+      <div class="g-body">
+        Exact wording and tone<br/>
+        Detailed tool outputs<br/>
+        Step-by-step reasoning trace<br/>
+        Nuance between related facts
+      </div>
+    </div>
+  </div>
+
+  <!-- Repeated compaction warning -->
+  <div class="warn">
+    <strong>⚠️ Compaction degrades over time.</strong> Second compaction merges a previous summary + new messages — you're summarizing a summary. Details erode faster each time. Claude's solution: warn the user ("I'm about to compact") and let them clear context or dump important info to a file first. There's no perfect solution — only trade-offs.
+  </div>
+
+  <!-- Token usage reporting -->
+  <div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:12px 14px;">
+    <div style="font-size:11px;color:#888;font-weight:700;letter-spacing:0.5px;margin-bottom:8px;">TOKEN USAGE UI REPORTING — callbacks.onTokenUsage()</div>
+    <div style="font-size:12px;color:#aaa;line-height:1.8;">
+      Called after every <code>messages.push()</code>. Sends: <code>inputTokens, outputTokens, totalTokens, contextWindow, threshold, percentage</code>.<br/>
+      Lets the UI show: <span style="color:#10b981;">0.6% used</span> / threshold: 80% / context: 400K — so users can see the window filling up in real time.
+    </div>
+  </div>
+
+  <!-- Scenario -->
+  <div class="scenario" style="background:#1a2a3a; border:1px solid #60a5fa44; border-radius:10px; color:#93c5fd; margin-top:4px;">
+    <strong>WNP scenario:</strong> Long audit session — agent has read 15 files, run 8 web searches, exchanged 50 messages with the user. Context hits 82% (328K/400K tokens). Pre-loop check fires: filter system, convert to text, summarize → "We're auditing Aldawair Finance, reviewed IFRS 16 leases, flagged 3 disclosure gaps, next step is the liquidity ratios." Replace 328K tokens with 800 tokens. Agent continues with 99.2% of the window free.
+  </div>
+
+  <div class="footer" style="margin-top:4px;">
+    Files: <span style="color:#7c6fff;">modelLimits.ts</span> · <span style="color:#60a5fa;">compaction.ts</span> · <span style="color:#10b981;">run.ts (pre-loop check + reportTokenUsage)</span> · Threshold: <span style="color:#f59e0b;">80% default, tune as needed</span>
+  </div>
+
+</div>
+</body>
+</html>

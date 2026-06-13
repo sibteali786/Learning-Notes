@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GraphQL — Interview Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --pink: #ff6b9d;
+    --cyan: #39d5f5;
+    --green: #3dffa0;
+    --yellow: #ffd166;
+    --purple: #c792ea;
+    --orange: #ff9d52;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 2rem;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent);
+    margin-top: 1.5rem;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--cyan);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--cyan), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 0.4rem; }
+
+  /* ── Grid layout ── */
+  .grid { display: grid; gap: 1.25rem; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── Section titles ── */
+  .section-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cyan);
+    font-family: var(--mono);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ── Code blocks ── */
+  pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .k { color: var(--purple); }   /* keyword */
+  .t { color: var(--cyan); }     /* type */
+  .s { color: var(--green); }    /* string */
+  .c { color: var(--muted); font-style: italic; } /* comment */
+  .p { color: var(--pink); }     /* property */
+  .n { color: var(--yellow); }   /* number/value */
+  .o { color: var(--orange); }   /* operator/special */
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+  .flow-step.pink { border-color: var(--pink); color: var(--pink); }
+  .flow-step.cyan { border-color: var(--cyan); color: var(--cyan); }
+  .flow-step.green { border-color: var(--green); color: var(--green); }
+  .flow-step.yellow { border-color: var(--yellow); color: var(--yellow); }
+  .flow-step.purple { border-color: var(--purple); color: var(--purple); }
+  .arrow {
+    color: var(--muted);
+    font-size: 1rem;
+    padding: 0 0.4rem;
+  }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid #21262d;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge-cyan { background: rgba(57,213,245,0.12); color: var(--cyan); }
+  .badge-pink { background: rgba(255,107,157,0.12); color: var(--pink); }
+  .badge-green { background: rgba(61,255,160,0.12); color: var(--green); }
+  .badge-yellow { background: rgba(255,209,102,0.12); color: var(--yellow); }
+  .badge-purple { background: rgba(199,146,234,0.12); color: var(--purple); }
+  .badge-orange { background: rgba(255,157,82,0.12); color: var(--orange); }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid var(--yellow);
+    background: rgba(255,209,102,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--yellow);
+    font-family: var(--mono);
+    margin-top: 0.75rem;
+  }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+  .checklist li {
+    font-size: 0.82rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .check { color: var(--green); font-size: 0.9rem; flex-shrink: 0; }
+
+  /* ── Q&A cards ── */
+  .qa { display: flex; flex-direction: column; gap: 0.75rem; }
+  .qa-item { background: var(--surface2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .qa-q {
+    background: rgba(57,213,245,0.07);
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cyan);
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-a {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* ── vs comparison ── */
+  .vs-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.5rem; align-items: start; }
+  .vs-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    padding-top: 1.5rem;
+  }
+  .vs-item {
+    font-size: 0.78rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    color: var(--text);
+  }
+  .vs-item:last-child { border-bottom: none; }
+
+  /* spacing helpers */
+  .mb1 { margin-bottom: 0.75rem; }
+  .mb2 { margin-bottom: 1.5rem; }
+  .mb3 { margin-bottom: 2.5rem; }
+  .mt1 { margin-top: 0.75rem; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<div class="header">
+  <div class="tag">Interview Prep · Inventeer Assessment · June 17</div>
+  <h1>GraphQL — Visual Reference</h1>
+  <div class="subtitle">Apollo Server · PostGraphile · NestJS mapping · Built hands-on</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     1. CORE MENTAL MODEL
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">01 · Core Mental Model</div>
+  <div class="card">
+    <div class="vs-grid">
+      <div>
+        <div class="vs-label" style="color:var(--muted)">REST</div>
+        <div class="vs-item">GET /tasks → fixed shape always</div>
+        <div class="vs-item">Multiple endpoints</div>
+        <div class="vs-item">Server decides response shape</div>
+        <div class="vs-item">Over/under fetching common</div>
+        <div class="vs-item">Parallel by default</div>
+      </div>
+      <div class="vs-divider">VS</div>
+      <div>
+        <div class="vs-label" style="color:var(--cyan)">GraphQL</div>
+        <div class="vs-item" style="color:var(--cyan)">query &#123; tasks &#123; id &#125; &#125; → you decide</div>
+        <div class="vs-item" style="color:var(--cyan)">Single endpoint /graphql</div>
+        <div class="vs-item" style="color:var(--cyan)">Client decides response shape</div>
+        <div class="vs-item" style="color:var(--cyan)">Exactly what you asked for</div>
+        <div class="vs-item" style="color:var(--cyan)">Queries parallel, mutations sequential</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     2. REQUEST FLOW
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">02 · Request Flow</div>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step pink">Client query</div>
+      <div class="arrow">→</div>
+      <div class="flow-step cyan">Schema validation</div>
+      <div class="arrow">→</div>
+      <div class="flow-step purple">Match resolver</div>
+      <div class="arrow">→</div>
+      <div class="flow-step yellow">Fetch / mutate data</div>
+      <div class="arrow">→</div>
+      <div class="flow-step green">Return exact shape</div>
+    </div>
+    <div class="callout mt1">
+      ⚡ Field resolvers fire AFTER parent resolver — each field can resolve independently
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     3. SCHEMA BUILDING BLOCKS
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">03 · Schema Building Blocks</div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">📐 Keywords</div>
+      <table>
+        <thead><tr><th>Keyword</th><th>Purpose</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-purple">type</span></td><td>Output shape</td><td>What you <em>return</em></td></tr>
+          <tr><td><span class="badge badge-pink">input</span></td><td>Argument shape</td><td>What you <em>receive</em></td></tr>
+          <tr><td><span class="badge badge-yellow">enum</span></td><td>Fixed value set</td><td>Like TS enum</td></tr>
+          <tr><td><span class="badge badge-cyan">Query</span></td><td>Read ops</td><td>Run in parallel</td></tr>
+          <tr><td><span class="badge badge-orange">Mutation</span></td><td>Write ops</td><td>Run sequentially</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">❗ Nullability</div>
+      <pre><span class="c"># ! = required, never null</span>
+<span class="p">id</span>: <span class="t">ID</span><span class="o">!</span>       <span class="c">← always exists</span>
+<span class="p">title</span>: <span class="t">String</span><span class="o">!</span>  <span class="c">← always exists</span>
+
+<span class="c"># no ! = nullable / optional</span>
+<span class="p">assignee</span>: <span class="t">User</span>   <span class="c">← can be null</span>
+<span class="p">email</span>: <span class="t">String</span>   <span class="c">← can be null</span></pre>
+      <div class="callout mt1">
+        ⚠️ type vs input — type fields CAN have resolvers & circular refs. input is plain validated data only.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     4. RESOLVER ANATOMY
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">04 · Resolver Anatomy</div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">🔌 Structure</div>
+      <pre><span class="k">const</span> resolvers = {
+  <span class="t">Query</span>: {
+    getTasks: (<span class="p">parent</span>, <span class="p">args</span>, <span class="p">ctx</span>, <span class="p">info</span>) => ...
+  },
+  <span class="t">Mutation</span>: {
+    createTask: (<span class="p">_</span>, { <span class="p">task</span> }, <span class="p">ctx</span>) => ...
+  },
+  <span class="t">Task</span>: {
+    <span class="c">// field-level resolver</span>
+    assignee: (<span class="p">parent</span>) => ...
+  }
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 4 Arguments</div>
+      <table>
+        <thead><tr><th>Arg</th><th>What it is</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-purple">parent</span></td><td>Parent resolver's return value</td><td>Field resolvers</td></tr>
+          <tr><td><span class="badge badge-cyan">args</span></td><td>Arguments passed to field</td><td>getTaskById(id)</td></tr>
+          <tr><td><span class="badge badge-green">context</span></td><td>Shared across ALL resolvers</td><td>Auth, DB, logging</td></tr>
+          <tr><td><span class="badge badge-muted" style="background:rgba(139,148,158,0.12);color:var(--muted)">info</span></td><td>Query AST + metadata</td><td>Complexity analysis</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     5. RESOLVER CHAIN
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">05 · Resolver Chain (Key Concept)</div>
+  <div class="card">
+    <div class="grid grid-2">
+      <pre><span class="c">// Data in memory</span>
+tasks = [
+  { <span class="p">id</span>: <span class="s">"1"</span>, <span class="p">assignee</span>: <span class="s">"1"</span> }
+]
+
+<span class="c">// Schema says assignee: User</span>
+<span class="c">// But data has assignee: "1" (ID)</span>
+
+<span class="c">// Field resolver bridges the gap ↓</span>
+<span class="t">Task</span>: {
+  assignee: (<span class="p">parent</span>) =>
+    users.find(u =>
+      u.id === <span class="p">parent</span>.assignee
+    )
+}</pre>
+      <div>
+        <div class="flow" style="flex-direction:column; align-items:flex-start; gap:0.5rem;">
+          <div class="flow-step cyan" style="width:100%">getTasks fires → returns [&#123;assignee:"1"&#125;]</div>
+          <div style="color:var(--muted); padding-left:1rem; font-size:0.8rem;">↓ for each Task</div>
+          <div class="flow-step purple" style="width:100%">Task.assignee resolver fires</div>
+          <div style="color:var(--muted); padding-left:1rem; font-size:0.8rem;">↓ parent = the task object</div>
+          <div class="flow-step green" style="width:100%">returns full User &#123; id, name, email &#125;</div>
+        </div>
+        <div class="callout mt1">
+          ⚡ Works for mock data AND freshly created mutation results — resolver chain doesn't care where the task came from
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     6. CONTEXT + AUTH
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">06 · Context + Auth Pattern</div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-title">🔐 Build Context</div>
+      <pre><span class="c">// runs on every request</span>
+context: <span class="k">async</span> ({ <span class="p">req</span> }) => {
+  <span class="k">const</span> token =
+    req.headers.authorization || <span class="s">""</span>
+  <span class="k">return</span> {
+    isAuthenticated:
+      token === <span class="s">"secret-token"</span>,
+    <span class="c">// db: prismaClient,</span>
+    <span class="c">// user: decodeJWT(token)</span>
+  }
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">🛡️ Protect Resolver</div>
+      <pre>getTasks: (<span class="p">_</span>, <span class="p">__</span>, <span class="p">ctx</span>) => {
+  <span class="k">if</span> (!ctx.isAuthenticated)
+    <span class="k">throw new</span> <span class="t">GraphQLError</span>(
+      <span class="s">"Unauthorized"</span>, {
+        extensions: {
+          code: <span class="s">"UNAUTHENTICATED"</span>
+        }
+      }
+    )
+  <span class="k">return</span> tasks
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     7. ERROR HANDLING
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">07 · Error Handling</div>
+  <div class="card">
+    <div class="grid grid-2">
+      <div>
+        <table>
+          <thead><tr><th>Case</th><th>Pattern</th></tr></thead>
+          <tbody>
+            <tr><td>Resource not found</td><td><span class="badge badge-yellow">return null</span> (expected)</td></tr>
+            <tr><td>Auth failure</td><td><span class="badge badge-pink">throw GraphQLError</span> UNAUTHENTICATED</td></tr>
+            <tr><td>Invalid input</td><td><span class="badge badge-pink">throw GraphQLError</span> BAD_USER_INPUT</td></tr>
+            <tr><td>Server error</td><td><span class="badge badge-pink">throw GraphQLError</span> INTERNAL_SERVER_ERROR</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre><span class="c">// findIndex + error pattern</span>
+<span class="k">const</span> index =
+  tasks.findIndex(t => t.id === id)
+
+<span class="k">if</span> (index === <span class="o">-1</span>)
+  <span class="k">throw new</span> <span class="t">GraphQLError</span>(<span class="s">"Invalid ID"</span>)
+
+tasks[index] = {
+  ...tasks[index], status
+}
+<span class="k">return</span> tasks[index]</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     8. QUERY VARIABLES
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">08 · Query Variables</div>
+  <div class="card">
+    <div class="grid grid-2">
+      <pre><span class="c"># Operation — never hardcode args</span>
+<span class="k">mutation</span> <span class="t">UpdateTask</span>(
+  <span class="p">$id</span>: <span class="t">ID</span><span class="o">!</span>,
+  <span class="p">$status</span>: <span class="t">Status</span><span class="o">!</span>
+) {
+  updateTaskStatus(
+    id: <span class="p">$id</span>,
+    status: <span class="p">$status</span>
+  ) {
+    id title status
+  }
+}</pre>
+      <pre><span class="c">// Variables panel / Apollo Client</span>
+{
+  <span class="p">"id"</span>: <span class="s">"1"</span>,
+  <span class="p">"status"</span>: <span class="s">"TODO"</span>
+}
+
+<span class="c">// React (Apollo Client)</span>
+<span class="k">const</span> [updateTask] =
+  <span class="t">useMutation</span>(UPDATE_TASK)
+
+updateTask({
+  variables: {
+    id: <span class="s">"1"</span>,
+    status: <span class="s">"TODO"</span>
+  }
+})</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     9. NESTJS MAPPING
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">09 · NestJS Mapping (Inventeer Stack)</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Apollo Standalone</th><th>NestJS Equivalent</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-cyan">typeDefs SDL string</span></td><td><span class="badge badge-purple">@ObjectType() + @Field()</span></td><td>Define output types</td></tr>
+        <tr><td><span class="badge badge-cyan">input type</span></td><td><span class="badge badge-purple">@InputType() + @Field()</span></td><td>Define input types</td></tr>
+        <tr><td><span class="badge badge-cyan">resolvers object</span></td><td><span class="badge badge-purple">@Resolver() class</span></td><td>Group resolver methods</td></tr>
+        <tr><td><span class="badge badge-cyan">Query field</span></td><td><span class="badge badge-purple">@Query() method</span></td><td>Read operation</td></tr>
+        <tr><td><span class="badge badge-cyan">Mutation field</span></td><td><span class="badge badge-purple">@Mutation() method</span></td><td>Write operation</td></tr>
+        <tr><td><span class="badge badge-cyan">context() function</span></td><td><span class="badge badge-purple">Guards + Interceptors</span></td><td>Auth / middleware</td></tr>
+        <tr><td><span class="badge badge-cyan">GraphQLError</span></td><td><span class="badge badge-purple">HttpException / filters</span></td><td>Error handling</td></tr>
+      </tbody>
+    </table>
+    <div class="callout mt1">💡 Concepts are identical — only syntax changes in NestJS</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     10. INTERVIEW Q&A
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">10 · Interview Quick-Fire</div>
+  <div class="qa">
+    <div class="qa-item">
+      <div class="qa-q">Q: What is a resolver?</div>
+      <div class="qa-a">A function that fulfills a schema field — like a route handler in Express. Every field in your schema can have one.</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Why use input instead of type for arguments?</div>
+      <div class="qa-a">type fields can have resolvers, arguments of their own, and circular references. input is intentionally flat — plain validated data, no resolution, no circular refs allowed.</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What is context used for?</div>
+      <div class="qa-a">A shared object built per-request and passed to every resolver. Used for auth (decoded JWT / current user), DB connections (Prisma client), and logging.</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: Query vs Mutation — beyond read/write?</div>
+      <div class="qa-a">Queries execute in parallel (safe, no state change). Mutations execute sequentially to prevent race conditions — e.g. createTask + updateTaskStatus running in parallel could corrupt data.</div>
+    </div>
+    <div class="qa-item">
+      <div class="qa-q">Q: What is a field-level resolver and when do you need one?</div>
+      <div class="qa-a">A resolver on a specific field of a type (e.g. Task.assignee). Needed when the raw data shape doesn't match the schema — e.g. data has assignee: "1" but schema expects a full User object.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     11. WHAT YOU BUILT
+══════════════════════════════════════════ -->
+<div class="mb3">
+  <div class="section-title">11 · What You Built Today</div>
+  <div class="card">
+    <div class="grid grid-3">
+      <div>
+        <div class="card-title">📐 Schema</div>
+        <ul class="checklist">
+          <li><span class="check">✓</span> enum Status</li>
+          <li><span class="check">✓</span> type User, type Task</li>
+          <li><span class="check">✓</span> input TaskInput</li>
+          <li><span class="check">✓</span> type Query</li>
+          <li><span class="check">✓</span> type Mutation</li>
+        </ul>
+      </div>
+      <div>
+        <div class="card-title">🔌 Resolvers</div>
+        <ul class="checklist">
+          <li><span class="check">✓</span> Query.getTasks (auth protected)</li>
+          <li><span class="check">✓</span> Query.getTaskById (nullable)</li>
+          <li><span class="check">✓</span> Mutation.createTask</li>
+          <li><span class="check">✓</span> Mutation.updateTaskStatus</li>
+          <li><span class="check">✓</span> Task.assignee (field resolver)</li>
+        </ul>
+      </div>
+      <div>
+        <div class="card-title">🎯 Patterns Covered</div>
+        <ul class="checklist">
+          <li><span class="check">✓</span> Resolver chain</li>
+          <li><span class="check">✓</span> GraphQLError handling</li>
+          <li><span class="check">✓</span> Context + auth</li>
+          <li><span class="check">✓</span> Query variables</li>
+          <li><span class="check">✓</span> Input vs type</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
