@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>setImmediate vs setTimeout — The Loop Position Trick</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #151820;
+    --border:   #1e2330;
+    --text:     #c9d1e0;
+    --muted:    #5a6270;
+    --timers:   #f0883e;
+    --check:    #f5c542;
+    --poll:     #3bc88a;
+    --nexttick: #e05c7b;
+    --accent:   #7c6af7;
+    --dim:      #1e2330;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 3rem;
+    padding-top: 2rem;
+  }
+  .hero-eyebrow {
+    font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .6rem;
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900; letter-spacing: -1px; line-height: 1.1;
+    margin-bottom: .8rem;
+  }
+  .hero h1 span.im  { color: var(--check); }
+  .hero h1 span.st  { color: var(--timers); }
+  .hero p { color: var(--muted); font-size: .9rem; max-width: 500px; margin: 0 auto; }
+
+  /* CORE INSIGHT BANNER */
+  .insight {
+    max-width: 760px; margin: 0 auto 3rem;
+    background: rgba(124,106,247,.07);
+    border: 1px solid rgba(124,106,247,.3);
+    border-radius: 14px;
+    padding: 1.4rem 1.8rem;
+    display: flex; gap: 1rem; align-items: flex-start;
+  }
+  .insight-icon { font-size: 2rem; flex-shrink: 0; }
+  .insight-body strong { display: block; font-size: 1rem; color: #e2e8f0; margin-bottom: .3rem; }
+  .insight-body p { font-size: .875rem; color: var(--muted); }
+  .insight-body em { color: var(--check); font-style: normal; font-weight: 700; }
+
+  /* SECTION */
+  .section { max-width: 860px; margin: 0 auto 3.5rem; }
+  .section-label {
+    font-size: .68rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .4rem;
+  }
+  .section-title {
+    font-size: 1.35rem; font-weight: 800; color: #e2e8f0; margin-bottom: 1.4rem;
+  }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; max-width: 860px; margin-left: auto; margin-right: auto; }
+
+  /* PHASE LOOP DIAGRAM */
+  .loop-wrap {
+    display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;
+  }
+  .loop-col { flex: 1; min-width: 260px; }
+  .loop-title {
+    font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .phase-list { display: flex; flex-direction: column; gap: 0; }
+  .phase-item {
+    display: flex; align-items: stretch; gap: 0;
+  }
+  .phase-connector {
+    display: flex; flex-direction: column; align-items: center; width: 24px; flex-shrink: 0;
+  }
+  .phase-line { width: 2px; flex: 1; background: var(--border); }
+  .phase-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin: 2px 0; }
+  .phase-content {
+    padding: .5rem .85rem .5rem .6rem; border-radius: 8px;
+    margin: 3px 0; flex: 1;
+    border: 1px solid transparent;
+    font-size: .82rem;
+    transition: all .2s;
+  }
+  .phase-name { font-weight: 700; }
+  .phase-sub  { font-size: .72rem; color: var(--muted); }
+
+  /* phase color states */
+  .ph-timers  .phase-dot { background: var(--timers); }
+  .ph-timers  .phase-content { border-color: var(--timers); background: rgba(240,136,62,.08); color: var(--timers); }
+  .ph-pending .phase-dot { background: var(--accent); }
+  .ph-pending .phase-content { border-color: var(--border); background: transparent; color: var(--muted); }
+  .ph-idle    .phase-dot { background: var(--muted); }
+  .ph-idle    .phase-content { border-color: var(--border); background: transparent; color: var(--muted); }
+  .ph-poll    .phase-dot { background: var(--poll); }
+  .ph-poll    .phase-content { border-color: var(--poll); background: rgba(59,200,138,.08); color: var(--poll); }
+  .ph-check   .phase-dot { background: var(--check); }
+  .ph-check   .phase-content { border-color: var(--check); background: rgba(245,197,66,.08); color: var(--check); }
+  .ph-close   .phase-dot { background: var(--nexttick); }
+  .ph-close   .phase-content { border-color: var(--border); background: transparent; color: var(--muted); }
+
+  /* YOU ARE HERE badge */
+  .you-here {
+    display: inline-block; font-size: .62rem; font-weight: 800;
+    letter-spacing: .07em; text-transform: uppercase;
+    background: var(--poll); color: #0d0f14;
+    padding: .1rem .45rem; border-radius: 4px; margin-left: .5rem;
+    vertical-align: middle;
+  }
+  .active-badge {
+    display: inline-block; font-size: .62rem; font-weight: 800;
+    letter-spacing: .07em; text-transform: uppercase;
+    padding: .1rem .45rem; border-radius: 4px; margin-left: .5rem;
+    vertical-align: middle;
+  }
+  .badge-check   { background: var(--check);  color: #0d0f14; }
+  .badge-timers  { background: var(--timers); color: #0d0f14; }
+  .badge-next    { color: var(--muted); font-size: .68rem; font-style: italic; font-weight: 400; margin-left: .4rem; }
+
+  /* DIM phases that already passed */
+  .ph-dim .phase-dot { background: var(--muted); opacity: .3; }
+  .ph-dim .phase-content { opacity: .3; }
+
+  /* SCENARIO CARDS */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  @media (max-width: 640px) { .scenario-grid { grid-template-columns: 1fr; } }
+
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .scenario-header {
+    padding: .85rem 1.2rem;
+    font-size: .82rem; font-weight: 700;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .scenario-body { padding: .9rem 1.2rem 1.2rem; }
+
+  .result-badge {
+    display: inline-flex; gap: .4rem; align-items: center;
+    font-size: .78rem; font-weight: 700;
+    padding: .3rem .75rem; border-radius: 6px; margin-top: .6rem;
+  }
+
+  /* CODE */
+  .code-block {
+    background: #0a0c10; border: 1px solid var(--border); border-radius: 8px;
+    padding: .9rem 1.1rem; font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem; line-height: 1.75; overflow-x: auto; margin: .8rem 0;
+  }
+  .c-comment { color: var(--muted); }
+  .c-kw      { color: var(--accent); }
+  .c-fn      { color: #5bc0f8; }
+  .c-str     { color: var(--poll); }
+  .c-num     { color: var(--check); }
+  .c-im      { color: var(--check); font-weight: 700; }
+  .c-st      { color: var(--timers); font-weight: 700; }
+
+  /* FLOW ARROW DIAGRAM */
+  .flow { display: flex; flex-direction: column; gap: 0; align-items: flex-start; margin: 1rem 0; }
+  .flow-row { display: flex; align-items: center; gap: .6rem; }
+  .flow-box {
+    padding: .45rem .9rem; border-radius: 7px; font-size: .78rem; font-weight: 600;
+    border: 1px solid; white-space: nowrap;
+  }
+  .flow-arrow { color: var(--muted); font-size: .9rem; padding: 3px 0; margin-left: 1.5rem; }
+  .flow-label { font-size: .7rem; color: var(--muted); margin-left: .5rem; }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0;
+    font-size: .84rem; display: flex; gap: .75rem; align-items: flex-start;
+  }
+  .callout-warn { background: rgba(245,197,66,.07); border: 1px solid rgba(245,197,66,.25); }
+  .callout-tip  { background: rgba(59,200,138,.07); border: 1px solid rgba(59,200,138,.25); }
+  .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+  .callout-body strong { display: block; color: #e2e8f0; margin-bottom: .2rem; }
+
+  /* MEMORY TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { padding: .6rem .9rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--muted); font-size: .7rem; letter-spacing: .07em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-weight: 600; color: #e2e8f0; }
+
+  .footer { text-align: center; color: var(--muted); font-size: .72rem; margin-top: 3rem; max-width: 860px; margin-left: auto; margin-right: auto; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Node.js Event Loop · Interview Gotcha</div>
+  <h1><span class="im">setImmediate()</span> vs <span class="st">setTimeout(0)</span></h1>
+  <p>Why the same two lines produce different output depending on <em>where in the loop you currently are</em>.</p>
+</div>
+
+<!-- CORE INSIGHT -->
+<div class="insight">
+  <div class="insight-icon">🔑</div>
+  <div class="insight-body">
+    <strong>The Key Insight — It's About Loop Position, Not Timer Value</strong>
+    <p>The question is never "which is faster?" It's: <em>"where in the event loop are you RIGHT NOW when you schedule both?"</em> — that determines which phase comes next, and therefore which runs first.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SCENARIO 1: INSIDE I/O -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Scenario 01</div>
+  <div class="section-title">Inside an I/O Callback — Always Deterministic</div>
+
+  <div class="loop-wrap">
+
+    <!-- PHASE DIAGRAM -->
+    <div class="loop-col">
+      <div class="loop-title" style="color:var(--poll)">Where you are in the loop</div>
+      <div class="phase-list">
+
+        <div class="phase-item ph-dim">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content"><div class="phase-name">timers <span class="active-badge badge-timers" style="opacity:.4">already ran</span></div><div class="phase-sub">setTimeout · setInterval</div></div>
+        </div>
+
+        <div class="phase-item ph-dim">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content"><div class="phase-name">pending callbacks</div><div class="phase-sub">deferred I/O errors</div></div>
+        </div>
+
+        <div class="phase-item ph-dim">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content"><div class="phase-name">idle · prepare</div><div class="phase-sub">internal only</div></div>
+        </div>
+
+        <div class="phase-item ph-poll">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content">
+            <div class="phase-name">poll <span class="you-here">📍 YOU ARE HERE</span></div>
+            <div class="phase-sub">fs.readFile callback is executing right now</div>
+            <div class="phase-sub" style="margin-top:.3rem; color:var(--poll)">
+              You schedule: setTimeout(0) + setImmediate()
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-item ph-check">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content">
+            <div class="phase-name">check <span class="active-badge badge-check">✅ runs next</span></div>
+            <div class="phase-sub">setImmediate fires here — immediately after poll</div>
+          </div>
+        </div>
+
+        <div class="phase-item ph-close">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content"><div class="phase-name">close callbacks</div></div>
+        </div>
+
+        <div class="phase-item ph-timers">
+          <div class="phase-connector"><div class="phase-line"></div><div class="phase-dot"></div><div class="phase-line"></div></div>
+          <div class="phase-content">
+            <div class="phase-name">↺ timers (next iteration) <span class="active-badge badge-timers">runs 2nd</span></div>
+            <div class="phase-sub">setTimeout(0) finally gets picked up here</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EXPLANATION -->
+    <div class="loop-col">
+      <div class="loop-title" style="color:#e2e8f0">Why setImmediate always wins here</div>
+
+      <div class="flow">
+        <div class="flow-row">
+          <div class="flow-box" style="border-color:var(--poll); color:var(--poll); background:rgba(59,200,138,.08)">
+            poll phase running
+          </div>
+          <div class="flow-label">← you're inside fs.readFile callback</div>
+        </div>
+        <div class="flow-arrow">↓ schedules both, then poll phase ends</div>
+        <div class="flow-row">
+          <div class="flow-box" style="border-color:var(--check); color:var(--check); background:rgba(245,197,66,.08)">
+            check phase
+          </div>
+          <div class="flow-label">← setImmediate() fires ✅</div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-row">
+          <div class="flow-box" style="border-color:var(--muted); color:var(--muted)">close callbacks</div>
+        </div>
+        <div class="flow-arrow">↓ loop wraps back</div>
+        <div class="flow-row">
+          <div class="flow-box" style="border-color:var(--timers); color:var(--timers); background:rgba(240,136,62,.08)">
+            timers phase
+          </div>
+          <div class="flow-label">← setTimeout(0) fires here ✅</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+<span class="c-fn">fs</span>.readFile(<span class="c-str">'file'</span>, () => {
+  <span class="c-comment">// You are inside poll phase right now</span>
+  <span class="c-fn">setTimeout</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'<span class="c-st">timeout</span>'</span>), <span class="c-num">0</span>);
+  <span class="c-fn">setImmediate</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'<span class="c-im">immediate</span>'</span>));
+});
+
+<span class="c-comment">// Output: ALWAYS</span>
+<span class="c-comment">// → immediate  (check phase, this iteration)</span>
+<span class="c-comment">// → timeout    (timers phase, next iteration)</span>
+      </div>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>timers phase already passed this iteration</strong>
+          When you're inside a poll callback, the loop has already visited timers this cycle. setTimeout(0) must wait for the loop to complete and wrap back. check phase hasn't happened yet — so setImmediate goes first. Every. Single. Time.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════ -->
+<!-- SCENARIO 2: OUTSIDE I/O -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Scenario 02</div>
+  <div class="section-title">Outside I/O — Non-Deterministic</div>
+
+  <div class="scenario-grid">
+
+    <div class="scenario">
+      <div class="scenario-header" style="background:rgba(240,136,62,.08); color:var(--timers)">
+        ⏱ Case A — Slow startup / timer already ready
+      </div>
+      <div class="scenario-body">
+        <p style="font-size:.82rem; color:var(--muted)">If Node took long enough to initialise, the 0ms setTimeout threshold has already passed by the time the loop starts.</p>
+        <div class="flow" style="margin-top:.8rem">
+          <div class="flow-row">
+            <div class="flow-box" style="border-color:var(--timers); color:var(--timers); background:rgba(240,136,62,.08)">timers</div>
+            <div class="flow-label">threshold passed → setTimeout runs ✅</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row">
+            <div class="flow-box" style="border-color:var(--check); color:var(--check); background:rgba(245,197,66,.08)">check</div>
+            <div class="flow-label">setImmediate runs</div>
+          </div>
+        </div>
+        <div class="result-badge" style="background:rgba(240,136,62,.1); color:var(--timers)">
+          Output: timeout → immediate
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-header" style="background:rgba(245,197,66,.08); color:var(--check)">
+        ⚡ Case B — Fast startup / timer not ready yet
+      </div>
+      <div class="scenario-body">
+        <p style="font-size:.82rem; color:var(--muted)">If Node initialised very quickly, the 0ms threshold hasn't been reached when timers phase runs. Loop moves past it.</p>
+        <div class="flow" style="margin-top:.8rem">
+          <div class="flow-row">
+            <div class="flow-box" style="border-color:var(--muted); color:var(--muted)">timers</div>
+            <div class="flow-label">threshold not met → skip</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-row">
+            <div class="flow-box" style="border-color:var(--check); color:var(--check); background:rgba(245,197,66,.08)">check</div>
+            <div class="flow-label">setImmediate runs ✅</div>
+          </div>
+          <div class="flow-arrow">↓ wrap back</div>
+          <div class="flow-row">
+            <div class="flow-box" style="border-color:var(--timers); color:var(--timers); background:rgba(240,136,62,.08)">timers</div>
+            <div class="flow-label">now ready → setTimeout runs</div>
+          </div>
+        </div>
+        <div class="result-badge" style="background:rgba(245,197,66,.1); color:var(--check)">
+          Output: immediate → timeout
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="code-block" style="margin-top:1.2rem">
+<span class="c-comment">// At top level — NOT inside any I/O callback</span>
+<span class="c-fn">setTimeout</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'<span class="c-st">timeout</span>'</span>), <span class="c-num">0</span>);
+<span class="c-fn">setImmediate</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'<span class="c-im">immediate</span>'</span>));
+
+<span class="c-comment">// Output: NON-DETERMINISTIC</span>
+<span class="c-comment">// Sometimes:  timeout → immediate</span>
+<span class="c-comment">// Sometimes:  immediate → timeout</span>
+<span class="c-comment">// Depends on OS scheduling + process startup time</span>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <strong>setTimeout(fn, 0) is a threshold — not a guarantee</strong>
+      The spec says setTimeout fires "after at least N ms" — not "exactly at N ms". At the top level, whether 0ms has elapsed by the time the timers phase runs is a race against process startup time. You cannot rely on the order here.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════ -->
+<!-- QUICK REFERENCE TABLE -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Quick Reference</div>
+  <div class="section-title">The Rules — Memorise These</div>
+
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Context</th>
+          <th>setImmediate()</th>
+          <th>setTimeout(0)</th>
+          <th>Winner</th>
+          <th>Why</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Inside I/O callback</td>
+          <td style="color:var(--check)">check phase — this iteration</td>
+          <td style="color:var(--timers)">timers phase — next iteration</td>
+          <td style="color:var(--check)">✅ setImmediate — always</td>
+          <td>Loop position: poll → check comes before ↺ timers</td>
+        </tr>
+        <tr>
+          <td>Top-level / outside I/O</td>
+          <td style="color:var(--check)">check phase</td>
+          <td style="color:var(--timers)">timers phase</td>
+          <td style="color:var(--muted)">🎲 Non-deterministic</td>
+          <td>Both at loop start — depends on startup elapsed time</td>
+        </tr>
+        <tr>
+          <td>Inside setTimeout callback</td>
+          <td style="color:var(--check)">check phase — this iteration</td>
+          <td style="color:var(--timers)">timers phase — next iteration</td>
+          <td style="color:var(--check)">✅ setImmediate — always</td>
+          <td>Same as I/O — timers phase already ran this cycle</td>
+        </tr>
+        <tr>
+          <td>Inside setImmediate callback</td>
+          <td style="color:var(--check)">check phase — next iteration</td>
+          <td style="color:var(--timers)">timers phase — next iteration</td>
+          <td style="color:var(--muted)">🎲 Non-deterministic</td>
+          <td>Both deferred — same race as top-level</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-tip" style="margin-top:1.2rem">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-body">
+      <strong>Interview one-liner answer</strong>
+      "Inside an I/O callback, setImmediate always runs before setTimeout(0) because we're already past the timers phase — check comes next, and timers only fires on the next loop iteration. Outside I/O, the order is non-deterministic because it depends on whether Node's startup elapsed time has crossed the 0ms threshold."
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Node.js Event Loop · setImmediate vs setTimeout deep dive<br>
+  Source: Node.js Official Docs · Ali's interview prep notes
+</div>
+
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 — PostgreSQL + Prisma Session Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2333;
+    --border:    #30363d;
+    --accent:    #e05c2a;
+    --accent2:   #58a6ff;
+    --accent3:   #3fb950;
+    --warn:      #d29922;
+    --error:     #f85149;
+    --purple:    #bc8cff;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --code-bg:   #010409;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+
+  .page { max-width: 980px; margin: 0 auto; }
+
+  /* HERO */
+  .hero {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    margin-bottom: 40px;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(88,166,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(63,185,80,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero h1 span { color: var(--accent2); }
+  .hero-sub { color: var(--muted); font-size: 14px; max-width: 580px; }
+  .hero-meta { display: flex; gap: 28px; margin-top: 24px; flex-wrap: wrap; }
+  .hero-stat { display: flex; flex-direction: column; gap: 2px; }
+  .hero-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent3); }
+  .hero-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title { font-weight: 600; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .card p { color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+  /* GRIDS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media(max-width: 680px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* CODE */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
+  .kw  { color: #ff7b72; }
+  .dec { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .fn  { color: #79c0ff; }
+  .cm  { color: #8b949e; font-style: italic; }
+  .num { color: #f2cc60; }
+  .type{ color: #ffa657; }
+  .op  { color: #ff7b72; }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-green  { background: rgba(63,185,80,0.15);   color: var(--accent3); }
+  .badge-orange { background: rgba(224,92,42,0.15);   color: var(--accent);  }
+  .badge-blue   { background: rgba(88,166,255,0.15);  color: var(--accent2); }
+  .badge-yellow { background: rgba(210,153,34,0.15);  color: var(--warn);    }
+  .badge-red    { background: rgba(248,81,73,0.15);   color: var(--error);   }
+  .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple);  }
+
+  /* GOTCHA */
+  .gotcha {
+    border-left: 3px solid var(--error);
+    background: rgba(248,81,73,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .gotcha-title { font-weight: 600; font-size: 13px; color: var(--error); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .gotcha p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .gotcha code { background: rgba(248,81,73,0.1); }
+
+  /* INSIGHT */
+  .insight {
+    border-left: 3px solid var(--accent3);
+    background: rgba(63,185,80,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .insight-title { font-weight: 600; font-size: 13px; color: var(--accent3); margin-bottom: 6px; }
+  .insight p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  /* WARNING */
+  .warning {
+    border-left: 3px solid var(--warn);
+    background: rgba(210,153,34,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .warning-title { font-weight: 600; font-size: 13px; color: var(--warn); margin-bottom: 6px; }
+  .warning p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+  th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* FLOW */
+  .flow { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+  .flow-step { display: flex; align-items: flex-start; gap: 14px; }
+  .flow-line { display: flex; flex-direction: column; align-items: center; min-width: 32px; }
+  .flow-circle {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    color: var(--accent2); flex-shrink: 0;
+  }
+  .flow-connector { width: 1px; height: 24px; background: var(--border); }
+  .flow-content { padding: 4px 0 24px; flex: 1; }
+  .flow-content strong { font-size: 13px; display: block; margin-bottom: 3px; }
+  .flow-content span { font-size: 12px; color: var(--muted); }
+
+  /* PROGRESS */
+  .progress-row { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .progress-label { font-size: 13px; min-width: 220px; }
+  .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; background: var(--accent3); }
+  .progress-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); min-width: 36px; text-align: right; }
+
+  /* SQL DIFF */
+  .sql-add { color: var(--accent3); }
+  .sql-key { color: var(--purple); }
+  .sql-val { color: var(--warn); }
+
+  mb32 { display: block; margin-bottom: 32px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Inventeer Prep · Day 3</div>
+    <h1>PostgreSQL + <span>Prisma</span><br>Session Summary</h1>
+    <p class="hero-sub">Replaced all mock data with a real PostgreSQL database running in Docker. Covered schema design, migrations, relations, type mapping, and module scoping.</p>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-val">1</span><span class="hero-stat-label">Real DB wired</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">2</span><span class="hero-stat-label">Tables migrated</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">6</span><span class="hero-stat-label">Bugs/gotchas</span></div>
+      <div class="hero-stat"><span class="hero-stat-val">✓</span><span class="hero-stat-label">GraphiQL working</span></div>
+    </div>
+  </div>
+
+  <!-- JOURNEY MAP -->
+  <div class="section-title">What We Built — Journey</div>
+  <div class="flow" style="margin-bottom:32px;">
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-circle">1</div><div class="flow-connector"></div></div>
+      <div class="flow-content"><strong>Docker PostgreSQL</strong><span><code>docker run --name pgdev -e POSTGRES_DB=orderdb -p 5432:5432 -d postgres</code> — real DB in one command</span></div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-circle">2</div><div class="flow-connector"></div></div>
+      <div class="flow-content"><strong>Prisma Init + Schema</strong><span>Defined <code>Order</code> + <code>OrderItem</code> models with enum, relations, Decimal precision</span></div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-circle">3</div><div class="flow-connector"></div></div>
+      <div class="flow-content"><strong>Migration</strong><span><code>prisma migrate dev --name init</code> → SQL generated + applied to DB automatically</span></div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-circle">4</div><div class="flow-connector"></div></div>
+      <div class="flow-content"><strong>PrismaService + PrismaModule</strong><span>Created injectable service, wrapped in exportable module for clean DI scoping</span></div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-circle">5</div><div class="flow-connector"></div></div>
+      <div class="flow-content"><strong>OrdersService — real queries</strong><span>Replaced mock arrays with <code>findMany({ include })</code> and nested <code>create</code></span></div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-line"><div class="flow-circle" style="color:var(--accent3); border-color:var(--accent3);">✓</div></div>
+      <div class="flow-content"><strong>GraphiQL — Real Data</strong><span>Both <code>getOrders</code> query and <code>createOrder</code> mutation hitting PostgreSQL</span></div>
+    </div>
+  </div>
+
+  <!-- SCHEMA -->
+  <div class="section-title">Prisma Schema — Final</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">📐 schema.prisma</div>
+    <pre><span class="kw">generator</span> client {
+  provider     = <span class="str">"prisma-client"</span>
+  output       = <span class="str">"../src/generated/prisma"</span>
+  moduleFormat = <span class="str">"cjs"</span>   <span class="cm">← required for NestJS CommonJS compat</span>
+}
+
+<span class="kw">datasource</span> db {
+  provider = <span class="str">"postgresql"</span>
+  url      = <span class="fn">env</span>(<span class="str">"DATABASE_URL"</span>)
+}
+
+<span class="kw">enum</span> <span class="type">OrderStatus</span> {
+  PENDING
+  SHIPPED
+  BOOKED
+}
+
+<span class="kw">model</span> <span class="type">Order</span> {
+  id         <span class="type">String</span>      <span class="dec">@id</span> <span class="dec">@default</span>(cuid())
+  status     <span class="type">OrderStatus</span> <span class="dec">@default</span>(PENDING)
+  total      <span class="type">Decimal</span>     <span class="dec">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  createdAt  <span class="type">DateTime</span>    <span class="dec">@default</span>(now())
+  orderItems <span class="type">OrderItem</span>[]
+}
+
+<span class="kw">model</span> <span class="type">OrderItem</span> {
+  id          <span class="type">String</span>  <span class="dec">@id</span> <span class="dec">@default</span>(cuid())
+  productName <span class="type">String</span>  <span class="dec">@unique</span>
+  price       <span class="type">Decimal</span> <span class="dec">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  quantity    <span class="type">Int</span>
+  orderId     <span class="type">String</span>
+  order       <span class="type">Order</span>   <span class="dec">@relation</span>(fields: [orderId], references: [id])
+}</pre>
+  </div>
+
+  <!-- WHAT PRISMA GENERATED -->
+  <div class="section-title">What Prisma Generated — SQL Under the Hood</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">🗄️ migration.sql — Know What Prisma Does for You</div>
+    <table>
+      <tr><th>Your Prisma Schema</th><th>SQL Generated</th><th>Why It Matters</th></tr>
+      <tr><td><code>enum OrderStatus</code></td><td><code class="sql-add">CREATE TYPE "OrderStatus" AS ENUM</code></td><td>Native Postgres enum — DB enforces valid values</td></tr>
+      <tr><td><code>@id @default(cuid())</code></td><td><code>CONSTRAINT "Order_pkey" PRIMARY KEY</code></td><td>Unique, URL-safe IDs without autoincrement</td></tr>
+      <tr><td><code>@db.Decimal(10,2)</code></td><td><code>DECIMAL(10,2)</code></td><td>Exact precision for money — never use Float for prices</td></tr>
+      <tr><td><code>@default(now())</code></td><td><code>DEFAULT CURRENT_TIMESTAMP</code></td><td>DB sets timestamp — not your app code</td></tr>
+      <tr><td><code>@unique</code></td><td><code>CREATE UNIQUE INDEX</code></td><td>Auto-indexed — fast lookups + constraint</td></tr>
+      <tr><td><code>@relation(...)</code></td><td><code>ADD CONSTRAINT ... FOREIGN KEY ... ON DELETE RESTRICT</code></td><td>Real FK — can't delete Order with existing items</td></tr>
+    </table>
+    <div class="warning" style="margin-top:12px; margin-bottom:0;">
+      <div class="warning-title">⚠️ ON DELETE RESTRICT — Interview Point</div>
+      <p>Prisma's default. Trying to delete an Order that has OrderItems → Postgres throws error. In real apps choose: <code>CASCADE</code> (delete items too) or <code>SetNull</code> (orphan items). Always a deliberate choice.</p>
+    </div>
+  </div>
+
+  <!-- MODULE SCOPING -->
+  <div class="section-title">Module Scoping — The Key Architecture Decision</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">🏗️ Why PrismaModule Not Just AppModule</div>
+    <div class="grid-2" style="margin-bottom:0; gap:20px;">
+      <div>
+        <div style="font-size:11px; color:var(--error); font-family:'JetBrains Mono',monospace; margin-bottom:8px;">❌ Flat approach (docs example)</div>
+        <pre><span class="cm">// Works only when everything</span>
+<span class="cm">// is in AppModule — not scalable</span>
+<span class="dec">@Module</span>({
+  providers: [
+    PrismaService,
+    UserService,   <span class="cm">// all flat</span>
+    PostService,
+  ]
+})</pre>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--accent3); font-family:'JetBrains Mono',monospace; margin-bottom:8px;">✅ Feature module approach (our setup)</div>
+        <pre><span class="cm">// PrismaModule exports PrismaService</span>
+<span class="dec">@Module</span>({
+  providers: [PrismaService],
+  exports: [PrismaService],  <span class="cm">← key</span>
+})
+<span class="kw">export class</span> <span class="type">PrismaModule</span> {}
+
+<span class="cm">// OrdersModule imports PrismaModule</span>
+<span class="dec">@Module</span>({
+  imports: [PrismaModule],  <span class="cm">← gets access</span>
+  providers: [OrdersService, OrdersResolver],
+})</pre>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding:12px; background:var(--surface2); border-radius:8px; font-size:13px; color:var(--muted);">
+      <strong style="color:var(--text);">The rule:</strong> NestJS modules are <strong style="color:var(--text);">encapsulated by default</strong>. A service declared in AppModule is NOT automatically available in OrdersModule. You must explicitly <code>export</code> from the providing module and <code>import</code> in the consuming module.
+    </div>
+  </div>
+
+  <!-- PRISMA QUERIES -->
+  <div class="section-title">Prisma Query Patterns Used</div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">🔍 findMany with include — Replaces Field Resolver</div>
+    <pre><span class="cm">// Gets all orders WITH their items in one DB query</span>
+<span class="kw">const</span> orders = <span class="kw">await</span> <span class="kw">this</span>.prismaService.order.<span class="fn">findMany</span>({
+  include: {
+    orderItems: <span class="kw">true</span>,   <span class="cm">← JOIN under the hood</span>
+  },
+});</pre>
+    <p style="margin-top:10px; font-size:13px; color:var(--muted);">This is why we removed <code>@ResolveField</code> — items already come back on the order object. No need for a separate lookup.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">✏️ Nested create — Order + Items in One Transaction</div>
+    <pre><span class="kw">const</span> order = <span class="kw">await</span> <span class="kw">this</span>.prismaService.order.<span class="fn">create</span>({
+  data: {
+    status: input.status <span class="kw">as</span> <span class="type">OrderStatus</span>,
+    total,
+    orderItems: {
+      create: newItems,   <span class="cm">← creates child records in same TX</span>
+    },
+  },
+  include: { orderItems: <span class="kw">true</span> },  <span class="cm">← return them too</span>
+});</pre>
+    <p style="margin-top:10px; font-size:13px; color:var(--muted);">Prisma wraps nested writes in a transaction automatically. If item creation fails, the order is rolled back. Production-safe by default.</p>
+  </div>
+
+  <!-- TYPE MAPPING -->
+  <div class="section-title">Prisma → GraphQL Type Mapping Problem</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">🔄 The Type Mismatch Problem + Solution</div>
+    <table>
+      <tr><th>Prisma Returns</th><th>GraphQL Entity Expects</th><th>Fix</th></tr>
+      <tr><td><code>Decimal</code> (Prisma type)</td><td><code>number</code></td><td><code>Number(order.total)</code></td></tr>
+      <tr><td><code>Date</code> object</td><td><code>string</code></td><td><code>String(order.createdAt)</code></td></tr>
+      <tr><td><code>OrderStatus</code> enum string</td><td><code>string</code> (old)</td><td>Use <code>registerEnumType</code> + type as <code>OrderStatus</code></td></tr>
+    </table>
+    <div style="margin-top:12px;">
+      <div style="font-size:11px; color:var(--accent3); font-family:'JetBrains Mono',monospace; margin-bottom:8px;">✅ Reusable converter pattern you created</div>
+      <pre><span class="cm">// Use Prisma.OrderGetPayload to get correct type with relations</span>
+<span class="kw">type</span> <span class="type">OrderWithItems</span> = Prisma.<span class="fn">OrderGetPayload</span>&lt;{
+  include: { orderItems: <span class="kw">true</span> };
+}&gt;;
+
+<span class="fn">convertTypesFromPrismaToGraphql</span>(orders: <span class="type">OrderWithItems</span>[]): <span class="type">GraphQLOrder</span>[] {
+  <span class="kw">return</span> orders.<span class="fn">map</span>(order => ({
+    ...order,
+    total: <span class="fn">Number</span>(order.total),
+    createdAt: <span class="fn">String</span>(order.createdAt),
+    orderItems: order.orderItems.<span class="fn">map</span>(item => ({
+      ...item,
+      price: <span class="fn">Number</span>(item.price),
+    })),
+  }));
+}</pre>
+    </div>
+  </div>
+
+  <!-- BUGS & MISTAKES -->
+  <div class="section-title">Every Bug & Mistake — With Explanations</div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Mistake 1 — Missing <code>url</code> in datasource block</div>
+    <p>Initial <code>schema.prisma</code> had <code>datasource db { provider = "postgresql" }</code> with no <code>url</code>. Prisma needs <code>url = env("DATABASE_URL")</code> to know where to connect. Without it, migration fails silently or uses wrong DB.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Mistake 2 — <code>INT</code> vs <code>Int</code> in Prisma schema</div>
+    <p>Used <code>quantity INT</code> and <code>orderId INT</code> — Prisma schema is case-sensitive. The correct type is <code>Int</code> (capital I, rest lowercase). <code>INT</code> causes a schema parse error.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Mistake 3 — <code>orderId</code> type mismatch with <code>id</code></div>
+    <p>Defined <code>orderId</code> as <code>Int</code> but <code>Order.id</code> is <code>String</code>. Foreign key type must exactly match the referenced field type. Changed to <code>orderId String</code>.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Mistake 4 — Prisma v7 ESM vs NestJS CommonJS conflict</div>
+    <p>Prisma v7 ships as ESM by default. NestJS uses CommonJS. Without <code>moduleFormat = "cjs"</code> in the generator config, the generated client fails to import in NestJS. Fix: add <code>moduleFormat = "cjs"</code> to <code>generator client</code> block.</p>
+  </div>
+
+  <div class="gotcha">
+    <div class="gotcha-title">🐛 Mistake 5 — Using base Prisma <code>Order</code> type instead of <code>OrderGetPayload</code></div>
+    <p>Imported <code>Order</code> from Prisma client and tried to access <code>order.orderItems</code>. The base <code>Order</code> type has no relations — it's just the table columns. Must use <code>Prisma.OrderGetPayload&lt;{ include: { orderItems: true } }&gt;</code> to get a type that includes the relation.</p>
+  </div>
+
+  <div class="gotcha" style="margin-bottom:32px;">
+    <div class="gotcha-title">🐛 Mistake 6 — <code>status</code> typed as <code>string</code> instead of enum</div>
+    <p>Initially <code>status</code> on <code>Order</code> entity was typed as <code>string</code>. GraphQL accepted any string — no validation. Fixed by using <code>registerEnumType(OrderStatus, { name: 'OrderStatus' })</code> and typing the field as <code>OrderStatus</code>. Now GraphQL rejects invalid values at the schema level.</p>
+  </div>
+
+  <!-- KEY INSIGHTS -->
+  <div class="section-title">Key Insights & Interview Points</div>
+
+  <div class="insight">
+    <div class="insight-title">💡 <code>include</code> replaces field resolvers for simple relations</div>
+    <p>When all data comes from Prisma with <code>include</code>, a <code>@ResolveField</code> is redundant — it adds an extra DB call for data already fetched. Use field resolvers only when the related data comes from a different service or data source.</p>
+  </div>
+
+  <div class="insight">
+    <div class="insight-title">💡 Prisma nested writes are transactional</div>
+    <p>When you use <code>orderItems: { create: [...] }</code> inside <code>order.create()</code>, Prisma wraps everything in a single DB transaction. If any item fails to create, the entire order is rolled back. You get ACID compliance for free.</p>
+  </div>
+
+  <div class="insight">
+    <div class="insight-title">💡 Never use Float for money in a DB</div>
+    <p>Floating point arithmetic is imprecise — <code>0.1 + 0.2 = 0.30000000000000004</code>. Always use <code>Decimal</code> (Prisma) or <code>NUMERIC</code> (SQL) for prices, totals, or any financial value. <code>@db.Decimal(10,2)</code> = up to 10 digits, 2 decimal places.</p>
+  </div>
+
+  <div class="insight">
+    <div class="insight-title">💡 <code>Prisma.ModelGetPayload</code> is the correct type for relations</div>
+    <p>Base Prisma model types (e.g. <code>Order</code>) only include scalar fields. To get TypeScript types that include relations, use <code>Prisma.OrderGetPayload&lt;{ include: { orderItems: true } }&gt;</code>. This is Prisma's way of typing dynamic query results.</p>
+  </div>
+
+  <div class="insight" style="margin-bottom:32px;">
+    <div class="insight-title">💡 PrismaModule with exports = production best practice</div>
+    <p>Rather than registering PrismaService in every feature module or flattening everything into AppModule, create a dedicated <code>PrismaModule</code> that exports <code>PrismaService</code>. Any feature module that needs DB access simply imports <code>PrismaModule</code>. Scales cleanly as the app grows.</p>
+  </div>
+
+  <!-- FULL REQUEST FLOW -->
+  <div class="section-title">Complete Request Flow — Day 3</div>
+  <div class="card" style="margin-bottom:32px;">
+    <div class="card-title">⚡ createOrder Mutation — End to End</div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">1</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>GraphiQL sends mutation</strong><span>Input validated by <code>ValidationPipe</code> — empty strings rejected before resolver</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">2</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>AuthGuard checks header</strong><span>Reads <code>Authorization</code> header — throws <code>UnauthorizedException</code> if missing</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">3</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>OrdersResolver.createOrder()</strong><span>Extracts <code>input</code> via <code>@Args</code>, calls service</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">4</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>OrdersService.create()</strong><span>Maps items, calculates total, calls Prisma</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">5</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>PrismaService → PostgreSQL (Docker)</strong><span>Nested write in single transaction — Order + OrderItems created atomically</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle">6</div><div class="flow-connector"></div></div>
+        <div class="flow-content"><strong>convertTypesFromPrismaToGraphql()</strong><span><code>Decimal→number</code>, <code>Date→string</code>, enum preserved</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-circle" style="color:var(--accent3); border-color:var(--accent3);">✓</div></div>
+        <div class="flow-content"><strong>GraphQL response</strong><span>Typed, nested, real data from PostgreSQL</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY 3 vs MOCK -->
+  <div class="section-title">Before vs After — Mock to Real DB</div>
+  <div class="card" style="margin-bottom:32px;">
+    <table>
+      <tr><th>Day 2 (Mock)</th><th>Day 3 (Real DB)</th></tr>
+      <tr><td><code>mockOrders: Order[]</code> array</td><td><code>prisma.order.findMany({ include })</code></td></tr>
+      <tr><td><code>mockOrderItems</code> + <code>findItemsByIds()</code></td><td>Removed — <code>include: { orderItems: true }</code> handles it</td></tr>
+      <tr><td><code>Math.random().toString()</code> for IDs</td><td><code>cuid()</code> generated by Prisma/Postgres</td></tr>
+      <tr><td><code>@ResolveField</code> to hydrate items</td><td>Removed — items already in Prisma response</td></tr>
+      <tr><td><code>status: string</code></td><td><code>status: OrderStatus</code> enum — schema validated</td></tr>
+      <tr><td>No transactions</td><td>Nested writes are atomic by default</td></tr>
+    </table>
+  </div>
+
+  <!-- COMPLETION -->
+  <div class="section-title">Day 3 Completion</div>
+  <div class="card" style="margin-bottom:40px;">
+    <div class="progress-row"><span class="progress-label">Docker PostgreSQL running</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">Prisma schema + migration</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">PrismaService + PrismaModule</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">Module scoping with exports</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">findMany with include</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">Nested create (transactional)</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">Decimal/Date type conversion</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+    <div class="progress-row"><span class="progress-label">OrderStatus enum in GraphQL</span><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div><span class="progress-pct">✓</span></div>
+  </div>
+
+  <!-- NEXT -->
+  <div class="section-title">Remaining Days — Deadline Jun 17</div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">⚛️ Day 4 — React Patterns</div>
+      <p>State, hooks, data fetching, component design. useQuery, error boundaries, performance patterns.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🔌 Day 5 — Axios + GCS</div>
+      <p>HTTP client patterns, retries, error handling. Google Cloud Storage overview.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 Day 6 — Mock Test</div>
+      <p>Simulate TestGorilla format. Weak spot review. Time-boxed problem solving.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

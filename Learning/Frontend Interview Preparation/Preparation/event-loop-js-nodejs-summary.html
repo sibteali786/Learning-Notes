@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Event Loop — Browser vs Node.js</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #151820;
+    --border:    #1e2330;
+    --text:      #c9d1e0;
+    --muted:     #5a6270;
+    --accent:    #7c6af7;      /* purple — microtasks */
+    --task:      #f0883e;      /* orange — macrotasks */
+    --render:    #3bc88a;      /* green  — render steps */
+    --nexttick:  #e05c7b;      /* pink   — process.nextTick */
+    --node:      #5bc0f8;      /* blue   — node-only */
+    --warn:      #f5c542;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    max-width: 860px;
+    margin: 0 auto 3rem;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--node) 60%, var(--render) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .source-pills { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1.2rem; }
+  .pill {
+    font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    padding: .25rem .75rem; border-radius: 99px; border: 1px solid;
+  }
+  .pill-jake  { color: var(--accent); border-color: var(--accent); }
+  .pill-node  { color: var(--node);   border-color: var(--node);   }
+  .pill-both  { color: var(--render); border-color: var(--render); }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center;
+    max-width: 860px; margin: 0 auto 3rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: .45rem;
+    font-size: .78rem; color: var(--muted); font-weight: 600;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── SECTION ── */
+  .section {
+    max-width: 960px; margin: 0 auto 3.5rem;
+  }
+  .section-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: .5rem;
+  }
+  .section-title {
+    font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem;
+    color: #e2e8f0;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-size: .85rem; font-weight: 700; margin-bottom: .6rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .tag {
+    font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: .15rem .55rem; border-radius: 4px;
+  }
+  .tag-jake   { background: rgba(124,106,247,.18); color: var(--accent); }
+  .tag-node   { background: rgba(91,192,248,.18);  color: var(--node);   }
+  .tag-both   { background: rgba(59,200,138,.18);  color: var(--render); }
+
+  /* ── COMPARISON GRID ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+
+  .compare-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+  }
+  .compare-col-header {
+    font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border);
+  }
+  .browser-header { color: var(--accent); }
+  .node-header    { color: var(--node);   }
+
+  /* ── QUEUE VISUALISER ── */
+  .queue-vis {
+    display: flex; flex-direction: column; gap: .5rem; margin: 1rem 0;
+  }
+  .queue-row {
+    display: flex; align-items: center; gap: .75rem;
+  }
+  .queue-label {
+    font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    min-width: 130px; color: var(--muted);
+  }
+  .queue-bar {
+    height: 32px; border-radius: 6px; display: flex; align-items: center;
+    padding: 0 .9rem; font-size: .75rem; font-weight: 700; color: #fff;
+    white-space: nowrap;
+  }
+  .queue-arrow { color: var(--muted); font-size: 1rem; margin: 0 .3rem; }
+  .priority-badge {
+    font-size: .65rem; font-weight: 800; padding: .1rem .45rem; border-radius: 4px;
+    margin-left: .5rem;
+  }
+
+  /* ── PHASE DIAGRAM (Node) ── */
+  .phase-diagram {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    margin: 1.5rem 0;
+  }
+  .phase-box {
+    width: 100%; max-width: 480px;
+    padding: .7rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid;
+    text-align: center;
+    font-size: .85rem; font-weight: 600;
+    position: relative;
+  }
+  .phase-arrow {
+    color: var(--muted); font-size: 1.2rem; line-height: 1;
+    margin: 2px 0;
+  }
+  .phase-note {
+    font-size: .7rem; font-weight: 400; color: var(--muted);
+    margin-top: .2rem;
+  }
+  .phase-timers    { background: rgba(240,136,62,.1);  border-color: var(--task);    color: var(--task);    }
+  .phase-pending   { background: rgba(91,192,248,.08); border-color: var(--node);    color: var(--node);    }
+  .phase-idle      { background: rgba(90,98,112,.08);  border-color: var(--muted);   color: var(--muted);   }
+  .phase-poll      { background: rgba(59,200,138,.1);  border-color: var(--render);  color: var(--render);  }
+  .phase-check     { background: rgba(245,197,66,.1);  border-color: var(--warn);    color: var(--warn);    }
+  .phase-close     { background: rgba(224,92,123,.1);  border-color: var(--nexttick);color: var(--nexttick);}
+  .phase-nexttick  { background: rgba(224,92,123,.15); border-color: var(--nexttick);color: var(--nexttick); font-size:.8rem;}
+
+  /* ── BROWSER LOOP VISUAL ── */
+  .browser-loop {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin: 1.5rem 0;
+  }
+  .browser-loop-center {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding-top: 1rem;
+    color: var(--muted); font-size: .75rem;
+  }
+  .loop-circle {
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 2px dashed var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; font-weight: 700; color: var(--muted); text-align: center;
+  }
+  .browser-col { display: flex; flex-direction: column; gap: .5rem; }
+  .browser-step {
+    padding: .55rem .85rem; border-radius: 8px; font-size: .78rem; font-weight: 600;
+    border: 1px solid;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #0a0c10; border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem 1.2rem; font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem; line-height: 1.7; overflow-x: auto; margin: .8rem 0;
+  }
+  .c-comment { color: var(--muted); }
+  .c-keyword  { color: var(--accent); }
+  .c-fn       { color: var(--node); }
+  .c-str      { color: var(--render); }
+  .c-num      { color: var(--warn); }
+  .c-out      { color: var(--task); }
+
+  /* ── GOTCHA / WARNING CALLOUT ── */
+  .callout {
+    border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0;
+    font-size: .85rem; display: flex; gap: .75rem; align-items: flex-start;
+  }
+  .callout-warn  { background: rgba(245,197,66,.08);  border: 1px solid rgba(245,197,66,.25); }
+  .callout-info  { background: rgba(124,106,247,.08); border: 1px solid rgba(124,106,247,.25); }
+  .callout-tip   { background: rgba(59,200,138,.08);  border: 1px solid rgba(59,200,138,.25); }
+  .callout-icon  { font-size: 1.2rem; flex-shrink: 0; }
+  .callout-body strong { display: block; margin-bottom: .25rem; color: #e2e8f0; }
+
+  /* ── QUIZ BOX ── */
+  .quiz {
+    background: rgba(124,106,247,.06); border: 1px solid rgba(124,106,247,.3);
+    border-radius: 10px; padding: 1.2rem 1.4rem; margin-top: 1.5rem;
+  }
+  .quiz-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: .5rem;
+  }
+  .quiz pre {
+    font-family: 'JetBrains Mono', monospace; font-size: .78rem;
+    background: #0a0c10; border-radius: 6px; padding: .8rem 1rem;
+    margin: .6rem 0; color: var(--text); overflow-x: auto;
+  }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { padding: .65rem .9rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--muted); font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-weight: 600; color: #e2e8f0; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+  /* ── FOOTER ── */
+  .footer { text-align: center; color: var(--muted); font-size: .75rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>The Event Loop</h1>
+  <p>Browser (Jake Archibald — "In the Loop") vs Node.js (Official Docs) — a comparative visual reference.</p>
+  <div class="source-pills">
+    <span class="pill pill-jake">Jake Archibald · JSConf Asia</span>
+    <span class="pill pill-node">Node.js Official Docs</span>
+    <span class="pill pill-both">Comparative Analysis</span>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:var(--task)"></div>Macrotask / setTimeout</div>
+  <div class="legend-item"><div class="dot" style="background:var(--accent)"></div>Microtask / Promise</div>
+  <div class="legend-item"><div class="dot" style="background:var(--render)"></div>Render Steps / Poll</div>
+  <div class="legend-item"><div class="dot" style="background:var(--nexttick)"></div>process.nextTick (Node only)</div>
+  <div class="legend-item"><div class="dot" style="background:var(--node)"></div>Node.js exclusive</div>
+  <div class="legend-item"><div class="dot" style="background:var(--warn)"></div>setImmediate (Node only)</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 1: WHAT IS THE EVENT LOOP -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 01</div>
+  <div class="section-title">What is the Event Loop?</div>
+
+  <div class="compare-grid">
+    <div class="compare-col">
+      <div class="compare-col-header browser-header">🌐 Browser (Jake Archibald)</div>
+      <p>JavaScript runs on the <strong>main thread</strong> — the same thread as rendering, DOM updates, and user interaction. This gives a deterministic, race-condition-free order but means a long-running script blocks <em>everything</em>: animations freeze, clicks go unresponded.</p>
+      <br>
+      <p>The browser spawns separate threads for networking, crypto, input monitoring etc., but those threads must hand results <em>back</em> to the main thread. The <strong>event loop</strong> orchestrates that hand-off.</p>
+    </div>
+    <div class="compare-col">
+      <div class="compare-col-header node-header">🟢 Node.js</div>
+      <p>Node uses a <strong>single JS thread</strong> too, but instead of a browser's main thread it communicates directly with the OS kernel. Most modern kernels are multi-threaded, so Node offloads I/O to them and gets notified via callbacks added to the <strong>poll queue</strong>.</p>
+      <br>
+      <p>Node uses <strong>libuv</strong> — a C library — to implement the event loop and all async behaviours. This gives it 6 named phases, each with its own queue.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-tip" style="margin-top:1rem">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body">
+      <strong>The shared core principle</strong>
+      Both environments are single-threaded JS runtimes that use an event loop to handle async work without blocking. The difference is <em>what</em> they're managing: a browser manages pixels and user input; Node manages OS-level I/O and file system calls.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 2: THE THREE QUEUES (BROWSER) -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 02 · Browser Only</div>
+  <div class="section-title">The Three Browser Queues</div>
+  <p style="color:var(--muted); margin-bottom:1.2rem">Jake identifies three distinct queues in the browser, each processed differently.</p>
+
+  <div class="queue-vis">
+
+    <div class="queue-row">
+      <div class="queue-label">① Task Queue</div>
+      <div class="queue-bar" style="background:var(--task); width:min-content">
+        setTimeout · setInterval · click events · fetch response
+      </div>
+      <span class="priority-badge" style="background:rgba(240,136,62,.15); color:var(--task)">1 per loop tick</span>
+    </div>
+
+    <div class="queue-row">
+      <div class="queue-label">② rAF Queue</div>
+      <div class="queue-bar" style="background:var(--render); width:min-content">
+        requestAnimationFrame callbacks
+      </div>
+      <span class="priority-badge" style="background:rgba(59,200,138,.15); color:var(--render)">All until done · new ones deferred</span>
+    </div>
+
+    <div class="queue-row">
+      <div class="queue-label">③ Microtask Queue</div>
+      <div class="queue-bar" style="background:var(--accent); width:min-content">
+        Promise .then() · MutationObserver · queueMicrotask()
+      </div>
+      <span class="priority-badge" style="background:rgba(124,106,247,.15); color:var(--accent)">ALL including newly queued — drains completely</span>
+    </div>
+
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>The dangerous difference</strong>
+      Tasks → only ONE runs before the loop continues. Microtasks → ALL run, including any microtasks queued <em>while</em> processing microtasks. A recursive <code>Promise.resolve().then(loop)</code> will starve the render loop exactly like a <code>while(true)</code>.
+    </div>
+  </div>
+
+  <!-- BROWSER LOOP VISUAL -->
+  <div style="margin-top:1.5rem">
+    <div class="card-title" style="font-size:.9rem; color:#e2e8f0">
+      Browser Event Loop — Execution Order per Tick
+    </div>
+    <div class="browser-loop">
+      <div class="browser-col">
+        <div class="browser-step" style="background:rgba(240,136,62,.1); border-color:var(--task); color:var(--task)">
+          🟠 Pick ONE Macrotask<br><span style="font-weight:400; font-size:.72rem">e.g. setTimeout callback, click handler</span>
+        </div>
+        <div class="browser-step" style="background:rgba(124,106,247,.1); border-color:var(--accent); color:var(--accent)">
+          🟣 Drain ALL Microtasks<br><span style="font-weight:400; font-size:.72rem">Promise .then(), MutationObserver — including newly queued</span>
+        </div>
+      </div>
+      <div class="browser-loop-center">
+        <div class="loop-circle">Event<br>Loop</div>
+        <div>↑ repeats ↑</div>
+      </div>
+      <div class="browser-col">
+        <div class="browser-step" style="background:rgba(59,200,138,.1); border-color:var(--render); color:var(--render)">
+          🟢 Render Steps (if needed)<br><span style="font-weight:400; font-size:.72rem">rAF → Style → Layout → Paint</span>
+        </div>
+        <div class="browser-step" style="background:rgba(90,98,112,.1); border-color:var(--muted); color:var(--muted)">
+          🔁 Back to Macrotask Queue<br><span style="font-weight:400; font-size:.72rem">Repeat from top</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">🎨</span>
+    <div class="callout-body">
+      <strong>requestAnimationFrame lives inside Render Steps</strong>
+      rAF callbacks run <em>before</em> Style calculation and Paint — not in the task queue. This is why <code>setTimeout</code> runs ~3.5× more often than rAF for animations and wastes work the user never sees. The browser only renders up to 60Hz; setTimeout doesn't respect that.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 3: NODE.JS PHASES -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 03 · Node.js Only</div>
+  <div class="section-title">Node.js Event Loop — 6 Phases</div>
+  <p style="color:var(--muted); margin-bottom:1.5rem">Unlike the browser's simple task/microtask model, Node's loop has explicit named phases. Between <em>every</em> phase transition, the nextTick queue and microtask queue are drained.</p>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; align-items:start">
+    <div class="phase-diagram">
+      <div class="phase-box phase-nexttick">
+        🔴 process.nextTick Queue<br>
+        <div class="phase-note">Drains before every phase transition (not officially a phase)</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-nexttick" style="background:rgba(124,106,247,.1); border-color:var(--accent); color:var(--accent)">
+        🟣 Promise Microtask Queue<br>
+        <div class="phase-note">Drains after nextTick queue, before each phase</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-timers">
+        🟠 timers<br>
+        <div class="phase-note">setTimeout() · setInterval() — executes when threshold passed</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-pending">
+        🔵 pending callbacks<br>
+        <div class="phase-note">Deferred I/O callbacks e.g. TCP ECONNREFUSED errors</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-idle">
+        ⚪ idle · prepare<br>
+        <div class="phase-note">Internal use only — you won't interact with this</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-poll">
+        🟢 poll<br>
+        <div class="phase-note">Retrieve new I/O events · execute I/O callbacks · may block here</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-check">
+        🟡 check<br>
+        <div class="phase-note">setImmediate() callbacks run here</div>
+      </div>
+      <div class="phase-arrow">↓</div>
+      <div class="phase-box phase-close">
+        🔴 close callbacks<br>
+        <div class="phase-note">socket.on('close') · socket.destroy()</div>
+      </div>
+      <div class="phase-arrow">↺ back to timers</div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:1rem">
+      <div class="card">
+        <div class="card-title" style="color:var(--render)">🟢 poll — The Heart of Node.js</div>
+        <p style="font-size:.83rem">The poll phase is where Node spends most of its time. It has two jobs:</p>
+        <ol style="margin: .6rem 0 0 1.2rem; font-size:.82rem; line-height:1.8">
+          <li>Calculate how long to block waiting for I/O</li>
+          <li>Process events in the poll queue</li>
+        </ol>
+        <br>
+        <p style="font-size:.82rem">If the queue is empty <em>and</em> no <code>setImmediate()</code> is pending → Node blocks here waiting for new I/O. This is what makes Node efficient for servers.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--warn)">🟡 setImmediate() vs setTimeout(0)</div>
+        <p style="font-size:.83rem">Outside an I/O callback → order is <strong>non-deterministic</strong> (depends on process startup time).</p>
+        <br>
+        <p style="font-size:.83rem">Inside an I/O callback (e.g. inside <code>fs.readFile</code>) → <code>setImmediate()</code> <em>always</em> runs first because check phase comes before the next timers phase.</p>
+        <div class="code-block">
+<span class="c-comment">// Inside I/O callback — always: immediate → timeout</span>
+<span class="c-fn">fs</span>.readFile(<span class="c-str">'file'</span>, () => {
+  <span class="c-fn">setTimeout</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'timeout'</span>), <span class="c-num">0</span>);
+  <span class="c-fn">setImmediate</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'immediate'</span>));
+});
+<span class="c-comment">// Output: immediate → timeout (always)</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--nexttick)">🔴 process.nextTick() — The Queue Jumper</div>
+        <p style="font-size:.83rem">Not technically a phase. Its queue drains <strong>after every operation</strong>, before the loop moves to the next phase — even before Promise microtasks.</p>
+        <br>
+        <p style="font-size:.83rem">Use case: guarantee a callback runs async (after current call stack) without waiting for I/O.</p>
+        <div class="callout callout-warn" style="margin-top:.6rem; font-size:.78rem">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body"><strong>Can starve I/O</strong> — recursive nextTick calls prevent the poll phase from ever running, blocking all file/network callbacks.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 4: EXECUTION ORDER COMPARISON -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 04 · Side-by-Side</div>
+  <div class="section-title">Execution Order — Browser vs Node.js</div>
+
+  <div class="compare-grid">
+    <div class="compare-col">
+      <div class="compare-col-header browser-header">🌐 Browser Execution Order</div>
+      <div class="queue-vis">
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">1st</div><div class="queue-bar" style="background:#1e2330; color:#e2e8f0; border:1px solid var(--border)">Synchronous (call stack)</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">2nd</div><div class="queue-bar" style="background:var(--accent); opacity:.85">Promise .then() microtasks</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">3rd</div><div class="queue-bar" style="background:var(--task); opacity:.85">setTimeout / setInterval</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">4th</div><div class="queue-bar" style="background:var(--render); opacity:.85">rAF → Style → Layout → Paint</div></div>
+      </div>
+      <div class="code-block" style="margin-top:.8rem">
+<span class="c-fn">console</span>.log(<span class="c-str">'A'</span>);               <span class="c-comment">// sync</span>
+<span class="c-fn">setTimeout</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'B'</span>), <span class="c-num">0</span>); <span class="c-comment">// macrotask</span>
+<span class="c-keyword">Promise</span>.resolve()
+  .then(() => <span class="c-fn">console</span>.log(<span class="c-str">'C'</span>));   <span class="c-comment">// microtask</span>
+<span class="c-fn">console</span>.log(<span class="c-str">'D'</span>);               <span class="c-comment">// sync</span>
+<span class="c-comment">// Output: A D C B</span>
+      </div>
+    </div>
+
+    <div class="compare-col">
+      <div class="compare-col-header node-header">🟢 Node.js Execution Order</div>
+      <div class="queue-vis">
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">1st</div><div class="queue-bar" style="background:#1e2330; color:#e2e8f0; border:1px solid var(--border)">Synchronous (call stack)</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">2nd</div><div class="queue-bar" style="background:var(--nexttick); opacity:.85">process.nextTick()</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">3rd</div><div class="queue-bar" style="background:var(--accent); opacity:.85">Promise .then() microtasks</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">4th</div><div class="queue-bar" style="background:var(--task); opacity:.85">setTimeout / setInterval</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">5th</div><div class="queue-bar" style="background:var(--render); opacity:.85">I/O callbacks (poll phase)</div></div>
+        <div class="queue-row"><div class="queue-label" style="font-size:.7rem">6th</div><div class="queue-bar" style="background:var(--warn); opacity:.85">setImmediate() (check phase)</div></div>
+      </div>
+      <div class="code-block" style="margin-top:.8rem">
+<span class="c-fn">console</span>.log(<span class="c-str">'A'</span>);
+<span class="c-fn">process</span>.nextTick(() => <span class="c-fn">console</span>.log(<span class="c-str">'B'</span>));
+<span class="c-keyword">Promise</span>.resolve().then(() => <span class="c-fn">console</span>.log(<span class="c-str">'C'</span>));
+<span class="c-fn">setTimeout</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'D'</span>), <span class="c-num">0</span>);
+<span class="c-fn">setImmediate</span>(() => <span class="c-fn">console</span>.log(<span class="c-str">'E'</span>));
+<span class="c-fn">console</span>.log(<span class="c-str">'F'</span>);
+<span class="c-comment">// Output: A F B C D E</span>
+<span class="c-comment">// (D/E order may vary outside I/O context)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 5: MICROTASKS DEEP DIVE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 05</div>
+  <div class="section-title">Microtasks — The Most Misunderstood Part</div>
+
+  <div class="card">
+    <div class="card-title" style="color:#e2e8f0">Origin Story (from Jake's Talk)</div>
+    <p style="font-size:.84rem">Microtasks were invented for <strong>MutationObserver</strong> in the browser. The old system (mutation events) fired 200 events for inserting 100 spans. Microtasks batch those into a single callback fired after JS finishes — much more efficient. Promises then adopted the same queue.</p>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem; margin-top:1rem">
+    <div class="card">
+      <div class="card-title"><span class="tag tag-both">Both</span> Task Queue</div>
+      <p style="font-size:.8rem">One item processed per loop tick. Additional items queued during processing go to the <em>end</em> of the queue — processed in a future tick.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="tag tag-jake">Browser</span> rAF Queue</div>
+      <p style="font-size:.8rem">All current items run to completion. Items queued <em>while</em> processing rAF callbacks are deferred to the <em>next frame</em>.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="tag tag-both">Both</span> Microtask Queue</div>
+      <p style="font-size:.8rem">All items drain completely — <em>including</em> items queued during processing. A recursive microtask loop blocks the render loop permanently.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-warn" style="margin-top:1rem">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body">
+      <strong>Microtasks run whenever the JS stack empties — not just between tasks</strong>
+      They can fire mid-task, inside rAF callbacks, anywhere. This is what guarantees Promise callbacks always see a consistent, fully-initialised state.
+    </div>
+  </div>
+
+  <!-- Jake's Quiz -->
+  <div class="quiz">
+    <div class="quiz-label">⚡ Jake's Classic Quiz — Two Event Listeners</div>
+    <p style="font-size:.83rem; margin-bottom:.5rem">What's the log order when a user <em>physically clicks</em> vs when you call <code>button.click()</code> in JS?</p>
+    <pre>button.addEventListener('click', () => {
+  Promise.resolve().then(() => console.log('Microtask 1'));
+  console.log('Listener 1');
+});
+button.addEventListener('click', () => {
+  Promise.resolve().then(() => console.log('Microtask 2'));
+  console.log('Listener 2');
+});</pre>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:.8rem">
+      <div style="background:#0a0c10; border-radius:8px; padding:.8rem 1rem; font-size:.8rem">
+        <div style="color:var(--render); font-weight:700; margin-bottom:.4rem">👆 User clicks (physical)</div>
+        Each listener runs in its own task.<br>Stack empties after Listener 1 → microtasks drain.<br><br>
+        <code style="color:var(--task)">Listener 1 → Microtask 1 → Listener 2 → Microtask 2</code>
+      </div>
+      <div style="background:#0a0c10; border-radius:8px; padding:.8rem 1rem; font-size:.8rem">
+        <div style="color:var(--warn); font-weight:700; margin-bottom:.4rem">💻 button.click() in JS</div>
+        JS stack never empties between listeners (<code>button.click()</code> hasn't returned). Microtasks only drain after both listeners complete.<br><br>
+        <code style="color:var(--task)">Listener 1 → Listener 2 → Microtask 1 → Microtask 2</code>
+      </div>
+    </div>
+    <p style="font-size:.75rem; color:var(--muted); margin-top:.7rem">⚠️ Real-world impact: automated tests clicking via JS may see different behaviour than a real user click. Also affects <code>event.preventDefault()</code> in async listeners.</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 6: WHAT BLOCKS RENDERING -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 06</div>
+  <div class="section-title">What Blocks Rendering?</div>
+
+  <div class="card" style="overflow:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Pattern</th>
+          <th>Blocks Rendering?</th>
+          <th>Why</th>
+          <th>Context</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>while(true)</code></td>
+          <td style="color:#e05c7b">✅ Yes — forever</td>
+          <td>Task never completes, loop never advances</td>
+          <td><span class="tag tag-jake">Browser</span></td>
+        </tr>
+        <tr>
+          <td><code>Promise.resolve().then(loop)</code></td>
+          <td style="color:#e05c7b">✅ Yes</td>
+          <td>Microtasks drain completely — render never reached</td>
+          <td><span class="tag tag-both">Both</span></td>
+        </tr>
+        <tr>
+          <td><code>setTimeout(loop, 0)</code></td>
+          <td style="color:var(--render)">❌ No</td>
+          <td>Each iteration is a new macrotask; render can happen between them</td>
+          <td><span class="tag tag-both">Both</span></td>
+        </tr>
+        <tr>
+          <td><code>requestAnimationFrame(loop)</code></td>
+          <td style="color:var(--render)">❌ No</td>
+          <td>Synced to display refresh; only runs when browser is ready to paint</td>
+          <td><span class="tag tag-jake">Browser</span></td>
+        </tr>
+        <tr>
+          <td><code>process.nextTick(loop)</code></td>
+          <td style="color:#e05c7b">✅ Yes (starves I/O)</td>
+          <td>nextTick queue drains before every phase — I/O poll never reached</td>
+          <td><span class="tag tag-node">Node.js</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 7: PROCESS.NEXTTICK USE CASES -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 07 · Node.js Only</div>
+  <div class="section-title">process.nextTick() — When and Why</div>
+
+  <div class="compare-grid">
+    <div class="card">
+      <div class="card-title" style="color:var(--nexttick)">Use Case 1 — Consistent Async API</div>
+      <p style="font-size:.83rem; margin-bottom:.8rem">Guarantee a callback is always called <em>asynchronously</em>, even if the error is detected synchronously. This prevents bugs where callers haven't finished setting up yet.</p>
+      <div class="code-block">
+<span class="c-keyword">function</span> <span class="c-fn">apiCall</span>(arg, callback) {
+  <span class="c-keyword">if</span> (<span class="c-keyword">typeof</span> arg !== <span class="c-str">'string'</span>) {
+    <span class="c-keyword">return</span> <span class="c-fn">process</span>.nextTick(
+      callback,
+      <span class="c-keyword">new</span> TypeError(<span class="c-str">'must be string'</span>)
+    );
+  }
+  <span class="c-comment">// ... do real work</span>
+}
+<span class="c-comment">// callback fires AFTER apiCall returns</span>
+<span class="c-comment">// so caller is fully initialised</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--nexttick)">Use Case 2 — EventEmitter in Constructor</div>
+      <p style="font-size:.83rem; margin-bottom:.8rem">Emitting an event in a constructor fires before the caller can attach a listener. nextTick defers the emit until the constructor returns.</p>
+      <div class="code-block">
+<span class="c-keyword">class</span> MyEmitter <span class="c-keyword">extends</span> EventEmitter {
+  <span class="c-fn">constructor</span>() {
+    <span class="c-keyword">super</span>();
+    <span class="c-fn">process</span>.nextTick(() => {
+      <span class="c-keyword">this</span>.<span class="c-fn">emit</span>(<span class="c-str">'ready'</span>);
+    });
+  }
+}
+<span class="c-keyword">const</span> e = <span class="c-keyword">new</span> MyEmitter();
+e.<span class="c-fn">on</span>(<span class="c-str">'ready'</span>, () => {
+  <span class="c-fn">console</span>.log(<span class="c-str">'works!'</span>); <span class="c-comment">// ✅</span>
+});
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-info" style="margin-top:1rem">
+    <span class="callout-icon">📌</span>
+    <div class="callout-body">
+      <strong>Names are swapped — a historical quirk</strong>
+      <code>process.nextTick()</code> fires more immediately than <code>setImmediate()</code>, even though the names imply the opposite. The Node.js team acknowledges this but can't change it without breaking npm. The recommendation: prefer <code>setImmediate()</code> when you just need to defer work.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 8: QUICK REFERENCE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 08</div>
+  <div class="section-title">Quick Reference — API Cheat Sheet</div>
+
+  <div class="card" style="overflow:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>API</th>
+          <th>Queue / Phase</th>
+          <th>Browser?</th>
+          <th>Node.js?</th>
+          <th>Use For</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>setTimeout(fn, 0)</code></td>
+          <td>Macrotask queue</td>
+          <td>✅</td><td>✅</td>
+          <td>Defer work one tick; not for animation</td>
+        </tr>
+        <tr>
+          <td><code>setInterval(fn, ms)</code></td>
+          <td>Macrotask queue</td>
+          <td>✅</td><td>✅</td>
+          <td>Repeated timer callbacks</td>
+        </tr>
+        <tr>
+          <td><code>Promise.then()</code></td>
+          <td>Microtask queue</td>
+          <td>✅</td><td>✅</td>
+          <td>Chained async work</td>
+        </tr>
+        <tr>
+          <td><code>queueMicrotask(fn)</code></td>
+          <td>Microtask queue</td>
+          <td>✅</td><td>✅</td>
+          <td>Explicit microtask scheduling</td>
+        </tr>
+        <tr>
+          <td><code>requestAnimationFrame(fn)</code></td>
+          <td>rAF queue (render steps)</td>
+          <td>✅</td><td>❌</td>
+          <td>All visual animation work</td>
+        </tr>
+        <tr>
+          <td><code>process.nextTick(fn)</code></td>
+          <td>nextTick queue (before microtasks)</td>
+          <td>❌</td><td>✅</td>
+          <td>Guarantee async callback; error handling in APIs</td>
+        </tr>
+        <tr>
+          <td><code>setImmediate(fn)</code></td>
+          <td>Check phase (after poll)</td>
+          <td>❌</td><td>✅</td>
+          <td>Run after I/O; safer than nextTick for deferring</td>
+        </tr>
+        <tr>
+          <td><code>MutationObserver</code></td>
+          <td>Microtask queue</td>
+          <td>✅</td><td>❌</td>
+          <td>Batch DOM change notifications</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION 9: INTERVIEW GOTCHAS -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 09 · Interview Focus</div>
+  <div class="section-title">Top Interview Gotchas</div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem">
+    <div class="callout callout-warn">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>setTimeout(fn, 0) is NOT immediate</strong>
+        Browser uses ~4.7ms minimum. It's a macrotask — rendering and microtasks run before the next setTimeout fires.
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>Promise loop blocks like while(true)</strong>
+        Microtasks drain fully — including newly queued ones. A recursive Promise loop starves rendering.
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>user click vs button.click() are different</strong>
+        JS-triggered click keeps the stack non-empty between listeners — microtasks don't fire mid-dispatch.
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>process.nextTick beats Promise.then in Node</strong>
+        Even though both are "microtask-like", nextTick has its own queue that drains first.
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>setImmediate vs setTimeout — non-deterministic at top level</strong>
+        Inside an I/O callback → setImmediate always wins. Outside → unpredictable.
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-body">
+        <strong>CSS changes batch until render steps</strong>
+        Setting <code>display</code> 100 times in one task costs the same as setting it once — browser only reads final state.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Sources: Jake Archibald — "In the Loop" JSConf Asia · andreaverlicchi.eu transposition · nodejs.org/learn<br>
+  Summary compiled for interview preparation — Ali
+</div>
+
+</body>
+</html>
