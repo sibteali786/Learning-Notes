@@ -11,24 +11,12 @@
             "id": "33852d1ecd66d77b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/DSA/DFS/dfs-tree.html"
               },
-              "icon": "lucide-file",
-              "title": "JavaScript DSA"
+              "icon": "code-glyph",
+              "title": "dfs-tree"
             }
           }
         ]
@@ -195,8 +183,10 @@
   },
   "active": "33852d1ecd66d77b",
   "lastOpenFiles": [
-    "Learning/JavaScript/Drawing 2026-06-15 22.31.53.excalidraw.md",
+    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
+    "Learning/DSA/DFS/dfs-tree.html",
     "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
+    "Learning/JavaScript/Drawing 2026-06-15 22.31.53.excalidraw.md",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-07-31_at_6.50.35_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-04-16_at_12.00.27_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-27_at_8.11.40_AM.png",
@@ -220,7 +210,6 @@
     "Learning/Frontend Interview Preparation/Preparation/NodeJs/event-loop-js-nodejs-summary.html",
     "Learning/Frontend Interview Preparation/Preparation/React/useeffect-all-forms.html",
     "Learning/Frontend Interview Preparation/Preparation/Prisma/day3-prisma.html",
-    "Learning/Frontend Interview Preparation/Preparation/Nestjs/NestJS-Graphql.html",
     "Learning/JavaScript/Coding/useQuery.excalidraw.md",
     "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
     "Learning/JavaScript/Coding/Promise/Promise.allSettled.excalidraw.md",
@@ -228,7 +217,6 @@
     "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
     "Learning/JavaScript/Coding/Throttle.excalidraw.md",
     "Learning/JavaScript/Coding/Flatten.excalidraw.md",
-    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
     "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
     "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
     "Learning/Frontend Interview Preparation/Preparation/Drawing 2026-06-11 10.00.21.excalidraw.md",
@@ -240,7 +228,6 @@
     "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
     "Learning/Book Reading/Reading List.md",
     "Learning/DSA/LinkedList/Drawing 2026-06-12 10.29.06.excalidraw.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

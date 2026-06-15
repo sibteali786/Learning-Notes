@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DFS & Trees — Interview Cheatsheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --card:     #1c2333;
+    --border:   #30363d;
+    --accent:   #58a6ff;
+    --green:    #3fb950;
+    --yellow:   #d29922;
+    --red:      #f85149;
+    --purple:   #bc8cff;
+    --orange:   #f0883e;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 2rem 1.5rem 4rem;
+    max-width: 960px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  header .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  header p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CARDS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .grid-1 { margin-bottom: 1rem; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem;
+  }
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+  .card-title.accent  { color: var(--accent); }
+  .card-title.green   { color: var(--green); }
+  .card-title.yellow  { color: var(--yellow); }
+  .card-title.red     { color: var(--red); }
+  .card-title.purple  { color: var(--purple); }
+  .card-title.orange  { color: var(--orange); }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    line-height: 1.7;
+    color: #cdd9e5;
+  }
+  .hl-green  { color: var(--green); }
+  .hl-accent { color: var(--accent); }
+  .hl-yellow { color: var(--yellow); }
+  .hl-red    { color: var(--red); }
+  .hl-purple { color: var(--purple); }
+  .hl-orange { color: var(--orange); }
+  .hl-muted  { color: var(--muted); }
+
+  /* ── FORMULA PILLS ── */
+  .formula-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .pill {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .pill.green  { color: var(--green);  border-color: var(--green);  background: rgba(63,185,80,0.08); }
+  .pill.accent { color: var(--accent); border-color: var(--accent); background: rgba(88,166,255,0.08); }
+  .pill.yellow { color: var(--yellow); border-color: var(--yellow); background: rgba(210,153,34,0.08); }
+  .pill.red    { color: var(--red);    border-color: var(--red);    background: rgba(248,81,73,0.08); }
+  .pill.purple { color: var(--purple); border-color: var(--purple); background: rgba(188,140,255,0.08); }
+  .pill.orange { color: var(--orange); border-color: var(--orange); background: rgba(240,136,62,0.08); }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: var(--text); }
+
+  /* ── TREE ASCII ── */
+  .tree-ascii {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: #cdd9e5;
+  }
+  .tree-ascii .node-accent { color: var(--accent); font-weight: 700; }
+  .tree-ascii .node-green  { color: var(--green);  font-weight: 700; }
+  .tree-ascii .node-yellow { color: var(--yellow); font-weight: 700; }
+
+  /* ── DFS PATTERN STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.3rem; }
+  .step {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 0.82rem;
+  }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.05rem;
+  }
+  .step-num.accent { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .step-num.green  { background: rgba(63,185,80,0.15);  color: var(--green);  }
+  .step-num.yellow { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .step-text { color: var(--text); line-height: 1.5; }
+  .step-sub  { color: var(--muted); font-size: 0.75rem; font-family: var(--mono); margin-top: 0.1rem; }
+
+  /* ── WHEN TO USE ── */
+  .use-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; }
+  .tag {
+    font-size: 0.72rem;
+    font-family: var(--mono);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .tag.yes { color: var(--green);  border-color: var(--green);  background: rgba(63,185,80,0.08); }
+  .tag.no  { color: var(--red);    border-color: var(--red);    background: rgba(248,81,73,0.08); }
+
+  /* ── CALL STACK VIZ ── */
+  .stack-frames {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+    margin-top: 0.5rem;
+  }
+  .frame {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    border-left: 3px solid;
+  }
+  .frame.f1 { border-color: var(--accent); background: rgba(88,166,255,0.08); color: var(--accent); }
+  .frame.f2 { border-color: var(--green);  background: rgba(63,185,80,0.08);  color: var(--green); }
+  .frame.f3 { border-color: var(--yellow); background: rgba(210,153,34,0.08); color: var(--yellow); }
+  .frame-label { color: var(--muted); font-size: 0.65rem; margin-top: 0.4rem; text-align: right; font-family: var(--mono); }
+
+  .mb { margin-bottom: 2rem; }
+  small { font-size: 0.72rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">DSA Interview Prep · Ali's Cheatsheet</div>
+  <h1>DFS & Binary Trees</h1>
+  <p>Complexity rules · Tree types · Patterns · Formulas · When to use what</p>
+</header>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 1: CORE DFS PATTERN -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Core DFS Pattern</div>
+<div class="grid-2 mb">
+
+  <div class="card">
+    <div class="card-title accent">On a Binary Tree</div>
+    <pre><span class="hl-accent">dfs</span>(node):
+  <span class="hl-yellow">if</span> node == null → <span class="hl-red">return</span>   <span class="hl-muted">← base case</span>
+
+  visit(node)               <span class="hl-muted">← pre-order</span>
+  <span class="hl-accent">dfs</span>(node.left)
+  <span class="hl-accent">dfs</span>(node.right)</pre>
+    <div style="margin-top:0.75rem;" class="steps">
+      <div class="step">
+        <div class="step-num accent">1</div>
+        <div><div class="step-text">Hit null → return (base case)</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num accent">2</div>
+        <div><div class="step-text">Go as deep left as possible</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num accent">3</div>
+        <div><div class="step-text">Backtrack → explore right subtree</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title purple">On a Graph (with cycles)</div>
+    <pre><span class="hl-accent">dfs</span>(node, visited):
+  <span class="hl-yellow">if</span> node in visited → <span class="hl-red">return</span>
+
+  visited.<span class="hl-green">add</span>(node)
+
+  <span class="hl-yellow">for</span> neighbor in node.neighbors:
+    <span class="hl-accent">dfs</span>(neighbor, visited)</pre>
+    <div style="margin-top:0.75rem;" class="steps">
+      <div class="step">
+        <div class="step-num purple">!</div>
+        <div><div class="step-text">Trees have no cycles — no visited set needed</div>
+        <div class="step-sub">Graphs need visited to prevent infinite loops</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 2: TRAVERSAL ORDERS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Traversal Orders</div>
+<div class="grid-3 mb">
+
+  <div class="card">
+    <div class="card-title green">Pre-order</div>
+    <pre><span class="hl-green">visit</span>(node)
+dfs(node.left)
+dfs(node.right)</pre>
+    <div style="margin-top:0.6rem; font-size:0.8rem; color:var(--muted);">Root → Left → Right<br><span style="color:var(--green);">Use: copy/serialize tree</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title accent">In-order</div>
+    <pre>dfs(node.left)
+<span class="hl-accent">visit</span>(node)
+dfs(node.right)</pre>
+    <div style="margin-top:0.6rem; font-size:0.8rem; color:var(--muted);">Left → Root → Right<br><span style="color:var(--accent);">Use: sorted output from BST</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title orange">Post-order</div>
+    <pre>dfs(node.left)
+dfs(node.right)
+<span class="hl-orange">visit</span>(node)</pre>
+    <div style="margin-top:0.6rem; font-size:0.8rem; color:var(--muted);">Left → Right → Root<br><span style="color:var(--orange);">Use: delete tree, compute size</span></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 3: TREE TYPES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Tree Types — Visual Comparison</div>
+<div class="grid-3 mb">
+
+  <div class="card">
+    <div class="card-title green">Complete</div>
+    <pre class="tree-ascii"><span class="node-accent">    1</span>
+   / \
+  <span class="node-green">2</span>   <span class="node-green">3</span>
+ / \ /
+<span class="node-yellow">4</span>  <span class="node-yellow">5</span> <span class="node-yellow">6</span></pre>
+    <div style="margin-top:0.6rem; font-size:0.79rem; color:var(--muted);">All levels full <em>except last</em>.<br>Last level fills <strong style="color:var(--green);">left → right</strong>.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title accent">Balanced</div>
+    <pre class="tree-ascii"><span class="node-accent">    1</span>
+   / \
+  <span class="node-green">2</span>   <span class="node-green">3</span>
+ /     \
+<span class="node-yellow">4</span>       <span class="node-yellow">5</span></pre>
+    <div style="margin-top:0.6rem; font-size:0.79rem; color:var(--muted);">Height diff between any left &amp; right subtree <strong style="color:var(--accent);">≤ 1</strong>.<br>Shape not strict.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title red">Degenerate (Skewed)</div>
+    <pre class="tree-ascii"><span class="node-accent">1</span>
+ \
+  <span class="node-green">2</span>
+   \
+    <span class="node-yellow">3</span>
+     \
+      <span class="node-yellow">4</span></pre>
+    <div style="margin-top:0.6rem; font-size:0.79rem; color:var(--muted);">Like a linked list.<br><strong style="color:var(--red);">Worst case</strong> for DFS space.</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 4: COMPLEXITY FORMULAS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Complexity Formulas — The Full Set</div>
+<div class="grid-1 mb">
+  <div class="card">
+    <div class="card-title yellow">Time Complexity</div>
+    <table>
+      <tr>
+        <th>Formula</th><th>What it means</th><th>Example</th>
+      </tr>
+      <tr>
+        <td><span class="hl-green">O(N)</span></td>
+        <td style="color:var(--text);">Work per node × N nodes = O(1) × N</td>
+        <td style="color:var(--muted);">Standard DFS traversal</td>
+      </tr>
+      <tr>
+        <td><span class="hl-yellow">O(N·k)</span></td>
+        <td style="color:var(--text);">O(k) work per node × N nodes</td>
+        <td style="color:var(--muted);">DFS + string copy of length k per node</td>
+      </tr>
+      <tr>
+        <td><span class="hl-accent">O(N log N)</span></td>
+        <td style="color:var(--text);">O(log N) work per node × N nodes</td>
+        <td style="color:var(--muted);">DFS + binary search at each node</td>
+      </tr>
+      <tr>
+        <td><span class="hl-red">O(N²)</span></td>
+        <td style="color:var(--text);">O(N) work per node × N nodes</td>
+        <td style="color:var(--muted);">DFS on skewed tree with inner loop</td>
+      </tr>
+    </table>
+    <div style="margin-top:0.75rem; font-family:var(--mono); font-size:0.72rem; color:var(--muted);">Rule: find work per recursive call → multiply by number of calls (N)</div>
+  </div>
+</div>
+
+<div class="grid-2 mb">
+  <div class="card">
+    <div class="card-title accent">Space Complexity</div>
+    <table>
+      <tr><th>Tree Type</th><th>Height H</th><th>Stack Space</th></tr>
+      <tr>
+        <td>Balanced / Complete</td>
+        <td><span class="hl-green">log₂(N)</span></td>
+        <td><span class="hl-green">O(log N)</span></td>
+      </tr>
+      <tr>
+        <td>Degenerate (skewed)</td>
+        <td><span class="hl-red">N - 1</span></td>
+        <td><span class="hl-red">O(N)</span></td>
+      </tr>
+    </table>
+    <div style="margin-top:0.75rem; font-family:var(--mono); font-size:0.72rem; color:var(--muted);">Space = call stack depth = tree height H<br>Always state: auxiliary space vs total space</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title purple">Height & Node Count</div>
+    <div class="formula-row">
+      <div class="pill green">H = log₂(N)&nbsp;&nbsp;&nbsp;← balanced</div>
+      <div class="pill red">H = N - 1&nbsp;&nbsp;&nbsp;&nbsp;← skewed</div>
+      <div class="pill accent">N = 2^(H+1) - 1&nbsp;&nbsp;← perfect tree</div>
+      <div class="pill yellow">call stack = H + 1&nbsp;← include root</div>
+      <div class="pill purple">leaves = 2^H&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← perfect tree</div>
+      <div class="pill orange">max nodes at level L = 2^L</div>
+    </div>
+    <div style="margin-top:0.75rem; font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+      Example: N=7, balanced → H = log₂(7) ≈ 2 edges → call stack = 3 frames
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 5: CALL STACK VISUALIZED -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Call Stack — How Backtracking Works</div>
+<div class="grid-2 mb">
+  <div class="card">
+    <div class="card-title accent">Max depth on a 7-node balanced tree</div>
+    <div class="stack-frames">
+      <div class="frame f1">dfs(root)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← frame 1</div>
+      <div class="frame f2">dfs(root.left)&nbsp;&nbsp;← frame 2</div>
+      <div class="frame f3">dfs(leaf)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;← frame 3 (deepest)</div>
+    </div>
+    <div class="frame-label">↑ top of stack</div>
+    <div style="margin-top:0.75rem; font-size:0.78rem; color:var(--muted);">
+      When frame 3 returns → pops → back to frame 2<br>
+      That's <strong style="color:var(--accent);">backtracking</strong>.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title green">The Rule</div>
+    <pre><span class="hl-muted">// When a recursive call RETURNS:</span>
+<span class="hl-green">✓</span> All nodes in left subtree visited
+<span class="hl-green">✓</span> All nodes in right subtree visited
+<span class="hl-green">✓</span> Frame popped off call stack
+<span class="hl-green">✓</span> Return VALUE is now available
+  to parent frame</pre>
+    <div style="margin-top:0.6rem; font-size:0.78rem; color:var(--muted);">This is how you <em>aggregate</em> info up the tree — return values bubble up from children to parent.</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 6: GRID DFS PATTERNS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Grid DFS — Two Key Patterns</div>
+<div class="grid-2 mb">
+
+  <div class="card">
+    <div class="card-title green">Count Connected Components (Islands)</div>
+    <pre><span class="hl-muted">directions = [UP, DOWN, LEFT, RIGHT]</span>
+<span class="hl-muted">           = [[-1,0],[1,0],[0,-1],[0,1]]</span>
+
+<span class="hl-yellow">for</span> each cell (r, c):
+  <span class="hl-yellow">if</span> cell == 1 AND not visited:
+    <span class="hl-accent">dfs</span>(r, c)     <span class="hl-muted">← flood fill island</span>
+    count++       <span class="hl-muted">← only fires once!</span></pre>
+    <div style="margin-top:0.6rem; font-size:0.78rem; color:var(--muted);">
+      Outer loop = <strong style="color:var(--text);">detective</strong> (finds new island)<br>
+      DFS = <strong style="color:var(--text);">flood fill</strong> (consumes entire island)
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title orange">Boundary DFS</div>
+    <pre><span class="hl-muted">// Flip the question:</span>
+<span class="hl-muted">// NOT "can cell reach border?"</span>
+<span class="hl-muted">// BUT "what can border reach?"</span>
+
+<span class="hl-yellow">for</span> each cell on the border:
+  <span class="hl-yellow">if</span> cell == 1:
+    <span class="hl-accent">dfs</span>(r, c)  <span class="hl-muted">← mark all reachable</span></pre>
+    <div style="margin-top:0.6rem; font-size:0.78rem; color:var(--muted);">
+      Used in: Surrounded Regions, Pacific Atlantic Water Flow.<br>
+      <strong style="color:var(--orange);">Key insight:</strong> start from border, work inward.
+    </div>
+  </div>
+</div>
+
+<!-- directions visual -->
+<div class="grid-1 mb">
+  <div class="card">
+    <div class="card-title accent">Direction Array — What Each Pair Means</div>
+    <pre>                  [-1, 0]  UP
+                     ↑
+[0,-1] LEFT  ←  [ CELL ]  →  [0, 1] RIGHT
+                     ↓
+                  [ 1, 0]  DOWN
+
+new_row = r + dr
+new_col = c + dc    <span class="hl-muted">← apply direction to current position</span></pre>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 7: DFS vs BFS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">DFS vs BFS — When to Use Which</div>
+<div class="grid-2 mb">
+  <div class="card">
+    <div class="card-title green">Use DFS ✓</div>
+    <div class="use-row">
+      <div class="tag yes">explore all paths</div>
+      <div class="tag yes">any valid solution</div>
+      <div class="tag yes">connected components</div>
+      <div class="tag yes">detect cycles</div>
+      <div class="tag yes">tree traversal</div>
+      <div class="tag yes">backtracking problems</div>
+      <div class="tag yes">nested/hierarchical data</div>
+      <div class="tag yes">path existence</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title red">Use BFS instead ✗</div>
+    <div class="use-row">
+      <div class="tag no">shortest path (unweighted)</div>
+      <div class="tag no">level-by-level traversal</div>
+      <div class="tag no">closest node to root</div>
+      <div class="tag no">minimum steps</div>
+    </div>
+    <div style="margin-top:0.75rem; font-size:0.78rem; color:var(--muted);">DFS finds <em>a</em> path, not the <em>shortest</em> path.</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 8: QUICK REFERENCE FORMULAS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section-label">Quick Reference — All Formulas</div>
+<div class="grid-1 mb">
+  <div class="card">
+    <div class="card-title yellow">At a Glance</div>
+    <div class="formula-row">
+      <div class="pill green">Time = O(1/k/logN/N) per node × N</div>
+      <div class="pill accent">Space = O(H) = O(logN) balanced</div>
+      <div class="pill red">Space = O(N) skewed</div>
+      <div class="pill yellow">H(balanced) = floor(log₂N)</div>
+      <div class="pill purple">call stack depth = H + 1</div>
+      <div class="pill orange">N(perfect, H levels) = 2^(H+1) - 1</div>
+      <div class="pill green">leaves(perfect) = ceil(N/2)</div>
+      <div class="pill accent">nodes at level L = 2^L</div>
+      <div class="pill red">skewed H = N - 1</div>
+      <div class="pill yellow">Big-O: use distinct vars (N=size, M=range)</div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-top:1rem;">
+  DFS & Trees Cheatsheet · Interview Prep · Next: Return Values → Path Problems
+</div>
+
+</body>
+</html>
