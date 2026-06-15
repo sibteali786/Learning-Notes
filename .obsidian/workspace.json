@@ -4,47 +4,34 @@
     "type": "split",
     "children": [
       {
-        "id": "1a4fb8e24e17a69e",
+        "id": "4514168da40a4be4",
         "type": "tabs",
         "children": [
           {
-            "id": "b9a86299815cd80b",
+            "id": "33852d1ecd66d77b",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Preparation/graphql-summary.html"
+                "file": "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "code-glyph",
-              "title": "graphql-summary"
-            }
-          },
-          {
-            "id": "42d5904133c4a27a",
-            "type": "leaf",
-            "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/Frontend Interview Preparation/Preparation/event-loop-js-nodejs-summary.html"
-              },
-              "icon": "code-glyph",
-              "title": "event-loop-js-nodejs-summary"
-            }
-          },
-          {
-            "id": "7179fc33a1033337",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Overview"
+              "icon": "lucide-file",
+              "title": "JavaScript DSA"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -76,7 +63,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "Tree Traversal",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -206,54 +193,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "42d5904133c4a27a",
+  "active": "33852d1ecd66d77b",
   "lastOpenFiles": [
-    "Learning/Frontend Interview Preparation/Preparation/setimmediate-vs-settimeout.html",
-    "Learning/Frontend Interview Preparation/Preparation/event-loop-js-nodejs-summary.html",
-    "Learning/Frontend Interview Preparation/Preparation/NestJS-Graphql.html",
-    "Learning/Frontend Interview Preparation/Preparation/graphql-summary.html",
-    "Learning/Frontend Interview Preparation/Preparation/day3-prisma.html",
+    "Learning/JavaScript/Drawing 2026-06-15 22.31.53.excalidraw.md",
+    "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-07-31_at_6.50.35_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-04-16_at_12.00.27_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-27_at_8.11.40_AM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/image.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-18_at_7.45.27_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/JavaScript/JavaScript DSA/attachments/Kubernetes path ce7a68365a764555b24021ec7a6a7469.md",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-15_at_2.03.57_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-01_at_12.00.55_PM.png",
+    "Learning/JavaScript/Dsa",
+    "Learning/JavaScript/JavaScript DSA/attachments/Untitled.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Untitled 9.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Untitled 8.png",
+    "Learning/JavaScript/JavaScript DSA",
+    "Learning/JavaScript/Coding/getElementBy../getElementByStyle.excalidraw.md",
+    "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md",
+    "Learning/DSA/DFS",
+    "Learning/Frontend Interview Preparation/Preparation/NodeJs/setimmediate-vs-settimeout.html",
+    "Learning/Frontend Interview Preparation/Preparation/NodeJs/nexttick-async-api.html",
+    "Learning/Frontend Interview Preparation/Preparation/NodeJs/event-loop-js-nodejs-summary.html",
+    "Learning/Frontend Interview Preparation/Preparation/React/useeffect-all-forms.html",
+    "Learning/Frontend Interview Preparation/Preparation/Prisma/day3-prisma.html",
+    "Learning/Frontend Interview Preparation/Preparation/Nestjs/NestJS-Graphql.html",
+    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.allSettled.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.any.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
+    "Learning/JavaScript/Coding/Throttle.excalidraw.md",
+    "Learning/JavaScript/Coding/Flatten.excalidraw.md",
+    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
     "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
     "Learning/Frontend Interview Preparation/Preparation/Drawing 2026-06-11 10.00.21.excalidraw.md",
-    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
     "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
     "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
-    "Learning/Database/Database Design/5-Relationships/ch5-relationships-summary.html",
     "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
     "Learning/Database/Database Design/5-Relationships/1-ERD-Diagrams.excalidraw.md",
-    "graphql-summary.html",
     "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
-    "Learning/System Design/Practice/Bitly/Bit.ly.excalidraw",
     "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
     "Learning/Book Reading/Reading List.md",
     "Learning/DSA/LinkedList/Drawing 2026-06-12 10.29.06.excalidraw.md",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Screenshot 2026-06-12 at 10.29.20 AM.png",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/1-web-search-context.html",
-    "Learning/Frontend Interview Preparation/Preparation",
     "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/2-compaction.html",
-    "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md",
-    "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md",
-    "Learning/DSA/Binary Search/Overview.excalidraw.md",
-    "Learning/JavaScript/Coding/Hooks/useDefault.excalidraw.md",
-    "Learning/JavaScript/Coding/Hooks/useBoolean.excalidraw.md",
-    "Learning/JavaScript/Coding/Deep Clone/DeepCloneII.excalidraw.md",
-    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/Evals.excalidraw.md",
-    "Learning/DSA/Binary Search/Smallest Divisor Given Threshold.excalidraw.md",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/Resources.md",
-    "Learning/DSA/Binary Search/5-Kth smallest element in a sorted matrix.md",
-    "Learning/JavaScript/Coding/Deep Clone/deepclone.md",
-    "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/xg3g8QJ39g-5.0~4qicn98.nms.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/xWkdHJANtnnJ.0924~mp8cjscf.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/trFqhoLyS8Wc.00it8g3sdt1x9.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/hvS08f3bK-45.0hc8ls~qrzxj1.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/oN2SYdSRofO2.06hwhk74kynd2.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/f0CknSRcOhe-.0d8fl2pjepvtt.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/dUY3kHsn3c4O.0aj_9xbjxmzsl.svg",
-    "Learning/System Design/Patterns/Realtime Udpates/attachments/ZS8xUcLSzgnn.0tv93afqil.jc.svg",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

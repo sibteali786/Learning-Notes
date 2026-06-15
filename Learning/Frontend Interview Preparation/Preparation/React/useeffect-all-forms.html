@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>useEffect — All 3 Forms + Bailout</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0d0f14;
+    --surface: #151820;
+    --border:  #1e2330;
+    --text:    #c9d1e0;
+    --muted:   #5a6270;
+    --form1:   #e05c7b;   /* no array — red/pink */
+    --form2:   #3bc88a;   /* empty array — green */
+    --form3:   #7c6af7;   /* with deps — purple */
+    --warn:    #f5c542;
+    --node:    #5bc0f8;
+    --bail:    #f0883e;
+  }
+
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; line-height: 1.7;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center; max-width: 700px;
+    margin: 0 auto 2.5rem; padding-top: 2rem;
+  }
+  .eyebrow {
+    font-size: .68rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900; letter-spacing: -1px; line-height: 1.15;
+    margin-bottom: .8rem; color: #e2e8f0;
+  }
+  .hero h1 code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: .05rem .4rem; font-size: .85em;
+    color: var(--node);
+  }
+  .hero p { color: var(--muted); font-size: .88rem; max-width: 500px; margin: 0 auto; }
+
+  /* SECTION */
+  .section { max-width: 960px; margin: 0 auto 3.5rem; }
+  .section-label {
+    font-size: .68rem; font-weight: 700; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .4rem;
+  }
+  .section-title { font-size: 1.3rem; font-weight: 800; color: #e2e8f0; margin-bottom: 1.3rem; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 2.5rem auto; max-width: 960px; }
+
+  /* 3 FORMS GRID */
+  .forms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+  @media (max-width: 700px) { .forms-grid { grid-template-columns: 1fr; } }
+
+  .form-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .form-card-header {
+    padding: 1rem 1.2rem; border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: .3rem;
+  }
+  .form-num {
+    font-size: .65rem; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; margin-bottom: .1rem;
+  }
+  .form-title { font-size: .95rem; font-weight: 800; color: #e2e8f0; }
+  .form-rule  { font-size: .75rem; color: var(--muted); }
+  .form-body  { padding: 1rem 1.2rem; }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; gap: 0; margin: .8rem 0; }
+  .tl-row { display: flex; align-items: stretch; gap: 0; }
+  .tl-gutter {
+    display: flex; flex-direction: column; align-items: center;
+    width: 28px; flex-shrink: 0;
+  }
+  .tl-line { width: 2px; flex: 1; min-height: 6px; }
+  .tl-dot  {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    margin: 2px 0; border: 2px solid;
+  }
+  .tl-content {
+    flex: 1; padding: .4rem .7rem; margin: 2px 0;
+    border-radius: 7px; font-size: .76rem;
+    border: 1px solid transparent;
+  }
+  .tl-event { font-weight: 700; }
+  .tl-note  { font-size: .7rem; color: var(--muted); }
+
+  /* timeline color variants */
+  .tl-mount .tl-dot  { background: var(--node); border-color: var(--node); }
+  .tl-mount .tl-line { background: var(--border); }
+  .tl-mount .tl-content { background: rgba(91,192,248,.07); border-color: rgba(91,192,248,.2); }
+  .tl-mount .tl-event { color: var(--node); }
+
+  .tl-effect .tl-dot  { border-color: currentColor; background: transparent; }
+  .tl-effect .tl-line { background: var(--border); }
+  .tl-effect .tl-content { }
+
+  .tl-rerender .tl-dot  { background: var(--warn); border-color: var(--warn); }
+  .tl-rerender .tl-line { background: var(--border); }
+  .tl-rerender .tl-content { background: rgba(245,197,66,.06); border-color: rgba(245,197,66,.2); }
+  .tl-rerender .tl-event { color: var(--warn); }
+
+  .tl-bail .tl-dot  { background: var(--bail); border-color: var(--bail); }
+  .tl-bail .tl-line { background: var(--border); }
+  .tl-bail .tl-content { background: rgba(240,136,62,.07); border-color: rgba(240,136,62,.25); }
+  .tl-bail .tl-event { color: var(--bail); }
+
+  .tl-stop .tl-dot  { background: var(--muted); border-color: var(--muted); }
+  .tl-stop .tl-line { background: transparent; }
+  .tl-stop .tl-content { background: transparent; border-color: transparent; }
+  .tl-stop .tl-event { color: var(--muted); }
+
+  .tl-dep .tl-dot  { background: var(--form3); border-color: var(--form3); }
+  .tl-dep .tl-line { background: var(--border); }
+  .tl-dep .tl-content { background: rgba(124,106,247,.07); border-color: rgba(124,106,247,.2); }
+  .tl-dep .tl-event { color: var(--form3); }
+
+  /* count badge */
+  .count-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .78rem; font-weight: 800;
+    padding: .35rem .9rem; border-radius: 8px; margin-top: .8rem;
+    width: 100%;
+  }
+
+  /* CODE */
+  .code-block {
+    background: #0a0c10; border: 1px solid var(--border); border-radius: 8px;
+    padding: .8rem 1rem; font-family: 'JetBrains Mono', monospace;
+    font-size: .74rem; line-height: 1.8; overflow-x: auto; margin: .7rem 0;
+  }
+  .c-muted  { color: var(--muted); }
+  .c-kw     { color: var(--form3); }
+  .c-fn     { color: var(--node); }
+  .c-str    { color: var(--form2); }
+  .c-num    { color: var(--warn); }
+  .c-f1     { color: var(--form1); font-weight: 700; }
+  .c-f2     { color: var(--form2); font-weight: 700; }
+  .c-f3     { color: var(--form3); font-weight: 700; }
+  .c-bail   { color: var(--bail); font-weight: 700; }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0;
+    font-size: .83rem; display: flex; gap: .75rem; align-items: flex-start;
+  }
+  .callout-warn { background: rgba(245,197,66,.07); border: 1px solid rgba(245,197,66,.25); }
+  .callout-info { background: rgba(124,106,247,.07); border: 1px solid rgba(124,106,247,.25); }
+  .callout-bail { background: rgba(240,136,62,.07); border: 1px solid rgba(240,136,62,.25); }
+  .callout-tip  { background: rgba(59,200,138,.07); border: 1px solid rgba(59,200,138,.25); }
+  .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+  .callout-body strong { display: block; color: #e2e8f0; margin-bottom: .2rem; }
+  .callout-body p { color: var(--muted); font-size: .81rem; }
+
+  /* COMPARISON TABLE */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { padding: .65rem .9rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--muted); font-size: .7rem; letter-spacing: .07em; text-transform: uppercase; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-family: 'JetBrains Mono', monospace; font-size: .78rem; }
+  td code { font-family: 'JetBrains Mono', monospace; font-size: .78rem; background: #0a0c10; padding: .1rem .35rem; border-radius: 4px; }
+
+  /* SPECTRUM BAR */
+  .spectrum {
+    display: flex; border-radius: 10px; overflow: hidden;
+    height: 44px; margin: 1rem 0;
+  }
+  .spectrum-seg {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+  }
+
+  /* QUIZ */
+  .quiz {
+    background: rgba(124,106,247,.05); border: 1px solid rgba(124,106,247,.25);
+    border-radius: 12px; padding: 1.2rem 1.4rem;
+  }
+  .quiz-label {
+    font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--form3); margin-bottom: .6rem;
+  }
+
+  /* RULE BOX */
+  .rule-box {
+    max-width: 960px; margin: 0 auto;
+    background: rgba(124,106,247,.05); border: 1px solid rgba(124,106,247,.3);
+    border-radius: 14px; padding: 1.4rem 1.8rem; text-align: center;
+  }
+  .rule-label {
+    font-size: .68rem; font-weight: 700; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--form3); margin-bottom: .6rem;
+  }
+  .rule-text { font-size: 1rem; font-weight: 700; color: #e2e8f0; line-height: 1.6; }
+  .rule-sub  { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
+
+  .footer { text-align: center; color: var(--muted); font-size: .72rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow">React · useEffect · All 3 Forms</div>
+  <h1>The <code>useEffect</code> Dependency Array — Complete Guide</h1>
+  <p>How the dependency array controls <em>when</em> effects run — including React's bailout optimisation.</p>
+</div>
+
+<!-- SPECTRUM -->
+<div class="section" style="margin-bottom:2rem">
+  <div class="spectrum">
+    <div class="spectrum-seg" style="background:rgba(224,92,123,.15); color:var(--form1)">Form 1 — No Array<br><span style="font-weight:400; font-size:.65rem">every render</span></div>
+    <div class="spectrum-seg" style="background:rgba(59,200,138,.15); color:var(--form2)">Form 2 — Empty []<br><span style="font-weight:400; font-size:.65rem">mount only</span></div>
+    <div class="spectrum-seg" style="background:rgba(124,106,247,.15); color:var(--form3)">Form 3 — [dep]<br><span style="font-weight:400; font-size:.65rem">mount + dep changes</span></div>
+  </div>
+  <p style="font-size:.78rem; color:var(--muted); text-align:center">The dependency array is React's "when should I re-run this?" instruction. Less info = runs more often.</p>
+</div>
+
+<!-- ══════════════════════ -->
+<!-- 3 FORMS SIDE BY SIDE  -->
+<!-- ══════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 01</div>
+  <div class="section-title">All 3 Forms — Behaviour & Timeline</div>
+
+  <div class="forms-grid">
+
+    <!-- FORM 1 -->
+    <div class="form-card" style="border-color:rgba(224,92,123,.3)">
+      <div class="form-card-header" style="background:rgba(224,92,123,.06)">
+        <div class="form-num" style="color:var(--form1)">Form 1</div>
+        <div class="form-title">No dependency array</div>
+        <div class="form-rule">Runs after <strong style="color:var(--form1)">every render</strong></div>
+      </div>
+      <div class="form-body">
+        <div class="code-block">
+<span class="c-fn">useEffect</span>(() => {
+  <span class="c-fn">console</span>.log(<span class="c-str">'Hello'</span>)
+  <span class="c-fn">setCounter</span>(<span class="c-num">1</span>)
+}) <span class="c-f1">← no array</span>
+        </div>
+
+        <div class="timeline">
+          <div class="tl-row tl-mount">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-event">Component mounts</div></div>
+          </div>
+          <div class="tl-row tl-effect" style="color:var(--form1)">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content" style="background:rgba(224,92,123,.07); border-color:rgba(224,92,123,.2)">
+              <div class="tl-event" style="color:var(--form1)">Effect runs → Hello (1)</div>
+              <div class="tl-note">setCounter(1) → triggers re-render</div>
+            </div>
+          </div>
+          <div class="tl-row tl-rerender">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-event">Re-render (state changed)</div></div>
+          </div>
+          <div class="tl-row tl-effect" style="color:var(--form1)">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content" style="background:rgba(224,92,123,.07); border-color:rgba(224,92,123,.2)">
+              <div class="tl-event" style="color:var(--form1)">Effect runs → Hello (2)</div>
+              <div class="tl-note">setCounter(1) same value → bailout</div>
+            </div>
+          </div>
+          <div class="tl-row tl-bail">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-event">React bails out 🛑</div>
+              <div class="tl-note">Object.is(1, 1) → same value → no re-render</div>
+            </div>
+          </div>
+          <div class="tl-row tl-stop">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-event">Stops ✅</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="count-badge" style="background:rgba(224,92,123,.1); color:var(--form1)">
+          🖨 'Hello' logs: <strong>2 times</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM 2 -->
+    <div class="form-card" style="border-color:rgba(59,200,138,.3)">
+      <div class="form-card-header" style="background:rgba(59,200,138,.06)">
+        <div class="form-num" style="color:var(--form2)">Form 2</div>
+        <div class="form-title">Empty array []</div>
+        <div class="form-rule">Runs on <strong style="color:var(--form2)">mount only</strong></div>
+      </div>
+      <div class="form-body">
+        <div class="code-block">
+<span class="c-fn">useEffect</span>(() => {
+  <span class="c-fn">console</span>.log(<span class="c-str">'Hello'</span>)
+  <span class="c-fn">setCounter</span>(<span class="c-num">1</span>)
+}, <span class="c-f2">[]</span>) <span class="c-muted">← empty array</span>
+        </div>
+
+        <div class="timeline">
+          <div class="tl-row tl-mount">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-event">Component mounts</div></div>
+          </div>
+          <div class="tl-row tl-effect" style="color:var(--form2)">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content" style="background:rgba(59,200,138,.07); border-color:rgba(59,200,138,.2)">
+              <div class="tl-event" style="color:var(--form2)">Effect runs → Hello (1)</div>
+              <div class="tl-note">setCounter(1) → triggers re-render</div>
+            </div>
+          </div>
+          <div class="tl-row tl-rerender">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-event">Re-render (state changed)</div></div>
+          </div>
+          <div class="tl-row tl-stop">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-event">Effect does NOT run again ✅</div>
+              <div class="tl-note">[] means no deps to watch — never re-runs</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="count-badge" style="background:rgba(59,200,138,.1); color:var(--form2)">
+          🖨 'Hello' logs: <strong>1 time</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM 3 -->
+    <div class="form-card" style="border-color:rgba(124,106,247,.3)">
+      <div class="form-card-header" style="background:rgba(124,106,247,.06)">
+        <div class="form-num" style="color:var(--form3)">Form 3</div>
+        <div class="form-title">With dependency</div>
+        <div class="form-rule">Runs on mount + <strong style="color:var(--form3)">when dep changes</strong></div>
+      </div>
+      <div class="form-body">
+        <div class="code-block">
+<span class="c-fn">useEffect</span>(() => {
+  <span class="c-fn">console</span>.log(<span class="c-str">'Hello'</span>)
+  <span class="c-fn">setCounter</span>(<span class="c-num">1</span>)
+}, <span class="c-f3">[props.visible]</span>)
+        </div>
+
+        <div class="timeline">
+          <div class="tl-row tl-mount">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-event">Component mounts</div></div>
+          </div>
+          <div class="tl-row tl-effect" style="color:var(--form3)">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content" style="background:rgba(124,106,247,.07); border-color:rgba(124,106,247,.2)">
+              <div class="tl-event" style="color:var(--form3)">Effect runs → Hello (1)</div>
+              <div class="tl-note">setCounter(1) re-renders but props.visible unchanged</div>
+            </div>
+          </div>
+          <div class="tl-row tl-rerender">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-event">Re-render (state changed)</div></div>
+          </div>
+          <div class="tl-row tl-stop">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-event">Effect skipped ✅</div>
+              <div class="tl-note">props.visible didn't change → no re-run</div>
+            </div>
+          </div>
+          <div class="tl-row tl-dep">
+            <div class="tl-gutter"><div class="tl-line"></div><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-event">props.visible changes → Hello (2)</div>
+              <div class="tl-note">dependency changed → effect re-runs</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="count-badge" style="background:rgba(124,106,247,.1); color:var(--form3)">
+          🖨 'Hello' logs: <strong>1 + 1 per dep change</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════ -->
+<!-- BAILOUT DEEP DIVE     -->
+<!-- ══════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 02 · The Hidden Behaviour</div>
+  <div class="section-title">React's Object.is Bailout — Why Form 1 Logs 2 Not Infinite</div>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2rem">
+
+    <div>
+      <div class="callout callout-bail">
+        <div class="callout-icon">🛑</div>
+        <div class="callout-body">
+          <strong>What is a bailout?</strong>
+          <p>React uses <code>Object.is(prevState, newState)</code> to compare state values. If they're the same, React skips re-rendering after the second attempt — but NOT after the first.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warn" style="margin-top:.8rem">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <strong>The "after first" rule</strong>
+          <p>React may still re-render once before bailing out, but won't go deeper. This is why you see 2 logs not infinite — the bailout kicks in on the second <code>setCounter(1)</code> call.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="code-block">
+<span class="c-muted">// setCounter(1) called with same value repeatedly</span>
+
+<span class="c-muted">// Render 1 (mount)</span>
+<span class="c-fn">setCounter</span>(<span class="c-num">1</span>)  <span class="c-muted">// was 0 → now 1 → re-renders</span>
+
+<span class="c-muted">// Render 2 (after state change)</span>
+<span class="c-fn">setCounter</span>(<span class="c-num">1</span>)  <span class="c-muted">// was 1 → still 1</span>
+              <span class="c-bail">// Object.is(1, 1) = true → BAIL OUT</span>
+
+<span class="c-muted">// No Render 3 — React stops here ✅</span>
+
+<span class="c-muted">// So useEffect ran exactly 2 times:</span>
+<span class="c-muted">// once on mount, once after first re-render</span>
+      </div>
+
+      <div class="callout callout-tip" style="margin-top:.8rem">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>Object.is vs ===</strong>
+          <p>Almost the same but handles two edge cases: <code>Object.is(NaN, NaN)</code> → <code>true</code> (=== gives false). <code>Object.is(+0, -0)</code> → <code>false</code> (=== gives true).</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════ -->
+<!-- COMPARISON TABLE      -->
+<!-- ══════════════════════ -->
+<div class="section">
+  <div class="section-label">Section 03 · Quick Reference</div>
+  <div class="section-title">All Forms — Side by Side</div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Syntax</th>
+          <th>When it runs</th>
+          <th>Equivalent to</th>
+          <th>Hello count (with setCounter(1))</th>
+          <th>Common use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--form1)">useEffect(fn)</td>
+          <td>After <strong>every</strong> render</td>
+          <td>componentDidUpdate (always)</td>
+          <td><strong style="color:var(--form1)">2</strong> — bails out on 2nd setCounter</td>
+          <td>Rarely — usually a bug waiting to happen</td>
+        </tr>
+        <tr>
+          <td style="color:var(--form2)">useEffect(fn, [])</td>
+          <td>Mount only</td>
+          <td>componentDidMount</td>
+          <td><strong style="color:var(--form2)">1</strong></td>
+          <td>Fetch initial data, set up subscriptions</td>
+        </tr>
+        <tr>
+          <td style="color:var(--form3)">useEffect(fn, [dep])</td>
+          <td>Mount + when dep changes</td>
+          <td>componentDidUpdate with condition</td>
+          <td><strong style="color:var(--form3)">1 + 1 per change</strong></td>
+          <td>React to prop/state changes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ORIGINAL QUESTION ANSWER -->
+  <div class="callout callout-info" style="margin-top:1.2rem">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-body">
+      <strong>Original TestGorilla question — answered</strong>
+      <p>Code used <code>useEffect(fn, [props.visible])</code> — Form 3. <code>props.visible</code> never changes inside the effect, and <code>setCounter(1)</code> triggers a re-render but the dependency is unchanged → effect doesn't re-run. Answer: <strong style="color:var(--form2)">1 time</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- RULE BOX -->
+<div class="rule-box">
+  <div class="rule-label">Mental Model to Memorise</div>
+  <div class="rule-text">
+    The dependency array is React's <span style="color:var(--warn)">"when should I re-run this?"</span> instruction.<br>
+    No instruction = run every time. Empty instruction = run once. Specific instruction = run on change.
+  </div>
+  <div class="rule-sub" style="margin-top:1rem; display:flex; justify-content:center; gap:2rem; flex-wrap:wrap">
+    <span style="color:var(--form1)">useEffect(fn) → every render</span>
+    <span style="color:var(--form2)">useEffect(fn, []) → mount only</span>
+    <span style="color:var(--form3)">useEffect(fn, [dep]) → mount + dep changes</span>
+  </div>
+</div>
+
+<div class="footer" style="margin-top:2.5rem">
+  React · useEffect dependency array · All 3 forms + Object.is bailout<br>
+  Ali's interview prep notes
+</div>
+
+</body>
+</html>

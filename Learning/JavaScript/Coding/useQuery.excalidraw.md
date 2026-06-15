@@ -104,6 +104,39 @@ export default useQuery<T>(fn: Promise<T>, deps: DependencyList = []){
 
 This version uses Type / Typescript and also take care of three states in a single state unlike last solution which uses three different states ^gjIKWdCP
 
+import { DependencyList, useEffect, useState } from 'react';
+
+type AsyncState<T> = | 
+{status: 'loading'} |
+{status: 'error', error: Error} |
+{ status: 'success', data: T }
+
+export default function useQuery<T>(fn: () => Promise<T>, deps: DependencyList = []) {
+    const [state, setState] = useState<AsyncState<T>>({status: 'loading'})
+    useEffect(() => {
+        let ignore = false
+        async function fetchResult() {
+            try{
+                const result = await fn()
+                if (!ignore) {
+                    setState({status: 'success', data: result})
+                }
+            }catch(e){
+                if (!ignore) {
+                    setState({status: 'error', error: e as Error})
+                }
+            }
+        }
+
+        fetchResult()
+        return () => {
+            ignore = true
+        }
+    },deps)
+
+    return state   
+} ^aLvsDe3O
+
 %%
 ## Drawing
 ```compressed-json
@@ -163,12 +196,22 @@ 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
 
-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
+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
 
-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
+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
 
-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
+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
 
-gIwGfBMD8AiQjoFAK1AZA9GXAM2NeFIiX9Zh4XKnh6wI5nsDAgoeYcNi2F7htuSEPYuMMmEXseBjgZgCkO3g5BegSg7IG5FI7u9+AUQ/kLdzQDAAPepkIAA=
+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
 ```
 %%
