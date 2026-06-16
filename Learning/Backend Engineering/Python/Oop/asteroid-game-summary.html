@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Asteroid Game — OOP Concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0e1117;
+    color: #e2e8f0;
+    font-family: 'DM Sans', sans-serif;
+    padding: 40px 24px;
+    max-width: 960px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  h1 { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: #fff; }
+  h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 16px; }
+  h3 { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+
+  .hero {
+    border-left: 4px solid #7c3aed;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    background: #13171f;
+    border-radius: 0 12px 12px 0;
+  }
+  .hero p { color: #94a3b8; margin-top: 8px; font-size: 0.95rem; }
+
+  .section { margin-bottom: 48px; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .pill-purple { background: #4c1d95; color: #c4b5fd; }
+  .pill-blue   { background: #1e3a5f; color: #93c5fd; }
+  .pill-green  { background: #064e3b; color: #6ee7b7; }
+  .pill-orange { background: #431407; color: #fdba74; }
+  .pill-pink   { background: #500724; color: #fda4af; }
+  .pill-yellow { background: #451a03; color: #fcd34d; }
+
+  .card {
+    background: #13171f;
+    border: 1px solid #1e2533;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-accent-purple { border-left: 3px solid #7c3aed; }
+  .card-accent-blue   { border-left: 3px solid #3b82f6; }
+  .card-accent-green  { border-left: 3px solid #10b981; }
+  .card-accent-orange { border-left: 3px solid #f97316; }
+  .card-accent-pink   { border-left: 3px solid #f43f5e; }
+  .card-accent-yellow { border-left: 3px solid #eab308; }
+
+  pre, code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+  }
+  pre {
+    background: #090c12;
+    border: 1px solid #1e2533;
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-top: 10px;
+    line-height: 1.7;
+  }
+  code { background: #1e2533; padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; }
+
+  .kw  { color: #c084fc; }
+  .fn  { color: #60a5fa; }
+  .str { color: #6ee7b7; }
+  .cm  { color: #475569; font-style: italic; }
+  .num { color: #fdba74; }
+  .cls { color: #fde68a; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
+  th { background: #1e2533; color: #94a3b8; padding: 8px 12px; text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+  td { padding: 8px 12px; border-bottom: 1px solid #1e2533; }
+  tr:last-child td { border-bottom: none; }
+
+  .diagram {
+    background: #090c12;
+    border: 1px solid #1e2533;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    white-space: pre;
+    overflow-x: auto;
+    margin-top: 12px;
+    line-height: 1.8;
+  }
+
+  .bug { background: #2d0a0a; border: 1px solid #7f1d1d; border-radius: 8px; padding: 12px 16px; margin-top: 10px; }
+  .fix { background: #052e16; border: 1px solid #14532d; border-radius: 8px; padding: 12px 16px; margin-top: 6px; }
+  .label { font-size: 0.68rem; font-family: 'JetBrains Mono', monospace; font-weight: 600; margin-bottom: 4px; }
+  .label-red { color: #f87171; }
+  .label-green { color: #34d399; }
+
+  .divider { height: 1px; background: #1e2533; margin: 48px 0; }
+
+  .highlight { color: #c084fc; font-weight: 600; }
+  .muted { color: #64748b; font-size: 0.85rem; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+  .arch-box {
+    border: 1px solid #1e2533;
+    border-radius: 8px;
+    padding: 14px 18px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+  }
+  .arch-box.purple { border-color: #7c3aed; color: #c4b5fd; background: #1a0a2e; }
+  .arch-box.blue   { border-color: #3b82f6; color: #93c5fd; background: #0c1a2e; }
+  .arch-box.green  { border-color: #10b981; color: #6ee7b7; background: #041f14; }
+  .arch-box.orange { border-color: #f97316; color: #fdba74; background: #1c0d00; }
+  .arch-box.gray   { border-color: #334155; color: #94a3b8; background: #0f1420; }
+  .arch-arrow { text-align: center; color: #334155; font-size: 1.2rem; padding: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🚀 Asteroid Game — OOP Concepts</h1>
+  <p>A visual cheatsheet of everything built and learned through the bootdev Python OOP course — from game loops to inheritance, vectors to collision detection.</p>
+</div>
+
+<!-- 1. CLASS HIERARCHY -->
+<div class="section">
+  <div class="pill pill-purple">OOP · Inheritance</div>
+  <h2>1. Class Hierarchy — How Everything Relates</h2>
+  <div class="card card-accent-purple">
+    <div class="diagram"><span style="color:#c4b5fd">pygame.sprite.Sprite</span>          ← pygame base, enables Group system
+         ↑
+    <span style="color:#fde68a">CircleShape</span>                       ← YOUR base: position, velocity, radius
+    ↑           ↑           ↑
+<span style="color:#60a5fa">Player</span>      <span style="color:#f97316">Asteroid</span>    <span style="color:#6ee7b7">Shot</span>          ← each overrides draw() + update()
+
+<span style="color:#475569">AsteroidField</span> → directly extends Sprite (not CircleShape, has no shape)</span></div>
+    <p style="margin-top:12px; color:#64748b; font-size:0.85rem;">Every game object shares <code>position</code>, <code>velocity</code>, <code>radius</code> from <span class="highlight">CircleShape</span> but draws and moves differently.</p>
+  </div>
+
+  <div class="grid-3" style="margin-top:16px">
+    <div class="arch-box purple">Player<br/><span style="font-size:0.7rem;color:#7c3aed">triangle shape<br/>WASD + Space</span></div>
+    <div class="arch-box orange">Asteroid<br/><span style="font-size:0.7rem;color:#b45309">circle, splits<br/>auto-spawned</span></div>
+    <div class="arch-box green">Shot<br/><span style="font-size:0.7rem;color:#065f46">tiny circle<br/>straight line</span></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 2. CIRCLESHAPE -->
+<div class="section">
+  <div class="pill pill-blue">OOP · Abstract Base Class</div>
+  <h2>2. CircleShape — The Base Class</h2>
+  <div class="grid-2">
+    <div class="card card-accent-blue">
+      <h3>Key Concepts</h3>
+      <table>
+        <tr><th>Attribute</th><th>Purpose</th></tr>
+        <tr><td><code>position</code></td><td>WHERE it is (x,y)</td></tr>
+        <tr><td><code>velocity</code></td><td>WHERE it's going</td></tr>
+        <tr><td><code>radius</code></td><td>HOW BIG (collision boundary)</td></tr>
+        <tr><td><code>containers</code></td><td>Which pygame Groups to join</td></tr>
+      </table>
+    </div>
+    <div class="card card-accent-blue">
+      <h3>containers + hasattr pattern</h3>
+<pre><span class="kw">if</span> <span class="fn">hasattr</span>(<span class="kw">self</span>, <span class="str">"containers"</span>):
+    <span class="fn">super()</span>.__init__(*<span class="kw">self</span>.containers)
+<span class="kw">else</span>:
+    <span class="fn">super()</span>.__init__()
+
+<span class="cm"># *self.containers unpacks tuple into args
+# Player.containers = (updatable, drawable)
+# → super().__init__(updatable, drawable)</span></pre>
+    </div>
+  </div>
+  <div class="card card-accent-blue" style="margin-top:0">
+    <h3>Collision Detection</h3>
+<pre><span class="kw">def</span> <span class="fn">collides_with</span>(<span class="kw">self</span>, other):
+    distance = <span class="kw">self</span>.position.<span class="fn">distance_to</span>(other.position)
+    <span class="kw">return</span> distance < <span class="kw">self</span>.radius + other.radius
+
+<span class="cm"># Two circles collide when distance between centers < sum of radii
+#
+#   (player●)─────────────(●asteroid)
+#      r=20    distance      r=60
+#   collide if distance < 20+60 = 80</span></pre>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3. PYGAME GROUPS -->
+<div class="section">
+  <div class="pill pill-green">Pygame · Groups</div>
+  <h2>3. Sprite Groups — Managing Game Objects</h2>
+  <div class="card card-accent-green">
+    <p class="muted" style="margin-bottom:12px">Groups are like arrays of sprites with superpowers — bulk update, draw, and collision check.</p>
+    <div class="diagram"><span style="color:#6ee7b7">updatable</span>  → Player, Asteroid, AsteroidField, Shot   (call .update(dt) on all)
+<span style="color:#60a5fa">drawable</span>   → Player, Asteroid, Shot                    (call .draw(screen) on all)
+<span style="color:#fdba74">asteroids</span>  → Asteroid only                             (collision checks vs player/shots)
+<span style="color:#fda4af">shots</span>      → Shot only                                (collision checks vs asteroids)</span>
+  </div>
+<pre style="margin-top:12px"><span class="cm"># Setup — BEFORE instantiation</span>
+Player.containers = (updatable, drawable)
+Asteroid.containers = (asteroids, updatable, drawable)
+Shot.containers = (shots, updatable, drawable)
+
+<span class="cm"># Game loop</span>
+updatable.<span class="fn">update</span>(dt)          <span class="cm"># calls update() on every sprite</span>
+<span class="kw">for</span> thing <span class="kw">in</span> drawable:
+    thing.<span class="fn">draw</span>(screen)          <span class="cm"># our custom draw(), not pygame's</span></pre>
+    <div class="bug" style="margin-top:12px">
+      <div class="label label-red">⚠️ GOTCHA</div>
+      <code>drawable.draw(screen)</code> — pygame's built-in needs a <code>.image</code> bitmap. Our sprites use custom <code>draw()</code>, so always loop manually.
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 4. VECTORS + MOVEMENT -->
+<div class="section">
+  <div class="pill pill-orange">Math · Vectors · Delta Time</div>
+  <h2>4. Vectors, Movement & Delta Time</h2>
+  <div class="grid-2">
+    <div class="card card-accent-orange">
+      <h3>pygame.Vector2</h3>
+      <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:10px">A 2D direction arrow. Supports math operations natively.</p>
+<pre><span class="cm"># (0,1) = pointing DOWN in pygame
+# Y increases downward ↓</span>
+
+forward = pygame.Vector2(<span class="num">0</span>, <span class="num">1</span>).<span class="fn">rotate</span>(rotation)
+<span class="cm"># rotation=0°  → ▼ (down)
+# rotation=180° → ▲ (up)
+# rotation=90°  → ◄ (left)</span></pre>
+    </div>
+    <div class="card card-accent-orange">
+      <h3>Delta Time (dt)</h3>
+      <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:10px">Decouples speed from frame rate.</p>
+<pre><span class="cm"># ❌ CPU dependent</span>
+position.x += <span class="num">5</span>
+
+<span class="cm"># ✅ always 200px/sec</span>
+position += velocity * SPEED * dt
+
+dt = clock.<span class="fn">tick</span>(<span class="num">60</span>) / <span class="num">1000</span>
+<span class="cm"># normal: dt ≈ 0.016s
+# slow:   dt ≈ 0.033s (compensates)</span></pre>
+    </div>
+  </div>
+
+  <div class="card card-accent-orange">
+    <h3>Player Movement — How the Triangle Points</h3>
+<pre><span class="cm"># forward = nose direction (pure direction, length=1)</span>
+forward = pygame.Vector2(<span class="num">0</span>, <span class="num">1</span>).<span class="fn">rotate</span>(<span class="kw">self</span>.rotation)
+
+<span class="cm"># right = wing offset (direction + distance baked in)</span>
+right = pygame.Vector2(<span class="num">0</span>, <span class="num">1</span>).<span class="fn">rotate</span>(<span class="kw">self</span>.rotation + <span class="num">90</span>) * <span class="kw">self</span>.radius / <span class="num">1.5</span>
+
+a = <span class="kw">self</span>.position + forward * <span class="kw">self</span>.radius        <span class="cm"># NOSE (20px ahead)</span>
+b = <span class="kw">self</span>.position - forward * <span class="kw">self</span>.radius - right  <span class="cm"># LEFT wing</span>
+c = <span class="kw">self</span>.position - forward * <span class="kw">self</span>.radius + right  <span class="cm"># RIGHT wing</span></pre>
+    <div class="diagram" style="margin-top:10px">         <span style="color:#60a5fa">a ▲</span>  ← nose (forward × radius = 20px ahead)
+        /│\
+       / │ \
+      /  <span style="color:#fde68a">*</span>  \   * = self.position (center)
+     /   │   \
+    <span style="color:#f97316">b</span>────┴────<span style="color:#f97316">c</span>
+←right─┤   ├─right→   (13.3px each side)</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 5. PYTHON CONCEPTS -->
+<div class="section">
+  <div class="pill pill-pink">Python · Types · Scope</div>
+  <h2>5. Python Concepts (from a JS dev's view)</h2>
+
+  <div class="grid-2">
+    <div class="card card-accent-pink">
+      <h3>TypedDict vs TypeScript interface</h3>
+<pre><span class="cm"># Python</span>
+<span class="kw">class</span> <span class="cls">SpriteInfo</span>(TypedDict):
+    type: <span class="fn">str</span>
+    pos: NotRequired[<span class="fn">list</span>[<span class="fn">float</span>]]
+
+<span class="cm">// TypeScript equivalent</span>
+<span class="kw">interface</span> <span class="cls">SpriteInfo</span> {
+  type: <span class="fn">string</span>
+  pos?: <span class="fn">number</span>[]
+}</pre>
+      <p class="muted" style="margin-top:8px">Python hints = JSDoc. Ignored at runtime. TS = enforced at compile time.</p>
+    </div>
+    <div class="card card-accent-pink">
+      <h3>Type Mapping</h3>
+      <table>
+        <tr><th>Python</th><th>TypeScript</th></tr>
+        <tr><td><code>str</code></td><td><code>string</code></td></tr>
+        <tr><td><code>float / int</code></td><td><code>number</code></td></tr>
+        <tr><td><code>bool</code></td><td><code>boolean</code></td></tr>
+        <tr><td><code>list[float]</code></td><td><code>number[]</code></td></tr>
+        <tr><td><code>dict[str, int]</code></td><td><code>Record&lt;string, number&gt;</code></td></tr>
+        <tr><td><code>NotRequired[X]</code></td><td><code>field?: X</code></td></tr>
+        <tr><td><code>tuple[X, ...]</code></td><td><code>X[]</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:0">
+    <div class="card card-accent-pink">
+      <h3>Module Variables & Privacy</h3>
+<pre><span class="cm"># __all__ = public API (like named exports)</span>
+__all__ = [<span class="str">"log_state"</span>, <span class="str">"log_event"</span>]
+
+<span class="cm"># _single = private by convention (not enforced)</span>
+_frame_count = <span class="num">0</span>
+
+<span class="cm"># Python has NO true private keyword
+# Single underscore = gentleman's agreement</span></pre>
+    </div>
+    <div class="card card-accent-pink">
+      <h3>global keyword</h3>
+<pre>_frame_count = <span class="num">0</span>
+
+<span class="kw">def</span> <span class="fn">log_state</span>():
+    <span class="cm"># reading — no global needed ✅</span>
+    <span class="fn">print</span>(_frame_count)
+
+    <span class="cm"># assigning — needs global ✅</span>
+    <span class="kw">global</span> _frame_count
+    _frame_count += <span class="num">1</span>
+
+<span class="cm"># JS closures just work — no declaration needed</span></pre>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 6. BUGS CAUGHT -->
+<div class="section">
+  <div class="pill pill-yellow">Debugging · Common Mistakes</div>
+  <h2>6. Bugs Caught Along the Way</h2>
+
+  <div class="card card-accent-yellow">
+    <h3>Bug 1 — Object recreated every frame</h3>
+    <div class="bug">
+      <div class="label label-red">❌ BUG — resets position every frame</div>
+<pre><span class="kw">while</span> <span class="kw">True</span>:
+    player = <span class="cls">Player</span>(x, y)   <span class="cm"># ← spawns fresh player each iteration</span></pre>
+    </div>
+    <div class="fix">
+      <div class="label label-green">✅ FIX — create once, outside loop</div>
+<pre>player = <span class="cls">Player</span>(x, y)
+<span class="kw">while</span> <span class="kw">True</span>:
+    player.<span class="fn">update</span>(dt)        <span class="cm"># state persists between frames</span></pre>
+    </div>
+    <p class="muted" style="margin-top:8px">Same as doing <code>const state = {"{x: 0}"}</code> inside React render instead of <code>useState</code>.</p>
+  </div>
+
+  <div class="card card-accent-yellow" style="margin-top:16px">
+    <h3>Bug 2 — Missing parentheses (function reference vs call)</h3>
+    <div class="bug">
+      <div class="label label-red">❌ BUG</div>
+<pre>self.move      <span class="cm"># just points to the function, doesn't run it</span></pre>
+    </div>
+    <div class="fix">
+      <div class="label label-green">✅ FIX</div>
+<pre>self.<span class="fn">move</span>(-dt)  <span class="cm"># actually calls it</span></pre>
+    </div>
+  </div>
+
+  <div class="card card-accent-yellow" style="margin-top:16px">
+    <h3>Bug 3 — Typo in variable name (test failing)</h3>
+    <div class="bug">
+      <div class="label label-red">❌ BUG — logger captures variable name as-is</div>
+<pre>update<span style="color:#f87171">able</span> = pygame.sprite.Group()   <span class="cm"># test expected "updatable"</span></pre>
+    </div>
+    <div class="fix">
+      <div class="label label-green">✅ FIX</div>
+<pre>updat<span style="color:#34d399">able</span> = pygame.sprite.Group()</pre>
+    </div>
+  </div>
+
+  <div class="card card-accent-yellow" style="margin-top:16px">
+    <h3>Bug 4 — Setting position instead of velocity on Shot</h3>
+    <div class="bug">
+      <div class="label label-red">❌ BUG — teleports bullet, doesn't give it motion</div>
+<pre>new_shot.position += scaled_vector</pre>
+    </div>
+    <div class="fix">
+      <div class="label label-green">✅ FIX</div>
+<pre>new_shot.velocity = scaled_vector   <span class="cm"># update() moves it each frame</span></pre>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 7. GAME LOOP -->
+<div class="section">
+  <div class="pill pill-purple">Architecture · Game Loop</div>
+  <h2>7. The Game Loop — Final Architecture</h2>
+  <div class="card card-accent-purple">
+<pre><span class="kw">while</span> <span class="kw">True</span>:
+    <span class="fn">log_state</span>()                         <span class="cm"># snapshot once/sec for CLI tests</span>
+
+    <span class="kw">for</span> event <span class="kw">in</span> pygame.event.<span class="fn">get</span>():      <span class="cm"># handle quit</span>
+        <span class="kw">if</span> event.type == pygame.QUIT: <span class="kw">return</span>
+
+    screen.<span class="fn">fill</span>(<span class="str">"black"</span>)                  <span class="cm"># erase last frame</span>
+    updatable.<span class="fn">update</span>(dt)                 <span class="cm"># move everything</span>
+
+    <span class="kw">for</span> asteroid <span class="kw">in</span> asteroids:            <span class="cm"># collision: asteroid vs player</span>
+        <span class="kw">if</span> asteroid.<span class="fn">collides_with</span>(player):
+            sys.<span class="fn">exit</span>()                   <span class="cm"># game over</span>
+        <span class="kw">for</span> shot <span class="kw">in</span> shots:               <span class="cm"># collision: shot vs asteroid</span>
+            <span class="kw">if</span> shot.<span class="fn">collides_with</span>(asteroid):
+                shot.<span class="fn">kill</span>()
+                asteroid.<span class="fn">split</span>()
+
+    <span class="kw">for</span> thing <span class="kw">in</span> drawable:               <span class="cm"># render everything</span>
+        thing.<span class="fn">draw</span>(screen)
+
+    pygame.display.<span class="fn">flip</span>()               <span class="cm"># push to monitor</span>
+    dt = clock.<span class="fn">tick</span>(<span class="num">60</span>) / <span class="num">1000</span>          <span class="cm"># cap 60fps, get delta time</span></pre>
+  </div>
+
+  <div class="grid-3" style="margin-top:16px">
+    <div class="card card-accent-purple" style="text-align:center">
+      <div style="font-size:1.6rem">🎮</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#c4b5fd;margin-top:6px">Input</div>
+      <div class="muted" style="margin-top:4px">get_pressed() every frame for smooth hold detection</div>
+    </div>
+    <div class="card card-accent-purple" style="text-align:center">
+      <div style="font-size:1.6rem">⚙️</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#c4b5fd;margin-top:6px">Update</div>
+      <div class="muted" style="margin-top:4px">position += velocity × dt on every sprite</div>
+    </div>
+    <div class="card card-accent-purple" style="text-align:center">
+      <div style="font-size:1.6rem">🖼️</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#c4b5fd;margin-top:6px">Render</div>
+      <div class="muted" style="margin-top:4px">fill black → draw all → flip to screen</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 8. KEY OOP LESSONS -->
+<div class="section">
+  <div class="pill pill-green">OOP · Key Takeaways</div>
+  <h2>8. OOP Lessons — The Big Picture</h2>
+  <div class="grid-2">
+    <div class="card card-accent-green">
+      <h3>Inheritance</h3>
+      <p style="font-size:0.85rem;color:#94a3b8">Share common code in a base class. Subclasses get everything for free and only implement what's different.</p>
+<pre>CircleShape → position, velocity, radius
+Player      → overrides draw() with triangle
+Asteroid    → overrides draw() with circle
+Shot        → overrides update() to move straight</pre>
+    </div>
+    <div class="card card-accent-green">
+      <h3>Override Pattern</h3>
+      <p style="font-size:0.85rem;color:#94a3b8">Base defines the contract. Children fulfill it their own way.</p>
+<pre><span class="cm"># Base — placeholder</span>
+<span class="kw">def</span> <span class="fn">draw</span>(<span class="kw">self</span>, screen): <span class="kw">pass</span>
+
+<span class="cm"># Player — triangle</span>
+<span class="kw">def</span> <span class="fn">draw</span>(<span class="kw">self</span>, screen):
+    pygame.draw.<span class="fn">polygon</span>(screen, ...)
+
+<span class="cm"># Asteroid/Shot — circle</span>
+<span class="kw">def</span> <span class="fn">draw</span>(<span class="kw">self</span>, screen):
+    pygame.draw.<span class="fn">circle</span>(screen, ...)</pre>
+    </div>
+    <div class="card card-accent-green">
+      <h3>Class vs Instance variables</h3>
+<pre><span class="cm"># Class variable — shared across ALL instances</span>
+Player.containers = (updatable, drawable)
+
+<span class="cm"># Instance variable — unique per object</span>
+<span class="kw">self</span>.position = pygame.Vector2(x, y)
+<span class="kw">self</span>.rotation = <span class="num">0</span></pre>
+    </div>
+    <div class="card card-accent-green">
+      <h3>Cooldown Timer Pattern</h3>
+<pre><span class="cm"># Count DOWN each frame</span>
+<span class="kw">self</span>.shot_timer -= dt
+
+<span class="cm"># Only act when expired</span>
+<span class="kw">if</span> keys[K_SPACE] <span class="kw">and</span> <span class="kw">self</span>.shot_timer <= <span class="num">0</span>:
+    <span class="kw">self</span>.<span class="fn">shoot</span>()
+    <span class="kw">self</span>.shot_timer = <span class="num">0.3</span>  <span class="cm"># reset</span>
+
+<span class="cm"># Without this: 60 bullets/sec while held</span></pre>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;color:#334155;font-size:0.75rem;font-family:'JetBrains Mono',monospace;margin-top:48px;padding-bottom:24px">
+  asteroid-game · bootdev OOP course · Python 3.13 + pygame 2.6
+</div>
+
+</body>
+</html>
