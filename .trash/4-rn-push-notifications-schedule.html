@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RN v3 — Push Notifications</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap');
+  :root{--bg:#0e1117;--surface:#161b25;--surf2:#1e2535;--border:#2a3347;--cyan:#6ee7f7;--violet:#a78bfa;--pink:#f472b6;--green:#34d399;--amber:#fbbf24;--red:#f87171;--text:#e2e8f0;--muted:#64748b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:32px 24px;max-width:900px;margin:0 auto;line-height:1.6;}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .hicon{width:42px;height:42px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .header h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .header p{color:var(--muted);font-size:13px;}
+  .badge{margin-left:auto;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);white-space:nowrap;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+  .ch{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+  .ch .bar{width:4px;height:18px;border-radius:2px;flex-shrink:0;}
+  .ch h2{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+  .pill{margin-left:auto;font-size:11px;border-radius:20px;padding:2px 8px;font-weight:500;border:1px solid;}
+  .cb{padding:14px 16px;}
+  .code{background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;overflow-x:auto;margin-top:8px;}
+  .cm{color:#4a5568;}.kw{color:var(--violet);}.fn{color:var(--cyan);}.str{color:var(--green);}.add{color:var(--green);}.del{color:var(--red);opacity:.6;}.prop{color:var(--pink);}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .mini{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .mini .lbl{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+  .mini p{color:#94a3b8;font-size:12.5px;}
+  .star{background:#1a1f2e;border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .star strong{color:var(--amber);}
+  .tip{background:#111a17;border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .tip strong{color:var(--green);}
+  .warn{background:#1a1113;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:#cbd5e1;}
+  .warn strong{color:var(--red);}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+  .tag{border-radius:4px;padding:3px 8px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid;}
+  .bg-cyan{background:rgba(110,231,247,.08);border-color:rgba(110,231,247,.3);color:var(--cyan);}
+  .bg-violet{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--violet);}
+  .bg-green{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.3);color:var(--green);}
+  .bg-amber{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.3);color:var(--amber);}
+  .bg-pink{background:rgba(244,114,182,.08);border-color:rgba(244,114,182,.3);color:var(--pink);}
+  .bg-red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:var(--red);}
+  /* FLOW */
+  .flow{display:flex;align-items:center;gap:0;margin-top:10px;flex-wrap:nowrap;}
+  .fstep{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;text-align:center;flex:1;min-width:0;}
+  .fstep .sn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:2px;}
+  .farrow{font-size:16px;color:var(--muted);flex-shrink:0;padding:0 4px;}
+  /* PERMISSION STATUS TABLE */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{background:var(--surf2);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  .tbl td{padding:8px 10px;border-bottom:1px solid #1e2535;color:#94a3b8;vertical-align:top;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+  hr.div{border:none;border-top:1px solid var(--border);margin:12px 0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hicon">🔔</div>
+  <div>
+    <h1>RN v3 — Push Notifications</h1>
+    <p>Kadi Kraman · expo-notifications · permission flow · Android channel · ask once rule</p>
+  </div>
+  <div class="badge">Chapter 12</div>
+</div>
+
+<!-- CONCEPT: LOCAL vs REMOTE -->
+<div class="card">
+  <div class="ch"><div class="bar" style="background:var(--cyan)"></div><h2>Local vs Remote Push Notifications</h2><span class="pill bg-cyan">Concept</span></div>
+  <div class="cb">
+    <div class="two-col">
+      <div class="mini">
+        <div class="lbl" style="color:var(--violet)">Remote (not covered)</div>
+        <p>Server sends notification via Apple APNs / Firebase FCM to device's push token. Requires backend server, token registration, significant setup. Not workshopable.</p>
+      </div>
+      <div class="mini">
+        <div class="lbl" style="color:var(--green)">Local (this chapter) ✓</div>
+        <p>Scheduled from within the app, delivered to the current device only. No server needed. Works in Expo Go. What we build here.</p>
+      </div>
+    </div>
+    <div class="star">
+      ★ <strong>Real-world use:</strong> Local notifications power reminders, alarms, recurring nudges ("You haven't checked your list today!"). Remote notifications power chat messages, breaking news alerts, order updates.
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL -->
+<div class="card">
+  <div class="ch"><div class="bar" style="background:var(--violet)"></div><h2>Install</h2><span class="pill bg-violet">Setup</span></div>
+  <div class="cb">
+    <div class="code">
+<span class="fn">npx expo install</span> <span class="str">expo-notifications expo-device</span>
+<span class="cm"># expo-device: needed to check if code runs on a real device vs simulator</span>
+    </div>
+  </div>
+</div>
+
+<!-- PERMISSION UTILITY -->
+<div class="card">
+  <div class="ch"><div class="bar" style="background:var(--green)"></div><h2>utils/registerForPushNotificationsAsync.ts</h2><span class="pill bg-green">New File</span></div>
+  <div class="cb">
+    <div class="code">
+<span class="kw">import</span> { Platform }         <span class="kw">from</span> <span class="str">"react-native"</span>;
+<span class="kw">import</span> * <span class="kw">as</span> Device         <span class="kw">from</span> <span class="str">"expo-device"</span>;
+<span class="kw">import</span> * <span class="kw">as</span> Notifications  <span class="kw">from</span> <span class="str">"expo-notifications"</span>;
+
+<span class="kw">export async function</span> <span class="fn">registerForPushNotificationsAsync</span>() {
+  <span class="cm">// Android 8+ requires a channel BEFORE requesting permission</span>
+  <span class="kw">if</span> (Platform.OS === <span class="str">"android"</span>) {
+    <span class="kw">await</span> Notifications.<span class="fn">setNotificationChannelAsync</span>(<span class="str">"default"</span>, {
+      <span class="prop">name</span>:              <span class="str">"default"</span>,
+      <span class="prop">importance</span>:       Notifications.AndroidImportance.DEFAULT,
+      <span class="prop">vibrationPattern</span>: [<span class="num">0</span>, <span class="num">250</span>, <span class="num">250</span>, <span class="num">250</span>],
+      <span class="prop">showBadge</span>:        <span class="kw">false</span>,
+    });
+  }
+
+  <span class="cm">// Simulators/emulators can't receive push notifications</span>
+  <span class="kw">if</span> (!Device.isDevice) <span class="kw">return null</span>;
+
+  <span class="cm">// Check current status — only request if undetermined</span>
+  <span class="kw">const</span> { status: existingStatus } =
+    <span class="kw">await</span> Notifications.<span class="fn">getPermissionsAsync</span>();
+
+  <span class="kw">if</span> (existingStatus !== <span class="str">"granted"</span>) {
+    <span class="kw">const</span> { status } = <span class="kw">await</span> Notifications.<span class="fn">requestPermissionsAsync</span>();
+    <span class="kw">return</span> status;  <span class="cm">// shows native prompt if undetermined, no-op if denied</span>
+  }
+  <span class="kw">return</span> existingStatus;
+}
+    </div>
+
+    <hr class="div"/>
+    <p style="font-family:Syne,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Permission Status Values</p>
+    <table class="tbl">
+      <thead><tr><th>Status</th><th>Meaning</th><th>requestPermissionsAsync() effect</th></tr></thead>
+      <tbody>
+        <tr><td class="mono" style="color:var(--amber)">undetermined</td><td style="color:#94a3b8">Never asked before</td><td style="color:var(--green)">Shows native prompt ← only time it works</td></tr>
+        <tr><td class="mono" style="color:var(--green)">granted</td><td style="color:#94a3b8">User said yes</td><td style="color:var(--muted)">No-op — already have permission</td></tr>
+        <tr><td class="mono" style="color:var(--red)">denied</td><td style="color:#94a3b8">User said no</td><td style="color:var(--red)">No-op — cannot re-ask in-app</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ASK ONCE RULE -->
+<div class="card">
+  <div class="ch"><div class="bar" style="background:var(--red)"></div><h2>The Ask-Once Rule</h2><span class="pill bg-red">Critical</span></div>
+  <div class="cb">
+    <div class="warn">
+      ⚠️ <strong>You can only show the native permission prompt once.</strong> If the user taps "Don't Allow", you can never ask again programmatically. <code>requestPermissionsAsync()</code> becomes a silent no-op.
+    </div>
+
+    <div class="flow" style="margin-top:12px">
+      <div class="fstep"><span class="sn">FIRST TIME</span><div style="color:var(--amber)">undetermined</div><div style="color:var(--muted);font-size:11px">native prompt shows</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep"><span class="sn">USER TAPS</span><div style="color:var(--green)">Allow</div><div style="color:var(--muted);font-size:11px">status = granted</div></div>
+      <div class="farrow">or</div>
+      <div class="fstep"><span class="sn">USER TAPS</span><div style="color:var(--red)">Don't Allow</div><div style="color:var(--muted);font-size:11px">status = denied forever</div></div>
+    </div>
+
+    <div class="mini" style="margin-top:10px">
+      <div class="lbl" style="color:var(--amber)">Recovery path for denied</div>
+      <p>User must go to <strong>Settings → Notifications → [Your App]</strong> and manually toggle on. In Expo Go during development: Settings → Notifications → Expo Go → toggle on.</p>
+    </div>
+
+    <div class="tip" style="margin-top:10px">
+      💡 <strong>Best practice:</strong> Show your own in-app explanation screen <em>before</em> triggering the native prompt. If the user understands why you need notifications, they're more likely to allow — and you only get one shot.
+    </div>
+  </div>
+</div>
+
+<!-- COUNTER SCREEN UPDATE -->
+<div class="card">
+  <div class="ch"><div class="bar" style="background:var(--amber)"></div><h2>counter/index.tsx — Request Permission Button</h2><span class="pill bg-amber">Code</span></div>
+  <div class="cb">
+    <div class="code">
+<span class="kw">import</span> { Text, View, StyleSheet, TouchableOpacity } <span class="kw">from</span> <span class="str">"react-native"</span>;
+<span class="kw">import</span> { theme } <span class="kw">from</span> <span class="str">"../../theme"</span>;
+<span class="kw">import</span> { registerForPushNotificationsAsync }
+  <span class="kw">from</span> <span class="str">"../../utils/registerForPushNotificationsAsync"</span>;
+
+<span class="kw">export default function</span> <span class="fn">CounterScreen</span>() {
+  <span class="kw">const</span> <span class="fn">handleRequestPermission</span> = <span class="kw">async</span> () => {
+    <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">registerForPushNotificationsAsync</span>();
+    console.<span class="fn">log</span>(<span class="str">"Permission:"</span>, result);  <span class="cm">// "granted" | "denied" | null (simulator)</span>
+  };
+
+  <span class="kw">return</span> (
+    <span class="kw">&lt;View</span> <span class="prop">style</span>={styles.container}<span class="kw">&gt;</span>
+      <span class="kw">&lt;TouchableOpacity</span>
+        <span class="prop">onPress</span>={handleRequestPermission}
+        <span class="prop">style</span>={styles.button}
+        <span class="prop">activeOpacity</span>={<span class="num">0.8</span>}
+      <span class="kw">&gt;</span>
+        <span class="kw">&lt;Text</span> <span class="prop">style</span>={styles.buttonText}<span class="kw">&gt;</span>Request permission<span class="kw">&lt;/Text&gt;</span>
+      <span class="kw">&lt;/TouchableOpacity&gt;</span>
+    <span class="kw">&lt;/View&gt;</span>
+  );
+}
+    </div>
+
+    <div class="warn" style="margin-top:10px">
+      ⚠️ <strong>fontWeight must be a string.</strong> <code>fontWeight: 700</code> (number) crashes on Android. Always use <code>fontWeight: "bold"</code> or <code>"700"</code> (string). Works fine on iOS but crashes Android silently.
+    </div>
+
+    <div class="mini" style="margin-top:10px">
+      <div class="lbl" style="color:var(--violet)">Android channel — why it's required</div>
+      <p>Android 8.0+ groups notifications by channel. Android 13+ requires at least one channel to exist before the permission prompt will even appear. The utility handles this automatically with <code>setNotificationChannelAsync</code> before requesting permission.</p>
+    </div>
+
+    <div class="tags" style="margin-top:10px">
+      <span class="tag bg-cyan">expo-notifications</span>
+      <span class="tag bg-violet">expo-device</span>
+      <span class="tag bg-green">registerForPushNotificationsAsync</span>
+      <span class="tag bg-amber">getPermissionsAsync</span>
+      <span class="tag bg-pink">setNotificationChannelAsync</span>
+      <span class="tag bg-red">ask-once rule</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

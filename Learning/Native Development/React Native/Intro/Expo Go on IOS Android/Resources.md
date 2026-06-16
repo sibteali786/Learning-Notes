@@ -31,3 +31,9 @@ https://www.nativewind.dev/
 https://docs.expo.dev/push-notifications/overview/
 ### Send Push Notifications
 https://docs.expo.dev/push-notifications/sending-notifications/
+
+### Push Notifications Documentation
+https://docs.expo.dev/versions/latest/sdk/notifications/
+
+### How to work with env variables
+https://docs.expo.dev/eas/environment-variables/?redirected
