@@ -4,22 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "8dd39ac8814760a0",
+        "id": "4514168da40a4be4",
         "type": "tabs",
         "children": [
           {
-            "id": "5dd432108f589204",
+            "id": "d7377bc38c800da3",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/Backend Engineering/Python/Oop/asteroid-game-summary.html"
+                "file": "Learning/DSA/DFS/Sum Root to Leaf Numbers.excalidraw.md"
               },
-              "icon": "code-glyph",
-              "title": "asteroid-game-summary"
+              "icon": "excalidraw-icon",
+              "title": "Sum Root to Leaf Numbers.excalidraw"
+            }
+          },
+          {
+            "id": "41b419d083677821",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/DFS/MaxDepth.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "MaxDepth.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -51,7 +64,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "Tree Traversal",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -76,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5
+    "width": 308.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -92,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +115,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks for 2-First SQL Query.excalidraw"
             }
           },
           {
@@ -140,13 +153,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Database/Database Design/2-Related Table and More SQL/Keys, Joins.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Maryam's Things"
+              "title": "Outline of Keys, Joins.excalidraw"
             }
           },
           {
@@ -181,53 +194,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "5dd432108f589204",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/Backend Engineering/Python/Oop/Drawing 2026-06-16 16.17.37.excalidraw.md",
-    "Personal/Maryam's Things.md",
-    "Learning/Backend Engineering/Python/Oop/asteroid-game-summary.html",
-    "Learning/Backend Engineering/Python/Oop",
-    "Learning/Backend Engineering/Python",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs/Pasted image 20260608215516.png",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs/PMS-Integration Guide.md",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/4-rn-schedule-notification-schedule.html",
-    "graphql-summary.html",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Screenshot 2026-06-12 at 10.29.20 AM.png",
-    "Learning/System Design/Practice/Bitly/practice guided/Guided Practice.excalidraw.md",
-    "Learning/System Design/Practice/Bitly/practice guided",
+    "Learning/Backend Engineering/Python/Oop/asteroid-game-summary.html",
+    "Learning/Backend Engineering/Python/Oop",
+    "Learning/Backend Engineering/Python",
+    "Learning/DSA/DFS/Sum Root to Leaf Numbers.excalidraw.md",
+    "Learning/DSA/DFS/MaxDepth.excalidraw.md",
+    "Learning/DSA/DFS/dfs-tree.html",
     "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
     "Learning/System Design/Practice/Bitly/Bit.ly.excalidraw",
-    "Learning/System Design/Practice/Bitly",
-    "Learning/System Design/Practice",
+    "Learning/System Design/Practice/Bitly/practice guided/Guided Practice.excalidraw.md",
+    "Learning/System Design/Practice/Bitly/practice guided",
+    "Learning/Freelance/upwork/Tips.md",
+    "Learning/Freelance/upwork",
+    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
+    "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
+    "Learning/JavaScript/Drawing 2026-06-15 22.31.53.excalidraw.md",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-07-31_at_6.50.35_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-04-16_at_12.00.27_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-27_at_8.11.40_AM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/image.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-18_at_7.45.27_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/JavaScript/JavaScript DSA/attachments/Kubernetes path ce7a68365a764555b24021ec7a6a7469.md",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-15_at_2.03.57_PM.png",
+    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-01_at_12.00.55_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Untitled.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Untitled 9.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Untitled 8.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Untitled 7.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Untitled 6.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Untitled 5.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Kubernetes path ce7a68365a764555b24021ec7a6a7469.md",
-    "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
-    "Learning/JavaScript/Drawing 2026-06-15 22.31.53.excalidraw.md",
-    "Learning/JavaScript/Coding/Hooks/useDefault.excalidraw.md",
-    "Learning/JavaScript/Coding/Hooks/useBoolean.excalidraw.md",
-    "Learning/JavaScript/Coding/Deep Clone/DeepCloneII.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
-    "Learning/Freelance/upwork/Tips.md",
-    "Learning/DSA/LinkedList/Drawing 2026-06-12 10.29.06.excalidraw.md",
+    "Learning/JavaScript/Coding/getElementBy../getElementByStyle.excalidraw.md",
     "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md",
-    "Learning/DSA/Binary Search/6-Smallest Divisor Given Threshold.excalidraw.md",
-    "Learning/AI&ML Engineering/Ai Agents Fundamentals/8-Web Search and Context/Resources.md",
-    "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/Resources.md",
-    "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
-    "Learning/Side Projects/HospitalityOS/Concerns.md",
-    "Learning/Book Reading/Atomic Habbits.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
-    "Learning/Freelance/Builders's Website/Builders Website.md",
-    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
-    "Learning/JavaScript/Coding/Deep Clone/deepclone.md",
+    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.allSettled.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.any.excalidraw.md",
+    "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
+    "Learning/JavaScript/Coding/Throttle.excalidraw.md",
+    "Learning/JavaScript/Coding/Flatten.excalidraw.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
+    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Preparation/Drawing 2026-06-11 10.00.21.excalidraw.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
