@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Goroutines & Fan-In — nclip notes</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --panel:#11161d;
+    --line:#22282f;
+    --text:#d8dee4;
+    --muted:#7d8590;
+    --accent:#39d98a;
+    --accent-dim:#1d6b46;
+    --bad:#e5534b;
+    --mono:'SF Mono','JetBrains Mono','Fira Code',Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:14.5px;
+    line-height:1.55;
+    padding:32px 18px 60px;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+  .tag{
+    display:inline-block;
+    color:var(--accent);
+    border:1px solid var(--accent-dim);
+    background:rgba(57,217,138,0.08);
+    padding:2px 8px;
+    border-radius:4px;
+    font-size:11px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  h1{
+    font-size:22px;
+    margin:14px 0 4px;
+    color:#fff;
+  }
+  .sub{color:var(--muted);margin-bottom:28px;font-size:13px;}
+  .prompt::before{content:"$ ";color:var(--accent);}
+  section{margin-bottom:34px;}
+  h2{
+    font-size:15px;
+    color:var(--accent);
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  h2 .n{
+    color:var(--muted);
+    font-size:12px;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px 20px;
+  }
+  .def-box{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+  }
+  .def-box .glyph{
+    flex:0 0 auto;
+    font-size:26px;
+    color:var(--accent);
+    line-height:1;
+    padding-top:2px;
+  }
+  code, .code{
+    color:#e6b450;
+    background:rgba(255,255,255,0.04);
+    padding:1px 5px;
+    border-radius:4px;
+    font-size:13px;
+  }
+
+  /* analogy scene */
+  .scene{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:6px;
+  }
+  .card{
+    background:#0a0e13;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+    position:relative;
+  }
+  .card .role{
+    position:absolute;
+    top:-10px;
+    left:12px;
+    background:var(--bg);
+    padding:0 6px;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.03em;
+  }
+  .card h3{
+    margin:6px 0 8px;
+    font-size:14px;
+    color:#fff;
+  }
+  .card p{margin:0;color:var(--text);font-size:13px;}
+  .card .maps-to{
+    margin-top:10px;
+    font-size:11.5px;
+    color:var(--accent);
+  }
+  .full{grid-column:1 / -1;}
+
+  .timeline{
+    margin-top:22px;
+    border-left:2px solid var(--accent-dim);
+    padding-left:18px;
+  }
+  .tl-step{
+    position:relative;
+    padding-bottom:18px;
+  }
+  .tl-step:last-child{padding-bottom:0;}
+  .tl-step::before{
+    content:"";
+    position:absolute;
+    left:-24px;
+    top:3px;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--accent);
+  }
+  .tl-step b{color:#fff;}
+  .tl-step .who{
+    display:inline-block;
+    font-size:10.5px;
+    color:var(--bg);
+    background:var(--accent);
+    border-radius:3px;
+    padding:1px 6px;
+    margin-right:6px;
+    font-weight:bold;
+  }
+  .tl-step .who.timer{background:#e0a93b;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  th{
+    text-align:left;
+    color:var(--muted);
+    font-weight:normal;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    border-bottom:1px solid var(--line);
+    padding:6px 10px;
+  }
+  td{
+    padding:9px 10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  tr:last-child td{border-bottom:none;}
+
+  .usecases{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .uc{
+    border-radius:8px;
+    padding:14px 16px;
+    border:1px solid var(--line);
+  }
+  .uc.good{border-color:var(--accent-dim);background:rgba(57,217,138,0.05);}
+  .uc.bad{border-color:#5c2b28;background:rgba(229,83,75,0.05);}
+  .uc h3{
+    margin:0 0 10px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .uc.good h3{color:var(--accent);}
+  .uc.bad h3{color:var(--bad);}
+  .uc ul{margin:0;padding-left:18px;}
+  .uc li{margin-bottom:8px;font-size:13px;}
+  .uc li .why{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;}
+
+  .footer-note{
+    margin-top:30px;
+    color:var(--muted);
+    font-size:12px;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  @media (max-width:600px){
+    .scene, .usecases{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="tag">nclip / internal / discovery</span>
+  <h1>Goroutines & the Fan-In Pattern</h1>
+  <div class="sub prompt">recall goroutines.md</div>
+
+  <section>
+    <h2><span class="n">01</span> What is a goroutine, actually</h2>
+    <div class="panel def-box">
+      <div class="glyph">⟶</div>
+      <div>
+        <p style="margin:0 0 8px;">A <b style="color:#fff">goroutine</b> is a lightweight thread managed by the <b>Go runtime</b>, not the OS. Starting one is just:</p>
+        <code>go func(){ ... }()</code>
+        <p style="margin:10px 0 0;color:var(--muted);">The call returns <b>immediately</b> — the caller does not wait. The function body runs concurrently, scheduled by Go itself (cheap enough to spin up thousands of them).</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span> Real-world analogy — the party doorbell</h2>
+    <p style="color:var(--muted);margin-top:-6px;">You shout into the hallway: <i>"Anyone who wants to join, knock in the next 10 minutes!"</i> Then you go back inside.</p>
+
+    <div class="scene">
+      <div class="card">
+        <span class="role">the shout</span>
+        <h3>resolver.Browse(ctx, …)</h3>
+        <p>Tells the mDNS library to start listening on the network. Doesn't block — hands off the work and returns to you right away.</p>
+        <div class="maps-to">→ fires off the search, non-blocking</div>
+      </div>
+
+      <div class="card">
+        <span class="role">the doorbell</span>
+        <h3>entries channel</h3>
+        <p>Rings every time a device on the network responds. Could ring 0 times, once, or 10 times — timing is unknown in advance.</p>
+        <div class="maps-to">→ chan *zeroconf.ServiceEntry</div>
+      </div>
+
+      <div class="card">
+        <span class="role">the helper at the door</span>
+        <h3>the goroutine</h3>
+        <p>Sits by the door the whole time. Every ring, they open it, write the guest's name into the guestbook. Nothing else on their plate.</p>
+        <div class="maps-to">→ go func(){ for entry := range entries {...} }()</div>
+      </div>
+
+      <div class="card">
+        <span class="role">you</span>
+        <h3>ctx.Done()</h3>
+        <p>You're not answering the door — you're watching a kitchen timer set for 10 minutes. When it beeps, you stop caring about new knocks.</p>
+        <div class="maps-to">→ &lt;-ctx.Done() unblocks on timeout/cancel</div>
+      </div>
+
+      <div class="card full">
+        <span class="role">why you need both, at once</span>
+        <p>If <i>you</i> had to both answer the door <b>and</b> watch the timer, you'd fail at one: stuck waiting for the next knock means missing the beep, and vice-versa. So the job is split — the <b style="color:var(--accent)">goroutine reacts to events whenever they happen</b>, while the <b style="color:var(--accent)">main function just watches the clock</b>. This is exactly why <code>Browse</code> needs a separate goroutine draining <code>entries</code> concurrently with the 10s wait.</p>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-step"><span class="who">main</span> calls <b>Browse</b> → tells zeroconf to start listening (the shout).</div>
+      <div class="tl-step"><span class="who">main</span> launches the door-watcher goroutine, then itself just sits on <b>&lt;-ctx.Done()</b> (the timer).</div>
+      <div class="tl-step"><span class="who timer">x N</span> for up to 10s, any responding device rings the doorbell (<code>entries</code>) — goroutine logs each into <code>found</code>.</div>
+      <div class="tl-step"><span class="who timer">timer</span> beeps → main stops waiting, returns whatever's in <code>found</code> — regardless of whether the goroutine is mid-write (the known race note).</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span> Fan-in pattern — why it's needed here</h2>
+    <div class="panel">
+      <p style="margin-top:0;"><b style="color:#fff">Fan-in</b> = multiple concurrent sources feeding into one consumer/destination.</p>
+      <table>
+        <tr><th>Role</th><th>In this code</th></tr>
+        <tr><td>Producer(s)</td><td>zeroconf's internal browsing — pushes to <code>entries</code> asynchronously, any time over 10s</td></tr>
+        <tr><td>Consumer</td><td>our goroutine — drains <code>entries</code>, writes into <code>found</code></td></tr>
+        <tr><td>Why a channel</td><td><code>resolver.Browse</code> can't know in advance how many devices respond or when — a channel is Go's idiomatic way to stream an unknown count of results over time</td></tr>
+        <tr><td>Why a goroutine specifically</td><td>a channel is useless unless something consumes it <i>concurrently</i> with the timeout being tracked elsewhere</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span> Good vs. bad goroutine use cases</h2>
+    <div class="usecases">
+      <div class="uc good">
+        <h3>✓ good fits</h3>
+        <ul>
+          <li>Waiting on a long-lived cancellation signal
+            <span class="why">e.g. <code>&lt;-ctx.Done()</code> to call Shutdown() later — exactly the Register() case</span>
+          </li>
+          <li>Draining a channel while something else tracks a timeout
+            <span class="why">the fan-in pattern above</span>
+          </li>
+          <li>Independent I/O that can run in parallel
+            <span class="why">fetching from 5 APIs at once instead of sequentially</span>
+          </li>
+          <li>Background workers pulling off a shared job queue
+            <span class="why">worker pool pattern — N goroutines, 1 channel of jobs</span>
+          </li>
+          <li>Fire-and-forget side effects
+            <span class="why">writing a log line, sending a metric — caller shouldn't block on it</span>
+          </li>
+        </ul>
+      </div>
+      <div class="uc bad">
+        <h3>✗ bad fits / footguns</h3>
+        <ul>
+          <li>Spawning one with no way to know when it's done
+            <span class="why">leaks silently — no <code>sync.WaitGroup</code>, no channel signal, no context</span>
+          </li>
+          <li>Mutating a shared variable from multiple goroutines without a lock
+            <span class="why">exactly the <code>found</code> race note above — works by luck of timing, not by guarantee</span>
+          </li>
+          <li>Goroutine-per-item for things that finish in microseconds
+            <span class="why">scheduling overhead can cost more than the work itself</span>
+          </li>
+          <li>Forgetting to close the channel a goroutine ranges over
+            <span class="why"><code>entries</code> here never gets closed — goroutine technically lingers past return</span>
+          </li>
+          <li>Using a goroutine just to "feel async" with no concurrency need
+            <span class="why">if nothing else is happening at the same time, you've only added complexity</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">
+    nclip · internal/discovery · grandcat/zeroconf · reference: Browse() / Register() — Phase 1 discovery notes
+  </div>
+
+</div>
+</body>
+</html>

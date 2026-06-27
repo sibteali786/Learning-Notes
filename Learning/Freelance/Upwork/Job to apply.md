@@ -1,0 +1,8 @@
+- The client has good reviews
+- The client’s past hourly rate average matches your demands
+- The client has successfully completed contracts in the past
+- The job has a well laid out job description
+- The client has good hiring ratio – if someone has 500 jobs open and only 5% hire rate, don’t waste your time
+- The client has decent spending history
+- Don’t waste effort on a job that asks too many questions, usually not worth the time
+- Lastly, don’t fall for scam posts – Yes, they happen, keep an eye out for something too good to be true

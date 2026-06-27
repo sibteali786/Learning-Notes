@@ -4,35 +4,34 @@
     "type": "split",
     "children": [
       {
-        "id": "4514168da40a4be4",
+        "id": "f00b07e0db1b82cc",
         "type": "tabs",
         "children": [
           {
-            "id": "0fa9e93e674783b2",
+            "id": "ba88f94e9b67dc4a",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/DSA/DFS/3-PathSum.excalidraw.md"
+                "file": "Learning/Prgamatism/Tips.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "3-PathSum.excalidraw"
-            }
-          },
-          {
-            "id": "18fbc635c80d6a56",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/DSA/DFS/4-Validate Binary Search Tree.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "4-Validate Binary Search Tree.excalidraw"
+              "icon": "lucide-file",
+              "title": "Tips"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -89,8 +88,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 308.50390243530273,
-    "collapsed": true
+    "width": 308.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -154,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Database/Database Design/2-Related Table and More SQL/Keys, Joins.excalidraw.md",
+                "file": "Learning/Prgamatism/Tips.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Keys, Joins.excalidraw"
+              "title": "Outline of Tips"
             }
           },
           {
@@ -195,54 +193,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "18fbc635c80d6a56",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/DSA/DFS/3-PathSum.excalidraw.md",
-    "Learning/DSA/DFS/4-Validate Binary Search Tree.excalidraw.md",
+    "Learning/Prgamatism/Knowledge Portfolio.md",
+    "Learning/Prgamatism/Drawing 2026-06-27 17.39.21.excalidraw.md",
+    "Learning/Prgamatism/Knowlegde Portfolio.md",
+    "Learning/Prgamatism/Tips.md",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/Prgamatism",
+    "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Application Layer.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/ComnDeepDives.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Load Balancing.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Network Layer.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Transport Layer Protocols.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Networking.md",
+    "Learning/System Design/Core Concepts/1-Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
+    "Learning/Freelance/Upwork/Job to apply.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
+    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/RateLimitingTechniques.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/REST.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Remote Procedure Call (RPC).excalidraw.md",
+    "Learning/Freelance/Upwork/Tips.md",
+    "Learning/Go Lang/Projects/nclip/goroutines.html",
+    "Learning/Go Lang/Projects/nclip",
+    "Learning/Go Lang/Projects",
+    "Pasted Image 20260621130431_558.png",
+    "Pasted Image 20260621125127_166.png",
     "Pasted Image 20260621111658_267.png",
-    "Learning/DSA/DFS/2-Sum Root to Leaf Numbers.excalidraw.md",
-    "Learning/DSA/DFS/1-MaxDepth.excalidraw.md",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs/Pasted image 20260608215516.png",
-    "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs/PMS-Integration Guide.md",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/4-rn-schedule-notification-schedule.html",
     "Learning/Backend Engineering/Python/Oop/asteroid-game-summary.html",
     "Learning/Backend Engineering/Python/Oop",
     "Learning/Backend Engineering/Python",
     "Learning/DSA/DFS/dfs-tree.html",
-    "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
-    "Learning/System Design/Practice/Bitly/Bit.ly.excalidraw",
-    "Learning/System Design/Practice/Bitly/practice guided/Guided Practice.excalidraw.md",
-    "Learning/System Design/Practice/Bitly/practice guided",
-    "Learning/Freelance/upwork/Tips.md",
-    "Learning/Freelance/upwork",
-    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
-    "Learning/JavaScript/JavaScript DSA/JavaScript DSA.md",
-    "Learning/JavaScript/Drawing 2026-06-15 22.31.53.excalidraw.md",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-07-31_at_6.50.35_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-04-16_at_12.00.27_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-27_at_8.11.40_AM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/image.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-18_at_7.45.27_PM.png",
-    "Learning/JavaScript/JavaScript DSA/attachments",
-    "Learning/JavaScript/Javascript.md",
-    "Learning/JavaScript/JavaScript DSA/attachments/Kubernetes path ce7a68365a764555b24021ec7a6a7469.md",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-15_at_2.03.57_PM.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-01_at_12.00.55_PM.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Untitled.png",
-    "Learning/JavaScript/Coding/getElementBy../getElementByStyle.excalidraw.md",
-    "Learning/DSA/Binary Search/7-Minimum Shipping Capacity.excalidraw.md",
-    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise/Promise.allSettled.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise/Promise.any.excalidraw.md",
-    "Learning/JavaScript/Coding/Promise/Promise.race.excalidraw.md",
-    "Learning/JavaScript/Coding/Throttle.excalidraw.md",
-    "Learning/JavaScript/Coding/Flatten.excalidraw.md",
-    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
-    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Drawing 2026-06-11 10.00.21.excalidraw.md",
-    "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
