@@ -219,7 +219,7 @@
 
   <span class="tag">nclip / internal / discovery</span>
   <h1>Goroutines & the Fan-In Pattern</h1>
-  <div class="sub prompt">recall goroutines.md</div>
+  <div class="sub prompt">recall goroutines.md · lib switched: hashicorp/mdns (was grandcat/zeroconf)</div>
 
   <section>
     <h2><span class="n">01</span> What is a goroutine, actually</h2>
@@ -276,7 +276,13 @@
       <div class="tl-step"><span class="who">main</span> calls <b>Browse</b> → tells zeroconf to start listening (the shout).</div>
       <div class="tl-step"><span class="who">main</span> launches the door-watcher goroutine, then itself just sits on <b>&lt;-ctx.Done()</b> (the timer).</div>
       <div class="tl-step"><span class="who timer">x N</span> for up to 10s, any responding device rings the doorbell (<code>entries</code>) — goroutine logs each into <code>found</code>.</div>
-      <div class="tl-step"><span class="who timer">timer</span> beeps → main stops waiting, returns whatever's in <code>found</code> — regardless of whether the goroutine is mid-write (the known race note).</div>
+      <div class="tl-step"><span class="who timer">timer</span> beeps (library's own <code>params.Timeout</code> this time, not a manual <code>ctx.WithTimeout</code>) → <code>QueryContext</code> returns.</div>
+      <div class="tl-step"><span class="who">main</span> calls <code>close(entries)</code> — tells the door-helper "no more guests coming," so their <code>for range</code> loop can exit instead of leaking.</div>
+      <div class="tl-step"><span class="who">main</span> waits on <code>&lt;-done</code> — makes sure the helper actually finished writing the last name into the guestbook before reading it. <b style="color:var(--accent)">This is the fix</b> for the old race note.</div>
+    </div>
+
+    <div class="panel" style="margin-top:14px;border-color:var(--accent-dim);background:rgba(57,217,138,0.05);">
+      <p style="margin:0;font-size:13px;"><b style="color:var(--accent)">Library switch (hashicorp/mdns):</b> same shout/doorbell/helper/timer shape as before, but two upgrades — (1) the grace window is now handled inside the library itself via <code>params.Timeout</code>, no manual <code>context.WithTimeout</code> needed; (2) a second channel, <code>done</code>, added so the main function can confirm the helper goroutine is truly finished before reading <code>found</code>, closing the leak <i>and</i> the race in one move.</p>
     </div>
   </section>
 
@@ -315,6 +321,9 @@
           <li>Fire-and-forget side effects
             <span class="why">writing a log line, sending a metric — caller shouldn't block on it</span>
           </li>
+          <li>Waiting on a <code>done</code> channel for goroutine completion
+            <span class="why">how the mdns version fixes the old leak — <code>close(entries)</code> then <code>&lt;-done</code> before reading shared state</span>
+          </li>
         </ul>
       </div>
       <div class="uc bad">
@@ -323,14 +332,14 @@
           <li>Spawning one with no way to know when it's done
             <span class="why">leaks silently — no <code>sync.WaitGroup</code>, no channel signal, no context</span>
           </li>
-          <li>Mutating a shared variable from multiple goroutines without a lock
-            <span class="why">exactly the <code>found</code> race note above — works by luck of timing, not by guarantee</span>
+          <li>Mutating a shared variable from multiple goroutines without a lock or sync point
+            <span class="why">old zeroconf version's race: read <code>found</code> right after timeout fired, no guarantee writer was done — fixed now via <code>done</code> channel</span>
           </li>
           <li>Goroutine-per-item for things that finish in microseconds
             <span class="why">scheduling overhead can cost more than the work itself</span>
           </li>
-          <li>Forgetting to close the channel a goroutine ranges over
-            <span class="why"><code>entries</code> here never gets closed — goroutine technically lingers past return</span>
+          <li>Forgetting to close a channel a goroutine ranges over <span class="code" style="color:var(--muted);">(fixed ✓)</span>
+            <span class="why">old: <code>entries</code> in zeroconf version never closed. new: <code>close(entries)</code> added — loop exits cleanly</span>
           </li>
           <li>Using a goroutine just to "feel async" with no concurrency need
             <span class="why">if nothing else is happening at the same time, you've only added complexity</span>
@@ -341,7 +350,7 @@
   </section>
 
   <div class="footer-note">
-    nclip · internal/discovery · grandcat/zeroconf · reference: Browse() / Register() — Phase 1 discovery notes
+    nclip · internal/discovery · hashicorp/mdns (was grandcat/zeroconf) · reference: Browse() / Register()
   </div>
 
 </div>
