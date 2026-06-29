@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "f00b07e0db1b82cc",
+        "id": "dad2beed5b893011",
         "type": "tabs",
         "children": [
           {
-            "id": "ba88f94e9b67dc4a",
+            "id": "99c090d7220125bf",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/Go Lang/Projects/nclip/goroutines-explained.html"
+                "file": "Learning/DSA/DFS/5-Binary-tree-tilt.excalidraw.md"
               },
-              "icon": "code-glyph",
-              "title": "goroutines-explained"
+              "icon": "excalidraw-icon",
+              "title": "5-Binary-tree-tilt.excalidraw"
             }
           }
         ]
@@ -76,7 +76,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 308.50390243530273
+    "width": 536.5110359191895,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,10 +182,15 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "ba88f94e9b67dc4a",
+  "active": "99c090d7220125bf",
   "lastOpenFiles": [
-    "Learning/Go Lang/Projects/nclip/goroutines.html",
+    "Learning/DSA/DFS/4-Validate Binary Search Tree.excalidraw.md",
+    "Learning/DSA/DFS/5-Binary-tree-tilt.excalidraw.md",
+    "Learning/Go Lang/Projects/nclip/phase_1-Task1-5/phase1-tasks-explained.html",
     "Learning/Go Lang/Projects/nclip/goroutines-explained.html",
+    "Learning/Go Lang/Projects/nclip/phase_1-Task1-5",
+    "Learning/Go Lang/Projects/nclip/goroutines-explained 1.html",
+    "Learning/Go Lang/Projects/nclip/goroutines.html",
     "Learning/Side Projects/GO Projects.md",
     "Learning/Prgamatism/Tips.md",
     "Learning/Prgamatism/Knowledge Portfolio.md",
@@ -210,7 +216,6 @@
     "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
     "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
     "Learning/System Design/Core Concepts/2-API Design/RateLimitingTechniques.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/REST.excalidraw.md",
     "Learning/Go Lang/Projects/nclip",
     "Learning/Go Lang/Projects",
     "Pasted Image 20260621130431_558.png",
@@ -219,10 +224,6 @@
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs/Pasted image 20260608215516.png",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Channex Docs",
     "Learning/Native Development/React Native/Intro/Expo Go on IOS Android/5-Device-Interactions/4-rn-schedule-notification-schedule.html",
-    "Learning/Backend Engineering/Python/Oop/asteroid-game-summary.html",
-    "Learning/Backend Engineering/Python/Oop",
-    "Learning/Backend Engineering/Python",
-    "Learning/DSA/DFS/dfs-tree.html",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-07-31_at_6.50.35_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-04-16_at_12.00.27_PM.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Screenshot_2024-02-27_at_8.11.40_AM.png",

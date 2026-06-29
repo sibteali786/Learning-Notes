@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>nclip — Phase 1 (Tasks 1-5) Explained for a JS Engineer</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#11161d; --line:#22282f; --text:#d8dee4; --muted:#7d8590;
+    --accent:#39d98a; --accent-dim:#1d6b46; --blue:#58a6ff; --gold:#e6b450; --bad:#e5534b;
+    --mono:'SF Mono','JetBrains Mono','Fira Code',Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14.5px;line-height:1.6;padding:32px 18px 70px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  .tag{display:inline-block;color:var(--accent);border:1px solid var(--accent-dim);background:rgba(57,217,138,0.08);padding:2px 8px;border-radius:4px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;}
+  h1{font-size:23px;margin:14px 0 4px;color:#fff;}
+  .sub{color:var(--muted);margin-bottom:24px;font-size:13px;}
+  .prompt::before{content:"$ ";color:var(--accent);}
+  nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;}
+  nav a{color:var(--blue);text-decoration:none;font-size:12px;border:1px solid var(--line);padding:4px 9px;border-radius:5px;}
+  nav a:hover{border-color:var(--blue);}
+  section{margin-bottom:40px;scroll-margin-top:20px;}
+  h2{font-size:16px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  h2 .n{color:var(--muted);font-size:12px;}
+  h3{font-size:14px;color:#fff;margin:0 0 8px;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 20px;margin-bottom:14px;}
+  code,.code{color:var(--gold);background:rgba(255,255,255,0.04);padding:1px 5px;border-radius:4px;font-size:13px;}
+  .js{color:var(--blue);}
+  .filecard{background:#0a0e13;border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:16px;}
+  .filecard .path{color:var(--muted);font-size:11.5px;margin-bottom:8px;letter-spacing:.02em;}
+  .filecard .path b{color:var(--accent);}
+  .analogy{border-left:3px solid var(--blue);padding:8px 0 8px 14px;margin:10px 0;background:rgba(88,166,255,0.05);border-radius:0 6px 6px 0;}
+  .analogy .lbl{color:var(--blue);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px;}
+  .gotcha{border-left:3px solid var(--gold);padding:8px 0 8px 14px;margin:10px 0;background:rgba(230,180,80,0.05);border-radius:0 6px 6px 0;}
+  .gotcha .lbl{color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;}
+  th{text-align:left;color:var(--muted);font-weight:normal;font-size:11px;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--line);padding:6px 9px;}
+  td{padding:9px 9px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+
+  /* diagrams */
+  .diagram{background:#0a0e13;border:1px solid var(--line);border-radius:8px;padding:22px;margin:14px 0;}
+  .row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .box{border:1px solid var(--line);border-radius:7px;padding:10px 14px;font-size:12.5px;text-align:center;background:var(--panel);min-width:120px;}
+  .box.standalone{border-color:var(--accent-dim);}
+  .box.notyet{border-style:dashed;color:var(--muted);}
+  .box .t{display:block;color:#fff;font-size:12.5px;margin-bottom:2px;}
+  .box .d{display:block;color:var(--muted);font-size:10.5px;}
+  .arrow{color:var(--accent);font-size:16px;}
+  .arrow.dash{color:var(--muted);}
+  .flow-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .flow-step:last-child{border-bottom:none;}
+  .flow-step .num{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;}
+  .flow-step .body b{color:#fff;}
+
+  .res{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .res .card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--panel);}
+  .res .card a{color:var(--blue);text-decoration:none;font-size:13px;font-weight:bold;}
+  .res .card p{margin:6px 0 0;color:var(--muted);font-size:12px;}
+  @media(max-width:640px){.res{grid-template-columns:1fr;}}
+  .footer-note{margin-top:30px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="tag">nclip · Phase 1 · Tasks 1-5</span>
+  <h1>From go.mod to TCP: how the early pieces work</h1>
+  <div class="sub prompt">explained for a JS/Node/React engineer · current real state, not the planned end-state</div>
+
+  <nav>
+    <a href="#bigpicture">Big picture</a>
+    <a href="#map">Dependency map</a>
+    <a href="#setup">go.mod &amp; Makefile</a>
+    <a href="#protocol">protocol</a>
+    <a href="#clipboard">clipboard</a>
+    <a href="#discovery">discovery</a>
+    <a href="#transport">transport/lan</a>
+    <a href="#cmd">cmd entrypoints</a>
+    <a href="#flow">End-to-end flow (planned)</a>
+    <a href="#resources">Resources</a>
+  </nav>
+
+  <section id="bigpicture">
+    <h2><span class="n">00</span> The big picture, in npm/Node terms</h2>
+    <table>
+      <tr><th>Go thing</th><th>Closest JS/Node equivalent</th><th>Note</th></tr>
+      <tr><td><code>go.mod</code></td><td><span class="js">package.json</span></td><td>module name + Go version + dependency list, all in one file</td></tr>
+      <tr><td><code>go.sum</code> (not in repomix, but exists)</td><td><span class="js">package-lock.json</span></td><td>exact versions + hashes, for reproducible builds</td></tr>
+      <tr><td><code>internal/</code> folder</td><td>nothing built-in quite like it — closest is a lint rule</td><td>the Go <b>compiler itself</b> blocks any code outside this module from importing anything under <code>internal/</code>. Not a convention, an enforced rule.</td></tr>
+      <tr><td><code>cmd/xxx/main.go</code></td><td>multiple <span class="js">"bin"</span> entries in package.json</td><td>each folder under <code>cmd/</code> compiles to its <b>own standalone binary</b> — <code>nclip</code> (CLI), <code>nclipd</code> (daemon), <code>nclip-relay</code> (server)</td></tr>
+      <tr><td><code>Makefile</code></td><td><span class="js">"scripts"</span> in package.json</td><td><code>build</code>/<code>vet</code>/<code>fmt</code> ≈ <code>build</code>/<code>lint</code>/<code>format</code></td></tr>
+      <tr><td>compiled binary</td><td>n/a — Node ships source + node_modules</td><td>Go compiles everything (including deps) into <b>one static executable</b>. No runtime install step on the target machine.</td></tr>
+    </table>
+  </section>
+
+  <section id="map">
+    <h2><span class="n">01</span> Module dependency map — what's actually wired up today</h2>
+    <p style="color:var(--muted);margin-top:-4px;">Important: only <b>one</b> real internal dependency exists right now. Everything else is an independent, tested unit sitting on the shelf — the daemon task (later) is what wires them together via the Unix socket. Don't read more integration into the code than exists yet.</p>
+    <div class="diagram">
+      <div class="row">
+        <div class="box notyet"><span class="t">cmd/nclipd</span><span class="d">empty stub — wiring happens later</span></div>
+      </div>
+      <div class="row"><span class="arrow dash">┊ (planned, not yet)</span></div>
+      <div class="row">
+        <div class="box standalone"><span class="t">internal/discovery</span><span class="d">Register / Browse — no internal deps</span></div>
+        <div class="box"><span class="t">internal/transport/lan</span><span class="d">Listen / Send</span></div>
+        <div class="box standalone"><span class="t">internal/clipboard</span><span class="d">Read / Write — no internal deps</span></div>
+      </div>
+      <div class="row">
+        <span class="arrow">↓ imports</span>
+      </div>
+      <div class="row">
+        <div class="box"><span class="t">internal/protocol</span><span class="d">Encode / Decode the wire message</span></div>
+      </div>
+    </div>
+    <div class="gotcha"><span class="lbl">Note</span>Only <code>transport/lan</code> imports <code>protocol</code> today (confirmed in <code>lan.go</code>'s import block). <code>discovery</code> and <code>clipboard</code> are self-contained — by design, per the earlier "discovery answers <i>who</i>, protocol answers <i>what</i>" separation.</div>
+  </section>
+
+  <section id="setup">
+    <h2><span class="n">02</span> go.mod &amp; Makefile</h2>
+    <div class="filecard">
+      <div class="path">📄 <b>go.mod</b></div>
+      <p>Declares: module path (<code>github.com/sibteali786/nclip</code> — this doubles as the import prefix every internal package uses), the Go version, and two direct dependencies (<code>atotto/clipboard</code>, <code>hashicorp/mdns</code>).</p>
+      <div class="analogy"><span class="lbl">JS analogy</span>Same role as <code>package.json</code>'s <code>name</code> + <code>dependencies</code> fields combined. The <code>// indirect</code> comments mark <b>transitive</b> deps — packages your direct deps need, that you never call yourself. npm hides these inside <code>node_modules</code>/lockfile; Go surfaces them right in the manifest.</div>
+      <div class="gotcha"><span class="lbl">Why miekg/dns shows up</span><code>hashicorp/mdns</code> needs it because mDNS packets <i>are</i> regular DNS-format packets, just sent over multicast instead of to a resolver — same wire format, different delivery mechanism. That's why a "DNS" library underlies "service discovery."</div>
+    </div>
+    <div class="filecard">
+      <div class="path">📄 <b>Makefile</b></div>
+      <p><code>build</code> → <code>go build ./...</code>, <code>vet</code> → <code>go vet ./...</code> (static analysis, catches bugs <code>gofmt</code> can't), <code>fmt</code> → <code>gofmt -l .</code> (lists files not matching Go's canonical formatting).</p>
+      <div class="analogy"><span class="lbl">JS analogy</span><code>vet</code> ≈ ESLint's logic rules; <code>fmt</code> ≈ Prettier — except <code>gofmt</code> isn't configurable. There's exactly one canonical Go style, enforced by the toolchain itself, not a config file you can tweak.</div>
+    </div>
+  </section>
+
+  <section id="protocol">
+    <h2><span class="n">03</span> internal/protocol — the wire message format</h2>
+    <div class="filecard">
+      <div class="path">📄 <b>internal/protocol/message.go</b></div>
+      <h3>What it does</h3>
+      <p>Defines the envelope every message sent between machines must have, and the functions to build/read it.</p>
+      <pre style="background:#0a0e13;padding:10px 14px;border-radius:6px;overflow-x:auto;font-size:12.5px;border:1px solid var(--line);">type Message struct {
+    Type      MsgType
+    ID        string
+    Payload   []byte   // ← raw JSON bytes, shape unknown until decoded
+    Timestamp int64
+    SrcDevice string
+}</pre>
+      <div class="analogy"><span class="lbl">JS analogy</span><code>type Message</code> ≈ a TypeScript interface. The interesting part is <code>Payload []byte</code> — it's storing an <b>already-JSON.stringify'd string</b> (as bytes) inside the outer object, not a nested object. Think of it like an envelope/event-bus pattern: <code>{ type: "send", id: "...", payload: "{\"content\":\"hi\"}" }</code> — the outer struct doesn't need to know the payload's shape until something decides to decode it based on <code>Type</code>. Similar to how Redux actions or webhook payloads often carry an opaque <code>data</code> blob keyed by an <code>event</code> field.</div>
+
+      <h3 style="margin-top:16px;">The four functions</h3>
+      <table>
+        <tr><th>Function</th><th>Does</th><th>JS equivalent</th></tr>
+        <tr><td><code>Encode(...)</code></td><td>JSON.stringify's your payload struct, wraps it in <code>Message{}</code> with id/timestamp/src</td><td>a factory function building <code>{type, id, payload: JSON.stringify(data), ...}</code></td></tr>
+        <tr><td><code>DecodePayload(msg, &dst)</code></td><td>unmarshals <code>msg.Payload</code> bytes <i>into</i> <code>dst</code></td><td><code>Object.assign(dst, JSON.parse(msg.payload))</code> — Go mutates the thing you pass a pointer to, rather than returning a fresh parsed value</td></tr>
+        <tr><td><code>MarshalMessage(msg)</code></td><td>JSON-encodes the <i>whole</i> envelope to bytes (for raw wire transmission)</td><td><code>JSON.stringify(msg)</code></td></tr>
+        <tr><td><code>UnmarshalMessage(data)</code></td><td>reverse of above</td><td><code>JSON.parse(data)</code></td></tr>
+      </table>
+      <div class="gotcha"><span class="lbl">Pointer gotcha (the unfamiliar part for JS devs)</span><code>DecodePayload(msg *Message, dst any)</code> takes a <b>pointer</b> to the destination (you call it as <code>DecodePayload(msg, &got)</code>). Go doesn't infer/return a typed value the way <code>JSON.parse&lt;T&gt;()</code> conceptually would in TS — instead it fills in a struct you already created, via its memory address. Mentally: it's like passing a <code>ref</code> object in React and having a function write into <code>ref.current</code> rather than returning a new value.</div>
+      <div class="gotcha"><span class="lbl">Error wrapping</span><code>fmt.Errorf("protocol.DecodePayload type=%s: %w", msg.Type, err)</code> — the <code>%w</code> verb "wraps" the original error so callers can still inspect it later via <code>errors.Is</code>/<code>errors.As</code>. Closest JS parallel: <code>new Error("decode failed", { cause: err })</code> — Go's error-wrapping convention predates JS's <code>cause</code> option by years, same underlying idea.</div>
+    </div>
+  </section>
+
+  <section id="clipboard">
+    <h2><span class="n">04</span> internal/clipboard — OS clipboard wrapper</h2>
+    <div class="filecard">
+      <div class="path">📄 <b>internal/clipboard/clipboard.go</b> — imports <code>github.com/atotto/clipboard</code></div>
+      <p>Three tiny functions: <code>Read()</code>, <code>Write(text)</code>, <code>Supported()</code> — all of them just call straight through to the third-party <code>atotto/clipboard</code> package and wrap its errors with context.</p>
+      <div class="analogy"><span class="lbl">JS analogy</span>Exactly the pattern of writing your own <code>lib/clipboard.ts</code> thin wrapper around an npm package like <code>clipboardy</code>, instead of importing <code>clipboardy</code> directly in ten different files. Under the hood, <code>atotto/clipboard</code> shells out to OS tools — <code>pbcopy</code>/<code>pbpaste</code> on macOS, <code>xclip</code>/<code>xsel</code> on Linux — the same way a Node clipboard package would.</div>
+      <div class="analogy"><span class="lbl">Why wrap it at all</span>If nclip ever needs to switch clipboard libraries (exactly what just happened with mDNS!), only this one file changes — every caller elsewhere in the codebase keeps calling <code>clipboard.Read()</code> unaware of what's underneath. This is the same reasoning behind the PLAN.md's §9 "evaluate both libraries, pick one" — the wrapper insulates that decision.</div>
+      <div class="analogy"><span class="lbl"><code>clipboard.Unsupported</code></span>A boolean flag the library sets if it couldn't find a working clipboard mechanism on this OS (e.g. headless Linux with no X11). <code>Supported()</code> just negates it. JS equivalent: <code>typeof navigator.clipboard !== 'undefined'</code> feature-detection before calling a browser API.</div>
+    </div>
+  </section>
+
+  <section id="discovery">
+    <h2><span class="n">05</span> internal/discovery — recap (full breakdown already covered)</h2>
+    <div class="filecard">
+      <div class="path">📄 <b>internal/discovery/discovery.go</b> — imports <code>github.com/hashicorp/mdns</code></div>
+      <p>You already have the deep-dive on goroutines/fan-in/<code>ctx.Done()</code> for this file from earlier. At the <b>project level</b>, the two functions get called at different points in the lifecycle:</p>
+      <table>
+        <tr><th>Function</th><th>Called when</th><th>Real-world equivalent</th></tr>
+        <tr><td><code>Register</code></td><td>once, at daemon startup — keeps announcing for as long as <code>ctx</code> lives</td><td>like a Chromecast/AirPlay device broadcasting its presence on the LAN so other devices can find it without you typing an IP</td></tr>
+        <tr><td><code>Browse</code></td><td>per-command — <code>devices</code>, <code>ping</code>, or right before <code>send</code> resolves a target name to an address</td><td>like your phone's Wi-Fi settings scanning for nearby AirDrop devices each time you open the share sheet</td></tr>
+      </table>
+      <div class="analogy"><span class="lbl">JS analogy</span>If you've used the npm package <code>bonjour-service</code> or <code>mdns-js</code> for zero-config service discovery in a Node app, this is the exact same mDNS protocol — Go's <code>hashicorp/mdns</code> is just a different language binding to the same multicast-DNS mechanism.</div>
+    </div>
+  </section>
+
+  <section id="transport">
+    <h2><span class="n">06</span> internal/transport/lan — raw TCP, hand-rolled request/response</h2>
+    <div class="filecard">
+      <div class="path">📄 <b>internal/transport/lan/lan.go</b> — imports <code>net</code>, <code>encoding/json</code>, and <b>internal/protocol</b></div>
+
+      <h3>Listen(ctx, port, handler)</h3>
+      <p>Starts a raw TCP server. For every incoming connection, spawns a goroutine that decodes one JSON message and calls your handler.</p>
+      <div class="analogy"><span class="lbl">JS analogy</span><code>net.createServer((socket) => {...}).listen(port)</code> from Node's built-in <code>net</code> module — <b>not</b> Express/HTTP. There's no routing, no headers, no status codes — just raw bytes over a socket. nclip is inventing its own tiny protocol on top of TCP, the same category of thing as writing a custom binary/JSON protocol instead of reaching for HTTP.</div>
+      <div class="gotcha"><span class="lbl">Concurrency model difference (important)</span>Node's <code>net.createServer</code> callback runs on Node's <b>single event loop thread</b> — concurrency comes from non-blocking I/O, not real parallelism. Go's <code>go handleConn(conn, handler)</code> spawns a genuinely independent goroutine per connection, scheduled by the Go runtime across potentially multiple OS threads. Both models let you "handle many connections without manually managing threads," but the mechanism underneath is different: Node is cooperative single-threaded async, Go is real (lightweight) concurrent execution.</div>
+
+      <h3 style="margin-top:14px;">handleConn(conn, handler)</h3>
+      <p><code>json.NewDecoder(conn).Decode(&msg)</code> — reads exactly one JSON object off the connection.</p>
+      <div class="analogy"><span class="lbl">JS analogy</span>Closer to a streaming JSON parser (like the <code>JSONStream</code> npm package) than <code>JSON.parse(fullString)</code>. <code>json.Decoder</code> reads bytes as they arrive and tracks bracket-nesting to know where the JSON object ends — it doesn't need a length-prefix or a fixed buffer size up front.</div>
+
+      <h3 style="margin-top:14px;">Send(addr, msg)</h3>
+      <p>Dials out, JSON-encodes the message, writes it, then <b>synchronously blocks</b> reading back exactly one ack message.</p>
+      <div class="analogy"><span class="lbl">JS analogy</span><code>net.connect(port, host)</code> + manually writing/reading the socket — like rolling your own tiny RPC call instead of using <code>fetch()</code>. Conceptually it's the same shape as a minimal JSON-over-TCP version of what gRPC does with protobuf-over-HTTP/2: a request goes out, the same connection is reused to read the matching response back.</div>
+      <div class="analogy"><span class="lbl"><code>net.DialTimeout</code></span>Equivalent to wrapping <code>net.connect()</code> with <code>AbortSignal.timeout(ms)</code> in modern <code>fetch</code>, or the older manual-<code>setTimeout</code>-plus-<code>socket.destroy()</code> pattern in Node — bounds how long the connection attempt itself can take, separate from how long the whole exchange takes.</div>
+
+      <h3 style="margin-top:14px;">Why this file imports protocol (and nothing else does)</h3>
+      <p>Transport is the one place that actually needs to know <i>both</i> "how to move bytes" (its own job) <i>and</i> "what shape those bytes are" (protocol's job) — it has to encode before sending and decode after receiving. Discovery and clipboard never touch message shape, so they never import it.</p>
+    </div>
+  </section>
+
+  <section id="cmd">
+    <h2><span class="n">07</span> cmd/nclip, cmd/nclipd, cmd/nclip-relay — entrypoints (currently stubs)</h2>
+    <div class="filecard">
+      <p>All three are currently just <code>func main() {}</code> — empty. This is intentional at this point in Phase 1: per §0 Working Agreement ("one task at a time"), the daemon-wiring task comes <i>after</i> the individual pieces (protocol, clipboard, discovery, transport) are each built and tested standalone.</p>
+      <div class="analogy"><span class="lbl">JS analogy</span>Like having three empty <code>index.ts</code> files as placeholders for three separate <code>bin</code> targets in package.json, before you've actually imported and wired up your services into each entrypoint. The difference: each of these compiles to a fully standalone native binary — no shipping source code or a <code>node_modules</code> folder to the target machine, no runtime needed there at all.</div>
+    </div>
+  </section>
+
+  <section id="flow">
+    <h2><span class="n">08</span> End-to-end flow — once the daemon wires these together <span style="color:var(--muted);font-size:12px;">(planned, per PLAN.md — not built yet)</span></h2>
+    <p style="color:var(--muted);margin-top:-4px;">This is what the pieces above are <i>for</i>, even though no single file does this yet. Useful to hold this mental model while reading the individual files.</p>
+    <div class="diagram">
+      <div class="flow-step"><div class="num">1</div><div class="body">User runs <b><code>nclip send "hello" --to macos</code></b> on machine A.</div></div>
+      <div class="flow-step"><div class="num">2</div><div class="body">CLI talks to the local daemon over the Unix socket (not built yet — separate IPC piece), which calls <b><code>discovery.Browse(ctx, "macos")</code></b> to resolve the name to an IP:port.</div></div>
+      <div class="flow-step"><div class="num">3</div><div class="body">Daemon calls <b><code>protocol.Encode(MsgSend, id, "laptop", SendPayload{Content:"hello"})</code></b> to build the wire message.</div></div>
+      <div class="flow-step"><div class="num">4</div><div class="body">Daemon calls <b><code>transport/lan.Send(addr, msg)</code></b> — dials machine B's TCP port, writes the JSON-encoded message, blocks waiting for an ack.</div></div>
+      <div class="flow-step"><div class="num">5</div><div class="body">On machine B, the daemon's <b><code>transport/lan.Listen</code></b> handler receives the connection, decodes the message, and — once wired — calls <b><code>protocol.DecodePayload</code></b> to get the actual text back out, then <b><code>clipboard.Write(text)</code></b> to put it on B's clipboard.</div></div>
+      <div class="flow-step"><div class="num">6</div><div class="body">Handler builds an ack via <code>protocol.Encode(MsgAck, ...)</code> and writes it back on the same connection — <code>Send</code> on machine A reads it and returns.</div></div>
+    </div>
+  </section>
+
+  <section id="resources">
+    <h2><span class="n">09</span> Resources — to actually understand <i>why</i>, not just skim</h2>
+    <div class="res">
+      <div class="card">
+        <a href="https://go.dev/tour/" target="_blank">A Tour of Go</a>
+        <p>Official interactive tour — closest thing Go has to learning JS via an interactive console. Start here if anything in structs/pointers/methods felt unfamiliar.</p>
+      </div>
+      <div class="card">
+        <a href="https://gobyexample.com/goroutines" target="_blank">Go by Example: Goroutines &amp; Channels</a>
+        <p>Short, runnable snippets — directly covers the goroutine/channel pattern used in <code>discovery.go</code> and <code>lan.go</code>. Also see their <code>/json</code> page for <code>encoding/json</code>.</p>
+      </div>
+      <div class="card">
+        <a href="https://go.dev/blog/context" target="_blank">Go blog: "Go Concurrency Patterns: Context"</a>
+        <p>The official explainer for exactly what <code>ctx.Done()</code>/<code>context.WithTimeout</code> are doing — directly answers the confusion from the discovery deep-dive.</p>
+      </div>
+      <div class="card">
+        <a href="https://go.dev/blog/json" target="_blank">Go blog: "JSON and Go"</a>
+        <p>Explains struct tags (<code>json:"type"</code>) and the marshal/unmarshal model used throughout <code>protocol/message.go</code>.</p>
+      </div>
+      <div class="card">
+        <a href="https://pkg.go.dev/net" target="_blank">pkg.go.dev/net (official docs)</a>
+        <p>Reference for everything used in <code>transport/lan.go</code> — <code>Listen</code>, <code>Dial</code>, <code>DialTimeout</code>. Structured like Node's API docs.</p>
+      </div>
+      <div class="card">
+        <a href="https://go.dev/doc/effective_go" target="_blank">Effective Go</a>
+        <p>Official idioms doc — error handling/wrapping conventions (the <code>%w</code> pattern), naming, and why Go looks the way it does once you're past syntax.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">
+    nclip · Phase 1, Tasks 1–5 · scope: protocol, clipboard, discovery, transport/lan, cmd entrypoints (stubs) · daemon wiring is a later task, not yet built
+  </div>
+
+</div>
+</body>
+</html>
