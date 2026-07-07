@@ -4,21 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "8dd39ac8814760a0",
+        "id": "03256d8664962a21",
         "type": "tabs",
         "children": [
           {
-            "id": "eb6b2ab1055e2dd0",
+            "id": "7df968a0074bf453",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "excalidraw",
               "state": {
-                "aFile": ".trash/Drawing 2026-06-30 14.07.25.excalidraw.md",
-                "bFile": ".trash/Drawing 2026-06-30 14.07.25.excalidraw.md",
-                "aRef": ""
+                "file": "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md"
               },
-              "icon": "diff",
-              "title": "Diff: Drawing 2026-06-30 14.07.25.excalidraw"
+              "icon": "excalidraw-icon",
+              "title": "Crypto-rand-math.excalidraw"
             }
           }
         ]
@@ -78,7 +76,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5
+    "width": 305.5,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -183,8 +182,9 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "7df968a0074bf453",
   "lastOpenFiles": [
+    "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
     "Screenshot 2026-07-06 at 10.46.32 PM.png",
     "Pasted Image 20260621130431_558.png",
     "Pasted Image 20260621125127_166.png",
@@ -229,7 +229,6 @@
     "Learning/JavaScript/JavaScript DSA/attachments/image.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Untitled.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Untitled 9.png",
-    "Learning/JavaScript/JavaScript DSA/attachments/Untitled 8.png",
     "Learning/JavaScript/JavaScript DSA/attachments/Kubernetes path ce7a68365a764555b24021ec7a6a7469.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
