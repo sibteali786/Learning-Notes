@@ -13,13 +13,26 @@
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md"
+                "file": "Learning/DSA/DFS/7-Path-Sum-II.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "JobsBoard.excalidraw"
+              "title": "7-Path-Sum-II.excalidraw"
+            }
+          },
+          {
+            "id": "ce5e9988dbf913b4",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "8-Longest-Univalue-path.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -76,7 +89,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,8 +195,11 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "ce5e9988dbf913b4",
   "lastOpenFiles": [
+    "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
+    "Learning/DSA/DFS/7-Path-Sum-II.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
     "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
     "Learning/DSA/Minimum Missing Number.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
@@ -190,7 +207,6 @@
     "Learning/Frontend Interview Preparation/Coding/attachments",
     "Learning/Frontend Interview Preparation/Coding/attachments/Screenshot 2026-07-06 at 10.46.32 PM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
     "Pasted Image 20260317121120_013.png",
     "Pasted Image 20260407123826_882.png",
@@ -200,7 +216,6 @@
     "Pasted Image 20260422143401_737.png",
     "Pasted Image 20260423111902_446.png",
     "Learning/DSA/DFS/3-PathSum.excalidraw.md",
-    "Learning/DSA/DFS/7-Path-Sum-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding",
     "Learning/JavaScript/attachments/functional-programming.pdf",
     "Learning/Side Projects/Aestheitc Bot/Requirements.md",
@@ -228,7 +243,6 @@
     "Learning/Side Projects/GO Projects.md",
     "Learning/Prgamatism/Drawing 2026-06-27 17.39.21.excalidraw.md",
     "Learning/Prgamatism/Knowlegde Portfolio.md",
-    "Learning/JavaScript/Javascript.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
