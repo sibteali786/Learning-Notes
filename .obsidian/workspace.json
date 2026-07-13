@@ -32,6 +32,18 @@
             }
           },
           {
+            "id": "85343d0e6f53ed91",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Tabs.excalidraw"
+            }
+          },
+          {
             "id": "cd058436ab6898bd",
             "type": "leaf",
             "state": {
@@ -71,7 +83,8 @@
               "title": "javascript-hard-parts-v2"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -128,7 +141,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -233,10 +247,12 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "3c3b2f5847052f33",
+  "active": "85343d0e6f53ed91",
   "lastOpenFiles": [
-    "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
+    "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/JavaScript/Javascript.md",
+    "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
     "Learning/JavaScript/attachments/Untitled 266.png",
     "Learning/JavaScript/attachments/Untitled 265.png",
     "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
@@ -256,7 +272,6 @@
     "Learning/System Design/Practice/Yelp",
     "Learning/System Design/Patterns/Drawing 2026-07-09 11.44.03.excalidraw.md",
     "Learning/System Design/Patterns/Scaling Writes",
-    "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
     "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
     "Learning/DSA/Minimum Missing Number.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
