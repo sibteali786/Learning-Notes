@@ -2393,7 +2393,6 @@ They are called as ***Execution Context.***
 2. return says to find what value result points to and ship it to Global EC where multiplyBy2 is now evaluated as 6 as value to output identifier.
 
 > Since there is only one Thread of Execution Context thus can only do one thing at a time.
-> 
 
 ### Call Stack
 
@@ -3001,7 +3000,7 @@ Functions are passed as a reference so that the instruction refer to multiplyBy2
     ```jsx
     
     ```
-    
+
 - Solution
     
     [](https://github.com/FrontendMasters/fm-snippets/blob/main/javascript-hard-parts-v2/closures.js)
