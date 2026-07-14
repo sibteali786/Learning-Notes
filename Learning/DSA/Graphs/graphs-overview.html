@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Graphs Overview — DFS Series</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#161925; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8ef; --sub:#9aa1b5; --accent:#7c9cff; --accent2:#ff9e7c;
+    --green:#5fd98a; --purple:#c58cff; --yellow:#ffd66b; --red:#ff6b81;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif;
+    margin:0; padding:32px 16px; line-height:1.5;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+  h1{font-size:26px; margin-bottom:4px;}
+  .subtitle{color:var(--sub); font-size:14px; margin-bottom:28px;}
+  .pill{
+    display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px;
+    font-weight:600; margin-right:6px; margin-bottom:6px;
+  }
+  .pill-blue{background:rgba(124,156,255,.15); color:var(--accent); border:1px solid rgba(124,156,255,.35);}
+  .pill-green{background:rgba(95,217,138,.15); color:var(--green); border:1px solid rgba(95,217,138,.35);}
+  .pill-red{background:rgba(255,107,129,.15); color:var(--red); border:1px solid rgba(255,107,129,.35);}
+  .pill-purple{background:rgba(197,140,255,.15); color:var(--purple); border:1px solid rgba(197,140,255,.35);}
+  .pill-yellow{background:rgba(255,214,107,.15); color:var(--yellow); border:1px solid rgba(255,214,107,.35);}
+
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:20px 22px; margin-bottom:18px;
+  }
+  .card h2{font-size:17px; margin:0 0 10px 0; display:flex; align-items:center; gap:8px;}
+  .card p{color:var(--text); font-size:14.5px; margin:6px 0;}
+  .sub{color:var(--sub); font-size:13.5px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+
+  .mini{
+    background:var(--card2); border:1px solid var(--border); border-radius:10px;
+    padding:14px; text-align:center;
+  }
+  .mini svg{margin:6px 0;}
+  .mini .caption{font-size:13px; color:var(--sub); margin-top:6px;}
+  .mini .label{font-weight:600; font-size:14px; color:var(--text);}
+
+  .callout{
+    border-left:3px solid var(--accent2); background:rgba(255,158,124,.08);
+    padding:10px 14px; border-radius:6px; font-size:14px; margin-top:10px;
+  }
+  .callout b{color:var(--accent2);}
+
+  .example{
+    border-left:3px solid var(--green); background:rgba(95,217,138,.08);
+    padding:10px 14px; border-radius:6px; font-size:14px; margin-top:10px;
+  }
+  .example b{color:var(--green);}
+
+  code{background:#0c0e15; padding:2px 6px; border-radius:4px; font-size:13px; color:var(--yellow);}
+
+  .compare-table{width:100%; border-collapse:collapse; font-size:14px; margin-top:8px;}
+  .compare-table th, .compare-table td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  .compare-table th{background:var(--card2); color:var(--accent);}
+  .compare-table td{color:var(--text);}
+
+  .footer-tip{
+    background:linear-gradient(135deg, rgba(124,156,255,.1), rgba(197,140,255,.1));
+    border:1px solid var(--border); border-radius:14px; padding:18px 22px; margin-top:20px;
+  }
+  .footer-tip h2{color:var(--purple); font-size:16px; margin-top:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Graphs Overview</h1>
+  <div class="subtitle">Hello Interview · Depth-First Search series</div>
+  <div>
+    <span class="pill pill-blue">Graph Fundamentals</span>
+    <span class="pill pill-purple">DFS Prep</span>
+    <span class="pill pill-green">Interview Core Concept</span>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="card">
+    <h2>📌 Why This Matters</h2>
+    <p>DFS isn't just for trees — it's a core tool for <b>graph traversal</b> too. Interviewers expect you to write graph DFS on both representations <b>quickly and without bugs</b>:</p>
+    <ul class="sub">
+      <li>Adjacency List</li>
+      <li>Matrix (2D grid)</li>
+    </ul>
+    <div class="callout"><b>Key difference from trees:</b> graphs can have <b>cycles</b>, so you must track visited nodes — otherwise DFS loops forever.</div>
+  </div>
+
+  <!-- HOW IT WORKS / VISUALS -->
+  <div class="card">
+    <h2>🧩 Core Building Blocks</h2>
+    <div class="grid2">
+      <div class="mini">
+        <div class="label">Node + Edge</div>
+        <svg width="140" height="80" viewBox="0 0 140 80">
+          <line x1="30" y1="60" x2="110" y2="20" stroke="#7c9cff" stroke-width="2"/>
+          <circle cx="30" cy="60" r="12" fill="#161925" stroke="#7c9cff" stroke-width="2"/>
+          <text x="30" y="65" fill="#e6e8ef" font-size="12" text-anchor="middle">A</text>
+          <circle cx="110" cy="20" r="12" fill="#161925" stroke="#7c9cff" stroke-width="2"/>
+          <text x="110" y="25" fill="#e6e8ef" font-size="12" text-anchor="middle">B</text>
+        </svg>
+        <div class="caption">Nodes (vertices) connected by edges</div>
+      </div>
+
+      <div class="mini">
+        <div class="label">Neighbors</div>
+        <svg width="150" height="120" viewBox="0 0 150 120">
+          <line x1="75" y1="60" x2="75" y2="15" stroke="#5fd98a" stroke-width="2"/>
+          <line x1="75" y1="60" x2="20" y2="90" stroke="#5fd98a" stroke-width="2"/>
+          <line x1="75" y1="60" x2="130" y2="90" stroke="#5fd98a" stroke-width="2"/>
+          <line x1="75" y1="60" x2="75" y2="105" stroke="#5fd98a" stroke-width="2"/>
+          <circle cx="75" cy="60" r="13" fill="#161925" stroke="#ffd66b" stroke-width="2"/>
+          <text x="75" y="65" fill="#ffd66b" font-size="12" text-anchor="middle">1</text>
+          <circle cx="75" cy="15" r="11" fill="#161925" stroke="#5fd98a" stroke-width="2"/>
+          <text x="75" y="19" fill="#e6e8ef" font-size="11" text-anchor="middle">0</text>
+          <circle cx="20" cy="90" r="11" fill="#161925" stroke="#5fd98a" stroke-width="2"/>
+          <text x="20" y="94" fill="#e6e8ef" font-size="11" text-anchor="middle">2</text>
+          <circle cx="130" cy="90" r="11" fill="#161925" stroke="#5fd98a" stroke-width="2"/>
+          <text x="130" y="94" fill="#e6e8ef" font-size="11" text-anchor="middle">3</text>
+          <circle cx="75" cy="105" r="11" fill="#161925" stroke="#5fd98a" stroke-width="2"/>
+          <text x="75" y="109" fill="#e6e8ef" font-size="11" text-anchor="middle">4</text>
+        </svg>
+        <div class="caption">Nodes 0, 2, 3, 4 are neighbors of node 1</div>
+      </div>
+
+      <div class="mini">
+        <div class="label">Cycle</div>
+        <svg width="150" height="120" viewBox="0 0 150 120">
+          <polygon points="75,15 130,90 20,90" fill="none" stroke="#ff6b81" stroke-width="2"/>
+          <circle cx="75" cy="15" r="11" fill="#161925" stroke="#ff6b81" stroke-width="2"/>
+          <circle cx="130" cy="90" r="11" fill="#161925" stroke="#ff6b81" stroke-width="2"/>
+          <circle cx="20" cy="90" r="11" fill="#161925" stroke="#ff6b81" stroke-width="2"/>
+        </svg>
+        <div class="caption">Path starts & ends at the same node → cycle</div>
+      </div>
+
+      <div class="mini">
+        <div class="label">Directed vs Undirected</div>
+        <svg width="150" height="90" viewBox="0 0 150 90">
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#c58cff"/>
+            </marker>
+          </defs>
+          <line x1="20" y1="40" x2="65" y2="40" stroke="#c58cff" stroke-width="2" marker-end="url(#arrow)"/>
+          <circle cx="15" cy="40" r="10" fill="#161925" stroke="#c58cff" stroke-width="2"/>
+          <circle cx="70" cy="40" r="10" fill="#161925" stroke="#c58cff" stroke-width="2"/>
+          <text x="40" y="60" fill="#9aa1b5" font-size="10" text-anchor="middle">directed</text>
+        </svg>
+        <div class="caption">Most interview graphs are <b>undirected</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="card">
+    <h2>⚖️ Key Distinctions</h2>
+    <table class="compare-table">
+      <tr><th>Concept</th><th>Meaning</th></tr>
+      <tr><td>Connected graph</td><td>Path exists between <b>every</b> pair of nodes</td></tr>
+      <tr><td>Tree</td><td>Connected graph with <b>no cycles</b> (special case of a graph)</td></tr>
+      <tr><td>Disconnected graph</td><td>At least 2 nodes have <b>no path</b> between them</td></tr>
+      <tr><td>Connected component</td><td>A cluster of nodes all reachable from each other</td></tr>
+      <tr><td>Directed graph</td><td>Edges go <b>one way</b> only</td></tr>
+      <tr><td>Undirected graph</td><td>Edges go <b>both ways</b></td></tr>
+    </table>
+    <div class="mini" style="margin-top:14px;">
+      <svg width="220" height="90" viewBox="0 0 220 90">
+        <line x1="30" y1="20" x2="70" y2="60" stroke="#7c9cff" stroke-width="2"/>
+        <line x1="70" y1="60" x2="30" y2="80" stroke="#7c9cff" stroke-width="2"/>
+        <line x1="70" y1="60" x2="110" y2="20" stroke="#7c9cff" stroke-width="2"/>
+        <circle cx="30" cy="20" r="10" fill="#161925" stroke="#7c9cff" stroke-width="2"/>
+        <circle cx="70" cy="60" r="10" fill="#161925" stroke="#7c9cff" stroke-width="2"/>
+        <circle cx="30" cy="80" r="10" fill="#161925" stroke="#7c9cff" stroke-width="2"/>
+        <circle cx="110" cy="20" r="10" fill="#161925" stroke="#7c9cff" stroke-width="2"/>
+        <circle cx="180" cy="50" r="10" fill="#161925" stroke="#ff6b81" stroke-width="2"/>
+        <text x="180" y="70" fill="#ff6b81" font-size="11" text-anchor="middle">isolated</text>
+      </svg>
+      <div class="caption">4 nodes connected (component 1) + 1 isolated node (component 2) → <b>disconnected graph</b></div>
+    </div>
+  </div>
+
+  <!-- REAL WORLD EXAMPLES -->
+  <div class="card">
+    <h2>🌍 Real-World Examples</h2>
+    <div class="example"><b>Social network:</b> people = nodes, friendships = undirected edges. Mutual friend groups = connected components.</div>
+    <div class="example"><b>Twitter follow graph:</b> directed edges (A follows B ≠ B follows A).</div>
+    <div class="example"><b>Road map:</b> intersections = nodes, roads = edges; one-way streets = directed edges, cycles = round trips possible.</div>
+    <div class="example"><b>Course prerequisites:</b> directed graph — a cycle means an impossible schedule (classic "Course Schedule" problem).</div>
+  </div>
+
+  <!-- INTERVIEW TIPS -->
+  <div class="footer-tip">
+    <h2>🎯 Interview / Practical Tips</h2>
+    <p>✅ Always maintain a <code>visited</code> set/array in graph DFS — trees don't need this, graphs do (cycles).</p>
+    <p>✅ Know both representations cold: <code>adjacency list</code> (dict of lists) and <code>matrix</code> (2D grid, common in "Number of Islands"-style problems).</p>
+    <p>✅ Most interview graphs = <b>undirected</b> unless stated otherwise (e.g. course prerequisites, dependency graphs → directed).</p>
+    <p>✅ "Is this a valid tree?" question = check: connected + exactly <code>n-1</code> edges + no cycle.</p>
+    <p>✅ Disconnected graph → you may need to loop through <b>all nodes</b> and run DFS from each unvisited one to cover every component.</p>
+  </div>
+
+</div>
+</body>
+</html>
