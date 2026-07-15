@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Controlled vs Uncontrolled Components</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #7c5cff;
+    --good: #3fb950; --bad: #f85149; --code-bg: #010409;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; line-height: 1.55;
+  }
+  h1 { font-size: 26px; } h1 span { color: var(--accent); }
+  h2 { margin-top: 44px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; font-size: 20px; }
+  h3 { color: var(--accent); font-size: 16px; margin-bottom: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin: 16px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+  code, pre {
+    background: var(--code-bg); color: #79c0ff; border-radius: 6px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 13px;
+  }
+  code { padding: 2px 6px; }
+  pre { padding: 12px 14px; overflow-x: auto; border: 1px solid var(--border); }
+  .uncontrolled { border-left: 4px solid #e3b341; }
+  .controlled { border-left: 4px solid var(--good); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #1c2128; color: var(--accent); }
+  .muted { color: var(--muted); font-size: 13.5px; }
+  .real-world { background: #1a2333; border: 1px dashed #4a5a8c; border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 14px; }
+  .real-world b { color: #9db4ff; }
+  .flow {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: monospace; font-size: 13px; margin: 14px 0; flex-wrap: wrap;
+  }
+  .box { background: #21262d; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; }
+  .box.parent { border-color: var(--accent); color: var(--accent); }
+  .arrow { color: var(--muted); }
+  .step { display:flex; gap:12px; margin: 14px 0; }
+  .step-num {
+    flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--accent);
+    color:#0d1117; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:14px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Controlled <span>vs</span> Uncontrolled Components</h1>
+<p class="muted">Reference: react.dev — Sharing State Between Components</p>
+
+<h2>1. The Core Idea in One Line</h2>
+<div class="card">
+<b>Uncontrolled</b> = component owns its state (source of truth = <code>useState</code> inside it).<br>
+<b>Controlled</b> = parent owns the state (source of truth = props passed in); component just renders what it's told.
+</div>
+
+<h2>2. Visualized: Data Ownership</h2>
+
+<div class="grid2">
+  <div class="card uncontrolled">
+    <h3>Uncontrolled</h3>
+    <div class="flow">
+      <div class="box parent">Parent</div>
+      <span class="arrow">— no visibility —</span>
+      <div class="box">Panel<br><span class="muted">isActive (own state)</span></div>
+    </div>
+    <p class="muted">Parent can't see or influence <code>isActive</code>. Each Panel is independent.</p>
+    <pre>function Panel() {
+  const [isActive, setIsActive]
+    = useState(false);
+  ...
+}</pre>
+  </div>
+
+  <div class="card controlled">
+    <h3>Controlled</h3>
+    <div class="flow">
+      <div class="box parent">Parent<br><span class="muted">activeIndex (state)</span></div>
+      <span class="arrow">→ isActive prop →</span>
+      <div class="box">Panel<br><span class="muted">(no state)</span></div>
+    </div>
+    <p class="muted">Parent is the single source of truth. Panel just displays what it's handed.</p>
+    <pre>function Panel({ isActive, onShow }) {
+  // no useState here at all
+  ...
+}</pre>
+  </div>
+</div>
+
+<h2>3. Why You'd Lift State Up (the Accordion Example)</h2>
+<p>Two independent <code>Panel</code>s, each with their own <code>isActive</code>. Requirement changes: <i>only one panel open at a time</i>. Independent state can't coordinate — you must move it up.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div><b>Remove</b> state from the children. <code>Panel</code> no longer has <code>useState(false)</code> — it receives <code>isActive</code> as a prop instead.</div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div><b>Move</b> the state to the closest common parent — <code>Accordion</code> now holds <code>activeIndex</code>.</div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div><b>Pass down</b> both the derived value (<code>isActive={activeIndex === 0}</code>) and an event handler (<code>onShow={() => setActiveIndex(0)}</code>) so children can request a change without owning the state themselves.</div>
+</div>
+
+<div class="real-world">
+<b>Real-world scenario (your Tabs case):</b> Uncontrolled Tabs is fine for a standalone widget. But if a parent page needs to deep-link to a specific tab via URL (<code>?tab=css</code>), or fire analytics on every switch, the parent needs to <i>own</i> <code>activeTab</code> — that forces Tabs into controlled mode: <code>&lt;Tabs value={activeTab} onChange={setActiveTab} /&gt;</code>.
+</div>
+
+<h2>4. Side-by-Side Comparison</h2>
+<table>
+<tr><th></th><th>Uncontrolled</th><th>Controlled</th></tr>
+<tr><td><b>Source of truth</b></td><td>Inside the component (<code>useState</code>)</td><td>Outside, in the parent (props)</td></tr>
+<tr><td><b>Setup effort</b></td><td>Low — just drop it in</td><td>Higher — parent must wire state + handler</td></tr>
+<tr><td><b>Flexibility</b></td><td>Low — parent can't react to/override changes</td><td>High — parent fully dictates behavior</td></tr>
+<tr><td><b>Multiple instances</b></td><td>Automatically independent</td><td>Independent only if parent tracks separate state per instance</td></tr>
+<tr><td><b>Analogy</b></td><td>Uncontrolled <code>&lt;input&gt;</code> — DOM tracks its own value</td><td>Controlled <code>&lt;input value={x} onChange={...}&gt;</code></td></tr>
+</table>
+
+<h2>5. Interview Tip</h2>
+<div class="card">
+It's rarely all-or-nothing — <span class="muted">per React docs: "each component usually has some mix of both local state and props."</span> Many production components support <b>both</b>: uncontrolled by default (<code>defaultValue</code> prop) with an escape hatch to go controlled (<code>value</code> + <code>onChange</code>) — this is exactly what the Tabs challenge solution proposes, and how Radix/Headless UI/React Aria all do it. <br><br>
+<b>Always clarify with your interviewer</b> which one they want before you start coding — it changes your prop API from the first line.
+</div>
+
+</body>
+</html>
