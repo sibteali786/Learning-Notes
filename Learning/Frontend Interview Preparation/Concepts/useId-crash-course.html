@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>useId — Crash Course</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #7c5cff;
+    --good: #3fb950; --bad: #f85149; --code-bg: #010409;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; line-height: 1.55;
+  }
+  h1 { font-size: 26px; } h1 span { color: var(--accent); }
+  h2 { margin-top: 44px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; font-size: 20px; }
+  h3 { color: var(--accent); font-size: 16px; margin-bottom: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin: 16px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  code, pre {
+    background: var(--code-bg); color: #79c0ff; border-radius: 6px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 13px;
+  }
+  code { padding: 2px 6px; }
+  pre { padding: 12px 14px; overflow-x: auto; border: 1px solid var(--border); }
+  .bad { border-left: 4px solid var(--bad); }
+  .good { border-left: 4px solid var(--good); }
+  .tag-bad { color: var(--bad); font-weight: 600; }
+  .tag-good { color: var(--good); font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #1c2128; color: var(--accent); }
+  .muted { color: var(--muted); font-size: 13.5px; }
+  .real-world { background: #1a2333; border: 1px dashed #4a5a8c; border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 14px; }
+  .real-world b { color: #9db4ff; }
+  .term { background:#21262d; border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin:8px 0; }
+  .term b { color:#e3b341; }
+</style>
+</head>
+<body>
+
+<h1><span>useId</span> — When, Why, and Why Not the Alternatives</h1>
+<p class="muted">References: react.dev/reference/react/useId · GreatFrontEnd quiz</p>
+
+<h2>1. Unfamiliar Terms First</h2>
+
+<div class="term"><b>SSR (Server-Side Rendering)</b> — the server runs your React components and produces finished HTML <i>before</i> sending it to the browser, instead of the browser building the page from scratch with JS.</div>
+<div class="term"><b>Hydration</b> — once that server-made HTML lands in the browser, React "wakes it up": attaches event handlers, wires up state, without re-building the DOM from scratch. For this to work correctly, the client must render <i>the exact same output</i> the server did — same elements, same ids, same everything.</div>
+<div class="term"><b>Hydration mismatch</b> — when client output differs from what the server sent (e.g. different generated ids). React throws a warning and may discard/redo that part of the tree — wasted work, visible flicker, sometimes broken interactivity.</div>
+<div class="term"><b>Client-rendered</b> — the browser does all the rendering work itself, from an empty HTML shell + JS bundle. No server HTML to match, so no hydration concerns — this is why <code>useId</code> issues mostly matter once SSR enters the picture.</div>
+
+<h2>2. What useId Actually Solves</h2>
+<div class="card">
+The real problem isn't "how do I make a unique string" — <code>Math.random()</code> could technically do that. The real problem is: <b>the server generates HTML first, the client re-renders separately to hydrate it, and both must produce identical ids</b> — deterministically, regardless of render order, Suspense timing, or streaming chunk order.
+</div>
+
+<div class="real-world">
+<b>Concrete failure without useId:</b> server renders 3 components, a global counter assigns ids 1, 2, 3. On the client, due to streaming/Suspense, component 3 happens to hydrate before component 1 — counter now assigns 1, 2, 3 in a <i>different order</i> to different components. Client id ≠ server id for that DOM node → hydration mismatch → React discards and re-renders that subtree.
+</div>
+
+<p><code>useId</code> avoids this because the ID is derived from <b>the component's position in the tree</b> ("parent path"), not from render order or timing — so server and client always compute the same value for the same component, independent of when each one actually runs.</p>
+
+<h2>3. Why Not the Obvious Alternatives</h2>
+
+<table>
+<tr><th>Approach</th><th>SSR-safe?</th><th>Stable across re-renders?</th><th>Why it fails</th></tr>
+<tr><td><code>Math.random()</code></td><td class="tag-bad">✗</td><td class="tag-bad">✗</td><td>New value every call — server and client never match, and it changes every render even client-side.</td></tr>
+<tr><td>Array <code>index</code> in <code>.map()</code></td><td class="tag-bad">✗</td><td class="tag-bad">✗</td><td>Not about SSR directly — the real issue is index isn't tied to the <i>data</i>. Reordering/inserting/filtering the list shifts indices, so id-to-element mapping silently breaks. (This is the same root problem as using index as a <code>key</code>.)</td></tr>
+<tr><td>Module-level counter (<code>let next = 0</code>)</td><td class="tag-bad">✗</td><td class="tag-good">✓ (within one session)</td><td>Was the pre-React-18 workaround. Breaks because server/client can increment in different orders — same failure mode as above, just less obviously random.</td></tr>
+<tr><td><code>crypto.randomUUID()</code> / <code>nanoid</code></td><td class="tag-bad">✗ (if called during render)</td><td class="tag-bad">✗</td><td>Same as Math.random for render-time generation — different value per environment/render. Fine <i>outside</i> render, for data that needs to persist.</td></tr>
+<tr><td><b><code>useId()</code></b></td><td class="tag-good">✓</td><td class="tag-good">✓</td><td>Derived from tree position — deterministic on server and client regardless of timing.</td></tr>
+</table>
+
+<h2>4. Why useId Is NOT a List Key</h2>
+<div class="grid2">
+  <div class="card bad">
+    <span class="tag-bad">✗ WRONG</span>
+    <pre>{items.map(item => {
+  const id = useId(); // ✗ hook in a loop!
+  return &lt;li key={id}&gt;...&lt;/li&gt;
+})}</pre>
+    <p class="muted">Two separate violations: (1) hooks can't be called inside loops — breaks the Rules of Hooks; (2) even if it worked, the id identifies <i>tree position</i>, not the underlying data item.</p>
+  </div>
+  <div class="card good">
+    <span class="tag-good">✓ CORRECT</span>
+    <pre>{items.map(item => (
+  &lt;li key={item.id}&gt;...&lt;/li&gt;
+))}</pre>
+    <p class="muted"><code>key</code> must come from your data (DB id, slug) so React can track <i>which item</i> moved/was removed when the list reorders.</p>
+  </div>
+</div>
+
+<div class="real-world">
+<b>Concrete break scenario:</b> if you used <code>useId</code>-per-render as a key, and the list gets reordered (drag-and-drop, sort, filter), the key is tied to <i>position in the tree</i>, not the item — so React thinks item content changed in place rather than "this item moved," and reconciliation does the wrong thing (wrong DOM node reused, state attached to the wrong row, stale inputs, etc). Keys must survive reordering; useId does not — it survives re-renders of the *same* component instance, but not changes to the *identity* of list membership.
+</div>
+
+<h2>5. Practical Usage Patterns</h2>
+<div class="grid3">
+  <div class="card">
+    <h3>Single element</h3>
+    <pre>const id = useId();
+&lt;input id={id} /&gt;
+&lt;label htmlFor={id}&gt;</pre>
+  </div>
+  <div class="card">
+    <h3>Multiple related elements</h3>
+    <pre>const id = useId();
+// call once, suffix per element
+`${id}-firstName`
+`${id}-lastName`</pre>
+  </div>
+  <div class="card">
+    <h3>Multiple React roots</h3>
+    <pre>createRoot(el, {
+  identifierPrefix: 'app-a-'
+})</pre>
+    <p class="muted">Prevents collisions when 2+ independent React apps share one page.</p>
+  </div>
+</div>
+
+<h2>6. Your Tabs Case, Mapped to the Rule</h2>
+<div class="card good">
+You called <code>useId()</code> <b>once</b> at the top of <code>Tabs</code> (not inside the `.map()`), then concatenated it with <code>value</code> (data-derived, stable) for each tab/panel pair. That's exactly the correct pattern: one hook call per component instance, suffixes built from data for per-item uniqueness — SSR-safe, and never touching <code>key</code>.
+</div>
+
+</body>
+</html>
