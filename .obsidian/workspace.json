@@ -25,12 +25,14 @@
             "id": "f36cdd116b78f58a",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "split-diff-view",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md"
+                "aFile": ".obsidian/graph.json",
+                "bFile": ".obsidian/graph.json",
+                "aRef": ""
               },
-              "icon": "excalidraw-icon",
-              "title": "Tabs-II.excalidraw"
+              "icon": "diff",
+              "title": "Diff: graph.json"
             }
           },
           {
@@ -78,7 +80,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Tree Traversal",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -99,7 +101,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -210,10 +213,13 @@
   },
   "active": "f36cdd116b78f58a",
   "lastOpenFiles": [
+    "Untitled 2.base",
+    "Untitled 1.base",
+    "Untitled.base",
+    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Concepts/useId-crash-course.html",
     "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
     "Learning/Frontend Interview Preparation/Concepts",
-    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
     "Learning/Frontend Interview Preparation/Preparation/Graphql/graphql-summary.html",
     "Learning/Frontend Interview Preparation/Overview.md",
@@ -224,8 +230,6 @@
     "Learning/Freelance/Job Post/HQ by Indigo.md",
     "Learning/DSA/Graphs/graphs-overview.html",
     "Learning/DSA/Graphs/DFS/AdjacencyList.excalidraw.md",
-    "Learning/DSA/Graphs/DFS",
-    "Learning/Freelance/Job Post",
     "Learning/DSA/Graphs/intuition.excalidraw.md",
     "Learning/JavaScript/Javascript.md",
     "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
