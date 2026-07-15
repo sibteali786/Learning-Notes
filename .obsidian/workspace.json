@@ -20,18 +20,6 @@
             }
           },
           {
-            "id": "cd058436ab6898bd",
-            "type": "leaf",
-            "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/Frontend Interview Preparation/Controlled-Vs-Uncontrolled/controlled-vs-uncontrolled.html"
-              },
-              "icon": "code-glyph",
-              "title": "controlled-vs-uncontrolled"
-            }
-          },
-          {
             "id": "8a32d6ec0501ff56",
             "type": "leaf",
             "state": {
@@ -43,6 +31,18 @@
               },
               "icon": "globe-2",
               "title": "CS Bin"
+            }
+          },
+          {
+            "id": "f36cdd116b78f58a",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Tabs-II.excalidraw"
             }
           },
           {
@@ -58,7 +58,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -115,7 +115,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -220,11 +221,16 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "cd058436ab6898bd",
+  "active": "f36cdd116b78f58a",
   "lastOpenFiles": [
+    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
+    "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
+    "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Preparation/Graphql/graphql-summary.html",
+    "Learning/Frontend Interview Preparation/Overview.md",
     "Learning/Frontend Interview Preparation/Accessibility/a11y-crash-course.html",
-    "Learning/Frontend Interview Preparation/Controlled-Vs-Uncontrolled",
     "Learning/Frontend Interview Preparation/Controlled-Vs-Uncontrolled/controlled-vs-uncontrolled.html",
+    "Learning/Frontend Interview Preparation/Controlled-Vs-Uncontrolled",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Freelance/Job Post/HQ by Indigo.md",
     "Learning/DSA/Graphs/graphs-overview.html",
@@ -232,10 +238,8 @@
     "Learning/DSA/Graphs/DFS",
     "Learning/Freelance/Job Post",
     "Learning/DSA/Graphs/intuition.excalidraw.md",
-    "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
     "Learning/DSA/Graphs",
     "Learning/JavaScript/Javascript.md",
-    "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf",
     "Learning/Frontend Interview Preparation/Accessibility",
     "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
     "Learning/JavaScript/attachments/Untitled 266.png",
@@ -253,9 +257,7 @@
     "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
     "Learning/System Design/Practice/How to Stop being Junior.excalidraw.md",
     "Learning/DSA/DFS/7-Path-Sum-II.excalidraw.md",
-    "Learning/System Design/Practice/Yelp",
     "Learning/System Design/Patterns/Drawing 2026-07-09 11.44.03.excalidraw.md",
-    "Learning/System Design/Patterns/Scaling Writes",
     "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
     "Learning/DSA/Minimum Missing Number.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
@@ -267,7 +269,6 @@
     "Learning/Side Projects/Aestheitc Bot/Requirements.md",
     "Learning/Go Lang/Projects/nclip/Mutex_works.excalidraw.md",
     "Learning/Prgamatism/Knowledge Portfolio.md",
-    "Learning/AI&ML Engineering/Learnings/Sampling.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
