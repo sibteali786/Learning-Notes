@@ -11,44 +11,40 @@
             "id": "8a32d6ec0501ff56",
             "type": "leaf",
             "state": {
-              "type": "webviewer",
+              "type": "excalidraw",
               "state": {
-                "url": "http://csbin.io/closures",
-                "title": "CS Bin",
-                "mode": "webview"
+                "file": "Learning/DSA/Graphs/DFS/AdjacencyList.excalidraw.md"
               },
-              "icon": "globe-2",
-              "title": "CS Bin"
+              "icon": "excalidraw-icon",
+              "title": "AdjacencyList.excalidraw"
             }
           },
           {
-            "id": "f36cdd116b78f58a",
+            "id": "164c5071f856ce0d",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "excalidraw",
               "state": {
-                "aFile": ".obsidian/graph.json",
-                "bFile": ".obsidian/graph.json",
-                "aRef": ""
+                "file": "Learning/DSA/Graphs/DFS/DFS-traversal-of-Graphs.excalidraw.md"
               },
-              "icon": "diff",
-              "title": "Diff: graph.json"
+              "icon": "excalidraw-icon",
+              "title": "DFS-traversal-of-Graphs.excalidraw"
             }
           },
           {
-            "id": "07641bd7234cb418",
+            "id": "7e4d33a925c41bc3",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/JavaScript/attachments/javascript-hard-parts-v2.pdf"
+                "file": "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md"
               },
-              "icon": "lucide-file-text",
-              "title": "javascript-hard-parts-v2"
+              "icon": "excalidraw-icon",
+              "title": "Copy_graph.excalidraw"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -101,12 +97,12 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -211,11 +207,14 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "f36cdd116b78f58a",
+  "active": "7e4d33a925c41bc3",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/DFS-traversal-of-Graphs.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/AdjacencyList.excalidraw.md",
+    "Untitled.base",
     "Untitled 2.base",
     "Untitled 1.base",
-    "Untitled.base",
     "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Concepts/useId-crash-course.html",
     "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
@@ -228,8 +227,6 @@
     "Learning/Frontend Interview Preparation/Concepts/Controlled-Vs-Uncontrolled",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Freelance/Job Post/HQ by Indigo.md",
-    "Learning/DSA/Graphs/graphs-overview.html",
-    "Learning/DSA/Graphs/DFS/AdjacencyList.excalidraw.md",
     "Learning/DSA/Graphs/intuition.excalidraw.md",
     "Learning/JavaScript/Javascript.md",
     "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
@@ -258,7 +255,6 @@
     "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
     "Learning/DSA/DFS/3-PathSum.excalidraw.md",
     "Learning/Side Projects/Aestheitc Bot/Requirements.md",
-    "Learning/Go Lang/Projects/nclip/Mutex_works.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
