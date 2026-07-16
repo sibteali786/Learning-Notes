@@ -23,28 +23,52 @@
             "id": "164c5071f856ce0d",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/DFS-traversal-of-Graphs.excalidraw.md"
+                "file": "Learning/Requirements Gathering/Research Papers and References.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "DFS-traversal-of-Graphs.excalidraw"
+              "icon": "lucide-file",
+              "title": "Research Papers and References"
             }
           },
           {
             "id": "7e4d33a925c41bc3",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md"
+                "file": "Learning/AI&ML Engineering/UsefullTools/Overview.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "Copy_graph.excalidraw"
+              "icon": "lucide-file",
+              "title": "Overview"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -76,7 +100,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "youtube",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -101,8 +125,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -207,15 +230,19 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "7e4d33a925c41bc3",
+  "active": "164c5071f856ce0d",
   "lastOpenFiles": [
-    "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md",
+    "Learning/AI&ML Engineering/UsefullTools/Overview.md",
+    "Learning/Requirements Gathering/Research Papers and References.md",
+    "Learning/Requirements Gathering",
+    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
+    "Learning/AI&ML Engineering/UsefullTools/Untitled",
     "Learning/DSA/Graphs/DFS/DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/AdjacencyList.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md",
     "Untitled.base",
     "Untitled 2.base",
     "Untitled 1.base",
-    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Concepts/useId-crash-course.html",
     "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
     "Learning/Frontend Interview Preparation/Concepts",
@@ -223,8 +250,6 @@
     "Learning/Frontend Interview Preparation/Preparation/Graphql/graphql-summary.html",
     "Learning/Frontend Interview Preparation/Overview.md",
     "Learning/Frontend Interview Preparation/Concepts/Accessibility/a11y-crash-course.html",
-    "Learning/Frontend Interview Preparation/Concepts/Controlled-Vs-Uncontrolled/controlled-vs-uncontrolled.html",
-    "Learning/Frontend Interview Preparation/Concepts/Controlled-Vs-Uncontrolled",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Freelance/Job Post/HQ by Indigo.md",
     "Learning/DSA/Graphs/intuition.excalidraw.md",
@@ -253,8 +278,6 @@
     "Learning/Frontend Interview Preparation/Coding/attachments/Screenshot 2026-07-06 at 10.46.32 PM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
-    "Learning/DSA/DFS/3-PathSum.excalidraw.md",
-    "Learning/Side Projects/Aestheitc Bot/Requirements.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
