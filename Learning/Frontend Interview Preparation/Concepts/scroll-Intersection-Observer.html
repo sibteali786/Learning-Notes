@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IntersectionObserver — What We Learned</title>
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,Segoe UI,sans-serif; background:#0f1117; color:#e5e7eb; padding:30px; }
+  .wrap { max-width:1000px; margin:0 auto; }
+  h1 { font-size:22px; margin-bottom:4px; }
+  .sub { color:#9ca3af; font-size:13px; margin-bottom:24px; }
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+  .card { background:#1a1d29; border-radius:12px; padding:18px; border:1px solid #262a38; }
+  .card.bad { border-color:#7f1d1d; }
+  .card.good { border-color:#14532d; }
+  .card h3 { margin:0 0 10px; font-size:14px; }
+  .card.bad h3 { color:#f87171; }
+  .card.good h3 { color:#4ade80; }
+  .card ul { margin:0; padding-left:18px; font-size:12.5px; color:#cbd5e1; line-height:1.8; }
+  .pill { display:inline-block; font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .pill.bad { background:#7f1d1d; color:#fecaca; }
+  .pill.good { background:#14532d; color:#bbf7d0; }
+  .stat-row { display:flex; gap:12px; margin-bottom:24px; }
+  .stat { flex:1; background:#141722; border-radius:10px; padding:14px; text-align:center; }
+  .stat .num { font-size:26px; font-weight:700; }
+  .stat.bad .num { color:#f87171; }
+  .stat.good .num { color:#4ade80; }
+  .stat .label { font-size:11px; color:#9ca3af; margin-top:4px; }
+  .flow { background:#141722; border-radius:12px; padding:20px; margin-bottom:24px; }
+  .flow-step { display:flex; align-items:center; gap:12px; margin-bottom:10px; font-size:13px; }
+  .flow-step .n { width:22px; height:22px; border-radius:50%; background:#6366f1; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  code { background:#0a0b10; padding:2px 6px; border-radius:4px; font-size:12px; color:#a5b4fc; }
+  .options { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+  .opt { background:#141722; border-radius:10px; padding:14px; }
+  .opt b { color:#818cf8; font-size:13px; }
+  .opt p { margin:6px 0 0; font-size:12px; color:#9ca3af; line-height:1.5; }
+  .todo { background:#1a1d29; border-radius:12px; padding:16px 20px; }
+  .todo h3 { margin:0 0 10px; font-size:14px; }
+  .todo-item { display:flex; gap:10px; font-size:13px; margin-bottom:8px; align-items:flex-start; }
+  .todo-item .icon { color:#fbbf24; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎓 IntersectionObserver — Infinite Scroll</h1>
+  <div class="sub">Built the scroll-event version first, felt the pain, then swapped it out. Here's what stuck.</div>
+
+  <div class="stat-row">
+    <div class="stat bad"><div class="num">~80+</div><div class="label">scroll event fires / gesture</div></div>
+    <div class="stat good"><div class="num">~8-10</div><div class="label">observer fires / gesture</div></div>
+  </div>
+
+  <div class="compare">
+    <div class="card bad">
+      <span class="pill bad">OLD WAY</span>
+      <h3 style="margin-top:10px">scroll event + manual math</h3>
+      <ul>
+        <li>Fires on every pixel scrolled</li>
+        <li>Reads <code>scrollTop/scrollHeight/clientHeight</code> → forces synchronous layout recalculation</li>
+        <li>Runs on main thread → competes with rendering</li>
+        <li>Needs manual "near bottom" math + loading guard</li>
+      </ul>
+    </div>
+    <div class="card good">
+      <span class="pill good">NEW WAY</span>
+      <h3 style="margin-top:10px">IntersectionObserver + sentinel</h3>
+      <ul>
+        <li>Fires only when sentinel crosses viewport threshold</li>
+        <li>Browser-engine optimized, off main thread's critical path</li>
+        <li>No layout thrashing on every event</li>
+        <li><code>rootMargin</code> lets you preload before user sees the edge</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="flow">
+    <h3 style="margin-top:0;font-size:14px">🔄 How it works, end to end</h3>
+    <div class="flow-step"><div class="n">1</div>Empty <code>sentinel</code> div placed at bottom of list — purely a tripwire, no content</div>
+    <div class="flow-step"><div class="n">2</div><code>new IntersectionObserver(callback, options)</code> created, told to watch sentinel</div>
+    <div class="flow-step"><div class="n">3</div>Sentinel scrolls near viewport → browser calls your callback with <code>entry.isIntersecting = true</code></div>
+    <div class="flow-step"><div class="n">4</div>Callback triggers <code>loadMore()</code> → fetch → append items → sentinel physically moves further down</div>
+    <div class="flow-step"><div class="n">5</div>Repeat — browser keeps watching the same sentinel element automatically</div>
+  </div>
+
+  <div class="options">
+    <div class="opt"><b>root</b><p>Container to observe within. <code>null</code> = browser viewport. Use the scroll container itself if it's not the whole page.</p></div>
+    <div class="opt"><b>rootMargin</b><p>Grows/shrinks the trigger zone. <code>'200px'</code> fires 200px before sentinel is visible — avoids blank-screen flash.</p></div>
+    <div class="opt"><b>threshold</b><p>% of sentinel visible before firing. <code>0.1</code> = 10% visible triggers the callback.</p></div>
+  </div>
+
+  <div class="todo">
+    <h3>⚠️ Not done yet — before shipping this for real</h3>
+    <div class="todo-item"><span class="icon">▸</span><div><b>Cleanup:</b> call <code>observer.disconnect()</code> on unmount, or it leaks forever in a component-based app.</div></div>
+    <div class="todo-item"><span class="icon">▸</span><div><b>Stop at end:</b> real APIs return <code>hasMore: false</code> eventually — otherwise you fetch forever.</div></div>
+    <div class="todo-item"><span class="icon">▸</span><div><b>Error handling:</b> fake fetch never fails; real fetch needs <code>.catch()</code> or <code>loading</code> gets stuck <code>true</code>.</div></div>
+  </div>
+</div>
+</body>
+</html>

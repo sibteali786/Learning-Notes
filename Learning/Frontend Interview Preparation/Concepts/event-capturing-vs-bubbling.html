@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Event Capturing vs Bubbling</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#262b38;
+    --capture:#f97316; --bubble:#22c55e; --target:#a78bfa;
+    --text:#e5e7eb; --sub:#9ca3af; --code:#0b0d12;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;margin:0;padding:32px;}
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .sub{color:var(--sub);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-bottom:10px;letter-spacing:.5px;}
+  .pill.capture{background:rgba(249,115,22,.15);color:var(--capture);}
+  .pill.bubble{background:rgba(34,197,94,.15);color:var(--bubble);}
+  .card h3{margin:0 0 8px;font-size:16px;}
+  .card p{margin:0;color:var(--sub);font-size:13.5px;line-height:1.5;}
+  .diagram{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:28px;}
+  .diagram h3{margin-top:0;font-size:15px;}
+  svg{width:100%;height:auto;display:block;}
+  .flow-label{font-size:11px;fill:var(--sub);}
+  table{width:100%;border-collapse:collapse;margin-bottom:28px;font-size:13.5px;}
+  th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;}
+  th{background:#1c2029;color:var(--sub);font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
+  td{color:var(--text);}
+  .code{background:var(--code);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'SF Mono',Consolas,monospace;font-size:12.5px;overflow-x:auto;white-space:pre;color:#c9d1d9;margin-bottom:20px;}
+  .comment{color:#6b7280;}
+  .kw{color:#ff7b72;}
+  .str{color:#a5d6ff;}
+  .section-title{font-size:18px;margin:36px 0 14px;border-left:3px solid var(--target);padding-left:10px;}
+  .example{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+  .example h4{margin:0 0 6px;font-size:14px;color:var(--target);}
+  .example p{margin:0;color:var(--sub);font-size:13.5px;line-height:1.5;}
+  .order-track{display:flex;justify-content:space-between;margin-top:14px;}
+  .order-step{flex:1;text-align:center;font-size:11px;color:var(--sub);}
+  .order-step .num-box{width:28px;height:28px;border-radius:50%;background:#1c2029;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-weight:700;color:var(--text);}
+  .callout{background:#1c1508;border:1px solid #3a2a0f;border-radius:10px;padding:12px 16px;font-size:13px;color:#fbbf24;margin-bottom:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Event Capturing vs Bubbling</h1>
+  <div class="sub">DOM event propagation — three phases, one event.</div>
+
+  <div class="grid">
+    <div class="card">
+      <span class="pill capture">CAPTURING</span>
+      <h3>Root → Target</h3>
+      <p>Event starts at the document root and travels down through ancestors to the target. Off by default — opt in with <code>true</code> or <code>{capture:true}</code> as the 3rd arg to addEventListener.</p>
+    </div>
+    <div class="card">
+      <span class="pill bubble">BUBBLING</span>
+      <h3>Target → Root</h3>
+      <p>Event starts at the target and travels back up through ancestors. On by default — this is what most click/input/change handlers use.</p>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <h3>Full propagation path (click on button)</h3>
+    <svg viewBox="0 0 760 220">
+      <rect x="60" y="30" width="640" height="160" rx="10" fill="none" stroke="#f97316" stroke-dasharray="4 3"/>
+      <text x="75" y="24" class="flow-label" fill="#f97316">grandparent</text>
+
+      <rect x="140" y="60" width="480" height="100" rx="10" fill="none" stroke="#f97316" stroke-dasharray="4 3"/>
+      <text x="155" y="54" class="flow-label" fill="#f97316">parent</text>
+
+      <rect x="300" y="90" width="160" height="40" rx="8" fill="#a78bfa22" stroke="#a78bfa"/>
+      <text x="380" y="115" text-anchor="middle" fill="#a78bfa" font-size="13" font-weight="700">button (target)</text>
+
+      <path d="M100,10 C60,40 60,130 90,155" stroke="#f97316" stroke-width="2" fill="none" marker-end="url(#arrowO)"/>
+      <text x="15" y="110" fill="#f97316" font-size="11">capture ↓</text>
+
+      <path d="M660,155 C700,130 700,40 660,10" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arrowG)"/>
+      <text x="668" y="110" fill="#22c55e" font-size="11">bubble ↑</text>
+
+      <defs>
+        <marker id="arrowO" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#f97316"/>
+        </marker>
+        <marker id="arrowG" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#22c55e"/>
+        </marker>
+      </defs>
+    </svg>
+
+    <div class="order-track">
+      <div class="order-step"><div class="num-box">1</div>grandparent<br>capture</div>
+      <div class="order-step"><div class="num-box">2</div>parent<br>capture</div>
+      <div class="order-step"><div class="num-box">3</div>target<br>(button)</div>
+      <div class="order-step"><div class="num-box">4</div>parent<br>bubble</div>
+      <div class="order-step"><div class="num-box">5</div>grandparent<br>bubble</div>
+    </div>
+  </div>
+
+  <div class="code"><span class="comment">// Full sequence — capture down, target, bubble up</span>
+grandparent.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'1. grandparent capture'</span>), <span class="kw">true</span>);
+parent.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'2. parent capture'</span>), <span class="kw">true</span>);
+child.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'3. target'</span>));            <span class="comment">// bubble phase, default</span>
+parent.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'4. parent bubble'</span>));
+grandparent.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'5. grandparent bubble'</span>));
+
+<span class="comment">// Output: 1 → 2 → 3 → 4 → 5</span></div>
+
+  <table>
+    <tr><th></th><th>Capturing</th><th>Bubbling</th></tr>
+    <tr><td>Phase order</td><td>First (root → target)</td><td>Last (target → root)</td></tr>
+    <tr><td>Enable via</td><td><code>true</code> / <code>{capture:true}</code></td><td>default (<code>false</code>)</td></tr>
+    <tr><td>Default on?</td><td>No — opt in</td><td>Yes</td></tr>
+    <tr><td>stopPropagation()</td><td>Blocks target + all bubble listeners too</td><td>Blocks only remaining ancestors</td></tr>
+    <tr><td>Typical use</td><td>Non-bubbling events, pre-empt/intercept, modals</td><td>Most click/input handlers, delegation</td></tr>
+  </table>
+
+  <div class="callout">⚠️ <code>stopPropagation()</code> called during capture kills the <em>entire rest of the flow</em> — target and bubble phases both never run. It's not "stop at this ancestor," it's "stop everywhere downstream."</div>
+
+  <div class="section-title">Where capture phase earns its keep</div>
+
+  <div class="example">
+    <h4>1. Delegating non-bubbling events</h4>
+    <p><code>focus</code>, <code>blur</code>, <code>scroll</code>, <code>mouseenter</code>/<code>mouseleave</code> don't bubble — but ancestors still see them during capture. Attaching <code>form.addEventListener('focus', fn, true)</code> gives you one delegated focus handler for every input, instead of wiring each input individually.</p>
+  </div>
+
+  <div class="example">
+    <h4>2. Pre-empting child handlers (analytics / feature gates)</h4>
+    <p>A capture listener on a container fires before any inner component's bubble handler runs — useful for logging every click region-wide, or killing an action with <code>stopPropagation()</code> before component code ever sees it.</p>
+  </div>
+
+  <div class="example">
+    <h4>3. Modal "click outside to close"</h4>
+    <p>Modals often listen on <code>document</code> with <code>capture:true</code>. If they used the bubble phase instead, an inner button's <code>stopPropagation()</code> could accidentally prevent the modal from ever hearing the click and closing.</p>
+  </div>
+
+  <div class="section-title">Where bubbling is used — event delegation</div>
+
+  <div class="example">
+    <h4>Real-world case: a 5,000-row table</h4>
+    <p>One listener on the <code>&lt;tbody&gt;</code>, checking <code>event.target.closest('tr')</code>, replaces 5,000 individual row listeners. New rows added later work automatically — no rebinding. This is only possible because click bubbles up from the row to the table.</p>
+  </div>
+
+  <div class="code"><span class="kw">const</span> outer = document.createElement(<span class="str">'div'</span>);
+<span class="kw">const</span> inner = document.createElement(<span class="str">'button'</span>);
+outer.appendChild(inner);
+
+outer.addEventListener(<span class="str">'click'</span>, (e) =&gt; { console.log(<span class="str">'outer capture: stop'</span>); e.stopPropagation(); }, <span class="kw">true</span>);
+inner.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'inner target'</span>));
+outer.addEventListener(<span class="str">'click'</span>, () =&gt; console.log(<span class="str">'outer bubble'</span>));
+
+inner.click();
+<span class="comment">// Output: "outer capture: stop"  — target and bubble handlers never fire</span></div>
+
+</div>
+</body>
+</html>
