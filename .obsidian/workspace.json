@@ -4,31 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "f28d4cbcf33f6a5e",
+        "id": "8642e46a68c26e58",
         "type": "tabs",
         "children": [
           {
-            "id": "0316c24cdc84e6fb",
+            "id": "19d3e2f8e53fa388",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Practice/Event Bubbling Vs Capturing.excalidraw.md"
+                "file": "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Event Bubbling Vs Capturing.excalidraw"
+              "title": "Numbers-to-know.excalidraw"
             }
           },
           {
-            "id": "cb9087f55593f160",
+            "id": "ac343a97c3007833",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Practice/Closure_with_an_example.excalidraw.md"
+                "file": "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Closure_with_an_example.excalidraw"
+              "title": "Practice.excalidraw"
             }
           }
         ],
@@ -89,8 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -195,11 +194,31 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "cb9087f55593f160",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/drills.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
+    "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
+    "Learning/System Design/Practice/Estimation",
+    "Learning/System Design/repomix-output.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Concepts/vanilla-vs-react-interection-observr.html",
+    "Learning/Frontend Interview Preparation/Concepts/useId-crash-course.html",
+    "Learning/Frontend Interview Preparation/Concepts/scroll-Intersection-Observer.html",
+    "Learning/Frontend Interview Preparation/Concepts/event-capturing-vs-bubbling.html",
+    "Learning/Frontend Interview Preparation/Practice/Caching.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Preparation/Nestjs/NestJS-Graphql.html",
+    "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Preparation/Graphql/graphql-summary.html",
+    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/Event Bubbling Vs Capturing.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/Closure_with_an_example.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Concepts/event-capturing-vs-bubbling.html",
     "Learning/Frontend Interview Preparation/Practice/Practice.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.24.47 PM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
@@ -210,34 +229,14 @@
     "Learning/Frontend Interview Preparation/Practice",
     "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
     "Learning/JavaScript/Coding/Debounce.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Concepts/vanilla-vs-react-interection-observr.html",
-    "Learning/Frontend Interview Preparation/Concepts/scroll-Intersection-Observer.html",
     "Learning/JavaScript/Coding/EventEmitter/EventEmitter.excalidraw.md",
     "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
     "Learning/Frontend Interview Preparation/Interview Session/progress-tracker.md",
     "Learning/Frontend Interview Preparation/Interview Session",
-    "Learning/Resume/~$bteali-Baqar.docx",
     "Learning/JavaScript/Coding/Throttle.excalidraw.md",
-    "Learning/Resume/Sibteali-Baqar.docx",
-    "Learning/Resume",
-    "Learning/Resume",
-    "Learning/Frontend Interview Preparation/Concepts/Caching.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md",
     "Learning/DSA/Graphs/DFS/DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Graph Valid Tree.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/AdjacencyList.excalidraw.md",
-    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
-    "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
-    "Learning/Requirements Gathering/Research Papers and References.md",
-    "Learning/AI&ML Engineering/UsefullTools/Overview.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
-    "Learning/DSA/DFS/8-Longest-Univalue-path.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Overview.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
-    "Learning/Freelance/Job Post/HQ by Indigo.md",
-    "Learning/DSA/Graphs/intuition.excalidraw.md",
     "Learning/JavaScript/attachments/Untitled 266.png",
     "Learning/JavaScript/attachments/Untitled 265.png",
     "Learning/System Design/Core Concepts/3-Data Modelling/attachments/Wide-Column-Database.png",
