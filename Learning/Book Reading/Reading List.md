@@ -7,3 +7,6 @@ https://talhaashraf.com/books
 
 ### Operating System Book
 Operating System Concepts, by Silberschatz
+
+- How to do the work
+- The finite and Infinite Games

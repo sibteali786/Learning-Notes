@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tabs Challenge Series — Full Summary</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #7c5cff;
+    --good: #3fb950; --bad: #f85149; --code-bg: #010409;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 920px; margin: 0 auto; padding: 32px 20px 80px; line-height: 1.55;
+  }
+  h1 { font-size: 27px; } h1 span { color: var(--accent); }
+  h2 { margin-top: 46px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; font-size: 20px; display:flex; align-items:center; gap:10px; }
+  .num { background: var(--accent); color:#0d1117; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
+  h3 { color: var(--accent); font-size: 15px; margin-bottom: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin: 14px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+  code, pre {
+    background: var(--code-bg); color: #79c0ff; border-radius: 6px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 12.5px;
+  }
+  code { padding: 2px 6px; }
+  pre { padding: 10px 12px; overflow-x: auto; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #1c2128; color: var(--accent); }
+  .muted { color: var(--muted); font-size: 13px; }
+  .bug { border-left: 4px solid var(--bad); }
+  .fix { border-left: 4px solid var(--good); }
+  .tag-bad { color: var(--bad); font-weight:600; }
+  .tag-good { color: var(--good); font-weight:600; }
+  .arc {
+    display:flex; gap:8px; align-items:center; justify-content:center;
+    margin: 16px 0; flex-wrap:wrap; font-size:13px;
+  }
+  .arc-step { background:#21262d; border:1px solid var(--border); border-radius:8px; padding:10px 16px; text-align:center; }
+  .arc-arrow { color:var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>Tabs Challenge Series <span>— Full Recap</span></h1>
+<p class="muted">Tabs I → II → III: from raw DOM manipulation to a fully accessible, keyboard-navigable component.</p>
+
+<div class="arc">
+  <div class="arc-step"><b>Tabs I</b><br><span class="muted">functionality<br>(state ownership)</span></div>
+  <div class="arc-arrow">→</div>
+  <div class="arc-step"><b>Tabs II</b><br><span class="muted">ARIA roles/states<br>(screen readers)</span></div>
+  <div class="arc-arrow">→</div>
+  <div class="arc-step"><b>Tabs III</b><br><span class="muted">keyboard + focus<br>(roving tabindex)</span></div>
+</div>
+
+<h2><span class="num">1</span>useId</h2>
+<div class="card">
+<b>Purpose</b>: SSR/hydration-safe unique ids — not primarily about uniqueness, but about server and client computing the <i>same</i> id deterministically (derived from component tree position, not render order).
+<pre>const tabsId = useId();
+// concatenate with data for per-item uniqueness:
+getTabListItemId(tabsId, itemValue)</pre>
+<table>
+<tr><th>Rejected alternative</th><th>Why</th></tr>
+<tr><td><code>Math.random()</code></td><td>New value every render/environment — never matches between server & client</td></tr>
+<tr><td>Array index</td><td>Breaks if list reorders — id-to-element mapping shifts</td></tr>
+<tr><td>Module counter</td><td>Server/client can increment in different order under streaming/Suspense</td></tr>
+<tr><td>As a list <code>key</code></td><td><b>Wrong tool</b> — key must track data identity for reconciliation, useId tracks tree position</td></tr>
+</table>
+</div>
+
+<h2><span class="num">2</span>Controlled vs Uncontrolled</h2>
+<div class="grid2">
+<div class="card">
+<h3>Uncontrolled (what we built)</h3>
+<code>const [value, setValue] = useState(...)</code> lives inside <code>Tabs</code>. Parent has no visibility into active tab.
+</div>
+<div class="card">
+<h3>Controlled (the escape hatch)</h3>
+<code>&lt;Tabs value={x} onChange={setX} /&gt;</code> — parent owns state, needed if parent must react to tab changes (analytics, URL sync).
+</div>
+</div>
+<p class="muted">Real solution used <code>defaultValue</code> prop → clarified during interview which one's expected, since it changes the prop API from line one.</p>
+
+<h2><span class="num">3</span>Accessibility — Roles, States, Properties</h2>
+<table>
+<tr><th>Category</th><th>Applied here</th></tr>
+<tr><td>Role (what it <i>is</i>)</td><td><code>role="tablist"</code>, <code>role="tab"</code>, <code>role="tabpanel"</code></td></tr>
+<tr><td>State (changes dynamically)</td><td><code>aria-selected={isActiveValue}</code></td></tr>
+<tr><td>Property (relationship link)</td><td><code>aria-controls</code> (tab → panel), <code>aria-labelledby</code> (panel → tab)</td></tr>
+</table>
+<div class="card bug">
+<b>Bug caught</b>: <code>aria-controls</code>/<code>aria-labelledby</code> are id <i>references</i> — pointing at a string that isn't a real element's <code>id</code> is a dangling reference, invisible to sighted users, broken for screen readers. Golden rule: <b>"No ARIA is better than bad ARIA"</b> — a role/property is a promise; an unfulfilled one actively misleads assistive tech.
+</div>
+
+<h2><span class="num">4</span>Keyboard Accessibility — Roving Tabindex</h2>
+<div class="card">
+<b>The mechanism</b>: only the active tab gets <code>tabIndex={0}</code> (in native Tab order); all others get <code>tabIndex={-1}</code> (focusable only via <code>.focus()</code>, skipped by Tab key). This alone satisfies Tab-in/Tab-out behavior for free.
+</div>
+<table>
+<tr><th>Key</th><th>Behavior implemented</th></tr>
+<tr><td>Tab</td><td>Native — lands on active tab going in, exits tablist going out (no code needed, side effect of roving tabindex)</td></tr>
+<tr><td>← / →</td><td>Modulo arithmetic for wraparound: <code>(i + 1) % len</code> and <code>(i - 1 + len) % len</code></td></tr>
+<tr><td>Home / End</td><td>Jump to index <code>0</code> / <code>items.length - 1</code></td></tr>
+</table>
+<div class="card">
+<b>onFocus, delegated at the container</b>: activation happens on focus, not click — required because arrow-key <code>.focus()</code> calls never fire a click event. Delegating one <code>onFocus</code> to the tablist (bubbles in React) replaced per-button handlers; ref-array comparison matched <code>event.target</code> back to the correct item without fragile id-string parsing.
+</div>
+<div class="card">
+<b>Ref array, not <code>document.querySelector</code></b>: needed for imperative <code>.focus()</code> calls — the one legitimate escape hatch from pure declarative state, since "move focus" can't be expressed as data the way "which tab is active" can.
+</div>
+
+<h2><span class="num">5</span>Mistakes Made & Fixes</h2>
+
+<div class="card bug">
+<b>Tabs I:</b> Direct DOM manipulation (<code>document.querySelector</code> + <code>classList</code>) inside a React component. <span class="tag-bad">Problem:</span> state lived in the DOM, invisible to React — risk of desync on any unrelated re-render.<br>
+<span class="tag-good">Fix:</span> moved active-tab tracking into <code>useState</code>.
+</div>
+
+<div class="card bug">
+<b>Tabs II:</b> Set <code>aria-controls</code>/<code>aria-labelledby</code> to values with no matching <code>id</code> anywhere → dangling ARIA references.<br>
+<span class="tag-good">Fix:</span> generated matching <code>id</code>s via helper functions, unique per-instance via <code>useId</code>.
+</div>
+
+<div class="card bug">
+<b>Tabs III — bug 1:</b> Used <code>event.target.key</code> (React-internal, not a real DOM property) to identify which tab was focused.<br>
+<span class="tag-good">Fix:</span> matched <code>event.target</code> against the ref array by identity instead.
+</div>
+
+<div class="card bug">
+<b>Tabs III — bug 2:</b> <code>event.preventDefault()</code> called unconditionally (first on every keydown, then on every button keydown) — silently broke native Tab-key navigation, since it suppressed default behavior for keys never meant to be intercepted.<br>
+<span class="tag-good">Fix:</span> scoped <code>preventDefault()</code> to only fire inside the specific ArrowLeft/ArrowRight/Home/End branches.
+</div>
+
+<h2><span class="num">6</span>Underlying Principle (carries to Menu, Accordion, Carousel, Combobox)</h2>
+<div class="card">
+<b>Declarative for state, refs only for imperative escape hatches.</b> "Which tab is active" is state → <code>useState</code>. "Move keyboard focus to this DOM node" is inherently imperative → the one legitimate reason to reach for a ref. This exact shape (roving tabindex + ref array + focus-driven activation) reappears near-identically in Menu, single-open Accordion, Carousel, and Combobox — all APG patterns with "a list of interactive elements, arrow keys move focus, one is active at a time."
+</div>
+
+</body>
+</html>
