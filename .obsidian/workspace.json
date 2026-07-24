@@ -8,24 +8,24 @@
         "type": "tabs",
         "children": [
           {
-            "id": "ac343a97c3007833",
+            "id": "cc3229a0a0daa48e",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md"
+                "file": "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Tabs.excalidraw"
+              "title": "Reading_Attempt.excalidraw"
             }
           },
           {
-            "id": "e308135ecac1cd93",
+            "id": "f2d29598527194cf",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Learning/Book Reading/Reading List.md",
+                "file": "Learning/Database/Fundamentals of Database Engineering.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -40,7 +40,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Reading List"
+              "title": "Fundamentals of Database Engineering"
             }
           }
         ]
@@ -75,7 +75,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Debounce",
+                "query": "Isolation Levels",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -100,7 +100,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -205,49 +206,48 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "ac343a97c3007833",
+  "active": "cc3229a0a0daa48e",
   "lastOpenFiles": [
-    "Learning/Book Reading/Reading List.md",
+    "Learning/Database/Fundamentals of Database Engineering.md",
+    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/why_shard_&_read_replicas.m4a",
+    "Recording 20260724004952.m4a",
+    "Learning/System Design/Patterns/Realtime Udpates/realtime-updates-summary.html",
+    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
+    "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
+    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation_level.m4a",
+    "Learning/System Design/Practice/Local Delivery Service/100K_items_DCs.m4a",
+    "Learning/System Design/Practice/Local Delivery Service/Item_vs_inventory.m4a",
+    "Recording 20260723203813.m4a",
+    "Recording 20260723203752.m4a",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/2-DFS-traversal-of-Graphs.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/3-Copy_graph.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service",
+    "Learning/DSA/Graphs/DFS/4-Graph Valid Tree.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/1-AdjacencyList.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
+    "Learning/Book Reading/Reading List.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Concepts/Tabs_concepts.html",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/drills.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
     "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
-    "Learning/System Design/Practice/Estimation",
     "Learning/System Design/repomix-output.md",
     "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Concepts/vanilla-vs-react-interection-observr.html",
-    "Learning/Frontend Interview Preparation/Concepts/useId-crash-course.html",
-    "Learning/Frontend Interview Preparation/Concepts/scroll-Intersection-Observer.html",
-    "Learning/Frontend Interview Preparation/Concepts/event-capturing-vs-bubbling.html",
     "Learning/Frontend Interview Preparation/Practice/Caching.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Nestjs/NestJS-Graphql.html",
     "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Graphql/graphql-summary.html",
     "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Practice/Event Bubbling Vs Capturing.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Practice/Closure_with_an_example.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Practice/Practice.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.24.47 PM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.20.30 PM.png",
     "Screenshot 2026-03-20 at 3.14.04 AM.png",
     "Pasted Image 20260317121120_013.png",
-    "Learning/Frontend Interview Preparation/Practice/attachments",
-    "Learning/Frontend Interview Preparation/Practice",
-    "Learning/JavaScript/Coding/Promise/Promise.all.excalidraw.md",
-    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
-    "Learning/JavaScript/Coding/EventEmitter/EventEmitter.excalidraw.md",
-    "Learning/JavaScript/Stack, GEC, and Scope Chain.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Interview Session/progress-tracker.md",
-    "Learning/JavaScript/Coding/Throttle.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Copy_graph.excalidraw.md",
     "Learning/JavaScript/attachments/Untitled 266.png",
     "Learning/JavaScript/attachments/Untitled 265.png",
     "Learning/System Design/Core Concepts/3-Data Modelling/attachments/Wide-Column-Database.png",

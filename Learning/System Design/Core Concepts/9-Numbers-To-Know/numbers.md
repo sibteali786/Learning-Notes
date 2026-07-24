@@ -8,7 +8,7 @@ Two eras of numbers are kept side by side on purpose: the **gist** numbers are s
 
 ## Metric Prefixes
 
-**Last verified: 2026-07-21** — source: Estimation article
+**Last verified: 2026-07-23** — source: Estimation article
 
 Stick to powers of 1000, not 1024, for interview mental math.
 
@@ -25,7 +25,7 @@ Stick to powers of 1000, not 1024, for interview mental math.
 
 ## Compute / Memory Hierarchy (raw latency)
 
-**Last verified: 2026-07-21** — source: gist (classic) + computers-are-fast.github.io
+**Last verified: 2026-07-23** — source: gist (classic) + computers-are-fast.github.io
 
 | Operation | Time (classic) | Comparison |
 |---|---|---|
@@ -49,7 +49,7 @@ Stick to powers of 1000, not 1024, for interview mental math.
 
 ## Storage — Item Sizes
 
-**Last verified: 2026-07-21** — source: Estimation article
+**Last verified: 2026-07-23** — source: Estimation article
 
 | Item | Size |
 |---|---|
@@ -65,7 +65,7 @@ Rule of thumb for sizing a record/struct: sum the fields, then round generously 
 
 ## Caching
 
-**Last verified: 2026-07-21** — source: 2026 hardware article
+**Last verified: 2026-07-23** — source: 2026 hardware article
 
 | Metric | 2026 value |
 |---|---|
@@ -82,7 +82,7 @@ Rule of thumb for sizing a record/struct: sum the fields, then round generously 
 
 ## Databases
 
-**Last verified: 2026-07-21** — source: 2026 hardware article
+**Last verified: 2026-07-23** — source: 2026 hardware article
 
 | Metric | 2026 value |
 |---|---|
@@ -101,7 +101,7 @@ Rule of thumb for sizing a record/struct: sum the fields, then round generously 
 
 ## Application Servers
 
-**Last verified: 2026-07-21** — source: 2026 hardware article
+**Last verified: 2026-07-23** — source: 2026 hardware article
 
 | Metric | 2026 value |
 |---|---|
@@ -119,7 +119,7 @@ CPU, not memory, is almost always the first bottleneck — don't shy away from m
 
 ## Message Queues
 
-**Last verified: 2026-07-21** — source: 2026 hardware article
+**Last verified: 2026-07-23** — source: 2026 hardware article
 
 | Metric | 2026 value |
 |---|---|
@@ -137,7 +137,7 @@ Modern queues are fast enough (sub-5ms) to sit inside synchronous request flows 
 
 ## Network / Cross-Region
 
-**Last verified: 2026-07-21** — source: 2026 hardware article + gist (classic)
+**Last verified: 2026-07-23** — source: 2026 hardware article + gist (classic)
 
 | Path | Latency (2026) |
 |---|---|
@@ -153,7 +153,7 @@ Bandwidth within a datacenter: 25 Gbps common, 50–100 Gbps+ on high-performanc
 
 ## Business / Scale Orders of Magnitude
 
-**Last verified: 2026-07-21** — source: Estimation article
+**Last verified: 2026-07-23** — source: Estimation article
 
 | Metric | Order of magnitude |
 |---|---|
