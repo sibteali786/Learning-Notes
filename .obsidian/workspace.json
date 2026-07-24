@@ -8,15 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "cc3229a0a0daa48e",
+            "id": "507f8dc892a66e02",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "split-diff-view",
               "state": {
-                "file": "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md"
+                "aFile": "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
+                "bFile": "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
+                "aRef": ""
               },
-              "icon": "excalidraw-icon",
-              "title": "Reading_Attempt.excalidraw"
+              "icon": "diff",
+              "title": "Diff: Isolation Levels.excalidraw"
             }
           },
           {
@@ -41,6 +43,18 @@
               },
               "icon": "lucide-file",
               "title": "Fundamentals of Database Engineering"
+            }
+          },
+          {
+            "id": "d3bb6a47057ca754",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Isolation Levels.excalidraw"
             }
           }
         ]
@@ -100,8 +114,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -206,10 +219,18 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "cc3229a0a0daa48e",
+  "active": "507f8dc892a66e02",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering.md",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232457_325.png",
+    "Pasted Image 20260621130431_558.png",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232740_447.png",
     "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering.md",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels",
+    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
+    "Learning/Book Reading/Writing/Writing Skills.md",
+    "Learning/Book Reading/Writing",
     "Learning/System Design/Practice/Local Delivery Service/why_shard_&_read_replicas.m4a",
     "Recording 20260724004952.m4a",
     "Learning/System Design/Patterns/Realtime Udpates/realtime-updates-summary.html",
@@ -224,14 +245,12 @@
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
     "Learning/DSA/Graphs/DFS/2-DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/3-Copy_graph.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service",
     "Learning/DSA/Graphs/DFS/4-Graph Valid Tree.excalidraw.md",
     "Learning/DSA/Graphs/DFS/1-AdjacencyList.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Book Reading/Reading List.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Concepts/Tabs_concepts.html",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
@@ -241,8 +260,6 @@
     "Learning/System Design/repomix-output.md",
     "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/Caching.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.24.47 PM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.20.30 PM.png",
@@ -251,8 +268,6 @@
     "Learning/JavaScript/attachments/Untitled 266.png",
     "Learning/JavaScript/attachments/Untitled 265.png",
     "Learning/System Design/Core Concepts/3-Data Modelling/attachments/Wide-Column-Database.png",
-    "Learning/System Design/Core Concepts/3-Data Modelling/attachments/NormaliationVsDenormalization.png",
-    "Learning/System Design/Core Concepts/3-Data Modelling/attachments/Graph-Database.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

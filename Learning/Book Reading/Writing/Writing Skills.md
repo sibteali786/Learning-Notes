@@ -1,0 +1,1 @@
+https://github.com/petergyang/no-ai-slop
