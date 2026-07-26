@@ -3142,3 +3142,468 @@ def tag_pre(text: str) -> str:
     return f"<pre>{text}</pre>"  # Don't change the body of tag_pre
 
 ```
+
+
+# Sum Types
+
+Remember when I said, "Pure functions are my favorite part of functional programming"? Well, [sum types](https://en.wikipedia.org/wiki/Tagged_union) are a close second.
+
+A "sum" type is the opposite of a "product" type. This Python object is an example of a _product_ type:
+
+```py
+man.studies_finance = True
+man.has_trust_fund = False
+```
+
+The total number of combinations a `man` can have is `4`, the _product_ of `2 * 2`:
+
+|studies_finance|has_trust_fund|
+|---|---|
+|`True`|`True`|
+|`True`|`False`|
+|`False`|`True`|
+|`False`|`False`|
+
+If we add a third attribute, perhaps a `has_blue_eyes` boolean, the total number of possibilities multiplies again, to `8`!
+
+|studies_finance|has_trust_fund|has_blue_eyes|
+|---|---|---|
+|`True`|`True`|`True`|
+|`True`|`True`|`False`|
+|`True`|`False`|`True`|
+|`True`|`False`|`False`|
+|`False`|`True`|`True`|
+|`False`|`True`|`False`|
+|`False`|`False`|`True`|
+|`False`|`False`|`False`|
+
+But let's pretend that we live in a world where there are _really_ only [three types of people](https://www.youtube.com/watch?v=tEt0IuQJX2o) that our program cares about:
+
+1. Dateable
+2. Undateable
+3. Maybe dateable
+
+We can _reduce_ the number of cases our code needs to handle by using a (fake Pythonic) sum type with only 3 possible _types_:
+
+```py
+class Person:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+class Dateable(Person):
+    pass
+
+
+class MaybeDateable(Person):
+    pass
+
+
+class Undateable(Person):
+    pass
+```
+
+Then we can use the [isinstance](https://docs.python.org/3/library/functions.html#isinstance) built-in function to check if a `Person` is an instance of one of the subclasses. It's a clunky way to represent sum types, but hey, it's Python.
+
+```py
+def respond_to_text(guy_at_bar: Person) -> str:
+    if isinstance(guy_at_bar, Dateable):
+        return f"Hey {guy_at_bar.name}, I'd love to go out with you!"
+    elif isinstance(guy_at_bar, MaybeDateable):
+        return f"Hey {guy_at_bar.name}, I'm busy but let's hang out sometime later."
+    elif isinstance(guy_at_bar, Undateable):
+        return "Have you tried being rich?"
+    else:
+        raise ValueError("invalid person type")
+```
+
+## Sum Types vs. Product Types
+
+As opposed to product types, which can have many (often _infinite_) combinations, sum types have a _fixed_ number of possible values. To be clear: **Python doesn't really support sum types**. We have to use a workaround and invent our own little system and enforce it ourselves.
+
+## Assignment
+
+Whenever a document is parsed by Doc2Doc, it can either succeed or fail. In functional programming, we often represent errors as data (e.g., the `ParseError` class) rather than by raising exceptions, because exceptions are side effects. (_This isn't standard Python practice, but it's useful to understand from an FP perspective._)
+
+**Complete the `Parsed` and `ParseError` subclasses.**
+
+- `Parsed` represents success. It should accept a `doc_name` string and a `text` string and save them as properties of the same name.
+- `ParseError` represents failure. It should accept a `doc_name` string and an `err` string and save them as properties of the same name.
+
+The test suite uses the `isinstance` function to see if an error occurred based on the class type.
+
+```python
+class MaybeParsed:
+    pass
+
+
+# Don't touch above this line
+
+
+class Parsed(MaybeParsed):
+    def __init__(self, doc_name: str, text: str) -> None:
+        self.doc_name = doc_name
+        self.text = text
+
+
+class ParseError(MaybeParsed):
+    def __init__(self, doc_name: str, err: str) -> None:
+        self.doc_name = doc_name
+        self.err = err
+
+```
+
+# Union Types
+
+We can simulate the shape of sum types in Python by using classes – like our `MaybeParsed` class with subclasses named `Parsed` and `ParseError`. That's better than nothing, but it's awkward.
+
+The [type hints](https://docs.python.org/3/library/typing.html) system in modern Python offers a more direct way of describing a value that may be one type or another. We can use what's called a [union type](https://docs.python.org/3/library/stdtypes.html#union-type):
+
+```py
+def parse_document(doc_name: str, content: str) -> Parsed | ParseError: ...
+```
+
+The `Parsed | ParseError` annotation means, "This function returns either a `Parsed` value or a `ParseError` value." Crucially, the `|` ("or") operator lets us express that relationship without forcing both classes to inherit from the same parent class. `Parsed` and `ParseError` still need to be real types, but they don't need to belong to a shared class hierarchy.
+
+A union type can list any number of possible types for a given value. One of the most common use cases is for _optional_ values like `str | None` – i.e., a value that may be a string, or may be `None` if the string isn't available yet or couldn't be retrieved.
+
+In functional programming, union types are used constantly to make "this or that" situations explicit: _some_ value or _none_; a _result_ from a function or an _error_.
+
+Python is still ultimately a dynamically typed language. The union type, like other type hints, is meant to help developers and their tools (code editors, type checkers). **It's not enforced at runtime.** But being able to document the shape of your data makes it easier to write robust programs.
+
+## Assignment
+
+Doc2Doc needs to parse documents without throwing exceptions for ordinary failures. **Complete the `parse_document` and `display_parse_result` functions.**
+
+1. [ ] `parse_document` accepts 2 string arguments, `doc_name` and `content`. It should return a `Parsed` value if `content` is _not_ empty:
+    - `doc_name`: the provided document name
+    - `text`: the provided content
+2. [ ] `parse_document` should return a `ParseError` if `content` is empty:
+    - `doc_name`: the provided document name
+    - `err`: `"no content"`
+3. [ ] `display_parse_result` accepts a `Parsed | ParseError` value and returns a string:
+    - If the provided value is `Parsed`, return `Parsed <doc_name>: <N> characters`, where `<N>` is the length of the parsed text.
+    - If the provided value is `ParseError`, return `Failed <doc_name>: <err>`.
+
+## Tip
+
+Use [`isinstance`](https://docs.python.org/3/library/functions.html#isinstance) to check which type of value you're working with.
+
+```python
+class Parsed:
+    def __init__(self, doc_name: str, text: str) -> None:
+        self.doc_name = doc_name
+        self.text = text
+
+
+class ParseError:
+    def __init__(self, doc_name: str, err: str) -> None:
+        self.doc_name = doc_name
+        self.err = err
+
+
+# Don't touch above this line
+
+
+def parse_document(doc_name: str, content: str) -> Parsed | ParseError:
+    if content != '':
+        return Parsed(doc_name, content)
+    return ParseError(doc_name, "no content")
+def display_parse_result(result: Parsed | ParseError) -> str:
+    if isinstance(result, Parsed):
+        return f"Parsed {result.doc_name}: {len(result.text)} characters"
+    if isinstance(result, ParseError):
+        return f"Failed {result.doc_name}: {result.err}"
+```
+
+# Enums
+
+So far, we've used classes to model the different cases in a sum type, and union type hints as a simpler way of describing the possible types of a value (albeit with no automatic enforcement at runtime).
+
+If what you're trying to represent is a **fixed set of values**, you have another good option in Python's type system: [enums](https://docs.python.org/3/library/enum.html).
+
+Click to hide video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: Python enums
+
+Let's say we have a `Color` variable that we want to restrict to only three possible values:
+
+- `RED`
+- `GREEN`
+- `BLUE`
+
+We could use a plain old `str` to represent these values, but that's annoying because we have to keep track of the "valid" values and defensively check for invalid ones all over our codebase. Instead, we can use an `Enum`:
+
+```py
+from enum import Enum
+
+Color = Enum("Color", ["RED", "GREEN", "BLUE"])
+print(Color.RED)  # this works, prints 'Color.RED'
+print(Color.TEAL)  # this raises an exception
+```
+
+There is also a manual class-based syntax:
+
+```py
+from enum import Enum
+
+
+class Color(Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+
+
+print(Color.RED)  # this works, prints 'Color.RED'
+print(Color.TEAL)  # this raises an exception
+```
+
+The class-based syntax is more verbose, but safer because it prevents ambiguity between the variable name and the enum name. With `Color = Enum("Color", ...)`, the string `"Color"` sets the enum class name, while `Color =` assigns that class to a variable. While those names normally _shouldn't_ be different, they _can_ be.
+
+Now `Color` is a sum type! _At least, as close as we can get in Python._ There are a few benefits:
+
+1. A `Color` can only be `RED`, `GREEN`, or `BLUE`. If you try to use `Color.TEAL`, Python raises an exception.
+2. There is a central place to see the "valid" values for a `Color`.
+3. Each `Color` has a "name" (e.g. `RED`) and an integer value (e.g. `1`). The value can be useful if you need to store, compare, or serialize the enum in a specific way.
+
+## Assignment
+
+**Create an `Enum` called `Doctype`** with values:
+
+- `PDF`
+- `TXT`
+- `DOCX`
+- `MD`
+- `HTML`
+
+## Tip
+
+Don't forget to `import` the `Enum` class from the `enum` module!
+
+```python
+from enum import Enum
+
+class Doctype(Enum):
+    PDF = 1
+    TXT = 2
+    DOCX = 3
+    MD = 4
+    HTML = 5
+```
+
+# Sum Types
+
+Unfortunately, Python does _not_ support sum types as well as some [statically typed](https://developer.mozilla.org/en-US/docs/Glossary/Static_typing) languages.
+
+Python [doesn't enforce](https://docs.python.org/3/library/typing.html) your types before your code runs. That's why we need this line here to `raise` an `Exception` if a color is invalid:
+
+```py
+def color_to_hex(color: Color) -> str:
+    if color == Color.GREEN:
+        return "#00FF00"
+    elif color == Color.BLUE:
+        return "#0000FF"
+    elif color == Color.RED:
+        return "#FF0000"
+    # handle the case where the color is invalid
+    raise Exception("unknown color")
+```
+
+In a language like [Rust](https://www.rust-lang.org/), which has an exceptionally rich type system, we could write the same thing like this:
+
+```rs
+fn color_to_hex(color: Color) -> String {
+    match color {
+        Color::Green => "#00FF00".to_string(),
+        Color::Blue => "#0000FF".to_string(),
+        Color::Red => "#FF0000".to_string(),
+    }
+}
+```
+
+Notice how there isn't any case for an unknown enum variant? That's because the Rust code will _fail to compile_ (a step that happens before the code runs at all) if the types don't line up. The Rust compiler enforces that a `Color` value can only be one of the defined variants, and the `match color` block is required to handle every variant!
+
+**This static enforcement is a huge benefit of sum types.** It's a shame we can't get that in Python.
+
+# Match
+
+Let's take another look at our example [`Enum`](https://docs.python.org/3/library/enum.html) from the previous lessons:
+
+```py
+from enum import Enum
+
+
+class Color(Enum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+```
+
+## Working With Enums
+
+Python has a [`match` statement](https://docs.python.org/3/tutorial/controlflow.html#match-statements) that tends to be a lot cleaner than a series of `if`/`elif`/`else` statements when we're working with a fixed set of possible values (like a sum type, or more specifically an enum):
+
+```py
+def get_hex(color: Color) -> str:
+    match color:
+        case Color.RED:
+            return "#FF0000"
+        case Color.GREEN:
+            return "#00FF00"
+        case Color.BLUE:
+            return "#0000FF"
+
+        # default case (invalid Color)
+        case _:
+            return "#FFFFFF"
+```
+
+If you have _two_ values to match, you can use a `tuple`:
+
+```py
+class Shade(Enum):
+    LIGHT = 1
+    DARK = 2
+
+
+def get_hex(color: Color, shade: Shade) -> str:
+    match (color, shade):
+        case (Color.RED, Shade.LIGHT):
+            return "#FFAAAA"
+        case (Color.RED, Shade.DARK):
+            return "#AA0000"
+        case (Color.GREEN, Shade.LIGHT):
+            return "#AAFFAA"
+        case (Color.GREEN, Shade.DARK):
+            return "#00AA00"
+        case (Color.BLUE, Shade.LIGHT):
+            return "#AAAAFF"
+        case (Color.BLUE, Shade.DARK):
+            return "#0000AA"
+
+        # default case (invalid combination)
+        case _:
+            return "#FFFFFF"
+```
+
+The value we want to compare is set after the `match` keyword, which is then compared against different cases/patterns. If a match is found, the code in the block is executed.
+
+## Assignment
+
+**Complete the `convert_format` function.** Using the enum `DocFormat`, it should support 3 types of conversions:
+
+1. [ ] From `MD` to `HTML`:
+    - Assume the content is a single `h1` tag in Markdown syntax – one string representing one line. Replace the leading `#` with an `<h1>` and add a `</h1>` to the end.
+    - Example: `# This is a heading` → `<h1>This is a heading</h1>`
+2. [ ] From `TXT` to `PDF`:
+    - Simply add a `[PDF]` tag to the beginning and end of the content.
+    - **Notice the spaces** between `[PDF]` tags and the content: `This is some text` → `[PDF] This is some text [PDF]`
+3. [ ] From `HTML` to `MD`:
+    - Replace any `<h1>` tags with `#` and remove any `</h1>` tags.
+    - Example: `<h1>This is a heading</h1>` → `# This is a heading`
+4. [ ] Any other conversion:
+    - If the input format is invalid, raise an `Exception`:
+    - ```text
+        invalid type
+        ```
+
+```python
+from enum import Enum
+
+
+class DocFormat(Enum):
+    PDF = 1
+    TXT = 2
+    MD = 3
+    HTML = 4
+
+
+# Don't touch above this line
+
+
+def convert_format(
+    content: str, from_format: DocFormat, to_format: DocFormat | None
+) -> str:
+    match(from_format, to_format):
+        case (DocFormat.MD, DocFormat.HTML):
+            content = content.replace("# ","<h1>")
+            content += "</h1>"
+            return content
+        case (DocFormat.TXT, DocFormat.PDF):
+            newContent = "[PDF] " + content + " [PDF]"
+            return newContent
+        case (DocFormat.HTML, DocFormat.MD):
+            content = content.replace("<h1>", "# ",1)
+            content = content.replace("</h1>","")
+            return content
+        case _:
+            return "invalid type"
+
+```
+
+
+# Sum Types Practice
+
+Doc2Doc should be able to prepare and export a CSV file of whatever data you input. CSV ([Comma-Separated Values](https://en.wikipedia.org/wiki/Comma-separated_values)) is a ubiquitous text format that allows for information to be structured in a table. There is usually a header row, followed by data rows. Within rows, items are separated by commas.
+
+## Assignment
+
+**Complete the `get_csv_status` function.** It should use a `match` statement to select the correct response depending on the status of the export operation. Create functions to handle each operation as follows:
+
+1. [ ] `PENDING`: return a tuple with the string `"Pending..."` and the raw table data converted from a list of lists of anything, to a prepared list of lists of strings.
+    1. [ ] Try to use nested `map` functions to convert the data items into strings.
+    2. [ ] Remember to convert from a `map` object back into a list.
+2. [ ] `PROCESSING`: return a tuple with the string `"Processing..."` and the prepared list of lists of strings converted to one CSV-formatted string.
+    1. [ ] For each list of strings, combine the strings with `join` with commas in between to form a row.
+    2. [ ] For each row string, combine the strings with `join` with newlines (`"\n"`) in between to form a table.
+3. [ ] `SUCCESS`: return a tuple with the string `"Success!"` and the data as-is.
+4. [ ] `FAILURE`: return a tuple with the string `"Unknown error, retrying..."` and the data after it's been prepared and processed into a CSV string, by combining the steps for `PENDING` and `PROCESSING`.
+5. [ ] For any other status, raise an `Exception`:
+    
+    ```text
+    unknown export status
+    ```
+
+## Tip
+
+It's better if you try this challenge without using loops for practice, but you _may_ use loops.
+
+```python
+from enum import Enum
+from typing import Any
+
+
+class CSVExportStatus(Enum):
+    PENDING = 1
+    PROCESSING = 2
+    SUCCESS = 3
+    FAILURE = 4
+
+
+RawCSVData = list[list[object]]
+PreparedCSVData = list[list[str]]
+CSVStatusResult = tuple[str, PreparedCSVData | str]
+
+# Don't touch above this line
+
+
+def get_csv_status(status: CSVExportStatus, data: Any) -> CSVStatusResult:
+    match(status):
+        case (CSVExportStatus.PENDING):
+            modData = [list(map(lambda val: str(val), lst)) for lst in data]
+            return ("Pending...",modData)
+        case (CSVExportStatus.PROCESSING):
+            row = [",".join(lst) for lst in data]
+            table = "\n".join(row)
+            return ("Processing...", table)
+        case (CSVExportStatus.SUCCESS):
+            return ("Success!", data)
+        case (CSVExportStatus.FAILURE):
+            modData = [list(map(lambda val: str(val), lst)) for lst in data]
+            row = [",".join(lst) for lst in modData]
+            table = "\n".join(row)
+            return ("Unknown error, retrying...", table)
+        case _:
+            raise Exception("unknown export status")
+
+```
