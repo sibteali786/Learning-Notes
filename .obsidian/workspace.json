@@ -8,67 +8,18 @@
         "type": "tabs",
         "children": [
           {
-            "id": "f2d29598527194cf",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Fundamentals of Database Engineering"
-            }
-          },
-          {
-            "id": "d3bb6a47057ca754",
+            "id": "1dfc800246989a50",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md"
+                "file": "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Isolation Levels.excalidraw"
-            }
-          },
-          {
-            "id": "1dfc800246989a50",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Notes"
+              "title": "Reading_Attempt.excalidraw"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -125,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -233,17 +183,22 @@
   },
   "active": "1dfc800246989a50",
   "lastOpenFiles": [
+    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
+    "Learning/Go Lang/Projects/nclip/phase_1-Task1-5/phase1-tasks-explained.html",
+    "Learning/Go Lang/Projects/nclip/Mutex_works.excalidraw.md",
+    "Learning/Go Lang/Projects/nclip/goroutines-explained.html",
+    "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
+    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering.md",
     "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
     "Pasted image 20260714215710.png",
     "Pasted image 20260714215620.png",
     "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/Backend Engineering/Python/functional_programming",
     "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
     "Learning/AI&ML Engineering/Projects",
     "Learning/AI&ML Engineering/Learnings/Drawing 2026-07-12 22.19.27.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232457_325.png",
     "Pasted Image 20260621130431_558.png",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232740_447.png",
@@ -256,10 +211,7 @@
     "Learning/System Design/Patterns/Realtime Udpates/realtime-updates-summary.html",
     "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
-    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation_level.m4a",
-    "Learning/System Design/Practice/Local Delivery Service/100K_items_DCs.m4a",
-    "Learning/System Design/Practice/Local Delivery Service/Item_vs_inventory.m4a",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
     "Learning/DSA/Graphs/DFS/2-DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/3-Copy_graph.excalidraw.md",
@@ -272,8 +224,6 @@
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/drills.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.24.47 PM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.20.30 PM.png",
