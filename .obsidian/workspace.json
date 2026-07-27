@@ -8,39 +8,39 @@
         "type": "tabs",
         "children": [
           {
-            "id": "1dfc800246989a50",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Reading_Attempt.excalidraw"
-            }
-          },
-          {
             "id": "d14a8cef49bd67ae",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md"
+                "file": "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Accordion.excalidraw"
+              "title": "1-AdjacencyList.excalidraw"
             }
           },
           {
-            "id": "291b21f9ade8f162",
+            "id": "36a2c7fa460f132b",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md"
+                "file": "Learning/DSA/Graphs/DFS/Matrices/Traversal.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Tabs.excalidraw"
+              "title": "Traversal.excalidraw"
+            }
+          },
+          {
+            "id": "6002dc26937709ff",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "2-DFS-traversal-of-Graphs.excalidraw"
             }
           }
         ],
@@ -207,12 +207,28 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "d14a8cef49bd67ae",
+  "active": "36a2c7fa460f132b",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
+    "Learning/DSA/Graphs/DFS/Matrices/Traversal.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md",
+    "Screenshot 2026-06-12 at 10.29.20 AM.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Screenshot 2026-04-07 at 11.58.25 AM.png",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Pasted image 20260714215620.png",
+    "Pasted Image 20260317121120_013.png",
+    "Pasted Image 20260407123826_882.png",
+    "Pasted Image 20260422143401_737.png",
+    "Pasted Image 20260423111902_446.png",
+    "Learning/DSA/Graphs/DFS/Adjacency List",
+    "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices",
+    "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion",
     "Learning/Frontend Interview Preparation/Concepts/Untitled",
@@ -224,38 +240,21 @@
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering.md",
-    "Pasted image 20260714215710.png",
-    "Pasted image 20260714215620.png",
     "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
     "Learning/Backend Engineering/Python/functional_programming",
     "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
     "Learning/AI&ML Engineering/Projects",
     "Learning/AI&ML Engineering/Learnings/Drawing 2026-07-12 22.19.27.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232457_325.png",
-    "Pasted Image 20260621130431_558.png",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232740_447.png",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Learning/Book Reading/Writing/Writing Skills.md",
     "Learning/Book Reading/Writing",
-    "Learning/System Design/Practice/Local Delivery Service/why_shard_&_read_replicas.m4a",
-    "Recording 20260724004952.m4a",
     "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/2-DFS-traversal-of-Graphs.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/3-Copy_graph.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/4-Graph Valid Tree.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/1-AdjacencyList.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Adjacency List/3-Copy_graph.excalidraw.md",
     "Learning/Book Reading/Reading List.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
-    "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.24.47 PM.png",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Learning/Frontend Interview Preparation/Practice/attachments/Screenshot 2026-07-20 at 7.20.30 PM.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Pasted Image 20260317121120_013.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
