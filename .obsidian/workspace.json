@@ -18,8 +18,33 @@
               "icon": "excalidraw-icon",
               "title": "Reading_Attempt.excalidraw"
             }
+          },
+          {
+            "id": "d14a8cef49bd67ae",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Accordion.excalidraw"
+            }
+          },
+          {
+            "id": "291b21f9ade8f162",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Tabs.excalidraw"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -76,7 +101,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,8 +207,15 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "1dfc800246989a50",
+  "active": "d14a8cef49bd67ae",
   "lastOpenFiles": [
+    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion",
+    "Learning/Frontend Interview Preparation/Concepts/Untitled",
     "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
     "Learning/Go Lang/Projects/nclip/phase_1-Task1-5/phase1-tasks-explained.html",
     "Learning/Go Lang/Projects/nclip/Mutex_works.excalidraw.md",
@@ -191,7 +224,6 @@
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering.md",
-    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
     "Pasted image 20260714215710.png",
     "Pasted image 20260714215620.png",
     "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
@@ -208,19 +240,14 @@
     "Learning/Book Reading/Writing",
     "Learning/System Design/Practice/Local Delivery Service/why_shard_&_read_replicas.m4a",
     "Recording 20260724004952.m4a",
-    "Learning/System Design/Patterns/Realtime Udpates/realtime-updates-summary.html",
     "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation_level.m4a",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
     "Learning/DSA/Graphs/DFS/2-DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/3-Copy_graph.excalidraw.md",
     "Learning/DSA/Graphs/DFS/4-Graph Valid Tree.excalidraw.md",
     "Learning/DSA/Graphs/DFS/1-AdjacencyList.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Book Reading/Reading List.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
