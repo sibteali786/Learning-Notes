@@ -25,10 +25,22 @@
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/Matrices/Traversal.excalidraw.md"
+                "file": "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Traversal.excalidraw"
+              "title": "1-Traversal.excalidraw"
+            }
+          },
+          {
+            "id": "a3d954c97e8116c1",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "2-FloodFill.excalidraw"
             }
           },
           {
@@ -37,14 +49,14 @@
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md"
+                "file": "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "2-DFS-traversal-of-Graphs.excalidraw"
+              "title": "1-Traversal.excalidraw"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -101,8 +113,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -207,10 +218,12 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "36a2c7fa460f132b",
+  "active": "6002dc26937709ff",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
-    "Learning/DSA/Graphs/DFS/Matrices/Traversal.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md",
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Screenshot 2026-03-20 at 3.14.04 AM.png",
@@ -224,7 +237,6 @@
     "Learning/DSA/Graphs/DFS/Adjacency List",
     "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices",
-    "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
