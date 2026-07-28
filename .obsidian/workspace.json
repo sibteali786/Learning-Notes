@@ -8,55 +8,30 @@
         "type": "tabs",
         "children": [
           {
-            "id": "d14a8cef49bd67ae",
+            "id": "5d2e423eaa83ee5b",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md"
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "1-AdjacencyList.excalidraw"
-            }
-          },
-          {
-            "id": "36a2c7fa460f132b",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "1-Traversal.excalidraw"
-            }
-          },
-          {
-            "id": "a3d954c97e8116c1",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "2-FloodFill.excalidraw"
-            }
-          },
-          {
-            "id": "6002dc26937709ff",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "1-Traversal.excalidraw"
+              "icon": "lucide-file",
+              "title": "Notes"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -113,7 +88,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -218,13 +194,21 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "6002dc26937709ff",
+  "active": "5d2e423eaa83ee5b",
   "lastOpenFiles": [
-    "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
+    "Learning/AI&ML Engineering/Learnings/Books.md",
+    "Learning/AI&ML Engineering/Learnings/Sampling.excalidraw.md",
+    "Learning/AI&ML Engineering/Learnings/Drawing 2026-07-12 22.19.27.excalidraw.md",
+    "Learning/AI&ML Engineering/UsefullTools/Overview.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "Personal/Remote Jobs/Remote Resource.md",
     "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C",
+    "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Screenshot 2026-03-20 at 3.14.04 AM.png",
     "Screenshot 2026-04-07 at 11.58.25 AM.png",
@@ -237,7 +221,6 @@
     "Learning/DSA/Graphs/DFS/Adjacency List",
     "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
@@ -256,17 +239,10 @@
     "Learning/Backend Engineering/Python/functional_programming",
     "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
     "Learning/AI&ML Engineering/Projects",
-    "Learning/AI&ML Engineering/Learnings/Drawing 2026-07-12 22.19.27.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Learning/Book Reading/Writing/Writing Skills.md",
-    "Learning/Book Reading/Writing",
     "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
-    "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Adjacency List/3-Copy_graph.excalidraw.md",
-    "Learning/Book Reading/Reading List.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Numbers-to-know.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
