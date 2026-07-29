@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scaling Reads — System Design (v2)</title>
+<style>
+/* Hallmark · macrostructure: Stat-Led · genre: editorial · theme: custom (dark, ink-blue)
+ * fix pass: Fraunces display + General Sans body + JetBrains Mono outlier
+ * fonts replace Syne-as-body; all colors routed through tokens; emoji icons removed
+ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap');
+
+:root {
+  --bg: #0d0f14;
+  --surface: #141720;
+  --surface2: #1c2030;
+  --surface3: #232840;
+  --border: #2a2f42;
+  --accent: #5b8fff;
+  --accent2: #ff6b6b;
+  --accent3: #43e97b;
+  --accent4: #f7b731;
+  --accent5: #a29bfe;
+  --text: #e8eaf0;
+  --text-body: #c0c6d8;
+  --muted: #8b92ac;
+
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-body: 'General Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.85rem;
+  --text-base: 1rem;
+  --text-md: 1.1rem;
+  --text-lg: 1.4rem;
+  --text-xl: 1.9rem;
+  --text-2xl: 2.6rem;
+  --text-display: clamp(2.5rem, 4vw + 1rem, 4.4rem);
+
+  --space-xs: 6px; --space-sm: 12px; --space-md: 20px; --space-lg: 32px; --space-xl: 48px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  padding: var(--space-xl) var(--space-lg);
+  max-width: 1280px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+h1, h2, h3 { font-family: var(--font-display); color: var(--text); font-style: normal; }
+
+/* ── HEADER ── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.page-header .kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--space-sm);
+}
+.page-header h1 {
+  font-size: var(--text-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.page-header h1 em { font-style: italic; color: var(--accent); }
+.tag-row { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+.tag-blue{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent);}
+.tag-green{color:var(--accent3);border-color:var(--accent3);background:color-mix(in srgb, var(--accent3) 8%, transparent);}
+.tag-yellow{color:var(--accent4);border-color:var(--accent4);background:color-mix(in srgb, var(--accent4) 8%, transparent);}
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.section-title::after { content:''; flex:1; height:1px; background: var(--border); }
+.section-title .num { color: var(--accent); }
+
+/* ── GRIDS ── */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg); }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg); }
+
+/* ── CARD ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: var(--space-md); position: relative; }
+.card.accent-blue { border-top: 2px solid var(--accent); }
+.card.accent-green { border-top: 2px solid var(--accent3); }
+.card.accent-yellow { border-top: 2px solid var(--accent4); }
+.card.accent-purple { border-top: 2px solid var(--accent5); }
+.card.accent-red { border-top: 2px solid var(--accent2); }
+.card-label { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: var(--space-sm); color: var(--muted); }
+.card-label.blue{color:var(--accent);} .card-label.green{color:var(--accent3);}
+.card-label.yellow{color:var(--accent4);} .card-label.purple{color:var(--accent5);} .card-label.red{color:var(--accent2);}
+.card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: var(--space-sm); }
+.card p, .card li { font-size: var(--text-sm); color: var(--text-body); margin-bottom: var(--space-xs); }
+.card ul { padding-left: 18px; }
+.card li::marker { color: var(--muted); }
+
+/* ── STAT STRIP (replaces some repeated cards w/ a different rhythm) ── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+}
+.stat {
+  padding: var(--space-md);
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+.stat:last-child { border-right: none; }
+.stat .num { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 700; color: var(--text); line-height: 1; }
+.stat .label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); margin-top: var(--space-xs); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ── FLOW DIAGRAM ── */
+.flow-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: var(--space-lg); margin-bottom: var(--space-lg); display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
+.flow-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 20px; text-align: center; min-width: 130px; }
+.flow-box .label { font-size: var(--text-xs); color: var(--muted); margin-bottom: 4px; font-family: var(--font-mono); }
+.flow-box .name { font-weight: 600; font-size: var(--text-md); font-family: var(--font-display); }
+.flow-arrow { display: flex; flex-direction: column; align-items: center; padding: 0 var(--space-md); }
+.flow-arrow .arrow { font-size: 1.4rem; color: var(--accent); }
+.flow-arrow .flabel { font-size: var(--text-xs); color: var(--accent); font-family: var(--font-mono); margin-bottom: 4px; white-space: nowrap; }
+
+/* ── COMPARE TABLE (cheatsheet becomes a table, not a card grid) ── */
+.compare-table { width: 100%; border-collapse: collapse; margin-bottom: var(--space-lg); font-size: var(--text-sm); }
+.compare-table th {
+  background: var(--surface2);
+  padding: 10px 14px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.compare-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .scenario { font-family: var(--font-display); font-weight: 600; color: var(--text); font-size: var(--text-md); }
+.compare-table .swatch { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; }
+
+/* ── CODE ── */
+.code-block { background: #0a0c10; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; overflow-x: auto; color: #abb2bf; margin-top: var(--space-sm); }
+.code-block .kw{color:#c678dd;} .code-block .fn{color:#61afef;} .code-block .str{color:#98c379;} .code-block .cm{color:#5c6370;font-style:italic;} .code-block .num{color:#d19a66;}
+
+/* ── PRO/CON ── */
+.procon { display:grid; grid-template-columns:1fr 1fr; gap: var(--space-sm); margin-top: var(--space-sm); }
+.pros, .cons { border-radius: 8px; padding: 10px 12px; font-size: var(--text-xs); }
+.pros{background:color-mix(in srgb, var(--accent3) 7%, transparent);border:1px solid color-mix(in srgb, var(--accent3) 22%, transparent);}
+.cons{background:color-mix(in srgb, var(--accent2) 7%, transparent);border:1px solid color-mix(in srgb, var(--accent2) 22%, transparent);}
+.pros .head{color:var(--accent3);font-weight:600;margin-bottom:6px;}
+.cons .head{color:var(--accent2);font-weight:600;margin-bottom:6px;}
+.pros li,.cons li{color:var(--text-body);margin-bottom:3px;padding-left:14px;list-style:none;position:relative;}
+.pros li::before{content:'+';position:absolute;left:0;color:var(--accent3);font-weight:700;}
+.cons li::before{content:'\2212';position:absolute;left:0;color:var(--accent2);font-weight:700;}
+
+/* ── CALLOUT ── */
+.callout {
+  background: color-mix(in srgb, var(--accent4) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent4) 30%, transparent);
+  border-left: 3px solid var(--accent4);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  margin: var(--space-sm) 0;
+  font-size: var(--text-sm);
+  color: #e0c97a;
+}
+.callout .head { font-weight: 600; font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.05em; margin-bottom: 4px; color: var(--accent4); text-transform: uppercase; }
+
+/* ── TIPS ── */
+.tip-row { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); align-items: flex-start; }
+.tip-num { min-width: 26px; height: 26px; background: var(--accent); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: 700; font-family: var(--font-mono); flex-shrink: 0; }
+.tip-text { font-size: var(--text-sm); color: var(--text-body); padding-top: 3px; }
+
+@media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr 1fr; } .stat-strip { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .stat-strip { grid-template-columns: 1fr; } .stat { border-right:none; border-bottom:1px solid var(--border); } .stat:last-child{border-bottom:none;} .page-header{flex-direction:column;align-items:flex-start;} }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="page-header">
+  <div>
+    <div class="kicker">System Design Pattern</div>
+    <h1>Scaling <em>Reads</em></h1>
+  </div>
+  <div class="tag-row">
+    <span class="tag tag-blue">Read/Write Skew</span>
+    <span class="tag tag-yellow">Interview Hot Topic</span>
+  </div>
+</div>
+
+<!-- ═══ NUMBERS TO KNOW — stat strip replaces a card ═══ -->
+<div class="stat-strip">
+  <div class="stat"><div class="num">10:1</div><div class="label">baseline read:write</div></div>
+  <div class="stat"><div class="num">100:1+</div><div class="label">content-heavy apps</div></div>
+  <div class="stat"><div class="num">50–100K</div><div class="label">reads/sec before scale-out</div></div>
+  <div class="stat"><div class="num">90%+</div><div class="label">origin load cut by CDN</div></div>
+</div>
+
+<!-- ═══ THE PROBLEM ═══ -->
+<div class="section-title"><span class="num">01</span> The Problem — Why Reads Dominate</div>
+
+<div class="card accent-yellow" style="margin-bottom: var(--space-lg);">
+  <div class="card-label yellow">The Imbalance</div>
+  <p>Loading an Instagram feed = 100+ read ops (photo metadata, user info, likes, comment previews) vs. maybe 1 post/day per user (1 write). This pattern repeats everywhere: 1 tweet → thousands of reads, 1 Amazon product upload → hundreds of browses, YouTube serves billions of views/day on millions of uploads.</p>
+  <div class="callout">
+    <div class="head">Interview note</div>
+    This is often <strong>physics, not a software bug</strong> — CPU cores, memory, disk I/O are all physically bounded. More code won't fix a hardware ceiling.
+  </div>
+</div>
+
+<!-- ═══ SOLUTION PROGRESSION ═══ -->
+<div class="section-title"><span class="num">02</span> The Solution — A Natural Progression</div>
+
+<div class="flow-diagram">
+  <div class="flow-box" style="border-color:var(--accent3);">
+    <div class="label">STEP 1</div>
+    <div class="name" style="color:var(--accent3);">Optimize DB</div>
+  </div>
+  <div class="flow-arrow"><div class="flabel">headroom first</div><div class="arrow">→</div></div>
+  <div class="flow-box" style="border-color:var(--accent4);">
+    <div class="label">STEP 2</div>
+    <div class="name" style="color:var(--accent4);">Scale Horizontally</div>
+  </div>
+  <div class="flow-arrow"><div class="flabel">replicas / shards</div><div class="arrow">→</div></div>
+  <div class="flow-box" style="border-color:var(--accent);">
+    <div class="label">STEP 3</div>
+    <div class="name" style="color:var(--accent);">Add Caching</div>
+  </div>
+</div>
+
+<div class="callout" style="margin-bottom: var(--space-lg);">
+  <div class="head">Interview mistake</div>
+  Most candidates jump straight to complex distributed caching. Exhaust simpler solutions first — modern databases, properly indexed, handle far more load than most engineers realize.
+</div>
+
+<!-- ═══ STEP 1: OPTIMIZE WITHIN DB ═══ -->
+<div class="section-title"><span class="num">03</span> Step 1 — Optimize Within Your Database</div>
+
+<div class="grid-3">
+  <div class="card accent-green">
+    <div class="card-label green">Indexing</div>
+    <h3>O(n) → O(log n)</h3>
+    <p>Index = sorted lookup table pointing to rows, like a book index. Without it: full table scan (read every row). With it: jump straight to matches.</p>
+    <p style="color:var(--accent3);">1M row scan → ~20 index lookups.</p>
+    <p>B-tree = general queries. Hash = exact matches. Specialized = full-text/geo.</p>
+    <div class="callout">
+      <div class="head">Confidently over-index</div>
+      "Too many indexes slow writes" fear is overblown on modern hardware. Under-indexing kills more apps than over-indexing. Index columns you query/join/sort on.
+    </div>
+  </div>
+
+  <div class="card" style="border-top: 2px solid var(--muted);">
+    <div class="card-label" style="color:var(--muted);">Hardware Upgrades</div>
+    <h3>Boring but Effective</h3>
+    <ul>
+      <li>SSD vs spinning disk: <strong>10-100x</strong> faster random I/O</li>
+      <li>More RAM → more dataset cached in memory</li>
+      <li>Faster CPU/more cores → more concurrent queries</li>
+    </ul>
+    <p style="color:var(--muted);font-size:var(--text-xs);margin-top:var(--space-sm);">Mention it, but rarely what interviewer wants — sidesteps the actual question.</p>
+  </div>
+
+  <div class="card accent-yellow">
+    <div class="card-label yellow">Denormalization</div>
+    <h3>Trade Storage for Speed</h3>
+    <p>Normalized data = split across tables, needs joins (expensive at scale). Denormalized = redundant data in one table, single-query reads.</p>
+    <div class="code-block">
+<span class="cm">-- Normalized: needs 3-way join</span>
+<span class="kw">SELECT</span> u.name, o.order_date, p.price
+<span class="kw">FROM</span> users u <span class="kw">JOIN</span> orders o ...
+
+<span class="cm">-- Denormalized: single table</span>
+<span class="kw">SELECT</span> user_name, order_date, price
+<span class="kw">FROM</span> order_summary <span class="kw">WHERE</span> order_id = <span class="num">12345</span>;</div>
+    <div class="callout">
+      <div class="head">Check read/write ratio first</div>
+      Duplicated data (e.g. user name) means updates touch multiple places. Worth it only when reads vastly outnumber writes.
+    </div>
+    <p style="margin-top:6px;">Materialized views: precompute expensive aggregations (e.g. avg rating) via background job instead of on every page load.</p>
+  </div>
+</div>
+
+<!-- ═══ STEP 2: HORIZONTAL SCALING ═══ -->
+<div class="section-title"><span class="num">04</span> Step 2 — Scale Your Database Horizontally</div>
+
+<div class="callout" style="margin-bottom: var(--space-md);">
+  <div class="head">Numbers to know</div>
+  Rough rule of thumb: horizontal scaling (or caching) needed beyond <strong>50,000–100,000 read requests/sec</strong> (assuming proper indexing already in place). Rough estimate — fine to justify decisions in interview.
+</div>
+
+<div class="grid-2">
+  <div class="card accent-blue">
+    <div class="card-label blue">Read Replicas</div>
+    <h3>Leader-Follower Replication</h3>
+    <p>Primary (leader) handles writes, secondaries (followers) handle reads. Distributes read load; bonus: promote a replica if primary fails (redundancy).</p>
+    <div class="procon">
+      <div class="pros"><div class="head">Sync</div><ul><li>Strong consistency</li></ul></div>
+      <div class="cons"><div class="head">Sync</div><ul><li>Higher write latency</li></ul></div>
+    </div>
+    <div class="procon">
+      <div class="pros"><div class="head">Async</div><ul><li>Lower latency</li></ul></div>
+      <div class="cons"><div class="head">Async</div><ul><li>Replication lag — stale reads</li></ul></div>
+    </div>
+    <div class="callout">
+      <div class="head">Common question</div>
+      Users may not see their own writes if reading from a lagging replica. Know the sync vs. async trade-off cold.
+    </div>
+  </div>
+
+  <div class="card accent-purple">
+    <div class="card-label purple">Database Sharding</div>
+    <h3>Split the Dataset Itself</h3>
+    <p>Replicas don't shrink dataset size. Sharding splits data across DBs so each query hits a smaller, faster dataset — and spreads read load.</p>
+    <ul>
+      <li><strong>Functional sharding</strong> — split by domain (users DB, products DB)</li>
+      <li><strong>Geographic sharding</strong> — US data in US DBs, EU in EU DBs; faster local reads</li>
+    </ul>
+    <div class="callout">
+      <div class="head">Mostly a write-scaling tool</div>
+      Sharding adds real operational complexity. For read scaling specifically, caching is usually more effective and easier to implement — reach for it first.
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STEP 3: CACHING ═══ -->
+<div class="section-title"><span class="num">05</span> Step 3 — Add External Caching Layers</div>
+
+<div class="card accent-green" style="margin-bottom: var(--space-md);">
+  <div class="card-label green">Why Caching Works</div>
+  <p>Most apps have <strong>skewed access patterns</strong> — millions read the same viral tweet, thousands view the same popular product. You're repeatedly querying identical, rarely-changing data. Caches serve pre-computed results from RAM: <strong>sub-millisecond</strong> vs tens of ms for even well-optimized DB queries.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card accent-blue">
+    <div class="card-label blue">Application-Level Caching</div>
+    <h3>Redis / Memcached</h3>
+    <p>Sits between app and DB. Hit → sub-ms response. Miss → query DB, populate cache. Popular data naturally stays warm; cold data falls back to DB.</p>
+    <p style="font-weight:600;color:var(--accent4);margin-top:var(--space-sm);">Invalidation strategies:</p>
+    <ul>
+      <li><strong>TTL</strong> — simplest, tolerates some staleness</li>
+      <li><strong>Write-through</strong> — update/delete cache on write; consistent, adds write latency</li>
+      <li><strong>Write-behind</strong> — async invalidation queue; faster writes, brief stale window</li>
+      <li><strong>Tagged</strong> — invalidate by tag (e.g. "user:123:posts"); powerful, needs tag tracking</li>
+      <li><strong>Versioned keys</strong> — bump version on update, old keys naturally orphaned</li>
+    </ul>
+    <div class="callout">
+      <div class="head">TTL from requirements</div>
+      "Search results ≤30s stale" → 30s TTL directly. "Profile tolerates 5min" → 5min TTL. Most production systems combine short TTL (5-15min) as safety net + active invalidation for critical data.
+    </div>
+  </div>
+
+  <div class="card accent-red">
+    <div class="card-label red">CDN & Edge Caching</div>
+    <h3>Cache at the Edge, Globally</h3>
+    <p>Modern CDNs cache dynamic content too (API responses, query results), not just static assets.</p>
+    <div class="callout">
+      <div class="head">Numbers to know</div>
+      Tokyo user hitting Tokyo edge vs. Virginia origin: <strong>200ms → under 10ms</strong>. CDN caching can cut origin load by <strong>90%+</strong> for read-heavy apps.
+    </div>
+    <p style="margin-top:var(--space-sm);"><strong>Only cache shared data</strong> — product pages, public posts, search results. Never cache user-specific data (preferences, private messages) — zero hit-rate benefit, only one user ever requests it.</p>
+  </div>
+</div>
+
+<!-- ═══ INTERVIEW SCENARIOS — table, not repeated cards ═══ -->
+<div class="section-title"><span class="num">06</span> When to Use in Interviews</div>
+
+<div class="callout" style="margin-bottom: var(--space-md);">
+  <div class="head">Core advice</div>
+  Look at each external API request; for high-volume ones, plan optimization proactively. E.g. while sketching API design: "This profile endpoint gets hit every profile view — millions of users means billions of reads/day. I'll address that in the deep dive."
+</div>
+
+<div style="overflow-x:auto;">
+<table class="compare-table">
+  <thead>
+    <tr><th>Scenario</th><th>Strategy</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="swatch" style="background:var(--accent);"></span><span class="scenario">Bitly / URL Shortener</span></td>
+      <td>Extreme ratio — shortened once, accessed millions of times. Cache short→long mapping aggressively in Redis with <strong>no expiration</strong> (URLs immutable). Add CDN for global traffic. DB only hit on cache miss for unpopular links.</td>
+    </tr>
+    <tr>
+      <td><span class="swatch" style="background:var(--accent4);"></span><span class="scenario">Ticketmaster</span></td>
+      <td>Event pages hammered at ticket drop. Cache event/venue/seating info aggressively — but <strong>never cache seat availability</strong> (would oversell). Read replicas for browsing, write master reserved for actual purchases.</td>
+    </tr>
+    <tr>
+      <td><span class="swatch" style="background:var(--accent3);"></span><span class="scenario">News Feed (FB/LinkedIn/Twitter)</span></td>
+      <td>Pre-compute feeds for active users, cache recent posts from followed users, smart pagination. Insight: users mostly read first few items — aggressive caching of recent content pays off massively.</td>
+    </tr>
+    <tr>
+      <td><span class="swatch" style="background:var(--accent5);"></span><span class="scenario">YouTube / Video Platforms</span></td>
+      <td>Metadata (titles, thumbnails, descriptions) cached aggressively — rarely changes. View counts can be <strong>eventually consistent</strong> (update every few minutes, not per-view). CDN extensively for thumbnails.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="grid-2">
+  <div class="card accent-red">
+    <div class="card-label red">When NOT to Use</div>
+    <ul>
+      <li><strong>Write-heavy systems</strong> — Uber location tracking (updates every few seconds); ratio might be 2:1 or 1:1. Focus on write scaling first.</li>
+      <li><strong>Small scale</strong> — "design for 1000 users" → well-indexed single DB handles thousands of QPS fine. Solve the actual problem, not the imagined one.</li>
+      <li><strong>Strongly consistent systems</strong> — financial transactions, inventory. Still usable but needs aggressive invalidation + short TTLs.</li>
+      <li><strong>Real-time collaborative</strong> — Google Docs needs real-time updates more than read scaling; caching actively hurts when every keystroke must be instantly visible.</li>
+    </ul>
+  </div>
+  <div class="card" style="border-top: 2px solid var(--muted);">
+    <div class="card-label" style="color:var(--muted);">Remember</div>
+    <p>Read scaling reduces <strong>database load</strong>, not just latency. If DB handles load fine but you need lower latency, that's a different problem (edge computing, service mesh optimization) — don't conflate the two.</p>
+  </div>
+</div>
+
+<!-- ═══ DEEP DIVES ═══ -->
+<div class="section-title"><span class="num">07</span> Common Deep Dives</div>
+
+<div class="grid-2">
+
+  <div class="card accent-blue">
+    <div class="card-label blue">Deep Dive 1</div>
+    <h3>Queries Slow as Dataset Grows</h3>
+    <p>10K users → snappy. 10M users → simple lookup takes 30s, CPU pegged at 100% on basic queries. Cause: no index → full table scan on every query (2GB scan @ 200 bytes/row × 10M rows just to find one user). Joins compound this — billions of row comparisons for a simple lookup.</p>
+    <div class="code-block">
+<span class="cm">-- Before: Seq Scan (cost=0.00..412,000.00)</span>
+<span class="kw">EXPLAIN SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> email = <span class="str">'x@y.com'</span>;
+
+<span class="kw">CREATE INDEX</span> idx_users_email <span class="kw">ON</span> users(email);
+
+<span class="cm">-- After: Index Scan (cost=0.43..8.45)</span></div>
+    <p style="margin-top:var(--space-sm);">Compound queries: column <strong>order in index matters</strong>. Index on (status, created_at) helps queries filtering by status alone or both — not created_at alone.</p>
+  </div>
+
+  <div class="card accent-yellow">
+    <div class="card-label yellow">Deep Dive 2</div>
+    <h3>Millions of Concurrent Reads, Same Key</h3>
+    <p>Celebrity posts → cache servers normally at 50K req/s suddenly hit 500K req/s for <strong>one key</strong>. Traditional caching assumes load spreads across keys — breaks when everyone wants the same one.</p>
+    <p style="font-weight:600;color:var(--accent);margin-top:var(--space-sm);">Fix 1 — Request Coalescing:</p>
+    <div class="code-block">
+<span class="kw">class</span> <span class="fn">CoalescingCache</span>:
+  <span class="kw">def</span> <span class="fn">get</span>(key):
+    <span class="kw">if</span> key <span class="kw">in</span> inflight: <span class="kw">return await</span> inflight[key]
+    <span class="cm"># else fetch once, share result with all waiters</span></div>
+    <p style="margin-top:6px;">Reduces backend load from "infinite" to exactly <strong>N</strong> (one per app server), even with millions of simultaneous requesters.</p>
+    <p style="font-weight:600;color:var(--accent5);margin-top:var(--space-sm);">Fix 2 — Cache Key Fanout:</p>
+    <p>Store identical copies under N keys (<code style="font-family:var(--font-mono);color:var(--accent5);">feed:x:1</code>, <code style="font-family:var(--font-mono);color:var(--accent5);">feed:x:2</code>...). Clients randomly pick one — spreads 500K req/s across 10 keys → 50K each. Trade-off: extra memory, more complex invalidation (must clear all copies).</p>
+  </div>
+
+  <div class="card accent-green">
+    <div class="card-label green">Deep Dive 3</div>
+    <h3>Cache Stampede on Expiry</h3>
+    <p>100K req/s all served from a cache entry with 1hr TTL. Entry expires → all 100K requests miss <strong>simultaneously</strong>, all hit DB at once — DB sized for ~1K req/s gets 100K identical queries. Self-inflicted DDoS.</p>
+    <div class="procon">
+      <div class="pros"><div class="head">Distributed Locks</div><ul><li>First request rebuilds, rest wait</li></ul></div>
+      <div class="cons"><div class="head">Downside</div><ul><li>Fragile — failed/slow rebuild = mass timeouts</li></ul></div>
+    </div>
+    <div class="callout">
+      <div class="head">Better: probabilistic early refresh</div>
+      Chance of background refresh grows as entry ages (e.g. 1% at min 50, 5% at min 55, 20% at min 59 of a 60min TTL). Spreads refreshes over last 10-15min instead of one stampede at expiry. Most-critical data: continuous background refresh before expiry (never goes stale, costs extra infra + wasted work).
+    </div>
+  </div>
+
+  <div class="card accent-purple">
+    <div class="card-label purple">Deep Dive 4</div>
+    <h3>Cache Invalidation, Immediate Visibility</h3>
+    <p>Naive delete-on-write has real problems: which caches to clear (app/CDN/browser)? What if invalidation fails? Race: read slips in between delete and new write, re-caches stale data.</p>
+    <p style="font-weight:600;color:var(--accent);margin-top:var(--space-sm);">Better — Cache Versioning:</p>
+    <p>Version number stored in DB, incremented on write (in same transaction). Cache key includes version: <code style="font-family:var(--font-mono);color:var(--accent);">event:123:v42</code> → <code style="font-family:var(--font-mono);color:var(--accent);">event:123:v43</code>. Old versions never deleted, just become unreachable — no race conditions (DB forces new version atomically), no invalidation broadcasts needed.</p>
+    <div class="procon">
+      <div class="cons"><div class="head">Trade-offs</div><ul><li>2 lookups/request (version + data)</li><li>Old versions accumulate — needs TTL cleanup</li><li>Doesn't help computed data (feeds, search)</li></ul></div>
+    </div>
+    <p style="font-weight:600;color:var(--accent3);margin-top:var(--space-sm);">For computed/aggregated data:</p>
+    <p><strong>Deleted items cache</strong> — small, fast cache of recently deleted/hidden/changed IDs. Filter these out of stale feed cache while background job properly rebuilds the larger structure. Good for moderation/privacy changes.</p>
+    <p style="margin-top:6px;">CDN invalidation is hardest — hundreds of edge locations, propagation takes time. Critical updates: prevent CDN caching entirely via headers, trading perf for consistency.</p>
+  </div>
+
+</div>
+
+<!-- ═══ INTERVIEW STRATEGY ═══ -->
+<div class="section-title"><span class="num">08</span> Interview Strategy</div>
+
+<div class="card" style="border-top: 2px solid var(--accent4); margin-bottom: var(--space-lg);">
+  <div class="card-label yellow">Interview Playbook</div>
+  <div style="margin-top:var(--space-sm);">
+    <div class="tip-row"><div class="tip-num">1</div><div class="tip-text"><strong>Follow the progression</strong> — optimize (indexing, denormalization) → horizontal scale (replicas/sharding) → caching. Don't skip straight to distributed caching.</div></div>
+    <div class="tip-row"><div class="tip-num">2</div><div class="tip-text"><strong>Index confidently</strong> — call out exactly which columns you'll index and why, while outlining schema. Under-indexing is the more common failure.</div></div>
+    <div class="tip-row"><div class="tip-num">3</div><div class="tip-text"><strong>Justify decisions with rough numbers</strong> — "beyond 50-100K reads/sec we'd need to scale horizontally" is enough; you don't need exact figures.</div></div>
+    <div class="tip-row"><div class="tip-num">4</div><div class="tip-text"><strong>Tie TTL to non-functional requirements</strong> — "results can be 30s stale" directly gives you the TTL. Don't pick arbitrary cache durations.</div></div>
+    <div class="tip-row"><div class="tip-num">5</div><div class="tip-text"><strong>Flag hot endpoints proactively</strong> — pause at high-traffic endpoints during API design and note you'll address scaling in the deep dive.</div></div>
+    <div class="tip-row"><div class="tip-num">6</div><div class="tip-text"><strong>Know when NOT to cache</strong> — write-heavy systems, small scale, strongly-consistent, or real-time collaborative apps. Shows judgment, not just pattern memorization.</div></div>
+  </div>
+</div>
+
+<!-- ═══ CHEATSHEET — dense table, not another card grid ═══ -->
+<div class="section-title"><span class="num">09</span> Read/Write Ratio Cheatsheet</div>
+
+<div style="overflow-x:auto;">
+<table class="compare-table">
+  <thead>
+    <tr><th>System</th><th>Approach</th><th>Pattern</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="scenario">Bitly</td><td>Redis, no TTL + CDN</td><td><span class="tag tag-blue">Extreme read-skew</span></td></tr>
+    <tr><td class="scenario">Ticketmaster</td><td>Cache details, never availability</td><td><span class="tag tag-yellow">Selective caching</span></td></tr>
+    <tr><td class="scenario">News Feed</td><td>Pre-compute + paginate</td><td><span class="tag tag-green">Precompute</span></td></tr>
+    <tr><td class="scenario">YouTube</td><td>Metadata cached, views eventual</td><td><span class="tag tag-blue">Eventual consistency</span></td></tr>
+    <tr><td class="scenario">Uber Location</td><td>Write-heavy, skip caching</td><td><span class="tag" style="color:var(--accent2);border-color:var(--accent2);">Anti-pattern</span></td></tr>
+    <tr><td class="scenario">Google Docs</td><td>Real-time &gt; read scaling</td><td><span class="tag" style="color:var(--muted);border-color:var(--muted);">Anti-pattern</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+</body>
+</html>

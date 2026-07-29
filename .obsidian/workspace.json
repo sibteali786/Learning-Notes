@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "8642e46a68c26e58",
+        "id": "a451def9d3e66c83",
         "type": "tabs",
         "children": [
           {
-            "id": "5d2e423eaa83ee5b",
+            "id": "7017e9bb54ea5345",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary-v2.html"
               },
-              "icon": "lucide-file",
-              "title": "Notes"
+              "icon": "code-glyph",
+              "title": "scaling-reads-summary-v2"
             }
           }
         ]
@@ -194,13 +182,27 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "5d2e423eaa83ee5b",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/720p_bjCG.mp4",
+    "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary-v2.html",
+    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
+    "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary.html",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry.html",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/OPuE8JWQn9U7.0mkv7w6ydu21w_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/FmYvAiFSqI5u.1gj57g4k3fpyh_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/eOze4GuN6r8a.2zb9aerb_7iey_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/Ckv1iXTqtgpO.399dktu8olxrc_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/7MTf5pZ6beTR.38i7itwkoyxb7_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/2qkV4Dk_8L2V.1y7z8qi9oppk0_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/-OojE1zJzrq6.3bu4kty8a3-ss_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/eZny1P3OYXCi.32q467eot6u9j_bjCG.svg",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
     "Learning/AI&ML Engineering/Learnings/Sampling.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Drawing 2026-07-12 22.19.27.excalidraw.md",
     "Learning/AI&ML Engineering/UsefullTools/Overview.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Personal/Remote Jobs/Remote Resource.md",
     "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
@@ -210,14 +212,6 @@
     "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Screenshot 2026-04-07 at 11.58.25 AM.png",
-    "Screenshot 2026-04-06 at 11.24.37 AM.png",
-    "Pasted image 20260714215620.png",
-    "Pasted Image 20260317121120_013.png",
-    "Pasted Image 20260407123826_882.png",
-    "Pasted Image 20260422143401_737.png",
-    "Pasted Image 20260423111902_446.png",
     "Learning/DSA/Graphs/DFS/Adjacency List",
     "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices",
@@ -228,21 +222,14 @@
     "Learning/Frontend Interview Preparation/Coding/Accordion",
     "Learning/Frontend Interview Preparation/Concepts/Untitled",
     "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
-    "Learning/Go Lang/Projects/nclip/phase_1-Task1-5/phase1-tasks-explained.html",
     "Learning/Go Lang/Projects/nclip/Mutex_works.excalidraw.md",
-    "Learning/Go Lang/Projects/nclip/goroutines-explained.html",
     "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering.md",
     "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming",
     "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
-    "Learning/AI&ML Engineering/Projects",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
-    "Learning/Book Reading/Writing/Writing Skills.md",
-    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
