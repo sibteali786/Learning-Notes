@@ -16,6 +16,13 @@ Interview date: Tuesday (next occurring after 2026-07-19)
 | Build tools (Webpack/Vite) | untested | |
 | Mentoring | untested | Lead Engineer title at Hill Country Coders — has story material |
 | Browser internals (CRP, Core Web Vitals, Intersection Observer) | weak (self-reported) | Failed Intersection Observer before — hit hard |
+| **Scope note** | | 2026-07-20: user flagged interview may be Full Stack, not pure frontend. Adding below rows. Frontend rows above still in scope. |
+| NestJS (architecture, DI, modules) | untested | |
+| Node.js internals (event loop, streams, cluster) | untested | |
+| PostgreSQL (design, indexing, query optimization) | untested | |
+| Prisma ORM (query methods, relations, migrations) | untested | |
+| API design best practices (REST/GraphQL API design, not just consumption) | untested | |
+| React lifecycle/hooks/state mgmt/memoization/props drilling (full-stack-lens re-ask) | partially covered | Already drilled hooks/context/memoization above from frontend angle |
 
 ## Question Log
 

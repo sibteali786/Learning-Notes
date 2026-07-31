@@ -8,18 +8,6 @@
         "type": "tabs",
         "children": [
           {
-            "id": "c5c7e13f756f4978",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "1-Intuition.excalidraw"
-            }
-          },
-          {
             "id": "e2a6639bd9986037",
             "type": "leaf",
             "state": {
@@ -29,6 +17,54 @@
               },
               "icon": "excalidraw-icon",
               "title": "2-TypesOfIndexes.excalidraw"
+            }
+          },
+          {
+            "id": "664040987b03e0b2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Notes"
+            }
+          },
+          {
+            "id": "f501db00c24f9a37",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Memory_Storage.excalidraw"
+            }
+          },
+          {
+            "id": "a9d3a5d0db76e85c",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "1-Intuition.excalidraw"
             }
           },
           {
@@ -43,7 +79,8 @@
               "title": "scaling-reads-summary-v2"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -63,7 +100,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": true
+                "autoReveal": true,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -206,11 +245,25 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "664040987b03e0b2",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
     "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary-v2.html",
+    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Interview Session/progress-tracker.md",
+    "Learning/Frontend Interview Preparation/Practice/Practice.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Practice/Event Bubbling Vs Capturing.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Practice/Closure_with_an_example.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Practice/Caching.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Concepts/vanilla-vs-react-interection-observr.html",
+    "Learning/Frontend Interview Preparation/Concepts/useId-crash-course.html",
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Number of Islands.excalidraw.md",
@@ -230,29 +283,16 @@
     "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/-OojE1zJzrq6.3bu4kty8a3-ss_bjCG.svg",
     "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/eZny1P3OYXCi.32q467eot6u9j_bjCG.svg",
     "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
     "Learning/AI&ML Engineering/Learnings/Sampling.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Drawing 2026-07-12 22.19.27.excalidraw.md",
     "Learning/AI&ML Engineering/UsefullTools/Overview.md",
     "Personal/Remote Jobs/Remote Resource.md",
-    "Learning/DSA/Graphs/DFS/Adjacency List/1-AdjacencyList.excalidraw.md",
     "Learning/Backend Engineering/Memory Management in C",
-    "Learning/DSA/Graphs/DFS/Adjacency List/2-DFS-traversal-of-Graphs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Learning/DSA/Graphs/DFS/Adjacency List",
-    "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices",
-    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion",
-    "Learning/Frontend Interview Preparation/Concepts/Untitled",
-    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
-    "Learning/Go Lang/Projects/nclip/Mutex_works.excalidraw.md",
-    "Learning/Go Lang/Projects/nclip/Crypto-rand-math.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
