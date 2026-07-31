@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "03256d8664962a21",
+        "id": "77a1d8a4fcdd4fdd",
         "type": "tabs",
         "children": [
           {
-            "id": "7df968a0074bf453",
+            "id": "018149d8f99d47a4",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,7 +28,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "AI Challenge Submission — Smart Code Reviewer"
+              "title": "Notes"
             }
           }
         ]
@@ -88,7 +88,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5
+    "width": 305.5,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -193,17 +194,27 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "018149d8f99d47a4",
   "lastOpenFiles": [
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730100726_423.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730092132_463.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/1-atomicmassunit.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730085940_939.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments/AtomicMassUnit.m4a",
+    "Pasted Image 20260730091822_124.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Screenshot 2026-06-12 at 10.29.20 AM.png",
+    "Screenshot 2026-06-12 at 10.29.31 AM.png",
+    "Pasted image 20260714215620.png",
+    "Pasted image 20260714215710.png",
+    "Pasted Image 20260317121120_013.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments",
+    "Learning/Research/Adam-DFT/Atomic Structure",
+    "Learning/Research/Adam-DFT",
+    "Learning/Research",
+    "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
     "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary-v2.html",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/eZny1P3OYXCi.32q467eot6u9j_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/eOze4GuN6r8a.2zb9aerb_7iey_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/OPuE8JWQn9U7.0mkv7w6ydu21w_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/FmYvAiFSqI5u.1gj57g4k3fpyh_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/Ckv1iXTqtgpO.399dktu8olxrc_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/7MTf5pZ6beTR.38i7itwkoyxb7_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/2qkV4Dk_8L2V.1y7z8qi9oppk0_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/-OojE1zJzrq6.3bu4kty8a3-ss_bjCG.svg",
     "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files",
     "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry.html",
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
@@ -214,19 +225,10 @@
     "Learning/Backend Engineering/Memory Management in C",
     "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-    "Learning/Backend Engineering/Python/Untitled",
-    "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
     "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
     "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
-    "Learning/System Design/Practice/Yelp",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232740_447.png",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Pasted Image 20260724232457_325.png",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/why_shard_&_read_replicas.m4a",
     "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Item_vs_inventory.m4a",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation_level.m4a",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels",
     "Learning/System Design/Practice/How to Stop being Junior.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
@@ -239,8 +241,6 @@
     "Learning/Frontend Interview Preparation/Practice/Closure_with_an_example.excalidraw.md",
     "Learning/Frontend Interview Preparation/Practice/Caching.excalidraw.md",
     "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Interview Session/progress-tracker.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
