@@ -1,3 +1,6 @@
+```table-of-contents
+```
+
 # Welcome to Memory Management
 
 Understanding how your _software_ runs on _hardware_ is important for writing fast, performant code. In this course we'll be talking all about one of the main aspects of software performance: **memory management**.
@@ -701,4 +704,902 @@ char *get_temperature_status(int temp){
     return "just right";
   }
 }
+```
+
+# Logical Operators
+
+Logical operators let you combine multiple conditions in C. There are three main logical operators you'll use all the time:
+
+- `&&` – Logical `AND`: true if _both_ conditions are true
+- `||` – Logical `OR`: true if _either_ condition is true
+- `!` – Logical `NOT`: inverts a boolean value
+
+```c
+int age = 25;
+bool has_license = true;
+
+if (age >= 18 && has_license) {
+    printf("Can drive\n");
+}
+```
+
+## Short-Circuit Evaluation
+
+C uses short-circuit evaluation with logical operators. This means:
+
+- With `&&`, if the first condition is false, the second isn't even checked (because the whole thing is already false)
+- With `||`, if the first condition is true, the second isn't checked (because the whole thing is already true)
+
+```c
+if (x != 0 && 10 / x > 2) {
+    // The division only happens if x != 0
+    // This prevents a division by zero error
+    printf("Safe!\n");
+}
+```
+## Operator Precedence
+
+Logical NOT (`!`) has higher precedence than AND (`&&`), which has higher precedence than OR (`||`). When in doubt, use parentheses to make your intent crystal clear:
+
+```c
+// without parentheses – might be confusing
+if (!is_raining && is_sunny || is_weekend)
+
+// with parentheses – much clearer
+if ((!is_raining && is_sunny) || is_weekend)
+```
+
+## Assignment
+
+The Sneklang package manager needs an access control system for its private package registry. Take a look at `exercise.h` and implement the function in `exercise.c`.
+
+The `can_access_registry` function should return `1` (true) if a user can access the private registry, or `0` (false) if they cannot.
+
+A user can access the private registry if **any** of these conditions are met:
+
+1. [ ] They have `is_premium` set to `1` (true)
+2. [ ] They have both `reputation >= 100` AND `has_2fa` (two-factor authentication) set to `1` (true)
+
+In C, we use `1` for true and `0` for false when returning boolean-like values from functions that return `int`.
+
+```c
+#include "exercise.h"
+
+int can_access_registry(int is_premium, int reputation, int has_2fa){
+  if (is_premium == 1 || (reputation >= 100 && has_2fa == 1)){
+    return 1;
+  }
+  return 0;
+}
+```
+
+# Ternary
+
+Like JavaScript, C has a ternary operator:
+
+```c
+int a = 5;
+int b = 10;
+int max = a > b ? a : b;
+printf("max: %d\n", max);
+// max: 10
+```
+
+Let's break down the syntax:
+
+```c
+a > b ? a : b
+```
+
+- `a > b` is the condition
+- `?` begins the "then" value
+- `a` is the final value if the condition is true
+- `:` separates the "else" value
+- `b` is the final value if the condition is false
+- The entire expression (`a > b ? a : b`) evaluates to either `a` or `b`, which is then assigned to `max` in our example.
+
+_Ternaries are a way to write a simple if/else statement in one line._
+
+My recommendation? **Don't use 'em**. Okay just kidding, they're fine. Just don't use them like a JS Andy on every single line to just save 3 keystrokes. I find them most useful when you are trying to set a single value to the result of some boolean expression, like `max` in the example above. Generally speaking, I think you're better served with `if` statements in C.
+
+# Type Sizes
+
+In C, the "size" (in memory) of a type is not guaranteed to be the same on all systems. That's because the size of a type is dependent on the system's architecture. For example, on a 32-bit system, the size of an `int` is usually 4 bytes, while on a 64-bit system, the size of an `int` can sometimes be 8 bytes – of course, you never know until you run `sizeof` with the compiler you plan on using.
+
+However, some types are always guaranteed to be the same. Here's a list of the basic C data types along with their typical sizes in bytes. Note that sizes can vary based on the platform (e.g., 32-bit vs. 64-bit systems):
+
+## Basic C Types and Sizes
+
+- **`char`**
+    - Size: **1 byte**
+    - Represents: Single character.
+    - Notes: Always 1 byte, but can be signed or unsigned.
+- **`float`**
+    - Size: **4 bytes**
+    - Represents: Single-precision floating-point number.
+- **`double`**
+    - Size: **8 bytes**
+    - Represents: Double-precision floating-point number.
+
+The actual sizes of these types can be determined using the `sizeof` operator in C for a specific platform, which we'll learn about next.
+
+
+
+# Sizeof
+
+C gives us a way to check the size of a type or a variable: [`sizeof`](https://en.cppreference.com/w/c/language/sizeof).
+
+You can use `sizeof` like a function (although, technically it's a [unary operator](https://en.wikipedia.org/wiki/Unary_operation), but that distinction is generally only useful for winning _super important_ internet arguments).
+
+We'll use the `sizeof` operator in the next few lessons to give us insight into the memory layout of different types in C. This will be particularly useful as we move deeper into C, and essential for understanding pointers.
+
+Pointers are not too bad once you understand the basics! I promise!
+
+## `size_t`
+
+The [`size_t` type](https://en.cppreference.com/w/c/types/size_t) is a special type that is guaranteed to be able to represent the size of the largest possible object in the target platform's address space (i.e. can fit any single, non-struct value inside of it).
+
+It's also the type that `sizeof` returns.
+
+## Assignment
+
+1. [ ] First, _run_ the function to see the size of a `char`.
+2. [ ] Follow the same pattern of the first print statement so that `main` also prints the size of each of the following types in order:
+    - [ ] `bool`
+    - [ ] `int`
+    - [ ] `float`
+    - [ ] `double`
+    - [ ] `size_t`
+
+_Take a look at the results before moving on!_ Notice that a `char` and `bool` only take up 1 byte (8 bits), while the other types take up more space.
+
+```c
+#include <stdbool.h>
+#include <stdio.h>
+
+int main() {
+  // Use %zu for printing `sizeof` result
+  printf("sizeof(char)   = %zu\n", sizeof(char));
+  printf("sizeof(bool)   = %zu\n", sizeof(bool));
+  printf("sizeof(int)   = %zu\n", sizeof(int));
+  printf("sizeof(float)   = %zu\n", sizeof(float));
+  printf("sizeof(double)   = %zu\n", sizeof(double));
+  printf("sizeof(size_t)   = %zu\n", sizeof(size_t));
+}
+
+```
+
+# For Loop
+
+A `for` loop in C is a control flow statement for repeated execution of a block of code. Very similar to Python, but with a different syntax.
+
+The syntax of a `for` loop in C consists of three main parts:
+
+1. Initialization
+2. Condition
+3. Final-expression.
+
+There is no "for each" (iterables) in C. For example, there is no way to do:
+
+```python
+for car in cars:
+    print(car)
+```
+
+Instead, we have to iterate over the numbers of indices in a list, and then we can access the item using the index.
+
+## Syntax
+
+```c
+for (initialization; condition; final-expression) {
+    // Loop Body
+}
+```
+
+## Parts of a `for` Loop
+
+1. **Initialization**
+    - Executed only once at the beginning of the loop.
+    - Is typically used to initialize the loop counter: `int i = 0;` for example
+2. **Condition**
+    - Checked before each iteration.
+    - If `true`, execute the body. If `false`, terminate the loop
+    - Often checks to ensure `i` is less than some value: `i < 5;` for example
+3. **Final-expression**
+    - Executed after each iteration of the loop body.
+    - Can be used to update the loop counter or run any other code: `i++` for example
+4. **Loop Body**
+    - The block of code that is executed while the condition is true.
+
+## Example: Basic Loop
+
+```c
+#include <stdio.h>
+
+int main() {
+  for (int i = 0; i < 5; i++) {
+    printf("%d\n", i);
+  }
+  return 0;
+}
+
+// Prints:
+// 0
+// 1
+// 2
+// 3
+// 4
+```
+
+## Assignment
+
+Implement the `print_numbers` prototyped in `exercise.h` that takes a starting number and an ending number and prints all the numbers in that range **inclusive** (using a for-loop).
+
+```c
+#include <stdio.h>
+
+void print_numbers(int start, int end){
+  for (int i = start; i <= end ;i++){
+    printf("%d\n", i);
+  }
+}
+
+```
+
+# While Loop
+
+A `while` loop in C is a control flow statement that allows code to be executed repeatedly based on a given boolean (`true`/`false`) condition. The loop continues to execute as long as the condition remains true.
+
+## Syntax
+
+```c
+while (condition) {
+    // Loop Body
+}
+```
+
+## Parts of a `while` Loop
+
+1. **Condition**
+    - Checked before each iteration.
+    - If `true`, execute the body. If `false`, terminate the loop
+2. **Loop Body**
+    - The block of code that is executed while `condition` is true.
+
+## Example: Basic Loop
+
+```c
+#include <stdio.h>
+
+int main() {
+    int i = 0;
+    while (i < 5) {
+        printf("%d\n", i);
+        i++;
+    }
+    return 0;
+}
+// Prints:
+// 0
+// 1
+// 2
+// 3
+// 4
+```
+
+## Key Points
+
+- The condition is evaluated _before_ the execution of the loop body.
+- If the condition is `false` initially, the loop body will never even start.
+- If the condition never becomes `false`, you will get an infinite loop.
+
+## Assignment
+
+Implement the `print_numbers_reverse` prototyped in `exercise.h`. It takes a starting number (higher) and an ending number (lower) and prints all the numbers in that range from highest to lowest **inclusive** (this time, using a while-loop).
+
+```c
+#include <stdio.h>
+
+void print_numbers_reverse(int start, int end) {
+  int i = start;
+  while (i >= end) {
+    printf("%d\n", i);
+    i--;
+  }
+}
+```
+
+# Do While Loop
+
+A `do while` loop in C is a control flow statement that allows code to be executed repeatedly based on a given boolean condition.
+
+Unlike the `while` loop, the `do while` loop checks the condition after executing the loop body, so the loop body is **always** executed at least once.
+
+## Syntax
+
+```c
+do {
+    // Loop Body
+} while (condition);
+```
+
+## Parts of a `do while` Loop
+
+1. **Loop Body**
+    - The block of code that is executed _before_ checking the condition, and then repeatedly as long as the condition is true.
+2. **Condition:**
+    - Checked _after_ each iteration.
+    - If `true`, execute the body again.
+    - If `false`, terminate the loop
+
+## Examples
+
+```c
+#include <stdio.h>
+
+int main() {
+    int i = 0;
+    do {
+        printf("i = %d\n", i);
+        i++;
+    } while (i < 5);
+    return 0;
+}
+// Prints:
+// i = 0
+// i = 1
+// i = 2
+// i = 3
+// i = 4
+```
+
+```c
+#include <stdio.h>
+
+int main() {
+    int i = 100;
+    do {
+        printf("i = %d\n", i);
+        i++;
+    } while (i < 5);
+    return 0;
+}
+// Prints:
+// i = 100
+```
+
+## Key Points
+
+The `do while` loop guarantees that the loop body is executed at least once, even if the condition is false initially.
+
+The most common scenario you will see a do-while loop used is in [C macros](https://gcc.gnu.org/onlinedocs/cpp/Macros.html) – they let you define a block of code and execute it exactly once in a way that is safe across different compilers, and ensures that the variables created/referenced within the macro do not leak to the surrounding environment.
+
+If you end up looking at any source code for macros, you will probably see a few do-while loops. For example, here's a simplified version from our `munit` testing library we're using:
+
+```c
+#define munit_assert_type_full(T, fmt, a, op, b, msg)                          \
+  do {                                                                         \
+    T munit_tmp_a_ = (a);                                                      \
+    T munit_tmp_b_ = (b);                                                      \
+    if (!(munit_tmp_a_ op munit_tmp_b_)) {                                     \
+      munit_errorf("assertion failed: %s %s %s (" prefix "%" fmt suffix        \
+                   " %s " "%" fmt "): %s",                                     \
+                   #a, #op, #b, munit_tmp_a_, #op, munit_tmp_b_, msg);         \
+    }                                                                          \
+  } while (0)
+```
+
+It creates a do-while loop, creates a few new variables and then checks that the assertion is valid. If it is not, then it errors and formats a (complicated) error message (If this code doesn't make any sense, that's fine too! I just wanted to show you where they most often occur).
+
+There is no semi-colon after `while(0)` in the loop above. This lets the macro be used in a block of code without causing syntax errors.
+
+When writing a normal do-while loop in your C code (not in a macro), you must include the semicolon after the loop.
+
+## Assignment
+
+Run the code. Notice that it prints numbers from `5` to `1` in descending order. However, when the starting number is less than the ending number, it doesn't print anything because the condition of the `while` loop is never `true`. Modify the `print_numbers_reverse` function to use a do-while loop so that it always prints the starting number at least once, even if the condition is initially false
+
+```c
+#include <stdio.h>
+
+void print_numbers_reverse(int start, int end) {
+  do{
+    printf("%d\n", start);
+    start--;
+  }while(start>=end);
+}
+
+```
+
+# Pragma Once and Header Guards
+
+We saw how `.h` header files are used in a previous lesson, but before we go further let's talk about a potential issue you might run into: multiple inclusions. If the same header file gets included more than once, you can end up with some nasty errors caused by redefining things like functions or structs.
+
+## Pragma Once
+
+One simple solution (and the one we'll use for the rest of this course) is `#pragma once`. Adding this line to the top of a header file tells the compiler to include the file only once, even if it's referenced multiple times across your program.
+
+```c
+// my_header.h
+
+#pragma once
+
+struct Point {
+    int x;
+    int y;
+};
+```
+
+## Header Guards
+
+Another common way to avoid multiple inclusions is with include guards, which use preprocessor directives like this:
+
+```c
+#ifndef MY_HEADER_H
+#define MY_HEADER_H
+
+// some cool code
+
+#endif
+```
+
+This method works by defining a unique [macro](https://gcc.gnu.org/onlinedocs/cpp/Macros.html) for the header file. If it's already been included, the guard prevents it from being processed again.
+
+	Throughout this course, you'll see `#pragma once` in our header files. It's quicker and less error-prone than traditional include guards, and it works well with most modern compilers.
+
+# Structs
+
+Click to hide video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: what are structs
+
+So far all we've seen are the _simple_ (non-collection) types in C. However, stuff like this can get really annoying:
+
+```c
+int main() {
+    int x_1 = 1;
+    int y_1 = 2;
+    int z_1 = 3;
+    int x_2 = 4;
+    int y_2 = 5;
+    int z_2 = 6;
+
+    int dist = distance(x_1, y_1, z_1, x_2, y_2, z_2);
+    printf("Distance: %d", dist);
+}
+```
+
+Because our distance function starts to look... ridiculous.
+
+```c
+int distance(int x_1, int y_1, int z_1,
+             int x_2, int y_2, int z_2)
+{
+    // a lot of numbers
+}
+```
+
+We also run into a new problem: _In C, we're only allowed to return a single value from a function_. This doesn't work:
+
+```c
+int int int scale_coordinate(int x, int y, int z, int scale) {
+    return x * scale, y * scale, z * scale;
+    // Error! Too many values to return
+}
+```
+
+_[Structs](https://en.cppreference.com/w/c/language/struct) solve this._ Here's an example of the syntax:
+
+```c
+struct Human {
+    int age;
+    char *name;
+    int is_alive;
+};
+```
+
+## Assignment
+
+Sneklang has built-in support for graphics programming (and vows to never gouge game devs...).
+
+Define a new struct called `Coordinate` in `coord.h`. Remember, `.h` files are for declarations of types and function prototypes. The `Coordinate` struct should have three fields:
+
+1. [ ] `x`: an integer
+2. [ ] `y`: an integer
+3. [ ] `z`: an integer
+
+```c
+#pragma once
+
+struct Coordinate {
+  int x;
+  int y;
+  int z;
+};
+```
+
+
+# Initializers
+
+So now you're probably wondering: "Hey TJ, so... how do we actually _make an instance of_ a struct"? You may have noticed in the previous lesson all we did was _define the struct type_.
+
+Unfortunately, there are a few different ways to [initialize a struct](https://en.cppreference.com/w/c/language/struct_initialization), I'll give you an example of each using this struct:
+
+```c
+struct City {
+  char *name;
+  int lat;
+  int lon;
+};
+```
+
+## Zero Initializer
+
+```c
+int main() {
+  struct City c = {0};
+}
+```
+
+This sets all the fields to `0` values.
+
+## Positional Initializer
+
+```c
+int main() {
+  struct City c = {"San Francisco", 37, -122};
+}
+```
+
+## Designated Initializer
+
+**This is my (generally) preferred way to initialize a struct.** Why?
+
+- It's easier to read (has the field names)
+- If the fields change, you don't have to worry about breaking the ordering
+
+```c
+int main() {
+  struct City c = {
+    .name = "San Francisco",
+    .lat = 37,
+    .lon = -122
+  };
+}
+```
+
+Remember, it's `.name` not `name`. If this trips you up, just remember it's `.name` and not `name` because that's how you access the field, e.g. `c.name`.
+
+## Accessing Fields
+
+Accessing a field in a struct is done using the `.` operator. For example:
+
+```c
+struct City c;
+c.lat = 41; // Set the latitude
+printf("Latitude: %d", c.lat); // Print the latitude
+```
+
+There's another way to do this for pointers that we'll get to later.
+
+## Assignment
+
+Complete the `new_coord` function. It accepts 3 integers and returns a `Coordinate`.
+
+_Use the "designated initializer" syntax... because I said so._
+
+## Tip
+
+The easiest way to return a struct is to initialize it in a variable first. If you want to skip the variable assignment, you can write something like this:
+
+```c
+struct City new_city(char *name, int lat, int lon) {
+    return (struct City){.name = name, .lat = lat, .lon = lon};
+}
+```
+
+
+```c
+#include "coord.h"
+
+struct Coordinate new_coord(int x, int y, int z) {
+  struct Coordinate coord = {.x = x, .y = y, .z = z};
+  return coord;
+}
+
+```
+# Scaling Coordinate
+
+Remember how we can **not** return multiple values from a function in C? We can't do this:
+
+```c
+int, char * become_older(int age, char *name) {
+  return age + 1, name;
+}
+```
+
+However, we _can_ accomplish effectively the same thing by returning a `struct`:
+
+```c
+struct Human become_older(int age, char *name) {
+  struct Human h = {.age = age, .name = name};
+  h.age++;
+  return h;
+}
+```
+
+## Assignment
+
+1. [ ] Open `coord.h` and add a declaration for the `scale_coordinate` function as defined in the `coord.c` file.
+2. [ ] Complete the `scale_coordinate` function in `coord.c`. It should return a new `Coordinate` where each field is scaled up (multiplied) by the `factor` parameter.
+```c
+#include "coord.h"
+
+struct Coordinate new_coord(int x, int y, int z) {
+  struct Coordinate coord = {.x = x, .y = y, .z = z};
+  return coord;
+}
+
+struct Coordinate scale_coordinate(struct Coordinate coord, int factor) {
+  coord.x *= factor;
+  coord.y *= factor;
+  coord.z *= factor;
+  return coord;
+}
+
+```
+
+`exercise.h`
+```c
+#pragma once
+
+struct Coordinate {
+  int x;
+  int y;
+  int z;
+};
+
+struct Coordinate new_coord(int x, int y, int z);
+
+struct Coordinate scale_coordinate(struct Coordinate, int factor);
+
+```
+
+# Typedef
+
+By now, you're probably tired of typing `struct Coordinate` over and over again, and you're wondering "How can I make my struct types easier to write, like `int`?"
+
+Good news! C can do this with the [`typedef` keyword](https://en.cppreference.com/w/c/language/typedef).
+
+```c
+struct Pastry {
+    char *name;
+    float weight;
+};
+```
+
+This can also be written as:
+
+```c
+typedef struct Pastry {
+    char *name;
+    float weight;
+} pastry_t;
+```
+
+Now, you can use `pastry_t` wherever before you would have used `struct Pastry`.
+
+The `_t` at the end is a common convention to indicate a type.
+
+In fact, you can optionally skip giving the struct a name:
+
+```c
+typedef struct {
+    char *name;
+    float weight;
+} pastry_t;
+
+pastry_t muffin = {"Muffin", 0.3};
+```
+
+In this case you'd only be able to refer to the type as `pastry_t`. In general, I _do_ give the struct an actual name (e.g. `Pastry`), but I only use the `typedef`'d type. _We'll be using this convention in this course._
+
+## Assignment
+
+1. [ ] Update the `Coordinate` declaration in `coord.h` to use `typedef` to create a new type called `coordinate_t`.
+2. [ ] Update the `new_coord` and `scale_coordinate` function declarations in `coord.h` and their definitions in `coord.c` to use the `coordinate_t` type instead of `struct Coordinate`.
+
+coord.h
+```c
+#pragma once
+
+typedef struct Coordinate {
+  int x;
+  int y;
+  int z;
+} coordinate_t ;
+
+coordinate_t new_coord(int x, int y, int z);
+coordinate_t scale_coordinate(struct Coordinate coord, int factor);
+
+```
+
+coord.c
+```c
+#include "coord.h"
+
+coordinate_t new_coord(int x, int y, int z) {
+  struct Coordinate coord = {.x = x, .y = y, .z = z};
+
+  return coord;
+}
+
+coordinate_t scale_coordinate(struct Coordinate coord, int factor) {
+  struct Coordinate scaled = coord;
+  scaled.x *= factor;
+  scaled.y *= factor;
+  scaled.z *= factor;
+
+  return scaled;
+}
+
+```
+
+# Sizeof
+
+As we saw earlier, [`sizeof`](https://en.cppreference.com/w/c/language/sizeof) can be used to view the size of a type (for once, programmers thought of a name that was actually helpful). But this isn't just true of builtin types like `int` or `float`, you can also use it to find out the size of `struct`s!
+
+```c
+printf("Size of coordinate_t: %zu bytes\n", sizeof(coordinate_t));
+```
+
+## Memory Layout
+
+Structs are stored contiguously in memory one field after another. Take this struct:
+
+```c
+typedef struct Coordinate {
+    int x;
+    int y;
+    int z;
+} coordinate_t;
+```
+
+Assuming `int` is 4 bytes, the memory layout for `coordinate_t` would look like:
+
+## Mixed Type Structs
+
+```c
+typedef struct Human{
+    char first_initial;
+    int age;
+    double height;
+} human_t;
+```
+
+Assuming `char` is 1 byte, `int` is 4 bytes, and `double` is 8 bytes, the memory layout for `human_t` might look like this:
+
+**Wait**! What is that `padding` doing here?
+
+It turns out that CPUs don't like accessing data that isn't [aligned](https://en.wikipedia.org/wiki/Data_structure_alignment) (incredible oversimplification alert, since obviously CPUs don't have feelings (yet)), so C inserts padding to maintain alignment (e.g. every 4 bytes in this example).
+
+_Huge caveat: these layouts can vary depending on the compiler and system architecture._
+
+
+# What is Alignment 
+Alignment means the CPU wants a variable's memory address to be a multiple of its own size (a 4-byte `int` wants to start at an address divisible by 4, an 8-byte `double` divisible by 8, etc). If a field doesn't naturally land there, the compiler inserts padding bytes to push it forward.
+
+For `human_t`:
+
+```c
+typedef struct Human {
+    char first_initial;  // 1 byte
+    int age;              // 4 bytes
+    double height;         // 8 bytes
+} human_t;
+```
+
+Byte-by-byte layout:
+
+```
+Offset:   0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
+        [ c ][ P ][ P ][ P ][------ age ------][-------------- height --------------]
+          |    └──┴──┴── padding (3 bytes) so 'age' starts at offset 4 (multiple of 4)
+          first_initial
+```
+
+Why: `age` is an `int` (4 bytes), so it needs to start at an offset divisible by 4. After `first_initial` at offset 0, the next free offset is 1 — not divisible by 4 — so the compiler inserts 3 padding bytes to bump `age` to offset 4.
+
+`height` is a `double` (8 bytes), needing an offset divisible by 8. After `age` ends at offset 8, that's already divisible by 8, so no padding needed there.
+
+Total size: 16 bytes, even though the fields themselves only add up to 1 + 4 + 8 = 13 bytes.
+
+Compare with `coordinate_t` (three `int`s, all 4-byte-aligned already):
+
+```
+Offset:  0    1    2    3    4    5    6    7    8    9   10   11
+       [-------- x --------][-------- y --------][-------- z --------]
+```
+
+No padding needed — every field is the same size, so each one naturally lands on a 4-byte boundary. Total: 12 bytes, matching the fields exactly.
+
+Real-world consequence: field order affects struct size. If you reordered `human_t` as `double height; int age; char first_initial;`, you'd get:
+
+```
+Offset:  0-7: height (8 bytes, no padding needed)
+Offset:  8-11: age (4 bytes, offset 8 is div by 4, no padding)
+Offset: 12: first_initial (1 byte)
+Offset: 13-15: 3 bytes trailing padding (to make the whole struct's size a multiple of the largest alignment, 8, so arrays of this struct stay aligned)
+```
+
+Still 16 bytes here, but with different structs the ordering can save real space — a common trick is "biggest fields first" to minimize wasted padding.
+
+lets look at good and bad strut positioning 
+```c
+struct Bad {
+    char a;   // 1 byte
+    int b;    // 4 bytes
+    char c;   // 1 byte
+};
+// layout: a(1) + pad(3) + b(4) + c(1) + pad(3) = 12 bytes
+```
+
+```c
+struct Good {
+    int b;    // 4 bytes
+    char a;   // 1 byte
+    char c;   // 1 byte
+};
+// layout: b(4) + a(1) + c(1) + pad(2) = 8 bytes
+```
+
+# Struct Padding
+
+There are a bunch of complicated rules and heuristics that different compilers use to determine how to lay out your structs. But to oversimplify:
+
+1. The fields of a struct are laid out in memory contiguously (next to each other).
+2. Structs can vary in size depending on how they are laid out.
+
+C is a language that aims to give tight control over memory, so the fact that you can control the layout of your structs is a feature, not a bug.
+
+Compilers + modern hardware + optimizations + skill issues means that sometimes what you _think_ the computer is going to do isn't exactly what it actually _does_. That said, C is designed to get you close to the machine and allows you to dig in and figure out what's going on if you want to for a specific compiler or architecture.
+
+As a _rule of thumb_, ordering your fields from largest to smallest will help the compiler minimize padding:
+
+```c
+typedef struct {
+  char* a;
+  double b;
+  char c;
+  char d;
+  long e;
+  char f;
+} poorly_aligned_t;
+
+typedef struct {
+  double b;
+  long e;
+  char* a;
+  char c;
+  char d;
+  char f;
+} better_t;
+```
+
+## Assignment
+
+Re-arrange the fields in `sneklang_var_t` so that the padding is optimal and the tests in `main.c` pass.
+
+```c
+#pragma once
+
+typedef struct SneklangVar {
+  double weight;
+  int value;
+  int scope_level;
+  char *name;
+  char type;
+  char is_constant;
+} sneklang_var_t;
+
 ```
