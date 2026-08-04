@@ -4,19 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "122c50702210387e",
+        "id": "77a1d8a4fcdd4fdd",
         "type": "tabs",
         "children": [
           {
-            "id": "d9555ad53538ff88",
+            "id": "018149d8f99d47a4",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md"
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "2-TypesOfIndexes.excalidraw"
+              "icon": "lucide-file",
+              "title": "Notes"
             }
           }
         ]
@@ -39,9 +51,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": true,
-                "showSearch": false,
-                "searchQuery": ""
+                "autoReveal": true
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -53,7 +63,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Isolation Levels",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +88,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
+    "width": 305.5,
     "collapsed": true
   },
   "right": {
@@ -95,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
+                "file": "Personal/Maryam's Things.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +115,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2-First SQL Query.excalidraw"
+              "title": "Backlinks for Maryam's Things"
             }
           },
           {
@@ -143,13 +153,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Prgamatism/Tips.md",
+                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Tips"
+              "title": "Outline of Notes"
             }
           },
           {
@@ -184,55 +194,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "d9555ad53538ff88",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Backend Engineering/Memory Management in C/Links.md",
-    "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
-    "Learning/Backend Engineering/Memory Management in C/Pasted Image 20260317121120_013.png",
-    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/attachments/WN83EM5-1051x569.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/wnmQI8j-1180x520.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments",
-    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Concepts/useLazyImage.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/accordion-summary.html",
-    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
-    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/REST.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Remote Procedure Call (RPC).excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/RateLimitingTechniques.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Transport Layer Protocols.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Networking.md",
-    "Learning/System Design/Core Concepts/1-Networking/Network Layer.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Load Balancing.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/ComnDeepDives.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Application Layer.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/1-HowANetworkRequestWorks_TCP.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Attachments/Fundamentals+of+Networking+Engineering.pdf",
-    "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Preparation/Nestjs/NestJS-Graphql.html",
-    "Learning/Frontend Interview Preparation/Concepts/event-capturing-vs-bubbling.html",
-    "Learning/Frontend Interview Preparation/Concepts/scroll-Intersection-Observer.html",
-    "Learning/Frontend Interview Preparation/Interview Session/progress-tracker.md.tmp.33396.adb1e6e18a9c",
-    "Learning/Frontend Interview Preparation/Concepts/vanilla-vs-react-interection-observr.html",
-    "Learning/Frontend Interview Preparation/Preparation/NodeJs/setimmediate-vs-settimeout.html",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
+    "Learning/Backend Engineering/Memory Management in C/attachments/wnmQI8j-1180x520.png",
+    "Learning/Backend Engineering/Memory Management in C/attachments/WN83EM5-1051x569.png",
+    "Learning/Backend Engineering/Memory Management in C/attachments",
+    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Links.md",
     "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730100726_423.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730092132_463.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/1-atomicmassunit.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730085940_939.png",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260729233420_052.png",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/OPuE8JWQn9U7.0mkv7w6ydu21w_bjCG.svg",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files/FmYvAiFSqI5u.1gj57g4k3fpyh_bjCG.svg",
-    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments/AtomicMassUnit.m4a",
+    "Pasted Image 20260730091822_124.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Screenshot 2026-06-12 at 10.29.20 AM.png",
+    "Screenshot 2026-06-12 at 10.29.31 AM.png",
+    "Pasted image 20260714215620.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments",
+    "Learning/Research/Adam-DFT/Atomic Structure",
+    "Learning/Research/Adam-DFT",
+    "Learning/Research",
+    "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
+    "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary-v2.html",
+    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files",
+    "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/AccordionII.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
+    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
+    "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
+    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
+    "Learning/System Design/Practice/How to Stop being Junior.excalidraw.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/drills.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
+    "Learning/Requirements Gathering/Research Papers and References.md",
+    "Learning/Frontend Interview Preparation/Practice/Practice.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
