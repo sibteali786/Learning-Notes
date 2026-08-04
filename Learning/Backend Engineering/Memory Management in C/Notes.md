@@ -1603,3 +1603,212 @@ typedef struct SneklangVar {
 } sneklang_var_t;
 
 ```
+
+# Memory
+
+Before we talk about pointers, we should talk about variables and memory in general. Here are some useful (albeit hand-wavy) mental models:
+
+> Variables are human readable names that refer to some data in memory.
+
+> Memory is a big array of bytes, and data is stored in the array.
+
+A variable is a human readable name that refers to an address in memory, which is an index into the big array of bytes. Here's a diagram:
+
+## Getting a Variable's Address
+
+[%p format specifier](https://en.cppreference.com/w/c/io/fprintf#:~:text=The%20following%20format%20specifiers%20are%20available%3A)
+## Assignment
+
+The `size_of_addr` function accepts a [`long long`](https://en.wikipedia.org/wiki/C_data_types) (a potentially very large integer) as input and returns the _size_ of its _address_.
+
+_There's a bug_! Memory addresses in Sneklang should always be `4` bytes long...
+
+Fix the function so that it returns the size of `i`'s _address_, not value.
+```c
+#include "snek.h"
+
+unsigned long size_of_addr(long long i) {
+  unsigned long sizeof_snek_version = sizeof(&i);
+  return sizeof_snek_version;
+}
+
+```
+
+# What Is an Address?
+
+So I mentioned in the last lesson that memory can be thought of as a big array of bytes, and each byte has an address.
+
+That's true, and the beauty is that each address is _literally just a number_. It's not some _mortal_ address like "1234 Elm St." or "1600 Pennsylvania Ave." It's **just a number**.
+
+You might be thinking, "Hey, if it's just a number, why does it look all disgusting like `0xfff8`?"
+
+That's because `0xfff8` _is_ just a number. But:
+
+1. It's written in [`hexadecimal`](https://www.wikipedia.org/wiki/Hexadecimal) (base 16) instead of decimal (base 10).
+2. It's a pretty big number, so it's not very human readable. `0xfff8` is the same as `65,528` in decimal.
+# Pointers
+
+You've probably heard of pointers. You may have also seen jokes about how they are impossible to learn... Well, that's _wrong_.
+
+In fact, now that you understand how memory is laid out in an array, a lot of the mystery behind pointers should be gone. Put simply: **a pointer is just a variable that stores a memory address**. It's called a pointer, because it "points" to the address of a variable, which stores the actual data held in that variable.
+
+Click to hide video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: pointers are easy
+
+## Syntax
+
+A pointer is declared with an asterisk (`*`) after the type. For example, `int *`.
+
+```c
+int age = 37;
+int *pointer_to_age = &age;
+```
+
+Remember, to get the address of a variable so that we can store it _in_ a pointer variable, we can use the address-of operator (`&`).
+
+
+# Why Pointers?
+
+To illustrate the usefulness of pointers, let's pretend we want to pass a collection of data into a function. Within that function, we want to modify the data. In Python, we could use a class to store the data, and pass an instance of that class into the function:
+
+```python
+class Coordinate:
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+
+def update_coordinate_x(coord, new_x):
+    coord.x = new_x
+
+
+c = Coordinate(1, 2, 3)
+print(c.x)  # 1
+update_coordinate_x(c, 4)
+print(c.x)  # 4
+```
+
+## Assignment
+
+Now let's do the same thing, but using a struct in C.
+
+**Complete the `coordinate_update_x` and `coordinate_update_and_return_x` functions.**
+
+1. [ ] `coordinate_update_x` should update the `x` field with the provided `new_x` value. It returns `void` and should not update the caller's struct.
+2. [ ] `coordinate_update_and_return_x` should update the `x` field with the provided `new_x` value, and then return the updated coordinate struct.
+
+Remember, you can access the field of a struct with a `.` operator, like so:
+
+```c
+car.tires = 4;
+```
+
+## What Happened?
+
+After passing the assignment, open up `main.c` and take a look at the test cases. You'll notice that `coordinate_update_x` doesn't update anything, but `coordinate_update_and_return_x` does because it returns a new copy of the struct.
+
+- In C, structs are passed by _value_. That's why updating a field in the struct does _not_ change the original struct from the `main` function.
+- To get the change to "persist", we needed to return the updated struct from the function (a new copy).
+- The memory address of the struct that went _in_ to `coordinate_update_and_return_x` was not the same as the address of the struct that was returned. Again, because we created a copy.
+
+
+# Pointer Basics
+
+Remember, pointers are just an address (read: value) that tells the computer where to look for _other_ values. Just like how the address to your house is not actually your house, but points you to where your house **is**.
+
+## Syntax Review
+
+Declare a pointer to an integer:
+
+```c
+// declares `pointer_to_something` as a pointer to an int
+int *pointer_to_something;
+```
+
+Get the address of a variable:
+
+```c
+int meaning_of_life = 42;
+int *pointer_to_mol = &meaning_of_life;
+// pointer_to_mol now holds the address of meaning_of_life
+```
+
+## New: Dereferencing Pointers
+
+Oftentimes we have a pointer, but we want to get access to the data that it points to. Not the address itself, but the value stored at _that_ address.
+
+We can use an asterisk (`*`) to do it. The `*` operator dereferences a pointer.
+
+```c
+int meaning_of_life = 42;
+int *pointer_to_mol = &meaning_of_life;
+int value_at_pointer = *pointer_to_mol;
+// value_at_pointer = 42
+```
+
+_It can be a touch confusing, but remember that the asterisk symbol is used for two different things:_
+
+1. Declaring a pointer type: `int *pointer_to_thing;`
+2. Dereferencing a pointer value: `int value = *pointer_to_thing;` (retrieving the value) or `*pointer_to_thing = 20;` (modifying the value)
+
+## Assignment
+
+Fix the `change_filetype` function (both in the `.c` and `.h` files). It should copy the struct from the pointer, update the copy, and leave the original unchanged.
+
+1. [ ] Accept _a pointer_ to a `codefile_t`, instead of a struct value
+2. [ ] Dereference the pointer into the `new_f` `codefile_t` struct
+3. [ ] The `filetype` field should still be changed to the provided `new_filetype` value
+4. [ ] Still return the updated `new_f` `codefile_t` struct
+
+`exercise.h`
+```c
+typedef struct CodeFile {
+  int lines;
+  int filetype;
+} codefile_t;
+
+codefile_t change_filetype(codefile_t *f, int new_filetype);
+```
+
+`exercise.c`
+```c
+#include "exercise.h"
+
+codefile_t change_filetype(codefile_t *f, int new_filetype) {
+  codefile_t new_f = *f;
+  new_f.filetype = new_filetype;
+  return new_f;
+}
+
+```
+
+# Pointers to Structs
+
+As you know, when you have a struct, you can access the fields with the dot (`.`) operator:
+
+```c
+coordinate_t point = {10, 20, 30};
+printf("X: %d\n", point.x); // X: 10
+```
+
+However, when you're working with a _pointer to a struct_, you need to use the arrow (`->`) operator:
+
+```c
+coordinate_t point = {10, 20, 30};
+coordinate_t *ptrToPoint = &point;
+printf("X: %d\n", ptrToPoint->x); // X: 10
+```
+
+It effectively dereferences the pointer and accesses the field in one step. To be fair, you can also use the dereference and dot operator (`*` and `.`) to achieve the same result (it's just more verbose and less common):
+
+```c
+coordinate_t point = {10, 20, 30};
+coordinate_t *ptrToPoint = &point;
+printf("X: %d\n", (*ptrToPoint).x); // X: 10
+```
+
+## Order of Operations
+
+The `.` operator has a higher precedence than the `*` operator, so parentheses are _necessary_ when using `*` to dereference a pointer before accessing a member... which is another reason why the arrow operator is so much more common.
