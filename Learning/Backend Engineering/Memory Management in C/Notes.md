@@ -1812,3 +1812,203 @@ printf("X: %d\n", (*ptrToPoint).x); // X: 10
 ## Order of Operations
 
 The `.` operator has a higher precedence than the `*` operator, so parentheses are _necessary_ when using `*` to dereference a pointer before accessing a member... which is another reason why the arrow operator is so much more common.
+
+# C Arrays
+
+If you're used to [Lists in Python](https://docs.python.org/3/tutorial/datastructures.html), [Arrays in C](https://en.cppreference.com/w/c/language/array) are _similar_, but a bit lower level.
+
+An array is a _fixed-size_, ordered collection of elements. Like Python lists, they are indexed by integers, starting at zero. Unlike Python lists, they can only hold elements of the same type. They are stored in contiguous memory, like structs.
+
+## Integer Array
+
+```c
+int numbers[5] = {1, 2, 3, 4, 5};
+```
+
+### Iterating Over an Array
+
+In C, there is no `for x in list:` syntax. Instead, you must iterate over them using a `for` loop with an index (or some other conditional loop)
+
+```c
+#include <stdio.h>
+
+int main() {
+    int numbers[5] = {1, 2, 3, 4, 5};
+
+    // Iterate and print each element
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", numbers[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
+```
+
+Output:
+
+```text
+1 2 3 4 5
+```
+
+### Updating Values in an Array
+
+The syntax for updating values in an array is the same as how you access them:
+
+`arr[index] = value`
+
+Using our `numbers` example:
+
+```c
+#include <stdio.h>
+
+int main() {
+    int numbers[5] = {1, 2, 3, 4, 5};
+
+    // Update some values
+    numbers[1] = 20;
+    numbers[3] = 40;
+
+    // Print updated array
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", numbers[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
+```
+
+Output:
+
+```text
+1 20 3 40 5
+```
+
+## Assignment
+
+Complete the `update_file` function. The `filedata` array is a large 200-integer array representing a Sneklang source file. Each integer in the array represents a special piece of data.
+
+- Index `1` is the number of lines
+- Index `2` is the filetype
+- Index `199` is always `0`
+
+Update the function so that it:
+
+1. [ ] overwrites indexes 1 and 2 with the provided values
+2. [ ] ensures that index 199 is always `0`
+
+By modifying the array within your function, you're changing the values of the **original array**, not just a copy. More on that later.
+
+```c
+#include "exercise.h"
+
+void update_file(int filedata[200], int new_filetype, int new_num_lines) {
+  filedata[2] = new_filetype;
+  filedata[1] = new_num_lines;
+
+  if (filedata[199] != 0){
+    filedata[199] = 0;
+  }
+}
+
+```
+# Arrays As Pointers in C
+
+In C, arrays and pointers are closely related. An array name acts as a pointer to the first element of the array. That means array indexing and pointer arithmetic can be used interchangeably to access array elements. Let's go through this step-by-step to understand how this works.
+
+## Step-by-Step Walkthrough
+
+1. **Array Declaration:**
+    
+    ```c
+    int numbers[5] = {1, 2, 3, 4, 5};
+    ```
+    
+    Here, `numbers` is an array of 5 integers.
+    
+2. **Array as Pointer:**
+    
+    The name `numbers` acts as a pointer to the first element of the array.
+    
+    ```c
+    int *numbers_ptr = numbers;
+    ```
+    
+    `numbers_ptr` is a pointer to the same place as `numbers`.
+    
+3. **Accessing Elements via Indexing:**
+    
+    ```c
+    // Access the third element (index 2)
+    int value = numbers[2];
+    ```
+    
+    Which is the same as:
+    
+    ```c
+    int value = *(numbers + 2);
+    ```
+    
+    Here, `numbers + 2` computes the address of the third element, and `*` dereferences it to get the value.
+    
+4. **Pointer Arithmetic:**
+    
+    When you add an integer to a pointer, the resulting pointer is offset by that integer times the size of the data type.
+    
+    ```c
+    int *p = numbers + 2;  // p points to the third element
+    int value = *p;        // value is 3
+    ```
+
+## Diagram Explanation
+
+Let's assume `numbers` is stored starting at memory address `0x1000`. An integer is typically 4 bytes in C. Here's how the array elements are laid out in memory:
+
+|Address|Element|Value|
+|---|---|---|
+|0x1000|numbers[0]|1|
+|0x1004|numbers[1]|2|
+|0x1008|numbers[2]|3|
+|0x100C|numbers[3]|4|
+|0x1010|numbers[4]|5|
+
+Try it out! Change the base address, operator, and offset to see how pointer arithmetic selects different memory cells:
+
+Base Address 0x1008
+
+Offset 
+
+0x1008+8=0x1028→0
+
+## Accessing Elements Using Pointers
+
+- `numbers + 0` or `&numbers[0]` points to `0x1000`
+- `numbers + 1` or `&numbers[1]` points to `0x1004`
+- `numbers + 2` or `&numbers[2]` points to `0x1008`
+- `numbers + 3` or `&numbers[3]` points to `0x100C`
+- `numbers + 4` or `&numbers[4]` points to `0x1010`
+
+## Example Code
+
+```c
+#include <stdio.h>
+
+int main() {
+  int numbers[5] = {1, 2, 3, 4, 5};
+
+  // Accessing elements using array indexing
+  printf("numbers[2] = %d\n", numbers[2]);  // Output: 3
+
+  // Accessing elements using pointers
+  printf("*(numbers + 2) = %d\n", *(numbers + 2));  // Output: 3
+
+  // Pointer arithmetic
+  int *ptr = numbers;
+  printf("Pointer ptr points to numbers[0]: %d\n", *ptr);  // Output: 1
+  ptr += 2;
+  printf("Pointer ptr points to numbers[2]: %d\n", *ptr);  // Output: 3
+
+  return 0;
+}
+```
