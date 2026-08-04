@@ -4,31 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "77a1d8a4fcdd4fdd",
+        "id": "e0e45530a20c3088",
         "type": "tabs",
         "children": [
           {
-            "id": "018149d8f99d47a4",
+            "id": "b04f832cec5cb8d9",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Notes"
+              "title": "New tab"
             }
           }
         ]
@@ -51,7 +37,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": true
+                "autoReveal": true,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -88,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5,
-    "collapsed": true
+    "width": 305.5
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -194,17 +181,18 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "b04f832cec5cb8d9",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
+    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Frontend Interview Preparation/Concepts/useLazyImage.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/accordion-summary.html",
     "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
     "Learning/Backend Engineering/Memory Management in C/attachments/wnmQI8j-1180x520.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/WN83EM5-1051x569.png",
     "Learning/Backend Engineering/Memory Management in C/attachments",
-    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
     "Learning/Backend Engineering/Memory Management in C/Links.md",
     "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730100726_423.png",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
@@ -227,7 +215,6 @@
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/AccordionII.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
@@ -241,7 +228,6 @@
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
     "Learning/Requirements Gathering/Research Papers and References.md",
-    "Learning/Frontend Interview Preparation/Practice/Practice.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
