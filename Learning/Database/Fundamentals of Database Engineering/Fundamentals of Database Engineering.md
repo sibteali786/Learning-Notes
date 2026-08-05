@@ -48,12 +48,12 @@ Postgres optimisesq rollback for commits ( they are fast ).
 
 ### Why Its Used
 
-![Screenshot 2025-01-16 at 8.02.21 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-16_at_8.02.21_AM.png)
+![Screenshot 2025-01-16 at 8.02.21 AM.png](Screenshot_2025-01-16_at_8.02.21_AM.png)
 
 - So Transactions are not for writing but also reading and while doing so we can come across different types of Reads based on different types of Isolation levels we have in different databases.
 - Thus reading from database also needs consistency.
     
-    ![Transaction.png](Fundamentals%20of%20Database%20Engineering/Transaction.png)
+    ![Transaction.png](Transaction.png)
     
 
 ## What Is Atomicity
@@ -111,7 +111,7 @@ Example
 > This happens when a transaction re-executes a query and finds new rows that weren't there before. This is because another transaction has inserted or deleted rows that affect the result set of the query.
 > 
 
-![Screenshot 2024-10-18 at 11.45.32 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2024-10-18_at_11.45.32_PM.png)
+![Screenshot 2024-10-18 at 11.45.32 PM.png](Screenshot_2024-10-18_at_11.45.32_PM.png)
 
 ## **Non-Repeatable Read vs. Phantom Read: Explained with Examples**
 
@@ -180,7 +180,7 @@ Understanding these differences helps in choosing the right database isolation l
 
 ## Isolation Levels
 
-![Screenshot 2024-10-19 at 1.55.34 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2024-10-19_at_1.55.34_AM.png)
+![Screenshot 2024-10-19 at 1.55.34 AM.png](Screenshot_2024-10-19_at_1.55.34_AM.png)
 
 - Postgres Reapeatable Reads does not have Phantom Reads as compare to other databases because it uses RR as snapshot.( RR and snapshot are same )
 
@@ -198,9 +198,9 @@ Understanding these differences helps in choosing the right database isolation l
 - Asynchronous Snapshot - while we write we keep everything in memory then asynchronously we snapshot everything to disk at once.
 - AOF - Append only Files, keeps tracks of the changes of what happens and then writes these things.
     
-    ![Screenshot 2024-10-27 at 1.19.33 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2024-10-27_at_1.19.33_PM.png)
+    ![Screenshot 2024-10-27 at 1.19.33 PM.png](Screenshot_2024-10-27_at_1.19.33_PM.png)
     
-    ![Screenshot 2024-10-27 at 1.23.30 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2024-10-27_at_1.23.30_PM.png)
+    ![Screenshot 2024-10-27 at 1.23.30 PM.png](Screenshot_2024-10-27_at_1.23.30_PM.png)
     
 
 ## Phantom Reads Example
@@ -222,11 +222,11 @@ begin transation isoltation level seriaizable;
 
 Non-Repeatable Read
 
-![image.png](Fundamentals%20of%20Database%20Engineering/image.png)
+![image.png](Learning/Database/Fundamentals%20of%20Database%20Engineering/attachments/image.png)
 
 Serialisable Read
 
-![Screenshot 2024-12-30 at 8.08.18 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2024-12-30_at_8.08.18_PM.png)
+![Screenshot 2024-12-30 at 8.08.18 PM.png](Screenshot_2024-12-30_at_8.08.18_PM.png)
 
 We can see the difference clearly as we arrive at different states of data when we do Non-Repeatable Reads while same state when serilisable.
 
@@ -291,7 +291,7 @@ In short, consistency means all data integrity rules are followed, and the datab
 
 - Consistency in data should be Atomic ( if one fail all should fail ) and Isolated .
 
-![image.png](Fundamentals%20of%20Database%20Engineering/image%201.png)
+![image.png](Learning/Database/Fundamentals%20of%20Database%20Engineering/attachments/image%201.png)
 
 ### Rule of Thumb
 
@@ -305,16 +305,18 @@ When you have cache you will have inconsistency until you update so that is even
 
 Agenda 
 
-![Screenshot 2025-01-02 at 8.31.12 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-02_at_8.31.12_AM.png)
+![Screenshot 2025-01-02 at 8.31.12 AM.png](Screenshot_2025-01-02_at_8.31.12_AM.png)
+
+**Row_ID**
+- System maintained
+- Some cases its same as primary key ( innoDB and mysql ) but other databases like postgres have system column  (row_id) or (tuple_id)
 
 **Page** 
 
 - Simply a fixed size memory location / disk location.
 - Each page can store multiple rows.
 - Each Database type like postgres or mysql has default page size as 8kb and 16kb respectively/
-- But page size is configurable.
-    
-    ![Screenshot 2025-01-02 at 8.39.53 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-02_at_8.39.53_AM.png)
+- But page size is configurable.![Screenshot 2025-01-02 at 8.39.53 AM.png](Screenshot_2025-01-02_at_8.39.53_AM.png)
     
 
 ### IO
@@ -323,16 +325,15 @@ Agenda
 - Like if we fetch a name from a table, IO will go to disk to get whole page or set of pages and not only that particular row, its the database which will filter out the stuff we do not want and throw it away.
 - Postgres relies haevily on OS thus its IO might go to OS cache rather than disk itself.
 
-![Screenshot 2025-01-02 at 8.55.42 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-02_at_8.55.42_AM.png)
+![Screenshot 2025-01-02 at 8.55.42 AM.png](Screenshot_2025-01-02_at_8.55.42_AM.png)
 
 ### HEAP
 
 > A collection of pages that point to our data table. It has everything about the table itself
-> 
 - Since it contains all data related to table, its heavy and is expensive to query as has alot of data
-- We need `indexes` to be able to read exaclty the page we need to, without `indexes` we cannot know which particular page to look for our data. Then we will have to read entire `Heap` . WHich is costly
+- We need `indexes` to be able to read exaclty the page we need to, without `indexes` we cannot know which particular page to look for our data. Then we will have to read entire `Heap` . Which is costly
 
-![image.png](Fundamentals%20of%20Database%20Engineering/image%202.png)
+![image.png](Learning/Database/Fundamentals%20of%20Database%20Engineering/attachments/image%202.png)
 
 ### Index
 
@@ -341,21 +342,21 @@ Agenda
 - Its essentially B-tree or LSM etc , which we have to read first and then parse the content to know where our page is in Heap.
 - Thus reading stored index has IO cost as its stored as a page itself.
     
-    ![Screenshot 2025-01-02 at 9.11.35 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-02_at_9.11.35_AM.png)
+    ![Screenshot 2025-01-02 at 9.11.35 AM.png](Screenshot_2025-01-02_at_9.11.35_AM.png)
     
 
 ### Example
 
 - The index are stored for Emloyee_ID like 10 ( 1,0 ) or (row, page)
 
-![Screenshot 2025-01-02 at 10.45.57 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-02_at_10.45.57_AM.png)
+![Screenshot 2025-01-02 at 10.45.57 AM.png](Screenshot_2025-01-02_at_10.45.57_AM.png)
 
 - Becuase of index stored we can quickly determine which page no to look for in heap and also which specific row.
 - When we retreive the specific page, we get all the rows there ( as IO gets whole page ) but we throw them away and only focus on the row that was specified.
 
 ### Notes
 
-![Screenshot 2025-01-02 at 10.55.09 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-02_at_10.55.09_AM.png)
+![Screenshot 2025-01-02 at 10.55.09 AM.png](Screenshot_2025-01-02_at_10.55.09_AM.png)
 
 - normally primary key is a clustered index unless its postgres ( it s essentially a secondary key pointing to row_id generated by postgreSQL )
 
@@ -367,51 +368,52 @@ Agenda
 
 - Running query for Ssn would have to go through each storage block/blob and see if it has required SSN if not move ahead. Anyway IO operation will be costly here as we have to fetch entire block no matter how many rows it has.
 
-![Screenshot 2025-01-03 at 7.06.14 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_7.06.14_AM.png)
+![Screenshot 2025-01-03 at 7.06.14 AM.png](Screenshot_2025-01-03_at_7.06.14_AM.png)
 
 - in case of * query is not that much expensive beside finding the block/blob in storage, when we have it we can get al columns as they are there in same storage block/blob while it is definitely tough in `Column oriented`
     
-    ![Screenshot 2025-01-03 at 7.11.04 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_7.11.04_AM.png)
+    ![Screenshot 2025-01-03 at 7.11.04 AM.png](Screenshot_2025-01-03_at_7.11.04_AM.png)
     
 - Also remember row can always span multiple blocks/blobs if its too large or huge in number
 - So if fetching such a row, if * query then database would get all blocks/blobs from storage to return all columns in specific row.
 - Otherwise if we selected only few columns, Database is smart enough to fetch only  blocks/blobs from storage having columns required.
 - Aggregate queries are very IO expensive in row oriented databases because we have to get an entire block/blob from storage only to get one column value and so on for all storage
 
-![Screenshot 2025-01-03 at 7.42.37 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_7.42.37_AM.png)
+![Screenshot 2025-01-03 at 7.42.37 AM.png](Screenshot_2025-01-03_at_7.42.37_AM.png)
 
 ### Column Oriented
 
-![image.png](Fundamentals%20of%20Database%20Engineering/image%203.png)
+![image.png](Learning/Database/Fundamentals%20of%20Database%20Engineering/attachments/image%203.png)
 
 - Fetching same column is much efficient in case of this orientation as entries of same colum are stored sequentially in storage blocks/blobs.
 
 ### Example Queries with Indexing
 
-![Screenshot 2025-01-03 at 9.28.34 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_9.28.34_AM.png)
+![Screenshot 2025-01-03 at 9.28.34 AM.png](Screenshot_2025-01-03_at_9.28.34_AM.png)
 
 - Being column oriented, database knows where SSN column is , gets first block no 666 then second block has ssn=666 , it points to row 1006 and first_name
 - Datase knows where first_name block is and since has row value 1006 knows which particular block of first_name column it should check.
 - The worst query because of how many IOs are here ( equal to no of total columns we have in database if the column referenced is found in first block otherwise we are doomed )
     
-    ![Screenshot 2025-01-03 at 9.33.05 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_9.33.05_AM.png)
+    ![Screenshot 2025-01-03 at 9.33.05 AM.png](Screenshot_2025-01-03_at_9.33.05_AM.png)
     
 - The best query
     
-    ![Screenshot 2025-01-03 at 9.34.41 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_9.34.41_AM.png)
+    ![Screenshot 2025-01-03 at 9.34.41 AM.png](Screenshot_2025-01-03_at_9.34.41_AM.png)
     
     ### Summar y
     
-    ![Screenshot 2025-01-03 at 9.36.48 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_9.36.48_AM.png)
+    ![Screenshot 2025-01-03 at 9.36.48 AM.png](Screenshot_2025-01-03_at_9.36.48_AM.png)
     
 - OLTP ( On-line transaction processing ) easy to write WAL because we know what we are changing exactly
-- Compression is not efficient in case of row orientation as most probably different typed data would be consequent while in column similar typed data is consequent ( same block ) which increases chances of duplicated values being found and thus good compression
+- Compression is not efficient in case of row orientation as most probably different typed data would be consequent while in column similar typed data is consequent ( same block ) which increases chances of duplicated values being found and thus good compression.
+- Aggregation queries are amazing in column databases since all values for given column might lie in same block or multiple consequent blocks as comapre to all different blocks and fetch uneccessary columns which are not even needed. 
 
 ## Question
 
 ### Why is Select * an expensive query
 
-![Screenshot 2025-01-03 at 10.06.49 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-03_at_10.06.49_AM.png)
+![Screenshot 2025-01-03 at 10.06.49 AM.png](Screenshot_2025-01-03_at_10.06.49_AM.png)
 
 ## Primary key vs Secondary Keys
 
@@ -511,7 +513,7 @@ create index grades_g on grades(g);
 
 ```
 
-![Screenshot 2025-01-10 at 9.23.04 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-10_at_9.23.04_AM.png)
+![Screenshot 2025-01-10 at 9.23.04 AM.png](Screenshot_2025-01-10_at_9.23.04_AM.png)
 
 1. First is usually the `query plan` which is `seq scan` or `Full Table Scan` 
 2. Cost has two numbers separated by `..` as `n1..n2`
@@ -526,25 +528,25 @@ create index grades_g on grades(g);
 
 Another example of a `Order By` query
 
-![Screenshot 2025-01-10 at 10.06.20 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-10_at_10.06.20_AM.png)
+![Screenshot 2025-01-10 at 10.06.20 AM.png](Screenshot_2025-01-10_at_10.06.20_AM.png)
 
 - order by name
 
-![Screenshot 2025-01-10 at 10.21.42 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-10_at_10.21.42_AM.png)
+![Screenshot 2025-01-10 at 10.21.42 AM.png](Screenshot_2025-01-10_at_10.21.42_AM.png)
 
 also read from bottom to Top ( correct way )
 
 - width is 4 bytes because its only one field
 
-![Screenshot 2025-01-10 at 10.22.49 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-10_at_10.22.49_AM.png)
+![Screenshot 2025-01-10 at 10.22.49 AM.png](Screenshot_2025-01-10_at_10.22.49_AM.png)
 
 - now width is 15 ( which is average length of the name not exact as name lengths vary here )
 
-![Screenshot 2025-01-10 at 10.23.50 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-10_at_10.23.50_AM.png)
+![Screenshot 2025-01-10 at 10.23.50 AM.png](Screenshot_2025-01-10_at_10.23.50_AM.png)
 
 ### Bitmap Index vs Index vs Table Scan
 
-![Screenshot 2025-01-13 at 4.20.41 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-13_at_4.20.41_PM.png)
+![Screenshot 2025-01-13 at 4.20.41 PM.png](Screenshot_2025-01-13_at_4.20.41_PM.png)
 
 Postgres is smart enough to decide what to chose specially when no of results to fetch are very large or smaller 
 
@@ -555,7 +557,7 @@ Postgres is smart enough to decide what to chose specially when no of results to
 SELECT name FROM grades WHERE id < 100;
 ```
 
-![Screenshot 2025-01-13 at 4.27.46 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-13_at_4.27.46_PM.png)
+![Screenshot 2025-01-13 at 4.27.46 PM.png](Screenshot_2025-01-13_at_4.27.46_PM.png)
 
 Index scan ( fetch name column, using B-Tree which is fast enough )
 
@@ -563,7 +565,7 @@ Index scan ( fetch name column, using B-Tree which is fast enough )
 	SELECT name FROM grades WHERE id > 100;
 ```
 
-![Screenshot 2025-01-13 at 4.28.00 PM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-13_at_4.28.00_PM.png)
+![Screenshot 2025-01-13 at 4.28.00 PM.png](Screenshot_2025-01-13_at_4.28.00_PM.png)
 
 sequential scan
 
@@ -574,9 +576,9 @@ sequential scan
 - since each age may not contain exaclty one row , so it can have one or more row, so if any extra row is fetched its filtered and dropped as per condition.
 - But this does not happen always
 
-![1.png](Fundamentals%20of%20Database%20Engineering/1.png)
+![1.png](1.png)
 
-![2.png](Fundamentals%20of%20Database%20Engineering/2.png)
+![2.png](2.png)
 
 - Then we sometimes also get across two Bitmap Index scans `AND` together, so that where even one of them has page value 1 is ignored as we have AND in the query. finally we do a bitmap heap scan on result of AND of both bitmaps
 
@@ -661,7 +663,7 @@ explain analyze select id,g from students where g > 80 and g < 95 order by g;
 - This insert query is gonna take some time ( like about 15 minutes 👹 ). We are inserting 50 million rows almost so it deserves that much.
 - There are no indexes in this table.
 
-![Screenshot 2025-01-15 at 9.10.23 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-15_at_9.10.23_AM.png)
+![Screenshot 2025-01-15 at 9.10.23 AM.png](Screenshot_2025-01-15_at_9.10.23_AM.png)
 
 this query is much slower as we can see its not a good query becuase we have no index 
 
@@ -677,18 +679,18 @@ CREATE INDEX g_idx on students(g);
 explain analyze select id, g from students where g > 80 and g < 95 order by g desc;
 ```
 
-![Screenshot 2025-01-15 at 9.27.48 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-15_at_9.27.48_AM.png)
+![Screenshot 2025-01-15 at 9.27.48 AM.png](Screenshot_2025-01-15_at_9.27.48_AM.png)
 
 in case of Hussiain Nasser, it ran Index Scan Backward while it still ran Gather merge in my case which is weird ? 
 
 - The backward is becuase we are ordering by desc on `g` column.
 - But applying limit on same query results in much quicker response as you can see.
 
-![Screenshot 2025-01-15 at 9.33.21 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-15_at_9.33.21_AM.png)
+![Screenshot 2025-01-15 at 9.33.21 AM.png](Screenshot_2025-01-15_at_9.33.21_AM.png)
 
 but its not always this fast as if we incldue buffers in with (analyze, buffers ) we see that shared-hit = 20 means all things we queried are cached.
 
-![Screenshot 2025-01-15 at 9.34.41 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-15_at_9.34.41_AM.png)
+![Screenshot 2025-01-15 at 9.34.41 AM.png](Screenshot_2025-01-15_at_9.34.41_AM.png)
 
 - lets trick OS to make new query so results are not cached now.
 
@@ -696,7 +698,7 @@ but its not always this fast as if we incldue buffers in with (analyze, buffers 
 explain analyze select id, g from students where g > 10 and g < 20 order by g desc limit 1000;
 ```
 
-![Screenshot 2025-01-15 at 9.37.05 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-15_at_9.37.05_AM.png)
+![Screenshot 2025-01-15 at 9.37.05 AM.png](Screenshot_2025-01-15_at_9.37.05_AM.png)
 
 we did something better here as `read=351` while shared hit is only `425` so it means we did get 351 pages from disk and now Execution time is increased to 90ms from 10ms
 
@@ -715,6 +717,6 @@ create index g_idx on students(g) include(id);
 
 - Now see `Index Only Scan` its 11ms as we never went to HEAP because `Heap Fetches = 0`
 
-![Screenshot 2025-01-15 at 9.43.21 AM.png](Fundamentals%20of%20Database%20Engineering/Screenshot_2025-01-15_at_9.43.21_AM.png)
+![Screenshot 2025-01-15 at 9.43.21 AM.png](Screenshot_2025-01-15_at_9.43.21_AM.png)
 
 we still went to disk for `read=12297` ,

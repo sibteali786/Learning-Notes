@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Row vs Column Oriented Database Storage</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2e; --panel2:#1c2438; --border:#2a3450;
+    --text:#e8ecf5; --muted:#93a0bf; --accent:#5b9dff; --accent2:#ffb454;
+    --good:#4fd18a; --bad:#ff6b6b; --purple:#b18cff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:linear-gradient(180deg,#0b0f19,#0f1420);
+    color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    margin:0; padding:0 0 60px 0; line-height:1.5;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:28px 20px;}
+  h1{font-size:1.7em; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-top:0; margin-bottom:28px;}
+  h2{
+    font-size:1.15em; color:var(--accent2); border-bottom:1px solid var(--border);
+    padding-bottom:8px; margin-top:44px; display:flex; align-items:center; gap:10px;
+  }
+  h2 .num{
+    background:var(--accent); color:#0b0f19; font-weight:700; border-radius:50%;
+    width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:0.75em; flex-shrink:0;
+  }
+  p{color:#d3d9ea;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .card.good{border-left:4px solid var(--good);}
+  .card.bad{border-left:4px solid var(--bad);}
+  .card.example{background:var(--panel2); border-left:4px solid var(--purple);}
+  .tag{font-weight:600; font-size:0.85em; text-transform:uppercase; letter-spacing:.04em;}
+  .card.example .tag{color:var(--purple);}
+  .card.good .tag{color:var(--good);}
+  .card.bad .tag{color:var(--bad);}
+  code, .mono{font-family:'SFMono-Regular',Consolas,monospace; background:#0b0f19; padding:2px 6px; border-radius:4px; color:#ffcf87; font-size:0.92em;}
+
+  table.logical{border-collapse:collapse; width:100%; margin:10px 0; font-size:0.85em;}
+  table.logical th{background:#22304f; color:var(--accent); padding:7px 9px; text-align:left; border:1px solid var(--border);}
+  table.logical td{padding:7px 9px; border:1px solid var(--border); color:#d3d9ea;}
+  table.logical tr:nth-child(even) td{background:#141b2b;}
+
+  .blocks{display:flex; gap:14px; flex-wrap:wrap; margin:16px 0;}
+  .block{background:#141b2b; border:2px solid var(--accent); border-radius:8px; padding:10px; width:280px; font-size:0.78em;}
+  .block.col{border-color:var(--purple);}
+  .block .btitle{font-weight:700; margin-bottom:6px; text-align:center; color:var(--accent);}
+  .block.col .btitle{color:var(--purple);}
+  .block .cell{background:#20293e; border-radius:5px; padding:5px 7px; margin-bottom:4px; color:#cdd6ec; word-break:break-word;}
+  .block .cell b{color:var(--accent2);}
+  .block .cell.miss{opacity:0.35;}
+  .block .cell.hit{border:1px solid var(--good);}
+
+  .flowrow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:14px 0;}
+  .flowbox{background:#141b2b; border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:0.85em; text-align:center;}
+  .flowbox.hit{border-color:var(--good); color:var(--good);}
+  .flowbox.skip{border-color:var(--bad); color:var(--bad); opacity:0.7;}
+  .flowbox.read{border-color:var(--accent2); color:var(--accent2);}
+  .flowarrow{color:var(--muted); font-size:1.1em;}
+
+  ul{padding-left:20px; color:#d3d9ea;}
+  li{margin-bottom:6px;}
+
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:14px 0;}
+  @media(max-width:700px){.compare{grid-template-columns:1fr;}}
+  .compare .col2{background:var(--panel2); border-radius:8px; padding:14px; border:1px solid var(--border);}
+  .compare .col2 h4{margin-top:0; font-size:0.95em;}
+  .compare .col2.row h4{color:var(--accent);}
+  .compare .col2.colstore h4{color:var(--purple);}
+
+  .summary-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0;}
+  @media(max-width:700px){.summary-grid{grid-template-columns:1fr;}}
+  .sitem{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px 14px;}
+  .sitem b{color:var(--accent2);}
+
+  .db-badge{display:inline-block; background:#22304f; color:var(--accent); padding:2px 8px; border-radius:4px; font-size:0.8em; font-weight:600; margin-right:6px;}
+  .scenario{background:#1a2236; border-radius:8px; padding:12px 14px; margin-top:8px; border-left:3px solid var(--accent2);}
+  .scenario .tag{color:var(--accent2);}
+
+  .scorebox{overflow-x:auto;}
+  table.score{border-collapse:collapse; width:100%; margin:14px 0; font-size:0.88em;}
+  table.score th{background:#22304f; padding:9px 10px; text-align:left; border:1px solid var(--border);}
+  table.score td{padding:9px 10px; border:1px solid var(--border);}
+  table.score th.row{color:var(--accent);}
+  table.score th.colh{color:var(--purple);}
+  table.score .win{color:var(--good); font-weight:700;}
+  table.score .lose{color:var(--bad);}
+
+  .toc{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:10px;}
+  .toc ol{margin:6px 0 0 0; padding-left:20px; columns:2;}
+  @media(max-width:600px){.toc ol{columns:1;}}
+  .toc li{margin-bottom:4px; font-size:0.92em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>📀 Row vs Column Oriented Database Storage</h1>
+  <p class="sub">Same table, two different physical layouts on disk — walking through 3 real queries against each to see exactly why the layout matters.</p>
+
+  <div class="toc">
+    <b>What we're covering</b>
+    <ol>
+      <li><a href="#setup">The Setup: One Table, No Indexes</a></li>
+      <li><a href="#roworiented">Row-Oriented Storage (Row Store)</a></li>
+      <li><a href="#rowqueries">Row Store: 3 Query Walkthroughs</a></li>
+      <li><a href="#colstore">Column-Oriented Storage (Columnar)</a></li>
+      <li><a href="#colqueries">Column Store: Same 3 Queries</a></li>
+      <li><a href="#scorecard">Head-to-Head Scorecard</a></li>
+      <li><a href="#proscons">Pros &amp; Cons Summary</a></li>
+      <li><a href="#reallife">Real-World Usage &amp; Engine Swizzling</a></li>
+    </ol>
+  </div>
+
+  <h2 id="setup"><span class="num">1</span>The Setup</h2>
+  <p>Same <code>employees</code> table, no indexes involved (indexes would complicate the comparison — this is purely about how the raw layout affects IO). Row ID is an internal database concept, distinct from your own <code>ID</code>/primary key column.</p>
+
+  <table class="logical">
+    <tr><th>RowID</th><th>ID</th><th>First</th><th>Last</th><th>SSN</th><th>Salary</th><th>DOB</th><th>Title</th><th>Join</th></tr>
+    <tr><td class="mono">1001</td><td>1</td><td>John</td><td>Smith</td><td>111</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td class="mono">1002</td><td>2</td><td>Melissa</td><td>...</td><td>222</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td class="mono">1006</td><td>6</td><td>Hussein</td><td>...</td><td>666</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+  </table>
+
+  <div class="card">
+    <span class="tag">Queries we'll run against both</span>
+    <ul>
+      <li><b>Q1 (selective, single-column filter):</b> <code>SELECT first_name FROM employees WHERE ssn = 666</code></li>
+      <li><b>Q2 (point lookup, all columns):</b> <code>SELECT * FROM employees WHERE id = 1</code></li>
+      <li><b>Q3 (aggregate on one column):</b> <code>SELECT SUM(salary) FROM employees</code></li>
+    </ul>
+  </div>
+
+  <h2 id="roworiented"><span class="num">2</span>Row-Oriented Storage</h2>
+  <p>Rows are stored <b>contiguously</b> on disk — ID, first name, last name, SSN, salary... then the next row starts immediately after. A disk read always pulls a full <b>block</b> (e.g. 512B–4KB), which typically contains several whole rows — <b>with every column</b>, whether you asked for them or not.</p>
+
+  <div class="blocks">
+    <div class="block">
+      <div class="btitle">Block 1 (Row Store)</div>
+      <div class="cell">1001, John, Smith, <b>SSN 111</b>, 90k, ...</div>
+      <div class="cell">1002, Melissa, ..., <b>SSN 222</b>, 85k, ...</div>
+    </div>
+    <div class="block">
+      <div class="btitle">Block 2 (Row Store)</div>
+      <div class="cell">1003, ..., <b>SSN 333</b>, ...</div>
+      <div class="cell">1004, ..., <b>SSN 444</b>, ...</div>
+    </div>
+    <div class="block">
+      <div class="btitle">Block 3 (Row Store)</div>
+      <div class="cell hit">1005, ..., <b>SSN 555</b>, ...</div>
+      <div class="cell hit">1006, Hussein, ..., <b>SSN 666</b>, ...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="tag">Core mechanic</span>
+    <p>One IO on a row store hands you <b>whole rows</b>, all columns included. Once a row is in memory (RAM), reading any additional column of that same row costs <b>zero extra IO</b> — it's already there.</p>
+  </div>
+
+  <h2 id="rowqueries"><span class="num">3</span>Row Store — Query Walkthroughs</h2>
+
+  <div class="card">
+    <span class="tag">Q1 — SSN = 666, need first_name only</span>
+    <div class="flowrow">
+      <div class="flowbox skip">Block 1<br>111, 222 ✗</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox skip">Block 2<br>333, 444 ✗</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox hit">Block 3<br>555, 666 ✓ "Hussein"</div>
+    </div>
+    <p><b>Cost: 3 block reads</b> (no index → sequential scan). Once found, grabbing <code>first_name</code> is free — it rode along in the same block read.</p>
+  </div>
+
+  <div class="card">
+    <span class="tag">Q2 — SELECT * WHERE id = 1</span>
+    <div class="flowrow">
+      <div class="flowbox hit">Block 1<br>id=1 found immediately</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox hit">All columns already in memory — free</div>
+    </div>
+    <p><b>Cost: 1 block read</b> (lucky first block; sometimes the DB can even map sequence → row ID directly). Asking for every column costs nothing extra since the entire row loaded together.</p>
+  </div>
+
+  <div class="card bad">
+    <span class="tag">Q3 — SUM(salary) across all employees</span>
+    <div class="flowrow">
+      <div class="flowbox read">Block 1<br>read full rows, use only salary</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox read">Block 2<br>same waste</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox read">Block 3<br>same waste</div>
+    </div>
+    <p><b>Cost: reads nearly the entire table</b>, pulling names, SSNs, DOBs, titles — everything — just to extract one number per row. Massively wasteful IO for a single-column aggregate.</p>
+  </div>
+
+  <h2 id="colstore"><span class="num">4</span>Column-Oriented Storage (Columnar)</h2>
+  <p>Every column gets its <b>own dedicated storage region</b>: all <code>id</code> values together, then all <code>first_name</code> values together, then all <code>ssn</code> values, etc. Each stored value carries the row ID it belongs to, since the columns must be re-joined logically at query time.</p>
+
+  <div class="blocks">
+    <div class="block col">
+      <div class="btitle">SSN column blocks</div>
+      <div class="cell">1001→111, 1002→222</div>
+      <div class="cell hit">1005→555, 1006→666 ✓</div>
+    </div>
+    <div class="block col">
+      <div class="btitle">first_name column blocks</div>
+      <div class="cell">1001→John, 1002→Melissa</div>
+      <div class="cell hit">1005→..., 1006→Hussein ✓</div>
+    </div>
+    <div class="block col">
+      <div class="btitle">salary column blocks</div>
+      <div class="cell">1001→90k, 1002→85k</div>
+      <div class="cell">1003→..., 1004→...</div>
+    </div>
+  </div>
+
+  <div class="card bad">
+    <span class="tag">The tradeoff</span>
+    <p>Because the row ID is duplicated across every single column structure, <b>writes/updates/deletes get expensive</b> — touching one logical row means touching many separate physical structures (one per column).</p>
+  </div>
+
+  <h2 id="colqueries"><span class="num">5</span>Column Store — Same 3 Queries</h2>
+
+  <div class="card good">
+    <span class="tag">Q1 — SSN = 666, need first_name only</span>
+    <div class="flowrow">
+      <div class="flowbox skip">SSN block 1<br>111,222 ✗</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox hit">SSN block 2<br>555,666 ✓ → RowID 1006</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox hit">Jump to first_name block for RowID 1006 → "Hussein"</div>
+    </div>
+    <p><b>Cost: 3 reads</b> (2 to scan SSN column, 1 to jump straight into the first_name column at the known row). Never touched last_name, DOB, title, join_date at all.</p>
+  </div>
+
+  <div class="card bad">
+    <span class="tag">Q2 — SELECT * WHERE id = 1 (the worst case for columnar)</span>
+    <div class="flowrow">
+      <div class="flowbox hit">id column: found RowID 1001</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox read">first_name block</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox read">last_name block</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox read">ssn / salary / dob / title / join_date...</div>
+    </div>
+    <p><b>Cost: one separate read per column</b> — 8 reads for 8 columns here, and this scales linearly with column count. <code>SELECT *</code> on a columnar store is a textbook worst case — avoid it even more than on row stores.</p>
+  </div>
+
+  <div class="card good">
+    <span class="tag">Q3 — SUM(salary) across all employees</span>
+    <div class="flowrow">
+      <div class="flowbox hit">Go straight to salary column blocks</div>
+      <div class="flowarrow">➜</div>
+      <div class="flowbox hit">Read only salary values, sum them</div>
+    </div>
+    <p><b>Cost: minimal</b> — touches only the salary structure, nothing else. Bonus: identical/repeated salary values compress extremely well (e.g. run-length encoding: <code>100k × 3</code> instead of three separate entries), so this can be even cheaper than the raw count of rows suggests.</p>
+  </div>
+
+  <h2 id="scorecard"><span class="num">6</span>Head-to-Head Scorecard</h2>
+  <div class="scorebox">
+    <table class="score">
+      <tr><th>Query</th><th class="row">Row Store</th><th class="colh">Column Store</th><th>Winner</th></tr>
+      <tr><td>Q1: filter on 1 column, return 1 different column</td><td>3 block reads, all columns pulled along</td><td>3 reads, only 2 columns ever touched</td><td class="win">Column (slightly, scales further with table width)</td></tr>
+      <tr><td>Q2: point lookup, SELECT *</td><td>1 block read — whole row free</td><td>1 read per column (8 reads here)</td><td class="win">Row — by a landslide</td></tr>
+      <tr><td>Q3: aggregate one column over all rows</td><td>Reads ~entire table, mostly wasted</td><td>Reads only the target column, compresses well</td><td class="win">Column — by a landslide</td></tr>
+    </table>
+  </div>
+
+  <div class="card example">
+    <span class="tag">Real-life scenario</span>
+    <p>A checkout service doing <code>SELECT * FROM orders WHERE order_id = X</code> thousands of times a second wants a <b>row store</b> — every lookup needs the full record, and row stores hand that back in one read. A BI dashboard doing <code>SELECT AVG(order_total) FROM orders WHERE region = 'EU'</code> over 50 million rows wants a <b>column store</b> — it only touches 2 of 40 columns and skips the rest entirely.</p>
+  </div>
+
+  <h2 id="proscons"><span class="num">7</span>Pros &amp; Cons Summary</h2>
+  <div class="compare">
+    <div class="col2 row">
+      <h4>🟦 Row-Oriented (OLTP)</h4>
+      <ul>
+        <li>✅ Fast reads &amp; writes for transactional workloads</li>
+        <li>✅ Simple structure → simpler write-ahead logging, easy to reason about</li>
+        <li>✅ Efficient when queries touch many/most columns of a row</li>
+        <li>❌ Poor compression (adjacent bytes are different types/values — nothing repeats)</li>
+        <li>❌ Poor aggregate performance (must read unrelated columns to get one)</li>
+      </ul>
+    </div>
+    <div class="col2 colstore">
+      <h4>🟪 Column-Oriented (OLAP)</h4>
+      <ul>
+        <li>✅ Excellent for aggregations/analytics on few columns over many rows</li>
+        <li>✅ Excellent compression (similar/repeated values stored together)</li>
+        <li>❌ Slow writes (updating 1 row touches N separate column structures)</li>
+        <li>❌ Terrible when a query needs many/all columns (SELECT * is worst-case)</li>
+        <li>❌ More complex to implement/maintain (row ID duplicated everywhere)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="reallife"><span class="num">8</span>Real-World Usage &amp; Engine Swizzling</h2>
+  <ul>
+    <li><span class="db-badge">Postgres</span><span class="db-badge">MySQL</span><span class="db-badge">Oracle</span> default to row-oriented storage — optimized for OLTP (transactional apps).</li>
+    <li><span class="db-badge">SAP HANA</span> and dedicated analytics warehouses default to columnar — optimized for OLAP (analytics/BI).</li>
+    <li>Some engines let you pick a <b>storage engine per table</b> — e.g. row store for your <code>orders</code> table (constant writes), columnar for your <code>orders_history_analytics</code> table (read-heavy reporting).</li>
+    <li>Joining a row-store table directly with a column-store table is generally unsupported or discouraged — the physical models don't mix cleanly.</li>
+  </ul>
+
+  <div class="scenario">
+    <span class="tag">Practical takeaway</span>
+    <p>Pick storage orientation based on <b>your actual query shape</b>: lots of writes and point lookups touching most columns → row store. Heavy aggregates/analytics touching a narrow slice of columns across huge row counts → column store. And remember: <code>SELECT *</code> is expensive on a row store, but it's a genuine anti-pattern on a column store.</p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -4,20 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "e0e45530a20c3088",
+        "id": "e3e688aed960b642",
         "type": "tabs",
         "children": [
           {
-            "id": "b04f832cec5cb8d9",
+            "id": "4fa072552b22677d",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "4-Surrounded-Regions.excalidraw"
+            }
+          },
+          {
+            "id": "68adfd96a4b602b8",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/System Design/Patterns/Large Blobs.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Large Blobs.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -76,7 +91,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5
+    "width": 305.5,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,37 +197,45 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "b04f832cec5cb8d9",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
+    "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
+    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
+    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/row-vs-column-storage.html",
+    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/db-storage-fundamentals.html",
+    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
+    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/1.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments",
+    "Learning/Database/Learnings/Things i learned while working.md",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-10_at_9.23.04_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-03_at_9.34.41_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-02_at_10.45.57_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2024-10-27_at_1.23.30_PM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-02_at_8.31.12_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2024-10-18_at_11.45.32_PM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-13_at_4.27.46_PM.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/Moles_MolarMass_practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/1-atomicmassunit.excalidraw.md",
     "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
     "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Frontend Interview Preparation/Concepts/useLazyImage.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/accordion-summary.html",
     "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/attachments/wnmQI8j-1180x520.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/WN83EM5-1051x569.png",
     "Learning/Backend Engineering/Memory Management in C/attachments",
     "Learning/Backend Engineering/Memory Management in C/Links.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730100726_423.png",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730092132_463.png",
-    "Learning/Research/Adam-DFT/Atomic Structure/1-atomicmassunit.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260730085940_939.png",
     "Learning/Research/Adam-DFT/Atomic Structure/attachments/AtomicMassUnit.m4a",
-    "Pasted Image 20260730091822_124.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
-    "Screenshot 2026-06-12 at 10.29.20 AM.png",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Pasted image 20260714215620.png",
     "Learning/Research/Adam-DFT/Atomic Structure/attachments",
     "Learning/Research/Adam-DFT/Atomic Structure",
-    "Learning/Research/Adam-DFT",
-    "Learning/Research",
     "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
-    "Learning/System Design/Patterns/Scaling Reads/scaling-reads-summary-v2.html",
-    "Learning/System Design/Patterns/Scaling Reads/How to scale reads in your system design interview _ Hello Interview System Design in a Hurry_files",
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/AccordionII.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
@@ -221,13 +245,6 @@
     "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
-    "Learning/System Design/Practice/How to Stop being Junior.excalidraw.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/progress.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/drills.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Practice.excalidraw.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/CLAUDE.md",
-    "Learning/Requirements Gathering/Research Papers and References.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
