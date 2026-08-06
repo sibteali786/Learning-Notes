@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Handling Large Blobs — System Design Pattern</title>
+<style>
+  :root{
+    --bg:#0b0d10; --card:#12151a; --card2:#171b21; --border:#242a33;
+    --accent:#ff7a6b; --accent2:#5ec8ff; --text:#e8eaed; --muted:#9aa4b2; --good:#5ecf8a; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; margin:0; padding:32px 20px; line-height:1.5;}
+  .wrap{max-width:980px; margin:0 auto;}
+  h1{font-size:26px; margin-bottom:2px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:19px; margin:38px 0 12px; border-left:4px solid var(--accent); padding-left:10px;}
+  h3{font-size:15px; color:var(--accent2); margin:18px 0 8px;}
+  p{color:#cdd3db; font-size:14.5px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin-bottom:14px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:13px; margin:10px 0;}
+  .box{background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; text-align:center; min-width:90px;}
+  .box.hot{border-color:var(--accent); color:var(--accent);}
+  .box.cold{border-color:var(--accent2); color:var(--accent2);}
+  .arrow{color:var(--muted); font-size:16px;}
+  .badge{display:inline-block; background:rgba(255,122,107,.15); color:var(--accent); border:1px solid var(--accent); border-radius:20px; padding:2px 10px; font-size:12px; font-weight:600; margin:2px 4px 2px 0;}
+  .badge.good{background:rgba(94,207,138,.15); color:var(--good); border-color:var(--good);}
+  .badge.bad{background:rgba(255,107,107,.15); color:var(--bad); border-color:var(--bad);}
+  code, .code{font-family:'JetBrains Mono',Consolas,monospace; font-size:12.5px;}
+  pre{background:#090b0d; border:1px solid var(--border); border-radius:8px; padding:12px 14px; overflow-x:auto; color:#b9e6ff;}
+  table{width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top;}
+  th{background:var(--card2); color:var(--accent2);}
+  ul{padding-left:20px; color:#cdd3db; font-size:14.5px;}
+  li{margin-bottom:6px;}
+  .qa{background:var(--card2); border-left:3px solid var(--accent2); border-radius:6px; padding:10px 14px; margin-bottom:10px;}
+  .qa .q{color:var(--accent2); font-weight:600; font-size:14px; margin-bottom:4px;}
+  .stat{display:inline-block; background:var(--card2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin:4px 6px 4px 0; text-align:center;}
+  .stat .n{font-size:18px; font-weight:700; color:var(--accent);}
+  .stat .l{font-size:11px; color:var(--muted);}
+  .use{border:1px solid var(--good); background:rgba(94,207,138,.08); border-radius:10px; padding:14px 16px;}
+  .avoid{border:1px solid var(--bad); background:rgba(255,107,107,.08); border-radius:10px; padding:14px 16px;}
+  .example{background:var(--card2); border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:13.5px;}
+  .example b{color:var(--accent2);}
+  .analogy{font-style:italic; color:var(--muted); border-left:2px solid var(--muted); padding-left:10px; margin:8px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>📁 Handling Large Blobs</h1>
+<div class="sub">System Design Interview Pattern — Hello Interview</div>
+
+<div class="card">
+<p><b>Core idea:</b> Don't route large files (video, images, docs) through your app servers. Use <span class="badge">presigned URLs</span> so clients transfer directly to blob storage / CDN. Servers shift from "data mover" → "access controller".</p>
+</div>
+
+<h2>1. The Problem — Server as Proxy</h2>
+<div class="flow">
+  <div class="box">Client</div><div class="arrow">→</div>
+  <div class="box hot">API Gateway</div><div class="arrow">→</div>
+  <div class="box hot">Server</div><div class="arrow">→</div>
+  <div class="box">Blob Storage</div>
+</div>
+<p style="color:var(--accent);font-size:13px;">↑ A 2GB file gets transferred <b>3 times</b> (client→gateway→server→storage) before it even lands. Servers add zero value, just latency + cost.</p>
+
+<div class="grid2">
+<div class="card">
+<h3>Why not store blobs in DB?</h3>
+<ul>
+<li>A 100MB BLOB in a DB kills query performance, backups, replication</li>
+<li>Object stores (S3 etc.) built for this: unlimited capacity, <b>11 nines (99.999999999%)</b> durability</li>
+<li>Rule of thumb: <b>&gt;10MB and no SQL query need → blob storage</b></li>
+</ul>
+</div>
+<div class="card">
+<h3>Failure modes of proxy approach</h3>
+<ul>
+<li>25GB upload failing at 99% → restart from scratch</li>
+<li>No visibility into upload progress (bypasses servers)</li>
+<li>DB says "pending" but file may already be complete in S3 — or not</li>
+</ul>
+</div>
+</div>
+
+<h2>2. The Solution — Direct Access via Presigned URLs</h2>
+<div class="analogy">🎫 Analogy: your server is a concert ticket booth. It verifies identity, hands you a wristband — it doesn't escort you to your seat. Validate once, then client talks directly to storage.</div>
+
+<div class="flow">
+  <div class="box">Client</div><div class="arrow">⇄</div>
+  <div class="box cold">API Gateway</div><div class="arrow">⇄</div>
+  <div class="box cold">Server<br><span style="font-size:11px;color:var(--muted)">(creates presigned URL)</span></div>
+</div>
+<p style="font-size:13px;color:var(--accent);">Server only issues the URL (in-memory, no network call). Client then does a direct <code>PUT</code> straight to Blob Storage — bytes never touch your infra.</p>
+
+<h3>Anatomy of a presigned URL</h3>
+<pre>https://mybucket.s3.amazonaws.com/uploads/user123/video.mp4
+?X-Amz-Algorithm=AWS4-HMAC-SHA256
+&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20240115%2Fus-east-1%2Fs3%2Faws4_request
+&X-Amz-Date=20240115T000000Z
+&X-Amz-Expires=900
+&X-Amz-SignedHeaders=host
+&X-Amz-Signature=b2754f5b1c9d7c4b8...</pre>
+<ul>
+<li>Signature = hash of (method + path + expiry) + your secret key. Storage recomputes it to verify.</li>
+<li>Typical expiry: <b>15 min – 1 hour</b></li>
+<li>Restrictions baked into signature: <code>content-length-range</code> (min/max size), <code>content-type</code> (e.g. images only)</li>
+</ul>
+
+<h3>Downloads: Blob Storage vs CDN signing</h3>
+<table>
+<tr><th></th><th>Blob Storage Signed URL (S3 presigned)</th><th>CDN Signed URL (CloudFront)</th></tr>
+<tr><td>Validated by</td><td>Storage service, using your cloud secret key</td><td>CDN edge servers, using public/private key pair</td></tr>
+<tr><td>Best for</td><td>Infrequent downloads — simpler & cheaper</td><td>Frequently accessed files — cached at edge, no origin round trip</td></tr>
+</table>
+<pre>https://d123456.cloudfront.net/videos/lecture.mp4
+?Expires=1705305600
+&Signature=j1k2l3m4n5...
+&Key-Pair-Id=APKAIOSFODNN7EXAMPLE</pre>
+
+<h2>3. Resumable Uploads (Chunking)</h2>
+<div class="stat"><div class="n">5GB @ 100Mbps</div><div class="l">= 429 sec (7m9s) — drop at 99% = restart from zero without chunking</div></div>
+
+<div class="flow" style="margin-top:14px;">
+  <div class="box">Client<br><span style="font-size:11px;color:var(--muted)">chunks + SDK</span></div><div class="arrow">→</div>
+  <div class="box hot">Chunk 1..6<br><span style="font-size:11px;">~5MB each</span></div><div class="arrow">→</div>
+  <div class="box">Blob Storage<br><span style="font-size:11px;color:var(--muted)">stitches chunks</span></div>
+</div>
+
+<table>
+<tr><th>Provider</th><th>Mechanism</th><th>Chunk size</th></tr>
+<tr><td>AWS S3</td><td>Multipart Upload — each part gets its own presigned URL</td><td>5MB – 5GB per part</td></tr>
+<tr><td>Google Cloud Storage</td><td>Resumable Uploads — single session URL, range headers</td><td>Flexible</td></tr>
+<tr><td>Azure</td><td>Block Blobs</td><td>4MB – 100MB per block</td></tr>
+</table>
+
+<div class="card">
+<h3>Resume flow</h3>
+<p>Connection drops at part 60/100 → client queries which parts succeeded (<code>ListParts</code> in S3 / session status in GCS / list committed blocks in Azure) → resumes from part 61. Session tracked via <b>upload ID</b> (S3) / <b>resumable URL</b> (GCS). Client must call a <b>completion endpoint</b> with part numbers + checksums — until then, parts exist but no accessible file. <span class="badge">Clean up incomplete uploads after 24–48h — they still cost money</span></p>
+</div>
+
+<h2>4. State Synchronization (Metadata ↔ File)</h2>
+<div class="flow">
+  <div class="box">Client</div><div class="arrow">→</div>
+  <div class="box hot">API Gateway</div><div class="arrow">→</div>
+  <div class="box hot">Server<br><span style="font-size:11px;color:var(--muted)">writes metadata</span></div><div class="arrow">→</div>
+  <div class="box">Blob Storage</div>
+</div>
+<p style="font-size:13px;">Server → <b>Primary DB</b> (metadata) and Blob Storage fires an <b>event notification</b> back to Primary DB to confirm completion status.</p>
+
+<pre>CREATE TABLE files (
+    id              UUID PRIMARY KEY,
+    user_id         UUID NOT NULL,
+    filename        VARCHAR(255),
+    size_bytes      BIGINT,
+    content_type    VARCHAR(100),
+    storage_key     VARCHAR(500),  -- s3://bucket/user123/files/abc-123.pdf
+    status          VARCHAR(50),   -- 'pending', 'uploading', 'completed', 'failed'
+    created_at      TIMESTAMP,
+    updated_at      TIMESTAMP
+);</pre>
+
+<div class="grid2">
+<div class="card">
+<h3>❌ Naive: trust the client</h3>
+<ul>
+<li>Race conditions — DB says 'completed' before file exists</li>
+<li>Orphaned files — client crashes after upload, before notifying</li>
+<li>Malicious clients — mark complete without uploading</li>
+<li>Notification network failures</li>
+</ul>
+</div>
+<div class="card">
+<h3>✅ Production: Events + Reconciliation</h3>
+<ul>
+<li>Storage (S3) fires event via SNS/SQS on real object arrival, includes the <code>storage_key</code></li>
+<li>Server matches key → updates DB row (source of truth = storage, not client)</li>
+<li>Periodic <b>reconciliation job</b> catches files stuck "pending" and verifies against storage (safety net for lost events)</li>
+</ul>
+</div>
+</div>
+
+<h3>Storage key pattern</h3>
+<p><code>uploads/{user_id}/{timestamp}/{uuid}</code> — never let clients pick their own key (overwrite/security risk). Don't rely on S3 object tags for rich metadata (max 10 tags, 256 chars, can't query well) — keep it in the DB.</p>
+
+<h2>5. Fast Downloads</h2>
+<div class="flow">
+  <div class="box cold">CDN<br><span style="font-size:11px;color:var(--muted)">near user</span></div><div class="arrow">↓ download</div>
+</div>
+<div class="flow">
+  <div class="box">Client</div><div class="arrow">→</div><div class="box">API Gateway</div><div class="arrow">→</div><div class="box">Server</div><div class="arrow">→</div><div class="box">Blob Storage<br><span style="font-size:11px;color:var(--accent)">only on cache miss</span></div>
+</div>
+<ul>
+<li>Cross-region direct download (e.g. Sydney user → Virginia storage) ≈ <b>200ms</b> latency; CDN edge cache ≈ <b>single-digit ms</b></li>
+<li><b>Range requests</b> enable resumable + parallel downloads: <code>GET /large-file.zip</code> + <code>Range: bytes=0-10485759</code></li>
+<li>Parallel chunk downloads (4–6 simultaneous) can 3–4x speed — rarely worth the complexity except multi-GB datasets/game assets</li>
+</ul>
+
+<h2>6. When to Use / Not Use in Interviews</h2>
+<div class="grid2">
+<div class="use">
+<h3 style="color:var(--good);margin-top:0;">✅ Use when</h3>
+<ul>
+<li>File &gt; ~10MB</li>
+<li>No synchronous validation needed on the bytes</li>
+<li>Async post-processing is acceptable (transcoding, thumbnails)</li>
+</ul>
+</div>
+<div class="avoid">
+<h3 style="color:var(--bad);margin-top:0;">🚫 Avoid when</h3>
+<ul>
+<li>Small files (&lt;10MB: JSON, forms, small images) — normal API is fine</li>
+<li>Must validate synchronously (e.g. CSV header/type check before accept)</li>
+<li>Compliance/inspection required (PCI scanning, HIPAA) — must proxy through certified systems</li>
+<li>UX needs instant feedback from file content (live face detection on profile pic)</li>
+</ul>
+</div>
+</div>
+
+<h3>Real interview scenarios</h3>
+<div class="example"><b>YouTube:</b> 2GB 4K upload → presigned S3 URL (multipart) → S3 event triggers transcoding. Downloads via CloudFront signed URLs for adaptive bitrate streaming.</div>
+<div class="example"><b>Instagram:</b> 50MB+ raw photo → presigned URL direct to S3 → event triggers async thumbnail/filter/metadata workers. Feed served via CloudFront signed URLs (anti-hotlinking).</div>
+<div class="example"><b>Dropbox:</b> 500MB file → chunked presigned uploads → sync workflow triggered. Shared links = time-limited signed URLs, no account needed.</div>
+<div class="example"><b>WhatsApp:</b> media uploads directly to storage; chat system only passes the file reference; recipients get expiring signed download URLs.</div>
+
+<h2>7. Common Deep-Dive Q&A</h2>
+<div class="qa"><div class="q">"What if the upload fails at 99%?"</div>Use chunked/multipart uploads (S3 ≥5MB parts / GCS any size / Azure ≥4MB blocks). Client queries which parts succeeded and resumes only the missing ones — critical for mobile/flaky connections. Track session ID; some store it in localStorage to survive app restarts.</div>
+<div class="qa"><div class="q">"How do you prevent abuse?"</div>Quarantine bucket first → run virus scan / content validation / file-type check → only then move to public bucket + mark 'available'. Enforce size limits via presigned URL conditions. Delay itself throttles automated abuse.</div>
+<div class="qa"><div class="q">"How do you handle metadata?"</div>Create DB row with status <code>'pending'</code> and storage key <b>before</b> the file even exists. Storage events use that same key to find & update the row. Avoid embedding rich metadata as object tags — use conditional uploads (required headers) only for metadata that must be atomic with the upload.</div>
+<div class="qa"><div class="q">"How do you ensure downloads are fast?"</div>CDN edge caching solves geography (200ms → ~5ms). Range requests solve large-file resumability. Parallel chunked downloads (3–4x speed) only for extreme multi-GB cases.</div>
+
+<h2>8. Cloud Provider Terminology Cheat Sheet</h2>
+<table>
+<tr><th>Feature</th><th>AWS</th><th>Google Cloud</th><th>Azure</th></tr>
+<tr><td>Temp Upload URLs</td><td>Presigned URLs (PUT/POST)</td><td>Signed URLs (resumable/simple)</td><td>SAS tokens</td></tr>
+<tr><td>Multipart Uploads</td><td>Multipart Upload API (5MB–5GB parts)</td><td>Resumable Uploads (flexible)</td><td>Block Blobs (4MB–100MB)</td></tr>
+<tr><td>Event Notifications</td><td>S3 Events → Lambda/SQS/SNS</td><td>Pub/Sub → Cloud Functions</td><td>Event Grid</td></tr>
+<tr><td>CDN + Signed URLs</td><td>CloudFront</td><td>Cloud CDN</td><td>Azure CDN</td></tr>
+<tr><td>Cleanup Policies</td><td>Lifecycle Rules</td><td>Lifecycle Management</td><td>Lifecycle Mgmt Policies</td></tr>
+</table>
+
+<h2>9. Interview Takeaway</h2>
+<div class="card">
+<p>Hear <b>"video upload," "file sharing," "photo storage"</b> → immediately think: bypass the server for bytes. Server's job = <b>access control + metadata</b>, not data transfer. Know the trade-off: when direct upload wins (&gt;10MB, async OK) vs. when to still proxy (compliance, sync validation). Don't forget the <b>state sync</b> discussion — events + reconciliation — this is where most candidates lose points.</p>
+</div>
+
+</div>
+</body>
+</html>

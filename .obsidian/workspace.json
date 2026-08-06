@@ -4,35 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "e3e688aed960b642",
+        "id": "122c50702210387e",
         "type": "tabs",
         "children": [
           {
-            "id": "4fa072552b22677d",
+            "id": "f87c6e0f4c8a00c5",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md"
+                "file": "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "4-Surrounded-Regions.excalidraw"
-            }
-          },
-          {
-            "id": "68adfd96a4b602b8",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/System Design/Patterns/Large Blobs.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Large Blobs.excalidraw"
+              "title": "Intuition.excalidraw"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -66,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "Isolation Levels",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -91,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5,
+    "width": 347.50390243530273,
     "collapsed": true
   },
   "right": {
@@ -108,7 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +105,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks for 2-First SQL Query.excalidraw"
             }
           },
           {
@@ -156,13 +143,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
+                "file": "Learning/Prgamatism/Tips.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Notes"
+              "title": "Outline of Tips"
             }
           },
           {
@@ -197,54 +184,55 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "f87c6e0f4c8a00c5",
   "lastOpenFiles": [
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
     "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
-    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260805001316_159.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/Moles_MolarMass_practice.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/image.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/image 3.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/image 2.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/image 1.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Transaction.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-16_at_8.02.21_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-15_at_9.43.21_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-15_at_9.37.05_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-15_at_9.34.41_AM.png",
+    "Learning/Database/Fundamentals of Database Engineering/attachments",
+    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/row-vs-column-storage.html",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/db-storage-fundamentals.html",
-    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/1.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments",
-    "Learning/Database/Learnings/Things i learned while working.md",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-10_at_9.23.04_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-03_at_9.34.41_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-02_at_10.45.57_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2024-10-27_at_1.23.30_PM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-02_at_8.31.12_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2024-10-18_at_11.45.32_PM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-13_at_4.27.46_PM.png",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/Moles_MolarMass_practice.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/1-atomicmassunit.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
-    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
+    "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
+    "Learning/System Design/Practice/Dropbox/4-Dropbox-Sync.m4a",
+    "Learning/System Design/Practice/Dropbox/3-Dropbox-ClientCompelxity.m4a",
+    "Learning/System Design/Practice/Dropbox/1-Dropbox-uploadFile.m4a",
+    "Learning/System Design/Practice/Dropbox/2-Dropbox-getFile.m4a",
+    "Recording 20260806210135.m4a",
+    "Learning/System Design/Patterns/Handling Large Blobs/handling-large-blobs-summary.html",
+    "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Frontend Interview Preparation/Concepts/useLazyImage.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/accordion-summary.html",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/attachments",
     "Learning/Backend Engineering/Memory Management in C/Links.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments/AtomicMassUnit.m4a",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments",
-    "Learning/Research/Adam-DFT/Atomic Structure",
-    "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/AccordionII.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-    "Learning/System Design/Practice/Yelp/Yelp Design.excalidraw.md",
-    "Learning/System Design/Practice/Yelp/My-Attempt.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Isolation Levels/Isolation Levels.excalidraw.md",
-    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
+    "Learning/System Design/Core Concepts/6-Sharding/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/REST.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Remote Procedure Call (RPC).excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/RateLimitingTechniques.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
+    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Transport Layer Protocols.excalidraw.md",
+    "Learning/System Design/Core Concepts/1-Networking/Networking.md",
+    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
