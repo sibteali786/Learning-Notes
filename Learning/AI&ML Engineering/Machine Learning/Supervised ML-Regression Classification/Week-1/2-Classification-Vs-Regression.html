@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Classification — Supervised Learning</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2e3a;
+    --accent:#7c9dff; --accent2:#ff8c7c; --green:#5fd8a1; --text:#e8eaf0; --muted:#9aa1b2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.5;
+  }
+  h1{font-size:26px; margin:0 0 4px;}
+  .sub{color:var(--muted); margin-bottom:24px;}
+  .label{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em;
+    text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-bottom:10px;
+  }
+  .pill-blue{background:rgba(124,157,255,.15); color:var(--accent);}
+  .pill-red{background:rgba(255,140,124,.15); color:var(--accent2);}
+  .pill-green{background:rgba(95,216,161,.15); color:var(--green);}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:20px 22px; margin-bottom:20px;
+  }
+  .card h2{margin:0 0 10px; font-size:17px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .compare th, .compare td{padding:8px 10px; text-align:left; font-size:14px;}
+  .compare{width:100%; border-collapse:collapse;}
+  .compare th{color:var(--muted); font-weight:600; border-bottom:1px solid var(--border);}
+  .compare td{border-bottom:1px solid var(--border);}
+  .compare tr:last-child td{border-bottom:none;}
+  code{background:#0d0f16; border:1px solid var(--border); padding:2px 6px; border-radius:6px; font-size:13px; color:var(--green);}
+  .example{
+    display:flex; gap:10px; align-items:flex-start; padding:10px 0;
+  }
+  .example .icon{font-size:20px;}
+  svg text{fill:var(--text); font-family:inherit;}
+  .tip{
+    border-left:3px solid var(--accent); padding:10px 14px; background:rgba(124,157,255,.06);
+    border-radius:0 8px 8px 0; font-size:14px; margin-top:10px;
+  }
+</style>
+</head>
+<body>
+
+<span class="label pill-blue">Supervised Learning</span>
+<h1>Classification</h1>
+<div class="sub">Predicting categories instead of numbers</div>
+
+<div class="card">
+  <h2>🩺 Problem Statement</h2>
+  <p>You're building a diagnostic tool: given a tumor's features (size, age, thickness, cell uniformity...), predict whether it's <b>benign (0)</b> or <b>malignant (1)</b>.</p>
+  <p style="color:var(--muted); font-size:14px;">Unlike regression (predict house price — infinite possible numbers), classification predicts one of a <b>small, finite set</b> of categories.</p>
+</div>
+
+<div class="card">
+  <h2>📊 How It Works — 1 Input (Tumor Size)</h2>
+  <svg width="100%" height="140" viewBox="0 0 600 140">
+    <line x1="40" y1="100" x2="560" y2="100" stroke="#2a2e3a" stroke-width="2"/>
+    <text x="560" y="125" font-size="12" fill="#9aa1b2">tumor size →</text>
+    <!-- benign circles -->
+    <circle cx="100" cy="100" r="7" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <circle cx="150" cy="100" r="7" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <circle cx="190" cy="100" r="7" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <!-- malignant crosses -->
+    <text x="330" y="107" font-size="16" fill="#ff8c7c">✕</text>
+    <text x="390" y="107" font-size="16" fill="#ff8c7c">✕</text>
+    <text x="460" y="107" font-size="16" fill="#ff8c7c">✕</text>
+    <text x="520" y="107" font-size="16" fill="#ff8c7c">✕</text>
+    <!-- new patient -->
+    <line x1="260" y1="60" x2="260" y2="100" stroke="#7c9dff" stroke-dasharray="3,3"/>
+    <text x="225" y="50" font-size="12" fill="#7c9dff">new patient?</text>
+  </svg>
+  <p style="font-size:14px; color:var(--muted);">🟢 Circles = benign (0) &nbsp;&nbsp; ❌ Crosses = malignant (1). The model must decide which side the new point falls on.</p>
+</div>
+
+<div class="card">
+  <h2>📈 How It Works — 2 Inputs (Age + Tumor Size)</h2>
+  <svg width="100%" height="220" viewBox="0 0 500 220">
+    <line x1="40" y1="180" x2="460" y2="180" stroke="#2a2e3a" stroke-width="2"/>
+    <line x1="40" y1="180" x2="40" y2="20" stroke="#2a2e3a" stroke-width="2"/>
+    <text x="450" y="200" font-size="12" fill="#9aa1b2">tumor size →</text>
+    <text x="10" y="20" font-size="12" fill="#9aa1b2">age</text>
+    <!-- decision boundary -->
+    <line x1="60" y1="40" x2="300" y2="170" stroke="#7c9dff" stroke-width="2" stroke-dasharray="5,4"/>
+    <!-- benign side -->
+    <circle cx="100" cy="140" r="6" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <circle cx="130" cy="160" r="6" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <circle cx="90" cy="100" r="6" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <circle cx="150" cy="120" r="6" fill="none" stroke="#5fd8a1" stroke-width="2"/>
+    <!-- malignant side -->
+    <text x="280" y="80" font-size="15" fill="#ff8c7c">✕</text>
+    <text x="330" y="110" font-size="15" fill="#ff8c7c">✕</text>
+    <text x="360" y="60" font-size="15" fill="#ff8c7c">✕</text>
+    <text x="400" y="140" font-size="15" fill="#ff8c7c">✕</text>
+    <text x="250" y="45" font-size="12" fill="#7c9dff">decision boundary</text>
+  </svg>
+  <p style="font-size:14px; color:var(--muted);">The algorithm learns a <b>boundary</b> separating classes. More real inputs (clump thickness, cell shape uniformity, etc.) are used in practice.</p>
+</div>
+
+<div class="card">
+  <h2>⚖️ Key Distinction: Classification vs Regression</h2>
+  <table class="compare">
+    <tr><th></th><th>Regression</th><th>Classification</th></tr>
+    <tr><td>Output type</td><td>Number (infinite possibilities)</td><td>Category (small, finite set)</td></tr>
+    <tr><td>Example output</td><td><code>$452,300</code></td><td><code>benign / malignant</code></td></tr>
+    <tr><td>Values in between?</td><td>Yes — 0.5, 1.7, etc. valid</td><td>No — only discrete classes (0, 1, 2...)</td></tr>
+    <tr><td>Use case</td><td>Predicting house prices</td><td>Detecting cancer type, spam vs not-spam</td></tr>
+  </table>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>🌍 Real-World Examples</h2>
+    <div class="example"><span class="icon">🐱</span><div>Cat vs Dog image classifier — 2 non-numeric classes</div></div>
+    <div class="example"><span class="icon">📧</span><div>Spam vs Not-Spam email filter — 2 classes</div></div>
+    <div class="example"><span class="icon">🧬</span><div>Benign / Type 1 cancer / Type 2 cancer — 3 output classes</div></div>
+  </div>
+  <div class="card">
+    <h2>💡 Key Takeaways</h2>
+    <div class="tip">Categories ≠ numeric order. "0/1/2" are labels, not measurable quantities like regression outputs.</div>
+    <div class="tip">"Class" and "category" are used interchangeably for outputs.</div>
+    <div class="tip">More inputs (features) → algorithm draws boundaries in higher-dimensional space, not just a line.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🎯 Quick Recap</h2>
+  <p><b>Supervised learning</b> = learn X → Y from labeled "right answers."</p>
+  <p><b>Regression</b> → predict a number (infinite outputs). <b>Classification</b> → predict a category (finite outputs).</p>
+  <p style="color:var(--muted); font-size:14px;">Next up: Unsupervised Learning →</p>
+</div>
+
+</body>
+</html>

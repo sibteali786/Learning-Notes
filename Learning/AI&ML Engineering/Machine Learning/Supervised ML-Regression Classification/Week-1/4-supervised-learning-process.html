@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How Supervised Learning Works — The Model f(x)</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2e3a;
+    --accent:#7c9dff; --accent2:#ff8c7c; --green:#5fd8a1; --yellow:#f4c15c; --text:#e8eaf0; --muted:#9aa1b2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.5;}
+  h1{font-size:26px; margin:0 0 4px;}
+  .sub{color:var(--muted); margin-bottom:24px;}
+  .label{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-bottom:10px;}
+  .pill-blue{background:rgba(124,157,255,.15); color:var(--accent);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:20px;}
+  .card h2{margin:0 0 10px; font-size:17px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .compare{width:100%; border-collapse:collapse;}
+  .compare th, .compare td{padding:8px 10px; text-align:left; font-size:14px;}
+  .compare th{color:var(--muted); font-weight:600; border-bottom:1px solid var(--border);}
+  .compare td{border-bottom:1px solid var(--border);}
+  .compare tr:last-child td{border-bottom:none;}
+  .tip{border-left:3px solid var(--accent); padding:10px 14px; background:rgba(124,157,255,.06); border-radius:0 8px 8px 0; font-size:14px; margin-top:10px;}
+  code{background:#0d0f16; border:1px solid var(--border); padding:2px 6px; border-radius:6px; font-size:13px; color:var(--green);}
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:14px;}
+  .box{background:#1d212c; border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-align:center; min-width:110px;}
+  .arrow{color:var(--muted); font-size:18px;}
+  .formula{font-size:20px; text-align:center; padding:14px; background:#0d0f16; border-radius:10px; border:1px solid var(--border); color:var(--green); margin:12px 0;}
+</style>
+</head>
+<body>
+
+<span class="label pill-blue">Supervised Learning</span>
+<h1>How Supervised Learning Works</h1>
+<div class="sub">The model f, and univariate linear regression</div>
+
+<div class="card">
+  <h2>🔄 The Overall Process</h2>
+  <div class="flow">
+    <div class="box">Training Set<br><span style="color:var(--muted); font-size:12px;">(x, y pairs)</span></div>
+    <span class="arrow">→</span>
+    <div class="box">Learning Algorithm</div>
+    <span class="arrow">→</span>
+    <div class="box">Function f<br><span style="color:var(--muted); font-size:12px;">(the "model")</span></div>
+  </div>
+  <div class="flow" style="margin-top:14px;">
+    <div class="box">New x<br><span style="color:var(--muted); font-size:12px;">e.g. house size</span></div>
+    <span class="arrow">→</span>
+    <div class="box" style="border-color:var(--green);">f(x)</div>
+    <span class="arrow">→</span>
+    <div class="box" style="border-color:var(--green);">ŷ (y-hat)<br><span style="color:var(--muted); font-size:12px;">prediction</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🔤 Key Terms</h2>
+  <table class="compare">
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td><code>f</code></td><td>the model / function (used to be called "hypothesis")</td></tr>
+    <tr><td><code>x</code></td><td>input feature (e.g. house size)</td></tr>
+    <tr><td><code>ŷ</code> (y-hat)</td><td>model's <b>prediction</b> / estimate of y</td></tr>
+    <tr><td><code>y</code></td><td><b>actual true value</b> from the training set (target)</td></tr>
+  </table>
+  <div class="tip">🏠 Real example: true sale price <code>y</code> isn't known until the house sells. The model outputs <code>ŷ</code> — its <i>estimate</i> before that happens.</div>
+</div>
+
+<div class="card">
+  <h2>📐 The Linear Function</h2>
+  <div class="formula">f<sub>w,b</sub>(x) = w·x + b &nbsp;&nbsp;(often shortened to f(x) = wx + b)</div>
+  <p style="font-size:14px; color:var(--muted);"><code>w</code> and <code>b</code> are numbers the algorithm chooses — they determine the line's slope and position, which determines the prediction ŷ.</p>
+</div>
+
+<div class="card">
+  <h2>📈 Why a Straight Line First?</h2>
+  <svg width="100%" height="160" viewBox="0 0 500 160">
+    <line x1="30" y1="140" x2="470" y2="140" stroke="#2a2e3a" stroke-width="2"/>
+    <line x1="30" y1="140" x2="30" y2="10" stroke="#2a2e3a" stroke-width="2"/>
+    <text x="440" y="155" font-size="11" fill="#9aa1b2">x</text>
+    <text x="8" y="12" font-size="11" fill="#9aa1b2">y</text>
+    <!-- linear -->
+    <line x1="50" y1="130" x2="420" y2="30" stroke="#7c9dff" stroke-width="2"/>
+    <text x="330" y="45" font-size="12" fill="#7c9dff">linear f(x)=wx+b</text>
+    <!-- nonlinear curve -->
+    <path d="M50,135 Q200,20 420,90" fill="none" stroke="#ff8c7c" stroke-width="2" stroke-dasharray="4,3"/>
+    <text x="200" y="35" font-size="12" fill="#ff8c7c">nonlinear (later)</text>
+  </svg>
+  <p style="font-size:14px; color:var(--muted);">Linear = simple, easy foundation. Nonlinear/curved models come later once the basics click.</p>
+</div>
+
+<div class="card">
+  <h2>🏷 Naming This Model</h2>
+  <table class="compare">
+    <tr><td><b>Linear Regression</b></td><td>fits a straight line to predict a number</td></tr>
+    <tr><td><b>Univariate Linear Regression</b></td><td>linear regression with <b>one</b> input feature (uni = one, variate = variable)</td></tr>
+  </table>
+  <div class="tip">Later: predicting price from size <b>+</b> bedrooms <b>+</b> other features → multiple features, not univariate.</div>
+</div>
+
+<div class="card">
+  <h2>💡 Key Takeaways</h2>
+  <div class="tip">The model is just a function <code>f</code> that maps x → ŷ. Training = choosing good <code>w</code> and <code>b</code>.</div>
+  <div class="tip">ŷ ≠ y: prediction vs. actual truth — the whole point of the model is to make ŷ close to y.</div>
+  <div class="tip">Next: <b>cost function</b> — how to measure how good/bad a choice of w, b is (used across nearly all ML models, not just linear regression).</div>
+</div>
+
+<div class="card">
+  <h2>🎯 Quick Recap</h2>
+  <p>Training set → learning algorithm → function <code>f(x) = wx + b</code> → new x → prediction ŷ.</p>
+  <p style="color:var(--muted); font-size:14px;">Next up: constructing the cost function →</p>
+</div>
+
+</body>
+</html>

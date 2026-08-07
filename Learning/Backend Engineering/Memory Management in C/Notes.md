@@ -2012,3 +2012,351 @@ int main() {
   return 0;
 }
 ```
+
+# Multibyte Arrays
+
+If we create an array of structs it gets crazy because we can access and manipulate the elements using either indexing _or_ pointer arithmetic. Let's see how multi-byte width structures are managed in memory.
+
+First, let's say we're working with our familiar Coordinate struct:
+
+```c
+typedef struct Coordinate {
+  int x;
+  int y;
+  int z;
+} coordinate_t;
+```
+
+We can declare an array of 3 `Coordinate` structs like so:
+
+```c
+coordinate_t points[3] = {
+  {1, 2, 3},
+  {4, 5, 6},
+  {7, 8, 9}
+};
+```
+
+Then we can print out the values of the second element in the array:
+
+```c
+printf("points[1].x = %d, points[1].y = %d, points[1].z = %d\n",
+  points[1].x, points[1].y, points[1].z
+);
+// points[1].x = 4, points[1].y = 5, points[1].z = 6
+```
+
+Or we can use a pointer:
+
+```c
+coordinate_t *ptr = points;
+printf("ptr[1].x = %d, ptr[1].y = %d, ptr[1].z = %d\n",
+  (ptr + 1)->x, (ptr + 1)->y, (ptr + 1)->z
+);
+// ptr[1].x = 4, ptr[1].y = 5, ptr[1].z = 6
+```
+
+## Memory Layout
+
+Assuming each `int` is 4 bytes, the `Coordinate` structure will be 12 bytes (`3 * 4` bytes). Let's assume the `points` array starts at memory address `0x2000`.
+
+Here is the memory layout:
+
+|Address|Element|Value|Offset (bytes)|
+|---|---|---|---|
+|`0x2000`|`points[0].x`|1|0|
+|`0x2004`|`points[0].y`|2|4|
+|`0x2008`|`points[0].z`|3|8|
+|`0x200C`|`points[1].x`|4|12|
+|`0x2010`|`points[1].y`|5|16|
+|`0x2014`|`points[1].z`|6|20|
+|`0x2018`|`points[2].x`|7|24|
+|`0x201C`|`points[2].y`|8|28|
+|`0x2020`|`points[2].z`|9|32|
+
+## Accessing Elements Using Pointers
+
+- `points + 0` or `&points[0]` points to `0x2000`
+- `points + 1` or `&points[1]` points to `0x200C` (next structure, offset by 12 bytes)
+- `points + 2` or `&points[2]` points to `0x2018`
+
+A struct stores 8 integers in its ordered fields:  
+A through H.  
+An array stores 10 of these structs.  
+What will be the offset in bytes from **the start** of the array to **the 5th element's `C` field**?
+
+indexes 0 
+- 5th element so one array of 8 values takes 4 * 8 = 32 bytes
+- so 4 * 32* = 128 bytes
+- 3rd element offset in struct so 2 * 4 = 8 bytes 
+- total offset = 136 bytes
+# Array Casting
+
+Let's explore a special kind of psychopathy that's possible in C. Let's assume we have this array of 3 structs where each struct holds 3 integers:
+
+```c
+coordinate_t points[3] = {
+  {5, 4, 1},
+  {7, 3, 2},
+  {9, 6, 8}
+};
+```
+
+Because arrays are basically just pointers (in most cases; more on that later), and we know that structs are contiguous in memory, we can cast the array of structs to an array of integers:
+
+```c
+int *points_start = (int *)points;
+```
+
+The cast tells C to treat the same starting address as an `int *`, so each index walks one `int` at a time through the contiguous struct fields.
+
+Then we can iterate over the known number of integers in the array of structs:
+
+```c
+for (int i = 0; i < 9; i++) {
+  printf("points_start[%d] = %d\n", i, points_start[i]);
+}
+/*
+points_start[0] = 5
+points_start[1] = 4
+points_start[2] = 1
+points_start[3] = 7
+points_start[4] = 3
+points_start[5] = 2
+points_start[6] = 9
+points_start[7] = 6
+points_start[8] = 8
+*/
+```
+
+## Assignment
+
+Take a look at the `dump_graphics` function. It works similarly to the example above.
+
+Go ahead and run it in its current state. You should notice that after all the values specified in `main.c` are printed... all hell breaks loose. That's because we've ventured out of the bounds of our array! We're going rogue! We're in the weeds! We're in undefined territory. This is something you _do not_ want to do. It's one of the things that makes C powerful but dangerous. Other languages stop you from going out of bounds, but C will let you fly off the edge of the world.
+
+**Fix the loop to only print the values that are actually in the array of structs**. Take a look at the `graphics_t` struct in `exercise.h` to figure out how large each struct is.
+
+```c
+#include "exercise.h"
+#include <stdio.h>
+
+void dump_graphics(graphics_t gsettings[10]) {
+  int *ptr = (int *)gsettings;
+  for (int i = 0; i < 30; i++) {
+    printf("settings[%d] = %d\n", i, ptr[i]);
+  }
+}
+
+```
+
+# Pointer Size
+
+The size of an array depends on both the number of elements and the size of each element. An array is a contiguous block of memory where each element has a specific type, and therefore, a specific size.
+
+In C, pointers are always the same size because they just represent memory addresses. The size of a pointer is determined by the architecture of the system (e.g., 32-bit or 64-bit). A pointer's size doesn't depend on the type of data it points to; it just holds the address of a memory location.
+
+## Pointer Example
+
+```c
+int *intPtr;
+char *charPtr;
+double *doublePtr;
+printf("Size of int pointer: %zu bytes\n", sizeof(intPtr));
+printf("Size of char pointer: %zu bytes\n", sizeof(charPtr));
+printf("Size of double pointer: %zu bytes\n", sizeof(doublePtr));
+// Size of int pointer: 4 bytes
+// Size of char pointer: 4 bytes
+// Size of double pointer: 4 bytes
+```
+
+In Boot.dev's 32-bit [WASM](https://webassembly.org/) environment, they're all the same [size](https://port70.net/~nsz/c/c11/n1570.html#6.5.3.4), because they're all just 32-bit memory addresses: it doesn't matter how much memory the value at that address takes up.
+
+## Array Example
+
+```c
+int intArray[10];
+char charArray[10];
+double doubleArray[10];
+printf("Size of int array: %zu bytes\n", sizeof(intArray));
+printf("Size of char array: %zu bytes\n", sizeof(charArray));
+printf("Size of double array: %zu bytes\n", sizeof(doubleArray));
+// Size of int array: 40 bytes
+// Size of char array: 10 bytes
+// Size of double array: 80 bytes
+```
+
+Now the sizes are different because the array type keeps track of the size of each element and the number of elements. Although an array is a pointer to the first element, it's not _just_ a pointer: it's a block of memory that holds all the elements.
+
+Boot.dev runs C in the browser using [WASM](https://webassembly.org/), which is typically a 32-bit system. If you run this code on a 64-bit system, the size of the pointers will be 8 bytes.```
+# Arrays Decay to Pointers
+
+So we know that arrays are _like_ pointers, but they're not exactly the same. Arrays allocate memory for all their elements, whereas pointers just hold the address of a memory location. In many contexts, [arrays **decay** to pointers](https://port70.net/~nsz/c/c11/n1570.html#6.3.2.1), meaning the array name _becomes_ "just" a pointer to the first element of the array.
+
+## When Arrays Decay
+
+Arrays decay when used in expressions containing pointers:
+
+```c
+int arr[5];
+
+// 'arr' decays to 'int*' because that's the type of 'ptr'
+int *ptr = arr;
+
+// 'arr' decays to 'int*' to perform pointer arithmetic
+int value = *(arr + 2);
+```
+
+And also when they're passed to functions... so they actually decay quite often in practice. That's why you can't pass an array to a function by value like you do with a struct; instead, the array name decays to a pointer.
+
+### When Arrays Don't Decay
+
+- **`sizeof` Operator:** Returns the size of the entire array (e.g., sizeof(arr)), not just the size of a pointer.
+- **`&` Operator:** Taking the address of an array with `&arr` gives you a pointer to the whole array, not just the first element. The type of `&arr` is a pointer to the array type, e.g., `int (*)[5]` for an `int` array with 5 elements.
+- **Initialization:** When an array is declared and initialized, it is fully allocated in memory and does not decay to a pointer.
+
+## Assignment
+
+Take a look at the `main` function. It declares an array of numbers `core_utilization` that represents the CPU utilization of each core on a system running the Sneklang interpreter. The array has 8 elements. On lines 12 and 13 it prints the size of the array and the length of the array.
+
+Complete the `core_utils_func` function to print:
+
+```text
+sizeof core_utilization in core_utils_func: X
+```
+
+Where `X` is the size of the array calculated using the `sizeof` operator.
+
+**Once you've completed the function, run it and take a look at the output. You'll notice that due to the array decaying to a pointer, the reported size is the size of a pointer, not the size of the actual array.**
+
+```c
+#include <stdio.h>
+
+void core_utils_func(int core_utilization[]) {
+  printf("sizeof core_utilization in core_utils_func: %zu", sizeof(core_utilization));
+}
+
+// don't touch below this line
+
+int main() {
+  int core_utilization[] = {43, 67, 89, 92, 71, 43, 56, 12};
+  int len = sizeof(core_utilization) / sizeof(core_utilization[0]);
+  printf("sizeof core_utilization in main: %zu\n", sizeof(core_utilization));
+  printf("len of core_utilization: %d\n", len);
+  core_utils_func(core_utilization);
+  return 0;
+}
+
+```
+
+
+# C Strings
+
+Since the beginning of the course we've been doing these shenanigans to be able to print strings:
+
+```c
+char *msg = "ssh terminal.shop for the best coffee";
+```
+
+I told you not to worry about the weird `char *` syntax, but now that we understand a bit about pointers, let's dive into it. In the example above, `msg` is a pointer to the first character of the string `"ssh terminal.shop for the best coffee"`, which is a [C string](https://en.wikipedia.org/wiki/C_string_handling). C strings are:
+
+- How we represent text in C programs
+- Any number of characters (`char`s) terminated by a null character (`'\0'`).
+- A pointer to the first element of a character array.
+
+It's important to understand that most string manipulation in C is done using pointers to move around the array and the null terminator is critical for determining the end of the string. In the example above, the string `"ssh terminal.shop for the best coffee"` is stored in memory as an array of characters, and the null terminator `'\0'` is automatically added at the end.
+
+## C Strings Are Simple
+
+- Unlike other programming languages, C strings do _not_ store their length.
+- The length of a C string is determined by the position of the null terminator (`'\0'`).
+- Functions like [`strlen`](https://en.cppreference.com/w/c/string/byte/strlen) calculate the length of a string by iterating through the characters until the null terminator is encountered.
+- This lack of length storage requires careful management to avoid issues such as buffer overflows and off-by-one errors during string operations.
+
+## Pointers vs. Arrays
+
+You can declare strings in C using either arrays or pointers:
+
+```c
+char str1[] = "Hi";
+char *str2 = "Snek";
+printf("%s %s\n", str1, str2);
+// Output: Hi Snek
+```
+
+The output is the same. Let's break down the memory of this example:
+
+```c
+// notice we aren't using all 50 characters
+char first[50] = "Snek";
+char *second = "lang!";
+strcat(first, second);
+printf("Hello, %s\n", first);
+// Output: Hello, Sneklang!
+```
+
+The [`strcat`](https://en.cppreference.com/w/c/string/byte/strcat) function appends its second argument to the first argument. In this case, it appends `"lang!"` to `"Snek"`, resulting in the output `Hello, Sneklang!`.
+
+Here's what `first` might look like in memory:
+
+The **\0** is a `\` followed by the **number zero**. Do not confuse it with the **O** letter.
+
+|'S'|'n'|'e'|'k'|'\0'|????|...|????|
+|---|---|---|---|---|---|---|---|
+|0x3000|0x3001|0x3002|0x3003|0x3004|0x3005|...|0x3031|
+
+_NOTE! There is a bunch of garbage memory after the end of the string_.
+
+Here's what `second` might look like in memory:
+
+|'l'|'a'|'n'|'g'|'!'|'\0'|
+|---|---|---|---|---|---|
+|0x4000|0x4001|0x4002|0x4003|0x4004|0x4005|
+
+And `first` after `strcat`:
+
+|'S'|'n'|'e'|'k'|'l'|'a'|'n'|'g'|'!'|'\0'|????|...|????|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|0x3000|0x3001|0x3002|0x3003|0x3004|0x3005|0x3006|0x3007|0x3008|0x3009|0x300A|...|0x3031|
+
+The `strcat` function appends the string `"lang!"` to the end of the string `"Snek"`, but smartly uses the null terminator to know where to start appending. It doesn't know the length of the string, but it knows where it ends.
+
+## Assignment
+
+At Sneklang, we have a bit of ["not invented here"](https://en.wikipedia.org/wiki/Not_invented_here) culture. As such, we've decided to implement our own string concatenation function.
+
+Complete the `concat_strings` function. It should append `str2` to the end of `str1` _in place_. Here are the steps:
+
+1. [ ] Find the null terminator ('\0') of `str1`
+2. [ ] Iterate over `str2` and copy each character to the memory locations at the end of `str1`.
+3. [ ] Add a null terminator at the end of the concatenated string.
+
+_Don't cheat and use `strcat`!_
+
+`str1` is already allocated with enough memory to hold the concatenated string, so don't worry about that.
+
+## Tips
+
+- Use a while loop and a pointer dereference to see when you reach a null terminator.
+- Increment your pointer with the `++` operator to move to the next character.
+- You can copy a character by dereferencing and assigning the value of one pointer to another.
+
+```c
+#include "exercise.h"
+#include <stdio.h>
+
+void concat_strings(char *str1, const char *str2) {
+  char *start = str1;
+  while(*str1 != '\0'){
+    str1++;
+  }
+  const char *p = str2;
+  while(*p != '\0'){
+    *str1 = *p;
+    p++;
+    str1++;
+  }
+  *str1 = '\0';
+}
+
+```

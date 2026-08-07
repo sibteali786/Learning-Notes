@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Unsupervised Learning — Clustering</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2e3a;
+    --accent:#7c9dff; --accent2:#ff8c7c; --green:#5fd8a1; --yellow:#f4c15c; --text:#e8eaf0; --muted:#9aa1b2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.5;}
+  h1{font-size:26px; margin:0 0 4px;}
+  .sub{color:var(--muted); margin-bottom:24px;}
+  .label{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-bottom:10px;}
+  .pill-purple{background:rgba(178,124,255,.15); color:#b27cff;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:20px;}
+  .card h2{margin:0 0 10px; font-size:17px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  @media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .compare{width:100%; border-collapse:collapse;}
+  .compare th, .compare td{padding:8px 10px; text-align:left; font-size:14px;}
+  .compare th{color:var(--muted); font-weight:600; border-bottom:1px solid var(--border);}
+  .compare td{border-bottom:1px solid var(--border);}
+  .compare tr:last-child td{border-bottom:none;}
+  .example{display:flex; gap:10px; align-items:flex-start; padding:10px 0;}
+  .example .icon{font-size:20px;}
+  .tip{border-left:3px solid #b27cff; padding:10px 14px; background:rgba(178,124,255,.06); border-radius:0 8px 8px 0; font-size:14px; margin-top:10px;}
+  .tag{display:inline-block; font-size:12px; background:rgba(255,255,255,.06); padding:2px 8px; border-radius:6px; margin:2px 4px 0 0; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<span class="label pill-purple">Unsupervised Learning</span>
+<h1>Clustering</h1>
+<div class="sub">Finding structure in data that has no labels</div>
+
+<div class="card">
+  <h2>❓ Problem Statement</h2>
+  <p>You have patient data — <b>tumor size + age</b> — but <b>no label Y</b> (no benign/malignant answer given). The algorithm isn't told what's "right." Instead: <b>find structure on its own.</b></p>
+  <div class="tip">Supervised learning has answer keys (X → Y). Unsupervised learning gets only X, and must discover patterns itself.</div>
+</div>
+
+<div class="card">
+  <h2>🔎 How It Works</h2>
+  <svg width="100%" height="180" viewBox="0 0 500 180">
+    <line x1="40" y1="150" x2="460" y2="150" stroke="#2a2e3a" stroke-width="2"/>
+    <line x1="40" y1="150" x2="40" y2="20" stroke="#2a2e3a" stroke-width="2"/>
+    <text x="440" y="170" font-size="12" fill="#9aa1b2">tumor size →</text>
+    <text x="10" y="20" font-size="12" fill="#9aa1b2">age</text>
+    <!-- cluster 1 (no distinguishing shapes - all same dot, unlabeled) -->
+    <ellipse cx="120" cy="110" rx="60" ry="40" fill="rgba(124,157,255,.12)" stroke="#7c9dff" stroke-dasharray="4,3"/>
+    <circle cx="100" cy="120" r="5" fill="#7c9dff"/>
+    <circle cx="130" cy="100" r="5" fill="#7c9dff"/>
+    <circle cx="110" cy="90" r="5" fill="#7c9dff"/>
+    <circle cx="150" cy="115" r="5" fill="#7c9dff"/>
+    <!-- cluster 2 -->
+    <ellipse cx="340" cy="80" rx="70" ry="45" fill="rgba(95,216,161,.12)" stroke="#5fd8a1" stroke-dasharray="4,3"/>
+    <circle cx="320" cy="70" r="5" fill="#5fd8a1"/>
+    <circle cx="360" cy="90" r="5" fill="#5fd8a1"/>
+    <circle cx="340" cy="60" r="5" fill="#5fd8a1"/>
+    <circle cx="370" cy="70" r="5" fill="#5fd8a1"/>
+    <text x="90" y="60" font-size="12" fill="#7c9dff">cluster A (found, not labeled)</text>
+    <text x="290" y="30" font-size="12" fill="#5fd8a1">cluster B (found, not labeled)</text>
+  </svg>
+  <p style="font-size:14px; color:var(--muted);">All points look the same (no O/✕ labels). The algorithm itself groups similar points into clusters — it isn't told what the groups mean.</p>
+</div>
+
+<div class="card">
+  <h2>⚖️ Key Distinction: Supervised vs Unsupervised</h2>
+  <table class="compare">
+    <tr><th></th><th>Supervised</th><th>Unsupervised</th></tr>
+    <tr><td>Labels (Y)?</td><td>Yes — "right answers" given</td><td>No labels at all</td></tr>
+    <tr><td>Goal</td><td>Predict Y for new X</td><td>Discover structure/patterns in X</td></tr>
+    <tr><td>Example task</td><td>Is tumor benign or malignant?</td><td>What natural groups exist in this data?</td></tr>
+    <tr><td>Algorithm type</td><td>Regression / Classification</td><td>Clustering (and others)</td></tr>
+  </table>
+</div>
+
+<div class="grid3">
+  <div class="card">
+    <h2>📰 Google News</h2>
+    <div class="example"><span class="icon">🐼</span><div>Groups hundreds of thousands of daily articles by shared words ("panda", "twin", "zoo") — with no human tagging topics.</div></div>
+  </div>
+  <div class="card">
+    <h2>🧬 DNA Microarray</h2>
+    <div class="example"><span class="icon">🧫</span><div>Groups people into Type 1 / Type 2 / Type 3 based on gene expression patterns — types aren't predefined.</div></div>
+  </div>
+  <div class="card">
+    <h2>🎯 Market Segmentation</h2>
+    <div class="example"><span class="icon">👥</span><div>DeepLearning.ai clustered learners into groups: <span class="tag">skill growth</span><span class="tag">career development</span><span class="tag">staying current</span></div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>💡 Key Takeaways</h2>
+  <div class="tip">"Unsupervised" = no one supervises the algorithm with correct answers; it discovers patterns on its own.</div>
+  <div class="tip">Clustering is one type of unsupervised learning — groups similar data points together automatically.</div>
+  <div class="tip">Scales where manual labeling is impossible (e.g., can't hand-tag every news article, every day).</div>
+</div>
+
+<div class="card">
+  <h2>🎯 Quick Recap</h2>
+  <p><b>Unsupervised learning</b> = data with no output labels Y → find structure/patterns automatically.</p>
+  <p><b>Clustering</b> = group unlabeled data points into clusters based on similarity.</p>
+  <p style="color:var(--muted); font-size:14px;">Next up: other types of unsupervised learning →</p>
+</div>
+
+</body>
+</html>
