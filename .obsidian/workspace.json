@@ -11,40 +11,17 @@
             "id": "6a398f372b04c452",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "split-diff-view",
               "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md"
+                "aFile": "conflict-files-obsidian-git.md",
+                "bFile": "conflict-files-obsidian-git.md",
+                "aRef": ""
               },
-              "icon": "excalidraw-icon",
-              "title": "1-Basics.excalidraw"
-            }
-          },
-          {
-            "id": "e10e526171421cb9",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "conflict-files-obsidian-git.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "conflict-files-obsidian-git"
+              "icon": "diff",
+              "title": "Diff: conflict-files-obsidian-git"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -209,10 +186,10 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "e10e526171421cb9",
+  "active": "6a398f372b04c452",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "conflict-files-obsidian-git.md",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
     "Learning/System Design/Practice/Dropbox/4-Dropbox-Sync.m4a",
     "Learning/System Design/Practice/Dropbox/3-Dropbox-ClientCompelxity.m4a",
