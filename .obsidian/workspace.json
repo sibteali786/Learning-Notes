@@ -18,8 +18,33 @@
               "icon": "excalidraw-icon",
               "title": "1-Basics.excalidraw"
             }
+          },
+          {
+            "id": "e10e526171421cb9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -184,28 +209,29 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "e10e526171421cb9",
   "lastOpenFiles": [
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
+    "conflict-files-obsidian-git.md",
+    "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
+    "Learning/System Design/Practice/Dropbox/4-Dropbox-Sync.m4a",
+    "Learning/System Design/Practice/Dropbox/3-Dropbox-ClientCompelxity.m4a",
+    "Learning/System Design/Practice/Dropbox/2-Dropbox-getFile.m4a",
+    "Learning/System Design/Practice/Dropbox/1-Dropbox-uploadFile.m4a",
+    "Learning/System Design/Practice/Dropbox",
+    "Learning/System Design/Patterns/Handling Large Blobs/handling-large-blobs-summary.html",
+    "Learning/System Design/Patterns/Handling Large Blobs",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/4-supervised-learning-process.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/3-linear-regression.html",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807124227_035.png",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/3-unsupervised-clustering.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/2-Classification-Vs-Regression.html",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807111118_819.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807102338_467.png",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification",
-    "Learning/AI&ML Engineering/Machine Learning/attachments",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1",
-    "Untitled",
-    "Learning/AI&ML Engineering/Machine Learning",
-    "Learning/Backend Engineering/Memory Management in C/virtual-memory-summary.html",
     "Learning/Backend Engineering/Memory Management in C/Links.md",
     "Personal/Me/Journal.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Moles_MolarMass_practice.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
-    "Personal/Me",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Drawing 2026-08-05 23.23.08.excalidraw.md",
     "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
@@ -231,7 +257,6 @@
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/AccordionII.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/recursive.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
