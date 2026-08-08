@@ -2360,3 +2360,244 @@ void concat_strings(char *str1, const char *str2) {
 }
 
 ```
+
+# C String Library
+
+The C standard library provides a comprehensive set of functions to manipulate strings in the `<string.h>` header file. Here are some of the most commonly used functions:
+
+- [`strcpy`](https://en.cppreference.com/w/c/string/byte/strcpy): Copies a string to another.
+    
+    ```c
+    char src[] = "Hello";
+    char dest[6];
+    strcpy(dest, src);
+    // dest now contains "Hello"
+    ```
+    
+- [`strncpy`](https://en.cppreference.com/w/c/string/byte/strncpy): Copies a _specified number of characters_ from one string to another.
+    
+    ```c
+    char src[] = "Hello";
+    char dest[6];
+    strncpy(dest, src, 3);
+    // dest now contains "Hel"
+    dest[3] = '\0';
+    // ensure null termination
+    ```
+    
+- [`strcat`](https://en.cppreference.com/w/c/string/byte/strcat): Concatenates (appends) one string to another.
+    
+    ```c
+    char dest[12] = "Hello";
+    char src[] = " World";
+    strcat(dest, src);
+    // dest now contains "Hello World"
+    ```
+    
+- [`strncat`](https://en.cppreference.com/w/c/string/byte/strncat): Concatenates a _specified number of characters_ from one string to another.
+    
+    ```c
+    char dest[12] = "Hello";
+    char src[] = " World";
+    strncat(dest, src, 3);
+    // dest now contains "Hello Wo"
+    ```
+    
+- [`strlen`](https://en.cppreference.com/w/c/string/byte/strlen): Returns the length of a string (excluding the null terminator).
+    
+    ```c
+    char str[] = "Hello";
+    size_t len = strlen(str);
+    // len is 5
+    ```
+    
+- [`strcmp`](https://en.cppreference.com/w/c/string/byte/strcmp): Compares two strings lexicographically.
+    
+    ```c
+    char str1[] = "Hello";
+    char str2[] = "World";
+    int result = strcmp(str1, str2);
+    // result is negative since "Hello" < "World"
+    ```
+    
+- [`strchr`](https://en.cppreference.com/w/c/string/byte/strchr): Finds the first occurrence of a character in a string.
+    
+    ```c
+    char str[] = "Hello";
+    char *pos = strchr(str, 'l');
+    // pos points to the first 'l' in "Hello"
+    ```
+    
+- [`strstr`](https://en.cppreference.com/w/c/string/byte/strstr): Finds the first occurrence of a substring in a string.
+    
+    ```c
+    char str[] = "Hello World";
+    char *pos = strstr(str, "World");
+    // pos points to "World" in "Hello World"
+    ```
+    
+
+## Assignment
+
+Complete the `smart_append` function. It appends a `src` string to the `buffer` field inside the `dest` `TextBuffer` _struct_.
+
+The `TextBuffer` struct tracks both the buffer and its current length. It's called a "smart" append because the destination buffer is a fixed `64` bytes, and it:
+
+- Checks for available space before appending.
+- Appends as much as possible if there's not enough space.
+- Always ensures the buffer remains null-terminated.
+- Returns a status indicating whether the full append was possible.
+
+Here are the steps:
+
+1. [ ] If either the `dest` or `src` input is `NULL`, return `1` (failure). The input pointer checks can be done with `ptr == NULL` or `!ptr`.
+    
+    In C, `NULL` represents a [null pointer](https://en.wikipedia.org/wiki/Null_pointer), which does not point to a value.
+    
+2. [ ] Create a constant to represent the max buffer size of 64.
+3. [ ] Get the length of the src string using `strlen`.
+4. [ ] Calculate the remaining space in the dest buffer. Notice that it stores its own length. The 64-byte buffer can hold 63 characters plus the null terminator.
+5. [ ] If the src string is larger than the remaining space:
+    1. [ ] Copy as much of the src string as possible to the dest buffer using `strncat`.
+    2. [ ] Update the dest buffer length to the max size, accounting for the null terminator.
+    3. [ ] Return `1` (failure) to indicate the full append wasn't possible.
+6. [ ] Otherwise, if there's enough space:
+    1. [ ] Append the entire src string to the dest buffer using `strcat`.
+    2. [ ] Update the dest buffer length.
+    3. [ ] Return `0` (success) to indicate the full append was possible.
+
+
+```c
+#include "exercise.h"
+#include <string.h>
+#include <stdio.h>
+
+int smart_append(TextBuffer *dest, const char *src) {
+  if (dest == NULL || src == NULL ) {
+    return 1;
+  }
+  const int max_buffer = 64;
+  size_t src_len = strlen(src);
+  printf("\nSrc Length: %zu\n",src_len);
+  size_t remaining_length = max_buffer - dest->length - 1;
+  printf("\nRemaining Length: %zu\n",remaining_length);
+  if (src_len > remaining_length) {
+    strncat(dest->buffer, src, remaining_length);
+    dest->length = max_buffer - 1;
+    return 1;
+  }else {
+    strcat(dest->buffer, src);
+    dest->length += src_len;
+    return 0;
+  }
+}
+```
+
+# Forward Declaration
+
+Sometimes you have a struct that may need to reference itself, or be used recursively.
+
+For example, consider a `Node` struct that can contain other `Node`s. This might be useful for building a linked list or a tree:
+
+```c
+typedef struct Node {
+  int value;
+  node_t *next;
+} node_t;
+```
+
+The problem here is that `node_t` is not defined yet, so the compiler will complain. To fix this, we can add a forward declaration. A forward declaration lets the compiler know about the existence of a struct type before it's fully defined:
+
+```c
+typedef struct Node node_t;
+
+typedef struct Node {
+  int value;
+  node_t *next;
+} node_t;
+```
+
+Note that the forward declaration must match the eventual definition, so you can't do something like this:
+
+```c
+typedef struct Node node_t;
+
+typedef struct BadName {
+  int value;
+  node_t *next;
+} node_t;
+```
+
+## Assignment
+
+Sneklang, like Python, is built on the idea of dynamic objects, and objects need to be able to store other objects.
+
+Run the code in its current state. Notice that the `.h` file is producing an error because the `Object` struct references itself. Fix it with a forward declaration.
+
+```c
+typedef struct SnekObject snekobject_t;
+typedef struct SnekObject {
+  char *name;
+  snekobject_t *child;
+} snekobject_t;
+
+snekobject_t new_node(char *name);
+
+```
+
+# Mutual Structs
+
+Forward declarations can also be used when two structs reference each other (a circular reference). For example, a `Person` has a `Computer` and a `Computer` has a `Person`:
+
+```c
+typedef struct Computer computer_t;
+typedef struct Person person_t;
+
+struct Person {
+  char *name;
+  computer_t *computer;
+};
+
+struct Computer {
+  char *brand;
+  person_t *owner;
+};
+```
+
+Notice that the struct definitions end with just `};` rather than `} person_t;`. Since we already created the typedef aliases in the forward declarations, we don't need to repeat them, though both styles are valid in C.
+
+Note that when you use forward declarations, you must use pointers to incomplete types (`Computer *computer;`), not full values (`Computer computer;`). This is because the size of the struct is unknown.
+
+## Assignment
+
+Complete the definitions of the `Employee` and `Department` structs. Take a look at the implementations in the `.c` file to understand how they should be defined.
+
+## Tip
+
+_A manager is just another `employee_t`._
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Employee employee_t;
+typedef struct Department department_t;
+
+struct Employee {
+  int id;
+  char *name;
+  department_t *department;
+};
+
+struct Department {
+  char *name;
+  employee_t *manager;
+};
+
+employee_t create_employee(int id, char *name);
+department_t create_department(char *name);
+
+void assign_employee(employee_t *emp, department_t *department);
+void assign_manager(department_t *dept, employee_t *manager);
+```

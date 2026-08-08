@@ -4,21 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "e3e688aed960b642",
+        "id": "daa02502514e0089",
         "type": "tabs",
         "children": [
           {
-            "id": "6a398f372b04c452",
+            "id": "574bde5f38fdfacb",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "excalidraw",
               "state": {
-                "aFile": "conflict-files-obsidian-git.md",
-                "bFile": "conflict-files-obsidian-git.md",
-                "aRef": ""
+                "file": "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md"
               },
-              "icon": "diff",
-              "title": "Diff: conflict-files-obsidian-git"
+              "icon": "excalidraw-icon",
+              "title": "4-Surrounded-Regions.excalidraw"
+            }
+          },
+          {
+            "id": "3ad22c01749c9822",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "3-Number of Islands.excalidraw"
             }
           }
         ]
@@ -186,10 +196,20 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "6a398f372b04c452",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "conflict-files-obsidian-git.md",
+    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
+    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
+    "Learning/AI&ML Engineering/Machine Learning/Full Stack AI Career Guide.md",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/4-supervised-learning-process.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/3-unsupervised-clustering.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/3-linear-regression.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/2-Classification-Vs-Regression.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "conflict-files-obsidian-git.md",
     "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
     "Learning/System Design/Practice/Dropbox/4-Dropbox-Sync.m4a",
     "Learning/System Design/Practice/Dropbox/3-Dropbox-ClientCompelxity.m4a",
@@ -197,27 +217,18 @@
     "Learning/System Design/Practice/Dropbox/1-Dropbox-uploadFile.m4a",
     "Learning/System Design/Practice/Dropbox",
     "Learning/System Design/Patterns/Handling Large Blobs/handling-large-blobs-summary.html",
-    "Learning/System Design/Patterns/Handling Large Blobs",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/4-supervised-learning-process.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/3-linear-regression.html",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807124227_035.png",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/3-unsupervised-clustering.html",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807111118_819.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807102338_467.png",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Backend Engineering/Memory Management in C/Links.md",
     "Personal/Me/Journal.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Moles_MolarMass_practice.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Drawing 2026-08-05 23.23.08.excalidraw.md",
     "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
     "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
     "Learning/Database/Fundamentals of Database Engineering/attachments/1.png",
     "Learning/Database/Learnings/Things i learned while working.md",
@@ -232,8 +243,6 @@
     "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
     "Learning/AI&ML Engineering/Projects/AI Challenge Submission — Smart Code Reviewer.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/AccordionII.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/Accordion.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
