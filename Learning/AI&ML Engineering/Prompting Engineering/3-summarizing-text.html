@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Summarizing Text with LLMs</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d2130; --border:#2a2f3f;
+    --text:#e7e9ee; --sub:#9aa1b2; --accent:#7c9fff; --accent2:#ffb37c;
+    --green:#6fe3a1; --purple:#c792ea; --red:#ff6f8e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px 80px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin-bottom:4px}
+  .subtitle{color:var(--sub);margin-bottom:28px;font-size:15px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-right:6px}
+  .pill-blue{background:rgba(124,159,255,.15);color:var(--accent)}
+  .pill-orange{background:rgba(255,179,124,.15);color:var(--accent2)}
+  .pill-green{background:rgba(111,227,161,.15);color:var(--green)}
+  .pill-purple{background:rgba(199,146,234,.15);color:var(--purple)}
+  .section-label{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:36px 0 12px;display:flex;align-items:center;gap:10px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--border)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card p{margin:6px 0;color:var(--sub);font-size:14px}
+  code, .code{
+    display:block;background:#0b0d13;border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;font-family:'Fira Code',monospace;font-size:12.5px;color:#c9d1e8;white-space:pre-wrap;margin-top:8px
+  }
+  .example{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px;color:#c9cee0}
+  .example b{color:var(--accent2)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:720px){.grid3{grid-template-columns:1fr}}
+  .dept-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .dept-card h4{margin:0 0 6px;font-size:14px;color:var(--accent2)}
+  .dept-card p{font-size:13px;margin:0;color:var(--sub)}
+  .original{background:#0b0d13;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12.5px;color:#8890a0;margin:10px 0;font-style:italic}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase}
+  .badge-mode{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+  .mode-summarize{background:rgba(124,159,255,.15);color:var(--accent)}
+  .mode-extract{background:rgba(111,227,161,.15);color:var(--green)}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;font-size:13px}
+  .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px}
+  .flow-arrow{color:var(--sub)}
+  .footer-tip{margin-top:40px;padding:16px 20px;background:rgba(124,159,255,.08);border:1px dashed var(--accent);border-radius:10px;font-size:13.5px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>📝 Summarizing Text with LLMs</h1>
+  <div class="subtitle">Turning long text into short, targeted takeaways — with control over length, focus, and summarize-vs-extract mode.</div>
+
+  <div>
+    <span class="pill pill-blue">Length Control</span>
+    <span class="pill pill-orange">Focus / Audience Targeting</span>
+    <span class="pill pill-green">Summarize vs. Extract</span>
+    <span class="pill pill-purple">Batch Processing</span>
+  </div>
+
+  <div class="section-label">Why This Matters</div>
+  <div class="card">
+    <p>No one has time to read everything. LLMs let you compress long text (articles, reviews, reports) into short digests — a common building block across many real products, e.g. an <b style="color:var(--text)">e-commerce dashboard</b> that summarizes hundreds of customer reviews so a team can scan them quickly and click into full reviews only when needed.</p>
+  </div>
+
+  <div class="section-label">1 · Basic Summary</div>
+  <div class="card">
+    <div class="original">"Got this panda plush toy for my daughter's birthday, who loves it and takes it everywhere... it's a bit small for what I paid though... arrived a day earlier than expected."</div>
+    <div class="code">Your task is to generate a short summary of a
+product review from an e-commerce site.
+Summarize the review below, in at most 30 words.</div>
+    <p>→ <b style="color:var(--text)">Output:</b> "Soft and cute panda plush toy loved by daughter, but small for the price. Arrived early."</p>
+  </div>
+
+  <div class="section-label">2 · Focus the Summary by Audience</div>
+  <div class="card">
+    <p>Same review, same length limit — but adding a <b style="color:var(--text)">"focus on X"</b> clause reshapes which details rise to the top.</p>
+    <div class="grid3">
+      <div class="dept-card">
+        <h4>🚚 Shipping Dept</h4>
+        <p>"Focus on shipping and delivery" → summary leads with "arrived a day earlier than expected."</p>
+      </div>
+      <div class="dept-card">
+        <h4>💰 Pricing Dept</h4>
+        <p>"Focus on price and perceived value" → summary leads with "price may be too high for the size."</p>
+      </div>
+      <div class="dept-card">
+        <h4>🧸 Product/CX Dept</h4>
+        <p>Could focus on comfort, durability, daughter's reaction — same technique, different angle.</p>
+      </div>
+    </div>
+    <div class="example">🧪 <b>Scenario:</b> One raw review, three different departments each get a summary tuned to what they actually need to act on — no manual re-reading required.</div>
+  </div>
+
+  <div class="section-label">3 · Summarize vs. Extract</div>
+  <div class="card">
+    <table>
+      <tr><th>Mode</th><th>Prompt Style</th><th>Result</th></tr>
+      <tr>
+        <td><span class="badge-mode mode-summarize">Summarize</span></td>
+        <td>"Generate a summary focused on shipping"</td>
+        <td>Shipping detail + <i>some other general info too</i> (broader, may include extra context)</td>
+      </tr>
+      <tr>
+        <td><span class="badge-mode mode-extract">Extract</span></td>
+        <td>"Extract information relevant to shipping"</td>
+        <td>Only: "Product arrived a day earlier than expected." (narrow, on-topic only)</td>
+      </tr>
+    </table>
+    <p style="margin-top:10px"><b style="color:var(--text)">Rule of thumb:</b> use <i>summarize</i> for a general gist, <i>extract</i> when you want strictly on-topic facts with no extra noise.</p>
+  </div>
+
+  <div class="section-label">4 · Batch Summarization Workflow</div>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step">📋 List of reviews</div><span class="flow-arrow">→</span>
+      <div class="flow-step">🔁 Loop over each</div><span class="flow-arrow">→</span>
+      <div class="flow-step">✂️ Summarize (≤20 words)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">🖨️ Print/store all summaries</div>
+    </div>
+    <div class="code">for review in reviews:
+    prompt = f"""Summarize the review in at most
+20 words: ```{review}```"""
+    response = get_completion(prompt)
+    print(response)</div>
+    <div class="example">🧪 <b>Scenario:</b> Reviews for a panda toy, a lamp, an electric toothbrush, and a blender → each condensed to one line, letting someone scan a whole dashboard of products in seconds instead of reading paragraphs per item.</div>
+  </div>
+
+  <div class="footer-tip">💡 <b>Interview/practical tip:</b> When designing a summarization feature, always ask "summary for whom, and how short?" — the same source text should be re-prompted per audience/department rather than trying to write one universal summary. And choose extract-mode when precision matters more than context.</div>
+
+</div>
+</body>
+</html>
