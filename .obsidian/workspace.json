@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "122c50702210387e",
+        "id": "3681acae37c29be1",
         "type": "tabs",
         "children": [
           {
-            "id": "f87c6e0f4c8a00c5",
+            "id": "675dd738b2d2b49a",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Intuition.excalidraw"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -78,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,33 +181,37 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "f87c6e0f4c8a00c5",
+  "active": "675dd738b2d2b49a",
   "lastOpenFiles": [
-    "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/attachments/Pasted Image 20260805001316_159.png",
-    "Learning/Research/Adam-DFT/Atomic Structure/Moles_MolarMass_practice.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/image.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/image 3.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/image 2.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/image 1.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Transaction.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-16_at_8.02.21_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-15_at_9.43.21_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-15_at_9.37.05_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-15_at_9.34.41_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments",
-    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/row-vs-column-storage.html",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/db-storage-fundamentals.html",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals",
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
+    "Learning/System Design/redis-deep-dive-for-system-design-interviews-hello-interview-system-design-in-a-hurry.md",
+    "Learning/System Design/assets/img-006.png",
+    "Learning/System Design/assets/img-005.png",
+    "Learning/System Design/assets/img-004.png",
+    "Learning/System Design/assets/img-003.png",
+    "Learning/System Design/assets/img-002.png",
+    "Learning/System Design/assets/img-001.png",
+    "Learning/System Design/assets",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry.html",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/check-circle-outline_oGUW.svg",
+    "Learning/System Design/redis-deep-dive-for-system-design-interviews.md",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/www-widgetapi_oGUW.js",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/unnamed_oGUW.png",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/unnamed_oGUW.jpg",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/unnamed_002_oGUW.png",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/turbopack-0wuci8qfr7vcn_oGUW.js",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/replay.min_oGUW.js",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/js_oGUW.js",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/iframe_api_oGUW.js",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/fbevents_oGUW.js",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/client_oGUW",
+    "Learning/System Design/Redis Deep Dive for System Design Interviews _ Hello Interview System Design in a Hurry_files/chunk-0_oGUW.mp3",
+    "Learning/System Design/Practice/How to Stop being Junior.excalidraw.md",
+    "Learning/System Design/api-design-for-system-design-interviews-hello-interview-system-design-in-a-hurry.md",
     "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
-    "Learning/System Design/Practice/Dropbox/4-Dropbox-Sync.m4a",
-    "Learning/System Design/Practice/Dropbox/3-Dropbox-ClientCompelxity.m4a",
-    "Learning/System Design/Practice/Dropbox/1-Dropbox-uploadFile.m4a",
-    "Learning/System Design/Practice/Dropbox/2-Dropbox-getFile.m4a",
-    "Recording 20260806210135.m4a",
-    "Learning/System Design/Patterns/Handling Large Blobs/handling-large-blobs-summary.html",
+    "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/Moles_MolarMass_practice.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
+    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
     "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
@@ -227,11 +228,6 @@
     "Learning/System Design/Core Concepts/2-API Design/REST.excalidraw.md",
     "Learning/System Design/Core Concepts/2-API Design/Remote Procedure Call (RPC).excalidraw.md",
     "Learning/System Design/Core Concepts/2-API Design/RateLimitingTechniques.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/GraphQL.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Common API Patterns.excalidraw.md",
-    "Learning/System Design/Core Concepts/2-API Design/Api Types Overview.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Transport Layer Protocols.excalidraw.md",
-    "Learning/System Design/Core Concepts/1-Networking/Networking.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
