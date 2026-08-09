@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Expanding Text with LLMs</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d2130; --border:#2a2f3f;
+    --text:#e7e9ee; --sub:#9aa1b2; --accent:#7c9fff; --accent2:#ffb37c;
+    --green:#6fe3a1; --purple:#c792ea; --red:#ff6f8e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px 80px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin-bottom:4px}
+  .subtitle{color:var(--sub);margin-bottom:28px;font-size:15px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-right:6px}
+  .pill-blue{background:rgba(124,159,255,.15);color:var(--accent)}
+  .pill-orange{background:rgba(255,179,124,.15);color:var(--accent2)}
+  .pill-green{background:rgba(111,227,161,.15);color:var(--green)}
+  .pill-red{background:rgba(255,111,142,.15);color:var(--red)}
+  .section-label{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:36px 0 12px;display:flex;align-items:center;gap:10px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--border)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card p{margin:6px 0;color:var(--sub);font-size:14px}
+  code, .code{
+    display:block;background:#0b0d13;border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;font-family:'Fira Code',monospace;font-size:12.5px;color:#c9d1e8;white-space:pre-wrap;margin-top:8px
+  }
+  .example{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px;color:#c9cee0}
+  .example b{color:var(--accent2)}
+  .warn{background:rgba(255,111,142,.08);border-left:3px solid var(--red);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px;color:#e7c2cc}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;font-size:13px}
+  .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px}
+  .flow-arrow{color:var(--sub)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase}
+  .temp-scale{display:flex;align-items:center;gap:0;margin:16px 0;border-radius:8px;overflow:hidden;height:36px}
+  .temp-seg{flex:1;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+  .footer-tip{margin-top:40px;padding:16px 20px;background:rgba(124,159,255,.08);border:1px dashed var(--accent);border-radius:10px;font-size:13.5px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>📈 Expanding Text with LLMs</h1>
+  <div class="subtitle">Turning short input (a review, a topic list) into longer generated output (an email, an essay) — plus controlling randomness with temperature.</div>
+
+  <div>
+    <span class="pill pill-blue">Short → Long Generation</span>
+    <span class="pill pill-orange">Temperature Control</span>
+    <span class="pill pill-red">Responsible Use</span>
+  </div>
+
+  <div class="section-label">What Is Expanding?</div>
+  <div class="card">
+    <p>Taking a short input — instructions, a topic list, a customer review — and having the model generate a longer piece of text, e.g. an email or essay. Great as a <b style="color:var(--text)">brainstorming partner</b>.</p>
+    <div class="warn">⚠️ <b>Responsible use required</b> — the same capability that drafts a helpful personalized email can be misused to mass-generate spam. Use only in ways that genuinely help people.</div>
+  </div>
+
+  <div class="section-label">Worked Example — Auto-Generated Customer Reply</div>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step">1️⃣ Customer review</div><span class="flow-arrow">→</span>
+      <div class="flow-step">2️⃣ Extract sentiment (from Inferring)</div><span class="flow-arrow">→</span>
+      <div class="flow-step">3️⃣ Generate reply email</div>
+    </div>
+    <div class="code">You are a customer service AI assistant. Your task
+is to send a reply to a valued customer.
+
+Given the review delimited by ```, generate a reply
+to thank the customer.
+- If sentiment is positive/neutral: thank them.
+- If sentiment is negative: apologize + suggest they
+  contact customer service.
+
+Use specific details from the review. Write in a
+concise, professional tone.
+Sign the email as 'AI customer agent'.</div>
+    <p><b style="color:var(--text)">Result:</b> a personalized reply referencing specific details from the blender review, correctly branching tone based on sentiment.</p>
+    <div class="warn">🔍 <b>Transparency matters:</b> Signing as "AI customer agent" is intentional — users should always know when they're reading AI-generated text.</div>
+  </div>
+
+  <div class="section-label">Temperature — Controlling Randomness</div>
+  <div class="card">
+    <p>Temperature controls how "exploratory" the model's word choices are. Example: for "my favorite food is..." the model might rank <code style="display:inline;padding:2px 6px">pizza</code> (most likely) &gt; <code style="display:inline;padding:2px 6px">sushi</code> &gt; <code style="display:inline;padding:2px 6px">tacos</code> (least likely, ~5%).</p>
+    <div class="temp-scale">
+      <div class="temp-seg" style="background:rgba(124,159,255,.25);color:var(--accent)">Temp 0 → always picks "pizza"</div>
+      <div class="temp-seg" style="background:rgba(255,179,124,.25);color:var(--accent2)">Temp 0.7 → varies each run</div>
+      <div class="temp-seg" style="background:rgba(255,111,142,.25);color:var(--red)">Temp 1+ → more "tacos"-like picks</div>
+    </div>
+    <table>
+      <tr><th>Temperature</th><th>Behavior</th><th>Best for</th></tr>
+      <tr><td>0</td><td>Deterministic — same input → same output every time</td><td>Reliable, predictable production systems (used throughout this course)</td></tr>
+      <tr><td>0.7+</td><td>Random — same input → different output each run</td><td>Creative brainstorming, varied marketing copy, idea generation</td></tr>
+    </table>
+    <div class="example">🧪 <b>Scenario:</b> Generating 5 different variations of a marketing email to A/B test → run the same prompt at temperature 0.7 multiple times instead of manually rewriting.</div>
+  </div>
+
+  <div class="footer-tip">💡 <b>Interview/practical tip:</b> Default to temperature 0 for anything requiring consistency (support replies, data extraction, structured output). Reserve higher temperature strictly for creative/exploratory tasks where variety is the goal, not a bug.</div>
+
+</div>
+</body>
+</html>
