@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Linear Regression — Training Set & Notation</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2e3a;
+    --accent:#7c9dff; --accent2:#ff8c7c; --green:#5fd8a1; --yellow:#f4c15c; --text:#e8eaf0; --muted:#9aa1b2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.5;}
+  h1{font-size:26px; margin:0 0 4px;}
+  .sub{color:var(--muted); margin-bottom:24px;}
+  .label{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-bottom:10px;}
+  .pill-blue{background:rgba(124,157,255,.15); color:var(--accent);}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:20px;}
+  .card h2{margin:0 0 10px; font-size:17px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .compare{width:100%; border-collapse:collapse;}
+  .compare th, .compare td{padding:8px 10px; text-align:left; font-size:14px;}
+  .compare th{color:var(--muted); font-weight:600; border-bottom:1px solid var(--border);}
+  .compare td{border-bottom:1px solid var(--border);}
+  .compare tr:last-child td{border-bottom:none;}
+  .tip{border-left:3px solid var(--accent); padding:10px 14px; background:rgba(124,157,255,.06); border-radius:0 8px 8px 0; font-size:14px; margin-top:10px;}
+  code{background:#0d0f16; border:1px solid var(--border); padding:2px 6px; border-radius:6px; font-size:13px; color:var(--green);}
+  table.notation{width:100%; border-collapse:collapse; font-size:14px;}
+  table.notation th, table.notation td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left;}
+  table.notation th{color:var(--muted);}
+  .datatable{width:100%; border-collapse:collapse; font-size:13px; margin-top:8px;}
+  .datatable th, .datatable td{padding:6px 10px; border:1px solid var(--border); text-align:center;}
+  .datatable th{background:#1d212c; color:var(--muted);}
+  .highlight{background:rgba(124,157,255,.12);}
+</style>
+</head>
+<body>
+
+<span class="label pill-blue">Supervised Learning</span>
+<h1>Linear Regression — Training Set & Notation</h1>
+<div class="sub">Fitting a straight line to predict house prices</div>
+
+<div class="card">
+  <h2>🏠 Problem Statement</h2>
+  <p>Predict a house's price from its size using a Portland, OR housing dataset. Client's house = <b>1,250 sq ft</b> → model estimates <b>~$220,000</b>.</p>
+  <p style="color:var(--muted); font-size:14px;">Linear regression = fit a straight line through (size, price) data points, then read off the prediction for a new size.</p>
+</div>
+
+<div class="card">
+  <h2>📈 How It Works</h2>
+  <svg width="100%" height="220" viewBox="0 0 500 220">
+    <line x1="40" y1="190" x2="470" y2="190" stroke="#2a2e3a" stroke-width="2"/>
+    <line x1="40" y1="190" x2="40" y2="20" stroke="#2a2e3a" stroke-width="2"/>
+    <text x="440" y="210" font-size="12" fill="#9aa1b2">size (sq ft) →</text>
+    <text x="8" y="18" font-size="12" fill="#9aa1b2">price ($k)</text>
+    <!-- data crosses -->
+    <text x="80" y="165" font-size="14" fill="#ff8c7c">✕</text>
+    <text x="120" y="150" font-size="14" fill="#ff8c7c">✕</text>
+    <text x="160" y="140" font-size="14" fill="#ff8c7c">✕</text>
+    <text x="200" y="110" font-size="14" fill="#ff8c7c">✕</text>
+    <text x="260" y="95" font-size="14" fill="#ff8c7c">✕</text>
+    <text x="300" y="80" font-size="14" fill="#ff8c7c">✕</text>
+    <text x="360" y="55" font-size="14" fill="#ff8c7c">✕</text>
+    <!-- fit line -->
+    <line x1="60" y1="185" x2="430" y2="40" stroke="#7c9dff" stroke-width="2"/>
+    <!-- prediction marker -->
+    <line x1="235" y1="190" x2="235" y2="103" stroke="#5fd8a1" stroke-dasharray="4,3"/>
+    <line x1="40" y1="103" x2="235" y2="103" stroke="#5fd8a1" stroke-dasharray="4,3"/>
+    <circle cx="235" cy="103" r="4" fill="#5fd8a1"/>
+    <text x="180" y="205" font-size="11" fill="#5fd8a1">1,250 sq ft</text>
+    <text x="45" y="98" font-size="11" fill="#5fd8a1">~$220k</text>
+  </svg>
+  <p style="font-size:14px; color:var(--muted);">✕ = actual sold houses (training data). Blue line = best fit. Green dashed = reading the prediction for the client's 1,250 sq ft house.</p>
+</div>
+
+<div class="card">
+  <h2>⚖️ Regression vs Classification (recap)</h2>
+  <table class="compare">
+    <tr><th></th><th>Regression</th><th>Classification</th></tr>
+    <tr><td>Output</td><td>Number (infinite possibilities)</td><td>Category (small, finite set)</td></tr>
+    <tr><td>Example</td><td>House price: $220,000</td><td>Cat vs Dog, disease vs no disease</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>🔤 Notation Cheat Sheet</h2>
+  <table class="notation">
+    <tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
+    <tr><td><code>x</code></td><td>Input variable / feature</td><td>house size</td></tr>
+    <tr><td><code>y</code></td><td>Output / target variable</td><td>house price</td></tr>
+    <tr><td><code>m</code></td><td>Number of training examples</td><td>47</td></tr>
+    <tr><td><code>(x, y)</code></td><td>One training example</td><td>(2104, 400)</td></tr>
+    <tr><td><code>(x⁽ⁱ⁾, y⁽ⁱ⁾)</code></td><td>i-th training example (i = row index, not exponent!)</td><td>(x⁽¹⁾, y⁽¹⁾) = (2104, 400)</td></tr>
+  </table>
+  <div class="tip">⚠️ The superscript <code>(i)</code> is just an index — <b>not</b> exponentiation. <code>x⁽²⁾</code> means "2nd training example," not x².</div>
+</div>
+
+<div class="card">
+  <h2>🗂 Training Set — Table View</h2>
+  <table class="datatable">
+    <tr><th>i</th><th>x (size, sq ft)</th><th>y (price, $1000s)</th></tr>
+    <tr class="highlight"><td>1</td><td>2104</td><td>400</td></tr>
+    <tr><td>2</td><td>...</td><td>...</td></tr>
+    <tr><td>...</td><td>...</td><td>...</td></tr>
+    <tr><td>47</td><td>...</td><td>...</td></tr>
+  </table>
+  <p style="font-size:14px; color:var(--muted);">Each row = one house = one training example = one plotted point.</p>
+</div>
+
+<div class="card">
+  <h2>💡 Key Takeaways</h2>
+  <div class="tip">"Training set" = data used to train the model (client's unsold house is <b>not</b> in it).</div>
+  <div class="tip">Linear regression is one type of regression model — the most widely used ML algorithm.</div>
+  <div class="tip">Same notation (x, y, m, training examples) applies across most models you'll see later in the specialization.</div>
+</div>
+
+<div class="card">
+  <h2>🎯 Quick Recap</h2>
+  <p>Train on <code>(x⁽ⁱ⁾, y⁽ⁱ⁾)</code> pairs → fit a line → feed in new <code>x</code> → predict <code>y</code>.</p>
+  <p style="color:var(--muted); font-size:14px;">Next up: how to feed the training set to a learning algorithm →</p>
+</div>
+
+</body>
+</html>

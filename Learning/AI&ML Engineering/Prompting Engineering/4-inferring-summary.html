@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inferring with LLMs — Summary</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f5f7;
+    margin: 0;
+    padding: 40px 20px;
+    color: #1f2430;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 {
+    font-size: 28px;
+    margin-bottom: 4px;
+  }
+  .subtitle { color: #666; margin-bottom: 30px; font-size: 15px; }
+  .old-vs-new {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card.old { border-top: 4px solid #e05252; }
+  .card.new { border-top: 4px solid #2fa86a; }
+  .card h3 { margin-top: 0; font-size: 16px; }
+  .card ol { padding-left: 18px; margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
+  section { margin-bottom: 36px; }
+  section h2 {
+    font-size: 20px;
+    border-left: 4px solid #4a6cf7;
+    padding-left: 10px;
+    margin-bottom: 16px;
+  }
+  .task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .task {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+  .task .icon { font-size: 22px; }
+  .task h4 { margin: 8px 0 4px; font-size: 15px; }
+  .task p { margin: 0; font-size: 13.5px; color: #555; line-height: 1.5; }
+  .example {
+    background: #eef1ff;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: #333;
+  }
+  .example b { color: #4a6cf7; }
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  }
+  .flow .step {
+    background: #4a6cf7;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .flow .arrow { color: #aaa; font-size: 16px; }
+  .prompt-box {
+    background: #1e1e2e;
+    color: #d4d4f0;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  .output-box {
+    background: #eafaf0;
+    border: 1px solid #b7e6c8;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #1c6b3c;
+  }
+  .callout {
+    background: #fff8e6;
+    border: 1px solid #f2d98a;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .callout b { color: #a6720d; }
+  .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .tag {
+    background: #e5e9ff;
+    color: #3348c9;
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .next {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg,#4a6cf7,#7b5cf7);
+    color: #fff;
+    border-radius: 12px;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔍 Inferring with LLMs</h1>
+  <div class="subtitle">Video summary — one model, one prompt, many text-analysis tasks</div>
+
+  <div class="old-vs-new">
+    <div class="card old">
+      <h3>⚙️ Traditional ML Workflow</h3>
+      <ol>
+        <li>Collect &amp; label a dataset</li>
+        <li>Train a model</li>
+        <li>Deploy it to the cloud</li>
+        <li>Repeat separately for <i>every</i> task (sentiment, names, topics…)</li>
+      </ol>
+    </div>
+    <div class="card new">
+      <h3>⚡ LLM Prompting Workflow</h3>
+      <ol>
+        <li>Write a prompt</li>
+        <li>Get results immediately</li>
+        <li>One model / one API handles many tasks</li>
+        <li>Zero-shot — no labeled training data needed</li>
+      </ol>
+    </div>
+  </div>
+
+  <section>
+    <h2>What "Inferring" Means Here</h2>
+    <p style="font-size:14.5px; line-height:1.6;">
+      The model takes text as input and analyzes it — extracting labels, names, sentiment, topics, etc. All examples in the video use one running case: a customer review for a <b>lamp</b>.
+    </p>
+  </section>
+
+  <section>
+    <h2>🧪 Tasks Demonstrated</h2>
+    <div class="task-grid">
+
+      <div class="task">
+        <span class="icon">😊</span>
+        <h4>Sentiment Analysis</h4>
+        <p>Classify a review as positive/negative. Adding "answer in one word" makes output easy to post-process.</p>
+        <div class="example"><b>Result:</b> "positive"</div>
+      </div>
+
+      <div class="task">
+        <span class="icon">💢</span>
+        <h4>Emotion Extraction</h4>
+        <p>List up to 5 emotions the reviewer expresses — useful for gauging customer feelings in detail.</p>
+      </div>
+
+      <div class="task">
+        <span class="icon">🚨</span>
+        <h4>Anger Detection</h4>
+        <p>Binary classifier: is the writer angry? Helps route upset customers to support/success teams.</p>
+        <div class="example"><b>Result:</b> Not angry</div>
+      </div>
+
+      <div class="task">
+        <span class="icon">📦</span>
+        <h4>Information Extraction</h4>
+        <p>Pull structured facts: item purchased, brand/company. Output requested as JSON for easy parsing.</p>
+        <div class="example"><b>Result:</b> {"Item": "lamp", "Brand": "Lumina"}</div>
+      </div>
+
+      <div class="task">
+        <span class="icon">🧩</span>
+        <h4>Multi-Task Single Prompt</h4>
+        <p>Combine sentiment + anger + item + brand into ONE prompt instead of 3–4 separate calls. Anger returned as real boolean (no quotes).</p>
+      </div>
+
+      <div class="task">
+        <span class="icon">📰</span>
+        <h4>Topic Inference</h4>
+        <p>Given a news article, generate 5 topic labels (1–2 words each), comma-separated.</p>
+        <div class="example"><b>Example article:</b> government survey → topics: <b>survey, job satisfaction, NASA, government, employees</b></div>
+      </div>
+
+      <div class="task">
+        <span class="icon">🎯</span>
+        <h4>Zero-Shot Topic Tagging</h4>
+        <p>Given a fixed topic list, output 0/1 for whether each is covered — no training data required.</p>
+        <div class="example"><b>Topics:</b> NASA(1), local govt(0), engineering(0), employee satisfaction(1), federal govt(1)</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>🧵 Multi-Task Prompt Example (Sentiment + Anger + Item + Brand)</h2>
+    <div class="prompt-box">Identify the following items from the review text:
+- Sentiment (positive or negative)
+- Is the reviewer expressing anger? (true/false as boolean)
+- Item purchased
+- Company that made the item
+
+Format response as JSON.</div>
+    <div class="output-box">{
+  "Sentiment": "positive",
+  "Anger": false,
+  "Item": "lamp with additional storage",
+  "Brand": "Lumina"
+}</div>
+  </section>
+
+  <section>
+    <h2>🔔 Real-World Use Case: NASA News Alert System</h2>
+    <div class="flow">
+      <div class="step">1. New article arrives</div>
+      <div class="arrow">→</div>
+      <div class="step">2. Zero-shot topic tagging</div>
+      <div class="arrow">→</div>
+      <div class="step">3. Load result into dict</div>
+      <div class="arrow">→</div>
+      <div class="step">4. If NASA = 1</div>
+      <div class="arrow">→</div>
+      <div class="step">🚨 "ALERT: New NASA story!"</div>
+    </div>
+  </section>
+
+  <div class="callout">
+    <b>⚠️ Caveat mentioned in the video:</b> Returning topics as a plain comma-separated list (rather than JSON) makes the pipeline brittle — LLM output formatting can be inconsistent. For production, prefer requesting <b>JSON output</b> for reliable parsing.
+  </div>
+
+  <div style="height:24px;"></div>
+
+  <div class="tags">
+    <span class="tag">Zero-Shot Learning</span>
+    <span class="tag">Sentiment Analysis</span>
+    <span class="tag">Named Entity / Info Extraction</span>
+    <span class="tag">Topic Classification</span>
+    <span class="tag">NLP</span>
+  </div>
+
+  <div style="height:30px;"></div>
+
+  <div class="next">
+    ➡️ Next video: <b>"Transforming"</b> — using LLMs to convert text into other text, e.g. translating to a different language.
+  </div>
+
+</div>
+</body>
+</html>
