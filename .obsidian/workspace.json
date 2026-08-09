@@ -11,10 +11,24 @@
             "id": "d2921cff1c319335",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Full Stack AI Career Guide"
             }
           }
         ]
@@ -76,7 +90,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,7 +196,7 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "d2921cff1c319335",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
     "Learning/AI&ML Engineering/Prompting Engineering/4-inferring-summary.html",
     "Learning/AI&ML Engineering/Prompting Engineering/3-summarizing-text.html",
