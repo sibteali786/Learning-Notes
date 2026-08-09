@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hash Index Sketch</title>
+<style>
+  body{
+    margin:0; background:#f5f5f0; font-family:'Comic Sans MS','Segoe Print',cursive;
+    display:flex; justify-content:center; padding:30px 10px;
+  }
+  svg{max-width:1000px; width:100%; height:auto;}
+  .label{font-family:'Comic Sans MS','Segoe Print',cursive;}
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Title -->
+  <text x="500" y="40" text-anchor="middle" font-size="26" font-weight="bold" fill="#1e1e1e" class="label">Hash Index — Keys, Buckets, Chaining</text>
+
+  <!-- KEYS column -->
+  <text x="90" y="90" font-size="16" fill="#555" class="label">Keys</text>
+  <g font-size="14" class="label">
+    <rect x="30" y="105" width="150" height="36" rx="4" fill="#ffec99" stroke="#1e1e1e" stroke-width="2" transform="rotate(-1 105 123)"/>
+    <text x="105" y="128" text-anchor="middle" transform="rotate(-1 105 123)">alice@x.com</text>
+
+    <rect x="30" y="160" width="150" height="36" rx="4" fill="#ffec99" stroke="#1e1e1e" stroke-width="2" transform="rotate(1 105 178)"/>
+    <text x="105" y="183" text-anchor="middle" transform="rotate(1 105 178)">bob@x.com</text>
+
+    <rect x="30" y="215" width="150" height="36" rx="4" fill="#ffec99" stroke="#1e1e1e" stroke-width="2" transform="rotate(-1 105 233)"/>
+    <text x="105" y="238" text-anchor="middle" transform="rotate(-1 105 233)">carol@x.com</text>
+
+    <rect x="30" y="270" width="150" height="36" rx="4" fill="#ffec99" stroke="#1e1e1e" stroke-width="2" transform="rotate(1 105 288)"/>
+    <text x="105" y="293" text-anchor="middle" transform="rotate(1 105 288)">dan@x.com</text>
+  </g>
+
+  <!-- Hash function box -->
+  <rect x="260" y="150" width="130" height="90" rx="10" fill="#ffd8a8" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(-1 325 195)"/>
+  <text x="325" y="190" text-anchor="middle" font-size="16" font-weight="bold" class="label" transform="rotate(-1 325 195)">hash()</text>
+  <text x="325" y="212" text-anchor="middle" font-size="22" class="label" transform="rotate(-1 325 195)">🌀</text>
+
+  <!-- arrows from keys to hash fn -->
+  <g stroke="#1e1e1e" stroke-width="2" fill="none">
+    <path d="M180,123 Q230,140 260,175" marker-end="url(#arrow)"/>
+    <path d="M180,178 Q220,185 260,190" marker-end="url(#arrow)"/>
+    <path d="M180,233 Q220,215 260,200" marker-end="url(#arrow)"/>
+    <path d="M180,288 Q230,240 260,215" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- Buckets array -->
+  <text x="560" y="90" font-size="16" fill="#555" class="label">Bucket Array</text>
+  <g stroke="#1e1e1e" stroke-width="2.5">
+    <rect x="480" y="105" width="90" height="50" fill="#eaeaea"/>
+    <rect x="480" y="155" width="90" height="50" fill="#b2f2bb"/>
+    <rect x="480" y="205" width="90" height="50" fill="#eaeaea"/>
+    <rect x="480" y="255" width="90" height="50" fill="#a5d8ff"/>
+    <rect x="480" y="305" width="90" height="50" fill="#eaeaea"/>
+  </g>
+  <g font-size="13" fill="#1e1e1e" class="label" text-anchor="middle">
+    <text x="525" y="134">bucket 5</text>
+    <text x="525" y="184" font-weight="bold">bucket 6</text>
+    <text x="525" y="234">bucket 7</text>
+    <text x="525" y="284" font-weight="bold">bucket 8</text>
+    <text x="525" y="334">bucket 9</text>
+  </g>
+
+  <!-- arrows hash fn -> buckets (collision demo: alice+carol -> bucket 6) -->
+  <g stroke="#e8590c" stroke-width="2.5" fill="none">
+    <path d="M390,185 Q440,180 480,180" marker-end="url(#arrow-orange)"/>
+    <path d="M390,195 Q440,240 480,230" marker-end="url(#arrow-orange)"/>
+  </g>
+  <g stroke="#1971c2" stroke-width="2.5" fill="none">
+    <path d="M390,175 Q430,150 480,130" marker-end="url(#arrow-blue)"/>
+    <path d="M390,205 Q440,270 480,280" marker-end="url(#arrow-blue)"/>
+  </g>
+  <text x="430" y="270" font-size="12" fill="#e8590c" class="label" font-style="italic">bob &amp; carol collide!</text>
+
+  <!-- Chaining off bucket 6 -->
+  <g stroke="#1e1e1e" stroke-width="2" stroke-dasharray="5,4" fill="none">
+    <path d="M570,180 L650,180"/>
+  </g>
+  <rect x="650" y="155" width="150" height="50" rx="6" fill="#fff" stroke="#e8590c" stroke-width="2.5"/>
+  <text x="725" y="176" text-anchor="middle" font-size="12" class="label">bob → page 12</text>
+  <text x="725" y="196" text-anchor="middle" font-size="12" class="label">carol → page 45</text>
+  <text x="725" y="140" text-anchor="middle" font-size="12" fill="#e8590c" class="label">overflow chain ↴</text>
+
+  <!-- pointer from bucket 8 to disk page -->
+  <path d="M570,280 Q640,280 690,280" stroke="#1e1e1e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <rect x="690" y="255" width="140" height="50" rx="6" fill="#e7f5ff" stroke="#1971c2" stroke-width="2.5" stroke-dasharray="4,3"/>
+  <text x="760" y="276" text-anchor="middle" font-size="12" class="label">disk page 88</text>
+  <text x="760" y="294" text-anchor="middle" font-size="11" class="label" fill="#555">(dan's full record)</text>
+
+  <!-- Legend / notes at bottom -->
+  <line x1="30" y1="400" x2="970" y2="400" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="2,4"/>
+
+  <text x="30" y="435" font-size="15" font-weight="bold" class="label">Notes for video:</text>
+  <text x="30" y="465" font-size="14" class="label">1. hash(key) picks ONE bucket — direct jump, no tree traversal</text>
+  <text x="30" y="495" font-size="14" class="label">2. same bucket can hold multiple keys → collisions handled by chaining</text>
+  <text x="30" y="525" font-size="14" class="label">3. chain = linked list (in-memory) OR overflow pages (Postgres, on-disk)</text>
+  <text x="30" y="555" font-size="14" class="label">4. lookup = hash → jump to bucket → scan short chain → follow pointer to real data</text>
+  <text x="30" y="585" font-size="14" class="label" fill="#e8590c">5. no ordering preserved → can't do range queries or sorting</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#1e1e1e"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#e8590c"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#1971c2"/>
+    </marker>
+  </defs>
+
+</svg>
+</body>
+</html>
