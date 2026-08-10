@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cost Function Intuition (Simplified Model, b=0)</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:32px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; color:#f8fafc; border-bottom: 3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#38bdf8; font-size:19px; margin-top:36px; }
+  .card { background:#1e293b; border-radius:12px; padding:18px 22px; margin:14px 0; border:1px solid #334155; }
+  .formula { background:#0b1220; color:#7dd3fc; padding:14px 18px; border-radius:8px; font-family:"Cambria Math", Georgia, serif; font-size:18px; text-align:center; margin:10px 0; border-left:4px solid #38bdf8; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
+  th { color:#94a3b8; font-size:13px; text-transform:uppercase; }
+  .note { background:#422006; border-left:4px solid #facc15; padding:10px 16px; border-radius:6px; font-size:14px; color:#fde68a; margin:10px 0; }
+  .badge { display:inline-block; background:#134e4a; color:#5eead4; padding:2px 10px; border-radius:12px; font-size:12px; margin-left:8px; }
+  svg { display:block; margin:10px auto; background:#0b1220; border-radius:8px; }
+  .lowcost { color:#4ade80; font-weight:bold; }
+  .highcost { color:#f87171; font-weight:bold; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Cost Function Intuition: Finding the Best w <span class="badge">DeepLearning.AI notes</span></h1>
+
+  <div class="card">
+    <strong>Goal of this video:</strong> Build intuition for what J(w) is actually computing, by walking through one worked example — and show that minimizing J(w) is exactly how linear regression picks the best-fitting line.
+  </div>
+
+  <h2>1. Simplified Model (b = 0)</h2>
+  <p>To make the plots easy to visualize, drop the intercept term:</p>
+  <div class="formula">f<sub>w</sub>(x) = w·x &nbsp; (instead of f<sub>w,b</sub>(x) = wx + b)</div>
+  <div class="formula">
+    J(w) = (1 / 2m) · Σ<sub>i=1</sub><sup>m</sup> ( f<sub>w</sub>(x<sup>(i)</sup>) − y<sup>(i)</sup> )²
+  </div>
+  <div class="note">
+    Now <strong>f is a function of x</strong> (for a fixed w), but <strong>J is a function of w</strong> (with x, y fixed as the training data). Two different plots: f(x) vs. x on the left, J(w) vs. w on the right.
+  </div>
+
+  <h2>2. The Toy Training Set</h2>
+  <table>
+    <tr><th>x</th><th>y</th></tr>
+    <tr><td>1</td><td>1</td></tr>
+    <tr><td>2</td><td>2</td></tr>
+    <tr><td>3</td><td>3</td></tr>
+  </table>
+  <p>m = 3 examples. Since y = x exactly, the perfect fit is the line f(x) = x, i.e. <strong>w = 1</strong>.</p>
+
+  <h2>3. Trying Different Values of w</h2>
+
+  <div class="card">
+    <strong>w = 1</strong> → f(x) = x. Every prediction matches exactly: (1,1), (2,2), (3,3) all have error 0.
+    <div class="formula">J(1) = (1/6)·(0² + 0² + 0²) = <span class="lowcost">0</span></div>
+  </div>
+
+  <div class="card">
+    <strong>w = 0.5</strong> → f(x) = 0.5x. Predictions: f(1)=0.5, f(2)=1, f(3)=1.5. Errors vs. actual y=1,2,3:
+    <div class="formula">J(0.5) = (1/6)·[(0.5−1)² + (1−2)² + (1.5−3)²] = (1/6)·3.5 ≈ <span class="lowcost">0.58</span></div>
+  </div>
+
+  <div class="card">
+    <strong>w = 0</strong> → f(x) = 0 (flat line on the x-axis). Errors = full distance to each point (1, 2, 3):
+    <div class="formula">J(0) = (1/6)·(1² + 2² + 3²) = (1/6)·14 ≈ <span class="highcost">2.33</span></div>
+  </div>
+
+  <div class="card">
+    <strong>w = −0.5</strong> → downward-sloping line, errors get even bigger:
+    <div class="formula">J(−0.5) ≈ <span class="highcost">5.25</span></div>
+  </div>
+
+  <h2>4. Tracing Out J(w)</h2>
+  <svg width="820" height="260" viewBox="0 0 820 260">
+    <line x1="60" y1="20" x2="60" y2="230" stroke="#475569" stroke-width="1"/>
+    <line x1="60" y1="230" x2="780" y2="230" stroke="#475569" stroke-width="1"/>
+    <text x="30" y="235" fill="#94a3b8" font-size="12">0</text>
+    <text x="770" y="245" fill="#94a3b8" font-size="12">w</text>
+    <text x="35" y="30" fill="#94a3b8" font-size="12">J(w)</text>
+    <!-- bowl-shaped curve through points -->
+    <polyline points="150,180 250,80 340,40 450,40 540,90 640,180" fill="none" stroke="#38bdf8" stroke-width="3"/>
+    <circle cx="640" cy="180" r="5" fill="#f87171"/><text x="620" y="200" fill="#f87171" font-size="12">w=-0.5, J≈5.25</text>
+    <circle cx="540" cy="90" r="5" fill="#facc15"/><text x="500" y="75" fill="#facc15" font-size="12">w=0, J≈2.33</text>
+    <circle cx="450" cy="40" r="5" fill="#4ade80"/><text x="380" y="30" fill="#4ade80" font-size="12">w=0.5, J≈0.58</text>
+    <circle cx="340" cy="40" r="6" fill="#22d3ee"/>
+    <circle cx="395" cy="228" r="6" fill="#22d3ee" stroke="#22d3ee"/>
+    <circle cx="395" cy="228" r="6" fill="none" stroke="#22d3ee" stroke-width="3"/>
+    <text x="360" y="255" fill="#22d3ee" font-size="13" font-weight="bold">w=1 → J(1)=0 (minimum!)</text>
+  </svg>
+  <p>Plotting these (w, J(w)) points traces out a <strong>bowl-shaped curve</strong>. Each point on the right corresponds to one entire line f(x)=wx on the left.</p>
+
+  <h2>5. The Key Insight</h2>
+  <div class="card">
+    <strong>Minimizing J(w) = finding the best-fitting line.</strong> The value of w that makes J(w) smallest (here, w=1, J=0) is exactly the line that fits the training data best. This is the core mechanism of linear regression:
+    <div class="formula">minimize<sub>w,b</sub> &nbsp; J(w, b)</div>
+  </div>
+
+  <h2>Real-World Framing</h2>
+  <div class="card">
+    <strong>Example:</strong> Think of w as a dial you can turn — each position gives a different line (different price predictions per sq ft). J(w) is like a "wrongness meter" that tells you how bad that dial setting is. Linear regression's job is to find the dial position where the wrongness meter reads the lowest.
+  </div>
+
+  <h2>What's Next</h2>
+  <div class="card">
+    The next video brings back the full model f<sub>w,b</sub>(x) = wx + b (both parameters) and visualizes J(w,b) as a 3D bowl-shaped surface, plus contour plots.
+  </div>
+
+</div>
+</body>
+</html>
