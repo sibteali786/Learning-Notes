@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Designing Dropbox — Visual Summary</title>
+<style>
+  :root{
+    --ink:#1e1e2e; --paper:#fdfaf3; --accent:#0061fe; --accent2:#ff6b35;
+    --green:#2f9e44; --purple:#7048e8; --card:#ffffff; --line:#333;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif; background:var(--paper); color:var(--ink);
+    margin:0; padding:0 0 60px;
+  }
+  header{
+    background:linear-gradient(135deg,#0061fe,#3d8bff); color:#fff; padding:40px 30px 30px;
+    text-align:center; border-bottom:6px solid #003f9e;
+  }
+  header h1{margin:0 0 6px; font-size:2.1em}
+  header p{margin:0; opacity:.9; font-size:1.05em}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px}
+  section{margin-top:38px}
+  h2{
+    font-size:1.4em; border-left:6px solid var(--accent); padding-left:12px; margin-bottom:14px;
+  }
+  h3{color:var(--accent); margin-bottom:8px}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .card{
+    background:var(--card); border:2px solid var(--ink); border-radius:10px; padding:16px 18px;
+    box-shadow:4px 4px 0 rgba(0,0,0,.08);
+  }
+  .card.func{border-color:var(--green)}
+  .card.func h3{color:var(--green)}
+  .card.nonfunc{border-color:var(--accent2)}
+  .card.nonfunc h3{color:var(--accent2)}
+  .card ul{margin:6px 0 0; padding-left:20px}
+  .card li{margin-bottom:6px; line-height:1.4}
+  .oos{opacity:.6; font-size:.85em; margin-top:10px; border-top:1px dashed #999; padding-top:8px}
+  .entities{display:flex; gap:16px; flex-wrap:wrap; justify-content:center}
+  .entity{
+    background:#fff3bf; border:2px solid #e8b800; border-radius:8px; padding:14px 20px;
+    min-width:180px; text-align:center; box-shadow:3px 3px 0 rgba(0,0,0,.08);
+  }
+  .entity b{display:block; margin-bottom:4px; font-size:1.05em}
+  code, pre{
+    background:#282a36; color:#f8f8f2; border-radius:6px; font-size:.85em;
+  }
+  pre{padding:12px 14px; overflow-x:auto; margin:8px 0}
+  .api-row{
+    display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #ddd;
+    border-radius:8px; padding:10px 14px; margin-bottom:8px;
+  }
+  .method{
+    font-weight:700; color:#fff; padding:3px 10px; border-radius:5px; font-size:.8em; min-width:56px; text-align:center;
+  }
+  .GET{background:#2f9e44} .POST{background:#0061fe}
+  .api-row code{background:none; color:var(--ink); font-size:.95em}
+  .timeline{position:relative; margin-left:20px; border-left:3px solid var(--accent); padding-left:24px}
+  .tl-item{margin-bottom:22px; position:relative}
+  .tl-item::before{
+    content:''; position:absolute; left:-32px; top:4px; width:14px; height:14px;
+    background:var(--accent); border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 2px var(--accent);
+  }
+  .tl-item h4{margin:0 0 4px; color:var(--accent)}
+  .deepdive{
+    background:#f3f0ff; border:2px dashed var(--purple); border-radius:10px; padding:16px 18px; margin-bottom:16px;
+  }
+  .deepdive h3{color:var(--purple)}
+  .example{
+    background:#e6fcf5; border-left:4px solid #0ca678; padding:10px 14px; margin-top:10px; border-radius:0 6px 6px 0; font-size:.92em;
+  }
+  .example b{color:#0ca678}
+  table{width:100%; border-collapse:collapse; margin-top:10px}
+  th,td{border:1px solid #ccc; padding:8px 10px; text-align:left; font-size:.9em}
+  th{background:var(--ink); color:#fff}
+  tr:nth-child(even){background:#f6f6f6}
+  .badge{display:inline-block; background:var(--accent); color:#fff; border-radius:4px; padding:2px 8px; font-size:.75em; margin-right:6px}
+  .level-cards{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px}
+  .level-cards .card{font-size:.88em}
+  .level-cards h3{font-size:1em}
+  svg text{font-family:'Segoe UI',sans-serif}
+  .diagram-wrap{background:#fff; border:2px solid var(--ink); border-radius:10px; padding:10px; overflow-x:auto}
+  @media(max-width:800px){.grid2,.level-cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>☁️ Designing Dropbox</h1>
+  <p>System Design Interview Visual Summary</p>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2>1. Requirements</h2>
+  <div class="grid2">
+    <div class="card func">
+      <h3>✅ Functional (in scope)</h3>
+      <ul>
+        <li>Upload a file from any device</li>
+        <li>Download a file from any device</li>
+        <li>Share a file with other users, view shared files</li>
+        <li>Automatically sync files across devices</li>
+      </ul>
+      <div class="oos">Out of scope: editing files, viewing without downloading, blob-storage internals</div>
+    </div>
+    <div class="card nonfunc">
+      <h3>⚙️ Non-Functional</h3>
+      <ul>
+        <li><b>Availability &gt; Consistency</b> (eventual consistency is fine)</li>
+        <li>Support files up to <b>50GB</b></li>
+        <li>Secure & reliable — recoverable if lost/corrupted</li>
+        <li>Low latency upload / download / sync</li>
+      </ul>
+      <div class="oos">Out of scope: storage quotas, versioning, virus scanning</div>
+    </div>
+  </div>
+  <div class="example"><b>Why availability &gt; consistency:</b> Unlike a stock-trading app (where a buy in Germany must replicate before a buy in the US), Dropbox is fine if a file uploaded in Germany takes a few extra seconds to appear for a user in the US.</div>
+</section>
+
+<section>
+  <h2>2. Core Entities</h2>
+  <div class="entities">
+    <div class="entity"><b>📄 File</b>the raw bytes</div>
+    <div class="entity"><b>🏷️ FileMetadata</b>name, size, mimeType, owner</div>
+    <div class="entity"><b>👤 User</b>the account holder</div>
+  </div>
+</section>
+
+<section>
+  <h2>3. API Surface</h2>
+  <div class="api-row"><span class="method POST">POST</span><code>/files</code> — upload File + FileMetadata</div>
+  <div class="api-row"><span class="method GET">GET</span><code>/files/{fileId}</code> — download File & FileMetadata</div>
+  <div class="api-row"><span class="method POST">POST</span><code>/files/{fileId}/share</code> — share with User[]</div>
+  <div class="api-row"><span class="method GET">GET</span><code>/files/changes?since={timestamp}</code> — poll ChangeEvent[] for sync</div>
+  <div class="example">Auth (session token / JWT) always travels in <b>headers</b>, never the request body — prevents client tampering with identity.</div>
+</section>
+
+<section>
+  <h2>4. High-Level Architecture</h2>
+  <div class="diagram-wrap">
+<svg viewBox="0 0 1000 620" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#333"/></marker>
+    <filter id="sketch"><feTurbulence baseFrequency="0.02" numOctaves="2" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="2"/></filter>
+  </defs>
+  <style>
+    .box{fill:#fff; stroke:#1e1e2e; stroke-width:2.5; rx:10;}
+    .lbl{font-size:14px; font-weight:700; fill:#1e1e2e;}
+    .sub{font-size:11px; fill:#555;}
+    .arrow{stroke:#333; stroke-width:2; fill:none; marker-end:url(#arrow);}
+    .arrowlbl{font-size:10.5px; fill:#0061fe; font-style:italic;}
+  </style>
+
+  <!-- Uploader / Downloader clients -->
+  <rect x="20" y="30" width="140" height="60" class="box" fill="#d0ebff" filter="url(#sketch)"/>
+  <text x="90" y="55" text-anchor="middle" class="lbl">Uploader</text>
+  <text x="90" y="72" text-anchor="middle" class="sub">chunk + fingerprint</text>
+
+  <rect x="20" y="510" width="140" height="60" class="box" fill="#d0ebff" filter="url(#sketch)"/>
+  <text x="90" y="535" text-anchor="middle" class="lbl">Downloader</text>
+  <text x="90" y="552" text-anchor="middle" class="sub">poll / WS sync</text>
+
+  <!-- API Gateway -->
+  <rect x="260" y="260" width="180" height="70" class="box" fill="#ffe066" filter="url(#sketch)"/>
+  <text x="350" y="288" text-anchor="middle" class="lbl">API Gateway / LB</text>
+  <text x="350" y="304" text-anchor="middle" class="sub">auth · routing · rate-limit</text>
+
+  <!-- File Service -->
+  <rect x="520" y="260" width="180" height="70" class="box" fill="#b2f2bb" filter="url(#sketch)"/>
+  <text x="610" y="288" text-anchor="middle" class="lbl">File Service</text>
+  <text x="610" y="304" text-anchor="middle" class="sub">generates presigned URLs</text>
+
+  <!-- Metadata DB -->
+  <rect x="520" y="380" width="180" height="90" class="box" fill="#eebefa" filter="url(#sketch)"/>
+  <text x="610" y="405" text-anchor="middle" class="lbl">FileMetadata DB</text>
+  <text x="610" y="422" text-anchor="middle" class="sub">fileId · name · size</text>
+  <text x="610" y="437" text-anchor="middle" class="sub">status · chunks[] · s3Url</text>
+  <text x="610" y="452" text-anchor="middle" class="sub">+ SharedFiles table</text>
+
+  <!-- S3 -->
+  <rect x="780" y="260" width="170" height="70" class="box" fill="#ffc9c9" filter="url(#sketch)"/>
+  <text x="865" y="288" text-anchor="middle" class="lbl">S3 (Blob Storage)</text>
+  <text x="865" y="304" text-anchor="middle" class="sub">stores raw file bytes</text>
+
+  <!-- CDN -->
+  <rect x="780" y="60" width="170" height="70" class="box" fill="#ffd8a8" filter="url(#sketch)"/>
+  <text x="865" y="88" text-anchor="middle" class="lbl">CDN</text>
+  <text x="865" y="104" text-anchor="middle" class="sub">caches file at edge</text>
+
+  <!-- Arrows -->
+  <path class="arrow" d="M160,60 C220,60 220,270 260,285"/>
+  <text x="175" y="45" class="arrowlbl">upload/download req</text>
+
+  <path class="arrow" d="M160,540 C220,540 220,300 260,295"/>
+  <text x="175" y="530" class="arrowlbl">poll /changes</text>
+
+  <path class="arrow" d="M440,290 L515,290"/>
+  <text x="450" y="280" class="arrowlbl">route</text>
+
+  <path class="arrow" d="M610,330 L610,375"/>
+  <text x="618" y="358" class="arrowlbl">read/write meta</text>
+
+  <path class="arrow" d="M700,280 L775,280"/>
+  <text x="700" y="270" class="arrowlbl">get presigned URL</text>
+
+  <path class="arrow" d="M865,260 C865,180 865,150 865,133"/>
+  <text x="820" y="200" class="arrowlbl">cache miss fetch</text>
+
+  <path class="arrow" d="M90,90 C90,180 780,95 780,95" stroke-dasharray="5,4"/>
+  <text x="300" y="130" class="arrowlbl">upload chunks directly via presigned URL (bypasses gateway)</text>
+
+  <path class="arrow" d="M780,110 C400,180 160,300 160,530" stroke-dasharray="5,4"/>
+  <text x="300" y="490" class="arrowlbl">download via CDN signed URL</text>
+
+</svg>
+  </div>
+  <div class="example"><b>Key idea:</b> File Service never touches file bytes — it only signs URLs. Uploads/downloads flow client ⇄ S3/CDN directly, keeping the backend out of the data path.</div>
+</section>
+
+<section>
+  <h2>5. Feature Walkthroughs</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <h4>① Upload</h4>
+      Client requests a presigned URL from File Service → uploads bytes straight to S3 → S3 fires a completion notification → metadata status flips to "uploaded".
+    </div>
+    <div class="tl-item">
+      <h4>② Download</h4>
+      File Service checks permissions → issues a CDN-signed URL → CDN serves from edge cache (fetching from S3 on first miss).
+    </div>
+    <div class="tl-item">
+      <h4>③ Share</h4>
+      Owner adds a user's email to the file's ACL → a row is written to the <code>SharedFiles</code> table (userId, fileId) → download requests check this table for authorization.
+    </div>
+    <div class="tl-item">
+      <h4>④ Sync (Local ⇄ Remote)</h4>
+      <b>Local→Remote:</b> OS file-watcher (FSEvents/FileSystemWatcher) detects change → queues upload → last-write-wins on conflict.<br>
+      <b>Remote→Local:</b> Hybrid — WebSocket push for real-time change events, plus periodic <code>GET /files/changes?since=</code> polling as a reliability safety net.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>6. Deep Dive — Large File Uploads (50GB)</h2>
+  <div class="deepdive">
+    <h3>Why a single POST fails</h3>
+    <table>
+      <tr><th>Problem</th><th>Detail</th></tr>
+      <tr><td>Timeouts</td><td>50GB @ 100Mbps ≈ <b>1.1 hours</b> — far past typical server/client timeouts</td></tr>
+      <tr><td>Payload limits</td><td>API Gateway caps requests at ~10MB</td></tr>
+      <tr><td>Network drops</td><td>Any interruption forces a full restart</td></tr>
+      <tr><td>UX</td><td>No progress feedback</td></tr>
+    </table>
+  </div>
+  <div class="deepdive">
+    <h3>Solution: Client-side chunking + S3 Multipart Upload</h3>
+    <ul>
+      <li>File split into 5–10MB chunks <b>on the client</b> (never the server — that defeats the purpose)</li>
+      <li>SHA-256 <b>fingerprint</b> per file and per chunk → enables dedup + resume</li>
+      <li><code>chunks[]</code> array tracked in FileMetadata (uploaded / uploading / not-uploaded)</li>
+      <li>Backend calls S3 <code>CreateMultipartUpload</code> → presigned URL per part → client uploads in parallel → <code>CompleteMultipartUpload</code> assembles the object</li>
+    </ul>
+    <pre>{
+  "id": "123", "name": "file.txt", "status": "uploading",
+  "chunks": [
+    {"id": "chunk1", "status": "uploaded"},
+    {"id": "chunk2", "status": "uploading"},
+    {"id": "chunk3", "status": "not-uploaded"}
+  ]
+}</pre>
+    <div class="example"><b>Resumability in practice:</b> User's laptop dies at 40GB. On reopening, client re-fingerprints the file, backend sees a matching in-progress upload, and only the remaining ~10GB of chunks are sent — not the whole file again.</div>
+  </div>
+  <div class="deepdive">
+    <h3>Speed: chunking, CDC & compression</h3>
+    <ul>
+      <li><b>Parallel chunk upload</b> maximizes available bandwidth</li>
+      <li><b>Content-Defined Chunking (rolling hash)</b> instead of fixed-size chunks — a 1-byte edit near the start of a file only reshuffles nearby chunk boundaries, not every chunk after it, so delta sync stays cheap</li>
+      <li><b>Client-side compression</b> (Zstandard/Brotli/Gzip) — big win for text, negligible for already-compressed media like JPEG/PNG/MP4</li>
+      <li>Always <b>compress before encrypt</b> — encrypted data is random and doesn't compress well</li>
+    </ul>
+  </div>
+  <div class="deepdive">
+    <h3>Security</h3>
+    <ul>
+      <li><b>In transit:</b> HTTPS everywhere</li>
+      <li><b>At rest:</b> S3 server-side encryption</li>
+      <li><b>Access control:</b> SharedFiles table acts as the ACL</li>
+      <li><b>Signed URLs:</b> short-lived (~5 min) bearer tokens for CDN/S3 access — limits blast radius if a link leaks, though anyone holding it before expiry can still use it</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>7. Interview Bar by Level</h2>
+  <div class="level-cards">
+    <div class="card">
+      <h3>🟢 Mid-level (E4)</h3>
+      Define API + data model, land a working high-level design for upload/download/share. Not expected to independently know presigned URLs or chunking, but should reason to them when prompted.
+    </div>
+    <div class="card">
+      <h3>🔵 Senior (E5)</h3>
+      Moves fast through the high-level design to spend real time on large-file upload deep dive; proactively discusses multipart upload and trade-offs.
+    </div>
+    <div class="card">
+      <h3>🟣 Staff+ (E6+)</h3>
+      Breezes through the basics; drives depth on CDC, compression ordering, resumability internals, and security trade-offs from real experience. Interviewer intervenes only to focus, not to steer.
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
