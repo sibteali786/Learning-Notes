@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Log-Structured Hash Index Sketch</title>
+<style>
+  body{
+    margin:0; background:#f5f5f0; font-family:'Comic Sans MS','Segoe Print',cursive;
+    display:flex; justify-content:center; padding:30px 10px;
+  }
+  svg{max-width:1050px; width:100%; height:auto;}
+  .label{font-family:'Comic Sans MS','Segoe Print',cursive;}
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1050 760" xmlns="http://www.w3.org/2000/svg">
+
+  <text x="525" y="40" text-anchor="middle" font-size="26" font-weight="bold" fill="#1e1e1e" class="label">Log-Structured Storage + In-Memory Hash Index (Bitcask-style)</text>
+
+  <!-- WRITE PATH -->
+  <text x="30" y="80" font-size="17" font-weight="bold" fill="#1971c2" class="label">Write path</text>
+
+  <rect x="30" y="95" width="150" height="40" rx="6" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="2" transform="rotate(-1 105 115)"/>
+  <text x="105" y="120" text-anchor="middle" font-size="13" class="label" transform="rotate(-1 105 115)">SET user123 = "v3"</text>
+
+  <path d="M180,115 Q220,115 250,115" stroke="#1e1e1e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <text x="215" y="105" font-size="12" fill="#555" class="label">append</text>
+
+  <!-- Segment / Log file -->
+  <text x="270" y="80" font-size="15" fill="#555" class="label">Segment file (append-only log)</text>
+  <rect x="270" y="95" width="700" height="50" fill="#fff" stroke="#1e1e1e" stroke-width="2.5"/>
+  <g font-size="12" class="label">
+    <rect x="272" y="97" width="110" height="46" fill="#ffec99" stroke="#1e1e1e"/>
+    <text x="327" y="124" text-anchor="middle">user123=v1</text>
+
+    <rect x="382" y="97" width="110" height="46" fill="#d0bfff" stroke="#1e1e1e"/>
+    <text x="437" y="124" text-anchor="middle">user456=v1</text>
+
+    <rect x="492" y="97" width="110" height="46" fill="#ffec99" stroke="#1e1e1e"/>
+    <text x="547" y="124" text-anchor="middle">user123=v2</text>
+
+    <rect x="602" y="97" width="110" height="46" fill="#b2f2bb" stroke="#1e1e1e"/>
+    <text x="657" y="124" text-anchor="middle">user789=v1</text>
+
+    <rect x="712" y="97" width="110" height="46" fill="#ffec99" stroke="#e8590c" stroke-width="3"/>
+    <text x="767" y="124" text-anchor="middle" font-weight="bold">user123=v3 ←new</text>
+
+    <rect x="822" y="97" width="145" height="46" fill="#f1f3f5" stroke="#1e1e1e" stroke-dasharray="3,3"/>
+    <text x="894" y="124" text-anchor="middle" fill="#999">(more appends...)</text>
+  </g>
+  <text x="270" y="163" font-size="12" fill="#555" class="label">offsets →</text>
+  <text x="327" y="163" font-size="11" fill="#999" class="label">0</text>
+  <text x="437" y="163" font-size="11" fill="#999" class="label">110</text>
+  <text x="547" y="163" font-size="11" fill="#999" class="label">220</text>
+  <text x="657" y="163" font-size="11" fill="#999" class="label">330</text>
+  <text x="767" y="163" font-size="11" fill="#e8590c" class="label" font-weight="bold">440</text>
+
+  <!-- hashmap update -->
+  <path d="M767,143 Q767,190 550,230" stroke="#e8590c" stroke-width="2.5" fill="none" marker-end="url(#arrow-orange)" stroke-dasharray="5,3"/>
+  <text x="700" y="200" font-size="12" fill="#e8590c" class="label">update hashmap[user123] = 440</text>
+
+  <!-- In-memory hashmap -->
+  <text x="380" y="255" font-size="16" font-weight="bold" fill="#1e1e1e" class="label">In-memory hash map (key → byte offset)</text>
+  <rect x="380" y="270" width="290" height="150" rx="8" fill="#fff9db" stroke="#1e1e1e" stroke-width="2.5"/>
+  <g font-size="13" class="label">
+    <text x="400" y="298">user123  →  440</text>
+    <text x="400" y="325" fill="#999" text-decoration="line-through">user123  →  220 (stale, overwritten)</text>
+    <text x="400" y="352">user456  →  110</text>
+    <text x="400" y="379">user789  →  330</text>
+  </g>
+  <text x="400" y="410" font-size="11" fill="#666" class="label" font-style="italic">only latest offset per key kept live</text>
+
+  <!-- READ PATH -->
+  <text x="30" y="470" font-size="17" font-weight="bold" fill="#2f9e44" class="label">Read path</text>
+  <rect x="30" y="485" width="150" height="40" rx="6" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="2" transform="rotate(1 105 505)"/>
+  <text x="105" y="510" text-anchor="middle" font-size="13" class="label" transform="rotate(1 105 505)">GET user123</text>
+
+  <path d="M180,505 Q280,505 400,400" stroke="#2f9e44" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+  <text x="220" y="470" font-size="12" fill="#2f9e44" class="label">1. lookup hashmap</text>
+
+  <path d="M550,420 Q650,470 767,143" stroke="#2f9e44" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)" stroke-dasharray="4,3"/>
+  <text x="620" y="480" font-size="12" fill="#2f9e44" class="label">2. seek offset 440, read value</text>
+
+  <!-- COMPACTION SECTION -->
+  <line x1="30" y1="555" x2="1020" y2="555" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="2,4"/>
+  <text x="30" y="590" font-size="17" font-weight="bold" fill="#862e9c" class="label">Compaction &amp; merge (background)</text>
+
+  <rect x="30" y="605" width="220" height="45" fill="#eebefa" stroke="#1e1e1e" stroke-width="2"/>
+  <text x="140" y="632" text-anchor="middle" font-size="12" class="label">Segment 1 (old, has dupes)</text>
+
+  <rect x="290" y="605" width="220" height="45" fill="#eebefa" stroke="#1e1e1e" stroke-width="2"/>
+  <text x="400" y="632" text-anchor="middle" font-size="12" class="label">Segment 2 (old, has dupes)</text>
+
+  <path d="M140,650 Q300,700 500,700" stroke="#862e9c" stroke-width="2" fill="none" marker-end="url(#arrow-purple)"/>
+  <path d="M400,650 Q450,690 500,700" stroke="#862e9c" stroke-width="2" fill="none" marker-end="url(#arrow-purple)"/>
+  <text x="300" y="685" font-size="12" fill="#862e9c" class="label">merge + keep only latest value per key</text>
+
+  <rect x="500" y="678" width="240" height="45" fill="#d0bfff" stroke="#1e1e1e" stroke-width="2.5"/>
+  <text x="620" y="705" text-anchor="middle" font-size="12" font-weight="bold" class="label">New merged segment</text>
+
+  <text x="770" y="705" font-size="12" fill="#555" class="label">old segments deleted after switch-over ✓</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1e1e1e"/></marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e8590c"/></marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2f9e44"/></marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#862e9c"/></marker>
+  </defs>
+
+</svg>
+</body>
+</html>

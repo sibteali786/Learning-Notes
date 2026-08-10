@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Transforming Text with LLMs</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d2130; --border:#2a2f3f;
+    --text:#e7e9ee; --sub:#9aa1b2; --accent:#7c9fff; --accent2:#ffb37c;
+    --green:#6fe3a1; --purple:#c792ea; --red:#ff6f8e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px 80px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin-bottom:4px}
+  .subtitle{color:var(--sub);margin-bottom:28px;font-size:15px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-right:6px}
+  .pill-blue{background:rgba(124,159,255,.15);color:var(--accent)}
+  .pill-orange{background:rgba(255,179,124,.15);color:var(--accent2)}
+  .pill-green{background:rgba(111,227,161,.15);color:var(--green)}
+  .pill-purple{background:rgba(199,146,234,.15);color:var(--purple)}
+  .section-label{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:36px 0 12px;display:flex;align-items:center;gap:10px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--border)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card p{margin:6px 0;color:var(--sub);font-size:14px}
+  code, .code{
+    display:block;background:#0b0d13;border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;font-family:'Fira Code',monospace;font-size:12.5px;color:#c9d1e8;white-space:pre-wrap;margin-top:8px
+  }
+  .example{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px;color:#c9cee0}
+  .example b{color:var(--accent2)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .before-after{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;margin-top:8px}
+  .ba-box{background:#0b0d13;border:1px solid var(--border);border-radius:6px;padding:8px 12px;flex:1;min-width:200px}
+  .ba-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;display:block}
+  .arrow-mid{color:var(--sub);font-size:18px}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--sub);font-weight:600;font-size:12px;text-transform:uppercase}
+  .footer-tip{margin-top:40px;padding:16px 20px;background:rgba(124,159,255,.08);border:1px dashed var(--accent);border-radius:10px;font-size:13.5px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔀 Transforming Text with LLMs</h1>
+  <div class="subtitle">Translation, tone shifting, format conversion, and proofreading — tasks that used to need regex and rules, now done in one prompt.</div>
+
+  <div>
+    <span class="pill pill-blue">Translation</span>
+    <span class="pill pill-orange">Tone Transformation</span>
+    <span class="pill pill-green">Format Conversion</span>
+    <span class="pill pill-purple">Spelling & Grammar</span>
+  </div>
+
+  <div class="section-label">1 · Translation</div>
+  <div class="card">
+    <h3>Basic translation</h3>
+    <div class="before-after">
+      <div class="ba-box"><span class="ba-label" style="color:var(--sub)">English</span>"Hi, I would like to order a blender"</div>
+      <div class="arrow-mid">→</div>
+      <div class="ba-box"><span class="ba-label" style="color:var(--accent)">Spanish</span>"Hola, me gustaría ordenar una licuadora"</div>
+    </div>
+    <p style="margin-top:10px"><b style="color:var(--text)">Also supports:</b></p>
+    <ul style="color:var(--sub);font-size:13px;padding-left:20px;margin:4px 0">
+      <li>Language identification ("What language is this?")</li>
+      <li>Multiple languages at once (French + Spanish + "pirate English")</li>
+      <li>Formal vs. informal register ("Spanish formal and informal forms")</li>
+    </ul>
+    <div class="example">🧪 <b>Scenario — Universal Translator:</b> A multinational e-commerce support inbox gets IT issues in many languages. Loop over each message → detect language → translate to English (for support team) and Korean (for regional team). Built in minutes, no per-language rules.</div>
+  </div>
+
+  <div class="section-label">2 · Tone Transformation</div>
+  <div class="card">
+    <h3>Slang → Business Letter</h3>
+    <div class="before-after">
+      <div class="ba-box"><span class="ba-label" style="color:var(--red)">Slang</span>"Dude, this is Joe, check out this spec on the standing lamp."</div>
+      <div class="arrow-mid">→</div>
+      <div class="ba-box"><span class="ba-label" style="color:var(--green)">Formal</span>Professional letter proposing the standing lamp spec.</div>
+    </div>
+    <div class="example">🧪 <b>Scenario:</b> Draft a casual internal Slack note, then auto-formalize it into a client-ready email — same content, audience-appropriate tone.</div>
+  </div>
+
+  <div class="section-label">3 · Format Conversion</div>
+  <div class="card">
+    <h3>JSON → HTML Table</h3>
+    <div class="code">Translate the following Python dictionary from JSON
+to an HTML table with column headers and title.</div>
+    <p>Input: list of employees (name, email) as JSON → Output: a rendered HTML <code style="display:inline;padding:2px 6px">&lt;table&gt;</code>.</p>
+    <div class="example">🧪 <b>Scenario:</b> Replaces what used to be manual templating or regex-based format conversion — describe input + output format in plain English, model does the transformation.</div>
+  </div>
+
+  <div class="section-label">4 · Spelling & Grammar Correction</div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Basic proofreading</h3>
+      <div class="code">Proofread and correct the following text.</div>
+      <p>Tip: add <b style="color:var(--text)">"If you don't find any errors, just say 'No errors found'"</b> so it doesn't rewrite already-correct text unnecessarily.</p>
+    </div>
+    <div class="card">
+      <h3>Show the diff</h3>
+      <p>Use the <code style="display:inline;padding:2px 6px">redlines</code> Python package to visually diff the original vs. corrected text — see exactly what changed.</p>
+      <div class="example">🧪 <b>Scenario:</b> Proofreading a product review before posting publicly — diff view shows precisely which words were fixed.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Combine correction + style upgrade</h3>
+    <div class="code">Proofread and correct this review. Make it more
+compelling. Ensure it follows APA style and targets
+an advanced reader. Output in markdown.</div>
+    <p>One prompt does grammar fix + tone upgrade + style guide compliance + format conversion simultaneously.</p>
+  </div>
+
+  <div class="section-label">Quick Reference</div>
+  <div class="card">
+    <table>
+      <tr><th>Task</th><th>Key phrase to use</th></tr>
+      <tr><td>Translate</td><td>"Translate the following text to [language]"</td></tr>
+      <tr><td>Detect language</td><td>"Tell me what language this is"</td></tr>
+      <tr><td>Formal/informal</td><td>"...in both the formal and informal forms"</td></tr>
+      <tr><td>Tone shift</td><td>"Translate the following from [tone A] to [tone B]"</td></tr>
+      <tr><td>Format convert</td><td>"Translate the following from [format A] to [format B]"</td></tr>
+      <tr><td>Proofread</td><td>"Proofread and correct the following text"</td></tr>
+    </table>
+  </div>
+
+  <div class="footer-tip">💡 <b>Interview/practical tip:</b> Frame transformation tasks as "translate from X to Y" — this pattern works whether X/Y are languages, tones, or data formats (JSON→HTML, slang→formal). It's the same underlying skill, just applied broadly.</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>raf vs setInterval Sketch</title>
+<style>
+  body{
+    margin:0; background:#f5f5f0; font-family:'Comic Sans MS','Segoe Print',cursive;
+    display:flex; justify-content:center; padding:30px 10px;
+  }
+  svg{max-width:1050px; width:100%; height:auto;}
+  .label{font-family:'Comic Sans MS','Segoe Print',cursive;}
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1050 900" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Title -->
+  <text x="525" y="40" text-anchor="middle" font-size="26" font-weight="bold" fill="#1e1e1e" class="label">requestAnimationFrame vs setInterval — Day 27</text>
+
+  <!-- ===== SECTION 1: the two-paint problem ===== -->
+  <text x="30" y="85" font-size="17" font-weight="bold" fill="#1e1e1e" class="label">1. Why two states are needed at all</text>
+
+  <g font-size="13" class="label">
+    <!-- before: 0% then 100% same tick -->
+    <rect x="40" y="105" width="200" height="80" rx="8" fill="#ffc9c9" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(-1 140 145)"/>
+    <text x="140" y="130" text-anchor="middle" font-size="12" transform="rotate(-1 140 145)">width: 0%</text>
+    <text x="140" y="148" text-anchor="middle" font-size="12" transform="rotate(-1 140 145)">width: 100%</text>
+    <text x="140" y="170" text-anchor="middle" font-size="11" fill="#e8590c" transform="rotate(-1 140 145)">(same tick, back to back)</text>
+
+    <path d="M245,145 Q280,145 315,145" stroke="#1e1e1e" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+    <rect x="320" y="105" width="200" height="80" rx="8" fill="#ffa8a8" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(1 420 145)"/>
+    <text x="420" y="140" text-anchor="middle" font-size="13" font-weight="bold" transform="rotate(1 420 145)">browser paints</text>
+    <text x="420" y="158" text-anchor="middle" font-size="13" font-weight="bold" transform="rotate(1 420 145)">100% only 😬</text>
+
+    <text x="420" y="205" text-anchor="middle" font-size="12" fill="#e8590c" font-style="italic">SNAP — no animation, 0% never got shown</text>
+
+    <!-- fix: with a real gap -->
+    <rect x="620" y="105" width="200" height="80" rx="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(-1 720 145)"/>
+    <text x="720" y="130" text-anchor="middle" font-size="12" transform="rotate(-1 720 145)">paint #1: 0%</text>
+    <text x="720" y="148" text-anchor="middle" font-size="12" transform="rotate(-1 720 145)">— real gap —</text>
+    <text x="720" y="166" text-anchor="middle" font-size="12" transform="rotate(-1 720 145)">paint #2: 100%</text>
+
+    <path d="M825,145 Q855,145 885,145" stroke="#1e1e1e" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+    <text x="960" y="145" font-size="34" transform="rotate(6 960 145)">🎉</text>
+    <text x="960" y="180" text-anchor="middle" font-size="12" fill="#2f9e44" font-weight="bold">animates!</text>
+  </g>
+
+  <line x1="30" y1="240" x2="1020" y2="240" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="2,4"/>
+
+  <!-- ===== SECTION 2: raf's actual job ===== -->
+  <text x="30" y="278" font-size="17" font-weight="bold" fill="#1e1e1e" class="label">2. raf's ONE job — force that paint gap (not animate!)</text>
+
+  <g font-size="13" class="label">
+    <rect x="60" y="300" width="230" height="70" rx="8" fill="#ffd8a8" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(-1 175 335)"/>
+    <text x="175" y="330" text-anchor="middle" font-size="13" font-weight="bold" transform="rotate(-1 175 335)">mount</text>
+    <text x="175" y="350" text-anchor="middle" font-size="11" transform="rotate(-1 175 335)">set width: 0%</text>
+
+    <path d="M295,335 Q325,335 355,335" stroke="#1e1e1e" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+    <rect x="360" y="300" width="230" height="70" rx="8" fill="#ffe066" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(1 475 335)"/>
+    <text x="475" y="325" text-anchor="middle" font-size="13" font-weight="bold" transform="rotate(1 475 335)">raf ①</text>
+    <text x="475" y="345" text-anchor="middle" font-size="11" transform="rotate(1 475 335)">fires right before</text>
+    <text x="475" y="360" text-anchor="middle" font-size="11" transform="rotate(1 475 335)">next paint (the 0% one)</text>
+
+    <path d="M595,335 Q625,335 655,335" stroke="#1e1e1e" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+    <rect x="660" y="300" width="230" height="70" rx="8" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(-1 775 335)"/>
+    <text x="775" y="325" text-anchor="middle" font-size="13" font-weight="bold" transform="rotate(-1 775 335)">raf ② (nested)</text>
+    <text x="775" y="345" text-anchor="middle" font-size="11" transform="rotate(-1 775 335)">now safe to set</text>
+    <text x="775" y="360" text-anchor="middle" font-size="11" transform="rotate(-1 775 335)">width: 100%</text>
+
+    <text x="960" y="335" font-size="13" fill="#e8590c" class="label" font-style="italic">👈 only raf's job</text>
+  </g>
+
+  <text x="525" y="410" text-anchor="middle" font-size="13" fill="#555" class="label" font-style="italic">CSS transition handles the actual animating between these two painted states — not raf</text>
+
+  <line x1="30" y1="435" x2="1020" y2="435" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="2,4"/>
+
+  <!-- ===== SECTION 3: single vs double raf ===== -->
+  <text x="30" y="473" font-size="17" font-weight="bold" fill="#1e1e1e" class="label">3. Why nested (double) raf, not just one?</text>
+
+  <g font-size="13" class="label">
+    <!-- single raf lane -->
+    <text x="255" y="503" text-anchor="middle" font-size="14" font-weight="bold" fill="#e8590c">single raf — risky</text>
+    <rect x="60" y="520" width="130" height="55" rx="6" fill="#ffc9c9" stroke="#1e1e1e" stroke-width="2" transform="rotate(-1 125 547)"/>
+    <text x="125" y="552" text-anchor="middle" font-size="11" transform="rotate(-1 125 547)">mount, call raf①</text>
+    <path d="M195,547 Q220,547 245,547" stroke="#1e1e1e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <rect x="250" y="520" width="150" height="55" rx="6" fill="#ffa8a8" stroke="#e8590c" stroke-width="2.5" transform="rotate(1 325 547)"/>
+    <text x="325" y="542" text-anchor="middle" font-size="10" transform="rotate(1 325 547)">raf① fires, sets</text>
+    <text x="325" y="558" text-anchor="middle" font-size="10" transform="rotate(1 325 547)">width 100% right away</text>
+    <text x="255" y="605" text-anchor="middle" font-size="11" fill="#e8590c">0% paint not guaranteed yet ⚠️</text>
+
+    <!-- double raf lane -->
+    <text x="795" y="503" text-anchor="middle" font-size="14" font-weight="bold" fill="#2f9e44">double raf — safe</text>
+    <rect x="620" y="520" width="120" height="55" rx="6" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="2" transform="rotate(-1 680 547)"/>
+    <text x="680" y="552" text-anchor="middle" font-size="11" transform="rotate(-1 680 547)">mount, call raf①</text>
+    <path d="M745,547 Q765,547 785,547" stroke="#1e1e1e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <rect x="790" y="520" width="110" height="55" rx="6" fill="#8ce99a" stroke="#1e1e1e" stroke-width="2" transform="rotate(1 845 547)"/>
+    <text x="845" y="545" text-anchor="middle" font-size="10" transform="rotate(1 845 547)">raf① fires,</text>
+    <text x="845" y="560" text-anchor="middle" font-size="10" transform="rotate(1 845 547)">0% now painted</text>
+    <path d="M905,547 Q920,547 935,547" stroke="#1e1e1e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <rect x="940" y="520" width="90" height="55" rx="6" fill="#2f9e44" stroke="#1e1e1e" stroke-width="2.5" transform="rotate(-1 985 547)"/>
+    <text x="985" y="542" text-anchor="middle" font-size="9" fill="#fff" transform="rotate(-1 985 547)">raf② fires,</text>
+    <text x="985" y="557" text-anchor="middle" font-size="9" fill="#fff" transform="rotate(-1 985 547)">now set 100%</text>
+    <text x="795" y="605" text-anchor="middle" font-size="11" fill="#2f9e44">guaranteed gap ✓</text>
+  </g>
+
+  <line x1="30" y1="635" x2="1020" y2="635" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="2,4"/>
+
+  <!-- ===== SECTION 4: raf vs setInterval contract ===== -->
+  <text x="30" y="673" font-size="17" font-weight="bold" fill="#1e1e1e" class="label">4. The real difference — a promise about WHAT</text>
+
+  <g font-size="13" class="label">
+    <rect x="60" y="695" width="420" height="110" rx="10" fill="#e7f5ff" stroke="#1971c2" stroke-width="2.5" transform="rotate(-1 270 750)"/>
+    <text x="270" y="725" text-anchor="middle" font-size="15" font-weight="bold" fill="#1971c2" transform="rotate(-1 270 750)">setInterval(fn, 0)</text>
+    <text x="270" y="750" text-anchor="middle" font-size="12" transform="rotate(-1 270 750)">a TIME based promise</text>
+    <text x="270" y="770" text-anchor="middle" font-size="11" fill="#555" transform="rotate(-1 270 750)">"run roughly every N ms"</text>
+    <text x="270" y="788" text-anchor="middle" font-size="11" fill="#e8590c" transform="rotate(-1 270 750)">no relationship to paint cycle</text>
+
+    <text x="525" y="750" text-anchor="middle" font-size="26">⚡ vs ⚡</text>
+
+    <rect x="570" y="695" width="420" height="110" rx="10" fill="#fff3bf" stroke="#f08c00" stroke-width="2.5" transform="rotate(1 780 750)"/>
+    <text x="780" y="725" text-anchor="middle" font-size="15" font-weight="bold" fill="#f08c00" transform="rotate(1 780 750)">requestAnimationFrame</text>
+    <text x="780" y="750" text-anchor="middle" font-size="12" transform="rotate(1 780 750)">a PAINT based promise</text>
+    <text x="780" y="770" text-anchor="middle" font-size="11" fill="#555" transform="rotate(1 780 750)">"call me right before next paint"</text>
+    <text x="780" y="788" text-anchor="middle" font-size="11" fill="#2f9e44" transform="rotate(1 780 750)">exact contract with browser paint</text>
+  </g>
+
+  <text x="525" y="855" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e1e1e" class="label">for anything animation related → always reach for raf, never setInterval</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#1e1e1e"/>
+    </marker>
+  </defs>
+
+</svg>
+</body>
+</html>

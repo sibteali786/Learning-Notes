@@ -130,22 +130,22 @@ Expose one of your services as an MCP server using the **Node/TypeScript MCP SDK
 
 #### DeepLearning.AI Courses → Projects Mapping
 
-|Order|Course|Instructor(s)|Maps to Project|
-|---|---|---|---|
-|1|ChatGPT Prompt Engineering for Developers|Isa Fulford + Andrew Ng|Foundation — needed before A|
-|2|Building Systems with the ChatGPT API|Isa Fulford + Andrew Ng|Foundation — needed before A|
-|3|LangChain: Chat with Your Data|Harrison Chase|**Project A** (RAG)|
-|4|Building and Evaluating Advanced RAG Applications|Jerry Liu + Anupam Datta|**Project A** (RAG + evals)|
-|5|Building Applications with Vector Databases|Pinecone (DeepLearning.AI partnership)|**Project A** (vector DB concepts)|
-|6|JavaScript RAG Web Apps with LlamaIndex|Laurie Voss|**Project A** (only JS-native course)|
-|7|Functions, Tools and Agents with LangChain|Harrison Chase|**Project B** (tool-calling)|
-|8|AI Agents in LangGraph|Harrison Chase + Rotem Weiss|**Project B** (orchestration)|
-|9|Agentic AI|Andrew Ng|**Project B** (planning/multi-agent)|
-|10|Evaluating AI Agents|Arize AI (Gilhuly + Khan)|**Project C** (evals microservice)|
-|11|Evaluating and Debugging Generative AI|Weights & Biases|**Project C** (evals microservice)|
-|12|MCP: Build Rich-Context AI Apps with Anthropic|Elie Schoppik (Anthropic)|**Project D** (MCP server)|
-|13|Serverless LLM Apps with Amazon Bedrock|Mike Chambers (AWS)|Deployment — any project|
-|Optional|Finetuning Large Language Models|Sharon Zhou (Lamini)|Conceptual only|
-|Optional|AI Python for Beginners|Andrew Ng|Only if Python is rusty|
+| Order    | Course                                            | Instructor(s)                          | Maps to Project                       |
+| -------- | ------------------------------------------------- | -------------------------------------- | ------------------------------------- |
+| 1        | ChatGPT Prompt Engineering for Developers         | Isa Fulford + Andrew Ng                | Foundation — needed before A          |
+| 2        | Building Systems with the ChatGPT API             | Isa Fulford + Andrew Ng                | Foundation — needed before A          |
+| 3        | LangChain: Chat with Your Data                    | Harrison Chase                         | **Project A** (RAG)                   |
+| 4        | Building and Evaluating Advanced RAG Applications | Jerry Liu + Anupam Datta               | **Project A** (RAG + evals)           |
+| 5        | Building Applications with Vector Databases       | Pinecone (DeepLearning.AI partnership) | **Project A** (vector DB concepts)    |
+| 6        | JavaScript RAG Web Apps with LlamaIndex           | Laurie Voss                            | **Project A** (only JS-native course) |
+| 7        | Functions, Tools and Agents with LangChain        | Harrison Chase                         | **Project B** (tool-calling)          |
+| 8        | AI Agents in LangGraph                            | Harrison Chase + Rotem Weiss           | **Project B** (orchestration)         |
+| 9        | Agentic AI                                        | Andrew Ng                              | **Project B** (planning/multi-agent)  |
+| 10       | Evaluating AI Agents                              | Arize AI (Gilhuly + Khan)              | **Project C** (evals microservice)    |
+| 11       | Evaluating and Debugging Generative AI            | Weights & Biases                       | **Project C** (evals microservice)    |
+| 12       | MCP: Build Rich-Context AI Apps with Anthropic    | Elie Schoppik (Anthropic)              | **Project D** (MCP server)            |
+| 13       | Serverless LLM Apps with Amazon Bedrock           | Mike Chambers (AWS)                    | Deployment — any project              |
+| Optional | Finetuning Large Language Models                  | Sharon Zhou (Lamini)                   | Conceptual only                       |
+| Optional | AI Python for Beginners                           | Andrew Ng                              | Only if Python is rusty               |
 
 **How to use it:** take each course (concepts only, 1-2 hrs), then immediately rebuild the concept in the matching project. Courses 1-6 → Project A. 7-9 → Project B. 10-11 → Project C. 12 → Project D. Course language doesn't matter — the project's target stack (TS or Python, per the split above) is what you actually build in.

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Building Chatbots with LLMs</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d2130; --border:#2a2f3f;
+    --text:#e7e9ee; --sub:#9aa1b2; --accent:#7c9fff; --accent2:#ffb37c;
+    --green:#6fe3a1; --purple:#c792ea; --red:#ff6f8e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px 80px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin-bottom:4px}
+  .subtitle{color:var(--sub);margin-bottom:28px;font-size:15px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-right:6px}
+  .pill-blue{background:rgba(124,159,255,.15);color:var(--accent)}
+  .pill-orange{background:rgba(255,179,124,.15);color:var(--accent2)}
+  .pill-green{background:rgba(111,227,161,.15);color:var(--green)}
+  .pill-purple{background:rgba(199,146,234,.15);color:var(--purple)}
+  .section-label{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:36px 0 12px;display:flex;align-items:center;gap:10px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--border)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card p{margin:6px 0;color:var(--sub);font-size:14px}
+  code, .code{
+    display:block;background:#0b0d13;border:1px solid var(--border);border-radius:8px;
+    padding:12px 14px;font-family:'Fira Code',monospace;font-size:12.5px;color:#c9d1e8;white-space:pre-wrap;margin-top:8px
+  }
+  .example{background:var(--card2);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin-top:8px;font-size:13.5px;color:#c9cee0}
+  .example b{color:var(--accent2)}
+  .role-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .role-tag{flex-shrink:0;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;min-width:80px;text-align:center}
+  .role-system{background:rgba(199,146,234,.18);color:var(--purple)}
+  .role-user{background:rgba(124,159,255,.18);color:var(--accent)}
+  .role-assistant{background:rgba(111,227,161,.18);color:var(--green)}
+  .role-msg{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;flex:1}
+  .chat-window{background:#0b0d13;border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:10px}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;font-size:13px}
+  .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px}
+  .flow-arrow{color:var(--sub)}
+  .footer-tip{margin-top:40px;padding:16px 20px;background:rgba(124,159,255,.08);border:1px dashed var(--accent);border-radius:10px;font-size:13.5px;color:var(--sub)}
+  .json-out{background:#0b0d13;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Fira Code',monospace;font-size:12px;color:var(--green);margin-top:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🤖 Building Chatbots with LLMs</h1>
+  <div class="subtitle">The chat completions message format — system/user/assistant roles, context/memory, and a full OrderBot walkthrough.</div>
+
+  <div>
+    <span class="pill pill-blue">Message Roles</span>
+    <span class="pill pill-orange">Context = Memory</span>
+    <span class="pill pill-green">OrderBot Example</span>
+    <span class="pill pill-purple">Structured JSON Handoff</span>
+  </div>
+
+  <div class="section-label">The Three Message Roles</div>
+  <div class="card">
+    <div class="role-row">
+      <span class="role-tag role-system">system</span>
+      <div class="role-msg">Sets behavior/persona for the whole conversation. Invisible to the user — like <b style="color:var(--accent2)">"whispering in the assistant's ear."</b></div>
+    </div>
+    <div class="role-row">
+      <span class="role-tag role-user">user</span>
+      <div class="role-msg">What the human types (in ChatGPT's web UI, this is your message).</div>
+    </div>
+    <div class="role-row">
+      <span class="role-tag role-assistant">assistant</span>
+      <div class="role-msg">The model's generated reply.</div>
+    </div>
+    <div class="example">🧪 <b>Scenario:</b> System message: "You are an assistant that speaks like Shakespeare." → User: "Tell me a joke... why did the chicken cross the road?" → Assistant (in-character): "To get to the other side, fair sir or madam!"</div>
+  </div>
+
+  <div class="section-label">Context = the Model's "Memory"</div>
+  <div class="card">
+    <p>Each conversation is <b style="color:var(--text)">stateless</b> — the model doesn't remember anything you didn't explicitly include in the message list this call.</p>
+    <div class="flow">
+      <div class="flow-step" style="border-color:var(--red);color:var(--red)">❌ No context → "What's my name?" → model has no idea</div>
+    </div>
+    <div class="flow">
+      <div class="flow-step" style="border-color:var(--green);color:var(--green)">✅ Prior turns included in messages[] → model "remembers" your name</div>
+    </div>
+    <div class="example">🧪 <b>Scenario:</b> Every chatbot turn re-sends the <i>entire</i> conversation history (system + all past user/assistant turns) as the "context" — that's literally how memory works in these APIs.</div>
+  </div>
+
+  <div class="section-label">Full Example — OrderBot (Pizza Restaurant)</div>
+  <div class="card">
+    <h3>System message defines the whole flow</h3>
+    <div class="code">You are OrderBot, an automated service to collect
+orders for a pizza restaurant. Greet the customer,
+collect the order, ask pickup or delivery, clarify
+toppings/sizes/extras, summarize, confirm, then collect
+payment. Respond in a short, friendly, conversational
+style. Menu: [pizza types, toppings, drinks, sides...]</div>
+
+    <h3 style="margin-top:16px">Conversation builds up context turn by turn</h3>
+    <div class="chat-window">
+      <div class="role-row"><span class="role-tag role-user" style="min-width:60px">User</span><div class="role-msg">Hi, I'd like to order a pizza.</div></div>
+      <div class="role-row"><span class="role-tag role-assistant" style="min-width:60px">Bot</span><div class="role-msg">Great! We have pepperoni, cheese, and eggplant. Which would you like?</div></div>
+      <div class="role-row"><span class="role-tag role-user" style="min-width:60px">User</span><div class="role-msg">Medium eggplant, no extra toppings. Add fries too.</div></div>
+      <div class="role-row"><span class="role-tag role-assistant" style="min-width:60px">Bot</span><div class="role-msg">Small or large fries?</div></div>
+    </div>
+    <p style="margin-top:10px">The system prompt explicitly told the bot to <b style="color:var(--text)">clarify all extras and sizes</b> — that's why it asks about fries size before moving on.</p>
+  </div>
+
+  <div class="section-label">Handoff to a Backend System (Structured Output)</div>
+  <div class="card">
+    <p>Once the order conversation is done, add a follow-up instruction asking for a JSON summary — ready to submit to an order system.</p>
+    <div class="code">Create a JSON summary of the food order. Include:
+1) pizza (with size), 2) list of toppings,
+3) list of drinks, 4) list of sides,
+and the total price.</div>
+    <div class="json-out">{
+  "pizza": "Medium Eggplant",
+  "toppings": [],
+  "drinks": [],
+  "sides": [{"item": "fries", "size": "small"}],
+  "total_price": "$XX.XX"
+}</div>
+    <p><b style="color:var(--text)">Temperature tip:</b> use a <b>higher</b> temperature for natural conversation, but switch to <b>low/zero</b> temperature for this final structured summary — you want it predictable and parseable, not creative.</p>
+  </div>
+
+  <div class="footer-tip">💡 <b>Interview/practical tip:</b> A chatbot is just: (1) a system message defining persona/rules, (2) a growing list of user/assistant turns replayed every call, (3) optionally a final low-temperature "extract structured JSON from this conversation" step to hand off to another system. That's the whole pattern.</div>
+
+</div>
+</body>
+</html>
