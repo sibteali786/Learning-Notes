@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "ba310e3cf0d3a55c",
+        "id": "2e79546432384671",
         "type": "tabs",
         "children": [
           {
-            "id": "d2921cff1c319335",
+            "id": "5ec72d45913dec03",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Frontend Interview Preparation/Coding/Progress/ProgressBar.excalidraw.md"
               },
-              "icon": "lucide-file",
-              "title": "Full Stack AI Career Guide"
+              "icon": "excalidraw-icon",
+              "title": "ProgressBar.excalidraw"
             }
           }
         ]
@@ -90,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -196,8 +183,26 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "5ec72d45913dec03",
   "lastOpenFiles": [
+    "Learning/Frontend Interview Preparation/Coding/Progress/day27-raf-vs-setinterval-sketch.html",
+    "Learning/JavaScript/Coding/Hooks/useDefault.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Progress/ProgressBar.excalidraw.md",
+    "Learning/JavaScript/Coding/Hooks/useBoolean.excalidraw.md",
+    "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
+    "Learning/JavaScript/Coding/Async Map/async-map.excalidraw.md",
+    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
+    "Learning/JavaScript/Coding/Throttle.excalidraw.md",
+    "Learning/JavaScript/Coding/Flatten.excalidraw.md",
+    "Learning/JavaScript/Coding/Debounce.excalidraw.md",
+    "Learning/JavaScript/Coding/useQuery.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs-II.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
+    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
+    "Learning/Frontend Interview Preparation/Coding/Progress",
     "Learning/AI&ML Engineering/Prompting Engineering/4-inferring-summary.html",
     "Learning/AI&ML Engineering/Prompting Engineering/3-summarizing-text.html",
     "Learning/AI&ML Engineering/Prompting Engineering/2-iterative-prompt-development.html",
@@ -210,14 +215,11 @@
     "Learning/Database/Indexes",
     "conflict-files-obsidian-git.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Moles_MolarMass_practice.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/isotopes_summary.html",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807124227_035.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807111118_819.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807102338_467.png",
-    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
     "Learning/System Design/redis-deep-dive-for-system-design-interviews-hello-interview-system-design-in-a-hurry.md",
     "Learning/System Design/assets/img-006.png",
     "Learning/System Design/assets/img-005.png",
@@ -229,21 +231,6 @@
     "Learning/System Design/redis-deep-dive-for-system-design-interviews.md",
     "Learning/System Design/Practice/How to Stop being Junior.excalidraw.md",
     "Learning/System Design/api-design-for-system-design-interviews-hello-interview-system-design-in-a-hurry.md",
-    "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
-    "Learning/System Design/Patterns/Large Blobs.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/Moles_MolarMass_practice.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
-    "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
-    "Learning/System Design/Core Concepts/3-Data Modelling/1-Options.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Backend Engineering/Memory Management in C/Links.md",
-    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Tabs_III.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
