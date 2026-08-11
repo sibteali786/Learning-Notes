@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Implementing Gradient Descent</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:32px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; color:#f8fafc; border-bottom: 3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#38bdf8; font-size:19px; margin-top:36px; }
+  .card { background:#1e293b; border-radius:12px; padding:18px 22px; margin:14px 0; border:1px solid #334155; }
+  .formula { background:#0b1220; color:#7dd3fc; padding:14px 18px; border-radius:8px; font-family:"Cambria Math", Georgia, serif; font-size:18px; text-align:center; margin:10px 0; border-left:4px solid #38bdf8; }
+  .note { background:#422006; border-left:4px solid #facc15; padding:10px 16px; border-radius:6px; font-size:14px; color:#fde68a; margin:10px 0; }
+  .badge { display:inline-block; background:#134e4a; color:#5eead4; padding:2px 10px; border-radius:12px; font-size:12px; margin-left:8px; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
+  th { color:#94a3b8; font-size:13px; text-transform:uppercase; }
+  code { background:#0b1220; color:#7dd3fc; padding:2px 6px; border-radius:4px; font-size:13px; }
+  pre { background:#0b1220; padding:14px 18px; border-radius:8px; overflow-x:auto; font-size:14px; }
+  pre code { background:none; padding:0; }
+  .compare { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  .compare .card { margin:0; }
+  .good { border-left:4px solid #4ade80; }
+  .bad { border-left:4px solid #f87171; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Implementing Gradient Descent <span class="badge">DeepLearning.AI notes</span></h1>
+
+  <div class="card">
+    <strong>Goal:</strong> Turn the "walk downhill" intuition from the last video into the actual update equations for w and b — and learn the one implementation detail (simultaneous update) that's easy to get wrong.
+  </div>
+
+  <h2>1. The Update Rule</h2>
+  <div class="formula">w := w − α · (d/dw) J(w,b)</div>
+  <div class="formula">b := b − α · (d/db) J(w,b)</div>
+  <p><code>:=</code> here is <strong>assignment</strong> (like <code>w = w - ...</code> in code), not a mathematical truth claim. In math notation "=" can mean either; in code, assignment is <code>=</code> and equality-testing is <code>==</code>.</p>
+
+  <h2>2. The Two Pieces of the Update</h2>
+  <table>
+    <tr><th>Term</th><th>Name</th><th>Role</th></tr>
+    <tr><td>α (alpha)</td><td>Learning rate</td><td>A small positive number (0–1, e.g. 0.01) that controls <strong>step size</strong>. Large α → aggressive/big steps; small α → cautious/tiny steps.</td></tr>
+    <tr><td>d/dw J(w,b)</td><td>Derivative term</td><td>Comes from calculus — tells you the <strong>direction</strong> to step (combined with α, also affects step size). No calculus background needed; intuition comes next video.</td></tr>
+  </table>
+  <div class="note">You do not need to know calculus to use or understand gradient descent in this course — the derivative term's meaning will be built up intuitively in the next video.</div>
+
+  <h2>3. Repeat Until Convergence</h2>
+  <div class="card">
+    Repeat both update steps (for w and b) until the algorithm <strong>converges</strong> — i.e., w and b stop changing much with each additional step. This mirrors taking repeated baby steps downhill until you reach the valley floor.
+  </div>
+
+  <h2>4. The Critical Detail: Simultaneous Update</h2>
+  <p>Both parameters must be updated <strong>at the same time</strong>, using the <em>old</em> values of w and b in both computations.</p>
+
+  <div class="compare">
+    <div class="card good">
+      <strong>✅ Correct (simultaneous)</strong>
+<pre><code>tempW = w - α * d/dw J(w,b)
+tempB = b - α * d/db J(w,b)
+w = tempW
+b = tempB</code></pre>
+      Both right-hand sides are computed <em>first</em>, using the original w and b, before either variable is overwritten.
+    </div>
+    <div class="card bad">
+      <strong>❌ Incorrect (sequential)</strong>
+<pre><code>tempW = w - α * d/dw J(w,b)
+w = tempW              &lt;- updated too early!
+tempB = b - α * d/db J(w,b)  &lt;- uses NEW w
+b = tempB</code></pre>
+      Here, the second line's derivative term uses the <strong>already-updated</strong> w, silently changing the math. This is a different (and not standard) algorithm.
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Rule of thumb:</strong> whenever someone says "gradient descent," they mean the <strong>simultaneous update</strong> version. The non-simultaneous version may still sort of work in practice, but it's technically a different algorithm — always implement the correct simultaneous form.
+  </div>
+
+  <h2>Real-World Framing</h2>
+  <div class="card">
+    <strong>Example:</strong> Think of adjusting two oven dials (temperature and time) to bake the perfect cake. You shouldn't change the temperature dial, taste-test, <em>then</em> decide how much to change the time dial based on that new temperature — you should decide both adjustments based on the current state of the cake at once, then apply both changes together. That's simultaneous update.
+  </div>
+
+  <h2>What's Next</h2>
+  <div class="card">
+    Next video: unpacking the derivative term d/dw J(w,b) — building intuition for what it represents and why it points you in the right direction, no calculus background required.
+  </div>
+
+</div>
+</body>
+</html>

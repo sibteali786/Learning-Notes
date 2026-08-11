@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Linear Regression: The Cost Function</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:32px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; color:#f8fafc; border-bottom: 3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#38bdf8; font-size:19px; margin-top:36px; }
+  .card { background:#1e293b; border-radius:12px; padding:18px 22px; margin:14px 0; border:1px solid #334155; }
+  .formula { background:#0b1220; color:#7dd3fc; padding:14px 18px; border-radius:8px; font-family:"Cambria Math", Georgia, serif; font-size:18px; text-align:center; margin:10px 0; border-left:4px solid #38bdf8; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; margin:16px 0; }
+  .grid .card { margin:0; text-align:center; }
+  .grid .val { font-size:15px; color:#facc15; font-weight:bold; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #334155; }
+  th { color:#94a3b8; font-size:13px; text-transform:uppercase; }
+  .steps { counter-reset: step; list-style:none; padding:0; }
+  .steps li { counter-increment: step; position:relative; padding:10px 0 10px 40px; border-left:2px solid #334155; margin-left:12px; }
+  .steps li::before { content: counter(step); position:absolute; left:-14px; top:8px; background:#38bdf8; color:#0f172a; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px; }
+  .note { background:#422006; border-left:4px solid #facc15; padding:10px 16px; border-radius:6px; font-size:14px; color:#fde68a; margin:10px 0; }
+  .badge { display:inline-block; background:#134e4a; color:#5eead4; padding:2px 10px; border-radius:12px; font-size:12px; margin-left:8px; }
+  svg { display:block; margin:10px auto; background:#0b1220; border-radius:8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Linear Regression: Building the Cost Function <span class="badge">DeepLearning.AI notes</span></h1>
+
+  <div class="card">
+    <strong>Goal:</strong> Define a function that tells us how well a line fits the training data — so we can improve it. This is the <em>cost function</em>.
+  </div>
+
+  <h2>1. The Model & Its Parameters</h2>
+  <div class="formula">f<sub>w,b</sub>(x) = w·x + b</div>
+  <table>
+    <tr><th>Symbol</th><th>Meaning</th></tr>
+    <tr><td>x, y</td><td>Input feature / output target from the training set</td></tr>
+    <tr><td>w, b</td><td><strong>Parameters</strong> (also called weights/coefficients) — adjusted during training</td></tr>
+    <tr><td>w</td><td>Slope of the line</td></tr>
+    <tr><td>b</td><td>y-intercept (where the line crosses the y-axis)</td></tr>
+    <tr><td>ŷ<sup>(i)</sup></td><td>Prediction for example i: ŷ<sup>(i)</sup> = f<sub>w,b</sub>(x<sup>(i)</sup>)</td></tr>
+  </table>
+
+  <h2>2. How w and b Shape the Line</h2>
+  <svg width="820" height="260" viewBox="0 0 820 260">
+    <!-- axes -->
+    <line x1="40" y1="20" x2="40" y2="240" stroke="#475569" stroke-width="1"/>
+    <line x1="40" y1="240" x2="800" y2="240" stroke="#475569" stroke-width="1"/>
+    <!-- plot 1: w=0,b=1.5 -->
+    <g transform="translate(0,0)">
+      <line x1="60" y1="170" x2="260" y2="170" stroke="#f87171" stroke-width="3"/>
+      <text x="60" y="255" fill="#94a3b8" font-size="13">w=0, b=1.5 → horizontal line, ŷ=1.5 always</text>
+    </g>
+    <!-- plot 2: w=0.5,b=0 -->
+    <g transform="translate(280,0)">
+      <line x1="60" y1="220" x2="260" y2="70" stroke="#4ade80" stroke-width="3"/>
+      <text x="60" y="255" fill="#94a3b8" font-size="13">w=0.5, b=0 → slope 0.5, passes origin</text>
+    </g>
+    <!-- plot 3: w=0.5,b=1 -->
+    <g transform="translate(540,0)">
+      <line x1="60" y1="190" x2="260" y2="40" stroke="#60a5fa" stroke-width="3"/>
+      <text x="60" y="255" fill="#94a3b8" font-size="13">w=0.5, b=1 → slope 0.5, intercept 1</text>
+    </g>
+  </svg>
+
+  <div class="grid">
+    <div class="card"><div>Case 1</div><div class="val">w=0, b=1.5</div>f(x)=1.5 (constant, ŷ=b)</div>
+    <div class="card"><div>Case 2</div><div class="val">w=0.5, b=0</div>f(x)=0.5x (slope only)</div>
+    <div class="card"><div>Case 3</div><div class="val">w=0.5, b=1</div>f(x)=0.5x+1 (slope + intercept)</div>
+  </div>
+
+  <h2>3. Building the Cost Function — Step by Step</h2>
+  <ul class="steps">
+    <li><strong>Error:</strong> for each example i, compute ŷ<sup>(i)</sup> − y<sup>(i)</sup> (how far off the prediction is)</li>
+    <li><strong>Square it:</strong> (ŷ<sup>(i)</sup> − y<sup>(i)</sup>)² — penalizes larger errors more, keeps result positive</li>
+    <li><strong>Sum over all training examples:</strong> Σ from i=1 to m</li>
+    <li><strong>Average it</strong> (divide by m) so cost doesn't grow just because the dataset is bigger</li>
+    <li><strong>Divide by 2</strong> (convention) — makes later derivative calculations cleaner (does not change what "good" looks like)</li>
+  </ul>
+
+  <h2>4. The Cost Function (Squared Error Cost)</h2>
+  <div class="formula">
+    J(w,b) = (1 / 2m) · Σ<sub>i=1</sub><sup>m</sup> ( f<sub>w,b</sub>(x<sup>(i)</sup>) − y<sup>(i)</sup> )²
+  </div>
+  <div class="note">
+    m = number of training examples (e.g. 47 in the video's housing dataset). This is called the <strong>squared error cost function</strong> — the most common cost function for linear regression and regression problems in general.
+  </div>
+
+  <h2>5. Real-World Framing</h2>
+  <div class="card">
+    <strong>Example:</strong> Predicting house price (y) from size in sq ft (x). Each training house gives a real price y<sup>(i)</sup> and your model predicts ŷ<sup>(i)</sup>. J(w,b) is essentially the <em>average squared prediction error</em> across all houses — small J means your line's price predictions are close to actual sale prices; large J means the line is a poor fit.
+  </div>
+
+  <h2>What's Next</h2>
+  <div class="card">
+    The next video builds intuition for what J(w,b) actually looks like geometrically, and how minimizing it (choosing the best w, b) connects to visually fitting the line to the data.
+  </div>
+
+</div>
+</body>
+</html>

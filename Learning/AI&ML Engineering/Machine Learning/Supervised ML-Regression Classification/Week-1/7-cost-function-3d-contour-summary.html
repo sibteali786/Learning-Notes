@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Visualizing J(w,b): 3D Surface & Contour Plots</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:32px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; color:#f8fafc; border-bottom: 3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#38bdf8; font-size:19px; margin-top:36px; }
+  .card { background:#1e293b; border-radius:12px; padding:18px 22px; margin:14px 0; border:1px solid #334155; }
+  .formula { background:#0b1220; color:#7dd3fc; padding:14px 18px; border-radius:8px; font-family:"Cambria Math", Georgia, serif; font-size:18px; text-align:center; margin:10px 0; border-left:4px solid #38bdf8; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
+  th { color:#94a3b8; font-size:13px; text-transform:uppercase; }
+  .note { background:#422006; border-left:4px solid #facc15; padding:10px 16px; border-radius:6px; font-size:14px; color:#fde68a; margin:10px 0; }
+  .badge { display:inline-block; background:#134e4a; color:#5eead4; padding:2px 10px; border-radius:12px; font-size:12px; margin-left:8px; }
+  .compare { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  .compare .card { margin:0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Visualizing J(w,b): From a Bowl Curve to a 3D Surface <span class="badge">DeepLearning.AI notes</span></h1>
+
+  <div class="card">
+    <strong>Goal:</strong> Bring back the full model f<sub>w,b</sub>(x) = wx + b (both parameters, no longer setting b=0) and build intuition for what J(w,b) looks like — as a 3D surface, and as a 2D contour plot.
+  </div>
+
+  <h2>1. Recap: One Parameter vs. Two</h2>
+  <table>
+    <tr><th></th><th>Previous video (b=0)</th><th>This video (full model)</th></tr>
+    <tr><td>Model</td><td>f<sub>w</sub>(x) = wx</td><td>f<sub>w,b</sub>(x) = wx + b</td></tr>
+    <tr><td>Cost function</td><td>J(w) — one input</td><td>J(w,b) — two inputs</td></tr>
+    <tr><td>Shape of J</td><td>2D U-shaped curve ("soup bowl" cross-section)</td><td>3D bowl-shaped surface</td></tr>
+  </table>
+
+  <h2>2. Example: A Bad Fit</h2>
+  <div class="card">
+    <strong>w = 0.06, b = 50</strong> → f(x) = 0.06x + 50. On the housing price training set, this line consistently <em>underestimates</em> prices — a poor fit, so J(w,b) will be large at this point.
+  </div>
+
+  <h2>3. The 3D Surface Plot</h2>
+  <div class="card">
+    <strong>Axes:</strong> horizontal plane = w and b, vertical axis = J(w,b).
+    <div class="formula">Any point (w, b) → height of the surface above it = J(w, b)</div>
+    The surface is bowl-shaped (like a soup bowl, a curved dinner plate, or a hammock) — the exact same idea as the 2D U-curve from before, just extended into 3D because there are now two parameters instead of one.
+    <div class="note">Example: at w = −10, b = −15, the height of the surface at that point is J(−10, −15) — likely a large value, since that's a poor line.</div>
+  </div>
+
+  <h2>4. The Contour Plot (2D Alternative)</h2>
+  <div class="card">
+    A <strong>contour plot</strong> is the same J(w,b) function, sliced horizontally — like a topographic map of a mountain (e.g. Mount Fuji), where each line traces points of equal elevation.
+    <ul style="margin:8px 0 0 18px; padding:0;">
+      <li>Axes: <strong>w</strong> (horizontal), <strong>b</strong> (vertical)</li>
+      <li>Each oval/ellipse = the set of (w, b) points that share the <em>same</em> J value (same "height" on the 3D bowl)</li>
+      <li>Think of it as looking straight down at the 3D bowl from above</li>
+      <li>The <strong>center of the smallest, innermost oval</strong> = the minimum of J(w,b) — the best-fitting (w, b)</li>
+    </ul>
+  </div>
+
+  <h2>5. Key Insight: Same Cost, Different Lines</h2>
+  <div class="card">
+    Three different points sitting on the <em>same</em> contour ellipse all have the <strong>same J value</strong> — even though each corresponds to a different (w, b), and therefore a different straight line f(x). In this video's example, all three of these lines were poor fits to the housing data (same "badness," different specific line).
+  </div>
+
+  <h2>Comparison Summary</h2>
+  <div class="compare">
+    <div class="card">
+      <strong>3D Surface Plot</strong><br>
+      Shows J(w,b) as literal height above the (w,b) plane. Intuitive but harder to read exact minimum from a static image.
+    </div>
+    <div class="card">
+      <strong>Contour Plot</strong><br>
+      Same function, viewed top-down as elevation rings. Easier to pinpoint the minimum: it's the center of the innermost ellipse.
+    </div>
+  </div>
+
+  <h2>Real-World Framing</h2>
+  <div class="card">
+    <strong>Example:</strong> Think of J(w,b) like a hilly landscape where elevation = prediction error. A contour map (like ones used for hiking trails) lets you spot the lowest valley at a glance — that valley floor is the (w, b) pair giving the best-fitting line for house prices.
+  </div>
+
+  <h2>What's Next</h2>
+  <div class="card">
+    Next video: plot specific (w, b) choices on the contour map and see, side by side, how each choice changes the straight line fit to the data.
+  </div>
+
+</div>
+</body>
+</html>
