@@ -11,12 +11,24 @@
             "id": "af0a5cd7703c48ce",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md"
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "Intuition.excalidraw"
+              "icon": "lucide-file",
+              "title": "Notes"
             }
           }
         ]
@@ -78,7 +90,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273
+    "width": 347.50390243530273,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -183,10 +196,10 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "af0a5cd7703c48ce",
   "lastOpenFiles": [
-    "Learning/System Design/Practice/Dropbox/dropbox-system-design.html",
     "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
+    "Learning/System Design/Practice/Dropbox/dropbox-system-design.html",
     "Learning/System Design/Practice/Dropbox/5-Deep-Dive-Sync.m4a",
     "Recording 20260810171503.m4a",
     "Learning/System Design/Practice/Dropbox/4-Dropbox-Sync.m4a",
