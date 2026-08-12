@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vectorization - Summary</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:30px; }
+  .container { max-width: 900px; margin: auto; }
+  h1 { color:#38bdf8; font-size:28px; border-bottom:3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#facc15; margin-top:36px; font-size:20px; }
+  .card { background:#1e293b; border-radius:10px; padding:18px 22px; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+  .formula { background:#0f172a; border-left:4px solid #38bdf8; padding:12px 16px; font-family:'Courier New',monospace; font-size:16px; color:#a5f3fc; margin:10px 0; border-radius:4px; }
+  pre { background:#0f172a; border-radius:6px; padding:14px; overflow-x:auto; font-size:14px; color:#a5f3fc; border-left:4px solid #22c55e;}
+  table { width:100%; border-collapse: collapse; margin:10px 0; }
+  th, td { border:1px solid #334155; padding:8px 12px; text-align:left; }
+  th { background:#334155; color:#facc15; }
+  tr:nth-child(even){ background:#1a2436; }
+  .badge { display:inline-block; background:#38bdf8; color:#0f172a; font-weight:bold; padding:2px 10px; border-radius:12px; font-size:12px; margin-right:6px;}
+  .badge.bad { background:#ef4444; }
+  .badge.good { background:#22c55e; }
+  .note { background:#3a2a12; border-left:4px solid #f59e0b; padding:10px 16px; border-radius:4px; margin:10px 0; font-size:14px;}
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:700px){ .grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>⚡ Vectorization</h1>
+  <p>Vectorized code is <b>shorter to write</b> and <b>runs much faster</b> — it lets NumPy tap into parallel hardware (CPU or GPU) instead of computing one step at a time.</p>
+
+  <h2>1️⃣ Setup: Parameters & Features</h2>
+  <div class="card">
+    <p>Math indexing starts at <b>1</b> (w₁, w₂, w₃), but Python/NumPy indexing starts at <b>0</b> (w[0], w[1], w[2]).</p>
+    <pre>import numpy as np
+w = np.array([1.0, 2.5, -3.3])   # w[0], w[1], w[2]
+b = 4
+x = np.array([10, 20, 30])       # x[0], x[1], x[2]</pre>
+    <div class="note">🔹 n = 3 here (number of features). w and x are NumPy arrays, not plain lists — that's what enables vectorized math.</div>
+  </div>
+
+  <h2>2️⃣ Three Ways to Compute the Prediction</h2>
+  <div class="grid">
+    <div class="card">
+      <span class="badge bad">Method 1 — Manual</span>
+      <p>Write out every term explicitly. Fine for n=3, unworkable for n=100,000.</p>
+      <div class="formula">f = w₁x₁ + w₂x₂ + w₃x₃ + b</div>
+      <pre>f = w[0]*x[0] + \
+    w[1]*x[1] + \
+    w[2]*x[2] + b</pre>
+      <p>😞 Inefficient to write AND to compute.</p>
+    </div>
+    <div class="card">
+      <span class="badge bad">Method 2 — For Loop</span>
+      <p>Scales to any n, but still computes one multiply-add at a time (sequential).</p>
+      <div class="formula">f = Σ(j=1 to n) wⱼxⱼ + b</div>
+      <pre>f = 0
+for j in range(0, n):
+    f = f + w[j] * x[j]
+f = f + b</pre>
+      <p>😞 Better, but not vectorized → still slow for large n.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge good">Method 3 — Vectorized ✅</span>
+    <p>Uses NumPy's dot product, which runs in parallel under the hood.</p>
+    <div class="formula">f = w⃗ · x⃗ + b</div>
+    <pre>f = np.dot(w, x) + b</pre>
+    <p>😄 One line. Much faster, especially as n grows large.</p>
+  </div>
+
+  <h2>3️⃣ Why Vectorization Wins — Two Benefits</h2>
+  <div class="card">
+    <table>
+      <tr><th>Benefit</th><th>Explanation</th></tr>
+      <tr><td><b>Shorter code</b></td><td>One line (<code>np.dot(w,x)+b</code>) instead of loops or long expressions — easier to write and read</td></tr>
+      <tr><td><b>Faster execution</b></td><td><code>np.dot</code> uses parallel hardware (CPU vector instructions or GPU) instead of computing terms one after another like the for loop does</td></tr>
+    </table>
+  </div>
+
+  <h2>4️⃣ Real-World Angle: Why This Matters at Scale</h2>
+  <div class="card">
+    <p><b>Example scenario:</b> Imagine n = 100,000 features (e.g., a large feature set in a big dataset).</p>
+    <ul style="margin:6px 0; padding-left:20px;">
+      <li>Manual expression → impossible to type 100,000 terms</li>
+      <li>For loop → runs sequentially, 100,000 steps, one at a time</li>
+      <li>np.dot(w, x) → computed in parallel, dramatically faster</li>
+    </ul>
+    <p>This speedup matters even more when running on a <b>GPU</b> (Graphics Processing Unit), hardware originally built for graphics but well suited to the same parallel math used in ML.</p>
+  </div>
+
+  <h2>➡️ Next</h2>
+  <div class="card">
+    <p>What's actually happening under the hood in your computer/hardware that makes vectorized code run so much faster.</p>
+  </div>
+</div>
+</body>
+</html>

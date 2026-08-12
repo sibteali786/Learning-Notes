@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "529aea032faca58b",
+        "id": "6e28e8d9eadf88e2",
         "type": "tabs",
         "children": [
           {
-            "id": "9d3e84ebb15f14e5",
+            "id": "18adf1856367373a",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "html-view",
+              "state": {
+                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/2-vectorization-summary.html"
+              },
+              "icon": "code-glyph",
+              "title": "2-vectorization-summary"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 305.5
+    "width": 545.0703125,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -181,24 +184,24 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/postgres-million-rows.html",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/database-pages-deep-dive.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/4-gradient-descent-multiple-regression-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/1-multiple-linear-regression-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/C1_W2_Lab01_Python_Numpy_Vectorization_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/3-vectorization-under-the-hood-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/2-vectorization-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/10-gradient-descent-derivative-intuition-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/11-gradient-descent-linear-regression-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/12-learning-rate-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/9-gradient-descent-implementation-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/8-gradient-descent-intro-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/7-cost-function-3d-contour-summary.html",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/Database Pages.md",
     "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
-    "Learning/Database/Fundamentals of Database Engineering/database-pages-deep-dive.html",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/db-storage-fundamentals.html",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/Drawing 2026-08-12 16.51.43.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/primary-vs-secondary-index.html",
-    "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/row-vs-column-storage.html",
     "Learning/Database/Learnings/Things i learned while working.md",
-    "Learning/Database/Fundamentals of Database Engineering/Tables and Indexes",
-    "Learning/Database/Indexes/hash-index-sketch.html",
-    "Learning/Database/Indexes/log-structured-hash-index-sketch.html",
-    "Learning/Database/Indexes/hash-indexes-summary.html",
     "Learning/Frontend Interview Preparation/Coding/Star/Stars.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/9-gradient-descent-implementation-summary.html",
     "conflict-files-obsidian-git.md",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
     "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
