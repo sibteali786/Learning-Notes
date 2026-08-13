@@ -3326,3 +3326,153 @@ char *get_full_greeting(char *greeting, char *name, int size) {
 }
 
 ```
+
+# Malloc
+
+The [`malloc` function](https://en.cppreference.com/w/c/memory/malloc) (`m`emory `alloc`ation) is a standard library function in C that allocates a specified number of bytes of memory on the heap and returns a pointer to the allocated memory.
+
+This new memory is **uninitialized**, which means:
+
+- It contains whatever data was previously at that location.
+- It is the programmer's responsibility to ensure that the allocated memory is properly initialized and eventually freed using [`free`](https://en.cppreference.com/w/c/memory/free) to avoid memory leaks.
+
+If you want to make sure that the memory is properly initialized, you can use the `calloc` function, which allocates the specified number of bytes of memory on the heap and returns a pointer to the allocated memory. This memory is initialized to zero (meaning it contains all zeroes).
+
+## Function Signature
+
+```c
+void* malloc(size_t size);
+```
+
+- `size`: The number of bytes to allocate.
+- Returns: A pointer to the allocated memory or `NULL` if the allocation fails.
+
+## Example Usage
+
+```c
+// Allocates memory for an array of 4 integers
+int *ptr = malloc(4 * sizeof(int));
+if (ptr == NULL) {
+  // Handle memory allocation failure
+  printf("Memory allocation failed\n");
+  exit(1);
+}
+// use the memory here
+// ...
+free(ptr);
+```
+
+## Manual Memory Management
+
+This idea of manually calling `malloc` and `free` is what puts the "manual" in "manually managing memory":
+
+- The programmer must remember to eventually free the allocated memory using `free(ptr)` to avoid memory leaks.
+- Otherwise, that allocated memory is never returned to the operating system for use by other programs. (Until the program exits, at which point the operating system will clean up after it, but that's not ideal.)
+
+Manually managing memory can be error-prone and tedious, but languages that automatically manage memory (like Python, Java, and C#) have their own trade-offs, usually in terms of performance.
+
+## Assignment
+
+We're working on some of the dynamic memory management tooling that we'll eventually need to build a garbage collector for Sneklang.
+
+Complete the `allocate_scalar_array` function. It should:
+
+1. [ ] Accept `size` and `multiplier` parameters and should allocate an array of `size` integers on the heap.
+2. [ ] Gracefully return `NULL` if the allocation fails.
+3. [ ] Initialize each element in the array to the `index * multiplier`. (e.g. a multiplier of 2 would result in `[0, 2, 4, 6, ...]`)
+4. [ ] Return a pointer to the allocated memory.
+
+_Assume that the calling code will eventually call `free` on the returned pointer._
+
+```c
+#include "exercise.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int *allocate_scalar_array(int size, int multiplier) {
+  int *arr = malloc(size * sizeof(int));
+  if (arr == NULL){
+    printf("Memory allocation failed");
+    exit(1);
+  }
+  for (int i = 0; i < size; i++){
+    arr[i] = i * multiplier;
+  }
+  return arr;
+}
+
+```
+
+# Free
+
+The [`free`](https://en.cppreference.com/w/c/memory/free) function deallocates memory that was previously allocated by [`malloc`](https://en.cppreference.com/w/c/memory/malloc), [`calloc`](https://en.cppreference.com/w/c/memory/calloc), or [`realloc`](https://en.cppreference.com/w/c/memory/realloc).
+
+```c
+int *ptr = malloc(4 * sizeof(int));
+free(ptr);
+```
+
+**IMPORTANT:** `free` does not change the **value** stored in the memory, and it doesn't even change the address stored in the pointer. Instead, it simply informs the operating system that the memory can be used again.
+
+## Forgetting to free
+
+Forgetting to call `free` leads to a memory leak. This means that the allocated memory remains occupied and cannot be reused, even though the program no longer needs it. Over time, if a program continues to allocate memory without freeing it, the program may run out of memory and crash.
+
+Memory leaks are one of the most common bugs in C programs, and they can be difficult to track down because the memory is still allocated and accessible, even though it is no longer needed.
+
+## Assignment
+
+We may be inefficient here at Sneklang, but we don't want outright memory leaks!
+
+1. Run the code in its current state. After a number of successful allocations you should get a failure. The program is running out of memory due to a leak.
+    
+    See how it's calling the `allocate_scalar_list` function in a loop? Well, the lists aren't needed from loop to loop, so they should be freed at the end of each iteration. If we do that, we should be able to allocate as many lists as we want (because we return the memory in between iterations).
+    
+1. Fix the code by freeing the allocated list at the end of each loop.
+```c
+#include "exercise.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+  const int num_lists = 500;
+  for (int i = 0; i < num_lists; i++) {
+    int *lst = allocate_scalar_list(50000, 2);
+    if (lst == NULL) {
+      printf("Failed to allocate list\n");
+      return 1;
+    } else {
+      printf("Allocated list %d\n", i);
+    }
+    free(lst);
+  }
+  return 0;
+}
+```
+
+# Big Endian and Little Endian
+
+While we are on the topic of memory, it's worth knowing about "endianness". Endianness is the order in which bytes are stored in memory. The two most common formats are big endian and little endian.
+
+## Big Endian
+
+In a big-endian system, the most significant byte is stored first, at the lowest memory address. The "most significant byte" is just a fancy way of saying "the biggest part of the number".
+
+Let's say you have the hexadecimal number `0x12345678`. Here's how it would be stored in big-endian format:
+
+  
+The most significant byte (`0x12`) is stored at the lowest memory address.
+
+## Little Endian
+
+In a little-endian system, the least significant byte (the "smallest" part of the number) is stored first, at the lowest memory address. This is the format used by most modern computers.
+
+Using the same number `0x12345678`, here's how it would be stored in little-endian format:
+
+  
+Here, the least significant byte (`0x78`) is stored first.
+
+For the most part, you won't have to worry about endianness when writing programs. The way data is read from memory automatically handles this, so we can spend our valuable time building e-commerce shops for the terminal instead. Endianness becomes important in certain scenarios, like networking and working with binary files.
+
+For now, just know that most modern systems use little-endian, and the compiler takes care of how data is stored and accessed.
+![[Pasted image 20260813204427.png]]![[Pasted image 20260813204431.png]]

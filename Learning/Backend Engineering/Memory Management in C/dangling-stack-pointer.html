@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dangling Pointers to the Stack</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#151b23; --border:#2a333d;
+    --text:#e6edf3; --dim:#8b949e;
+    --a:#ff6b6b; --b:#4dabf7; --c:#51cf66; --gold:#ffd43b;
+    --mono: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif;
+    margin:0; padding:40px 20px;
+  }
+  .wrap{max-width:880px; margin:0 auto;}
+  h1{font-size:1.8rem; margin-bottom:4px;}
+  .sub{color:var(--dim); margin-bottom:32px; font-size:0.95rem;}
+  .pill{
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:0.75rem; font-weight:600; letter-spacing:0.03em;
+  }
+  .pill-bug{background:rgba(255,107,107,0.15); color:var(--a); border:1px solid rgba(255,107,107,0.4);}
+  .pill-fix{background:rgba(81,207,102,0.15); color:var(--c); border:1px solid rgba(81,207,102,0.4);}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:24px; margin-bottom:24px;
+  }
+  .card h2{margin-top:0; font-size:1.1rem;}
+  code, pre{font-family:var(--mono); font-size:0.85rem;}
+  pre{background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; line-height:1.5;}
+  .frame{
+    border:2px solid var(--border); border-radius:8px; padding:10px 14px; margin:6px 0;
+    font-family:var(--mono); font-size:0.85rem; position:relative;
+  }
+  .frame-main{border-color:var(--b); background:rgba(77,171,247,0.06);}
+  .frame-call{border-color:var(--a); background:rgba(255,107,107,0.08);}
+  .addr{color:var(--gold); font-weight:bold;}
+  .step{display:flex; gap:16px; align-items:flex-start; margin-bottom:18px;}
+  .step-num{
+    flex:0 0 30px; height:30px; border-radius:50%; background:var(--a); color:#0a0e14;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;
+  }
+  .arrow{color:var(--dim); text-align:center; font-size:1.3rem; margin:2px 0;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+  .grid2 .card{margin-bottom:0;}
+  .final-arrows{font-family:var(--mono); line-height:1.9; font-size:0.9rem; white-space:pre;}
+  ul{margin:8px 0; padding-left:20px;}
+  li{margin-bottom:6px;}
+  .tag{color:var(--dim); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Dangling Pointers to the Stack</h1>
+  <div class="sub">Why <code>new_coord()</code> always prints <strong>50, 60</strong></div>
+
+  <div class="card">
+    <div class="tag">The Bug</div>
+    <span class="pill pill-bug">BROKEN</span>
+    <pre>coord_t *new_coord(int x, int y) {
+  coord_t c;          <span style="color:var(--dim)">// lives on new_coord's stack frame</span>
+  c.x = x; c.y = y;
+  return &amp;c;          <span style="color:var(--a)">// returns address of LOCAL variable</span>
+}</pre>
+    <p style="color:var(--dim); font-size:0.9rem;">The moment <code>new_coord</code> returns, its stack frame is popped. The address <code>&c</code> now points to freed memory — undefined behavior.</p>
+  </div>
+
+  <div class="card">
+    <h2>Same address, reused three times</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div style="flex:1;">
+        <div class="frame frame-main">main's frame</div>
+        <div class="frame frame-call">new_coord(10,20) → c.x=10, c.y=20 <span class="addr">@ addr A</span></div>
+        <div class="arrow">↓ returns, frame popped, addr A freed</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div style="flex:1;">
+        <div class="frame frame-main">main's frame</div>
+        <div class="frame frame-call">new_coord(30,40) → c.x=30, c.y=40 <span class="addr">@ addr A (reused)</span></div>
+        <div class="arrow">↓ returns, frame popped, addr A freed</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div style="flex:1;">
+        <div class="frame frame-main">main's frame</div>
+        <div class="frame frame-call">new_coord(50,60) → c.x=50, c.y=60 <span class="addr">@ addr A (reused)</span></div>
+        <div class="arrow">↓ returns, frame popped — last value left at A: <strong>50, 60</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Why all three pointers show the same thing</h2>
+    <div class="final-arrows">c1 ──┐
+c2 ──┼──► <span class="addr">address A</span> ──► { x: 50, y: 60 }   (last write wins)
+c3 ──┘</div>
+    <p style="color:var(--dim); font-size:0.9rem; margin-top:10px;">
+      Calls are <strong>sequential</strong>, not concurrent — each frame pops before the next pushes, so the allocator keeps handing out the same free slot. <code>c1</code>, <code>c2</code>, <code>c3</code> all end up pointing at that one shared, stale address.
+    </p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="tag">Recursive / nested calls</div>
+      <p style="font-size:0.9rem;">If a call happens <em>before</em> the previous one returns (recursion, nesting), frames stack on top of each other at <strong>different</strong> addresses — no collision, because nothing has been popped yet.</p>
+    </div>
+    <div class="card">
+      <div class="tag">This bug specifically</div>
+      <p style="font-size:0.9rem;">Two things combine: (1) returning a pointer to memory that dies when the function returns, and (2) the next call reusing that exact freed address — making the bug look consistent instead of random garbage.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tag">The Fix</div>
+    <span class="pill pill-fix">CORRECT</span>
+    <pre>coord_t new_coord(int x, int y) {   <span style="color:var(--c)">// return by VALUE</span>
+  coord_t c;
+  c.x = x; c.y = y;
+  return c;                         <span style="color:var(--c)">// compiler COPIES c into caller's frame</span>
+}</pre>
+    <p style="color:var(--dim); font-size:0.9rem;">The struct is copied out before the frame is popped, so each caller gets its own independent <code>coord_t</code> — not a pointer to a reused address.</p>
+  </div>
+
+  <div class="card">
+    <h2>Other ways to solve it</h2>
+    <ul>
+      <li><strong>Return by value</strong> (used above) — simplest, safest for small structs. Minor copy cost.</li>
+      <li><strong>Heap allocation (<code>malloc</code>)</strong> — pointer stays valid after return, but you now own manual <code>free()</code>; risk of leaks/double-frees.</li>
+      <li><strong>Caller-allocated (<code>coord_t *out</code> param)</strong> — no copy, no heap; caller owns the memory. Common in perf-sensitive C, shifts responsibility to caller.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
