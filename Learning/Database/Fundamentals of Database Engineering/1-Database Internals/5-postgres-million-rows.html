@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generating Million-Row Test Tables — Postgres + Docker</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e7e9ee; --muted:#9aa2b8; --accent:#7c9bff; --accent2:#ff9f7c;
+    --good:#5fd68f; --bad:#ff6b6b; --pill:#242a3d;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:32px;line-height:1.5;max-width:900px;margin-inline:auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px}
+  .section-label{display:inline-block;background:var(--pill);color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:22px}
+  .step{display:flex;gap:14px;margin-bottom:16px}
+  .num{flex:0 0 30px;height:30px;border-radius:50%;background:rgba(124,155,255,.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+  .step-body{flex:1}
+  .step-title{font-weight:700;margin-bottom:4px;font-size:14.5px}
+  pre{background:#0b0d13;border:1px solid var(--border);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13px;color:var(--accent2);margin:8px 0 0}
+  code{background:var(--pill);padding:2px 6px;border-radius:5px;font-size:13px;color:var(--accent2)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0}
+  .pill-good{background:rgba(95,214,143,.15);color:var(--good)}
+  .pill-accent{background:rgba(124,155,255,.15);color:var(--accent)}
+  .example{background:var(--card2);border-left:3px solid var(--accent);padding:12px 14px;border-radius:8px;font-size:13.5px;color:var(--muted);margin-top:10px}
+  .example b{color:var(--text)}
+  svg{width:100%;height:auto;display:block;margin-top:8px}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:4px 0;font-size:14px}
+  .tip{background:linear-gradient(135deg,rgba(124,155,255,.12),rgba(255,159,124,.08));border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:22px}
+  .tip .box-title{color:var(--accent);font-weight:700;margin-bottom:8px;font-size:15px}
+</style>
+</head>
+<body>
+
+<h1>🐘 Generating a Million-Row Test Table (Postgres + Docker)</h1>
+<div class="subtitle">Quick recipe for spinning up test data to play with indexing/partitioning</div>
+
+<div class="section-label">Goal</div>
+<div class="card">
+Spin up a throwaway Postgres container and generate <b>1,000,000 rows</b> of random data in one <code>INSERT</code> — no external tools, no CSV files, no loops.
+</div>
+
+<div class="section-label">Steps</div>
+<div class="card">
+
+<div class="step">
+<div class="num">1</div>
+<div class="step-body">
+<div class="step-title">Spin up Postgres in Docker</div>
+<pre>docker run --name pg1 -e POSTGRES_PASSWORD=postgres -d postgres:13</pre>
+<span class="pill pill-accent">No port exposed</span> — access happens via <code>docker exec</code>, not from the host.
+</div>
+</div>
+
+<div class="step">
+<div class="num">2</div>
+<div class="step-body">
+<div class="step-title">Shell into the container's psql</div>
+<pre>docker exec -it pg1 psql -U postgres</pre>
+</div>
+</div>
+
+<div class="step">
+<div class="num">3</div>
+<div class="step-body">
+<div class="step-title">Create a simple table</div>
+<pre>CREATE TABLE temp (t INTEGER);</pre>
+One column just to keep the demo minimal.
+</div>
+</div>
+
+<div class="step">
+<div class="num">4</div>
+<div class="step-body">
+<div class="step-title">Bulk-insert a million random rows in ONE statement</div>
+<pre>INSERT INTO temp
+SELECT random() * 100
+FROM generate_series(0, 1000000);</pre>
+</div>
+</div>
+
+<div class="step">
+<div class="num">5</div>
+<div class="step-body">
+<div class="step-title">Verify</div>
+<pre>SELECT t FROM temp LIMIT 10;
+SELECT COUNT(*) FROM temp;  -- ~1,000,000</pre>
+</div>
+</div>
+
+</div>
+
+<div class="section-label">How The Insert Trick Works</div>
+<div class="card">
+<svg viewBox="0 0 720 150">
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent2)"/></marker></defs>
+
+  <rect x="10" y="10" width="220" height="50" rx="8" fill="var(--card2)" stroke="var(--border)"/>
+  <text x="120" y="32" text-anchor="middle" fill="var(--text)" font-size="12">generate_series(0, 1000000)</text>
+  <text x="120" y="48" text-anchor="middle" fill="var(--muted)" font-size="11">1,000,001 sequential rows</text>
+
+  <line x1="230" y1="35" x2="290" y2="35" stroke="var(--accent2)" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="290" y="10" width="180" height="50" rx="8" fill="rgba(124,155,255,.15)" stroke="var(--accent)"/>
+  <text x="380" y="32" text-anchor="middle" fill="var(--accent)" font-size="12">random() * 100</text>
+  <text x="380" y="48" text-anchor="middle" fill="var(--muted)" font-size="11">0.0–1.0 → 0.0–100.0</text>
+
+  <line x1="470" y1="35" x2="530" y2="35" stroke="var(--accent2)" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="530" y="10" width="180" height="50" rx="8" fill="rgba(95,214,143,.15)" stroke="var(--good)"/>
+  <text x="620" y="32" text-anchor="middle" fill="var(--good)" font-size="12">coerced to INTEGER</text>
+  <text x="620" y="48" text-anchor="middle" fill="var(--muted)" font-size="11">column type = int</text>
+
+  <text x="10" y="100" fill="var(--muted)" font-size="12">generate_series only supplies row COUNT (values themselves are sequential/thrown away)</text>
+  <text x="10" y="118" fill="var(--muted)" font-size="12">random() breaks the sequential pattern — gives realistic, non-ordered test data</text>
+  <text x="10" y="136" fill="var(--muted)" font-size="12">Implicit cast: assigning a float into an INTEGER column truncates/rounds automatically</text>
+</svg>
+</div>
+
+<div class="section-label">Extending It</div>
+<div class="card">
+<ul>
+<li><b>Change row count:</b> swap <code>1000000</code> in <code>generate_series</code> for any number.</li>
+<li><b>Multiple columns:</b> just add more expressions, comma-separated, in the <code>SELECT</code>.</li>
+<li><b>Text/character columns:</b> generate an integer with <code>random()</code>, then convert to ASCII characters (e.g. <code>chr()</code>) instead of leaving it numeric.</li>
+</ul>
+<pre>CREATE TABLE temp (t INTEGER, label TEXT);
+
+INSERT INTO temp
+SELECT random() * 100,
+       chr((random() * 26)::int + 65)   -- random A–Z letter
+FROM generate_series(0, 1000000);</pre>
+<div class="example">🎯 <b>Real-life scenario:</b> Testing whether adding an index on a <code>temp</code> table actually speeds up range queries (<code>WHERE t BETWEEN 20 AND 40</code>) — you need realistic volume (millions of rows) and non-sequential values to see genuine I/O behavior, not an artificially fast sequential scan.</div>
+</div>
+
+<div class="tip">
+<div class="box-title">💡 Practical Tip</div>
+<ul>
+<li><code>generate_series</code> + <code>random()</code> is the standard Postgres pattern for synthetic load-testing data — no need for external seed scripts for simple cases.</li>
+<li>Skip exposing the container port (<code>-p 5432:5432</code>) entirely if you only need to poke around via <code>docker exec</code> — one less thing to clean up.</li>
+<li>Ties directly back to the earlier primary-key/clustering discussion: this is exactly the kind of table you'd use to physically compare a clustered/IOT layout vs Postgres's heap + secondary index behavior at real scale.</li>
+</ul>
+</div>
+
+</body>
+</html>

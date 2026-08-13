@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Database Indexing — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d212c; --border:#2a2f3d;
+    --text:#e6e8ee; --muted:#9aa3b5; --accent:#6ea8fe; --green:#3ecf8e;
+    --red:#ff6b6b; --amber:#ffb84d; --purple:#b18cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:28px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px}
+  .label{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:#1a2233;border:1px solid #29406b;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+  h2{font-size:18px;margin:0 0 10px}
+  p{color:#c7cbd6;margin:6px 0}
+  code, .code{font-family:'Fira Code',Consolas,monospace;background:#11141b;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:13px;color:#9fd1ff}
+  pre{background:#0b0d12;border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;margin:2px 4px 2px 0}
+  .pill.fast{background:#123322;color:var(--green);border:1px solid #1f5a3d}
+  .pill.slow{background:#3a1616;color:var(--red);border:1px solid #6b2323}
+  .pill.mid{background:#3a2c10;color:var(--amber);border:1px solid #6b4d1a}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .compare{display:flex;gap:14px;align-items:stretch}
+  .compare>div{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .compare .vs{display:flex;align-items:center;color:var(--muted);font-weight:700}
+  svg{max-width:100%}
+  .tip{background:#141c14;border:1px solid #2a4a2a;border-left:4px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .real{background:#1a1720;border-left:4px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Database Indexing, in a Nutshell</h1>
+<div class="sub">Visual summary — B-Tree indexes, sequential scans, and query planning (Postgres)</div>
+
+<div class="card">
+  <span class="label">Problem</span>
+  <h2>Finding a row in an 11 million row table</h2>
+  <p>Without help, Postgres has to check every row one by one — a <b>full table (sequential) scan</b>. An index is a separate data structure built on a column that lets Postgres jump straight to the matching rows instead.</p>
+  <div class="real"><b>Real-world analogy:</b> A phone book. Looking for "Zebra Co." — without an index you'd read every entry front to back. With the book's A–Z tab index, you flip straight to "Z" and start there.</div>
+</div>
+
+<div class="card">
+  <span class="label">How it works</span>
+  <h2>B-Tree lookup vs. sequential scan</h2>
+  <svg width="900" height="220" viewBox="0 0 900 220">
+    <text x="10" y="20" fill="#9aa3b5" font-size="12">WITH INDEX (B-Tree) — jump straight to it</text>
+    <circle cx="150" cy="60" r="22" fill="#1d212c" stroke="#6ea8fe" stroke-width="2"/>
+    <text x="150" y="65" fill="#e6e8ee" font-size="11" text-anchor="middle">4000</text>
+    <line x1="150" y1="82" x2="90" y2="120" stroke="#6ea8fe"/>
+    <line x1="150" y1="82" x2="210" y2="120" stroke="#2a2f3d"/>
+    <circle cx="90" cy="140" r="20" fill="#1d212c" stroke="#6ea8fe" stroke-width="2"/>
+    <text x="90" y="145" fill="#e6e8ee" font-size="10" text-anchor="middle">1000</text>
+    <circle cx="210" cy="140" r="20" fill="#1d212c" stroke="#2a2f3d"/>
+    <text x="210" y="145" fill="#8a8f9c" font-size="10" text-anchor="middle">6000</text>
+    <line x1="90" y1="160" x2="90" y2="190" stroke="#3ecf8e"/>
+    <circle cx="90" cy="200" r="16" fill="#123322" stroke="#3ecf8e" stroke-width="2"/>
+    <text x="90" y="204" fill="#3ecf8e" font-size="9" text-anchor="middle">2000 ✓</text>
+    <text x="90" y="30" fill="#3ecf8e" font-size="11" text-anchor="middle">found in ~0.1ms</text>
+
+    <text x="480" y="20" fill="#9aa3b5" font-size="12">WITHOUT INDEX — scan every row</text>
+    <g>
+      <rect x="470" y="50" width="380" height="20" fill="#3a1616" stroke="#6b2323"/>
+      <text x="660" y="65" fill="#ff6b6b" font-size="11" text-anchor="middle">row 1 → row 2 → row 3 → ... → row 11,000,000</text>
+    </g>
+    <text x="660" y="100" fill="#ff6b6b" font-size="11" text-anchor="middle">~3 seconds, every row checked</text>
+  </svg>
+</div>
+
+<div class="card">
+  <span class="label">Key Distinctions</span>
+  <h2>What made each query fast or slow</h2>
+  <table>
+    <tr><th>Query</th><th>Plan used</th><th>Time</th><th>Why</th></tr>
+    <tr><td><code>WHERE id = 2000</code></td><td>Index scan</td><td><span class="pill fast">0.1–0.6 ms</span></td><td>PK has an index by default; ID itself lives in the index → no heap fetch</td></tr>
+    <tr><td><code>SELECT name WHERE id = 5000</code></td><td>Index + heap fetch</td><td><span class="pill mid">~2.5 ms</span></td><td><code>name</code> isn't in the index → extra trip to the table (heap) on disk</td></tr>
+    <tr><td><code>WHERE name = 'xz'</code> (no index)</td><td>Parallel seq scan</td><td><span class="pill slow">~3 s</span></td><td>No index on <code>name</code> → must read all 11M rows</td></tr>
+    <tr><td><code>WHERE name LIKE '%z%'</code> (no index)</td><td>Parallel seq scan</td><td><span class="pill slow">~1.1 s</span></td><td>Wildcard search, still no index to use</td></tr>
+    <tr><td><code>WHERE name = 'xz'</code> (indexed)</td><td>Bitmap index scan</td><td><span class="pill mid">~47 ms</span></td><td>Index now exists, but still needs a heap fetch for full row</td></tr>
+    <tr><td><code>WHERE UPPER(name) = 'XZ'</code></td><td>Parallel seq scan</td><td><span class="pill slow">slow again</span></td><td>Expression on the column ≠ literal value → index can't be used</td></tr>
+  </table>
+  <div class="tip"><b>Rule of thumb:</b> an index only helps when you query the column as a plain literal. Wrapping it in a function/expression (<code>UPPER(name)</code>) makes Postgres unable to use the index — it falls back to a full scan.</div>
+</div>
+
+<div class="card">
+  <span class="label">Compare</span>
+  <h2>Index Scan vs. Sequential Scan</h2>
+  <div class="compare">
+    <div>
+      <h2 style="color:var(--green);font-size:15px">✅ Index Scan</h2>
+      <p>• Uses B-Tree to jump to match</p>
+      <p>• Fast: O(log n)</p>
+      <p>• Best when column selected is also in the index ("inline" — no heap fetch)</p>
+      <p>• Requires: index exists + literal value predicate</p>
+    </div>
+    <div class="vs">VS</div>
+    <div>
+      <h2 style="color:var(--red);font-size:15px">🐌 Sequential Scan</h2>
+      <p>• Reads every row, O(n)</p>
+      <p>• Postgres parallelizes with worker threads, but still slow at scale</p>
+      <p>• Happens when: no index, or index can't be used (expression, function-wrapped column)</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <span class="label">Practical Tips</span>
+  <h2>Interview / real-world takeaways</h2>
+  <p>🔹 <b>Every primary key gets a B-Tree index automatically</b> — that's why PK lookups are fast by default.</p>
+  <p>🔹 <b>"Inlining":</b> if the columns you SELECT are all inside the index, Postgres never touches the table (heap) — the fastest possible query.</p>
+  <p>🔹 <b>Avoid <code>SELECT *</code></b> — pulling unnecessary columns forces heap fetches you didn't need.</p>
+  <p>🔹 <b>Having an index ≠ guaranteed use.</b> The query planner decides based on cost — an expression on an indexed column, or a low-selectivity filter, can still trigger a full scan.</p>
+  <p>🔹 <b>Use <code>EXPLAIN ANALYZE</code></b> to see whether Postgres chose an index scan, bitmap scan, or sequential scan, and why.</p>
+  <div class="real"><b>Real-world scenario:</b> A "search users by email" login query without an index on <code>email</code> is fine at 100 rows, but at 10M rows it becomes a multi-second full scan on every login attempt — exactly the <code>WHERE name = 'xz'</code> case above. Adding an index turns it back into a sub-millisecond lookup.</div>
+</div>
+
+<div class="card">
+  <span class="label">Setup</span>
+  <h2>Table creation (from employees.sql)</h2>
+  <pre><code>create table employees( id serial primary key, name text);
+
+create or replace function random_string(length integer) returns text as
+$$
+declare
+  chars text[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
+  result text := '';
+  i integer := 0;
+  length2 integer := (select trunc(random() * length + 1));
+begin
+  if length2 &lt; 0 then
+    raise exception 'Given length cannot be less than 0';
+  end if;
+  for i in 1..length2 loop
+    result := result || chars[1+random()*(array_length(chars, 1)-1)];
+  end loop;
+  return result;
+end;
+$$ language plpgsql;
+
+insert into employees(name)(select random_string(10) from generate_series(0, 1000000));</code></pre>
+  <p style="margin-top:10px">Index used later in the video:</p>
+  <pre><code>create index employees_name on employees(name);</code></pre>
+</div>
+
+</div>
+</body>
+</html>

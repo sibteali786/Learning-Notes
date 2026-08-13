@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Database Pages — Deep Dive</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e7e9ee; --muted:#9aa2b8; --accent:#7c9bff; --accent2:#ff9f7c;
+    --good:#5fd68f; --bad:#ff6b6b; --pill:#242a3d; --purple:#c792ea;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:32px;line-height:1.5;max-width:980px;margin-inline:auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px}
+  .section-label{display:inline-block;background:var(--pill);color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0}
+  .pill-good{background:rgba(95,214,143,.15);color:var(--good)}
+  .pill-bad{background:rgba(255,107,107,.15);color:var(--bad)}
+  .pill-accent{background:rgba(124,155,255,.15);color:var(--accent)}
+  .pill-accent2{background:rgba(255,159,124,.15);color:var(--accent2)}
+  .pill-purple{background:rgba(199,146,234,.15);color:var(--purple)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  code{background:var(--pill);padding:2px 6px;border-radius:5px;font-size:13px;color:var(--accent2)}
+  .box-title{font-weight:700;margin-bottom:8px;font-size:15px}
+  .example{background:var(--card2);border-left:3px solid var(--accent);padding:12px 14px;border-radius:8px;font-size:13.5px;color:var(--muted);margin-top:10px}
+  .example b{color:var(--text)}
+  svg{width:100%;height:auto;display:block;margin-top:8px}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:4px 0;font-size:14px}
+  .tip{background:linear-gradient(135deg,rgba(124,155,255,.12),rgba(255,159,124,.08));border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:22px}
+  .tip .box-title{color:var(--accent)}
+  .qa{border-color:var(--accent)}
+  .qa .q{color:var(--accent2);font-weight:700;font-size:15px;margin-bottom:8px}
+  text{font-family:monospace}
+</style>
+</head>
+<body>
+
+<h1>📄 Database Pages — Deep Dive</h1>
+<div class="subtitle">How rows, columns, docs & indexes become fixed-size bytes on disk (Postgres focus)</div>
+
+<div class="section-label">Problem / Why Pages Exist</div>
+<div class="card">
+Every DB — rows, indexes, sequences, documents — eventually stores data as bytes in <b>fixed-size pages</b>. This separates the storage engine from the query/API layer, and makes reading, writing, and caching uniform: everything is "a page."
+</div>
+
+<div class="section-label">How It Works — The Read/Write Path</div>
+<div class="card">
+<svg viewBox="0 0 760 190">
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent2)"/></marker></defs>
+  <rect x="10" y="70" width="130" height="50" rx="8" fill="var(--card2)" stroke="var(--border)"/><text x="75" y="100" text-anchor="middle" fill="var(--text)" font-size="13">Disk / File</text>
+  <line x1="140" y1="95" x2="200" y2="95" stroke="var(--accent2)" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="145" y="85" fill="var(--muted)" font-size="11">read page @ offset</text>
+
+  <rect x="200" y="70" width="150" height="50" rx="8" fill="var(--card2)" stroke="var(--border)"/><text x="275" y="92" text-anchor="middle" fill="var(--text)" font-size="12">OS Filesystem</text><text x="275" y="108" text-anchor="middle" fill="var(--text)" font-size="12">Cache</text>
+  <line x1="350" y1="95" x2="410" y2="95" stroke="var(--accent2)" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="410" y="70" width="150" height="50" rx="8" fill="rgba(124,155,255,.12)" stroke="var(--accent)"/><text x="485" y="92" text-anchor="middle" fill="var(--accent)" font-size="12">DB Buffer /</text><text x="485" y="108" text-anchor="middle" fill="var(--accent)" font-size="12">Shared Pool</text>
+  <line x1="560" y1="95" x2="620" y2="95" stroke="var(--accent2)" stroke-width="1.6" marker-end="url(#a)"/>
+
+  <rect x="620" y="70" width="130" height="50" rx="8" fill="var(--card2)" stroke="var(--border)"/><text x="685" y="100" text-anchor="middle" fill="var(--text)" font-size="13">Your Query</text>
+
+  <text x="10" y="150" fill="var(--muted)" font-size="12">Write path (reverse): row updated in buffer pool → change journaled to WAL on disk → page flushed later</text>
+  <text x="10" y="170" fill="var(--muted)" font-size="12">Page stays in buffer pool to absorb more reads/writes before flush → fewer physical I/Os</text>
+</svg>
+</div>
+
+<div class="section-label">Page Sizes by Database</div>
+<div class="card">
+<table>
+<tr><th>Database</th><th>Default Page Size</th></tr>
+<tr><td>PostgreSQL</td><td>8 KB</td></tr>
+<tr><td>MySQL (InnoDB)</td><td>16 KB</td></tr>
+<tr><td>MongoDB (WiredTiger)</td><td>32 KB</td></tr>
+<tr><td>SQL Server</td><td>8 KB</td></tr>
+<tr><td>Oracle</td><td>8 KB</td></tr>
+</table>
+<div class="example">📌 Small pages → less wasted I/O per read but higher header-overhead ratio. Large pages → less metadata overhead but costlier cold reads/writes and more page-split risk.</div>
+</div>
+
+<div class="section-label">Postgres Page Layout (8KB)</div>
+<div class="card">
+<svg viewBox="0 0 700 160">
+  <rect x="10" y="10" width="680" height="30" fill="rgba(124,155,255,.15)" stroke="var(--accent)"/><text x="350" y="30" text-anchor="middle" fill="var(--accent)" font-size="13">Page Header — 24 bytes (fixed metadata: free space, checksums, etc.)</text>
+
+  <rect x="10" y="45" width="680" height="26" fill="rgba(255,159,124,.15)" stroke="var(--accent2)"/><text x="350" y="63" text-anchor="middle" fill="var(--accent2)" font-size="13">ItemIds — array of 4-byte (offset:length) pointers, one per tuple</text>
+
+  <rect x="10" y="76" width="680" height="50" fill="var(--card2)" stroke="var(--border)"/><text x="350" y="105" text-anchor="middle" fill="var(--text)" font-size="13">Items — variable length (the actual tuples/rows live here, growing ⟶ toward Special)</text>
+
+  <rect x="10" y="131" width="680" height="24" fill="rgba(199,146,234,.15)" stroke="var(--purple)"/><text x="350" y="148" text-anchor="middle" fill="var(--purple)" font-size="12">Special — variable (B+Tree leaf: prev/next page links only)</text>
+</svg>
+<div class="example">⚠️ <b>Author's criticism:</b> at 4 bytes per ItemId, 1000 items = 4KB of pointer overhead alone — half an 8KB page gone just to metadata.</div>
+</div>
+
+<div class="section-label">Row-Store vs Column-Store vs Document vs Graph Pages</div>
+<div class="grid2">
+  <div class="card">
+    <div class="box-title">🟦 Row Store</div>
+    <p style="color:var(--muted);font-size:13.5px">All columns of a row packed together, one row after another → good for OLTP.</p>
+  </div>
+  <div class="card">
+    <div class="box-title">🟧 Column Store</div>
+    <p style="color:var(--muted);font-size:13.5px">Values of one column packed together across many rows → good for OLAP aggregates.</p>
+  </div>
+</div>
+
+<div class="section-label">❓ Your Questions Answered</div>
+
+<div class="card qa">
+<div class="q">1. What is OLTP?</div>
+<b>OLTP = Online Transaction Processing.</b> Many small, fast read/write operations touching few rows — inserts, updates, point lookups. Optimized by <b>row-store</b> (all columns of one row together = one I/O gets the whole row).
+<div class="example">🎯 <b>Real-life analogy:</b> An ATM withdrawal — check your balance, deduct amount, log the transaction. Fast, single-customer, single-row operations happening thousands of times a second.<br><br>
+<b>Examples:</b> e-commerce checkout, banking transfers, ride-booking apps, inventory scan-at-checkout.</div>
+</div>
+
+<div class="card qa">
+<div class="q">2. What is OLAP?</div>
+<b>OLAP = Online Analytical Processing.</b> Few, heavy queries scanning millions of rows but only a handful of columns — <code>SUM</code>, <code>AVG</code>, <code>GROUP BY</code>. Optimized by <b>column-store</b> (only pull the columns you're aggregating, skip the rest entirely).
+<div class="example">🎯 <b>Real-life analogy:</b> A company's finance team asking "what was total revenue per region last quarter?" — they need 2 columns (region, revenue) out of a 50-column sales table, across millions of rows. Reading full rows would waste massive I/O on irrelevant columns.<br><br>
+<b>Examples:</b> BI dashboards, quarterly sales reports, data warehouses (Snowflake, Redshift, ClickHouse).</div>
+
+<table style="margin-top:14px">
+<tr><th></th><th>OLTP</th><th>OLAP</th></tr>
+<tr><td>Query shape</td><td>Many, small, row-targeted</td><td>Few, large, column-targeted</td></tr>
+<tr><td>Storage layout</td><td>Row-store</td><td>Column-store</td></tr>
+<tr><td>Example ops</td><td><code>INSERT</code>, point <code>UPDATE</code></td><td><code>SUM()</code>, <code>GROUP BY</code></td></tr>
+<tr><td>Example systems</td><td>Postgres, MySQL, Oracle (OLTP mode)</td><td>Redshift, BigQuery, ClickHouse</td></tr>
+</table>
+</div>
+
+<div class="card qa">
+<div class="q">3. Row vs Tuple vs Item — explained more</div>
+Three layers of the same logical thing, from "what the user sees" down to "what's physically stored":
+<svg viewBox="0 0 700 210">
+  <text x="10" y="20" fill="var(--muted)" font-size="12">Logical layer (what you SELECT)</text>
+  <rect x="10" y="28" width="200" height="34" rx="6" fill="rgba(124,155,255,.15)" stroke="var(--accent)"/><text x="110" y="50" text-anchor="middle" fill="var(--accent)" font-size="13">ROW (id=5, name="Ali")</text>
+
+  <text x="10" y="85" fill="var(--muted)" font-size="12">Physical instances in the page — MVCC keeps multiple versions</text>
+  <rect x="10" y="93" width="130" height="30" rx="6" fill="var(--card2)" stroke="var(--bad)"/><text x="75" y="112" text-anchor="middle" fill="var(--bad)" font-size="11">Tuple v1 (dead)</text>
+  <rect x="150" y="93" width="130" height="30" rx="6" fill="var(--card2)" stroke="var(--bad)"/><text x="215" y="112" text-anchor="middle" fill="var(--bad)" font-size="11">Tuple v2 (dead)</text>
+  <rect x="290" y="93" width="150" height="30" rx="6" fill="var(--card2)" stroke="var(--accent2)"/><text x="365" y="112" text-anchor="middle" fill="var(--accent2)" font-size="11">7 old versions (MVCC-visible)</text>
+  <rect x="450" y="93" width="150" height="30" rx="6" fill="rgba(95,214,143,.15)" stroke="var(--good)"/><text x="525" y="112" text-anchor="middle" fill="var(--good)" font-size="11">1 ACTIVE tuple ✅</text>
+
+  <text x="10" y="150" fill="var(--muted)" font-size="12">Each tuple physically = an "Item" in the page, referenced by an ItemId pointer</text>
+  <rect x="10" y="158" width="580" height="30" rx="6" fill="rgba(255,159,124,.10)" stroke="var(--accent2)"/><text x="300" y="177" text-anchor="middle" fill="var(--accent2)" font-size="12">ItemId[k] → offset:length pointing to one tuple's bytes = "Item"</text>
+</svg>
+<ul>
+<li><b>Row</b> = the logical concept: what you get back from <code>SELECT</code>, e.g. "id=5, name=Ali".</li>
+<li><b>Tuple</b> = one physical, versioned copy of that row in the page. Postgres uses MVCC — every <code>UPDATE</code> doesn't overwrite in place, it writes a <b>new tuple</b>. Old tuples stay around because some other transaction may still be mid-read of the old version.</li>
+<li><b>Item</b> = the tuple's stored bytes in the page, addressed via its ItemId pointer.</li>
+</ul>
+So the same "row" can have 10 tuples on disk: 1 currently active/visible tuple, 7 still needed by ongoing/older transactions (MVCC snapshot isolation), and 2 fully dead ones no transaction needs anymore (cleaned up later by <b>VACUUM</b>).
+<div class="example">🎯 <b>Real-life analogy:</b> Think of Google Docs version history. The "document" (row) you see is one thing, but there are 10 saved snapshots (tuples) behind it — some still open in other people's tabs (visible to other transactions), some fully stale and safe to delete (dead, awaiting cleanup/VACUUM).</div>
+</div>
+
+<div class="card qa">
+<div class="q">4. Is the Buffer/Shared Pool the same as the OS Cache?</div>
+<b>No — they're two separate caches, stacked on top of each other.</b>
+<svg viewBox="0 0 700 150">
+  <rect x="10" y="10" width="200" height="50" rx="8" fill="rgba(124,155,255,.15)" stroke="var(--accent)"/><text x="110" y="32" text-anchor="middle" fill="var(--accent)" font-size="12">DB Buffer Pool</text><text x="110" y="48" text-anchor="middle" fill="var(--muted)" font-size="10">(shared_buffers)</text>
+  <rect x="250" y="10" width="200" height="50" rx="8" fill="var(--card2)" stroke="var(--border)"/><text x="350" y="32" text-anchor="middle" fill="var(--text)" font-size="12">OS Filesystem Cache</text><text x="350" y="48" text-anchor="middle" fill="var(--muted)" font-size="10">(page cache)</text>
+  <rect x="490" y="10" width="200" height="50" rx="8" fill="var(--card2)" stroke="var(--border)"/><text x="590" y="32" text-anchor="middle" fill="var(--text)" font-size="12">Disk / SSD</text>
+
+  <text x="230" y="35" fill="var(--muted)" font-size="18">←</text>
+  <text x="470" y="35" fill="var(--muted)" font-size="18">←</text>
+
+  <text x="10" y="100" fill="var(--muted)" font-size="12">1. DB checks its OWN buffer pool first (parsed, page-format aware, DB knows exactly what's dirty/pinned)</text>
+  <text x="10" y="120" fill="var(--muted)" font-size="12">2. Miss → asks OS to read the file → OS checks its own page cache (raw bytes, no DB awareness)</text>
+  <text x="10" y="140" fill="var(--muted)" font-size="12">3. Miss → OS issues real disk I/O, populates its cache, DB then caches it too in its buffer pool</text>
+</svg>
+<ul>
+<li><b>DB Buffer Pool</b>: managed by the database itself, understands page structure, tracks dirty pages, pins pages in use, controlled by settings like Postgres' <code>shared_buffers</code>.</li>
+<li><b>OS Page Cache</b>: managed by the operating system, just caches raw file bytes with no idea what a "tuple" or "row" is.</li>
+</ul>
+So a read can actually be served from either layer — DB buffer pool (fastest, no syscall) → OS cache (fast, syscall but no disk I/O) → real disk (slowest). This is why the article says <i>"the OS checks its filesystem cache and if the required data isn't there, the OS issues the read"</i> — that's a separate hop from the DB's own buffer pool.
+<div class="example">🎯 <b>Real-life analogy:</b> Buffer pool = notes on your desk (you organized them, you know exactly what's there). OS cache = the photocopier's memory that happened to keep a copy of the last page you scanned (helpful, but it doesn't know it's "page 4 of your book" — just raw bytes).</div>
+</div>
+
+<div class="tip">
+<div class="box-title">💡 Practical / Interview Tip</div>
+<ul>
+<li>If asked <i>"why does Postgres need VACUUM?"</i> → tie it directly to dead tuples from MVCC described above — VACUUM reclaims space from tuples no transaction can see anymore.</li>
+<li>If asked to compare row vs column store → answer via I/O pattern: row-store minimizes I/O per <i>row</i>, column-store minimizes I/O per <i>column</i> scanned across many rows.</li>
+<li>Two-cache trick question: "if a page is evicted from the DB buffer pool, is it definitely gone?" → No, it likely still lives in the OS page cache, so the next read might still avoid real disk I/O.</li>
+</ul>
+</div>
+
+</body>
+</html>

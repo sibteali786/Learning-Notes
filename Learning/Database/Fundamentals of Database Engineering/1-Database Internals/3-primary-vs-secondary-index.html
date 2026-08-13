@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Primary Key vs Secondary Key — Index Organized vs Heap Organized</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e7e9ee; --muted:#9aa2b8; --accent:#7c9bff; --accent2:#ff9f7c;
+    --good:#5fd68f; --bad:#ff6b6b; --pill:#242a3d;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:32px;line-height:1.5}
+  h1{font-size:26px;margin:0 0 4px}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px}
+  .section-label{display:inline-block;background:var(--pill);color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:22px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0}
+  .pill-good{background:rgba(95,214,143,.15);color:var(--good)}
+  .pill-bad{background:rgba(255,107,107,.15);color:var(--bad)}
+  .pill-accent{background:rgba(124,155,255,.15);color:var(--accent)}
+  .pill-accent2{background:rgba(255,159,124,.15);color:var(--accent2)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  code{background:var(--pill);padding:2px 6px;border-radius:5px;font-size:13px;color:var(--accent2)}
+  .box-title{font-weight:700;margin-bottom:8px;font-size:15px}
+  .example{background:var(--card2);border-left:3px solid var(--accent);padding:12px 14px;border-radius:8px;font-size:13.5px;color:var(--muted);margin-top:10px}
+  .example b{color:var(--text)}
+  svg{width:100%;height:auto;display:block}
+  .heap-row{fill:var(--card2);stroke:var(--border)}
+  .heap-cell text{fill:var(--text);font-size:13px;font-family:monospace}
+  .idx-cell{fill:rgba(124,155,255,.15);stroke:var(--accent)}
+  .idx-cell text{fill:var(--accent);font-weight:700;font-size:13px;font-family:monospace}
+  .arrow{stroke:var(--accent2);stroke-width:1.6;marker-end:url(#arrow)}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:4px 0;font-size:14px}
+  .tip{background:linear-gradient(135deg,rgba(124,155,255,.12),rgba(255,159,124,.08));border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-top:22px}
+  .tip .box-title{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<h1>🔑 Primary Key vs Secondary Key</h1>
+<div class="subtitle">Clustered (Index-Organized) vs Heap-Organized tables — Postgres, MySQL, Oracle</div>
+
+<div class="section-label">Problem</div>
+<div class="card">
+A table's rows have <b>no order by default</b> — inserting 7, then 1, then 2 just appends them in whatever order they arrive (the <b>heap</b>). A "primary key" isn't just "unique" — it implicitly tells you <b>how the table itself is physically organized on disk</b>, which changes query performance.
+</div>
+
+<div class="section-label">How It Works</div>
+<div class="grid2">
+
+  <div class="card">
+    <div class="box-title">🟦 Primary Key → Clustered / Index-Organized Table (IOT)</div>
+    <span class="pill pill-good">Heap IS the index</span>
+    <p style="color:var(--muted);font-size:13.5px">Table rows are physically stored <b>sorted by the primary key</b>. The heap and the index are the same structure.</p>
+    <svg viewBox="0 0 320 120">
+      <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent2)"/></marker></defs>
+      <g font-family="monospace" font-size="13">
+        <rect class="idx-cell" x="10" y="10" width="70" height="30" rx="4"/><text x="45" y="30" text-anchor="middle" fill="var(--accent)">1</text>
+        <rect class="idx-cell" x="90" y="10" width="70" height="30" rx="4"/><text x="125" y="30" text-anchor="middle" fill="var(--accent)">2</text>
+        <rect class="idx-cell" x="170" y="10" width="70" height="30" rx="4"/><text x="205" y="30" text-anchor="middle" fill="var(--accent)">7</text>
+        <rect class="idx-cell" x="250" y="10" width="70" height="30" rx="4"/><text x="285" y="30" text-anchor="middle" fill="var(--accent)">8</text>
+      </g>
+      <text x="10" y="65" fill="var(--muted)" font-size="12">Rows physically sorted. Range scan 1→9 = ~1 sequential I/O.</text>
+    </svg>
+    <div class="example">🎯 <b>Example:</b> MySQL InnoDB — every table <i>must</i> have a clustered primary key (auto-assigned if you don't declare one). Oracle calls this an <code>IOT</code> (Index-Organized Table).</div>
+  </div>
+
+  <div class="card">
+    <div class="box-title">🟧 Secondary Key → Heap-Organized Table + Separate Index</div>
+    <span class="pill pill-bad">Heap ≠ index (2 structures)</span>
+    <p style="color:var(--muted);font-size:13.5px">Table rows stay in a <b>jumbled, unordered heap</b>. A separate B-tree stores key → row-ID mappings.</p>
+    <svg viewBox="0 0 320 140">
+      <g font-family="monospace" font-size="13">
+        <rect class="idx-cell" x="10" y="5" width="60" height="26" rx="4"/><text x="40" y="23" text-anchor="middle" fill="var(--accent)">idx</text>
+        <rect class="heap-row" x="90" y="45" width="60" height="26" rx="4"/><text x="120" y="63" text-anchor="middle" fill="var(--text)">7</text>
+        <rect class="heap-row" x="170" y="10" width="60" height="26" rx="4"/><text x="200" y="28" text-anchor="middle" fill="var(--text)">300</text>
+        <rect class="heap-row" x="10" y="80" width="60" height="26" rx="4"/><text x="40" y="98" text-anchor="middle" fill="var(--text)">1</text>
+        <rect class="heap-row" x="250" y="55" width="60" height="26" rx="4"/><text x="280" y="73" text-anchor="middle" fill="var(--text)">8</text>
+        <line class="arrow" x1="40" y1="31" x2="115" y2="48"/>
+      </g>
+      <text x="10" y="130" fill="var(--muted)" font-size="12">Step 1: search index. Step 2: jump to scattered heap rows (extra I/O each).</text>
+    </svg>
+    <div class="example">🎯 <b>Example:</b> Postgres — <i>all</i> indexes are secondary by default (no true primary-key clustering). A random/UUID PK in this setup means constant random-page jumps across the heap.</div>
+  </div>
+
+</div>
+
+<div class="section-label">Key Distinctions</div>
+<div class="card">
+<table>
+<tr><th>Aspect</th><th>Primary / Clustered (IOT)</th><th>Secondary Index</th></tr>
+<tr><td>Physical row order</td><td><span class="pill pill-good">Sorted by key</span></td><td><span class="pill pill-bad">Random / insertion order</span></td></tr>
+<tr><td>Structures maintained</td><td>1 (heap = index)</td><td>2 (heap + B-tree)</td></tr>
+<tr><td>Range scan cost</td><td><span class="pill pill-good">~1 sequential I/O</span></td><td><span class="pill pill-bad">Index lookup + N random heap I/Os</span></td></tr>
+<tr><td>Insert cost</td><td>Higher (must keep order)</td><td>Lower (heap just appends)</td></tr>
+<tr><td>Random key (e.g. UUID) as key</td><td><span class="pill pill-bad">Bad — causes page splits/shifts</span></td><td>Less relevant (heap unordered anyway)</td></tr>
+<tr><td>Oracle name</td><td><code>IOT</code> (Index-Organized Table)</td><td>Heap-Organized Table (HOT) + index</td></tr>
+<tr><td>MySQL (InnoDB)</td><td><span class="pill pill-accent">Default & mandatory</span></td><td>Secondary indexes point back to PK</td></tr>
+<tr><td>Postgres</td><td><span class="pill pill-accent2">No true clustered PK</span> (CLUSTER cmd = one-time reorg only)</td><td><span class="pill pill-accent">Default for everything</span></td></tr>
+<tr><td>SQL Server</td><td>Optional — you choose clustered index</td><td>Optional — nonclustered index</td></tr>
+</table>
+</div>
+
+<div class="section-label">Your Note — New Discovery ✅</div>
+<div class="card" style="border-color:var(--accent)">
+Correct refinement: it's <b>not</b> "only PK can organize the heap." The real split is:
+<ul>
+<li><b>Index-Organized Table</b> → heap <i>is</i> organized around the key (no second fetch needed for range scans).</li>
+<li><b>Postgres model</b> → <i>every</i> index (including on the PK column) is a <b>secondary</b> index: search index → get row ID(s) → fetch from an unordered heap. Two hops, always.</li>
+</ul>
+That's why Postgres has <code>CLUSTER table USING index</code> — a manual, one-time physical reorg that mimics IOT behavior but doesn't stay maintained automatically like MySQL/Oracle's true clustered structures.
+</div>
+
+<div class="tip">
+<div class="box-title">💡 Practical / Interview Tip</div>
+<ul>
+<li>If asked <i>"why avoid random UUIDs as primary keys?"</i> → answer in terms of clustering: random values cause page splits/fragmentation in clustered (IOT) tables — much less of an issue in Postgres since the heap is unordered anyway.</li>
+<li>If asked <i>"why is <code>SELECT *</code> slower on a secondary-indexed column?"</i> → because after the index lookup, DB must do an extra heap fetch per row ("bookmark lookup").</li>
+<li>Remember: <b>Postgres has no primary-key clustering by default</b> — a common trick question.</li>
+</ul>
+</div>
+
+</body>
+</html>

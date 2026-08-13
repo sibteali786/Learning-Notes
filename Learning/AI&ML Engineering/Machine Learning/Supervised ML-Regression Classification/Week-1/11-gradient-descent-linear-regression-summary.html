@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gradient Descent for Linear Regression</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:32px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; color:#f8fafc; border-bottom: 3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#38bdf8; font-size:19px; margin-top:36px; }
+  .card { background:#1e293b; border-radius:12px; padding:18px 22px; margin:14px 0; border:1px solid #334155; }
+  .formula { background:#0b1220; color:#7dd3fc; padding:14px 18px; border-radius:8px; font-family:"Cambria Math", Georgia, serif; font-size:18px; text-align:center; margin:10px 0; border-left:4px solid #38bdf8; }
+  .note { background:#422006; border-left:4px solid #facc15; padding:10px 16px; border-radius:6px; font-size:14px; color:#fde68a; margin:10px 0; }
+  .badge { display:inline-block; background:#134e4a; color:#5eead4; padding:2px 10px; border-radius:12px; font-size:12px; margin-left:8px; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
+  th { color:#94a3b8; font-size:13px; text-transform:uppercase; }
+  .compare { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  .compare .card { margin:0; }
+  .hilly { border-left:4px solid #f87171; }
+  .bowl { border-left:4px solid #4ade80; }
+  .steps { counter-reset: step; list-style:none; padding:0; }
+  .steps li { counter-increment: step; position:relative; padding:8px 0 8px 40px; border-left:2px solid #334155; margin-left:12px; }
+  .steps li::before { content: counter(step); position:absolute; left:-14px; top:6px; background:#38bdf8; color:#0f172a; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; }
+  .qa { background:#1e293b; border:1px solid #38bdf8; border-radius:12px; padding:18px 22px; margin:16px 0; }
+  .qa .q { color:#facc15; font-weight:bold; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Putting It Together: Gradient Descent for Linear Regression <span class="badge">DeepLearning.AI notes</span></h1>
+
+  <div class="card">
+    <strong>Goal:</strong> Combine the linear regression model, the squared error cost function, and gradient descent into one complete learning algorithm — and clarify how "local minima" and "convex" relate to this specific cost function.
+  </div>
+
+  <h2>1. The Three Pieces Combined</h2>
+  <table>
+    <tr><th>Piece</th><th>Formula</th></tr>
+    <tr><td>Model</td><td>f<sub>w,b</sub>(x) = wx + b</td></tr>
+    <tr><td>Cost function</td><td>J(w,b) = (1/2m) Σ (f<sub>w,b</sub>(x<sup>(i)</sup>) − y<sup>(i)</sup>)²</td></tr>
+    <tr><td>Gradient descent</td><td>w := w − α·(d/dw)J(w,b), &nbsp; b := b − α·(d/db)J(w,b) — simultaneously</td></tr>
+  </table>
+
+  <h2>2. The Derivative Terms (Plug These In)</h2>
+  <div class="formula">
+    d/dw J(w,b) = (1/m) · Σ<sub>i=1</sub><sup>m</sup> ( f<sub>w,b</sub>(x<sup>(i)</sup>) − y<sup>(i)</sup> ) · x<sup>(i)</sup>
+  </div>
+  <div class="formula">
+    d/db J(w,b) = (1/m) · Σ<sub>i=1</sub><sup>m</sup> ( f<sub>w,b</sub>(x<sup>(i)</sup>) − y<sup>(i)</sup> )
+  </div>
+  <p>Same formula, except the w-derivative has an extra x<sup>(i)</sup> factor at the end.</p>
+
+  <h2>3. Where These Come From (Optional Calculus)</h2>
+  <div class="note">
+    Fully optional — skipping this does not affect your ability to implement gradient descent. Substituting f<sub>w,b</sub>(x<sup>(i)</sup>) = wx<sup>(i)</sup> + b into J(w,b) and differentiating with the chain rule causes the "2" from squaring to cancel with the "1/2" in front of the cost function — <strong>this is exactly why the 1/2 was included in the cost function's definition</strong> in the first place: purely to make this derivative come out clean.
+  </div>
+
+  <h2>4. Local Minima vs. Global Minimum — Two Different Cost Surfaces</h2>
+  <div class="compare">
+    <div class="card hilly">
+      <strong>Generic cost function</strong> (e.g. neural net)<br>
+      Hilly, "outdoor park" surface — <strong>multiple local minima</strong>. Where gradient descent ends up depends on the starting point (w, b).
+    </div>
+    <div class="card bowl">
+      <strong>Squared error cost, linear regression</strong><br>
+      Bowl/hammock-shaped surface — <strong>convex</strong>: only ever one minimum, the global minimum. No other valleys exist to get stuck in.
+    </div>
+  </div>
+  <div class="note">
+    Because J(w,b) for linear regression is always this bowl shape, gradient descent with a properly chosen α is guaranteed to converge to the <strong>global minimum</strong> — regardless of where w and b are initialized.
+  </div>
+
+  <h2>Your Question, Answered</h2>
+  <div class="qa">
+    <div class="q">Q: Are the squared error cost function and "the gradient cost function" different things — of course they are?</div>
+    There's really only <strong>one</strong> cost function in play for linear regression: the squared error cost J(w,b). Gradient descent is not a separate cost function — it's the <strong>optimization algorithm</strong> that minimizes whatever cost function you hand it. There's no separate "gradient cost function"; gradient descent just uses the derivative <em>of</em> J(w,b) to decide which way to step.
+  </div>
+  <div class="qa">
+    <div class="q">Q: Then why does Andrew say gradient descent on a convex function only finds the global minimum, when the cost function has multiple minima?</div>
+    The "multiple minima" surface was a <strong>different example J</strong> (the generic, hilly one used to illustrate local minima in general) — <strong>not</strong> the squared error cost function used for linear regression. The squared error cost function is <em>always</em> the bowl shape (convex), with exactly one minimum. So there's no contradiction: gradient descent applied to a non-convex J (hilly) can get stuck in a local minimum; the same algorithm applied to the convex J (bowl, squared error) always reaches the single global minimum. Same algorithm, two different cost landscapes.
+  </div>
+
+  <h2>Real-World Framing</h2>
+  <div class="card">
+    <strong>Example:</strong> Predicting house prices from size. Because the squared error cost is convex, no matter what starting guess you pick for w and b (even w=0, b=0), gradient descent is guaranteed to walk downhill into the one true best-fit line — you'll never get unlucky and land on a "good but not best" line the way you could with a hilly, non-convex cost function.
+  </div>
+
+  <h2>What's Next</h2>
+  <div class="card">
+    Final video of the week: seeing gradient descent for linear regression actually run, step by step, on real data.
+  </div>
+
+</div>
+</body>
+</html>

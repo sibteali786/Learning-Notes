@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Choosing the Learning Rate (alpha)</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0f172a; color:#e2e8f0; margin:0; padding:32px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 26px; color:#f8fafc; border-bottom: 3px solid #38bdf8; padding-bottom:10px; }
+  h2 { color:#38bdf8; font-size:19px; margin-top:36px; }
+  .card { background:#1e293b; border-radius:12px; padding:18px 22px; margin:14px 0; border:1px solid #334155; }
+  .formula { background:#0b1220; color:#7dd3fc; padding:14px 18px; border-radius:8px; font-family:"Cambria Math", Georgia, serif; font-size:18px; text-align:center; margin:10px 0; border-left:4px solid #38bdf8; }
+  .note { background:#422006; border-left:4px solid #facc15; padding:10px 16px; border-radius:6px; font-size:14px; color:#fde68a; margin:10px 0; }
+  .badge { display:inline-block; background:#134e4a; color:#5eead4; padding:2px 10px; border-radius:12px; font-size:12px; margin-left:8px; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
+  th { color:#94a3b8; font-size:13px; text-transform:uppercase; }
+  .compare { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  .compare .card { margin:0; }
+  .too-small { border-left:4px solid #facc15; }
+  .too-large { border-left:4px solid #f87171; }
+  .just-right { border-left:4px solid #4ade80; }
+  .steps { counter-reset: step; list-style:none; padding:0; }
+  .steps li { counter-increment: step; position:relative; padding:8px 0 8px 40px; border-left:2px solid #334155; margin-left:12px; }
+  .steps li::before { content: counter(step); position:absolute; left:-14px; top:6px; background:#38bdf8; color:#0f172a; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>The Learning Rate α: Too Small, Too Large, and Just Right <span class="badge">DeepLearning.AI notes</span></h1>
+
+  <div class="card">
+    <strong>Goal:</strong> Understand how the choice of α affects gradient descent — and why it can automatically slow down near a minimum even with a fixed α.
+  </div>
+
+  <div class="formula">w := w − α · (d/dw) J(w)</div>
+
+  <h2>1. α Too Small</h2>
+  <div class="card too-small">
+    <strong>What happens:</strong> multiplying the derivative by a tiny α (e.g. 0.0000001) produces tiny update steps. Gradient descent still moves toward the minimum — <strong>correctly</strong> — but extremely slowly, needing a huge number of iterations.
+  </div>
+  <p><strong>Verdict:</strong> works, but wastes time/compute.</p>
+
+  <h2>2. α Too Large</h2>
+  <div class="card too-large">
+    <strong>What happens:</strong> even starting close to the minimum, a large α causes a huge step that <em>overshoots</em> past the minimum to the other side — increasing J instead of decreasing it. The next step overshoots again, even further away. Each iteration gets <strong>worse</strong>, not better.
+  </div>
+  <p><strong>Verdict:</strong> gradient descent may fail to converge, or actively <strong>diverge</strong> (cost keeps growing instead of shrinking).</p>
+
+  <h2>3. What Happens Exactly At a Minimum?</h2>
+  <div class="card just-right">
+    At a local minimum, the tangent line is <strong>flat</strong> → slope = 0 → derivative = 0.
+    <div class="formula">w := w − α · 0 &nbsp;=&nbsp; w</div>
+    So the update leaves w completely unchanged. <strong>Example:</strong> if w = 5 and α = 0.1, after one iteration w is still 5 — gradient descent naturally "locks in" once it finds a minimum, without needing any special stopping rule.
+  </div>
+
+  <h2>4. Why Fixed α Still Slows Down Automatically</h2>
+  <ul class="steps">
+    <li>Far from the minimum → curve is steep → derivative is large → big update step</li>
+    <li>Getting closer → curve flattens → derivative shrinks → smaller update step</li>
+    <li>Very close to the minimum → derivative nearly 0 → tiny update step</li>
+    <li>At the minimum → derivative = 0 → no further change</li>
+  </ul>
+  <div class="note">
+    Even though α itself never changes, the <strong>step size shrinks automatically</strong> as you approach the minimum, because the derivative (slope) naturally decreases. This is why you don't need to manually shrink α over time for gradient descent to settle at a minimum.
+  </div>
+
+  <h2>Summary Table</h2>
+  <table>
+    <tr><th>α value</th><th>Behavior</th><th>Outcome</th></tr>
+    <tr><td>Too small</td><td>Tiny steps every iteration</td><td>Converges, but very slowly</td></tr>
+    <tr><td>Too large</td><td>Overshoots the minimum repeatedly</td><td>May fail to converge / diverge</td></tr>
+    <tr><td>At a minimum</td><td>Derivative = 0</td><td>No change — stays put</td></tr>
+    <tr><td>Well-chosen</td><td>Large steps far away, small steps close by (automatic)</td><td>Converges efficiently</td></tr>
+  </table>
+
+  <h2>Real-World Framing</h2>
+  <div class="card">
+    <strong>Example:</strong> Think of parking a car by pressing the gas pedal. Too light a tap (small α) and you creep toward the parking spot forever. Too hard a stomp (large α) and you overshoot past the spot, have to reverse, overshoot again — swinging back and forth or crashing further away each time. A good driver eases off the gas automatically as they get close — which is exactly what gradient descent does on its own as the slope flattens near the minimum.
+  </div>
+
+  <h2>What's Next</h2>
+  <div class="card">
+    Next video: plug the actual mean-squared-error cost function (from linear regression) back into gradient descent — this combination gives you your first complete learning algorithm.
+  </div>
+
+</div>
+</body>
+</html>
