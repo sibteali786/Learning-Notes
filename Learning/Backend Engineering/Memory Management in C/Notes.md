@@ -3314,3 +3314,15 @@ The `free` function returns (deallocates) that memory for use elsewhere. It's im
 Use [snprintf](https://cplusplus.com/reference/cstdio/snprintf/) to write the formatted output to a buffer. Remember to pass in the `size` rather than the hard-coded `100`.
 ![[Pasted image 20260813172704.png]]![[Pasted image 20260813172709.png]]
 ![[Pasted image 20260813172716.png]]
+```c
+#include "exercise.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+char *get_full_greeting(char *greeting, char *name, int size) {
+  char *full_greeting = malloc(size * sizeof(char));
+  snprintf(full_greeting, size, "%s %s", greeting, name);
+  return full_greeting;
+}
+
+```
