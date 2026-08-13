@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Seq Scan vs Index Scan vs Bitmap Scan — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d212c; --border:#2a2f3d;
+    --text:#e6e8ee; --muted:#9aa3b5; --accent:#6ea8fe; --green:#3ecf8e;
+    --red:#ff6b6b; --amber:#ffb84d; --purple:#b18cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:28px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px}
+  .label{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:#1a2233;border:1px solid #29406b;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+  h2{font-size:18px;margin:0 0 10px}
+  p{color:#c7cbd6;margin:6px 0}
+  code{font-family:'Fira Code',Consolas,monospace;background:#11141b;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:13px;color:#9fd1ff}
+  pre{background:#0b0d12;border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;margin:2px 4px 2px 0}
+  .pill.fast{background:#123322;color:var(--green);border:1px solid #1f5a3d}
+  .pill.slow{background:#3a1616;color:var(--red);border:1px solid #6b2323}
+  .pill.mid{background:#3a2c10;color:var(--amber);border:1px solid #6b4d1a}
+  .compare3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:760px){.compare3{grid-template-columns:1fr}}
+  .compare3>div{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px}
+  svg{max-width:100%}
+  .tip{background:#141c14;border:1px solid #2a4a2a;border-left:4px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .real{background:#1a1720;border-left:4px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .bitrow{display:flex;gap:4px;margin:8px 0;flex-wrap:wrap}
+  .bit{width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#2a2f3d;color:#9aa3b5}
+  .bit.on{background:var(--red);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Seq Scan vs Index Scan vs Bitmap Index Scan</h1>
+<div class="sub">Visual summary — how Postgres picks a scan strategy (table: <code>grades</code>, ~50M rows, index on <code>id</code> and on <code>g</code>)</div>
+
+<div class="card">
+  <span class="label">Problem</span>
+  <h2>Same table, three different plans for three different queries</h2>
+  <p>Postgres doesn't always use an index just because one exists. It picks whichever plan its cost estimator thinks is <b>cheapest</b> — and that decision depends heavily on <i>how many rows</i> it expects to match.</p>
+  <div class="real"><b>Table:</b> <code>grades(id serial primary key, name text, g int)</code> — <code>id</code> indexed (PK), <code>g</code> indexed, <code>name</code> not indexed.</div>
+</div>
+
+<div class="card">
+  <span class="label">Key Distinctions</span>
+  <h2>Three scans, three row-count regimes</h2>
+  <div class="compare3">
+    <div>
+      <h2 style="color:var(--green);font-size:15px">🟢 Index Scan</h2>
+      <p><code>WHERE id = 1000</code></p>
+      <p>Very few rows match. Postgres jumps straight into the B-Tree, finds the row, then does one heap fetch.</p>
+      <p><span class="pill fast">Cheap</span> — few random heap lookups</p>
+    </div>
+    <div>
+      <h2 style="color:var(--amber);font-size:15px">🟡 Bitmap Index Scan</h2>
+      <p><code>WHERE g > 95</code></p>
+      <p>Moderate number of rows match. Postgres scans the index and builds a bitmap of <b>pages</b> to visit, then fetches each page once.</p>
+      <p><span class="pill mid">Balanced</span> — one sorted pass over the heap</p>
+    </div>
+    <div>
+      <h2 style="color:var(--red);font-size:15px">🔴 Sequential Scan</h2>
+      <p><code>WHERE id > 100</code></p>
+      <p>Almost all rows match. Jumping page-by-page via the index would touch nearly the whole table anyway — cheaper to just read it straight through.</p>
+      <p><span class="pill slow">Full scan</span> — but no wasted index overhead</p>
+    </div>
+  </div>
+  <div class="tip"><b>Rule of thumb:</b> few matches → Index Scan. Some matches → Bitmap Index Scan. Most/all matches → Sequential Scan. The index is only worth using when it actually narrows things down.</div>
+</div>
+
+<div class="card">
+  <span class="label">How it works</span>
+  <h2>Bitmap Index Scan, step by step</h2>
+  <p>Instead of jumping to the heap for every single matching row (random access — slow), Postgres first marks <i>which pages</i> contain matches, then visits each page once.</p>
+
+  <p style="margin-top:14px;color:#9aa3b5;font-size:13px">1. Start with an empty bitmap — one bit per heap page</p>
+  <div class="bitrow">
+    <div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div>
+  </div>
+
+  <p style="margin-top:14px;color:#9aa3b5;font-size:13px">2. Scan the index on <code>g</code> → mark pages that contain a match (here: pages 14, 15)</p>
+  <div class="bitrow">
+    <div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit on">1</div><div class="bit on">1</div>
+  </div>
+
+  <p style="margin-top:14px;color:#9aa3b5;font-size:13px">3. Fetch each marked page <b>once</b> from the heap — get every row on it, then recheck the condition on each row (a page can hold rows that don't actually match)</p>
+  <div class="bitrow">
+    <div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div>
+  </div>
+  <p style="font-size:12px;color:#8a8f9c">(Second bitmap shown here is illustrative of a different query pass — the point is: mark pages first, fetch each page exactly once, recheck rows on that page.)</p>
+
+  <div class="tip"><b>Why this beats a plain index scan:</b> a plain index scan jumps to the heap once per matching <i>row</i> (random access, expensive at scale). A bitmap scan jumps to the heap once per matching <i>page</i>, and each page usually holds several matching rows — far fewer trips.</div>
+</div>
+
+<div class="card">
+  <span class="label">Bonus</span>
+  <h2>Combining two bitmaps (AND)</h2>
+  <p><code>WHERE g > 95 AND id < 10000</code> — Postgres builds <b>two</b> bitmaps (one from the <code>g</code> index, one from the <code>id</code> index) and <b>ANDs</b> them together before touching the heap at all.</p>
+  <pre><code>Bitmap Heap Scan on grades
+  Recheck Cond: ((g > 95) AND (id < 10000))
+  ->  BitmapAnd
+        ->  Bitmap Index Scan on grades_g_idx
+              Index Cond: (g > 95)
+        ->  Bitmap Index Scan on grades_pkey
+              Index Cond: (id < 10000)</code></pre>
+  <div class="tip">Any page present in one bitmap but not the other is guaranteed to have zero matching rows — so it's skipped entirely, shrinking thousands of candidate rows down to only the pages that satisfy <i>both</i> conditions.</div>
+</div>
+
+<div class="card">
+  <span class="label">Practical Tips</span>
+  <h2>Interview / real-world takeaways</h2>
+  <p>🔹 <b>Having an index doesn't force its use</b> — the planner estimates match count (via <code>ANALYZE</code> statistics) and picks the cheapest strategy.</p>
+  <p>🔹 <b>Bitmap scans exist because random I/O is expensive.</b> They trade a little index-scanning overhead for far fewer heap page visits.</p>
+  <p>🔹 <b>Multiple indexes can combine via <code>BitmapAnd</code>/<code>BitmapOr</code></b> even without a composite index — useful when you can't create one for every column combination.</p>
+  <p>🔹 Run <code>ANALYZE table_name</code> periodically so the planner's row estimates (and thus its scan choice) stay accurate.</p>
+  <div class="real"><b>Real-world scenario:</b> An e-commerce <code>orders</code> table filtered by <code>status = 'pending' AND region = 'EU'</code> — neither filter alone is selective enough for a plain index scan, but a <code>BitmapAnd</code> across both indexes narrows it to just the qualifying pages before hitting disk, instead of falling back to a full table scan.</div>
+</div>
+
+</div>
+</body>
+</html>

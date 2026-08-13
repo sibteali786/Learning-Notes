@@ -8,15 +8,39 @@
         "type": "tabs",
         "children": [
           {
-            "id": "37a8d2c25a241603",
+            "id": "7a794b1fcc298e28",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/2-explain-postgres.html"
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "code-glyph",
-              "title": "2-explain-postgres"
+              "icon": "lucide-file",
+              "title": "Notes"
+            }
+          },
+          {
+            "id": "d4408288fa50c390",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Backend Engineering/Memory Management in C/Drawing 2026-08-13 15.18.44.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-08-13 15.18.44.excalidraw"
             }
           }
         ]
@@ -183,9 +207,16 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "7a794b1fcc298e28",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/Memory Management in C/Drawing 2026-08-13 15.18.44.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141935.png",
+    "Pasted image 20260714215710.png",
+    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
+    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141945.png",
     "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/3-scan-types.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/2-explain-postgres.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/1-db-indexing.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing",
@@ -195,7 +226,6 @@
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/1-db-storage-fundamentals.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/2-vectorization-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/4-gradient-descent-multiple-regression-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/1-multiple-linear-regression-summary.html",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/Database Pages.md",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/Drawing 2026-08-12 16.51.43.excalidraw.md",
     "Learning/Database/Learnings/Things i learned while working.md",
@@ -212,7 +242,6 @@
     "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807124227_035.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807111118_819.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807102338_467.png",
@@ -226,10 +255,6 @@
     "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Adjacency List/4-Graph Valid Tree.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/attachments/1.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-10_at_9.23.04_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-03_at_9.34.41_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2025-01-02_at_10.45.57_AM.png",
-    "Learning/Database/Fundamentals of Database Engineering/attachments/Screenshot_2024-10-27_at_1.23.30_PM.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
