@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Postgres EXPLAIN — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d212c; --border:#2a2f3d;
+    --text:#e6e8ee; --muted:#9aa3b5; --accent:#6ea8fe; --green:#3ecf8e;
+    --red:#ff6b6b; --amber:#ffb84d; --purple:#b18cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:28px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px}
+  .label{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:#1a2233;border:1px solid #29406b;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+  h2{font-size:18px;margin:0 0 10px}
+  p{color:#c7cbd6;margin:6px 0}
+  code, .code{font-family:'Fira Code',Consolas,monospace;background:#11141b;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:13px;color:#9fd1ff}
+  pre{background:#0b0d12;border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;margin:2px 4px 2px 0}
+  .pill.fast{background:#123322;color:var(--green);border:1px solid #1f5a3d}
+  .pill.slow{background:#3a1616;color:var(--red);border:1px solid #6b2323}
+  .pill.mid{background:#3a2c10;color:var(--amber);border:1px solid #6b4d1a}
+  .compare{display:flex;gap:14px;align-items:stretch}
+  .compare>div{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .compare .vs{display:flex;align-items:center;color:var(--muted);font-weight:700}
+  svg{max-width:100%}
+  .tip{background:#141c14;border:1px solid #2a4a2a;border-left:4px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .real{background:#1a1720;border-left:4px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .warn{background:#2a1a10;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Reading Postgres <code style="background:none;border:none;color:#e6e8ee;padding:0">EXPLAIN</code> Output</h1>
+<div class="sub">Visual summary — cost estimates, sorting, row width, index vs index-only scans</div>
+
+<div class="card">
+  <span class="label">Problem</span>
+  <h2>EXPLAIN shows the plan, not the actual runtime</h2>
+  <p><code>EXPLAIN</code> asks Postgres "what would you do with this query?" — it returns an <b>estimated plan and cost</b> based on table statistics, without running the query. (Running it too is <code>EXPLAIN ANALYZE</code> — a separate command, covered elsewhere.)</p>
+  <div class="real"><b>Table used:</b> <code>grades(id serial primary key, g int, name text)</code>, ~10M rows. <code>id</code> has a PK index; <code>g</code> and <code>name</code> have <b>no index</b> in this run.</div>
+</div>
+
+<div class="card">
+  <span class="label">Anatomy</span>
+  <h2>Decoding one line of output</h2>
+  <pre><code>Seq Scan on grades  (cost=0.00..167363.25 rows=10000425 width=22)</code></pre>
+  <svg width="900" height="150" viewBox="0 0 900 150">
+    <text x="10" y="20" fill="#9aa3b5" font-size="12">cost = startup..total</text>
+    <rect x="10" y="35" width="140" height="30" rx="6" fill="#123322" stroke="#1f5a3d"/>
+    <text x="80" y="55" fill="#3ecf8e" font-size="12" text-anchor="middle">0.00 startup</text>
+    <text x="10" y="80" fill="#8a8f9c" font-size="11">time to get 1st row</text>
+
+    <rect x="170" y="35" width="220" height="30" rx="6" fill="#1a2233" stroke="#29406b"/>
+    <text x="280" y="55" fill="#6ea8fe" font-size="12" text-anchor="middle">167363.25 total</text>
+    <text x="170" y="80" fill="#8a8f9c" font-size="11">est. time to finish (arbitrary units)</text>
+
+    <rect x="410" y="35" width="220" height="30" rx="6" fill="#3a2c10" stroke="#6b4d1a"/>
+    <text x="520" y="55" fill="#ffb84d" font-size="12" text-anchor="middle">rows=10000425</text>
+    <text x="410" y="80" fill="#8a8f9c" font-size="11">estimated row count (from stats)</text>
+
+    <rect x="650" y="35" width="200" height="30" rx="6" fill="#241a30" stroke="#4a2f6b"/>
+    <text x="750" y="55" fill="#b18cff" font-size="12" text-anchor="middle">width=22</text>
+    <text x="650" y="80" fill="#8a8f9c" font-size="11">avg bytes per row returned</text>
+  </svg>
+  <div class="tip"><b>Startup cost</b> rises when Postgres has to do work <i>before</i> returning the first row — e.g. sorting, aggregating. <b>Total cost</b> is the full estimated cost to return everything.</div>
+</div>
+
+<div class="card">
+  <span class="label">Key Distinctions</span>
+  <h2>Plan comparison from the session</h2>
+  <table>
+    <tr><th>Query</th><th>Plan</th><th>Startup cost</th><th>Total cost</th><th>Why</th></tr>
+    <tr><td><code>SELECT * FROM grades</code></td><td>Seq Scan</td><td><span class="pill fast">0.00</span></td><td>167363.25</td><td>No filter, no order → go straight to heap</td></tr>
+    <tr><td><code>... ORDER BY g</code></td><td>Sort → Seq Scan</td><td><span class="pill slow">1,740,269.56</span></td><td>1,765,270.63</td><td><b>No index on <code>g</code></b> → must scan + sort all rows before returning row 1</td></tr>
+    <tr><td><code>... ORDER BY name</code></td><td>Sort → Seq Scan</td><td><span class="pill slow">1,740,269.56</span></td><td>1,765,270.63</td><td>Same — no index on <code>name</code> either</td></tr>
+    <tr><td><code>SELECT id FROM grades</code></td><td>Seq Scan</td><td><span class="pill fast">0.00</span></td><td>167363.25</td><td>width drops to 4 bytes (just the int)</td></tr>
+    <tr><td><code>SELECT * WHERE id=10</code></td><td>Index Scan</td><td><span class="pill fast">0.43</span></td><td>8.45</td><td>PK index finds row, then fetches full row from heap</td></tr>
+    <tr><td><code>SELECT id WHERE id=10</code></td><td><b>Index Only Scan</b></td><td><span class="pill fast">0.43</span></td><td>4.45</td><td>Only column needed is already in the index → no heap trip</td></tr>
+  </table>
+  <div class="warn"><b>Your case:</b> in the original video, <code>g</code> had an index so <code>ORDER BY g</code> stayed cheap (sort on an already-sorted index). In your run neither <code>g</code> nor <code>name</code> is indexed, so both sorts collapse to the same expensive Sort → Seq Scan plan — matching exactly what you observed.</div>
+</div>
+
+<div class="card">
+  <span class="label">Compare</span>
+  <h2>Index Scan vs. Index Only Scan</h2>
+  <div class="compare">
+    <div>
+      <h2 style="color:var(--amber);font-size:15px">🟡 Index Scan</h2>
+      <p>Used for <code>SELECT *</code> or any column not in the index.</p>
+      <p>Steps: index → find match → jump to heap → fetch full row.</p>
+      <p>cost 0.43..8.45</p>
+    </div>
+    <div class="vs">VS</div>
+    <div>
+      <h2 style="color:var(--green);font-size:15px">🟢 Index Only Scan</h2>
+      <p>Used when every selected column is already inside the index.</p>
+      <p>Steps: index → find match → return value directly, <b>no heap trip</b>.</p>
+      <p>cost 0.43..4.45 — cheaper total cost</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <span class="label">Practical Tips</span>
+  <h2>Interview / real-world takeaways</h2>
+  <p>🔹 <b><code>EXPLAIN</code> alone never runs the query</b> — it's a plan + estimate. Use <code>EXPLAIN ANALYZE</code> to get real timings.</p>
+  <p>🔹 <b>Watch startup cost</b> for sorts/aggregates before the real work — a huge startup cost usually means "no index to help this ORDER BY."</p>
+  <p>🔹 <b>Use estimated row counts instead of <code>SELECT COUNT(*)</code></b> for approximate counts on huge tables — the planner's estimate is nearly free, a real count on billions of rows is not.</p>
+  <p>🔹 <b><code>width</code> matters over the network</b> — fewer/smaller columns selected means less data shipped to your backend.</p>
+  <p>🔹 <b>Watch for int overflow</b> — a <code>serial</code> (4-byte int) PK caps at ~2.1 billion; use <code>bigserial</code> if the table might outgrow that (mentioned Parler hit this).</p>
+  <div class="real"><b>Real-world scenario:</b> A leaderboard table sorted by score with no index on <code>score</code> — fine at 10K rows, but at 10M rows every "top 100 players" query pays that same huge Sort→SeqScan startup cost you just measured on <code>g</code>. Adding <code>CREATE INDEX ON grades(g)</code> turns the ORDER BY into a cheap index-ordered read.</div>
+</div>
+
+<div class="card">
+  <span class="label">Setup</span>
+  <h2>Table + data used in this session</h2>
+  <pre><code>create table grades (
+  id serial primary key,
+  g int,
+  name text
+);
+
+insert into grades (g, name)
+select
+  random()*100,
+  substring(md5(random()::text), 0, floor(random()*31)::int)
+from generate_series(0, 10000000);</code></pre>
+  <p style="margin-top:10px">To reproduce the original video's cheaper <code>ORDER BY g</code> plan, add:</p>
+  <pre><code>create index grades_g_idx on grades(g);</code></pre>
+</div>
+
+</div>
+</body>
+</html>
