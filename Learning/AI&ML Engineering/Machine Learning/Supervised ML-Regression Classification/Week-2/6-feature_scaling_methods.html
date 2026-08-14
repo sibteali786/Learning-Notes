@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Feature Scaling Methods — Summary</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --text:#e2e8f0; --muted:#94a3b8;
+    --accent:#38bdf8; --accent2:#fb923c; --good:#4ade80; --bad:#f87171; --purple:#c084fc;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:32px;}
+  h1{font-size:1.7rem;margin-bottom:4px;}
+  .sub{color:var(--muted);margin-bottom:24px;}
+  .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.3);margin-bottom:20px;}
+  .card h2{margin-top:0;font-size:1.15rem;color:var(--accent);}
+  code{background:#0b1220;padding:2px 6px;border-radius:4px;color:var(--accent);}
+  table{width:100%;border-collapse:collapse;margin-top:8px;}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid #334155;font-size:.9rem;}
+  th{color:var(--muted);}
+  .good{color:var(--good);font-weight:600;} .bad{color:var(--bad);font-weight:600;}
+
+  .method-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .method{background:#0b1220;border-radius:10px;padding:14px;border-top:3px solid var(--accent);}
+  .method.mean{border-color:var(--accent2);}
+  .method.z{border-color:var(--purple);}
+  .method h3{margin:0 0 6px;font-size:1rem;}
+  .method .formula{font-size:1.05rem;text-align:center;margin:10px 0;color:#fff;}
+  .method .range{font-size:.85rem;color:var(--muted);}
+  .method .range b{color:var(--good);}
+
+  .analogy-box{background:#0b1220;border-left:3px solid var(--purple);padding:12px 16px;border-radius:6px;margin-top:10px;font-size:.92rem;}
+  .std-visual{display:flex;justify-content:center;margin:14px 0;}
+  svg text{font-family:inherit;}
+
+  .steps{counter-reset:step;list-style:none;padding:0;}
+  .steps li{counter-increment:step;margin-bottom:10px;padding-left:34px;position:relative;}
+  .steps li::before{content:counter(step);position:absolute;left:0;top:0;background:var(--accent);color:#0f172a;
+    width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;}
+
+  .rule-good{background:#052e1a;color:var(--good);}
+  .rule-bad{background:#3a0d0d;color:var(--bad);}
+  .footer{color:var(--muted);font-size:.85rem;margin-top:20px;border-top:1px solid #334155;padding-top:12px;}
+</style>
+</head>
+<body>
+
+<h1>📏 Feature Scaling Methods + Standard Deviation & Z-Score</h1>
+<div class="sub">How to actually implement feature scaling: divide-by-max, mean normalization, z-score normalization, and how to judge if scaling is needed</div>
+
+<div class="card">
+  <h2>❓ Quick Answers First</h2>
+  <table>
+    <tr><th style="width:160px">Concept</th><th>Explanation</th></tr>
+    <tr>
+      <td><b>Standard deviation (σ)</b></td>
+      <td>Measures how spread out data is from the mean. Steps: find distance of each value from the mean → square each distance
+      → average the squares → take the square root. Small σ = values cluster near the mean; large σ = values are spread wide.
+      In a normal (bell-curve) distribution, ~68% of values fall within 1σ of the mean.</td>
+    </tr>
+    <tr>
+      <td><b>Z-score</b></td>
+      <td><code>z = (x − μ) / σ</code> — "how many standard deviations away from average is this value?" It recenters a feature
+      around 0 and rescales it by its typical spread, so features on very different scales become comparable.</td>
+    </tr>
+  </table>
+  <div class="analogy-box">
+    🎓 <b>Analogy:</b> Exam scores. Class average (μ) = 70, σ = 10. You score 90 → z = (90−70)/10 = <b>2</b> (2 std devs above
+    average — a strong result). Someone else scores 90 on a different test where the average was 88 and σ = 2 → z = (90−88)/2 = <b>1</b>
+    (only 1 std dev above average). Same raw score, very different standing — z-score reveals the real difference. This is exactly
+    what z-score normalization does to ML features: it strips away arbitrary raw scale so gradient descent treats each feature fairly.
+  </div>
+</div>
+
+<div class="card">
+  <h2>⚙️ Three Ways to Implement Feature Scaling</h2>
+  <p>Applied to x₁ = size in feet² (300–2000) and x₂ = # bedrooms (0–5):</p>
+  <div class="method-grid">
+    <div class="method">
+      <h3>1️⃣ Divide by Max</h3>
+      <div class="formula">x<sub>scaled</sub> = x / max</div>
+      <p class="range">x₁: 0.15 → <b>1</b><br>x₂: 0 → <b>1</b></p>
+      <p style="font-size:.82rem;color:var(--muted);">Simplest method — just divide every value by the maximum in that feature's range.</p>
+    </div>
+    <div class="method mean">
+      <h3>2️⃣ Mean Normalization</h3>
+      <div class="formula">x<sub>norm</sub> = (x − μ) / (max − min)</div>
+      <p class="range">μ₁=600 → x₁: <b>−0.18 to 0.82</b><br>μ₂=2.3 → x₂: <b>−0.46 to 0.54</b></p>
+      <p style="font-size:.82rem;color:var(--muted);">Centers data around 0 — values become both negative and positive.</p>
+    </div>
+    <div class="method z">
+      <h3>3️⃣ Z-score Normalization</h3>
+      <div class="formula">x = (x − μ) / σ</div>
+      <p class="range">μ₁=600, σ₁=450 → x₁: <b>−0.67 to 3.1</b><br>μ₂=2.3, σ₂=1.4 → x₂: <b>−1.6 to 1.9</b></p>
+      <p style="font-size:.82rem;color:var(--muted);">Uses standard deviation instead of range — standard in most ML pipelines.</p>
+    </div>
+  </div>
+
+  <div class="std-visual">
+    <svg width="260" height="110" viewBox="0 0 260 110">
+      <path d="M10,90 Q80,10 130,10 Q180,10 250,90" fill="none" stroke="#c084fc" stroke-width="2.5"/>
+      <line x1="130" y1="10" x2="130" y2="95" stroke="#94a3b8" stroke-dasharray="3,3"/>
+      <text x="120" y="108" fill="#94a3b8" font-size="11">μ (mean)</text>
+      <line x1="100" y1="30" x2="130" y2="30" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="60" y="26" fill="#38bdf8" font-size="10">σ (spread)</text>
+    </svg>
+  </div>
+</div>
+
+<div class="card">
+  <h2>📐 Rule of Thumb: When Do You Need to Rescale?</h2>
+  <p>Aim for roughly <code>−1 ≤ x ≤ 1</code> per feature. Anything from <code>−3 to 3</code> down to <code>−0.3 to 0.3</code> is fine too.</p>
+  <table>
+    <tr><th>Feature range</th><th>Verdict</th></tr>
+    <tr class="rule-good"><td>0 ≤ x₁ ≤ 3</td><td class="good">✓ Okay, no rescaling needed</td></tr>
+    <tr class="rule-good"><td>−2 ≤ x₂ ≤ 0.5</td><td class="good">✓ Okay, no rescaling needed</td></tr>
+    <tr class="rule-bad"><td>−100 ≤ x₃ ≤ 100</td><td class="bad">✗ Too large → rescale</td></tr>
+    <tr class="rule-bad"><td>−0.001 ≤ x₄ ≤ 0.001</td><td class="bad">✗ Too small → rescale</td></tr>
+    <tr class="rule-bad"><td>98.6 ≤ x₅ ≤ 105 (body temp)</td><td class="bad">✗ Too large (centered far from 0) → rescale</td></tr>
+  </table>
+  <p style="font-size:.88rem;color:var(--muted);margin-top:10px;">💡 There's almost never any harm in rescaling — when in doubt, just do it.</p>
+</div>
+
+<div class="card">
+  <h2>📝 Recap Steps</h2>
+  <ol class="steps">
+    <li>Divide-by-max: quick and simple, scales to [0,1] but doesn't center around 0.</li>
+    <li>Mean normalization: <code>(x−μ)/(max−min)</code> — centers around 0, both negative and positive values.</li>
+    <li>Z-score normalization: <code>(x−μ)/σ</code> — uses standard deviation, the most common in practice.</li>
+    <li>Check each feature's range against the −1 to 1 rule of thumb; rescale anything far outside it.</li>
+    <li>Next up: how to tell if gradient descent is actually converging, then how to pick a good learning rate.</li>
+  </ol>
+</div>
+
+<div class="footer">
+  📌 Ties back to the previous lecture: any of these three scaling methods turns tall, skinny cost-function contours into
+  more circular ones, letting gradient descent converge faster and more directly.
+</div>
+
+</body>
+</html>

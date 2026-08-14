@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Choosing a Good Learning Rate — Summary</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --text:#e2e8f0; --muted:#94a3b8;
+    --accent:#38bdf8; --accent2:#fb923c; --good:#4ade80; --bad:#f87171; --purple:#c084fc; --pink:#f472b6;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:32px;}
+  h1{font-size:1.7rem;margin-bottom:4px;}
+  .sub{color:var(--muted);margin-bottom:24px;}
+  .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.3);margin-bottom:20px;}
+  .card h2{margin-top:0;font-size:1.15rem;color:var(--accent);}
+  code{background:#0b1220;padding:2px 6px;border-radius:4px;color:var(--accent);}
+  table{width:100%;border-collapse:collapse;margin-top:8px;}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid #334155;font-size:.9rem;}
+  th{color:var(--muted);}
+  .good{color:var(--good);font-weight:600;} .bad{color:var(--bad);font-weight:600;}
+  .plots3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  .box{background:#0b1220;border-radius:8px;padding:12px;}
+  .box .cap{font-size:.8rem;color:var(--muted);text-align:center;margin-top:4px;}
+  .warn{background:#3a0d0d;border-left:3px solid var(--bad);padding:10px 14px;border-radius:6px;font-size:.88rem;margin-top:10px;}
+  .tip{background:#052e1a;border-left:3px solid var(--good);padding:10px 14px;border-radius:6px;font-size:.88rem;margin-top:10px;}
+  .chip{display:inline-block;background:#0b1220;border:1px solid #334155;color:var(--accent2);border-radius:6px;padding:5px 12px;font-size:.9rem;margin:4px 4px 0 0;font-weight:600;}
+  .chip.big{color:var(--pink);}
+  .steps{counter-reset:step;list-style:none;padding:0;}
+  .steps li{counter-increment:step;margin-bottom:10px;padding-left:34px;position:relative;}
+  .steps li::before{content:counter(step);position:absolute;left:0;top:0;background:var(--accent);color:#0f172a;
+    width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;}
+  .footer{color:var(--muted);font-size:.85rem;margin-top:20px;border-top:1px solid #334155;padding-top:12px;}
+</style>
+</head>
+<body>
+
+<h1>🎚️ Choosing a Good Learning Rate (α)</h1>
+<div class="sub">Diagnosing bad learning rates, spotting code bugs, and a systematic way to search for α</div>
+
+<div class="card">
+  <h2>Core Idea</h2>
+  <p>Learning rate α controls the size of each gradient descent step. Too small → converges correctly but painfully
+  slowly. Too large → may overshoot the minimum and even <b>fail to converge</b>, with the cost bouncing up and down
+  or increasing every iteration. Diagnosing this from the learning curve (J vs. iterations) tells you whether to
+  shrink α or go hunting for a bug in your code.</p>
+</div>
+
+<div class="card">
+  <h2>🩺 Identifying the Problem</h2>
+  <div class="plots3">
+    <div class="box">
+      <svg width="100%" height="110" viewBox="0 0 160 110">
+        <line x1="20" y1="10" x2="20" y2="90" stroke="#64748b"/>
+        <line x1="20" y1="90" x2="150" y2="90" stroke="#64748b"/>
+        <path d="M25,25 L45,55 L60,40 L80,65 L95,50 L115,72 L130,60 L145,75" fill="none" stroke="#f87171" stroke-width="2"/>
+        <text x="4" y="30" fill="#e2e8f0" font-size="9">J</text>
+      </svg>
+      <div class="cap">J bounces up &amp; down each iteration → <span class="bad">α too large</span> (or a bug)</div>
+    </div>
+    <div class="box">
+      <svg width="100%" height="110" viewBox="0 0 160 110">
+        <line x1="20" y1="10" x2="20" y2="90" stroke="#64748b"/>
+        <line x1="20" y1="90" x2="150" y2="90" stroke="#64748b"/>
+        <path d="M25,85 Q60,80 80,55 Q110,25 145,15" fill="none" stroke="#f87171" stroke-width="2"/>
+        <text x="4" y="30" fill="#e2e8f0" font-size="9">J</text>
+      </svg>
+      <div class="cap">J consistently <b>increases</b> → α too large, OR a sign bug: check <code>w = w − αd</code> not <code>w = w + αd</code></div>
+    </div>
+    <div class="box">
+      <svg width="100%" height="110" viewBox="0 0 160 110">
+        <path d="M40,20 Q90,10 130,15" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+        <circle cx="70" cy="14" r="4" fill="#f87171"/>
+        <path d="M40,20 A35,35 0 0,0 40,90" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+        <path d="M70,14 L130,90" stroke="#f87171" stroke-width="1.6" marker-end="url(#a)"/>
+        <path d="M130,90 L40,50" stroke="#f87171" stroke-width="1.6" marker-end="url(#a)"/>
+        <path d="M40,50 L100,95" stroke="#f87171" stroke-width="1.6" marker-end="url(#a)"/>
+        <defs><marker id="a" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#f87171"/></marker></defs>
+      </svg>
+      <div class="cap">On a J(w₁) curve: big α → overshoots the minimum each step, zig-zagging away instead of converging</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>⚖️ Big α vs. Smaller α (parameter-space view)</h2>
+  <table>
+    <tr><th style="width:180px">Situation</th><th>What happens</th></tr>
+    <tr><td class="bad">α too big</td><td>Each update overshoots the minimum, bouncing back and forth across the curve — may never converge</td></tr>
+    <tr><td class="good">Smaller α</td><td>Steps move steadily toward the minimum, decreasing J on every iteration — converges reliably</td></tr>
+    <tr><td class="bad">α too small</td><td>Still converges correctly, but takes <b>a lot more iterations</b> to get there — inefficient</td></tr>
+  </table>
+  <div class="tip">✅ Debugging tip: with a small enough α, J should decrease on every single iteration. If you set α to a
+  tiny value and J still increases sometimes, that's not a learning-rate problem — it's a <b>bug in the code</b>
+  (e.g. a missing minus sign in the update rule).</div>
+  <div class="warn">⚠️ Common bug: <code>w₁ = w₁ + α·d₁</code> (wrong — moves away from minimum) vs. the correct
+  <code>w₁ = w₁ − α·d₁</code> (uses a minus sign, moves toward the minimum).</div>
+</div>
+
+<div class="card">
+  <h2>🔍 Systematic Search: Values of α to Try</h2>
+  <p>Run gradient descent for just a handful of iterations at each α, and plot the learning curve — roughly
+  <b>tripling</b> α each time:</p>
+  <div>
+    <span class="chip">0.001</span><span class="chip">0.003</span><span class="chip">0.01</span>
+    <span class="chip">0.03</span><span class="chip">0.1</span><span class="chip">0.3</span><span class="chip">1</span>
+  </div>
+  <p style="font-size:.85rem;color:var(--muted);margin-top:8px;">≈3× increase between each value (0.001→0.003 is 3×, 0.003→0.01 is ≈3×, and so on).</p>
+
+  <div class="plots3" style="grid-template-columns:1fr 1fr;margin-top:14px;">
+    <div class="box">
+      <svg width="100%" height="110" viewBox="0 0 200 110">
+        <line x1="20" y1="10" x2="20" y2="90" stroke="#64748b"/>
+        <line x1="20" y1="90" x2="190" y2="90" stroke="#64748b"/>
+        <path d="M25,25 Q100,30 185,45" fill="none" stroke="#e2e8f0" stroke-width="1.8"/>
+        <path d="M25,25 Q100,55 185,80" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="150" y="42" fill="#e2e8f0" font-size="9">α=0.001</text>
+        <text x="140" y="90" fill="#38bdf8" font-size="9">α=0.01</text>
+      </svg>
+      <div class="cap">Both decrease steadily — 0.01 decreases faster (still safe)</div>
+    </div>
+    <div class="box">
+      <svg width="100%" height="110" viewBox="0 0 200 110">
+        <line x1="20" y1="10" x2="20" y2="90" stroke="#64748b"/>
+        <line x1="20" y1="90" x2="190" y2="90" stroke="#64748b"/>
+        <path d="M25,25 Q100,30 185,45" fill="none" stroke="#e2e8f0" stroke-width="1.8"/>
+        <path d="M25,30 L50,55 L70,40 L95,65 L115,50 L140,70 L160,60 L180,75" fill="none" stroke="#f472b6" stroke-width="1.8"/>
+        <path d="M25,30 Q100,55 185,80" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+        <text x="150" y="42" fill="#e2e8f0" font-size="9">baseline</text>
+        <text x="130" y="90" fill="#38bdf8" font-size="9">α just right</text>
+        <text x="30" y="20" fill="#f472b6" font-size="9">α too big (bounces)</text>
+      </svg>
+      <div class="cap">One α zig-zags (too big), one decreases fast and consistently (just right)</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🎯 The Strategy</h2>
+  <ol class="steps">
+    <li>Try a range of α values, each ~3× the last: 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1…</li>
+    <li>For each value, run gradient descent for just a few iterations and plot J vs. iterations.</li>
+    <li>Find a value that's clearly <b>too small</b> (decreases very slowly) and one that's clearly <b>too large</b> (bounces/increases).</li>
+    <li>Pick the largest α that still decreases J rapidly and consistently — often just slightly smaller than the largest reasonable value found.</li>
+  </ol>
+  <p style="font-size:.85rem;color:var(--muted);">The optional lab lets you experiment with feature scaling and different α choices hands-on.</p>
+</div>
+
+<div class="footer">
+  📌 Next lecture: choosing custom/engineered features — lets multiple linear regression fit curves, not just straight lines, to your data.
+</div>
+
+</body>
+</html>
