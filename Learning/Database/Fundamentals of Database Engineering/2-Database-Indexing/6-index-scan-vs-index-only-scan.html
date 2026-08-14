@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Index Scan vs Index Only Scan — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d212c; --border:#2a2f3d;
+    --text:#e6e8ee; --muted:#9aa3b5; --accent:#6ea8fe; --green:#3ecf8e;
+    --red:#ff6b6b; --amber:#ffb84d; --purple:#b18cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:28px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px}
+  .label{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:#1a2233;border:1px solid #29406b;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+  h2{font-size:18px;margin:0 0 10px}
+  p{color:#c7cbd6;margin:6px 0}
+  code{font-family:'Fira Code',Consolas,monospace;background:#11141b;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:13px;color:#9fd1ff}
+  pre{background:#0b0d12;border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;margin:2px 4px 2px 0}
+  .pill.fast{background:#123322;color:var(--green);border:1px solid #1f5a3d}
+  .pill.slow{background:#3a1616;color:var(--red);border:1px solid #6b2323}
+  .pill.mid{background:#3a2c10;color:var(--amber);border:1px solid #6b4d1a}
+  .compare{display:flex;gap:14px;align-items:stretch}
+  .compare>div{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .compare .vs{display:flex;align-items:center;color:var(--muted);font-weight:700}
+  svg{max-width:100%}
+  .tip{background:#141c14;border:1px solid #2a4a2a;border-left:4px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .real{background:#1a1720;border-left:4px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .warn{background:#2a1a10;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Index Scan vs. Index Only Scan</h1>
+<div class="sub">Visual summary — table <code>grades(id, g, name)</code>, ~10M rows</div>
+
+<div class="card">
+  <span class="label">Problem</span>
+  <h2>Same lookup, three different costs</h2>
+  <p><code>SELECT name FROM grades WHERE id = 7</code> was tested three ways: no index, a plain index on <code>id</code>, and an index on <code>id</code> that also carries <code>name</code> along with it (non-key column).</p>
+</div>
+
+<div class="card">
+  <span class="label">Key Distinctions</span>
+  <h2>The three runs, side by side</h2>
+  <table>
+    <tr><th>Setup</th><th>Query</th><th>Plan</th><th>Time</th></tr>
+    <tr><td>No index</td><td><code>SELECT name WHERE id = 7</code></td><td>Parallel Seq Scan</td><td><span class="pill slow">3,416 ms</span></td></tr>
+    <tr><td><code>id_idx ON grades(id)</code></td><td><code>SELECT name WHERE id = 7</code></td><td>Index Scan (heap fetch for <code>name</code>)</td><td><span class="pill mid">0.065 ms</span></td></tr>
+    <tr><td>same index</td><td><code>SELECT id WHERE id = 7</code></td><td><b>Index Only Scan</b> — <code>id</code> already in index</td><td><span class="pill fast">0.040 ms</span></td></tr>
+    <tr><td><code>id_idx ON grades(id) INCLUDE(name)</code></td><td><code>SELECT name WHERE id = 7</code></td><td><b>Index Only Scan</b> — <code>name</code> now riding in the index too</td><td><span class="pill fast">0.039 ms</span></td></tr>
+    <tr><td>same covering index</td><td><code>SELECT g WHERE id = 7</code></td><td>Back to Index Scan — <code>g</code> not in the index</td><td><span class="pill mid">0.018–0.033 ms</span></td></tr>
+  </table>
+  <div class="tip"><b>The pattern:</b> the plan flips to Index Only Scan whenever <i>every column you SELECT</i> is present in the index — either as the search key or as an included non-key column. Ask for anything not in the index, and it drops back to a regular Index Scan (extra heap trip).</div>
+</div>
+
+<div class="card">
+  <span class="label">Compare</span>
+  <h2>Index Scan vs. Index Only Scan</h2>
+  <div class="compare">
+    <div>
+      <h2 style="color:var(--amber);font-size:15px">🟡 Index Scan</h2>
+      <p>Finds the match in the B-Tree, then jumps to the heap to fetch any column not stored in the index (here: <code>name</code>, <code>g</code>).</p>
+      <p>Two data structures touched per row.</p>
+    </div>
+    <div class="vs">VS</div>
+    <div>
+      <h2 style="color:var(--green);font-size:15px">🟢 Index Only Scan</h2>
+      <p>Every requested column is already inside the index entry — no heap trip at all.</p>
+      <p>One data structure touched per row — the fastest lookup Postgres can do.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <span class="label">How it works</span>
+  <h2>Making a query "index only" with a non-key column</h2>
+  <pre><code>-- key column: what you SEARCH by
+-- non-key (INCLUDE) column: what you also want STORED, not searched
+drop index id_idx;
+create index id_idx on grades(id) include (name);</code></pre>
+  <svg width="900" height="140" viewBox="0 0 900 140">
+    <rect x="10" y="30" width="260" height="60" rx="8" fill="#1a2233" stroke="#29406b"/>
+    <text x="140" y="55" fill="#6ea8fe" font-size="12" text-anchor="middle">KEY: id</text>
+    <text x="140" y="75" fill="#8a8f9c" font-size="10" text-anchor="middle">used to search / sort</text>
+
+    <rect x="290" y="30" width="260" height="60" rx="8" fill="#241a30" stroke="#4a2f6b"/>
+    <text x="420" y="55" fill="#b18cff" font-size="12" text-anchor="middle">INCLUDE: name</text>
+    <text x="420" y="75" fill="#8a8f9c" font-size="10" text-anchor="middle">just stored, not searchable</text>
+
+    <rect x="570" y="30" width="260" height="60" rx="8" fill="#123322" stroke="#1f5a3d"/>
+    <text x="700" y="55" fill="#3ecf8e" font-size="12" text-anchor="middle">Result: no heap trip</text>
+    <text x="700" y="75" fill="#8a8f9c" font-size="10" text-anchor="middle">for SELECT id, name WHERE id=...</text>
+  </svg>
+  <div class="warn"><b>You cannot filter or sort by a non-key (INCLUDE) column</b> — e.g. <code>WHERE name = 'x'</code> won't use this index's B-Tree structure for <code>name</code>, since it's not part of the search key, only carried as extra payload.</div>
+</div>
+
+<div class="card">
+  <span class="label">Practical Tips</span>
+  <h2>Interview / real-world takeaways</h2>
+  <p>🔹 <b>Index Only Scan is the fastest lookup possible</b> — no second data structure touched.</p>
+  <p>🔹 <b>Design indexes around your actual SELECT list</b>, not just your WHERE clause — include the columns you commonly fetch alongside the filter column.</p>
+  <p>🔹 <b>Trade-off:</b> every included column grows the index size on disk — larger indexes mean more pages to read, which can offset the benefit if overused. Only include columns you genuinely fetch often.</p>
+  <p>🔹 <b>Bare index vs. covering index — same key, different capability:</b> a plain <code>(id)</code> index can still do Index Only Scan for <code>SELECT id</code> alone (the key itself is "free"); it's only extra <i>selected</i> columns like <code>name</code> that require <code>INCLUDE</code>.</p>
+  <div class="real"><b>Real-world scenario:</b> A "get user profile summary" endpoint that always runs <code>SELECT id, display_name FROM users WHERE id = ?</code> — indexing <code>(id) INCLUDE (display_name)</code> turns every profile lookup into a pure index-only read, skipping the users heap table entirely on a hot path that gets hit on every page load.</div>
+</div>
+
+<div class="card">
+  <span class="label">Setup</span>
+  <h2>Table + queries used</h2>
+  <pre><code>create table grades (
+  id serial,
+  g int,
+  name text
+);
+
+insert into grades (g, name)
+select
+  random()*100,
+  substring(md5(random()::text), 0, floor(random()*31)::int)
+from generate_series(0, 10000000);
+
+create index id_idx on grades(id);
+-- later, upgraded to a covering index:
+drop index id_idx;
+create index id_idx on grades(id) include (name);</code></pre>
+</div>
+
+</div>
+</body>
+</html>
