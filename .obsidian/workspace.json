@@ -4,47 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "ea5f13669ed213fb",
+        "id": "2f127ab23d4a54cc",
         "type": "tabs",
         "children": [
           {
-            "id": "af0a5cd7703c48ce",
+            "id": "3ba10d779f43ac0e",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Notes"
-            }
-          },
-          {
-            "id": "56b50897d746571e",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Stack Pointer.excalidraw"
+              "title": "New tab"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -103,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 347.50390243530273,
-    "collapsed": true
+    "width": 347.50390243530273
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -209,10 +181,14 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "56b50897d746571e",
+  "active": "3ba10d779f43ac0e",
   "lastOpenFiles": [
-    "conflict-files-obsidian-git.md",
+    "Learning/Side Projects/2026-08-14-explanation-session-store.md",
+    "Learning/Untitled",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
+    "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
+    "conflict-files-obsidian-git.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/3-scan-types.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/2-explain-postgres.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/1-db-indexing.html",
@@ -226,8 +202,6 @@
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141935.png",
     "Learning/Backend Engineering/Memory Management in C/Drawing 2026-08-13 15.18.44.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/1-multiple-linear-regression-summary.html",
-    "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Accordion/AttachmentsIII.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Star/Stars.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/JobsBoard.excalidraw.md",
@@ -248,7 +222,6 @@
     "Learning/Frontend Interview Preparation/Coding/ContactForm.excalidraw.md",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Moles_MolarMass_practice.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807124227_035.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807111118_819.png",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807102338_467.png",
