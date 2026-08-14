@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "5502c3bca624e8c7",
+        "id": "0501d0bcbf39e13d",
         "type": "tabs",
         "children": [
           {
-            "id": "e155aa522a711c3e",
+            "id": "95b29cd4cabb70fd",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/4-gradient-descent-multiple-regression-summary.html"
               },
-              "icon": "lucide-file",
-              "title": "5-index vs Index Only"
+              "icon": "code-glyph",
+              "title": "4-gradient-descent-multiple-regression-summary"
             }
           }
         ]
@@ -178,7 +166,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 313.87890625
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -195,14 +183,14 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "95b29cd4cabb70fd",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-index-scan-vs-index-only-scan.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/queries_analyze.pdf",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-index-selectivity-case-study.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-index-scan-vs-index-only-scan.html",
+    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/queries_analyze.pdf",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/3-scan-types.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/employees.sql",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/grades.sql",
@@ -225,7 +213,6 @@
     "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/2-explain-postgres.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/1-db-indexing.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/Database Pages.md",
     "Learning/Database/Fundamentals of Database Engineering/1-Database Internals/Drawing 2026-08-12 16.51.43.excalidraw.md",
     "Learning/Database/Learnings/Things i learned while working.md",
