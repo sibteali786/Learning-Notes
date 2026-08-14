@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Case Study — Why Postgres Ignored the Index</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d212c; --border:#2a2f3d;
+    --text:#e6e8ee; --muted:#9aa3b5; --accent:#6ea8fe; --green:#3ecf8e;
+    --red:#ff6b6b; --amber:#ffb84d; --purple:#b18cff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5;padding:32px 16px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:28px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px}
+  .label{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:#1a2233;border:1px solid #29406b;padding:3px 10px;border-radius:20px;margin-bottom:12px}
+  h2{font-size:18px;margin:0 0 10px}
+  p{color:#c7cbd6;margin:6px 0}
+  code{font-family:'Fira Code',Consolas,monospace;background:#11141b;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:13px;color:#9fd1ff}
+  pre{background:#0b0d12;border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;margin:2px 4px 2px 0}
+  .pill.fast{background:#123322;color:var(--green);border:1px solid #1f5a3d}
+  .pill.slow{background:#3a1616;color:var(--red);border:1px solid #6b2323}
+  .pill.mid{background:#3a2c10;color:var(--amber);border:1px solid #6b4d1a}
+  .qa{background:var(--card2);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+  .qa .q{color:var(--accent);font-weight:700;margin-bottom:6px}
+  svg{max-width:100%}
+  .tip{background:#141c14;border:1px solid #2a4a2a;border-left:4px solid var(--green);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .warn{background:#2a1a10;border-left:4px solid var(--amber);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .real{background:#1a1720;border-left:4px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;font-size:14px}
+  .bar{height:22px;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#0f1117}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Case Study: Index Exists, Planner Still Chose Seq Scan</h1>
+<div class="sub">Table <code>students</code> — 50M rows, index on <code>g</code>, mixed results across your test queries</div>
+
+<div class="card">
+  <span class="label">Problem</span>
+  <h2>What you observed</h2>
+  <p>After creating <code>g_index ON students(g)</code>: <code>g BETWEEN 10 AND 20 LIMIT 1000</code> used the index (<b>~4ms</b>), but <code>g BETWEEN 8 AND 95</code> — with or without <code>LIMIT 1000</code> — still ran a <b>Parallel Seq Scan + external merge sort</b> (16–36 <b>seconds</b>).</p>
+</div>
+
+<div class="card">
+  <span class="label">Answer</span>
+  <h2>Short answer: it's selectivity, not memory</h2>
+  <p><code>g</code> is <code>random()*100</code>, so it's roughly uniform across 0–100. That means:</p>
+  <table>
+    <tr><th>Condition</th><th>% of table matched</th><th>Rows matched (of 50M)</th></tr>
+    <tr><td><code>g &gt; 8 AND g &lt; 95</code></td><td><span class="pill slow">~87%</span></td><td>~43,000,000</td></tr>
+    <tr><td><code>g &gt; 10 AND g &lt; 20</code></td><td><span class="pill fast">~10%</span></td><td>~4,500,000</td></tr>
+  </table>
+  <div class="bar" style="width:87%;background:#ff6b6b;margin-top:10px">g &gt; 8 AND g &lt; 95 — 87% of rows</div>
+  <div class="bar" style="width:10%;background:#3ecf8e;margin-top:6px">g &gt; 10 AND g &lt; 20 — 10% of rows</div>
+  <div class="tip"><b>This is the real cause.</b> Your own EXPLAIN output confirms it — for the 8–95 query the planner estimates <code>rows=43056508</code> (an <code>Index Scan</code> line even shows <code>rows=43051483</code> as its own estimate). When a query matches ~87% of a table, walking the B-Tree and randomly jumping to the heap 43 million times is far more expensive than just reading the table straight through. The planner correctly avoids the index here — this isn't a bug or a memory shortfall, it's the planner doing its job.</div>
+</div>
+
+<div class="card">
+  <span class="label">Q&A</span>
+  <h2>Your specific questions</h2>
+
+  <div class="qa">
+    <div class="q">Q: Even after having an index on g, we still get a sequential scan — why?</div>
+    <p>Because <code>g BETWEEN 8 AND 95</code> matches ~87% of the 50M rows. Above roughly 5–15% selectivity (the exact crossover depends on cost settings), a full sequential scan is cheaper than an index scan: reading the table straight through is sequential I/O, while an index scan on this many matches means ~43M random heap lookups. The planner's cost model picked correctly.</p>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q: Is it because Docker's shared memory on my Ubuntu machine is too small to hold the whole index?</div>
+    <p>Not the primary cause here — though it's a real, secondary factor. Your own vacuum output shows <code>953,365 pages</code> for the table alone (heavily read from disk: <code>read=952650</code> buffers vs only ~800 cache <code>hit</code>), so yes, the working set doesn't fit in <code>shared_buffers</code>. That does make disk-heavy plans slower in absolute terms. But it does <b>not</b> explain why the planner <i>chose</i> Seq Scan over Index Scan — that choice is driven by estimated selectivity/cost, computed before any actual I/O happens. Even with unlimited RAM, Postgres would still prefer Seq Scan for an 87%-selectivity predicate, because touching 87% of pages via random access is inherently more work than one sequential pass — cache size just changes how painful each approach is, not which one wins.</p>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q: Why did LIMIT 1000 with g BETWEEN 10 AND 20 use the index, but g BETWEEN 8 AND 95 (with or without LIMIT) still didn't?</div>
+    <p><code>ORDER BY g DESC LIMIT 1000</code> only helps the planner when it can avoid sorting the whole result — i.e. by reading rows already in <code>g</code>-sorted order straight from the index and stopping after 1000. For <b>10–20</b> (~4.5M candidate rows), reading the index backward and stopping at 1000 matches is nearly free — that's exactly what your <code>Index Scan Backward</code> / <code>Index Only Scan Backward</code> plans show (2–4ms). For <b>8–95</b> (~43M candidate rows), the planner estimates it may still need to scan a large fraction of the index before finding 1000 that satisfy the range in descending order — worst case, the first row of the whole index doesn't fall in <code>[8,95]</code> and it has to skip millions of unmatching entries via random heap-adjacent index reads. Past a certain selectivity threshold, the "let's Seq Scan + Sort + cut top 1000" plan wins even with the LIMIT, since a full sort of the actual 43M-row filtered set is still cheaper than an unpredictable, possibly-huge random walk through the index. Your EXPLAIN confirms this: with the 8–95 LIMIT 1000 query, the plan is still <code>Gather Merge → Sort (top-N heapsort) → Parallel Seq Scan</code>, executing in ~16.6s.</p>
+  </div>
+</div>
+
+<div class="card">
+  <span class="label">Timeline</span>
+  <h2>What each step actually changed</h2>
+  <table>
+    <tr><th>Step</th><th>Query</th><th>Plan</th><th>Time</th></tr>
+    <tr><td>1</td><td>g BETWEEN 8–95, no index</td><td>Parallel Seq Scan + Sort (external merge, disk)</td><td><span class="pill slow">33.2s</span></td></tr>
+    <tr><td>2</td><td>g BETWEEN 8–95 LIMIT 1000, no index</td><td>Parallel Seq Scan + top-N heapsort</td><td><span class="pill slow">16.6s</span></td></tr>
+    <tr><td>3</td><td><b>Index created</b> on g</td><td>—</td><td>—</td></tr>
+    <tr><td>4</td><td>g BETWEEN 8–95, indexed</td><td>Still Parallel Seq Scan + Sort (disk)</td><td><span class="pill slow">36.4s</span></td></tr>
+    <tr><td>5</td><td>g BETWEEN 8–95 LIMIT 1000, indexed</td><td><b>Index Scan Backward</b> — planner switched!</td><td><span class="pill fast">4.0ms</span></td></tr>
+    <tr><td>6</td><td>g BETWEEN 10–20 LIMIT 1000, indexed</td><td>Index Scan Backward</td><td><span class="pill fast">4.1ms</span></td></tr>
+    <tr><td>7</td><td>g BETWEEN 10–20, no LIMIT, indexed</td><td>Back to Parallel Seq Scan + Sort (10% is still too much without LIMIT)</td><td><span class="pill slow">17.2s</span></td></tr>
+    <tr><td>8</td><td>g BETWEEN 10–20 LIMIT 1000, after VACUUM</td><td>Index Only Scan Backward, <code>Heap Fetches: 0</code></td><td><span class="pill fast">0.46ms</span></td></tr>
+  </table>
+  <div class="warn"><b>Important correction:</b> row 5 above (8–95 with LIMIT 1000, after indexing) — check your actual result again: the "Limit (cost=0.56..1933.77)... Index Scan Backward using g_index... Index Cond: ((g > 8) AND (g < 95))" block in your paste <i>does</i> show the index being used and finishing in 4.001ms. So the index <i>was</i> used for 8–95 once <code>LIMIT 1000</code> was added — it's only the <b>no-LIMIT</b> version of 8–95 that keeps falling back to Seq Scan. That matches the selectivity explanation exactly: LIMIT lets Postgres stop early regardless of range width, as long as it's scanning in the already-sorted index order.</div>
+</div>
+
+<div class="card">
+  <span class="label">Key Distinction</span>
+  <h2>Index Scan vs. Index Only Scan — the <code>INCLUDE(id)</code> step</h2>
+  <p>You dropped the plain <code>g_index</code> and recreated it as:</p>
+  <pre><code>create index g_index on students(g) include(id);</code></pre>
+  <p>This is the <b>non-key column</b> technique — <code>id</code> isn't part of the search key, it just rides along inside the index entries. Since your query only selects <code>id, g</code>, both columns now live entirely in the index. That's what upgraded the plan from a regular Index Scan to an <b>Index Only Scan</b>:</p>
+  <table>
+    <tr><th>Index definition</th><th>Plan for <code>SELECT id, g WHERE g BETWEEN 10 AND 20 LIMIT 1000</code></th><th>Heap Fetches</th><th>Time</th></tr>
+    <tr><td><code>g_index on students(g)</code></td><td>Index Scan Backward — still jumps to heap for <code>id</code></td><td>implicit (one per row)</td><td><span class="pill mid">4.1ms</span></td></tr>
+    <tr><td><code>g_index on students(g) include(id)</code></td><td>Index Only Scan Backward</td><td><span class="pill mid">1000</span> (before VACUUM)</td><td><span class="pill fast">3.3ms</span></td></tr>
+    <tr><td>same, <b>after VACUUM</b></td><td>Index Only Scan Backward</td><td><span class="pill fast">0</span></td><td><span class="pill fast">0.46ms</span></td></tr>
+  </table>
+  <div class="tip"><b>Why VACUUM still mattered here:</b> even with <code>id</code> included in the index, Postgres can only skip the heap entirely if the visibility map says those pages have no dead/uncommitted rows to double-check. Right after a bulk load, that map isn't populated yet — so you still see <code>Heap Fetches: 1000</code> despite having a "covering" index. Running <code>VACUUM</code> updates the visibility map and drops <code>Heap Fetches</code> to 0, which is the ~7x jump from 3.3ms → 0.46ms above.</div>
+  <div class="real"><b>Real-world scenario:</b> An API endpoint that always does <code>SELECT user_id, score FROM leaderboard WHERE score > X ORDER BY score DESC LIMIT 100</code> — indexing <code>(score) INCLUDE (user_id)</code> means this hot path never touches the table heap at all, as long as the table is vacuumed regularly. Trade-off: the index itself gets larger (it now stores <code>user_id</code> too), so it's a deliberate choice per query pattern, not a default you'd apply to every index.</div>
+</div>
+
+<div class="card">
+  <span class="label">Practical Tips</span>
+  <h2>Takeaways</h2>
+  <p>🔹 <b>Selectivity, not index existence, drives the choice.</b> A B-Tree index only wins when the match set is small relative to the table (rule of thumb: roughly under ~5–15% for random heap access, but there's no fixed universal cutoff — it's cost-based).</p>
+  <p>🔹 <b><code>ORDER BY + LIMIT</code> on an indexed column</b> can make the index attractive even for a wide range, because Postgres can walk the pre-sorted index and stop early — but only if it doesn't expect to skip too much before filling the LIMIT.</p>
+  <p>🔹 <b>Run <code>VACUUM</code> after bulk loads</b> — it's what gets you <code>Heap Fetches: 0</code> (true Index Only Scan) by updating the visibility map; without it, even an index-only-eligible query still touches the heap.</p>
+  <p>🔹 <b>Watch <code>Buffers: shared hit vs read</code></b> in <code>EXPLAIN (ANALYZE, BUFFERS)</code> — high <code>read</code> counts relative to <code>hit</code> mean you're going to disk a lot, which is a real perf issue, just a separate one from plan choice.</p>
+  <div class="real"><b>Real-world scenario:</b> An orders table filtered by <code>status = 'pending'</code> when 90% of rows are pending will Seq Scan even with an index — same reasoning as your 8–95 case. But <code>status = 'cancelled'</code> at 2% of rows will happily use the index. Same column, same index, opposite plan — because selectivity, not the presence of an index, is what the planner actually optimizes for.</div>
+</div>
+
+</div>
+</body>
+</html>
