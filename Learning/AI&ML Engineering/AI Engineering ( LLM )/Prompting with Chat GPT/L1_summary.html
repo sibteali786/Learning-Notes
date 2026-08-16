@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L1: Language Models, Chat Format & Tokens — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;margin:10px 0;}
+  .flow .step{background:var(--card2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;}
+  .flow .arrow{color:var(--muted);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .token-demo{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;}
+  .tok{background:#26305a;border:1px solid var(--accent);padding:4px 8px;border-radius:6px;font-size:13px;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+</style>
+</head>
+<body>
+
+<h1>🧠 L1 — Language Models, the Chat Format & Tokens</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 1 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">⚙️</span> How an LLM Learns (Supervised Learning)</h2>
+    <p>An LLM is trained by repeatedly predicting the <b>next token</b> given prior text — a supervised learning task turned into a massive next-word-prediction dataset.</p>
+    <div class="example"><b>Example:</b> "My favorite food is a bagel with cream cheese and lox." becomes many training pairs:
+      <br>"My favorite food is a" → <b>bagel</b> &nbsp;|&nbsp; "My favorite food is a bagel" → <b>with</b>
+    </div>
+    <p>Trained on hundreds of billions of words (or more) — this base-training phase can take <b>months</b> on large compute clusters.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🧩</span> Base LLM vs Instruction-Tuned LLM</h2>
+    <table>
+      <tr><th></th><th>Base LLM</th><th>Instruction-Tuned</th></tr>
+      <tr><td>Behavior</td><td>Predicts likely next words</td><td>Follows the instruction</td></tr>
+      <tr><td>Prompt: "What is the capital of France?"</td>
+          <td>May output "What is France's largest city?" (continues quiz-like pattern)</td>
+          <td>"The capital of France is Paris."</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🔁</span> Base → Instruction-Tuned Pipeline</h2>
+    <div class="flow">
+      <div class="step">1. Train Base LLM<br><span style="color:var(--muted)">months, 100B+ words</span></div>
+      <span class="arrow">→</span>
+      <div class="step">2. Fine-tune on instruction/response pairs</div>
+      <span class="arrow">→</span>
+      <div class="step">3. RLHF using human ratings<br><span style="color:var(--muted)">helpful · honest · harmless</span></div>
+    </div>
+    <p>Steps 2–3 take only <b>days</b> on much smaller datasets/compute compared to base training.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🔤</span> Tokens, Not Words</h2>
+    <p>LLMs predict the next <b>token</b> (common character chunk), not the next character or word. ~1 token ≈ 4 characters ≈ ¾ of a word (English).</p>
+    <div class="token-demo">
+      <span class="tok">learning</span><span class="tok">new</span><span class="tok">things</span><span class="tok">is</span><span class="tok">fun</span><span class="tok">!</span>
+    </div>
+    <p>Less common words split into multiple tokens:</p>
+    <div class="token-demo">
+      <span class="tok">'prom</span><span class="tok">pt</span><span class="tok">ing'</span> → "prompting"
+    </div>
+    <div class="token-demo">
+      <span class="tok">l</span><span class="tok">oll</span><span class="tok">ipop</span> → "lollipop"
+    </div>
+    <div class="example">⚠️ <b>Real-world failure:</b> Asking ChatGPT to reverse the letters of "lollipop" often fails/garbles, because the model sees 3 tokens (l / oll / ipop), not 7 letters.
+      <br>✅ <b>Fix:</b> Insert dashes/spaces between letters — <code>l-o-l-l-i-p-o-p</code> — forces each character into its own token, so the model can correctly reverse it: <code>p-o-p-i-l-l-o-l</code>.</div>
+    <p><b>Context limit example:</b> gpt-3.5-turbo has a limit of roughly <b>4,000 tokens</b> for input + output combined ("context" = input, "completion" = output). Exceeding it throws an error.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">💬</span> The Chat Format: system / user / assistant</h2>
+    <div class="flow">
+      <div class="step">🛠️ system<br><span style="color:var(--muted)">sets overall tone/behavior</span></div>
+      <span class="arrow">→</span>
+      <div class="step">🙋 user<br><span style="color:var(--muted)">specific instruction</span></div>
+      <span class="arrow">→</span>
+      <div class="step">🤖 assistant<br><span style="color:var(--muted)">model's reply (can feed back for multi-turn)</span></div>
+    </div>
+    <div class="example"><b>Example:</b> system = "You are an assistant who responds in the style of Dr. Seuss." + user = "write me a very short poem about a happy carrot" → rhyming Seuss-style poem output.</div>
+    <div class="example"><b>Constraint example:</b> system = "All your responses must be one sentence long." → forces a single-sentence carrot story instead of a poem.</div>
+    <div class="example"><b>Combined:</b> style + length constraints stack together in one system message.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📊</span> Counting Tokens Per Call</h2>
+    <p>The API response includes usage stats you can inspect:</p>
+    <pre>{'prompt_tokens': 37,
+ 'completion_tokens': 89,
+ 'total_tokens': 126}</pre>
+    <p>Useful mainly to check if a user's input risks exceeding the ~4,000-token limit, so you can truncate proactively.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🔐</span> API Key Security</h2>
+    <p class="pill warn">Avoid</p> Hardcoding <code>openai.api_key = "sk-..."</code> directly in a notebook — easy to leak via sharing/GitHub.
+    <p class="pill good" style="margin-top:8px;">Prefer</p> Store the key in a local <code>.env</code> file and load it:
+    <pre>from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+api_key = os.getenv("OPENAI_API_KEY")</pre>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>The notebook uses the <b>legacy OpenAI Python SDK (pre-1.0)</b>. As of the current <code>openai</code> package (v1.x+), the interface has changed. Verified against <a href="https://github.com/openai/openai-python">openai/openai-python</a> and the <a href="https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create">official API reference</a>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code> (attribute, not dict key)</td></tr>
+      <tr><td><code>response['usage']['prompt_tokens']</code></td><td><code>response.usage.prompt_tokens</code></td></tr>
+    </table>
+    </div>
+    <p><b>Corrected helper functions (drop-in replacements):</b></p>
+    <pre>from openai import OpenAI
+client = OpenAI()  # reads OPENAI_API_KEY from env automatically
+
+def get_completion(prompt, model="gpt-3.5-turbo"):
+    messages = [{"role": "user", "content": prompt}]
+    response = client.chat.completions.create(
+        model=model, messages=messages, temperature=0,
+    )
+    return response.choices[0].message.content
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content
+
+def get_completion_and_token_count(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    content = response.choices[0].message.content
+    token_dict = {
+        'prompt_tokens': response.usage.prompt_tokens,
+        'completion_tokens': response.usage.completion_tokens,
+        'total_tokens': response.usage.total_tokens,
+    }
+    return content, token_dict</pre>
+    <p style="margin-top:10px;"><b>Also worth noting:</b> <code>gpt-3.5-turbo</code> is legacy-tier now; current OpenAI docs recommend <code>gpt-4o-mini</code> / <code>gpt-4.1-mini</code> for cost-effective chat use, and the 4,000-token context limit is outdated — current models support far larger context windows (128K+ depending on model). Worth re-checking OpenAI's <a href="https://developers.openai.com/api/docs/guides/completions">Completions guide</a> and model list before using this in production.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚡</span> Why Prompting Changes the AI Dev Workflow</h2>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Stage</th><th>Traditional Supervised ML</th><th>Prompting-based</th></tr>
+      <tr><td>Collect labeled data</td><td>Weeks–a month</td><td>—</td></tr>
+      <tr><td>Train/tune model</td><td>Days–months</td><td>Minutes–hours (iterate on prompt)</td></tr>
+      <tr><td>Deploy to cloud</td><td>Additional setup time</td><td>Call API directly</td></tr>
+      <tr><td><b>Total</b></td><td><b>Months</b></td><td><b>Hours–days</b></td></tr>
+    </table>
+    </div>
+    <p><span class="pill info">Caveat</span> This speed advantage mainly applies to <b>unstructured data</b> (text, increasingly vision) — not structured/tabular data ML problems.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L1_student.ipynb + lesson transcript · SDK claims verified against openai/openai-python (GitHub) and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>
