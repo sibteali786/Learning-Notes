@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Feature Engineering — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --line:#262b38;
+    --blue:#5b9dff; --orange:#ff9d3d; --green:#3ddc97; --text:#e8eaf0; --muted:#9aa1b5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:32px;}
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-size:28px;margin:0 0 6px;}
+  .sub{color:var(--muted);margin:0 0 28px;font-size:15px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+  .card h2{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:8px;}
+  .badge{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--orange);color:#1a1200;font-weight:700;font-size:13px;text-align:center;line-height:22px;}
+  .badge.blue{background:var(--blue);color:#001633;}
+  .badge.green{background:var(--green);color:#00291b;}
+  p{line-height:1.55;color:var(--text);margin:0 0 10px;}
+  .formula{background:#0c0e14;border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-family:"Cambria Math",Georgia,serif;font-size:18px;margin:10px 0;overflow-x:auto;}
+  .formula .w{color:var(--blue);} .formula .o{color:var(--orange);}
+  .diagram{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:14px 0;}
+  .house-box{position:relative;width:220px;height:220px;background:linear-gradient(135deg,#2b3a2b,#3f5a3f);border:2px dashed var(--orange);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+  .house{font-size:54px;}
+  .label{position:absolute;font-size:12px;color:var(--orange);font-weight:600;}
+  .label.x1{top:8px;left:8px;}
+  .label.x2{bottom:8px;right:8px;}
+  .arrow-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:8px;color:var(--muted);font-size:13px;}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin:16px 0;}
+  .pill{background:#0c0e14;border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;}
+  .pill.new{border-color:var(--green);color:var(--green);}
+  .arrow{color:var(--muted);font-size:20px;}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;}
+  .tag{display:inline-block;background:#0c0e14;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);margin-right:6px;}
+  .example{background:#0c0e14;border-left:3px solid var(--green);border-radius:8px;padding:12px 16px;margin-top:10px;font-size:14px;color:var(--muted);}
+  .example b{color:var(--text);}
+  .next{color:var(--muted);font-size:14px;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🏠 Feature Engineering</h1>
+  <p class="sub">Using intuition to design new features by transforming or combining the original ones.</p>
+
+  <div class="card">
+    <h2><span class="badge blue">1</span> Starting model — raw features</h2>
+    <p>Predicting house price from two raw features: <b>frontage (x₁)</b> — the width of the lot, and <b>depth (x₂)</b> — how far back the lot goes.</p>
+    <div class="formula">f<sub>w,b</sub>(x) = <span class="w">w₁</span>x₁ + <span class="w">w₂</span>x₂ + b</div>
+    <div class="diagram">
+      <div class="house-box">
+        <span class="label x1">x₁ = frontage</span>
+        <div class="house">🏡</div>
+        <span class="label x2">x₂ = depth</span>
+      </div>
+    </div>
+    <p class="next">This works okay, but treats width and depth as independent — it doesn't capture the idea of total <i>land area</i>.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">2</span> The insight — area matters more</h2>
+    <p>Intuition: <b>area</b> (a combination of frontage and depth) may be more predictive of price than the two dimensions taken separately.</p>
+    <div class="formula">area = frontage × depth</div>
+    <div class="flow">
+      <div class="pill">x₁ (frontage)</div>
+      <span class="arrow">×</span>
+      <div class="pill">x₂ (depth)</div>
+      <span class="arrow">=</span>
+      <div class="pill new">x₃ = x₁·x₂ (new feature: area)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge green">3</span> Engineered model — richer features</h2>
+    <p>Add the new feature x₃ into the model. The learning algorithm now decides — via the parameters — whether frontage, depth, or area matters most.</p>
+    <div class="formula">f<sub>w,b</sub>(x) = <span class="w">w₁</span>x₁ + <span class="w">w₂</span>x₂ + <span class="o">w₃</span>x₃ + b</div>
+    <table>
+      <tr><th>Symbol</th><th>Meaning</th></tr>
+      <tr><td>x₁</td><td>frontage (lot width)</td></tr>
+      <tr><td>x₂</td><td>depth (lot length)</td></tr>
+      <tr><td>x₃ = x₁·x₂</td><td>engineered feature: total land area</td></tr>
+      <tr><td>w₁, w₂, w₃</td><td>learned weights — algorithm decides importance of each</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge blue">💡</span> Definition</h2>
+    <p><b>Feature engineering:</b> using domain knowledge or intuition about a problem to design new features — usually by <span class="tag">transforming</span> or <span class="tag">combining</span> original features — so the learning algorithm can make more accurate predictions.</p>
+    <div class="example">
+      <b>Real-life analogy:</b> Imagine estimating a pizza's price from just "diameter" alone feels off — a wide-but-thin pizza isn't the same value as a wide-but-thick one. If you also had "thickness," you might engineer a new feature <i>volume = π·r²·thickness</i>, which could be a much better price predictor than either raw measurement alone.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">➡️</span> What's next</h2>
+    <p>This same idea — creating new features like x₃ = x₁x₂ — is also the trick that lets linear regression fit <b>curves</b>, not just straight lines, by engineering polynomial features (e.g. x², x³) from a single input.</p>
+  </div>
+</div>
+</body>
+</html>
