@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stopwatch — Study Card</title>
+<style>
+  :root{
+    --bg:#0b0e14;
+    --panel:#131822;
+    --panel2:#171d29;
+    --line:#232b3a;
+    --ink:#e7ecf5;
+    --sub:#8b96ac;
+    --mine:#5fb3ff;
+    --official:#ffb454;
+    --good:#6fd68a;
+    --bad:#ff7a7a;
+    --mono:'SF Mono', 'Roboto Mono', Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    padding:40px 24px 80px;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+  header{margin-bottom:36px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--sub); margin-bottom:10px;
+  }
+  h1{font-size:32px; margin:0 0 8px; letter-spacing:-0.02em;}
+  .sub{color:var(--sub); font-size:15px; line-height:1.5; max-width:640px;}
+
+  .clock{
+    font-family:var(--mono); font-size:13px; color:var(--sub);
+    display:flex; gap:18px; margin-top:18px; flex-wrap:wrap;
+  }
+  .clock span b{color:var(--ink); font-weight:600;}
+
+  h2{
+    font-size:14px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--sub); margin:52px 0 16px; display:flex; align-items:center; gap:10px;
+  }
+  h2::after{content:''; flex:1; height:1px; background:var(--line);}
+
+  .principle-grid{display:grid; grid-template-columns:1fr; gap:10px;}
+  .principle{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:16px 18px; display:grid; grid-template-columns:190px 1fr; gap:16px; align-items:start;
+  }
+  .principle .label{font-size:13px; font-weight:600; color:var(--ink);}
+  .principle .label .tag{
+    display:block; font-family:var(--mono); font-size:10.5px; color:var(--sub);
+    margin-top:4px; font-weight:400;
+  }
+  .principle .detail{font-size:13.5px; color:#c3cbdb; line-height:1.55;}
+  .principle .detail code{
+    font-family:var(--mono); background:var(--panel2); padding:1px 5px; border-radius:4px;
+    font-size:12.5px; color:var(--official);
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:6px; font-size:13.5px;}
+  th{
+    text-align:left; font-family:var(--mono); font-size:11px; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--sub); padding:10px 14px; border-bottom:1px solid var(--line);
+  }
+  td{padding:14px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  td.dim-col{color:var(--sub); font-weight:600; width:150px;}
+  td.mine{border-left:2px solid var(--mine);}
+  td.official{border-left:2px solid var(--official);}
+  code.inline{font-family:var(--mono); font-size:12px; background:var(--panel2); padding:1px 5px; border-radius:4px; color:var(--ink);}
+
+  .verdict-row td{background:rgba(111,214,138,0.05);}
+  .badge{
+    display:inline-block; font-family:var(--mono); font-size:10.5px; font-weight:700;
+    padding:3px 8px; border-radius:5px; letter-spacing:.04em; margin-bottom:6px;
+  }
+  .badge.good{background:rgba(111,214,138,.15); color:var(--good);}
+  .badge.bad{background:rgba(255,122,122,.15); color:var(--bad);}
+  .badge.mine{background:rgba(95,179,255,.15); color:var(--mine);}
+  .badge.official{background:rgba(255,180,84,.15); color:var(--official);}
+
+  .timeline{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px;
+    font-family:var(--mono); font-size:12.5px; color:#c3cbdb; overflow-x:auto;
+  }
+  .timeline .step{display:flex; gap:14px; padding:6px 0; align-items:baseline;}
+  .timeline .t{color:var(--sub); width:52px; flex-shrink:0;}
+  .timeline .arrow{color:var(--bad); font-weight:700;}
+
+  .complexity{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px;
+  }
+  .complexity .box{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px;
+  }
+  .complexity .box .big{font-family:var(--mono); font-size:26px; color:var(--good); font-weight:700;}
+  .complexity .box .cap{font-size:12px; color:var(--sub); margin-top:6px; line-height:1.5;}
+
+  footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--sub);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">GreatFrontEnd · Component Series</div>
+    <h1>Stopwatch — Study Card</h1>
+    <div class="sub">Timestamp-anchored timing, ref-vs-state discipline, and the tick-boundary bug most solutions quietly ship. Comparing your build against the official reference.</div>
+    <div class="clock">
+      <span>Time source: <b>Date.now()</b></span>
+      <span>Your tick interval: <b>10ms</b></span>
+      <span>Official tick interval: <b>1ms</b></span>
+    </div>
+  </header>
+
+  <h2>Core principles</h2>
+  <div class="principle-grid">
+
+    <div class="principle">
+      <div class="label">Drift-proof timing<span class="tag">core mechanic</span></div>
+      <div class="detail">Never accumulate with <code>interval += tickMs</code> — ticks aren't guaranteed to fire exactly on schedule (event loop, tab throttling). Anchor to a real timestamp instead: <code>elapsed = accumulated + (Date.now() - startTimestamp)</code>. Self-correcting even if a tick fires late.</div>
+    </div>
+
+    <div class="principle">
+      <div class="label">ref vs state<span class="tag">decision rule</span></div>
+      <div class="detail">Ask: <em>does changing this need to update the screen on its own?</em> Yes → <code>useState</code> (button label, running flag). No, it's just math bookkeeping another render will pick up → <code>useRef</code> (timestamps, accumulators).</div>
+    </div>
+
+    <div class="principle">
+      <div class="label">Dummy re-render trigger<span class="tag">pattern</span></div>
+      <div class="detail"><code>forceTick(n => n+1)</code> — a state variable whose <em>value</em> is meaningless, used purely so React recomputes derived values every interval. Always changes → never bailed out by Object.is.</div>
+    </div>
+
+    <div class="principle">
+      <div class="label">Single source of truth<span class="tag">architecture</span></div>
+      <div class="detail">Derive <code>elapsedTime</code> fresh every render from refs, rather than storing it as state you must remember to sync at every stop/reset call site. One formula, computed at render time, can't go stale.</div>
+    </div>
+
+    <div class="principle">
+      <div class="label">Object.is bailout<span class="tag">gotcha</span></div>
+      <div class="detail"><code>setState(sameValue)</code> skips re-render silently. Don't rely on a boolean flip alone to guarantee a redraw if it might already be at that value — this is exactly why <code>forceTick</code> exists as a fallback.</div>
+    </div>
+
+    <div class="principle">
+      <div class="label">Separation of concerns<span class="tag">design</span></div>
+      <div class="detail"><code>formatTime()</code> returns plain numbers — pure data transform, testable in isolation. Omission logic (show hours only if &gt;0) and styling live in JSX, the presentation layer.</div>
+    </div>
+
+    <div class="principle">
+      <div class="label">A11y for rapid updates<span class="tag">accessibility</span></div>
+      <div class="detail"><code>aria-live="off"</code> + a stable <code>aria-label</code> stop assistive tech from trying to announce a number changing 100×/sec. The Start/Stop label change gets announced for free via default button focus semantics — no extra ARIA needed there.</div>
+    </div>
+
+  </div>
+
+  <h2>Your approach vs. the official solution</h2>
+  <table>
+    <tr>
+      <th>Dimension</th>
+      <th style="color:var(--mine)">Your build</th>
+      <th style="color:var(--official)">Official (GFE)</th>
+    </tr>
+    <tr>
+      <td class="dim-col">Time model</td>
+      <td class="mine">Absolute anchor. One <code class="inline">startTimestamp</code>; elapsed = one subtraction from "now" each render.</td>
+      <td class="official">Delta accumulation. Every tick computes <code class="inline">now - lastTick</code>, adds that small delta into state, resets anchor.</td>
+    </tr>
+    <tr>
+      <td class="dim-col">Where duration lives</td>
+      <td class="mine"><code class="inline">accumulatedTime</code> + <code class="inline">startTimestamp</code> in refs; <code class="inline">elapsedTime</code> is a derived local, never stored.</td>
+      <td class="official"><code class="inline">totalDuration</code> is real state, updated directly by the interval callback.</td>
+    </tr>
+    <tr>
+      <td class="dim-col">Running flag</td>
+      <td class="mine">Separate <code class="inline">isRunning</code> boolean state, set explicitly on toggle.</td>
+      <td class="official">No separate flag — <code class="inline">isRunning = timerId != null</code>. One variable does double duty.</td>
+    </tr>
+    <tr>
+      <td class="dim-col">Re-render driver</td>
+      <td class="mine">Dedicated dummy <code class="inline">forceTick</code> state, decoupled from the actual time math.</td>
+      <td class="official">The real <code class="inline">totalDuration</code> state update itself drives the re-render — no separate dummy needed.</td>
+    </tr>
+    <tr>
+      <td class="dim-col">Accessibility</td>
+      <td class="mine"><span class="badge good">PRESENT</span><br><code class="inline">aria-live="off"</code>, stable <code class="inline">aria-label</code> on both buttons.</td>
+      <td class="official"><span class="badge bad">ABSENT</span><br>No ARIA attributes at all.</td>
+    </tr>
+    <tr class="verdict-row">
+      <td class="dim-col">Stop-boundary precision</td>
+      <td class="mine"><span class="badge good">EXACT</span><br>Elapsed is always recomputed fresh from timestamps at the exact click moment. Zero possible drift, at any tick interval.</td>
+      <td class="official"><span class="badge bad">BOUNDED DRIFT</span><br><code class="inline">stopInterval()</code> never accounts for the gap between the last tick and the actual click — up to one tick-interval of time is silently dropped. Masked only because their interval is 1ms.</td>
+    </tr>
+  </table>
+
+  <h2>The bug the official solution has (and why it's invisible)</h2>
+  <div class="timeline">
+    <div class="step"><span class="t">t=100ms</span> last interval tick fires → <code>lastTickTiming.current = 100</code></div>
+    <div class="step"><span class="t">t=100.6</span> user clicks <b>Stop</b> — between ticks</div>
+    <div class="step"><span class="t">stopInterval()</span> <span class="arrow">→</span> clears interval, nulls <code>timerId</code>. <b>No final delta computed.</b></div>
+    <div class="step"><span class="t">result</span> the 0.6ms between last tick and actual click is silently dropped from <code>totalDuration</code></div>
+  </div>
+  <p style="color:var(--sub); font-size:13px; margin-top:14px; line-height:1.6;">
+    This is the exact "two sources of truth" risk flagged earlier when choosing between storing <code class="inline">elapsedTime</code> directly as state vs. deriving it fresh from refs. The official solution accepted the risk and made it invisible by choosing a 1ms tick — smaller than what any display resolution (centiseconds) could ever show. Your anchor-based design has no such drift, at any tick interval, because <code class="inline">accumulatedTime.current = elapsedTime</code> captures the exact value at the exact click moment — never an interpolated tick value.
+  </p>
+
+  <h2>Complexity</h2>
+  <div class="complexity">
+    <div class="box">
+      <div class="big">O(1)</div>
+      <div class="cap">Time per tick — fixed number of arithmetic ops + one state update, regardless of how long the stopwatch has run.</div>
+    </div>
+    <div class="box">
+      <div class="big">O(1)</div>
+      <div class="cap">Space — fixed variable count. Would become O(n) only with an added feature like lap history.</div>
+    </div>
+  </div>
+
+  <footer>
+    Next up: Countdown Timer reuses this exact anchor-timestamp pattern, with the added twist of clamping at zero and firing a completion callback. Roving-focus patterns (Menu, Carousel, Combobox) remain the other open thread.
+  </footer>
+
+</div>
+</body>
+</html>
