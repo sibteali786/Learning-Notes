@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Polynomial Regression — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --line:#262b38;
+    --blue:#5b9dff; --orange:#ff9d3d; --green:#3ddc97; --pink:#ff5bd0; --purple:#a77bff;
+    --text:#e8eaf0; --muted:#9aa1b5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:32px;}
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-size:28px;margin:0 0 6px;}
+  .sub{color:var(--muted);margin:0 0 28px;font-size:15px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+  .card h2{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:8px;}
+  .badge{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--orange);color:#1a1200;font-weight:700;font-size:13px;text-align:center;line-height:22px;}
+  .badge.blue{background:var(--blue);color:#001633;}
+  .badge.green{background:var(--green);color:#00291b;}
+  .badge.pink{background:var(--pink);color:#2b0021;}
+  .badge.purple{background:var(--purple);color:#160034;}
+  p{line-height:1.55;color:var(--text);margin:0 0 10px;}
+  .formula{background:#0c0e14;border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-family:"Cambria Math",Georgia,serif;font-size:17px;margin:10px 0;overflow-x:auto;}
+  svg{display:block;margin:14px auto;background:#0c0e14;border-radius:10px;border:1px solid var(--line);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;}
+  .warn{background:#241612;border-left:3px solid var(--orange);border-radius:8px;padding:12px 16px;margin-top:10px;font-size:14px;}
+  .example{background:#0c0e14;border-left:3px solid var(--green);border-radius:8px;padding:12px 16px;margin-top:10px;font-size:14px;color:var(--muted);}
+  .example b{color:var(--text);}
+  .steps{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .step{flex:1;min-width:220px;background:#0c0e14;border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .step .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  .step .f{font-family:Georgia,serif;font-size:15px;margin-top:4px;}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;}
+  .next{color:var(--muted);font-size:14px;margin-top:6px;}
+  .tag{display:inline-block;background:#0c0e14;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted);margin-right:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📈 Polynomial Regression</h1>
+  <p class="sub">Combining multiple linear regression + feature engineering to fit curves instead of straight lines.</p>
+
+  <div class="card">
+    <h2><span class="badge blue">1</span> The problem: a line doesn't fit</h2>
+    <p>Housing data with feature <b>x = size (sq ft)</b> curves upward and levels off — a straight line underfits it.</p>
+    <svg width="820" height="260" viewBox="0 0 820 260">
+      <line x1="60" y1="20" x2="60" y2="220" stroke="#444" stroke-width="2"/>
+      <line x1="60" y1="220" x2="790" y2="220" stroke="#444" stroke-width="2"/>
+      <text x="20" y="120" fill="#9aa1b5" font-size="13">price y</text>
+      <text x="740" y="245" fill="#ff9d3d" font-size="13">size x</text>
+      <!-- data points -->
+      <g fill="#ff4d4d">
+        <circle cx="90" cy="205" r="4"/><circle cx="120" cy="150" r="4"/><circle cx="140" cy="185" r="4"/>
+        <circle cx="170" cy="120" r="4"/><circle cx="190" cy="165" r="4"/><circle cx="220" cy="90" r="4"/>
+        <circle cx="250" cy="130" r="4"/><circle cx="290" cy="105" r="4"/><circle cx="330" cy="95" r="4"/>
+        <circle cx="370" cy="115" r="4"/><circle cx="410" cy="80" r="4"/><circle cx="450" cy="100" r="4"/>
+        <circle cx="500" cy="70" r="4"/><circle cx="540" cy="90" r="4"/><circle cx="600" cy="60" r="4"/>
+        <circle cx="650" cy="80" r="4"/>
+      </g>
+      <!-- quadratic (pink dashed after peak) -->
+      <path d="M85,210 C200,80 400,60 550,75" stroke="#ff5bd0" stroke-width="3" fill="none"/>
+      <path d="M550,75 C620,85 660,140 700,230" stroke="#ff5bd0" stroke-width="3" fill="none" stroke-dasharray="6,5"/>
+      <!-- cubic (purple, keeps rising) -->
+      <path d="M85,212 C220,90 420,70 550,78 C630,84 680,55 740,25" stroke="#a77bff" stroke-width="3" fill="none"/>
+      <!-- sqrt (blue, flattens gently) -->
+      <path d="M85,215 C220,110 420,80 550,75 C620,72 680,68 740,65" stroke="#5b9dff" stroke-width="3" fill="none"/>
+      <text x="560" y="65" fill="#a77bff" font-size="12">cubic (x³)</text>
+      <text x="560" y="105" fill="#5b9dff" font-size="12">√x</text>
+      <text x="560" y="145" fill="#ff5bd0" font-size="12">quadratic (x²) — dips back down ✗</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge pink">2</span> Attempt 1 — Quadratic</h2>
+    <div class="formula"><span style="color:var(--pink)">f<sub>w,b</sub>(x) = w₁x + w₂x² + b</span></div>
+    <p>Fits the curve better — but a parabola eventually <b>bends back down</b>. That's unrealistic: bigger houses shouldn't get cheaper.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge purple">3</span> Attempt 2 — Cubic</h2>
+    <div class="formula"><span style="color:var(--purple)">f<sub>w,b</sub>(x) = w₁x + w₂x² + w₃x³ + b</span></div>
+    <p>Adding x³ lets the curve rise again for large x — more realistic for house prices. Features here: size, size², size³.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge green">4</span> Attempt 3 — Square root</h2>
+    <div class="formula"><span style="color:var(--blue)">f<sub>w,b</sub>(x) = w₁x + w₂√x + b</span></div>
+    <p>√x rises more slowly as x grows, but <b>never</b> flattens out completely and <b>never</b> comes back down — another valid, well-behaved option.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">⚠️</span> Why feature scaling matters here</h2>
+    <p>Powers of x explode in range compared to x itself — gradient descent needs comparable ranges to converge well.</p>
+    <div class="steps">
+      <div class="step"><div class="k" style="color:#ff9d3d"><span class="swatch" style="background:#ff9d3d"></span>size (x)</div><div class="f">1 – 1,000</div></div>
+      <div class="step"><div class="k" style="color:#ff5bd0"><span class="swatch" style="background:#ff5bd0"></span>size² (x²)</div><div class="f">1 – 1,000,000</div></div>
+      <div class="step"><div class="k" style="color:#a77bff"><span class="swatch" style="background:#a77bff"></span>size³ (x³)</div><div class="f">1 – 1,000,000,000</div></div>
+    </div>
+    <div class="warn">🔑 Rule of thumb: whenever you engineer polynomial features, <b>apply feature scaling</b> — otherwise gradient descent struggles because the features live on wildly different scales.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge blue">💡</span> Real-life analogy</h2>
+    <div class="example">
+      <b>Think of a car's stopping distance vs. speed.</b> It's not linear — it grows roughly with speed². A model using just "speed" underfits; adding "speed²" as an engineered feature captures the real physics much better. Same logic as size → size² → size³ for house prices.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">➡️</span> What's next</h2>
+    <table>
+      <tr><th>Topic</th><th>Where</th></tr>
+      <tr><td>How to systematically choose which features/model to use</td><td>Course 2 of this specialization</td></tr>
+      <tr><td>Hands-on polynomial regression code (x, x², x³)</td><td>Optional lab (this week)</td></tr>
+      <tr><td>Scikit-learn implementation of linear regression</td><td>Optional lab (this week)</td></tr>
+      <tr><td>Practice quiz + graded lab implementing linear regression</td><td>This week's assignments</td></tr>
+      <tr><td>First classification algorithm (predicting categories, not numbers)</td><td>Next week</td></tr>
+    </table>
+    <p class="next"><span class="tag">Note</span> It's recommended to implement linear regression by hand first before relying on library black-boxes like Scikit-learn — but Scikit-learn is what's actually used in industry.</p>
+  </div>
+</div>
+</body>
+</html>

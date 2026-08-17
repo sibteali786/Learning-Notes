@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L2: Evaluate Inputs — Classification — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;margin:10px 0;}
+  .flow .step{background:var(--card2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;}
+  .flow .arrow{color:var(--muted);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+  .cat{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:12.5px;}
+  .cat b{color:var(--accent2);display:block;margin-bottom:4px;font-size:13px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .delim{background:#26305a;border:1px solid var(--accent);padding:2px 6px;border-radius:5px;font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<h1>🗂️ L2 — Evaluate Inputs: Classification</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 2 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">🎯</span> Why Classify Inputs First?</h2>
+    <p>When a system needs to handle many different types of requests, each with its own set of instructions, it's more reliable to first <b>classify the query type</b>, then route to the appropriate hard-coded instruction set — rather than trying to write one giant prompt that handles everything at once.</p>
+    <div class="example"><b>Real-world scenario:</b> A customer service assistant gets "close my account" vs "tell me about your TVs" — these need completely different follow-up instructions (account-closure flow with security checks vs. product-info retrieval). Classify first, then branch.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">✂️</span> Delimiters</h2>
+    <p>A delimiter marks where user-supplied text starts/ends, helping the model separate instructions from data (and reducing prompt-injection risk).</p>
+    <p>This lesson uses <span class="delim">####</span> — chosen because it reliably maps to a <b>single token</b>, making it a clean, unambiguous boundary marker.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📦</span> Structured Output (JSON)</h2>
+    <p>Asking the model to respond in JSON (e.g. <code>{"primary": ..., "secondary": ...}</code>) means the output can be parsed directly into a Python dict and used programmatically as input to the next step in a pipeline — no manual text parsing needed.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🏷️</span> The Category Taxonomy</h2>
+    <p>System message defines <b>4 primary categories</b>, each with fixed <b>secondary categories</b>:</p>
+    <div class="cat-grid">
+      <div class="cat"><b>Billing</b>Unsubscribe/upgrade<br>Add payment method<br>Explain a charge<br>Dispute a charge</div>
+      <div class="cat"><b>Technical Support</b>General troubleshooting<br>Device compatibility<br>Software updates</div>
+      <div class="cat"><b>Account Management</b>Password reset<br>Update personal info<br>Close account<br>Account security</div>
+      <div class="cat"><b>General Inquiry</b>Product information<br>Pricing<br>Feedback<br>Speak to a human</div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🧪</span> Worked Examples</h2>
+    <table>
+      <tr><th>User Message</th><th>Primary</th><th>Secondary</th></tr>
+      <tr><td>"I want you to delete my profile and all of my user data"</td><td>Account Management</td><td>Close account</td></tr>
+      <tr><td>"Tell me more about your flat screen TVs"</td><td>General Inquiry</td><td>Product information</td></tr>
+      <tr><td>"I am not able to pay my bill for this month"</td><td>Billing</td><td>Add a payment method</td></tr>
+    </table>
+    <p style="margin-top:10px;">Prompt structure used for each call:</p>
+    <pre>messages = [
+    {'role': 'system', 'content': system_message},   # taxonomy + JSON instructions
+    {'role': 'user', 'content': f"{delimiter}{user_message}{delimiter}"},
+]</pre>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>Same legacy pattern as L1 — this notebook still uses the pre-1.0 <code>openai</code> Python SDK. Verified against <a href="https://github.com/openai/openai-python">openai/openai-python</a> and the <a href="https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create">official API reference</a> — current SDK is v1.x+.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code> (attribute, not dict key)</td></tr>
+    </table>
+    </div>
+    <p><b>Corrected helper function (drop-in replacement):</b></p>
+    <pre>from openai import OpenAI
+client = OpenAI()  # reads OPENAI_API_KEY from env automatically
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content</pre>
+    <p style="margin-top:8px;"><b>Also worth checking:</b> for reliably structured JSON output, current OpenAI docs recommend using <a href="https://developers.openai.com/api/docs/guides/completions">Structured Outputs</a> (<code>response_format={"type": "json_schema", ...}</code>) instead of relying purely on prompt instructions — this guarantees schema-valid JSON rather than hoping the model follows the "respond in JSON" instruction correctly.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L2_student.ipynb + lesson transcript · SDK claims verified against openai/openai-python (GitHub) and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>

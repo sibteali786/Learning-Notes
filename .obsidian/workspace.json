@@ -18,8 +18,33 @@
               "icon": "excalidraw-icon",
               "title": "StopWatch.excalidraw"
             }
+          },
+          {
+            "id": "9b2ff5531d7f7575",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -184,33 +209,36 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "2f85c0cd8558c234",
+  "active": "9b2ff5531d7f7575",
   "lastOpenFiles": [
-    "Learning/Freelance/Builders's Website/Creds.md",
     "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/StopWatch",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-index-selectivity-case-study.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-index-scan-vs-index-only-scan.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "conflict-files-obsidian-git.md",
+    "redis_geosearch_grid_vs_radius.svg",
+    "Learning/System Design/Technologies/Redis/redis_deep_dive_summary.html",
+    "Learning/System Design/Technologies/Redis/redis-cluster-interview-guide.html",
+    "Learning/System Design/Technologies/Redis/Key Ideas.md",
+    "Learning/System Design/Technologies/Redis",
+    "Learning/System Design/Technologies",
+    "Learning/System Design/Practice/Ambigious Problem/BP Log Metric.md",
+    "Learning/System Design/Practice/Ambigious Problem",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab05_Sklearn_GD_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab04_FeatEng_PolyReg_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab03_Feature_Scaling_and_Learning_Rate_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab02_Multiple_Variable_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab01_Python_Numpy_Vectorization_Soln.ipynb",
+    "Learning/Freelance/Builders's Website/Creds.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "Pasted image 20260813204431.png",
     "Pasted image 20260813204427.png",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/students.sql",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/queries_analyze.pdf",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/grades.sql",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/employees.sql",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/dangling-stack-pointer.html",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172716.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172709.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172704.png",
     "Learning/Side Projects/2026-08-14-explanation-session-store.md",
-    "Learning/Untitled",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
     "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/3-scan-types.html",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141945.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141935.png",
@@ -227,11 +255,7 @@
     "Learning/JavaScript/Coding/Hooks/useBoolean.excalidraw.md",
     "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
     "Learning/JavaScript/Coding/Async Map/async-map.excalidraw.md",
-    "Learning/JavaScript/Coding/EventEmitter/Event Emitter II.excalidraw.md",
-    "Learning/JavaScript/Coding/Throttle.excalidraw.md",
-    "Learning/JavaScript/Coding/Flatten.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807124227_035.png",
-    "Learning/AI&ML Engineering/Machine Learning/attachments/Pasted Image 20260807111118_819.png",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"

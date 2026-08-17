@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checking Gradient Descent Convergence — Summary</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --text:#e2e8f0; --muted:#94a3b8;
+    --accent:#38bdf8; --accent2:#fb923c; --good:#4ade80; --bad:#f87171; --purple:#c084fc; --pink:#f472b6;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:32px;}
+  h1{font-size:1.7rem;margin-bottom:4px;}
+  .sub{color:var(--muted);margin-bottom:24px;}
+  .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.3);margin-bottom:20px;}
+  .card h2{margin-top:0;font-size:1.15rem;color:var(--accent);}
+  code{background:#0b1220;padding:2px 6px;border-radius:4px;color:var(--accent);}
+  table{width:100%;border-collapse:collapse;margin-top:8px;}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid #334155;font-size:.9rem;}
+  th{color:var(--muted);}
+  .good{color:var(--good);font-weight:600;} .bad{color:var(--bad);font-weight:600;}
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+  .steps{counter-reset:step;list-style:none;padding:0;}
+  .steps li{counter-increment:step;margin-bottom:10px;padding-left:34px;position:relative;}
+  .steps li::before{content:counter(step);position:absolute;left:0;top:0;background:var(--accent);color:#0f172a;
+    width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;}
+  .footer{color:var(--muted);font-size:.85rem;margin-top:20px;border-top:1px solid #334155;padding-top:12px;}
+  .box{background:#0b1220;border-radius:8px;padding:14px;}
+  .warn{background:#3a0d0d;border-left:3px solid var(--bad);padding:10px 14px;border-radius:6px;font-size:.88rem;margin-top:10px;}
+  .chip{display:inline-block;background:#0b1220;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:.85rem;margin:3px 4px 0 0;color:var(--accent2);}
+</style>
+</head>
+<body>
+
+<h1>📈 Checking If Gradient Descent Is Converging</h1>
+<div class="sub">Two ways to tell whether gradient descent found parameters close to the global minimum</div>
+
+<div class="card">
+  <h2>Core Idea</h2>
+  <p>Plot the cost <code>J(w,b)</code> (computed on the training set) against the <b>number of iterations</b> of
+  gradient descent — this is called a <b>learning curve</b>. Note the horizontal axis is iterations, not a
+  parameter like w or b, which is different from the contour/surface plots seen earlier. If gradient descent is
+  working correctly, <b>J should decrease after every single iteration</b>. Once the curve flattens out and stops
+  decreasing, gradient descent has likely <b>converged</b> — meaning the parameters found are close to the global minimum.</p>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>📉 The Learning Curve</h2>
+    <svg width="100%" height="230" viewBox="0 0 460 230">
+      <line x1="50" y1="10" x2="50" y2="190" stroke="#64748b" stroke-width="1.5"/>
+      <line x1="50" y1="190" x2="440" y2="190" stroke="#64748b" stroke-width="1.5"/>
+      <text x="4" y="100" fill="#e2e8f0" font-size="12">J(w,b)</text>
+      <text x="220" y="215" fill="#fb923c" font-size="12">iterations of gradient descent</text>
+      <text x="120" y="205" fill="#94a3b8" font-size="10">100</text>
+      <text x="210" y="205" fill="#94a3b8" font-size="10">200</text>
+      <text x="300" y="205" fill="#94a3b8" font-size="10">300</text>
+      <text x="380" y="205" fill="#94a3b8" font-size="10">400</text>
+      <path d="M60,30 C120,60 150,110 210,150 C260,175 320,183 300,185" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+      <path d="M300,185 L420,185" fill="none" stroke="#f87171" stroke-width="2.5"/>
+      <circle cx="120" cy="88" r="5" fill="#f472b6"/>
+      <text x="130" y="80" fill="#f472b6" font-size="10">after 100 iter</text>
+      <circle cx="210" cy="150" r="5" fill="#c084fc"/>
+      <text x="220" y="145" fill="#c084fc" font-size="10">after 200 iter</text>
+      <text x="300" y="175" fill="#fb923c" font-size="10">flattens ~300–400 → converged</text>
+    </svg>
+    <p style="font-size:.85rem;color:var(--muted);">Cost drops fast early on, then levels off. By ~400 iterations the
+    curve is flat — gradient descent has more or less converged.</p>
+  </div>
+
+  <div class="box">
+    <h2 style="color:var(--accent);font-size:1.1rem;margin-top:0;">✅ How to Read It</h2>
+    <table>
+      <tr><td>J decreases every iteration</td><td class="good">✓ working correctly</td></tr>
+      <tr><td>J increases at any point</td><td class="bad">✗ α too large, or a code bug</td></tr>
+      <tr><td>Curve flattens / barely moves</td><td class="good">✓ likely converged</td></tr>
+    </table>
+    <div class="warn">⚠️ If J ever goes <b>up</b> after an iteration, that's a red flag — check your learning rate α first (usually too large), then check your code for bugs.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🎯 Automatic Convergence Test</h2>
+  <p>Let <code>ε</code> ("epsilon") be a small number, e.g. <code>10⁻³ = 0.001</code>.</p>
+  <p><b>Rule:</b> If <code>J(w,b)</code> decreases by <code>≤ ε</code> in one iteration → declare <b>convergence</b>
+  (you've found parameters w, b close to the global minimum).</p>
+  <div class="warn" style="background:#052e1a;border-left-color:var(--good);color:var(--good);">
+    💡 Choosing the right ε threshold is often tricky in practice — most practitioners (including the instructor)
+    prefer visually inspecting the learning curve plot over relying solely on this automatic test, since the plot
+    can also warn you early if something's going wrong.
+  </div>
+</div>
+
+<div class="card">
+  <h2>⏱️ Iterations Needed Varies Wildly</h2>
+  <p>There's no way to know in advance how many iterations gradient descent needs to converge — it depends entirely on the application:</p>
+  <span class="chip">30 iterations</span><span class="chip">1,000 iterations</span><span class="chip">100,000 iterations</span>
+  <p style="font-size:.88rem;color:var(--muted);margin-top:8px;">This unpredictability is exactly why plotting the learning curve is useful — it lets you empirically discover when to stop training rather than guessing.</p>
+</div>
+
+<div class="card">
+  <h2>📝 Recap Steps</h2>
+  <ol class="steps">
+    <li>Plot J(w,b) vs. number of iterations after each parameter update — this is the learning curve.</li>
+    <li>Confirm J decreases every iteration; if it increases, suspect α is too large or a bug exists.</li>
+    <li>Watch for the curve to flatten out — that signals convergence near the global minimum.</li>
+    <li>Optionally use an automatic test: if J drops by ≤ ε (e.g. 0.001) in one iteration, declare convergence — but visual inspection is usually more reliable.</li>
+    <li>Next lecture: how to choose a good learning rate α.</li>
+  </ol>
+</div>
+
+<div class="footer">
+  📌 Objective reminder: <code>min꜀ w,b J(w,b)</code> — gradient descent's whole job is to find w, b that minimize the cost.
+</div>
+
+</body>
+</html>

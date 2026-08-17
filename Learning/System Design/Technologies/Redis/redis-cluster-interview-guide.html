@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Redis Cluster — System Design Interview Guide</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --panel:#151b23;
+    --panel2:#1c2530;
+    --line:#2a3542;
+    --text:#e6edf3;
+    --muted:#8b98a5;
+    --slot-a:#e0793c;
+    --slot-b:#4c9be8;
+    --slot-c:#5fb87a;
+    --danger:#e0574c;
+    --mono:'SF Mono',Consolas,'Courier New',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    margin:0; padding:32px 16px 80px;
+    line-height:1.5;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-size:26px;margin:0 0 4px;}
+  .subtitle{color:var(--muted);font-size:14px;margin-bottom:36px;}
+  h2{font-size:18px;margin:0 0 4px;display:flex;align-items:center;gap:10px;}
+  .badge{
+    font-family:var(--mono); font-size:11px; background:var(--panel2);
+    border:1px solid var(--line); color:var(--muted);
+    padding:2px 8px; border-radius:20px;
+  }
+  section{margin-bottom:40px;}
+  .card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding:20px 22px; margin-top:14px;
+  }
+  .analogy{
+    background:var(--panel2); border-left:3px solid var(--slot-b);
+    padding:10px 14px; border-radius:6px; font-size:14px; margin-top:12px;
+  }
+  .analogy b{color:var(--slot-b);}
+  .example{
+    background:var(--panel2); border-left:3px solid var(--slot-c);
+    padding:10px 14px; border-radius:6px; font-size:14px; margin-top:12px;
+  }
+  .example b{color:var(--slot-c);}
+  .pitfall{
+    background:#2a1614; border-left:3px solid var(--danger);
+    padding:10px 14px; border-radius:6px; font-size:14px; margin-top:12px;
+  }
+  .pitfall b{color:var(--danger);}
+  code{
+    font-family:var(--mono); background:#000; color:#9fd8ff;
+    padding:1px 6px; border-radius:4px; font-size:13px;
+  }
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px;}
+  .node{
+    border-radius:10px; padding:12px; text-align:center; font-size:13px;
+    border:1px solid var(--line);
+  }
+  .node .n{font-weight:700; font-size:15px;}
+  .node .slots{font-family:var(--mono); font-size:12px; margin-top:4px; opacity:.9;}
+  .nodeA{background:rgba(224,121,60,.15); border-color:var(--slot-a);}
+  .nodeB{background:rgba(76,155,232,.15); border-color:var(--slot-b);}
+  .nodeC{background:rgba(95,184,122,.15); border-color:var(--slot-c);}
+  svg{display:block; margin:16px auto;}
+  table{width:100%; border-collapse:collapse; margin-top:14px; font-size:13.5px;}
+  th,td{border:1px solid var(--line); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--muted); font-weight:600;}
+  .qa{
+    background:var(--panel2); border-radius:8px; padding:14px 16px; margin-top:12px;
+  }
+  .qa .q{color:var(--slot-a); font-weight:600; font-size:13.5px; margin-bottom:4px;}
+  .qa .a{font-size:13.5px; color:var(--text);}
+  .toc{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px;}
+  .toc a{
+    color:var(--muted); text-decoration:none; font-size:12.5px;
+    border:1px solid var(--line); padding:5px 10px; border-radius:20px;
+  }
+  .toc a:hover{color:var(--text); border-color:var(--slot-b);}
+  .flow{display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-family:var(--mono); font-size:12.5px; margin-top:12px;}
+  .flow .step{background:var(--panel2); border:1px solid var(--line); padding:6px 10px; border-radius:6px;}
+  .flow .arrow{color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Redis Cluster — Interview Survival Guide</h1>
+  <div class="subtitle">Just enough depth to explain it, draw it, and defend it under follow-up questions.</div>
+
+  <div class="toc">
+    <a href="#slots">Hash Slots</a>
+    <a href="#routing">Client Routing (MOVED)</a>
+    <a href="#replication">Replication & Failover</a>
+    <a href="#consistency">Consistency Tradeoff</a>
+    <a href="#tags">Hash Tags</a>
+    <a href="#limits">What Cluster Doesn't Do</a>
+    <a href="#qa">Interview Q&A</a>
+  </div>
+
+  <section id="slots">
+    <h2>1. Hash Slots <span class="badge">sharding mechanism</span></h2>
+    <div class="card">
+      <p>Redis Cluster splits the entire keyspace into <b>16,384 fixed slots</b>. Every key is deterministically mapped to one slot: <code>CRC16(key) % 16384</code>. Each node owns a contiguous range of slots.</p>
+
+      <div class="grid3">
+        <div class="node nodeA"><div class="n">Node A</div><div class="slots">slots 0–5460</div></div>
+        <div class="node nodeB"><div class="n">Node B</div><div class="slots">slots 5461–10922</div></div>
+        <div class="node nodeC"><div class="n">Node C</div><div class="slots">slots 10923–16383</div></div>
+      </div>
+
+      <div class="analogy"><b>Analogy:</b> think of it as a hotel with 16,384 room numbers, split across 3 wings (nodes). Reception (the hash function) always sends "John Smith" to the same room number every time — it doesn't care which wing owns that room, it just computes the number.</div>
+
+      <div class="example"><b>Example:</b> key <code>user:1001</code> hashes to slot 5678 → lives on Node B. Key <code>user:1002</code> might hash to slot 200 → lives on Node A. They're unrelated keys, so nobody cares they're on different nodes.</div>
+
+      <p style="margin-top:14px;"><b>Why fixed slots instead of "just hash to a node directly"?</b> Because slots are the unit that moves during rebalancing — not individual keys, not whole nodes. Adding Node D just means migrating some slot ranges to it. This is why Redis doesn't need consistent hashing (rehashing all keys) — it's a coarser, pre-defined layer of indirection.</p>
+    </div>
+  </section>
+
+  <section id="routing">
+    <h2>2. Client Routing — MOVED <span class="badge">how requests find the right node</span></h2>
+    <div class="card">
+      <p>There is <b>no proxy/router node</b>. Clients compute the slot themselves and cache a slot→node map. If they guess wrong (stale cache, slot recently migrated), the node replies <code>MOVED &lt;slot&gt; &lt;ip:port&gt;</code> instead of forwarding the request — the client updates its map and retries.</p>
+
+      <div class="flow">
+        <span class="step">client: hash(key)→slot 5678</span>
+        <span class="arrow">→</span>
+        <span class="step">asks Node A (stale cache)</span>
+        <span class="arrow">→</span>
+        <span class="step">Node A: "MOVED 5678 B:6379"</span>
+        <span class="arrow">→</span>
+        <span class="step">client updates map, asks Node B</span>
+        <span class="arrow">→</span>
+        <span class="step">✅ hit</span>
+      </div>
+
+      <div class="pitfall"><b>Common interview trip-up:</b> people assume any node can forward the request internally like a proxy. It can't — the client is responsible for redirecting itself. That's a deliberate design choice for low latency (no extra hop) at the cost of "dumb" nodes needing smart clients.</div>
+    </div>
+  </section>
+
+  <section id="replication">
+    <h2>3. Replication & Failover <span class="badge">high availability</span></h2>
+    <div class="card">
+      <p>Each master can have one or more replicas. Replication is <b>asynchronous</b> — the master ACKs your write before the replica has received it. If the master dies right after ACKing, that write can be lost when a replica is promoted.</p>
+
+      <div class="pitfall"><b>This is the single most-tested fact about Redis in interviews:</b> "Redis is not a strongly consistent system of record" — because of async replication. If asked "would you use Redis for payment balances?" the expected answer is generally no, or only with extreme caution (e.g. WAIT command, and even that has limits).</div>
+
+      <div class="example"><b>Example:</b> Master B acks a <code>SET cart:99 {...}</code>. 4ms later, before B1 (its replica) receives the update, B's process crashes. Cluster promotes B1 → new master. That write is gone. Client thinks it succeeded.</div>
+
+      <p style="margin-top:14px;"><b>Reads from replicas:</b> a client can opt into reading from replicas (<code>READONLY</code> command in cluster mode) to spread load — but those reads can be stale by however far replication lag has drifted.</p>
+    </div>
+  </section>
+
+  <section id="consistency">
+    <h2>4. The Core Tradeoff <span class="badge">why this matters in system design</span></h2>
+    <div class="card">
+      <table>
+        <tr><th>Property</th><th>What Redis Cluster gives you</th></tr>
+        <tr><td>Availability</td><td>High — replica auto-promotes on master failure</td></tr>
+        <tr><td>Partition tolerance</td><td>Yes — cluster keeps serving slots that aren't affected</td></tr>
+        <tr><td>Consistency</td><td><b style="color:var(--danger)">Weak</b> — async replication can lose acknowledged writes</td></tr>
+      </table>
+      <div class="analogy"><b>Analogy:</b> it's like a manager (master) who tells you "done!" the moment they've written a note themselves, without waiting to confirm their assistant (replica) copied it too. Usually fine, occasionally the note gets lost if the manager gets hit by a bus mid-sentence.</div>
+      <p style="margin-top:12px;">In interviews, this is the hook to talk about <b>CAP theorem</b>: Redis Cluster picks AP-leaning behavior (favors availability) over strict consistency, similar to how you'd frame Cassandra or DynamoDB vs. something like a single-leader SQL replica set configured for sync replication.</p>
+    </div>
+  </section>
+
+  <section id="tags">
+    <h2>5. Hash Tags <span class="badge">co-locating related keys</span></h2>
+    <div class="card">
+      <p>Multi-key operations (<code>MGET</code>, transactions, Lua scripts) only work if all keys are on the <b>same node</b>. By default that's basically random. Hash tags force co-location: only the substring inside <code>{}</code> is hashed.</p>
+
+      <table>
+        <tr><th>Keys</th><th>Result</th></tr>
+        <tr><td><code>{user:123}:posts</code> and <code>{user:123}:likes</code></td><td>✅ same slot (only <code>user:123</code> is hashed)</td></tr>
+        <tr><td><code>user:123:posts</code> and <code>user:123:likes</code></td><td>❌ different slots likely → <code>CROSSSLOT</code> error on multi-key ops</td></tr>
+      </table>
+
+      <div class="example"><b>Example use case:</b> you want to run a transaction that updates a user's profile and their session count atomically. Tag both keys with <code>{user:123}</code> so Redis guarantees they land on the same node/slot.</div>
+    </div>
+  </section>
+
+  <section id="limits">
+    <h2>6. What Cluster Deliberately Doesn't Do <span class="badge">good interview signal to mention</span></h2>
+    <div class="card">
+      <ul style="margin:0; padding-left:20px;">
+        <li>No query fan-out/merge — a command touching keys on multiple nodes just <b>errors</b>, it doesn't get split and recombined for you.</li>
+        <li>No cross-shard transactions unless keys share a slot (via hash tags).</li>
+        <li>No strong consistency guarantee — see above.</li>
+      </ul>
+      <p style="margin-top:12px;">Mentioning this unprompted signals you understand it's a <b>sharding + availability</b> tool, not a distributed database with a smart query planner — a distinction interviewers like to probe.</p>
+    </div>
+  </section>
+
+  <section id="qa">
+    <h2>7. Rapid-Fire Interview Q&A</h2>
+
+    <div class="qa"><div class="q">Q: Why 16,384 slots specifically?</div>
+    <div class="a">A: Small enough that the slot bitmap fits in ~2KB (cheap to gossip between nodes), large enough to divide reasonably evenly across up to ~1000 nodes.</div></div>
+
+    <div class="qa"><div class="q">Q: How does a client know the slot map without asking every time?</div>
+    <div class="a">A: It caches it locally and only refreshes on a MOVED response or at startup — same idea as a DNS cache with invalidation on stale hits.</div></div>
+
+    <div class="qa"><div class="q">Q: What happens if a master and all its replicas die simultaneously?</div>
+    <div class="a">A: Those slots become unavailable — the cluster can't serve that keyspace range until manual intervention. Other nodes/slots keep working.</div></div>
+
+    <div class="qa"><div class="q">Q: How would you design a leaderboard system with Redis in an interview?</div>
+    <div class="a">A: Sorted Set (ZSET) per leaderboard/shard key, cluster for horizontal scale if the leaderboard is huge, replicas for read scaling, and accept eventual/lossy consistency as a tradeoff for speed — flag it explicitly as a design decision.</div></div>
+
+    <div class="qa"><div class="q">Q: Redis Cluster vs Sentinel — when would you pick which?</div>
+    <div class="a">A: Sentinel = HA only, single master holds all data (no sharding), simpler ops. Cluster = HA + horizontal scaling via sharding, more moving parts. Pick Sentinel if dataset fits one node and you just need failover; Cluster if you need to scale beyond one node's memory/throughput.</div></div>
+
+  </section>
+
+</div>
+</body>
+</html>

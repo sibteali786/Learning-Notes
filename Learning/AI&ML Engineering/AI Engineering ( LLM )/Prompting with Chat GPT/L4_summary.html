@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L4: Process Inputs — Chain of Thought Reasoning — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;margin:10px 0;}
+  .flow .step{background:var(--card2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;}
+  .flow .arrow{color:var(--muted);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .delim{background:#26305a;border:1px solid var(--accent);padding:2px 6px;border-radius:5px;font-size:12.5px;}
+  .steps{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .step-row{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;}
+  .step-num{background:var(--accent);color:#0f1220;font-weight:700;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;}
+  .prod-table td, .prod-table th{font-size:12.5px;}
+  .visible{background:rgba(111,209,154,.12);border:1px solid var(--good);}
+  .hidden{background:rgba(255,139,139,.08);border:1px dashed var(--warn);opacity:.85;}
+</style>
+</head>
+<body>
+
+<h1>🧭 L4 — Process Inputs: Chain of Thought Reasoning</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 4 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">🎯</span> The Problem: Models Rush to Conclusions</h2>
+    <p>Left alone, a model can jump straight to an answer and make reasoning errors. <b>Chain-of-Thought (CoT) prompting</b> asks the model to work through explicit reasoning steps before giving a final answer — similar to how a person "shows their work."</p>
+    <div class="example"><b>Real-world scenario:</b> A retail chatbot is asked to compare two product prices. Without CoT, it might just guess/assert an answer. With CoT, it's forced to look up each price and compute the difference step by step, catching a wrong customer assumption along the way.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🤫</span> Inner Monologue</h2>
+    <p>For some apps (e.g. tutoring), showing the model's reasoning to the user is undesirable — it could give away the answer to a student. <b>Inner monologue</b> = ask the model to put reasoning into a structured, delimited format, then programmatically strip it out before showing the response to the user.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🏷️</span> 5-Step CoT Instruction Set</h2>
+    <div class="steps">
+      <div class="step-row"><span class="step-num">1</span>Decide if user is asking about a specific product (not just a category).</div>
+      <div class="step-row"><span class="step-num">2</span>Check if the product(s) mentioned are in the store's 5-item list.</div>
+      <div class="step-row"><span class="step-num">3</span>List any assumptions the user is making (e.g. "X is bigger than Y").</div>
+      <div class="step-row"><span class="step-num">4</span>Check whether each assumption is actually true.</div>
+      <div class="step-row"><span class="step-num">5</span>Politely correct wrong assumptions; answer only using the 5 real products, in a friendly tone.</div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">💻</span> The 5-Product Catalog Used</h2>
+    <div class="table-wrap">
+    <table class="prod-table">
+      <tr><th>Product</th><th>Category</th><th>Warranty</th><th>Price</th></tr>
+      <tr><td>TechPro Ultrabook</td><td>Laptop</td><td>1 yr</td><td>$799.99</td></tr>
+      <tr><td>BlueWave Gaming Laptop</td><td>Laptop</td><td>2 yr</td><td>$1199.99</td></tr>
+      <tr><td>PowerLite Convertible</td><td>Laptop</td><td>1 yr</td><td>$699.99</td></tr>
+      <tr><td>TechPro Desktop</td><td>Desktop</td><td>1 yr</td><td>$999.99</td></tr>
+      <tr><td>BlueWave Chromebook</td><td>Laptop</td><td>1 yr</td><td>$249.99</td></tr>
+    </table>
+    </div>
+    <p style="color:var(--muted);font-size:12.5px;margin-top:6px;">(All fictional — generated by GPT-4 for the course.)</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🧪</span> Worked Example: Model Catches a Wrong Assumption</h2>
+    <p><b>User:</b> "by how much is the BlueWave Chromebook more expensive than the TechPro Desktop?" <i>(false premise — Chromebook is actually cheaper)</i></p>
+    <div class="example hidden">
+      <b>🙈 Hidden reasoning (steps 1–4 — not shown to user):</b><br>
+      Step 1: comparing two specific products.<br>
+      Step 2: both products exist in catalog.<br>
+      Step 3: user assumes Chromebook is <i>more</i> expensive than Desktop.<br>
+      Step 4: Desktop = $999.99, Chromebook = $249.99 → assumption is false; Chromebook is actually $750 cheaper.
+    </div>
+    <div class="example visible">
+      <b>👁️ Visible response to user:</b> "The BlueWave Chromebook is actually $750 cheaper than the TechPro Desktop."
+    </div>
+    <p><b>Second example — "do you sell TVs?"</b> Model skips the assumption-checking steps (nothing applicable) and jumps straight to: "We currently do not sell TVs. Our store specializes in computers and laptops..." <span class="pill info">Note</span> the model didn't perfectly follow the requested N/A step format here — a reminder that even with careful instructions, weaker/older models can deviate; newer models follow format more reliably.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">✂️</span> Extracting Only the Final Answer (Code Pattern)</h2>
+    <p>Since every step is separated by <span class="delim">####</span>, splitting on the delimiter and taking the last segment isolates just the customer-facing response — hiding the inner monologue.</p>
+    <pre>try:
+    final_response = response.split(delimiter)[-1].strip()
+except Exception as e:
+    final_response = "Sorry, I'm having trouble right now, please try asking another question."
+
+print(final_response)</pre>
+    <p><span class="pill info">Design note</span> This whole 5-step prompt is intentionally shown as a somewhat convoluted example — the lesson explicitly calls out that simpler prompts may achieve the same result, and that finding the right complexity/reliability trade-off takes experimentation.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>Same legacy pattern as prior lessons. Verified against <a href="https://github.com/openai/openai-python">openai/openai-python</a> and the <a href="https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create">official API reference</a>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code></td></tr>
+    </table>
+    </div>
+    <pre>from openai import OpenAI
+client = OpenAI()
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content</pre>
+    <p style="margin-top:8px;"><b>Also worth knowing:</b> newer reasoning-focused models (e.g. OpenAI's o-series / GPT-5-class reasoning models) do multi-step reasoning internally and often don't need this manual step-by-step CoT scaffolding — some even discourage exposing raw chain-of-thought. Worth checking current OpenAI guidance on reasoning models before porting this pattern to a newer model.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L4_student.ipynb + lesson transcript · SDK claims verified against openai/openai-python (GitHub) and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>
