@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Part 2 · News Aggregator — Deep Dives → Final Design</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2e; --panel2:#1b2338; --border:#2a3350;
+    --text:#e7ecf7; --muted:#9aa7c2; --accent:#5b8cff; --accent2:#8b6bff;
+    --bad:#e6596b; --good:#e8b339; --great:#38c98a;
+    --code:#0c1120;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,#0b0f19,#0f1420 400px); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.55;}
+  .wrap{max-width:980px; margin:0 auto; padding:36px 20px 80px;}
+  header.hero{text-align:center; padding:28px 16px 20px;}
+  header.hero h1{font-size:27px; margin:0 0 8px; letter-spacing:-.02em;
+    background:linear-gradient(90deg,#7aa2ff,#b48bff); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  header.hero p{color:var(--muted); margin:0; font-size:14.5px}
+  .part-badge{display:inline-block; font-size:12px; font-weight:700; letter-spacing:.04em; color:#0b0f19;
+    background:linear-gradient(90deg,#7aa2ff,#b48bff); padding:4px 12px; border-radius:999px; margin-bottom:10px;}
+
+  nav.toc{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:22px 0 8px;}
+  nav.toc a{font-size:12px; color:var(--accent); text-decoration:none; background:var(--panel);
+    border:1px solid var(--border); padding:5px 11px; border-radius:8px;}
+
+  section{margin-top:46px}
+  h2{font-size:21px; margin:0 0 4px; letter-spacing:-.01em}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 18px}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:20px;}
+  .card > p.intro{margin:0 0 16px; font-size:14.5px; color:#cfd6e8}
+
+  .solution{border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin-bottom:14px; background:var(--panel2);}
+  .solution:last-child{margin-bottom:0}
+  .sol-head{display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap}
+  .sol-title{font-size:14.5px; font-weight:700}
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; white-space:nowrap;}
+  .b-bad{background:rgba(230,89,107,.15); color:var(--bad); border:1px solid rgba(230,89,107,.35)}
+  .b-good{background:rgba(232,179,57,.15); color:var(--good); border:1px solid rgba(232,179,57,.35)}
+  .b-great{background:rgba(56,201,138,.15); color:var(--great); border:1px solid rgba(56,201,138,.35)}
+  .sol-block{margin-top:8px}
+  .sol-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-bottom:3px;}
+  .sol-block p{margin:0; font-size:13.8px; color:#cfd6e8}
+  .sol-block.challenges{border-left:2px solid var(--bad); padding-left:10px; margin-top:10px;}
+  .sol-block.approach{border-left:2px solid var(--accent); padding-left:10px;}
+
+  .diagram{background:var(--code); border:1px solid var(--border); border-radius:12px; padding:16px; overflow-x:auto; margin:12px 0;}
+  .diagram pre{margin:0; font-family:"SF Mono",Consolas,Menlo,monospace; font-size:12.3px; color:#a9e3c4; white-space:pre; line-height:1.5;}
+  .diagram .cap{font-size:11.5px; color:var(--muted); margin-top:8px; font-family:inherit}
+
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:12px 0}
+  .flow .step{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:8px 12px; font-size:12.5px; white-space:nowrap;}
+  .flow .arrow{color:var(--accent); font-size:14px}
+
+  code{font-family:"SF Mono",Consolas,Menlo,monospace; background:var(--code); padding:2px 6px; border-radius:5px; font-size:12.4px; color:#a9e3c4; border:1px solid var(--border);}
+
+  .qa{border-left:3px solid var(--accent2); background:rgba(139,107,255,.07); border-radius:0 10px 10px 0; padding:12px 16px; margin:14px 0;}
+  .qa .q{font-size:13px; font-weight:700; color:#c9b8ff; margin-bottom:4px}
+  .qa .a{font-size:13.8px; color:#cfd6e8}
+
+  .why{background:rgba(91,140,255,.08); border:1px solid rgba(91,140,255,.25); border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:13.8px; color:#cfd6e8}
+  .why b{color:var(--accent)}
+
+  .glossary{width:100%; border-collapse:collapse; font-size:13.6px}
+  .glossary th{text-align:left; padding:9px 10px; color:var(--muted); border-bottom:1px solid var(--border); font-size:12px}
+  .glossary td{padding:10px; border-bottom:1px solid var(--border)}
+  .glossary tr:last-child td{border-bottom:none}
+  .glossary td:first-child{white-space:nowrap; font-weight:600; color:var(--accent)}
+
+  .divider{height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); margin:40px 0}
+  footer{margin-top:56px; text-align:center; color:var(--muted); font-size:12.5px; border-top:1px solid var(--border); padding-top:22px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="part-badge">PART 2 OF 2</span>
+    <h1>📰 News Aggregator — Deep Dives → Final Design</h1>
+    <p>All 7 deep dives, each with the why, the approach (how), and the challenges of every solution tier</p>
+  </header>
+
+  <nav class="toc">
+    <a href="#d1">1. Pagination</a>
+    <a href="#d2">2. Latency</a>
+    <a href="#d3">3. Freshness</a>
+    <a href="#d4">4. Media</a>
+    <a href="#d5">5. Traffic spikes</a>
+    <a href="#d6">6. Categories</a>
+    <a href="#d7">7. Personalization</a>
+    <a href="#final">Final Design</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+
+  <!-- DEEP DIVE 1 -->
+  <section id="d1">
+    <h2>1️⃣ How can we improve pagination consistency and efficiency?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> with thousands of publishers posting 50–100 articles/hour during peak periods, offset pagination causes "pagination drift" — a user scrolling for 10 minutes can see duplicate articles or miss new ones, because the offsets shift as new content is inserted above.</div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">Timestamp-Based Cursors</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Return a cursor = the timestamp of the last article in the response. Next request: <code>WHERE published_at &lt; cursor_timestamp ORDER BY published_at DESC LIMIT 20</code>. Since we're always querying relative to a fixed point in time (not a shifting offset), new articles published above don't affect older pagination. An index on <code>published_at</code> keeps this efficient.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Breaks when multiple articles share an identical timestamp — common when publishers batch-import or auto-timestamp articles. Querying "before X" can silently skip articles stamped at exactly X, creating gaps that worsen during high-volume periods.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">Composite Cursor (timestamp + article_id)</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Combine timestamp and article ID into one cursor, e.g. <code>2024-01-15T10:30:00Z_article123</code>. Query: <code>WHERE (published_at, article_id) &lt; (cursor_timestamp, cursor_id) ORDER BY published_at DESC, article_id DESC LIMIT 20</code> using SQL tuple comparison. A composite index on <code>(published_at, article_id)</code> keeps it fast at scale, and the article ID breaks any timestamp ties, giving total ordering.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Slightly more complex cursor encoding/decoding logic in the app layer; marginally more complex queries (though DBs handle tuple comparisons efficiently); a bit more storage for the wider composite index — negligible against the consistency gained.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">Monotonically Increasing Article IDs</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Design IDs to increase monotonically from the start — time-ordered UUIDs (ULIDs) or DB auto-increment — instead of random UUIDs. Since articles are collected chronologically, newer articles always get higher IDs. Pagination collapses to <code>WHERE article_id &lt; cursor_id ORDER BY article_id DESC LIMIT 20</code> — a single cursor value, no composite logic, no timestamp handling, just a simple index on <code>article_id</code>.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Must be planned upfront — migrating an existing random-UUID system to monotonic IDs is a real data migration. In distributed systems, ID generation must be coordinated across instances to preserve ordering (ULID generation or a centralized ID service handles this).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP DIVE 2 -->
+  <section id="d2">
+    <h2>2️⃣ How do we achieve low latency (&lt; 200ms) feed requests?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> 100M DAU refreshing 5–10x/day = 500M–1B feed requests daily. Querying millions of articles and filtering by region on every request, even indexed, blows past the 200ms budget.</div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">Redis Cache with TTL</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Cache recent articles per region in Redis sorted sets (<code>feed:US</code>, <code>feed:UK</code>...) with a TTL (e.g. 30 min) on the whole feed key (not per-article — sorted sets don't support per-member TTL). Cache-aside pattern: on miss, query DB, populate cache, return; subsequent requests hit cache until expiry.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Cache misses still trigger expensive DB queries that can violate latency requirements. The 30-min TTL means users may not see new articles for up to 30 minutes — violates freshness for a news platform. On expiry, every user requesting that region hits the DB simultaneously (thundering herd), degrading performance for minutes while the cache repopulates. Response times become inconsistent (fast on hit, slow on miss/refresh).</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">Real-time Cached Feeds with CDC</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Data Collection Service stores a new article in the DB → this triggers a <b>CDC (Change Data Capture)</b> event. <b>Feed Generation Workers</b> consume that event, determine which regional feeds it belongs to, and add it via <code>ZADD feed:US &lt;timestamp&gt; &lt;article_id&gt;</code> — score = timestamp, so ordering is automatic. No TTL needed; instead cap growth with <code>ZREMRANGEBYRANK feed:US 0 -2001</code> right after each ZADD, keeping only the newest ~2,000 per region. Reads become pure <code>ZREVRANGE feed:US 0 19</code> calls, completing well under 5ms because sorted sets are skip-list backed — <b>O(log N + M)</b> for N=2,000, M=20.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Added complexity in the ingestion/generation pipeline — need CDC infra, message queues, and worker processes, all requiring monitoring. Storage costs rise slightly from duplicating article data into caches (bounded by the size limit). Must handle cache corruption or worker failures with robust rebuild/error-handling logic. Despite this, it's the pattern major news/social platforms actually use because it balances performance and freshness best.</p>
+        </div>
+      </div>
+
+      <div class="diagram"><pre>Article DB ──CDC event──▶ Feed Generation Workers ──ZADD feed:US <ts> <id>──▶ Redis sorted sets
+                                                                              (feed:US, feed:UK, ...)
+
+Client → API Gateway → Feed Service → Redis (ZREVRANGE, reads only)
+                                    ↳ DB only on cache miss</pre></div>
+      <div class="flow">
+        <span class="step">ZADD feed:US &lt;ts&gt; article_1</span><span class="arrow">→</span>
+        <span class="step">ZREMRANGEBYRANK feed:US 0 -2001</span><span class="arrow">→</span>
+        <span class="step">ZREVRANGE feed:US 0 19 (read)</span>
+      </div>
+
+      <div class="qa">
+        <div class="q">🙋 Where do Feed Generation Workers fit in — they weren't in the v1 HLD?</div>
+        <div class="a">Correct — v1 kept caching simple. This deep dive is exactly where they're introduced: a CDC stream sits between the DB and these workers. The Data Collection Service <i>fetches &amp; saves</i> articles; workers <i>react afterward</i> to place articles into ready-to-read Redis feeds. This decouples ingestion from cache-serving, so a slow scrape never blocks a fast read.</div>
+      </div>
+      <div class="qa">
+        <div class="q">🙋 Is Redis access really under 1ms, and is ZREVRANGE 5ms end-to-end?</div>
+        <div class="a">Redis itself: ~0.1–1ms in-region — "&lt;200ms" in the article is the <i>full request budget</i> (network + app + serialization), not Redis alone. Same idea for "ZREVRANGE completes under 5ms" — that's the isolated command time, not the full round trip to the client. The speed comes from sorted sets' O(log N + M) range reads.</div>
+      </div>
+      <div class="qa">
+        <div class="q">🙋 Do we have documented replication lag numbers for Redis/DB read replicas?</div>
+        <div class="a">No — don't state a fixed number. Lag depends on write volume, network distance, replica load, and failures. Route correctness-sensitive reads to the primary; route feed reads (tolerant of slight staleness) to replicas.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP DIVE 3 -->
+  <section id="d3">
+    <h2>3️⃣ How do we ensure articles appear in feeds within 30 minutes of publication?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> polling every 3–6 hours means breaking news is already stale by the time it's discovered — users have seen it elsewhere first. A modern feed needs to surface major stories within minutes.</div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">Increased RSS Polling Frequency (tiered)</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Tiered polling by publisher priority: high-priority (CNN, BBC, Reuters — historically frequent, breaking-heavy) polled every 5–10 min; medium every 30 min; low (weekly magazines, niche) every 2–3 hrs. Separate worker processes per tier; high-priority workers run continuous loops sleeping only 5–10 min between cycles, comparing article GUIDs/timestamps against the DB and using ETags/Last-Modified headers to skip unchanged feeds.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>With 10,000+ publishers, high-priority polling every 5–10 min means 100,000+ HTTP requests/hour (vs. 2,000–3,000 today) — higher cost and risk of overwhelming/blocking smaller publishers' servers. Still fundamentally reactive: even 5-min polling adds up to 5 min + processing delay. Critically, <b>not all publishers have RSS feeds</b> — many newer sites have limited or none.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">Intelligent Web Scraping</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>For publishers without (good) RSS, run crawlers over homepages/category pages looking for article links (classes like "article-headline", "story-link"), extracting URL/title/timestamp. A fingerprint DB (URL hash or content checksum) identifies genuinely new content; full content gets extracted and normalized into the standard Article format, feeding the same pipeline as RSS. Same tiered scheduling idea — high-traffic sites scraped every 10–15 min, smaller sites hourly.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>High maintenance overhead — sites change HTML structure and break extraction logic. Slower and less reliable than RSS parsing, plus legal concerns for sites that prohibit scraping. Used strategically as a fallback, not the primary method.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">Publisher Webhooks with Fallback Polling</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Flip pull→push: build <code>POST /webhooks/article-published</code> that publishers call the moment they publish, with metadata or full content. A high-availability endpoint absorbs spikes when multiple publishers notify simultaneously; validates payloads, extracts data, queues into the same standard ingestion pipeline; webhook auth via shared secrets/API keys prevents spam. Content from webhook-enabled publishers can appear in feeds within ~30 seconds of publication. RSS polling and scraping remain as fallback for publishers who don't support webhooks — a hybrid system.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Requires coordination/buy-in from publishers — can't be implemented unilaterally like polling or scraping. Smaller publishers may lack the technical resources or be reluctant to add external integration dependencies. Good candidate for a back-and-forth with the interviewer: can I black box ingestion? Do publishers maintain RSS? Given our scale, would publishers implement webhooks for us?</p>
+        </div>
+      </div>
+
+      <div class="qa">
+        <div class="q">🙋 What does "ingestion" and the "ingestion pipeline" mean here?</div>
+        <div class="a"><b>Ingestion</b> = bringing outside data into the system to process/store — interviewers let you "black box" it so you can focus on serving. The referenced <b>ingestion pipeline</b> is the same flow used after RSS polling or scraping — the webhook just supplies the raw data at the front:</div>
+      </div>
+      <div class="flow">
+        <span class="step">webhook payload</span><span class="arrow">→</span>
+        <span class="step">validate</span><span class="arrow">→</span>
+        <span class="step">normalize to Article</span><span class="arrow">→</span>
+        <span class="step">store thumbnail (S3)</span><span class="arrow">→</span>
+        <span class="step">save to DB</span><span class="arrow">→</span>
+        <span class="step">CDC event</span><span class="arrow">→</span>
+        <span class="step">Feed Generation Workers update Redis</span>
+      </div>
+      <p style="font-size:13.8px;color:#cfd6e8;margin-top:10px">Final strategy = <b>hybrid</b>: RSS for cooperative publishers, scraping for no-RSS publishers, webhooks for premium/high-volume partnerships.</p>
+    </div>
+  </section>
+
+  <!-- DEEP DIVE 4 -->
+  <section id="d4">
+    <h2>4️⃣ How do we handle media content (images/videos) efficiently?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> since we link out to publishers rather than hosting articles, we only need thumbnails — but at 100M+ DAU even thumbnail delivery must be fast and cheap. We keep our own copies because publisher image URLs can be slow, change, or go down.</div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-bad">Bad</span><span class="sol-title">Database Blob Storage</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Download and resize the primary image (e.g. 300x200) at collection time, store the binary directly in the database alongside article metadata.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Even 20–50KB thumbnails multiplied by millions of articles bloat the DB — slow queries, huge backups, memory consumed by image bytes instead of query performance. Doesn't scale past a few thousand articles. Rule of thumb: databases store structured data; large binary blobs belong in object storage.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">S3 Storage with Direct Links</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Store thumbnails in S3, reference the URL in the article's metadata. During collection: download original → generate thumbnail (300x200) → upload to S3 → store URL. Thumbnails load directly from S3 to the browser, off-loading the app servers. This is what's in the v1 HLD.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Global users far from the S3 region see high latency. S3 egress costs add up across millions of daily thumbnail views. No adaptation for screen density (retina vs. standard) or slow networks.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">S3 + CloudFront CDN with Multiple Sizes</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Same S3 storage, but served through CloudFront for global edge distribution. Generate multiple sizes (150x100 mobile, 300x200 desktop, 600x400 retina) and use <code>srcset</code> or client logic to pick the right version per device/density. CDN edge caching gets sub-200ms loads worldwide.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Higher storage cost for multiple variants — minor compared to the performance gain. CDN caching cuts S3 requests by 90%+, lowering overall cost while improving UX.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP DIVE 5 -->
+  <section id="d5">
+    <h2>5️⃣ How do we handle traffic spikes during breaking news?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> elections, disasters, celebrity news can spike normal 100M DAU traffic to (an intentionally aggressive, interview-style estimate of) 10M concurrent users within minutes — everyone wants the latest update at once.</div>
+
+      <p style="font-size:14.5px;color:#cfd6e8"><b>Key advantage:</b> news is naturally region-partitionable — Americans want US news, Europeans want EU news. So instead of one massive global system, we build several smaller regional systems, each assumed to handle 10M concurrent users at peak, and scale each component to that number.</p>
+
+      <div class="solution">
+        <div class="sol-head"><span class="sol-title">Feed Service (application layer)</span></div>
+        <div class="sol-block approach"><div class="sol-label">How</div>
+          <p>A single server handles roughly 10,000–100,000 concurrent connections — nowhere near 10M. Solution: horizontal scaling — many stateless Feed Service instances behind load balancers, with cloud auto-scaling triggered by CPU/memory thresholds. Because the service is stateless, instances spin up/down in seconds, paying only for capacity during the spike.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="sol-title">Database layer</span></div>
+        <div class="sol-block approach"><div class="sol-label">How</div>
+          <p>A single DB instance can't handle 10M concurrent reads — I/O, network, and CPU all bottleneck regardless of hardware upgrades. The existing cache (from Deep Dive #2) already absorbs essentially all read traffic, so the scaling challenge shifts entirely from the database to the cache layer.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="sol-title">Cache layer (Redis)</span></div>
+        <div class="sol-block approach"><div class="sol-label">How</div>
+          <p>A single Redis instance serves ~100k requests/sec. Math: 10M concurrent ÷ 100k req/s per instance ≈ <b>100 Redis instances</b> needed (fewer in practice — not every region is equally popular, so scale per-region on demand). Since each region only holds ~2,000 recent articles, no complex sharding is needed — this is purely a read-throughput problem, solved with <b>master + read replicas</b>: writes (new articles, cache updates) go to master; reads are load-balanced (round-robin / least-connections) across replicas; Redis Sentinel auto-promotes a replica if the master fails. (If not using Redis: same idea via consistent hashing + replicas per shard.)</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges / trade-offs</div>
+          <p>More infrastructure to provision and monitor per region; replicas must be spun up ahead of predictable spikes (or fast enough during unpredictable ones) and scaled back down after, to control cost.</p>
+        </div>
+      </div>
+
+      <div class="diagram"><pre>          ┌── Replica 1 ──▶ reads
+Master ───┼── Replica 2 ──▶ reads
+ (writes) ├── Replica N ──▶ reads
+          └── Sentinel: auto-promotes a replica if master fails</pre>
+      <div class="cap">Regional clusters give sub-50ms cache responses from the nearest cluster; a spike in one region doesn't affect others; each region scales independently based on local demand — during breaking news, affected regions add replicas while others stay at baseline.</div></div>
+
+      <div class="qa">
+        <div class="q">🙋 Do we have a documented replication lag number for Redis/DB read replicas?</div>
+        <div class="a">No — don't quote a fixed number. It depends on write volume, network distance, replica load, and failure conditions. In an interview: state that lag is usually low in normal operation but replicas can be stale, so route correctness-sensitive reads to primary and use replicas for feeds where slight staleness is fine.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP DIVE 6 -->
+  <section id="d6">
+    <h2>6️⃣ Bonus: How can we support category-based feeds (Sports, Politics, Tech...)?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> real platforms organize into 25+ categories with hundreds of articles/day each. At 100M DAU that's up to 10M category-specific requests during peak (e.g. Sports during a big game) — the existing regional-only cache can't filter this granularly without hammering the database.</div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-bad">Bad</span><span class="sol-title">Database Query Filtering with a Category Column</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Add a <code>category</code> column to Article, extracted during ingestion from RSS <code>&lt;category&gt;</code> tags, webpage structure, or keyword matching. Feed Service queries <code>WHERE region='US' AND category='sports' ORDER BY published_at DESC LIMIT 20</code> with a composite index on <code>(region, category, published_at)</code>.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>50M peak requests = 50M DB operations; connection pools exhaust under concurrent load even with indexing. Caching is awkward — 25 categories × 10 regions = 250 cache-key combinations, each with its own invalidation pattern; misses still trigger expensive filtered queries.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">Pre-computed Category Feeds in Redis</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Extend the existing Redis regional caching with per-category-per-region sorted sets: <code>feed:sports:US</code>, <code>feed:politics:UK</code>, etc. During ingestion, Feed Generation Workers categorize each article and update multiple sorted sets simultaneously (e.g. a US sports article goes into both <code>feed:US</code> and <code>feed:sports:US</code>). A request becomes <code>ZREVRANGE feed:sports:US 0 19</code> — under 5ms.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>25 categories × 10 regions = 250+ sorted sets to maintain instead of 10 — significant memory growth (~1,000–2,000 articles each). Cache invalidation gets more complex since one article can belong to multiple sets, requiring coordinated cleanup; heavy publishing volume can make cache maintenance impact read performance.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">In-Memory Filtering of the Regional Cache</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Store full article metadata (not just IDs) as JSON in the existing <code>feed:US</code> cache, including a <code>category</code> field, e.g.:</p>
+          <div class="diagram"><pre>{
+  "id": "123",
+  "title": "NBA Finals Game 7 Results",
+  "description": "Warriors defeat Celtics in thrilling finale",
+  "url": "https://espn.com/nba/finals/game7",
+  "category": "sports",
+  "region": "US",
+  "published_at": "2024-06-21T22:30:00Z"
+}</pre></div>
+          <p>A category request pulls the top ~1,000 from <code>ZREVRANGE feed:US 0 999</code> (under 10ms) and filters in application memory for <code>category === "sports"</code> (1–2ms), then paginates. No new cache keys — the existing CDC pipeline just needs to include category in the cached payload.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Requires enough article volume per category within the top 1,000 regional articles to return 20–50 relevant results — fine for well-represented categories, could be thinner for niche ones. Considered the pragmatic choice: "the best solution is often the most straightforward one."</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP DIVE 7 -->
+  <section id="d7">
+    <h2>7️⃣ Bonus: How do we generate personalized feeds based on user reading behavior?</h2>
+    <div class="card">
+      <div class="why"><b>Why this matters:</b> a single regional feed is one-size-fits-all; users expect content prioritizing topics/publishers they engage with. (The actual scoring model is usually ML — abstracted away here; this isn't an MLE interview.)</div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-bad">Bad</span><span class="sol-title">Real-time Recommendation Scoring</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Maintain user profiles (reading history, topic preferences, behavior); on each feed request, score recent articles against the profile in real time using topic match, publisher preference, freshness, and collaborative filtering ("users who read A and B also engage with C").</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Scoring thousands of articles against 100M profiles is billions of calculations per hour — takes seconds, not the 200ms budget. Cost and latency degrade catastrophically exactly when traffic spikes (many users wanting personalization simultaneously).</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-good">Good</span><span class="sol-title">Pre-computed User Feed Caches</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Pre-compute personalized feeds per active user in Redis, e.g. <code>feed:user:12345</code>. Background workers continuously update these as new articles arrive, scoring by relevance to that user's interests/behavior rather than pure recency, blending explicit preferences (subscribed topics, publishers) with implicit signals (clicks, reading time, shares). Active users get dedicated caches; inactive users fall back to category caches generated on demand.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Memory explodes: 1,000 articles/user × 50M active users = 50 billion cache entries — 200–500x larger than category caching alone. Personalized feeds can go stale as interests shift, and may miss globally important breaking news that everyone should see.</p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <div class="sol-head"><span class="badge b-great">Great</span><span class="sol-title">Hybrid Personalization with Dynamic Feed Assembly</span></div>
+        <div class="sol-block approach"><div class="sol-label">Approach (how)</div>
+          <p>Store a lightweight preference vector per user (just kilobytes), and assemble a personalized feed on-demand by mixing existing pre-computed category caches — e.g. a tech-interested user gets 60% <code>feed:technology:US</code> + 30% <code>feed:business:US</code> + 10% <code>feed:trending:US</code>, with the mixing ratio driven by their preference vector. During breaking news, the system temporarily boosts trending-content weight while retaining personal preferences. This reuses the category cache infrastructure from Deep Dive #6, cutting memory needs by ~100x versus per-user caches — a few hundred category caches instead of 100M user caches. ML can tune mixing ratios from engagement over time.</p>
+        </div>
+        <div class="sol-block challenges"><div class="sol-label">Challenges</div>
+          <p>Less personalization depth than a full recommendation engine. Assembly ratios need careful tuning — too narrow and users miss important global stories; too broad and it feels generic. Balances individual relevance against editorial/global importance while holding the sub-200ms budget.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FINAL DESIGN -->
+  <section id="final">
+    <span class="part-badge">FINAL</span>
+    <h2>🏁 Final Design — all pieces together</h2>
+    <div class="card">
+      <div class="diagram"><pre>                         ┌── High-Pri Collection Service (RSS, 5–10 min)
+External Publishers ───▶ ├── Mid-Pri Collection Service (RSS, 30 min)
+  │                      ├── Low-Pri Collection Service (RSS, 2–3 hrs)
+  │                      ├── Web Scraper (no-RSS publishers)
+  └────── Webhook ───────┴── Webhook Service (real-time push)
+                                    │
+                                    ▼
+                          Article Database ◀── Publisher table (priority, scrapeType)
+                             │  (thumbnail)         │
+                             ▼                      │ CDC
+                        S3 (thumbnails)               ▼
+                             │              Feed Generation Workers
+                             ▼                        │
+                           CDN                          ▼
+                                            Redis (regional + category
+                                             sorted sets, read replicas)
+
+Client → API Gateway → Feed Service → Redis (read) → CDN (thumbnails)</pre></div>
+    </div>
+  </section>
+
+  <!-- GLOSSARY -->
+  <section id="glossary">
+    <span class="part-badge">REFERENCE</span>
+    <h2>🧠 Concept glossary</h2>
+    <div class="card">
+      <table class="glossary">
+        <tr><th>Term</th><th>Definition</th></tr>
+        <tr><td>RSS feed</td><td>Publisher-hosted XML list of recent articles (title, link, publish time)</td></tr>
+        <tr><td>CDC</td><td>Change Data Capture — stream of DB write events consumed by downstream workers</td></tr>
+        <tr><td>Feed Generation Worker</td><td>Reacts to CDC, writes prepared feeds into Redis — decoupled from ingestion</td></tr>
+        <tr><td>Ingestion</td><td>Bringing outside data into your system for processing/storage</td></tr>
+        <tr><td>Ingestion pipeline</td><td>Shared validate → normalize → store → CDC flow, regardless of source (RSS/scrape/webhook)</td></tr>
+        <tr><td>Replication lag</td><td>Delay between primary write and replica visibility — no fixed number; route reads by correctness need</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Interview-prep tip: re-derive the HLD on paper first, then only add each deep-dive component once you actually hit the limitation it solves — explaining <i>why</i> a piece (like Feed Generation Workers) appears where it does is what reads as senior-level.
+    <br><br>Source: Hello Interview — "Design a News Aggregator like Google News"
+  </footer>
+
+</div>
+</body>
+</html>

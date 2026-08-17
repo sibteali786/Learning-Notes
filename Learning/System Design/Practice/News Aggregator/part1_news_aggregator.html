@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Part 1 · News Aggregator — Requirements → HLD</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2e; --panel2:#1b2338; --border:#2a3350;
+    --text:#e7ecf7; --muted:#9aa7c2; --accent:#5b8cff; --accent2:#8b6bff;
+    --code:#0c1120;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:linear-gradient(180deg,#0b0f19,#0f1420 400px); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto; padding:36px 20px 80px;}
+  header.hero{text-align:center; padding:28px 16px 20px;}
+  header.hero h1{font-size:27px; margin:0 0 8px; letter-spacing:-.02em;
+    background:linear-gradient(90deg,#7aa2ff,#b48bff); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  header.hero p{color:var(--muted); margin:0; font-size:14.5px}
+  .tag-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:14px}
+  .tag{font-size:11.5px; padding:5px 11px; border-radius:999px; background:var(--panel2); border:1px solid var(--border); color:var(--muted);}
+  .part-badge{display:inline-block; font-size:12px; font-weight:700; letter-spacing:.04em; color:#0b0f19;
+    background:linear-gradient(90deg,#7aa2ff,#b48bff); padding:4px 12px; border-radius:999px; margin-bottom:10px;}
+  section{margin-top:40px}
+  h2{font-size:21px; margin:0 0 4px; letter-spacing:-.01em}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 20px}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:18px;}
+  .card h3{margin:0 0 10px; font-size:16px; display:flex; align-items:center; gap:8px}
+  .card p{margin:8px 0; font-size:14.5px; color:#cfd6e8}
+  .card p:first-child{margin-top:0}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  ul.clean{margin:0; padding-left:18px; font-size:14.5px; color:#cfd6e8}
+  ul.clean li{margin:6px 0}
+  .strike{color:#6c7690; text-decoration:line-through}
+  .pills{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0}
+  .pill{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:13px}
+  .pill b{color:var(--accent)}
+  .diagram{background:var(--code); border:1px solid var(--border); border-radius:12px; padding:18px; overflow-x:auto; margin:14px 0;}
+  .diagram pre{margin:0; font-family:"SF Mono",Consolas,Menlo,monospace; font-size:12.6px; color:#a9e3c4; white-space:pre; line-height:1.5;}
+  .diagram .cap{font-size:11.5px; color:var(--muted); margin-top:8px; font-family:inherit}
+  code{font-family:"SF Mono",Consolas,Menlo,monospace; background:var(--code); padding:2px 6px; border-radius:5px; font-size:12.6px; color:#a9e3c4; border:1px solid var(--border);}
+  .qa{border-left:3px solid var(--accent2); background:rgba(139,107,255,.07); border-radius:0 10px 10px 0; padding:12px 16px; margin:14px 0;}
+  .qa .q{font-size:13px; font-weight:700; color:#c9b8ff; margin-bottom:4px}
+  .qa .a{font-size:13.8px; color:#cfd6e8}
+  footer{margin-top:56px; text-align:center; color:var(--muted); font-size:12.5px; border-top:1px solid var(--border); padding-top:22px;}
+  .navlink{display:block; text-align:center; margin-top:6px; font-size:13px; color:var(--accent); text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="part-badge">PART 1 OF 2</span>
+    <h1>📰 News Aggregator (Google News) — Requirements → HLD</h1>
+    <p>Hello Interview walkthrough, part 1 — the setup before we start deep-diving</p>
+    <div class="tag-row">
+      <span class="tag">100M DAU · spikes to 500M</span>
+      <span class="tag">&lt;200ms feed latency</span>
+      <span class="tag">Availability &gt; Consistency</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>🧭 Understanding the Problem</h2>
+    <p class="lede">Google News aggregates articles from thousands of publishers into a scrollable feed — it never hosts content itself, only links out.</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>✅ Functional Requirements</h3>
+        <ul class="clean">
+          <li>View aggregated feed from thousands of publishers worldwide</li>
+          <li>Infinitely scroll the feed</li>
+          <li>Click article → redirect to publisher's site</li>
+          <li class="strike">Personalized feed (out of scope — later added as bonus deep dive)</li>
+          <li class="strike">Save articles / share on social (out of scope)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚖️ Non-Functional Requirements</h3>
+        <ul class="clean">
+          <li><b>Availability &gt; Consistency</b> (CAP theorem) — stale news beats no news</li>
+          <li>Scale to <b>100M DAU</b>, spikes to <b>500M</b></li>
+          <li>Feed loads in <b>&lt; 200ms</b></li>
+          <li class="strike">Privacy, monitoring, publisher-API resilience (out of scope)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🧱 Defining the Core Entities</h2>
+    <div class="card">
+      <p>Start broad — relationships and purpose matter more than every column at this stage.</p>
+      <div class="pills">
+        <span class="pill"><b>Article</b> — id, title, summary, thumbnailUrl, publishDate, publisherId, region, mediaUrls</span>
+        <span class="pill"><b>Publisher</b> — id, name, url, feedUrl, region</span>
+        <span class="pill"><b>User</b> — id, region (from IP or explicit)</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🔌 API / System Interface</h2>
+    <div class="card">
+      <div class="diagram"><pre>GET /feed?page={page}&limit={limit}&region={region} → Article[]</pre>
+      <div class="cap">Offset pagination is a starting placeholder — it breaks under scroll + new content, so it gets replaced with cursor-based pagination in Deep Dive #1 (see Part 2). No endpoint is needed to "read" an article — the browser simply navigates to <code>article.url</code> when clicked.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🏗️ High-Level Design (v1)</h2>
+    <div class="card">
+      <h3>Requirement 1 — Aggregated feed from thousands of publishers</h3>
+      <p><b>Why this is two problems, not one:</b> collecting content from publishers and serving it to users are separate concerns. We start with collection.</p>
+      <div class="pills">
+        <span class="pill"><b>Data Collection Service</b> — polls publisher RSS feeds/APIs every 3–6 hrs based on each publisher's update frequency</span>
+        <span class="pill"><b>Publishers</b> — thousands of sources worldwide via RSS/APIs</span>
+        <span class="pill"><b>Database</b> — stores articles, publishers, metadata</span>
+        <span class="pill"><b>Object Storage</b> — stores article thumbnails</span>
+      </div>
+
+      <div class="diagram"><pre>Publishers (RSS / APIs)
+        │
+        ▼
+Data Collection Service ──polls every 3–6 hrs──▶ Database (Article, Publisher)
+                                                        │
+                                                        ▼
+                                                Object Storage (S3, thumbnails)
+
+Client → API Gateway → Feed Service → Database   (direct query for now — bottleneck fixed in deep dives)</pre></div>
+
+      <div class="qa">
+        <div class="q">🙋 You asked: what is an RSS feed?</div>
+        <div class="a">A publisher-provided, machine-readable list of recent articles — usually XML — with each article's title, link, and publish time. Your Data Collection Service sends an HTTP request to the feed URL and gets back structured data, letting your system discover new articles without scraping web pages.</div>
+      </div>
+
+      <h3 style="margin-top:22px">Requirement 2 — Infinite scroll</h3>
+      <p><b>How:</b> client calls <code>/feed?page=1&limit=20</code>, then <code>page=2</code>, etc. Feed Service computes the offset <code>(page-1)*limit</code> and the database runs a query with <code>OFFSET</code> and <code>LIMIT</code>. Simple foundation, but has real performance/consistency limitations addressed later.</p>
+
+      <h3 style="margin-top:22px">Requirement 3 — Click article → redirect to publisher</h3>
+      <p><b>Why it's easy:</b> the browser handles it — when a user clicks, it redirects to the <code>url</code> field stored on the Article. Aggregators like this never host content themselves. (In the real product, this click would also be tracked for analytics/recommendations — out of scope here.)</p>
+    </div>
+  </section>
+
+  <footer>
+    v1 satisfies the functional requirements but is naive: every feed request hits the DB directly, and offset pagination breaks under scroll + new content. Both become the first two deep dives.
+    <a class="navlink" href="#">→ Continue to Part 2: Deep Dives → Final Design</a>
+    <br><br>Source: Hello Interview — "Design a News Aggregator like Google News"
+  </footer>
+
+</div>
+</body>
+</html>
