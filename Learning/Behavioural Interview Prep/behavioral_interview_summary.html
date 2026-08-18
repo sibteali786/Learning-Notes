@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Why the Behavioral Matters — Course Summary</title>
+<style>
+  :root{
+    --ink:#1c1a17;
+    --paper:#efe9dd;
+    --paper2:#e2dac9;
+    --rule:#c9bfa8;
+    --accent:#8a3324;
+    --accent2:#3d5a4c;
+    --gold:#b0813f;
+    --muted:#6b6355;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Georgia','Iowan Old Style',serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:40px 24px 80px;}
+
+  header.hero{
+    border-bottom:4px solid var(--ink);
+    padding-bottom:24px;
+    margin-bottom:36px;
+  }
+  .eyebrow{
+    font-family:'Courier New',monospace;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--accent);
+    margin-bottom:10px;
+  }
+  h1.title{
+    font-size:44px;
+    line-height:1.05;
+    margin:0 0 12px;
+    font-weight:700;
+    letter-spacing:-.01em;
+  }
+  .subtitle{
+    font-size:17px;
+    color:var(--muted);
+    max-width:640px;
+    font-style:italic;
+  }
+  .byline{
+    margin-top:18px;
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    color:var(--ink);
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .byline span b{color:var(--accent);}
+
+  section{margin-bottom:48px;}
+  h2.section-head{
+    font-size:13px;
+    font-family:'Courier New',monospace;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    color:var(--accent2);
+    border-top:2px solid var(--ink);
+    padding-top:10px;
+    margin-bottom:18px;
+    display:flex;
+    justify-content:space-between;
+  }
+  h3.block-title{
+    font-size:22px;
+    margin:0 0 10px;
+  }
+  p{margin:0 0 12px;}
+
+  /* Cycle diagram */
+  .cycle{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin:20px 0 8px;
+  }
+  .cycle .node{
+    background:var(--paper2);
+    border:1px solid var(--rule);
+    padding:16px 14px;
+    position:relative;
+  }
+  .cycle .node .icon{font-size:22px;display:block;margin-bottom:8px;}
+  .cycle .node h4{margin:0 0 6px;font-size:15px;letter-spacing:.02em;}
+  .cycle .node p{font-size:12.5px;color:var(--muted);margin:0;}
+  .cycle .node .arrow{
+    position:absolute;
+    right:-19px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:20px;
+    color:var(--accent);
+    z-index:2;
+  }
+  .cycle .node:last-child .arrow{display:none;}
+  .cycle-loop-note{
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    color:var(--accent);
+    text-align:right;
+    margin-top:6px;
+  }
+
+  /* Frameworks grid */
+  .grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+  .card{
+    background:#fff;
+    border:1px solid var(--rule);
+    padding:18px;
+  }
+  .card .num{
+    font-family:'Courier New',monospace;
+    font-size:11px;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .card h4{margin:0 0 8px;font-size:16px;}
+  .card p{font-size:13.5px;color:var(--muted);margin:0;}
+
+  /* Signal areas pill list */
+  .pill-note{font-size:13px;color:var(--muted);margin-bottom:12px;}
+
+  /* quotes */
+  .quote-stack{border-left:3px solid var(--accent);padding-left:18px;margin:12px 0;}
+  .quote{
+    font-style:italic;
+    font-size:14.5px;
+    color:var(--ink);
+    margin:0 0 12px;
+    position:relative;
+  }
+  .quote::before{content:"“";color:var(--accent);font-size:20px;margin-right:2px;}
+
+  /* Example scenario box */
+  .example-box{
+    background:#fbf6ea;
+    border:1px dashed var(--gold);
+    padding:16px 18px;
+    margin:14px 0;
+  }
+  .example-box .tag{
+    font-family:'Courier New',monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--gold);
+    margin-bottom:8px;
+  }
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:8px;
+  }
+  .compare div{padding:10px 12px;font-size:13.5px;}
+  .compare .bad{background:#f3e3df;border-left:3px solid var(--accent);}
+  .compare .good{background:#e5ecdf;border-left:3px solid var(--accent2);}
+  .compare .lbl{font-family:'Courier New',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px;color:var(--muted);}
+
+  /* misconceptions */
+  .myth{
+    display:grid;
+    grid-template-columns:34px 1fr;
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .myth:last-child{border-bottom:none;}
+  .myth .x{
+    font-size:20px;color:var(--accent);font-weight:bold;
+  }
+  .myth h4{margin:0 0 4px;font-size:15px;}
+  .myth p{font-size:13.5px;color:var(--muted);margin:0;}
+
+  /* course topics */
+  .topics{display:flex;flex-direction:column;gap:0;}
+  .topic-row{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:16px;
+    padding:14px 0;
+    border-bottom:1px solid var(--rule);
+    align-items:start;
+  }
+  .topic-row:first-child{border-top:1px solid var(--rule);}
+  .topic-row .label{
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    font-weight:bold;
+    color:var(--accent2);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  .topic-row p{font-size:13.5px;margin:0;color:var(--ink);}
+
+  /* timeline / time-to-prepare */
+  .timeline{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:14px;
+  }
+  .timebox{
+    border:1px solid var(--rule);
+    padding:14px;
+    background:var(--paper2);
+  }
+  .timebox .when{font-family:'Courier New',monospace;font-size:12px;color:var(--accent);margin-bottom:6px;}
+  .timebox p{font-size:13px;margin:0;color:var(--muted);}
+
+  .shortlist{
+    background:#fff;
+    border:1px solid var(--rule);
+    padding:16px 20px;
+    margin-top:14px;
+  }
+  .shortlist li{font-size:14px;margin-bottom:6px;}
+
+  footer{
+    margin-top:50px;
+    padding-top:18px;
+    border-top:2px solid var(--ink);
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  @media (max-width:720px){
+    .cycle{grid-template-columns:1fr 1fr;}
+    .cycle .node .arrow{display:none;}
+    .grid3{grid-template-columns:1fr;}
+    .compare{grid-template-columns:1fr;}
+    .topic-row{grid-template-columns:1fr;}
+    h1.title{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Course Summary — For Interview Prep</div>
+    <h1 class="title">Why the Behavioral Matters</h1>
+    <p class="subtitle">Mastering the round that decides who lands the roles that matter — decoded, catalogued, and delivered.</p>
+    <div class="byline">
+      <span>Author: <b>Austen McDonald</b> — former Meta Hiring Committee Chair, 1,000+ interviews conducted</span>
+      <span>Publisher: <b>Hello Interview</b> (Stefan, Evan, Austen)</span>
+      <span>Basis: <b>200+ candidates coached</b>, thousands of packets reviewed</span>
+    </div>
+  </header>
+
+  <section>
+    <h2 class="section-head">01 · What It Is</h2>
+    <h3 class="block-title">The non-technical round that forecasts you</h3>
+    <p>The behavioral interview — the "culture fit" / "soft skills" / "tell me about a time..." round — is where an interviewer (usually the hiring manager) discusses your past experience to predict your future performance. <b>The core belief: with people, past behavior predicts future results.</b> Technical skill can be taught quickly; who you are (judgment, EQ, how you act under pressure) changes slowly.</p>
+    <p>When they ask "tell me about a conflict with a teammate," they don't care about plot — they're scoring your <b>judgment, emotional intelligence, and relationship management</b>.</p>
+  </section>
+
+  <section>
+    <h2 class="section-head">02 · The Core Loop</h2>
+    <h3 class="block-title">Decode → Select → Deliver</h3>
+    <p>This loop runs in your head for <i>every single question</i> you're asked, including follow-ups.</p>
+    <div class="cycle">
+      <div class="node">
+        <span class="icon">🔍</span>
+        <h4>1. Decode</h4>
+        <p>Figure out the real signal area behind the surface question — that's where the actual assessment lives.</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="node">
+        <span class="icon">🎯</span>
+        <h4>2. Select</h4>
+        <p>Pick the best story from your catalog. Priority order: <b>highest scope → most relevant → most unique → most recent</b>.</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="node">
+        <span class="icon">🎤</span>
+        <h4>3. Deliver</h4>
+        <p>Tell it using <b>CARL</b> (Context, Actions, Results, Learnings) — a refinement of STAR built for what interviewers actually need.</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="node">
+        <span class="icon">🔁</span>
+        <h4>Repeat</h4>
+        <p>A follow-up question triggers the loop again. This continues for the full interview.</p>
+      </div>
+    </div>
+    <div class="cycle-loop-note">↻ runs once per question, including live follow-ups</div>
+  </section>
+
+  <section>
+    <h2 class="section-head">03 · How You're Actually Scored</h2>
+    <h3 class="block-title">Three assessment frameworks, applied consciously or not</h3>
+    <div class="grid3">
+      <div class="card">
+        <div class="num">Framework 1</div>
+        <h4>Signal Areas</h4>
+        <p>A structured set of competencies — Ownership, Perseverance, Conflict Resolution, and more. The course covers <b>8 total</b>.</p>
+      </div>
+      <div class="card">
+        <div class="num">Framework 2</div>
+        <h4>Company Values</h4>
+        <p>The qualities a specific company believes define their most successful employees — varies by employer.</p>
+      </div>
+      <div class="card">
+        <div class="num">Framework 3</div>
+        <h4>Cultural Assessment</h4>
+        <p>Unwritten rules about how work actually gets done inside that company's specific culture.</p>
+      </div>
+    </div>
+    <p class="pill-note" style="margin-top:14px;">Knowing these lets you map a question → signal area/value, choose the matching story, then tilt language toward what that interviewer/company wants to hear.</p>
+  </section>
+
+  <section>
+    <h2 class="section-head">04 · Why It Matters More Than Ever</h2>
+    <h3 class="block-title">Real feedback from rejected candidates</h3>
+    <div class="quote-stack">
+      <p class="quote">Rejected after all successful interviews and team match, at the hiring committee stage.</p>
+      <p class="quote">Passed every technical round, but the manager didn't like me — no follow-up ever came.</p>
+      <p class="quote">Downleveled from E5 to E4 based on behavioral feedback.</p>
+      <p class="quote">Both system design and behavioral were called "weak for IC5" but "expected for IC4."</p>
+      <p class="quote">Didn't effectively articulate technical contributions and impact in the final behavioral.</p>
+      <p class="quote">They didn't want just a tech wiz — they wanted someone who could work in a dynamic, complex team.</p>
+    </div>
+
+    <div class="grid3" style="margin-top:20px;">
+      <div class="card">
+        <div class="num">Reason 1</div>
+        <h4>Soft skills = seniority</h4>
+        <p>Senior engineers own problems end-to-end, learn fast, navigate org complexity, build stakeholder trust — all assessed here, not in coding rounds.</p>
+      </div>
+      <div class="card">
+        <div class="num">Reason 2</div>
+        <h4>AI raises the bar on soft skills</h4>
+        <p>As AI absorbs implementation work, companies now differentiate talent by judgment, leadership, and communication — skills once reserved for PMs.</p>
+      </div>
+      <div class="card">
+        <div class="num">Reason 3</div>
+        <h4>Ruthless selectivity</h4>
+        <p>Dozens of candidates clear the technical bar. The behavioral is the tiebreaker between otherwise-equal candidates.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-head">05 · Example: Standing Out</h2>
+    <h3 class="block-title">Concrete details beat vague claims</h3>
+    <div class="example-box">
+      <div class="tag">Real Scenario — "Standup Efficiency"</div>
+      <p>Compare how the same accomplishment lands depending on how it's told:</p>
+      <div class="compare">
+        <div class="bad">
+          <span class="lbl">✗ Vague (forgettable)</span>
+          "I improved team efficiency."
+        </div>
+        <div class="good">
+          <span class="lbl">✓ Concrete (memorable)</span>
+          "I noticed our standups ran 25 minutes and people zoned out, so I proposed flagging only blockers. We cut it to 8 minutes, and engineers said they actually looked forward to them."
+        </div>
+      </div>
+    </div>
+    <p>Beyond specificity, two more traits interviewers remember: <b>genuine enthusiasm</b> (candidates who light up describing their own work) and <b>self-awareness</b> (being able to name what you learned or would do differently — signals maturity and coachability).</p>
+  </section>
+
+  <section>
+    <h2 class="section-head">06 · Common Misconceptions</h2>
+    <div class="myth">
+      <div class="x">✗</div>
+      <div>
+        <h4>"No prep required, just be yourself."</h4>
+        <p>Be authentic — but intentional. Winging it means missing chances to showcase real impact and unique contributions.</p>
+      </div>
+    </div>
+    <div class="myth">
+      <div class="x">✗</div>
+      <div>
+        <h4>"I need to memorize likely questions."</h4>
+        <p>Unlike coding interviews, behavioral questions aren't reliably repeated, even within the same company. Prep bottom-up from your own career story catalog instead.</p>
+      </div>
+    </div>
+    <div class="myth">
+      <div class="x">✗</div>
+      <div>
+        <h4>"STAR is all I need."</h4>
+        <p>STAR beats no prep, but it doesn't tell you which story to pick, how to position for a top-tier company, or how to adapt per context.</p>
+      </div>
+    </div>
+    <div class="myth">
+      <div class="x">✗</div>
+      <div>
+        <h4>"The manager just wants social fit."</h4>
+        <p>They're also predicting job performance via repeatable behavior patterns — give them the evidence they need to advocate for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-head">07 · What The Full Course Covers</h2>
+    <div class="topics">
+      <div class="topic-row"><div class="label">Signal Areas</div><p>Deep dive into the 8 competencies interviewers actually evaluate, and how to demonstrate each one convincingly.</p></div>
+      <div class="topic-row"><div class="label">The Big Three</div><p>Dedicated prep for the three questions guaranteed to come up: "Tell me about yourself," "your favorite project," and "a conflict."</p></div>
+      <div class="topic-row"><div class="label">Big Tech Adjustments</div><p>How to adapt language/framing for Meta, Amazon, Google — each has distinct cultural assumptions about how work and success happen.</p></div>
+      <div class="topic-row"><div class="label">Practice Methods</div><p>Progressive path: solo practice → AI tools → peer mocks → professional mocks, designed to avoid wasted time.</p></div>
+      <div class="topic-row"><div class="label">Common Pitfalls</div><p>Fixable mistakes: saying "we" instead of "I," over-explaining context, choosing the wrong story.</p></div>
+      <div class="topic-row"><div class="label">Special Interview Types</div><p>Recruiter conversations, follow-up interviews, and leadership-track interviews.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-head">08 · How Much Time You Need</h2>
+    <div class="timeline">
+      <div class="timebox">
+        <div class="when">New to this? 1–2 weeks</div>
+        <p>Takes time to journal and remember past experiences deeply enough to build strong stories.</p>
+      </div>
+      <div class="timebox">
+        <div class="when">Some prep done? A few days</div>
+        <p>If you already know core concepts or have started story identification, you can move fast.</p>
+      </div>
+      <div class="timebox">
+        <div class="when">Interview very soon?</div>
+        <p>Ask the recruiter to push the date — most companies would rather you pass later than fail early.</p>
+      </div>
+    </div>
+
+    <div class="shortlist">
+      <p style="font-family:'Courier New',monospace;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">⚡ If you're really short on time, focus only on:</p>
+      <ul>
+        <li>The <b>Decode → Select → Deliver</b> framework</li>
+        <li>Preparing your <b>"Big Three"</b> answers</li>
+        <li>Reviewing the <b>Common Pitfalls</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-head">09 · Bottom Line</h2>
+    <p style="font-size:16px;">Most people who struggle don't lack experience — <b>their stories are already good enough</b>. What's missing is a framework for presenting them clearly. That framework is Decode → Select → Deliver, told through CARL, mapped to the signal areas interviewers are actually scoring.</p>
+  </section>
+
+  <footer>
+    <span>Hello Interview — "Why the Behavioral Matters"</span>
+    <span>Visual summary for interview prep</span>
+  </footer>
+
+</div>
+</body>
+</html>
