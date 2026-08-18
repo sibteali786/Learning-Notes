@@ -8,18 +8,31 @@
         "type": "tabs",
         "children": [
           {
-            "id": "2f85c0cd8558c234",
+            "id": "7027c515b9de5515",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md"
+                "file": "Learning/DSA/BFS/fundamentals.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "5-Pacific Atlantic Water Flow.excalidraw"
+              "title": "fundamentals.excalidraw"
+            }
+          },
+          {
+            "id": "c09bf7309b56b20c",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "1-Level-order-Sum.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -78,7 +91,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 289.0683403015137
+    "width": 287.6913871765137,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -183,10 +197,14 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "2f85c0cd8558c234",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
+    "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
+    "Learning/DSA/BFS/fundamentals.excalidraw.md",
+    "Learning/DSA/DFS/dfs-tree.html",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
+    "Learning/DSA/BFS",
+    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
     "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
@@ -202,8 +220,6 @@
     "Learning/System Design/Practice/Ambigious Problem",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab05_Sklearn_GD_Soln.ipynb",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab04_FeatEng_PolyReg_Soln.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab03_Feature_Scaling_and_Learning_Rate_Soln.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/notebooks/C1_W2_Lab02_Multiple_Variable_Soln.ipynb",
     "Learning/Freelance/Builders's Website/Creds.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
@@ -228,9 +244,6 @@
     "Learning/System Design/Practice/Dropbox/Intuition.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Progress/ProgressBar.excalidraw.md",
     "Learning/JavaScript/Coding/Hooks/useDefault.excalidraw.md",
-    "Learning/JavaScript/Coding/Hooks/useBoolean.excalidraw.md",
-    "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
-    "Learning/JavaScript/Coding/Async Map/async-map.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
