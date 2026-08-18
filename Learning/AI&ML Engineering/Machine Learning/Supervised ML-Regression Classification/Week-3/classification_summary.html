@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Classification & Why Linear Regression Fails</title>
+<style>
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1220;color:#e8e8f0;margin:0;padding:30px;}
+  .container{max-width:980px;margin:0 auto;}
+  h1{color:#ffd166;font-size:28px;border-bottom:3px solid #ffd166;padding-bottom:10px;}
+  h2{color:#7ecbff;margin-top:40px;border-left:5px solid #7ecbff;padding-left:12px;}
+  .card{background:#1b1f38;border-radius:12px;padding:20px 24px;margin:18px 0;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:16px 0;}
+  .grid div.ex{background:#232847;border-radius:10px;padding:14px;text-align:center;}
+  .grid div.ex .q{font-weight:600;color:#fff;}
+  .grid div.ex .a{margin-top:8px;font-size:13px;color:#aab;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;}
+  th,td{padding:10px 14px;border:1px solid #333865;text-align:left;}
+  th{background:#232847;color:#ffd166;}
+  .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+  .neg{background:#33415c;color:#7ecbff;}
+  .pos{background:#5c3333;color:#ff9a9a;}
+  code{background:#11142a;padding:2px 6px;border-radius:4px;color:#9be89b;font-family:Consolas,monospace;}
+  pre{background:#11142a;padding:16px;border-radius:8px;overflow-x:auto;color:#9be89b;font-size:13.5px;line-height:1.5;}
+  .callout{background:#3a2f10;border-left:5px solid #ffd166;padding:14px 18px;border-radius:6px;margin:16px 0;}
+  .fail{background:#3a1010;border-left:5px solid #ff5a5a;padding:14px 18px;border-radius:6px;margin:16px 0;}
+  .fix{background:#0f3a1a;border-left:5px solid #4ade80;padding:14px 18px;border-radius:6px;margin:16px 0;}
+  ul{line-height:1.8;}
+  .scenario{background:#1c2447;border:1px dashed #7ecbff;border-radius:8px;padding:14px 18px;margin:10px 0;font-size:14.5px;}
+  .badge{background:#7ecbff;color:#0f1220;font-weight:700;padding:2px 8px;border-radius:6px;font-size:12px;margin-right:8px;}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0;}
+  .flow .step{background:#232847;padding:10px 16px;border-radius:8px;}
+  .flow .arrow{color:#ffd166;font-size:20px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📊 Classification & Why Linear Regression Fails</h1>
+  <p style="color:#aab;">Week 3 · Lecture + Optional Lab (C1_W3_Lab01_Classification)</p>
+
+  <h2>1. What is Classification?</h2>
+  <div class="card">
+    <p>Classification predicts <strong>y</strong>, which can only take a <em>small handful of discrete values</em> — unlike regression, which predicts any number in a continuous range.</p>
+    <div class="grid">
+      <div class="ex"><div class="q">📧 Is this email spam?</div><div class="a">no / yes</div></div>
+      <div class="ex"><div class="q">💳 Is the transaction fraudulent?</div><div class="a">no / yes</div></div>
+      <div class="ex"><div class="q">🩺 Is the tumor malignant?</div><div class="a">no / yes</div></div>
+    </div>
+    <div class="callout"><strong>Binary classification</strong> = exactly two possible output classes/categories (terms used interchangeably).</div>
+  </div>
+
+  <h2>2. Class Labeling Convention</h2>
+  <div class="card">
+    <table>
+      <tr><th>Representation</th><th>False class</th><th>True class</th></tr>
+      <tr><td>Words</td><td>no</td><td>yes</td></tr>
+      <tr><td>Boolean</td><td>false</td><td>true</td></tr>
+      <tr><td>Number (used in code)</td><td>0</td><td>1</td></tr>
+    </table>
+    <p>
+      <span class="tag neg">Negative class (0)</span> = absence of the thing &nbsp;·&nbsp;
+      <span class="tag pos">Positive class (1)</span> = presence of the thing
+    </p>
+    <div class="callout">⚠️ "Negative"/"positive" ≠ "bad"/"good"! It's arbitrary which class is called 1 — e.g. spam=1 vs. not-spam=1 are both valid choices depending on the engineer.</div>
+  </div>
+
+  <h2>3. Why Linear Regression Fails for Classification</h2>
+  <div class="card">
+    <p>Try fitting a straight line <code>f(x) = wx + b</code> to malignant (1) vs. benign (0) tumor data (x = tumor size), then apply a <strong>threshold at 0.5</strong>:</p>
+    <pre>if f(x) &lt; 0.5  →  ŷ = 0  (not malignant)
+if f(x) ≥ 0.5  →  ŷ = 1  (malignant)</pre>
+    <div class="fix">✅ <strong>With the original dataset:</strong> the best-fit line crosses 0.5 at a reasonable point — the decision boundary looks fine.</div>
+    <div class="fail">❌ <strong>Add ONE more malignant example far to the right (large tumor):</strong> the best-fit line tilts/shifts to accommodate it. The 0.5-crossing point (decision boundary) shifts right too — and now a previously-correctly-classified point (a real malignant tumor near x=3) gets <strong>misclassified as benign</strong>, even though nothing about that point changed!</div>
+    <div class="scenario"><span class="badge">Real-world scenario</span>Imagine a hospital's tumor model correctly flags a 3cm tumor as malignant. A new patient is added to training data with a 10cm obviously-malignant tumor. Just by adding that one clear-cut case, linear regression's line shifts enough that the 3cm tumor now gets predicted "benign" — a dangerous false negative caused purely by an unrelated data point.</div>
+    <p><strong>Root cause:</strong> linear regression outputs <em>any</em> real number (even &lt;0 or &gt;1), and a single outlier can drag the whole best-fit line, moving the decision boundary in unintended ways.</p>
+  </div>
+
+  <h2>4. The Fix: Logistic Regression (preview)</h2>
+  <div class="flow">
+    <div class="step">Linear Regression<br><small>output: any real number</small></div>
+    <div class="arrow">✕ unstable boundary</div>
+    <div class="step" style="border:2px solid #4ade80;">Logistic Regression<br><small>output: always between 0 and 1</small></div>
+    <div class="arrow">✓ stable boundary</div>
+  </div>
+  <div class="card">
+    <p>Despite the word "regression" in its name (kept for historical reasons), <strong>logistic regression is a classification algorithm</strong>. Its output is constrained to [0, 1], which avoids the "outlier drags the line" problem seen above. This is one of the most widely used ML algorithms for binary classification.</p>
+  </div>
+
+  <h2>5. Optional Lab Walkthrough — <code>C1_W3_Lab01_Classification</code></h2>
+  <div class="card">
+    <h3 style="color:#ffd166;margin-top:0;">Setup</h3>
+    <pre>x_train = np.array([0., 1, 2, 3, 4, 5])
+y_train = np.array([0,  0, 0, 1, 1, 1])
+
+X_train2 = np.array([[0.5,1.5],[1,1],[1.5,0.5],[3,0.5],[2,2],[1,2.5]])
+y_train2 = np.array([0, 0, 0, 1, 1, 1])</pre>
+    <p>Two datasets: a 1-variable set (tumor size → malignant?) and a 2-variable set, both binary-labeled.</p>
+
+    <h3 style="color:#ffd166;">Plotting convention</h3>
+    <pre>ax[0].scatter(x_train[pos], y_train[pos], marker='x', c='red', label="y=1")
+ax[0].scatter(x_train[neg], y_train[neg], marker='o', label="y=0",
+              facecolors='none', edgecolors=dlc["dlblue"], lw=3)</pre>
+    <ul>
+      <li><strong>Red "X"</strong> = positive examples (y=1)</li>
+      <li><strong>Blue "O"</strong> = negative examples (y=0)</li>
+      <li>In the 1-variable plot, y=0/1 is on the vertical axis. In the 2-variable plot, there's no y-axis for the label — only marker shape/color conveys the class (since both axes are used for x₀, x₁).</li>
+    </ul>
+
+    <h3 style="color:#ffd166;">Interactive linear regression demo</h3>
+    <pre>w_in = np.zeros((1))
+b_in = 0
+addpt = plt_one_addpt_onclick(x_train, y_train, w_in, b_in, logistic=False)</pre>
+    <p>This launches an interactive widget where you can:</p>
+    <ol style="line-height:1.9;">
+      <li>Click <strong>"Run Linear Regression"</strong> → best-fit line doesn't match binary data well.</li>
+      <li>Toggle the <strong>0.5 threshold</strong> → predictions suddenly look reasonable.</li>
+      <li>Click to <strong>add a new malignant point far right</strong> (~x=10) → rerun regression → the line shifts, and the x=3 point flips to incorrectly predicted "benign".</li>
+    </ol>
+    <div class="fail">This hands-on step is the lab's core lesson: <strong>linear regression's decision boundary is not robust to new data</strong>, which is why it's unsuitable for classification.</div>
+
+    <h3 style="color:#ffd166;">Lab takeaways</h3>
+    <ul>
+      <li>Explored categorical (binary) data sets and how to plot them.</li>
+      <li>Confirmed empirically that linear regression is insufficient for classification — motivating logistic regression, covered next.</li>
+    </ul>
+  </div>
+
+  <h2>6. Quick Recap</h2>
+  <div class="card">
+    <table>
+      <tr><th>Concept</th><th>Key Point</th></tr>
+      <tr><td>Classification</td><td>Predicts one of a small set of discrete values (not a continuous number)</td></tr>
+      <tr><td>Binary classification</td><td>Exactly 2 classes: 0 (negative) / 1 (positive)</td></tr>
+      <tr><td>Linear regression for classification</td><td>Works sometimes, but decision boundary is unstable — shifts when new data is added, even far from the boundary</td></tr>
+      <tr><td>Decision boundary</td><td>The threshold (e.g. x-value) that separates predicted class 0 from class 1</td></tr>
+      <tr><td>Logistic regression</td><td>Correct tool for binary classification; output always in [0,1]; name is historical, not literal</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

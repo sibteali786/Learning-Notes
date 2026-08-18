@@ -3476,3 +3476,132 @@ For the most part, you won't have to worry about endianness when writing program
 
 For now, just know that most modern systems use little-endian, and the compiler takes care of how data is stored and accessed.
 ![[Pasted image 20260813204427.png]]![[Pasted image 20260813204431.png]]
+
+# Pointer-Pointers
+
+Ok, so... now we know what pointers are. So let's learn it over again! A pointer-to-pointer in C is just a pointer variable that holds the address of another pointer.
+
+Click to show video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: Pointer pointers are easy
+
+This allows you to create complex data structures like arrays of pointers, and to modify pointers indirectly. The syntax is exactly what you would expect:
+
+```c
+int value;
+int *pointer;
+int **pointer_pointer;
+```
+
+Pointers to pointers (or pointers to pointers to pointers to pointers... you get the idea) are like a treasure map or a scavenger hunt. You start at one pointer and keep following the chain of addresses until you get to the final value. Each `*` follows one address: `*pointer_pointer` gets the inner `int *`, and `**pointer_pointer` gets the final `int`.
+
+### Pointers in Memory
+
+A pointer is a variable whose stored value is another variable's address.
+
+ptr_to_ptr selected — choose an outlined int * cell.
+
+|Variable|Type|Memory address|Value|
+|---|---|---|---|
+|Variable name for age|Type for age|0x10004096|Value for age|
+|Variable name for score|Type for score|0x10084104|Value for score|
+|Variable name for ptr_to_age|Type for ptr_to_age|0x10184120|Value for ptr_to_age|
+|Variable name for ptr_to_score|Type for ptr_to_score|0x10204128|Value for ptr_to_score|
+|Variable name for ptr_to_ptr|Type for ptr_to_ptr|0x10284136|Value for ptr_to_ptr|
+
+## Assignment
+
+Complete the `allocate_int` function. It accepts a pointer to a pointer to an integer called `pointer_pointer`, and a raw value. Update the pointer that `pointer_pointer` points to so it stores the address of newly allocated memory containing `value`.
+
+1. [ ] Allocate memory for a single integer on the heap, and save its address into a new pointer.
+2. [ ] Update the pointer that pointer_pointer is pointing at to hold the newly allocated memory address.
+3. [ ] Set the raw value of the integer that `pointer_pointer` now points to (well, that it points to through 2 address hops) to the value passed in.
+
+_Observe: If you take a look at `test_does_not_overwrite` in the `main.c` file, you'll notice that while `pointer_pointer` does indeed unravel and point to the new value, the original value still exists at its spot in memory. We just don't point to it anymore._
+
+```c
+#include "exercise.h
+#include "stdlib.h"
+
+void allocate_int(int **pointer_pointer, int value) {
+  int *ptr = malloc(sizeof(int));
+  *pointer_pointer = ptr;
+  **pointer_pointer = value;
+}
+
+```
+
+note
+```
+`&` is only needed to get the address of a variable that already exists (like `&meaning_of_life`). `malloc` doesn't work that way — it directly _returns_ an address (of newly allocated heap memory), not a variable you then need to take the address of.
+```
+
+# Array of Pointers
+
+Making an array of integers on the heap is pretty simple:
+
+```c
+int *int_array = malloc(sizeof(int) * 3);
+int_array[0] = 1;
+int_array[1] = 2;
+int_array[2] = 3;
+```
+
+But we can also make an array of pointers! It's quite common to do this in C, especially considering that strings are just pointers to `char`s:
+
+```c
+char **string_array = malloc(sizeof(char *) * 3);
+string_array[0] = "foo";
+string_array[1] = "bar";
+string_array[2] = "baz";
+```
+
+## Assignment
+
+Sneklang, being a super-robust programming language toolchain, needs to represent "Tokens" – strings of text that represent Sneklang syntax, things like `if`, `else` and `def`. They're represented as structs, you can see the struct in `exercise.h`.
+
+Take a look at `create_token_pointer_array`. It correctly allocates an array of token pointers on the heap, but notice that the addresses it's adding to each index are the addresses of the stack-allocated inputs.
+
+1. [ ] Update the `create_token_pointer_array`'s loop to allocate _new_ space for each token on the heap.
+2. [ ] Store the address of the new space in the array instead of the stack address.
+3. [ ] Copy the members of the input struct into the newly allocated one.
+```c
+#include "exercise.h"
+#include <stdlib.h>
+
+token_t **create_token_pointer_array(token_t *tokens, size_t count) {
+  token_t **token_pointers = malloc(count * sizeof(token_t *));
+  if (token_pointers == NULL) {
+    exit(1);
+  }
+  for (size_t i = 0; i < count; ++i) {
+    token_t *new_ptr = malloc(sizeof(token_t));
+    token_pointers[i] = new_ptr;
+    *new_ptr = tokens[i];
+  }
+  return token_pointers;
+}
+
+```
+
+indivdual copy to new allocated heap space
+```c
+#include "exercise.h"
+#include <stdlib.h>
+
+token_t **create_token_pointer_array(token_t *tokens, size_t count) {
+  token_t **token_pointers = malloc(count * sizeof(token_t *));
+  if (token_pointers == NULL) {
+    exit(1);
+  }
+  for (size_t i = 0; i < count; ++i) {
+    token_t *new_ptr = malloc(sizeof(token_t));
+    token_pointers[i] = new_ptr;
+    new_ptr->literal = tokens[i].literal;
+    new_ptr-> line = tokens[i].line;
+    new_ptr -> column = tokens[i].column;
+  }
+  return token_pointers;
+}
+
+```
