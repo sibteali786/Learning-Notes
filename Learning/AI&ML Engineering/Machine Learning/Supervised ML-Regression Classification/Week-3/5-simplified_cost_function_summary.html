@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logistic Regression: Simplified Cost Function — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --text:#e8eaf6; --muted:#a6acc9;
+    --accent:#7c9dff; --accent2:#ff8a65; --green:#4fd1a5; --purple:#c792ea; --yellow:#ffd166;
+    --red:#ff6b6b; --blue:#5fb3ff; --border:#2b3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:linear-gradient(180deg,#0b0e1a,#12162a 40%,#0b0e1a);color:var(--text);
+    font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.55;padding:32px 16px 80px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:1.9rem;margin-bottom:4px;background:linear-gradient(90deg,var(--accent),var(--purple));
+     -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:1rem;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:22px;
+        box-shadow:0 4px 18px rgba(0,0,0,.25);}
+  .card h2{margin-top:0;font-size:1.25rem;display:flex;align-items:center;gap:10px;}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:600;
+         background:var(--card2);border:1px solid var(--border);color:var(--accent);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+  .formula{background:#0d1024;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:10px 0;
+           font-family:'Cambria Math','STIX Two Math',serif;font-size:1.05rem;overflow-x:auto;}
+  code, .code{font-family:'Fira Code',Consolas,monospace;background:#0d1024;border:1px solid var(--border);
+        border-radius:8px;padding:14px 16px;display:block;white-space:pre;overflow-x:auto;font-size:.88rem;color:#d7e0ff;}
+  ul{margin:8px 0 8px 0;padding-left:22px;}
+  li{margin-bottom:6px;}
+  .highlight{color:var(--yellow);font-weight:600;}
+  .pos{color:var(--red);font-weight:600;}
+  .neg{color:var(--blue);font-weight:600;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem;}
+  th,td{border:1px solid var(--border);padding:8px 12px;text-align:left;}
+  th{background:var(--card2);color:var(--accent);}
+  svg{background:#0d1024;border:1px solid var(--border);border-radius:10px;}
+  .caption{color:var(--muted);font-size:.85rem;text-align:center;margin-top:6px;}
+  .note{background:#1a1440;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .scenario{background:#0f1a2e;border-left:3px solid var(--green);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .toc{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+  .toc a{color:var(--accent);text-decoration:none;background:var(--card2);border:1px solid var(--border);
+         padding:6px 12px;border-radius:999px;font-size:.82rem;}
+  .toc a:hover{background:var(--accent);color:#0b0e1a;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Logistic Regression — Simplified Loss & Cost Function</h1>
+  <div class="subtitle">Collapsing the piecewise loss into one line, why this cost function was chosen, and the coding lab</div>
+
+  <div class="toc">
+    <a href="#step1">1. From piecewise to one-line loss</a>
+    <a href="#step2">2. Proof it's equivalent</a>
+    <a href="#step3">3. Simplified cost function</a>
+    <a href="#step4">4. Why this cost function?</a>
+    <a href="#lab">5. Lab: compute_cost_logistic</a>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card" id="step1">
+    <h2>1. Simplifying the Loss Function <span class="badge">one equation instead of two</span></h2>
+    <p>Previous (piecewise) form:</p>
+    <div class="formula">
+      L(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾) =
+      <br>&nbsp;&nbsp;−log(f<sub>w,b</sub>(x⁽ⁱ⁾))&nbsp;&nbsp;&nbsp;&nbsp;if y⁽ⁱ⁾ = 1
+      <br>&nbsp;&nbsp;−log(1 − f<sub>w,b</sub>(x⁽ⁱ⁾))&nbsp;&nbsp;if y⁽ⁱ⁾ = 0
+    </div>
+    <p>Because y is binary (only 0 or 1), both cases collapse into a single formula:</p>
+    <div class="formula" style="border:2px solid var(--accent);">
+      <strong>L(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾) = −y⁽ⁱ⁾·log(f<sub>w,b</sub>(x⁽ⁱ⁾)) − (1 − y⁽ⁱ⁾)·log(1 − f<sub>w,b</sub>(x⁽ⁱ⁾))</strong>
+    </div>
+    <p>This single-line form is <span class="highlight">algebraically identical</span> to the piecewise version — just easier to implement in code (no if/else needed).</p>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="step2">
+    <h2>2. Why the Collapse Works <span class="badge">plug in y=1 and y=0</span></h2>
+    <table>
+      <tr><th>Case</th><th>Substitution</th><th>Result</th></tr>
+      <tr>
+        <td class="pos">y = 1</td>
+        <td>−(1)·log(f) − (1−1)·log(1−f) = −log(f) − <span style="color:var(--muted)">0·(…)</span></td>
+        <td>−log(f<sub>w,b</sub>(x⁽ⁱ⁾)) ✓ matches top case</td>
+      </tr>
+      <tr>
+        <td class="neg">y = 0</td>
+        <td>−(0)·log(f) − (1−0)·log(1−f) = <span style="color:var(--muted)">0·(…)</span> − log(1−f)</td>
+        <td>−log(1 − f<sub>w,b</sub>(x⁽ⁱ⁾)) ✓ matches bottom case</td>
+      </tr>
+    </table>
+    <div class="note">Trick: y and (1−y) act as <strong>on/off switches</strong> — whichever term doesn't apply gets multiplied by 0 and disappears, leaving exactly the piecewise formula from before.</div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="step3">
+    <h2>3. Simplified Cost Function <span class="badge">average loss over all m examples</span></h2>
+    <div class="formula">
+      cost: J(w,b) = (1/m) Σᵢ₌₁ᵐ [ L(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾) ]
+    </div>
+    <p>Substituting the simplified loss and pulling the negative signs out front:</p>
+    <div class="formula" style="border:2px solid var(--accent);">
+      <strong>J(w,b) = −(1/m) Σᵢ₌₁ᵐ [ y⁽ⁱ⁾·log(f<sub>w,b</sub>(x⁽ⁱ⁾)) + (1 − y⁽ⁱ⁾)·log(1 − f<sub>w,b</sub>(x⁽ⁱ⁾)) ]</strong>
+    </div>
+    <p>This is <span class="highlight">the</span> cost function almost everyone uses to train logistic regression.</p>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card" id="step4">
+    <h2>4. Why This Particular Cost Function? <span class="badge">maximum likelihood estimation</span></h2>
+    <ul>
+      <li>It isn't arbitrary — it's derived from a statistical principle called <strong>Maximum Likelihood Estimation (MLE)</strong>, a standard method for efficiently finding parameters of a model.</li>
+      <li>Deep MLE details are beyond the scope of this course, but the key payoff is: this cost function is <span class="highlight">convex</span>.</li>
+      <li>Convexity ⇒ gradient descent is guaranteed to converge to the global minimum (no local-minima traps, unlike squared error with a sigmoid).</li>
+    </ul>
+    <div class="scenario"><strong>Takeaway:</strong> Many cost functions could technically be invented, but this log-loss form is the one with solid statistical justification (MLE) AND the convenient convex shape needed for gradient descent to work reliably.</div>
+  </div>
+
+  <!-- LAB -->
+  <div class="card" id="lab">
+    <h2>5. Hands-on Lab: Coding the Cost Function <span class="badge">C1_W3_Lab05_Cost_Function_Soln.ipynb</span></h2>
+
+    <h3 style="color:var(--accent2)">Setup & dataset (same as the decision-boundary lab)</h3>
+    <code>import numpy as np
+%matplotlib widget
+import matplotlib.pyplot as plt
+from lab_utils_common import plot_data, sigmoid, dlc
+plt.style.use('./deeplearning.mplstyle')
+
+X_train = np.array([[0.5, 1.5], [1,1], [1.5, 0.5], [3, 0.5], [2, 2], [1, 2.5]])  # (m,n)
+y_train = np.array([0, 0, 0, 1, 1, 1])                                           # (m,)</code>
+    <p>Plotted with red ✕ = y=1, blue ○ = y=0 via <code style="display:inline;padding:2px 6px;">plot_data</code>.</p>
+
+    <h3 style="color:var(--accent2)">Cost function formula being implemented</h3>
+    <div class="formula">
+      J(w,b) = (1/m) Σᵢ loss(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾),&nbsp;&nbsp; where f<sub>w,b</sub>(x⁽ⁱ⁾)=g(z⁽ⁱ⁾), z⁽ⁱ⁾=w·x⁽ⁱ⁾+b, g(z)=1/(1+e⁻ᶻ)
+    </div>
+
+    <h3 style="color:var(--accent2)">Code: compute_cost_logistic</h3>
+    <code>def compute_cost_logistic(X, y, w, b):
+    """
+    Computes cost
+
+    Args:
+      X (ndarray (m,n)): Data, m examples with n features
+      y (ndarray (m,)) : target values
+      w (ndarray (n,)) : model parameters
+      b (scalar)       : model parameter
+
+    Returns:
+      cost (scalar): cost
+    """
+    m = X.shape[0]
+    cost = 0.0
+    for i in range(m):
+        z_i = np.dot(X[i], w) + b
+        f_wb_i = sigmoid(z_i)
+        cost += -y[i]*np.log(f_wb_i) - (1-y[i])*np.log(1-f_wb_i)
+
+    cost = cost / m
+    return cost</code>
+    <p>Loops over all m examples, accumulates each example's loss (single-line formula from Section 1), then divides by m to average.</p>
+
+    <h3 style="color:var(--accent2)">Sanity check</h3>
+    <code>w_tmp = np.array([1,1])
+b_tmp = -3
+print(compute_cost_logistic(X_train, y_train, w_tmp, b_tmp))
+# Expected: 0.3668667864055175  →  got 0.36686678640551745 ✓</code>
+
+    <h3 style="color:var(--accent2)">Comparing two decision boundaries (b=−3 vs b=−4)</h3>
+    <p>Same w=[1,1] for both, only b differs:</p>
+    <ul>
+      <li><strong>b = −3</strong> → boundary: x₀+x₁−3=0 (blue line)</li>
+      <li><strong>b = −4</strong> → boundary: x₀+x₁−4=0 (magenta line)</li>
+    </ul>
+    <code>x0 = np.arange(0,6)
+x1 = 3 - x0
+x1_other = 4 - x0
+
+fig,ax = plt.subplots(1, 1, figsize=(4,4))
+ax.plot(x0, x1, c=dlc["dlblue"], label="$b$=-3")
+ax.plot(x0, x1_other, c=dlc["dlmagenta"], label="$b$=-4")
+ax.axis([0, 4, 0, 4])
+
+plot_data(X_train, y_train, ax)
+ax.axis([0, 4, 0, 4])
+ax.set_ylabel('$x_1$', fontsize=12)
+ax.set_xlabel('$x_0$', fontsize=12)
+plt.legend(loc="upper right")
+plt.title("Decision Boundary")
+plt.show()</code>
+    <p>Visually, the b=−4 (magenta) line sits further from the training points and cuts through the data less cleanly — a worse fit.</p>
+
+    <h3 style="color:var(--accent2)">Cost confirms which model is better</h3>
+    <code>w_array1 = np.array([1,1]); b_1 = -3
+w_array2 = np.array([1,1]); b_2 = -4
+
+print("Cost for b = -3 : ", compute_cost_logistic(X_train, y_train, w_array1, b_1))
+print("Cost for b = -4 : ", compute_cost_logistic(X_train, y_train, w_array2, b_2))
+# Cost for b = -3 :  0.36686678640551745
+# Cost for b = -4 :  0.503680863674846</code>
+
+    <table>
+      <tr><th>Parameters</th><th>Decision boundary</th><th>Cost</th><th>Fit quality</th></tr>
+      <tr><td>w=[1,1], b=−3</td><td style="color:var(--blue)">blue line</td><td><strong>0.3669</strong></td><td class="neg">Better ✓ (lower cost)</td></tr>
+      <tr><td>w=[1,1], b=−4</td><td style="color:#e879f9">magenta line</td><td><strong>0.5037</strong></td><td class="pos">Worse (higher cost)</td></tr>
+    </table>
+    <div class="scenario"><strong>Real-life analogy:</strong> Two competing tumor-classification models disagree only on the bias term. Plugging both into the cost function is like grading two students' exams with the same rubric — the model whose predictions align better with actual outcomes (lower cost) is objectively the better fit, confirming what the visual boundary already suggested.</div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <h2 style="justify-content:center;">Next up</h2>
+    <p>With a working, convex cost function in hand, the next step is applying <span class="highlight">gradient descent</span> to logistic regression — using derivatives of this exact J(w,b) to iteratively update w and b until the cost is minimized.</p>
+  </div>
+
+</div>
+</body>
+</html>
