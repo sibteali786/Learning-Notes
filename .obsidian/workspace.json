@@ -4,17 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "697430bbb9414dbc",
+        "id": "ef392d202f8e5404",
         "type": "tabs",
         "children": [
           {
-            "id": "9b0b253b9e3adf32",
+            "id": "8b9b4ccd180d78f0",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Personal/Me/Journal.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Journal"
             }
           }
         ]
@@ -183,6 +197,11 @@
   },
   "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/7-multi-index-optimizer.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies/why-composite-index-sort-order.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-Cobining-Index.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "conflict-files-obsidian-git.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/identity-infra-open-concerns.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-whatsnextplease.md",
@@ -201,9 +220,6 @@
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/L6_summary.html",
     "Personal/Me/Journal.md",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/logistic_regression_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/C1_W3_Lab01_Classification_Soln.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/C1_W3_Lab02_Sigmoid_function_Soln.ipynb",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
@@ -216,7 +232,6 @@
     "redis_geosearch_grid_vs_radius.svg",
     "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Pasted image 20260813204431.png",
@@ -228,7 +243,6 @@
     "Pasted image 20260714215710.png",
     "Pasted image 20260714215620.png",
     "Learning/Backend Engineering/Memory Management in C/Drawing 2026-08-13 15.18.44.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/Fundamentals of Database Engineering.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
