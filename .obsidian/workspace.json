@@ -11,24 +11,12 @@
             "id": "8b9b4ccd180d78f0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Personal/Me/Journal.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html"
               },
-              "icon": "lucide-file",
-              "title": "Journal"
+              "icon": "code-glyph",
+              "title": "4-logistic_loss_summary"
             }
           }
         ]
@@ -90,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 360.31640625
+    "width": 526.0546875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -195,12 +183,20 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/7-multi-index-optimizer.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies/why-composite-index-sort-order.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-Cobining-Index.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/2-logistic_regression_sigmoid_fn.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab02_Sigmoid_function_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/3-logistic_regression_decision_boundary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab03_Decision_Boundary_Soln.ipynb",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/multiple-indexes.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/bloom-filters.html",
+    "Personal/Me/Journal.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/Scaling_Probabilistic_Lookups.pptx",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/8-create-index-concurrently.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "conflict-files-obsidian-git.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/identity-infra-open-concerns.md",
@@ -209,16 +205,8 @@
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-email-module.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-asia-builders-erp.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/case-study-multi-file-upload.md",
-    "Learning/Requirements Gathering/Work Hisotry Case Studies",
     "Learning/DSA/BFS/fundamentals.excalidraw.md",
     "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
-    "Learning/DSA/BFS",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/L4_summary.html",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/notebooks/L5_student.ipynb",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/L5_summary.html",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/notebooks/L6_student.ipynb",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/L6_summary.html",
-    "Personal/Me/Journal.md",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
