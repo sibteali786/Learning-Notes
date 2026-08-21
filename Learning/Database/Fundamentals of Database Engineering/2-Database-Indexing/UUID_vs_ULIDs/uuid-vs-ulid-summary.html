@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UUID vs ULID — Index Performance Deep Dive</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card2:#1d2130; --border:#2a2f3f;
+    --text:#e6e8ee; --muted:#9aa1b4; --accent:#7c9cff; --good:#3ecf8e;
+    --bad:#ff6b6b; --warn:#ffb454; --pill:#252a3a;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;margin:0;padding:32px;line-height:1.55}
+  h1{font-size:28px;margin-bottom:4px}
+  .subtitle{color:var(--muted);margin-bottom:28px}
+  .section-label{display:inline-block;background:var(--accent);color:#0b0d13;font-weight:700;font-size:12px;letter-spacing:.06em;padding:4px 10px;border-radius:6px;text-transform:uppercase;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:26px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr}}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .compare > div{padding:16px}
+  .compare .uuid{background:linear-gradient(180deg,#2a1620,#1a1219);border-right:1px solid var(--border)}
+  .compare .ulid{background:linear-gradient(180deg,#132a20,#101a16)}
+  .pill{display:inline-block;background:var(--pill);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  .bad{color:var(--bad);font-weight:600}
+  .good{color:var(--good);font-weight:600}
+  code, .code{font-family:'Cascadia Code',Consolas,monospace;background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:2px 6px;font-size:13px;color:#a9d6ff}
+  .codeblock{font-family:'Cascadia Code',Consolas,monospace;background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;color:#a9d6ff;white-space:pre;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:left}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .example{background:var(--card2);border-left:3px solid var(--accent);border-radius:8px;padding:14px 16px;margin-top:12px;font-size:14px}
+  .example .tag{color:var(--accent);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  .tip{background:#1a1f14;border-left:3px solid var(--warn);border-radius:8px;padding:12px 16px;font-size:13px;margin-top:10px}
+  svg text{fill:var(--text);font-family:'Segoe UI',sans-serif}
+  .leg{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+  .leg span{display:flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+
+<h1>Random UUIDs vs ULIDs: Why Index Ordering Matters</h1>
+<div class="subtitle">A visual breakdown of B+Tree page splits, why Shopify moved off UUIDv4, and what "ordered IDs" actually save you.</div>
+
+<div class="section-label">Problem Statement</div>
+<div class="card">
+  Database indexes (B+Trees) require keys to be <b>stored in sorted order</b> on disk pages. When you insert a
+  <b>random UUID (v4)</b> as a primary/indexed key, each new value lands in a random position in that order —
+  forcing the database to repeatedly <span class="bad">split full pages</span>, rewrite sibling-page pointers, and
+  thrash pages in and out of the buffer pool. Insert an <b>ordered ID (ULID/UUIDv7)</b> instead, and new keys always
+  land at the tail — pages fill sequentially with almost no splitting or random disk I/O.
+</div>
+
+<div class="section-label">UUID vs ULID</div>
+<div class="card">
+  <div class="compare">
+    <div class="uuid">
+      <b>UUID v4</b>
+      <div class="leg"><span class="pill">128-bit</span><span class="pill">Fully random</span><span class="pill">36 chars w/ dashes</span></div>
+      <div class="codeblock">f47ac10b-58cc-4372-a567-0e02b2c3d479</div>
+      <p style="margin-top:10px">Two UUIDs generated back-to-back land <span class="bad">nowhere near each other</span> numerically → random insert position in the index.</p>
+    </div>
+    <div class="ulid">
+      <b>ULID (or UUIDv7)</b>
+      <div class="leg"><span class="pill">128-bit</span><span class="pill">Timestamp prefix + random</span><span class="pill">26 chars, sortable</span></div>
+      <div class="codeblock">01ARZ3NDEKTSV4RRFFQ69G5FAV
+└─ 48-bit ms timestamp ─┘└ 80-bit random ┘</div>
+      <p style="margin-top:10px">IDs generated close in time are <span class="good">numerically close</span> → new inserts land at (or near) the end of the index, sequentially.</p>
+    </div>
+  </div>
+  <table style="margin-top:16px">
+    <tr><th></th><th>UUID v4</th><th>ULID</th></tr>
+    <tr><td>Ordering</td><td class="bad">None — pure random</td><td class="good">Lexicographically sortable by creation time</td></tr>
+    <tr><td>Insert pattern</td><td class="bad">Scattered across all pages</td><td class="good">Appends to the last/rightmost page</td></tr>
+    <tr><td>Page splits</td><td class="bad">Frequent, unpredictable</td><td class="good">Rare — mostly clean page fills</td></tr>
+    <tr><td>Buffer pool behavior</td><td class="bad">Thrashing (constant fetch/evict)</td><td class="good">Hot page stays cached</td></tr>
+    <tr><td>Leaks info (e.g. MAC)</td><td>No (v4) / Yes (v1)</td><td>No</td></tr>
+    <tr><td>Human-sortable string</td><td>No</td><td class="good">Yes</td></tr>
+  </table>
+</div>
+
+<div class="section-label">Why Ordering Kills / Saves Performance — Visualized</div>
+<div class="card">
+<svg viewBox="0 0 900 260" width="100%">
+  <text x="10" y="20" font-size="13" font-weight="700" fill="#ff6b6b">Random UUID inserts → constant page splits</text>
+  <!-- page A -->
+  <rect x="10" y="40" width="120" height="50" rx="6" fill="#1d2130" stroke="#ff6b6b"/>
+  <text x="70" y="70" font-size="13" text-anchor="middle">10 | 40</text>
+  <rect x="150" y="40" width="120" height="50" rx="6" fill="#1d2130" stroke="#ff6b6b"/>
+  <text x="210" y="70" font-size="13" text-anchor="middle">45 | 70</text>
+  <rect x="290" y="40" width="120" height="50" rx="6" fill="#1d2130" stroke="#ff6b6b"/>
+  <text x="350" y="70" font-size="13" text-anchor="middle">80 | 90</text>
+  <text x="10" y="115" font-size="12" fill="#9aa1b4">Insert 5, 60 → both force a SPLIT (must slot between existing keys)</text>
+  <path d="M10 130 L410 130" stroke="#2a2f3f"/>
+
+  <text x="10" y="155" font-size="13" font-weight="700" fill="#3ecf8e">ULID inserts → sequential appends</text>
+  <rect x="10" y="175" width="120" height="50" rx="6" fill="#132a20" stroke="#3ecf8e"/>
+  <text x="70" y="205" font-size="13" text-anchor="middle">10 | 20</text>
+  <rect x="150" y="175" width="120" height="50" rx="6" fill="#132a20" stroke="#3ecf8e"/>
+  <text x="210" y="205" font-size="13" text-anchor="middle">30 | 40</text>
+  <rect x="290" y="175" width="120" height="50" rx="6" fill="#132a20" stroke="#3ecf8e" stroke-dasharray="4 3"/>
+  <text x="350" y="205" font-size="13" text-anchor="middle">50 | <tspan fill="#3ecf8e">70 →</tspan></text>
+  <text x="10" y="245" font-size="12" fill="#9aa1b4">New key 70 just appends to the last page — no reshuffling of earlier pages.</text>
+</svg>
+</div>
+
+<div class="section-label">Shopify: ULID Benefit vs UUID</div>
+<div class="card">
+  <p>Shopify tags every purchase/order with a unique ID for <b>idempotency</b> (catching duplicate submits). With UUIDv4:</p>
+  <ul>
+    <li>Thousands of purchases in the same minute generate IDs scattered <span class="bad">randomly across the whole index</span>.</li>
+    <li>Every insert risks a page split; every idempotency lookup risks pulling a "cold" page from disk.</li>
+    <li>The buffer pool (shared memory cache, LRU-evicted) constantly evicts pages it will need again seconds later → <b>I/O thrashing</b>.</li>
+  </ul>
+  <p>Switching to ULID (time-ordered):</p>
+  <ul>
+    <li>IDs created in the same time window are <span class="good">numerically clustered</span> → land on the same "hot" trailing pages.</li>
+    <li>Both <b>writes</b> (sequential inserts, few splits) and <b>reads</b> (idempotency re-checks happen within minutes/hours of creation, i.e. still on hot pages) benefit.</li>
+  </ul>
+
+  <div class="example">
+    <div class="tag">Example Scenario</div>
+    10,000 checkouts happen between 2:00–2:01 PM. Each gets an order ID.
+    <br><br>
+    <b>With UUIDv4:</b> order IDs like <code>a3f1..</code>, <code>08e4..</code>, <code>f921..</code> are inserted in totally random spots
+    across the order-index B+Tree. The DB has to split leaf pages constantly and pull cold, unrelated pages into memory —
+    even though all 10,000 rows were created in the same 60 seconds.
+    <br><br>
+    <b>With ULID:</b> all 10,000 IDs share the same millisecond-based prefix range, so they insert into the
+    <i>same handful of trailing pages</i>. If a customer double-clicks "Pay Now" and the app re-checks
+    "does this order ID already exist?" a second later, that check hits a page that's <b>already hot in the buffer pool</b> —
+    fast write, fast idempotency read, minimal disk I/O.
+  </div>
+
+  <div class="tip">Note: this benefit is workload-specific. A URL shortener's <i>read</i> pattern is random regardless of ID order (any short link can be hit at any time), so ULID mainly helps <i>write</i>-heavy, time-clustered workloads like Shopify's — not everything.</div>
+</div>
+
+<div class="section-label">B+Tree vs B-Tree</div>
+<div class="card">
+  <div class="grid2">
+    <div>
+      <b>B-Tree</b>
+      <ul>
+        <li>Keys <b>and</b> data/values can live in <i>any</i> node (internal or leaf).</li>
+        <li>No linked list between leaf nodes.</li>
+        <li>Range scans require traversing back up and down the tree.</li>
+      </ul>
+    </div>
+    <div>
+      <b>B+Tree</b>
+      <ul>
+        <li>All actual data/values live <b>only in leaf nodes</b>; internal nodes hold just keys for routing.</li>
+        <li>Leaf pages are <b>linked (often doubly)</b> to their siblings.</li>
+        <li>Range scans just walk the linked leaf list — no going back up the tree.</li>
+        <li>Used by MySQL (InnoDB), Postgres, most relational DBs — matches what's described in the transcript (linked leaf pages, page splits, sequential scans).</li>
+      </ul>
+    </div>
+  </div>
+  <table style="margin-top:14px">
+    <tr><th>Aspect</th><th>B-Tree</th><th>B+Tree</th></tr>
+    <tr><td>Data location</td><td>Any node</td><td>Leaf nodes only</td></tr>
+    <tr><td>Leaf linking</td><td>No</td><td>Yes (sibling pointers)</td></tr>
+    <tr><td>Range queries</td><td>Slower (tree traversal)</td><td>Faster (leaf-chain scan)</td></tr>
+    <tr><td>Typical use</td><td>Filesystems, some in-memory structures</td><td>Relational DB indexes (MySQL, Postgres, Oracle)</td></tr>
+  </table>
+</div>
+
+</body>
+</html>

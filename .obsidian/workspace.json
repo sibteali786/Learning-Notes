@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "1de41a217d61ddee",
+        "id": "5cbe24d5c67859a1",
         "type": "tabs",
         "children": [
           {
-            "id": "75180f658d9d781a",
+            "id": "5a90d66154cdf42e",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "html-view",
               "state": {
-                "file": "Learning/System Design/InterviewBoard.excalidraw.md"
+                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html"
               },
-              "icon": "excalidraw-icon",
-              "title": "InterviewBoard.excalidraw"
+              "icon": "code-glyph",
+              "title": "uuid-vs-ulid-summary"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 287.6913871765137,
-    "collapsed": true
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -185,20 +184,21 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/System Design/InterviewBoard.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs",
+    "Learning/Behavioural Interview Prep/decode_behavioral_interviews_summary.html",
+    "Learning/Behavioural Interview Prep/behavioral_interview_summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/3-logistic_regression_decision_boundary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/2-logistic_regression_sigmoid_fn.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/11-gradient-descent-linear-regression-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/12-learning-rate-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/10-gradient-descent-derivative-intuition-summary.html",
     "conflict-files-obsidian-git.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies/why-composite-index-sort-order.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/multiple-indexes.pdf",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/bloom-filters.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/Scaling_Probabilistic_Lookups.pptx",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/8-create-index-concurrently.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/7-multi-index-optimizer.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-Cobining-Index.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab05_Cost_Function_Soln.ipynb",
+    "Learning/System Design/InterviewBoard.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Summary.excalidraw.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-asia-builders-erp.md",
