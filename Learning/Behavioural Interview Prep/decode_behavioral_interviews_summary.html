@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Decode: How Behavioral Interviews Work — Summary</title>
+<style>
+  :root{
+    --ink:#1c1a17; --paper:#efe9dd; --paper2:#e2dac9; --rule:#c9bfa8;
+    --accent:#8a3324; --accent2:#3d5a4c; --gold:#b0813f; --muted:#6b6355;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Georgia','Iowan Old Style',serif;line-height:1.5;}
+  .wrap{max-width:940px;margin:0 auto;padding:40px 24px 80px;}
+  header.hero{border-bottom:4px solid var(--ink);padding-bottom:24px;margin-bottom:36px;}
+  .eyebrow{font-family:'Courier New',monospace;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--accent);margin-bottom:10px;}
+  h1.title{font-size:40px;line-height:1.05;margin:0 0 12px;font-weight:700;letter-spacing:-.01em;}
+  .subtitle{font-size:16px;color:var(--muted);max-width:680px;font-style:italic;}
+  section{margin-bottom:46px;}
+  h2.section-head{font-size:13px;font-family:'Courier New',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--accent2);border-top:2px solid var(--ink);padding-top:10px;margin-bottom:18px;}
+  h3.block-title{font-size:21px;margin:0 0 10px;}
+  p{margin:0 0 12px;}
+
+  /* signal area grid */
+  .signal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .signal-card{background:#fff;border:1px solid var(--rule);border-left:4px solid var(--accent2);padding:14px 16px;}
+  .signal-card h4{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px;}
+  .signal-card p{font-size:13px;color:var(--muted);margin:0 0 8px;}
+  .signal-card .qs{font-size:12px;font-style:italic;color:var(--accent);margin:0;}
+
+  /* question types */
+  .qtype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .qtype{background:var(--paper2);border:1px solid var(--rule);padding:16px;text-align:center;}
+  .qtype .badge{display:inline-block;font-family:'Courier New',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:3px;margin-bottom:10px;}
+  .qtype.common .badge{background:#3d5a4c;color:#fff;}
+  .qtype.less .badge{background:#c9bfa8;color:#1c1a17;}
+  .qtype h4{margin:0 0 8px;font-size:16px;}
+  .qtype p{font-size:12.5px;color:var(--muted);margin:0 0 8px;}
+  .qtype .ex{font-size:12px;font-style:italic;background:#fff;padding:8px 10px;border-radius:4px;}
+
+  /* deep dive rows */
+  .deepdive{border:1px solid var(--rule);background:#fff;margin-bottom:14px;overflow:hidden;}
+  .deepdive .dd-head{background:var(--paper2);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}
+  .deepdive .dd-head h4{margin:0;font-size:16px;}
+  .deepdive .dd-head .qs{font-size:11.5px;color:var(--muted);font-style:italic;}
+  .deepdive .dd-body{padding:14px 16px;}
+  .deepdive .dd-body p{font-size:13.5px;margin:0 0 10px;}
+  .deepdive ul{margin:0 0 10px;padding-left:20px;font-size:13px;}
+  .deepdive .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+  .deepdive .compare div{padding:8px 10px;font-size:12.5px;border-radius:4px;}
+  .deepdive .compare .weak{background:#f3e3df;border-left:3px solid var(--accent);}
+  .deepdive .compare .strong{background:#e5ecdf;border-left:3px solid var(--accent2);}
+  .deepdive .compare .lbl{display:block;font-family:'Courier New',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;}
+  .watch-out{background:#fbf6ea;border:1px dashed var(--gold);padding:10px 14px;font-size:12.5px;margin-top:8px;}
+  .watch-out b{color:var(--gold);}
+
+  /* company values */
+  .cv-examples{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;}
+  .cv-card{background:#fff;border:1px solid var(--rule);padding:12px 14px;font-size:13px;}
+  .cv-card b{color:var(--accent2);}
+
+  .footnote{font-size:12px;color:var(--muted);border-left:3px solid var(--rule);padding-left:12px;margin-top:10px;}
+
+  footer{margin-top:50px;padding-top:18px;border-top:2px solid var(--ink);font-family:'Courier New',monospace;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;}
+
+  @media (max-width:720px){
+    .signal-grid{grid-template-columns:1fr;}
+    .qtype-grid{grid-template-columns:1fr;}
+    .deepdive .compare{grid-template-columns:1fr;}
+    .cv-examples{grid-template-columns:1fr;}
+    h1.title{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Course Summary — Article 2 of the Behavioral Series</div>
+    <h1 class="title">Decode: How Behavioral Interviews Work</h1>
+    <p class="subtitle">The three lenses interviewers score you through, the three question formats they use to collect signal, and a deep dive into all 8 core competencies.</p>
+  </header>
+
+  <section>
+    <h2 class="section-head">01 · Why Decoding Matters</h2>
+    <p>Unlike a coding interview, you can't "run" a behavioral answer and check it against expected output — which is why most candidates leave unsure if they nailed it. Interviewers are <b>forecasters</b>: a great engineer from a startup can struggle in a Big Tech behavioral (and vice versa) not from lack of skill, but because success looks different in each environment. Decoding means figuring out what's actually being assessed before you choose or tell a story.</p>
+  </section>
+
+  <section>
+    <h2 class="section-head">02 · Three Evaluation Frameworks</h2>
+    <p>Every interviewer scores you through three lenses at once, often unconsciously:</p>
+    <div class="cv-examples">
+      <div class="cv-card"><b>Signal Areas</b> — 8 universal competencies (Ownership, Ambiguity, Conflict Resolution, etc.) common across all tech companies.</div>
+      <div class="cv-card"><b>Company Values</b> — company-specific language that usually repackages the same signal areas (Amazon's "Ownership" principle ≈ the Ownership signal area).</div>
+      <div class="cv-card"><b>Cultural Assessment</b> — unwritten norms: attitude to hierarchy, speed vs. quality, sensitivity to failure. No universal "right" — only "right for that company."</div>
+    </div>
+    <div class="watch-out"><b>Watch out — "value-dropping":</b> memorizing a company's values and forcing them into every answer. Interviewers see through it immediately. Let values inform story choice and language naturally instead — e.g. say "I took ownership of the customer experience" only where Amazon's language genuinely fits, don't force it.</div>
+  </section>
+
+  <section>
+    <h2 class="section-head">03 · Three Question Types</h2>
+    <div class="qtype-grid">
+      <div class="qtype common">
+        <span class="badge">Most Common</span>
+        <h4>"Tell me about a time..."</h4>
+        <p>Asks for a specific past behavior — interviewers want a concrete story, not a hypothetical. Most of your prep should target this format.</p>
+        <div class="ex">"Tell me about a time you received tough feedback."</div>
+      </div>
+      <div class="qtype less">
+        <span class="badge">Less Common</span>
+        <h4>Hypotheticals</h4>
+        <p>Poses a scenario you haven't lived through, to test judgment when past experience is limited.</p>
+        <div class="ex">"What would you do if your manager asked you to cut a critical feature to meet a deadline?"</div>
+      </div>
+      <div class="qtype less">
+        <span class="badge">Less Common</span>
+        <h4>Values Questions</h4>
+        <p>Philosophical — probes mindset and alignment with company culture rather than a specific event.</p>
+        <div class="ex">"What does ownership mean to you?"</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-head">04 · The 8 Signal Area Deep Dives</h2>
+    <p>Each signal area below includes what's really being assessed, the behaviors that demonstrate it, and a real example contrast where relevant.</p>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>📐 Scope</h4><span class="qs">"Tell me about your most impactful project"</span></div>
+      <div class="dd-body">
+        <p>Tests the "size of the box" you can operate in — does your past impact match the level you're interviewing for?</p>
+        <ul>
+          <li>Managing projects across large timescales; delivering real business value</li>
+          <li>Handling technical complexity (architecture, performance) and organizational complexity (stakeholders, team size)</li>
+          <li>Making decisions with real consequences; showing responsibility growth over time</li>
+        </ul>
+        <div class="watch-out"><b>Downlevel risk:</b> using a junior-level story for a senior role instantly signals you don't understand the target level's expectations.</div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>🔑 Ownership</h4><span class="qs">"Tell me about a time you solved a problem that wasn't your responsibility"</span></div>
+      <div class="dd-body">
+        <p>You don't just flag an issue — you drive the solution to completion and measure whether it worked.</p>
+        <div class="compare">
+          <div class="weak"><span class="lbl">Weak</span>"We solved the problem" / "the experiment was performed"</div>
+          <div class="strong"><span class="lbl">Strong</span>"I talked to the manager," "I built the proof of concept" — use "I," they're hiring you, not your team.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>🌫️ Ambiguity</h4><span class="qs">"Describe a time you worked with unclear requirements"</span></div>
+      <div class="dd-body">
+        <p>Ambiguity tolerance correlates directly with seniority and comp — higher-level work is inherently more uncertain.</p>
+        <ul>
+          <li>Breaking vague problems into concrete, actionable pieces</li>
+          <li>Making and documenting reasonable assumptions; starting with partial information</li>
+        </ul>
+        <div class="watch-out">Candidates often forget to explain <b>how</b> they created clarity (data? people? past experience?) and <b>how they validated</b> their assumptions afterward — both are what separate mature judgment from luck.</div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>🏔️ Perseverance</h4><span class="qs">"When have you had to cancel a project, and why?"</span></div>
+      <div class="dd-body">
+        <p>What you do when things get hard — because things always get hard.</p>
+        <div class="watch-out"><b>Two traps:</b> (1) Knowing when to quit is actually wisdom — canceling a project with good reasoning is strong signal, not weakness. (2) Avoid "martyr stories" — "I worked nights and weekends for a month" often reads as poor planning, not dedication.</div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>🤝 Conflict Resolution</h4><span class="qs">"Describe a conflict with a teammate and how you resolved it"</span></div>
+      <div class="dd-body">
+        <p>Tech companies value direct, healthy conflict — "I'm not one to create conflicts" is one of the worst possible openers.</p>
+        <ul>
+          <li>Initiating hard conversations rather than avoiding them; collecting data to support your position</li>
+          <li>Seeking to understand the other side first; finding win-win or "disagree and commit"</li>
+        </ul>
+        <div class="watch-out">Match the scope to your level: a peer conflict may be too junior for a staff-level story — better to use a conflict with a manager or cross-org partner.</div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>🌱 Growth</h4><span class="qs">"Tell me about a mistake you made"</span></div>
+      <div class="dd-body">
+        <p>Tells interviewers whether you'll get better over time and whether you're coachable.</p>
+        <div class="watch-out"><b>Two failure modes:</b> (1) Humble-brag weaknesses — "I care too much" isn't a real failure without a real downside. (2) Level-inappropriate mistakes — an error that should've been obvious at your level raises doubts about maturity.</div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>💬 Communication</h4><span class="qs">"Explain something technical to a non-technical audience"</span></div>
+      <div class="dd-body">
+        <p>The entire interview is itself a communication assessment — but also evaluated inside your stories via the "when" and "how," not just the "what."</p>
+        <div class="compare">
+          <div class="weak"><span class="lbl">Weak</span>"We agreed on the architecture proposal I suggested."</div>
+          <div class="strong"><span class="lbl">Strong</span>"I drafted a proposal and messaged the tech lead directly first since some choices were sensitive. After incorporating feedback, I presented it in the team meeting so everyone was aligned."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="deepdive">
+      <div class="dd-head"><h4>👑 Leadership</h4><span class="qs">"Tell me about a time you influenced without authority"</span></div>
+      <div class="dd-body">
+        <p>Matters even for ICs — you don't need direct reports to show leadership.</p>
+        <ul>
+          <li>Influencing through expertise or relationships; building consensus; mentoring others</li>
+          <li>Representing your team externally; owning team-wide improvements</li>
+        </ul>
+        <div class="watch-out">Senior candidates often bury their own leadership threads — the moment you convinced a manager to fund something, or unstuck a junior engineer, is behavioral gold. Look for it in stories you already have.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-head">05 · Bottom Line</h2>
+    <p style="font-size:15.5px;">A single story can carry signal across <b>multiple</b> areas at once — a conflict story is primarily Conflict Resolution but usually touches Communication, Perseverance, and Leadership too. Your best stories are the ones that stack signal, not the ones built around a single competency.</p>
+  </section>
+
+  <footer>
+    <span>Hello Interview — "Decode: How Behavioral Interviews Work"</span>
+    <span>Visual summary for interview prep</span>
+  </footer>
+
+</div>
+</body>
+</html>
