@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Postgres Indexing — Field Guide</title>
+<style>
+  :root{
+    --bg:#0b0f0e;
+    --panel:#111614;
+    --panel2:#161d1a;
+    --line:#26312c;
+    --text:#dfe8e2;
+    --muted:#8a9993;
+    --green:#5fd98a;
+    --amber:#e0b34a;
+    --red:#e0654a;
+    --blue:#5aa9e6;
+    --mono: 'SF Mono','Fira Code','JetBrains Mono',Consolas,monospace;
+    --sans: 'Inter','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, #0f2a1c33, transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    padding:32px 20px 80px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+  header{margin-bottom:36px;}
+  .eyebrow{
+    font-family:var(--mono);
+    color:var(--green);
+    font-size:12px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1{
+    font-size:clamp(28px,4vw,42px);
+    margin:0 0 8px;
+    line-height:1.1;
+    background:linear-gradient(90deg,#fff,#9fd9b4);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .sub{color:var(--muted);font-size:15px;max-width:640px;}
+
+  .rule{height:1px;background:var(--line);margin:28px 0;}
+
+  section{margin-bottom:40px;}
+  .sec-title{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:16px;
+  }
+  .sec-title .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+
+  /* setup cards */
+  .setup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .setup-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:16px;
+  }
+  .setup-card h3{margin:0 0 8px;font-size:14px;color:var(--text);}
+  .setup-card code{
+    display:block;font-family:var(--mono);font-size:12px;color:var(--green);
+    background:#0a0d0c;border-radius:6px;padding:8px;margin-bottom:8px;white-space:pre-wrap;
+  }
+  .setup-card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5;}
+
+  /* comparison table */
+  table.matrix{width:100%;border-collapse:collapse;font-size:13px;}
+  table.matrix th, table.matrix td{
+    border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;
+  }
+  table.matrix th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+  table.matrix td.query{font-family:var(--mono);color:var(--blue);white-space:nowrap;}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:11px;font-weight:600;
+    padding:3px 9px;border-radius:99px;white-space:nowrap;
+  }
+  .pill.good{background:#1c3a2a;color:var(--green);}
+  .pill.mid{background:#3a331c;color:var(--amber);}
+  .pill.bad{background:#3a2020;color:var(--red);}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .row-label{font-weight:600;color:var(--text);}
+
+  /* config sections */
+  .config{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:20px;margin-bottom:18px;
+  }
+  .config-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .config-head h3{margin:0;font-size:16px;}
+  .config-head code.ddl{font-family:var(--mono);font-size:12px;color:var(--amber);background:#0a0d0c;padding:5px 10px;border-radius:6px;}
+
+  .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .kv-item{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;}
+  .kv-item .q{font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:6px;}
+  .kv-item .verdict{font-size:12px;color:var(--muted);line-height:1.5;}
+  .kv-item .badge{margin-bottom:6px;}
+
+  @media (max-width:800px){
+    .setup-grid{grid-template-columns:1fr;}
+    .kv{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:520px){
+    .kv{grid-template-columns:1fr;}
+  }
+
+  /* rules panel */
+  .rules{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .rule-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;
+    border-left:3px solid var(--green);
+  }
+  .rule-card.warn{border-left-color:var(--red);}
+  .rule-card h4{margin:0 0 6px;font-size:14px;}
+  .rule-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.55;}
+  .rule-card code{font-family:var(--mono);color:var(--amber);font-size:12.5px;}
+  @media (max-width:700px){.rules{grid-template-columns:1fr;}}
+
+  /* leftmost prefix diagram */
+  .diagram{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;
+  }
+  .idx-cols{display:flex;gap:10px;margin-bottom:18px;font-family:var(--mono);font-size:13px;}
+  .idx-col{
+    flex:1;text-align:center;padding:14px 8px;border-radius:8px;background:var(--panel2);
+    border:1px solid var(--line);position:relative;
+  }
+  .idx-col .label{font-size:16px;font-weight:700;}
+  .idx-col .tag{display:block;font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.05em;}
+  .idx-col.scan{border-color:var(--green);background:#122a1c;}
+  .idx-col.filter{border-color:var(--amber);background:#2a2412;}
+  .arrow{display:flex;justify-content:center;color:var(--muted);font-size:12px;margin:-8px 0 18px;font-family:var(--mono);}
+  .legend{display:flex;gap:18px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;}
+  .legend .sw.green{background:#122a1c;border:1px solid var(--green);}
+  .legend .sw.amber{background:#2a2412;border:1px solid var(--amber);}
+
+  /* real world */
+  .scenario{
+    background:linear-gradient(135deg,#101a15,#0d1210);
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:14px;
+  }
+  .scenario h4{margin:0 0 8px;font-size:14.5px;display:flex;gap:8px;align-items:center;}
+  .scenario h4 .tag{font-family:var(--mono);font-size:10px;color:var(--bg);background:var(--green);padding:2px 7px;border-radius:5px;font-weight:700;}
+  .scenario p{margin:0;font-size:13px;color:var(--muted);line-height:1.6;}
+  .scenario code{color:var(--blue);font-family:var(--mono);font-size:12.5px;}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:50px;font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">// EXPLAIN ANALYZE · 12M row test table</div>
+    <h1>Postgres Indexing<br>Best Practices</h1>
+    <p class="sub">How the query planner actually chooses between a sequential scan, an index scan, and a bitmap index scan — across single, composite, and dual-index setups on columns A and B.</p>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- SETUP -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Table &amp; test queries</div>
+    <div class="setup-grid">
+      <div class="setup-card">
+        <h3>Table</h3>
+        <code>test(a int, b int, c int)
+~12,000,000 rows</code>
+        <p>Column <b>C</b> is never indexed — it's only ever selected, forcing a heap lookup whenever it's fetched.</p>
+      </div>
+      <div class="setup-card">
+        <h3>4 queries tested</h3>
+        <code>WHERE a = ?
+WHERE b = ?
+WHERE a = ? AND b = ?
+WHERE a = ? OR  b = ?</code>
+        <p>Every real backend query pattern boils down to one of these four shapes.</p>
+      </div>
+      <div class="setup-card">
+        <h3>3 index setups</h3>
+        <code>1) idx(a) + idx(b)
+2) idx(a, b)         composite
+3) idx(a, b) + idx(b)</code>
+        <p>Same table, same queries — only the indexing strategy changes.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SETUP 1 -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Setup 1 — separate index on A, separate index on B</div>
+    <div class="config">
+      <div class="config-head">
+        <h3>CREATE INDEX ON a; CREATE INDEX ON b;</h3>
+      </div>
+      <div class="kv">
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>index scan</span></div>
+          <div class="q">a = 70 (few rows)</div>
+          <div class="verdict">Planner skips the bitmap — rows returned are small &amp; sorted, so it walks the index directly into the heap.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill mid"><span class="dot"></span>bitmap index scan</span></div>
+          <div class="q">a = 70 (~9000 rows)</div>
+          <div class="verdict">C isn't in the index, so Postgres builds a bitmap of matching tuples, then jumps back to the heap. ~253ms.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill mid"><span class="dot"></span>bitmap index scan</span></div>
+          <div class="q">b = 100</div>
+          <div class="verdict">Same story on the B index. ~250ms, heap hit for C.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>bitmap AND — fast</span></div>
+          <div class="q">a = 100 AND b = 100</div>
+          <div class="verdict">Both indexes scanned in parallel, bitmaps <b>ANDed</b> together → tiny result set (6 rows) → very fast.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill bad"><span class="dot"></span>bitmap OR — slow</span></div>
+          <div class="q">a = 100 OR b = 100</div>
+          <div class="verdict">Both indexes scanned, bitmaps <b>ORed</b> → far more rows survive → double the index work, double the heap hits.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETUP 2 -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Setup 2 — single composite index (a, b)</div>
+    <div class="config">
+      <div class="config-head">
+        <h3>DROP old indexes → CREATE INDEX ON test(a, b);</h3>
+      </div>
+      <div class="kv">
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>uses index</span></div>
+          <div class="q">a = 70</div>
+          <div class="verdict"><b>A is the leftmost column</b> in (a,b), so Postgres can still scan the composite index just fine.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill bad"><span class="dot"></span>parallel seq scan</span></div>
+          <div class="q">b = 100</div>
+          <div class="verdict">B alone can't use (a,b) — index is only scannable left→right. Full table scan across worker threads instead.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>~0.5ms — best case</span></div>
+          <div class="q">a = 70 AND b = 80</div>
+          <div class="verdict">Both columns constrained, in order → the composite index nails it directly. This is the scenario composite indexes are built for.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill bad"><span class="dot"></span>seq scan — "all bets off"</span></div>
+          <div class="q">a = 70 OR b = 80</div>
+          <div class="verdict">OR can't be satisfied by one composite index scan on the leftmost column alone — planner gives up and does a full table scan.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETUP 3 -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Setup 3 — composite (a, b) <em>plus</em> a standalone index on B</div>
+    <div class="config">
+      <div class="config-head">
+        <h3>Keep idx(a, b) → ADD CREATE INDEX ON test(b);</h3>
+      </div>
+      <div class="kv">
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>composite index</span></div>
+          <div class="q">a = 70</div>
+          <div class="verdict">Same as before — leftmost column, fast.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>new B index — fixed!</span></div>
+          <div class="q">b = 100</div>
+          <div class="verdict">The B-only query is no longer a table scan — it now has its own index to use.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>composite index — genius</span></div>
+          <div class="q">a = 70 AND b = 80</div>
+          <div class="verdict">Still uses the composite index directly — fastest path, unchanged.</div>
+        </div>
+        <div class="kv-item">
+          <div class="badge"><span class="pill good"><span class="dot"></span>bitmap OR — recovered</span></div>
+          <div class="q">a = 70 OR b = 80</div>
+          <div class="verdict">Now Postgres can bitmap-scan the composite index (on a) AND the B index separately, then <b>OR</b> the bitmaps — no seq scan needed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SUMMARY MATRIX -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Side-by-side scoreboard</div>
+    <table class="matrix">
+      <tr>
+        <th>Query</th>
+        <th>idx(a) + idx(b)</th>
+        <th>idx(a,b) only</th>
+        <th>idx(a,b) + idx(b)</th>
+      </tr>
+      <tr>
+        <td class="row-label">WHERE a = ?</td>
+        <td><span class="pill good"><span class="dot"></span>index/bitmap</span></td>
+        <td><span class="pill good"><span class="dot"></span>composite index</span></td>
+        <td><span class="pill good"><span class="dot"></span>composite index</span></td>
+      </tr>
+      <tr>
+        <td class="row-label">WHERE b = ?</td>
+        <td><span class="pill good"><span class="dot"></span>index/bitmap</span></td>
+        <td><span class="pill bad"><span class="dot"></span>seq scan</span></td>
+        <td><span class="pill good"><span class="dot"></span>b index</span></td>
+      </tr>
+      <tr>
+        <td class="row-label">WHERE a = ? AND b = ?</td>
+        <td><span class="pill good"><span class="dot"></span>bitmap AND</span></td>
+        <td><span class="pill good"><span class="dot"></span>composite (fastest)</span></td>
+        <td><span class="pill good"><span class="dot"></span>composite (fastest)</span></td>
+      </tr>
+      <tr>
+        <td class="row-label">WHERE a = ? OR b = ?</td>
+        <td><span class="pill mid"><span class="dot"></span>bitmap OR (slow)</span></td>
+        <td><span class="pill bad"><span class="dot"></span>seq scan</span></td>
+        <td><span class="pill mid"><span class="dot"></span>bitmap OR (recovered)</span></td>
+      </tr>
+    </table>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- LEFTMOST PREFIX RULE -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>The core rule: leftmost-prefix</div>
+    <div class="diagram">
+      <div class="idx-cols">
+        <div class="idx-col scan"><span class="label">A</span><span class="tag">leftmost · scannable</span></div>
+        <div class="idx-col filter"><span class="label">B</span><span class="tag">filtered, not scanned</span></div>
+        <div class="idx-col filter"><span class="label">C</span><span class="tag">filtered, not scanned</span></div>
+      </div>
+      <div class="arrow">index on (a, b, c) — WHERE a = 5 AND b &gt;= 42 AND c &lt; 77</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;">
+        Postgres scans the index from <code style="color:var(--amber);font-family:var(--mono)">a=5, b=42</code> up through the last <code style="color:var(--amber);font-family:var(--mono)">a=5</code> entry.
+        The <code style="color:var(--amber);font-family:var(--mono)">c &lt; 77</code> constraint is checked <em>inside</em> the index (saves a heap trip) but does <b>not</b> shrink the scanned range — indexes are built and walked strictly left → right.
+      </p>
+      <div class="legend">
+        <span><span class="sw green"></span> narrows the scanned range</span>
+        <span><span class="sw amber"></span> checked in-index, doesn't narrow the range</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- RULES -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Takeaways</div>
+    <div class="rules">
+      <div class="rule-card">
+        <h4>Bitmap vs. plain index scan</h4>
+        <p>Few rows → plain <code>Index Scan</code> straight into the heap. Many rows → planner builds a <code>Bitmap Index Scan</code> first (cheaper than random heap hits at scale).</p>
+      </div>
+      <div class="rule-card">
+        <h4>AND loves multiple indexes</h4>
+        <p>Two separate indexes can be scanned in parallel and their bitmaps <b>ANDed</b> — often the cheapest plan for multi-column filters.</p>
+      </div>
+      <div class="rule-card warn">
+        <h4>Composite index ≠ works for every column</h4>
+        <p>An index on <code>(a, b)</code> only helps queries filtering on <code>a</code>, or <code>a AND b</code> — <b>never</b> <code>b</code> alone.</p>
+      </div>
+      <div class="rule-card warn">
+        <h4>OR defeats a single composite index</h4>
+        <p><code>a OR b</code> against one <code>(a,b)</code> index usually forces a full table scan — you need a separate index on <code>b</code> to recover it.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Best case: composite + query matches column order</h4>
+        <p><code>a = ? AND b = ?</code> against <code>(a,b)</code> is the fastest plan observed — sub-millisecond.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Composite indexes cost more to build</h4>
+        <p>They store more data per entry, so writes/inserts get slower and the index is larger — trade-off for the read speed.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- REAL WORLD -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Real-world scenarios</div>
+    <div class="scenario">
+      <h4><span class="tag">SaaS</span>Multi-tenant table filtered by tenant_id + status</h4>
+      <p>If every query looks like <code>WHERE tenant_id = ? AND status = ?</code>, a composite index <code>(tenant_id, status)</code> is the Setup-2 best case — sub-ms lookups, exactly matching this video's "genius" result.</p>
+    </div>
+    <div class="scenario">
+      <h4><span class="tag">Reporting</span>Dashboard that sometimes filters by status alone</h4>
+      <p>If analysts also run <code>WHERE status = ?</code> without <code>tenant_id</code>, that query can't use <code>(tenant_id, status)</code> — you'd need Setup-3: keep the composite index and add a standalone index on <code>status</code>.</p>
+    </div>
+    <div class="scenario">
+      <h4><span class="tag">Search</span>"Find by email OR username" login lookup</h4>
+      <p>An OR across two columns needs two separate indexes (one per column) so Postgres can bitmap-OR them — a single composite index on <code>(email, username)</code> won't help an OR query at all.</p>
+    </div>
+  </section>
+
+  <footer>EXPLAIN (ANALYZE) · Postgres query planner · leftmost-prefix rule applies to all B-tree multicolumn indexes</footer>
+</div>
+</body>
+</html>

@@ -18,8 +18,33 @@
               "icon": "excalidraw-icon",
               "title": "InterviewBoard.excalidraw"
             }
+          },
+          {
+            "id": "ea0ed21983fbba1b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -185,28 +210,29 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "75180f658d9d781a",
+  "active": "ea0ed21983fbba1b",
   "lastOpenFiles": [
     "Learning/System Design/InterviewBoard.excalidraw.md",
-    "Learning/Behavioural Interview Prep/decode_behavioral_interviews_summary.html",
-    "Learning/Behavioural Interview Prep/~$Vitals Vault - Behavioral Project Worksheet.xlsx",
-    "Learning/Behavioural Interview Prep/behavioral_interview_summary.html",
+    "conflict-files-obsidian-git.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies/why-composite-index-sort-order.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Intricacies",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/multiple-indexes.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/bloom-filters.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/Scaling_Probabilistic_Lookups.pptx",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/8-create-index-concurrently.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/7-multi-index-optimizer.html",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-Cobining-Index.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab05_Cost_Function_Soln.ipynb",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Summary.excalidraw.md",
-    "Learning/Behavioural Interview Prep/Vitals Vault - Behavioral Project Worksheet.xlsx",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-asia-builders-erp.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/case-study-multi-file-upload.md",
     "Personal/Maryam's Things.md",
     "Personal/Internal Trigger Chart.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/grades.sql",
     "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/employees.sql",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-index-scan-vs-index-only-scan.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-index-selectivity-case-study.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/queries_analyze.pdf",
-    "Learning/System Design/Technologies/Redis/redis-cluster-interview-guide.html",
     "Learning/System Design/Technologies/Redis/Key Ideas.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/identity-infra-open-concerns.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-whatsnextplease.md",
@@ -214,7 +240,6 @@
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-email-module.md",
     "Learning/DSA/BFS/fundamentals.excalidraw.md",
     "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
-    "conflict-files-obsidian-git.md",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
@@ -230,7 +255,6 @@
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172709.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172704.png",
     "Learning/Side Projects/2026-08-14-explanation-session-store.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141945.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",

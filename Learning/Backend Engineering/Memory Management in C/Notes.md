@@ -3476,3 +3476,338 @@ For the most part, you won't have to worry about endianness when writing program
 
 For now, just know that most modern systems use little-endian, and the compiler takes care of how data is stored and accessed.
 ![[Pasted image 20260813204427.png]]![[Pasted image 20260813204431.png]]
+
+# Pointer-Pointers
+
+Ok, so... now we know what pointers are. So let's learn it over again! A pointer-to-pointer in C is just a pointer variable that holds the address of another pointer.
+
+Click to show video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: Pointer pointers are easy
+
+This allows you to create complex data structures like arrays of pointers, and to modify pointers indirectly. The syntax is exactly what you would expect:
+
+```c
+int value;
+int *pointer;
+int **pointer_pointer;
+```
+
+Pointers to pointers (or pointers to pointers to pointers to pointers... you get the idea) are like a treasure map or a scavenger hunt. You start at one pointer and keep following the chain of addresses until you get to the final value. Each `*` follows one address: `*pointer_pointer` gets the inner `int *`, and `**pointer_pointer` gets the final `int`.
+
+### Pointers in Memory
+
+A pointer is a variable whose stored value is another variable's address.
+
+ptr_to_ptr selected — choose an outlined int * cell.
+
+|Variable|Type|Memory address|Value|
+|---|---|---|---|
+|Variable name for age|Type for age|0x10004096|Value for age|
+|Variable name for score|Type for score|0x10084104|Value for score|
+|Variable name for ptr_to_age|Type for ptr_to_age|0x10184120|Value for ptr_to_age|
+|Variable name for ptr_to_score|Type for ptr_to_score|0x10204128|Value for ptr_to_score|
+|Variable name for ptr_to_ptr|Type for ptr_to_ptr|0x10284136|Value for ptr_to_ptr|
+
+## Assignment
+
+Complete the `allocate_int` function. It accepts a pointer to a pointer to an integer called `pointer_pointer`, and a raw value. Update the pointer that `pointer_pointer` points to so it stores the address of newly allocated memory containing `value`.
+
+1. [ ] Allocate memory for a single integer on the heap, and save its address into a new pointer.
+2. [ ] Update the pointer that pointer_pointer is pointing at to hold the newly allocated memory address.
+3. [ ] Set the raw value of the integer that `pointer_pointer` now points to (well, that it points to through 2 address hops) to the value passed in.
+
+_Observe: If you take a look at `test_does_not_overwrite` in the `main.c` file, you'll notice that while `pointer_pointer` does indeed unravel and point to the new value, the original value still exists at its spot in memory. We just don't point to it anymore._
+
+```c
+#include "exercise.h
+#include "stdlib.h"
+
+void allocate_int(int **pointer_pointer, int value) {
+  int *ptr = malloc(sizeof(int));
+  *pointer_pointer = ptr;
+  **pointer_pointer = value;
+}
+
+```
+
+note
+```
+`&` is only needed to get the address of a variable that already exists (like `&meaning_of_life`). `malloc` doesn't work that way — it directly _returns_ an address (of newly allocated heap memory), not a variable you then need to take the address of.
+```
+
+# Array of Pointers
+
+Making an array of integers on the heap is pretty simple:
+
+```c
+int *int_array = malloc(sizeof(int) * 3);
+int_array[0] = 1;
+int_array[1] = 2;
+int_array[2] = 3;
+```
+
+But we can also make an array of pointers! It's quite common to do this in C, especially considering that strings are just pointers to `char`s:
+
+```c
+char **string_array = malloc(sizeof(char *) * 3);
+string_array[0] = "foo";
+string_array[1] = "bar";
+string_array[2] = "baz";
+```
+
+## Assignment
+
+Sneklang, being a super-robust programming language toolchain, needs to represent "Tokens" – strings of text that represent Sneklang syntax, things like `if`, `else` and `def`. They're represented as structs, you can see the struct in `exercise.h`.
+
+Take a look at `create_token_pointer_array`. It correctly allocates an array of token pointers on the heap, but notice that the addresses it's adding to each index are the addresses of the stack-allocated inputs.
+
+1. [ ] Update the `create_token_pointer_array`'s loop to allocate _new_ space for each token on the heap.
+2. [ ] Store the address of the new space in the array instead of the stack address.
+3. [ ] Copy the members of the input struct into the newly allocated one.
+```c
+#include "exercise.h"
+#include <stdlib.h>
+
+token_t **create_token_pointer_array(token_t *tokens, size_t count) {
+  token_t **token_pointers = malloc(count * sizeof(token_t *));
+  if (token_pointers == NULL) {
+    exit(1);
+  }
+  for (size_t i = 0; i < count; ++i) {
+    token_t *new_ptr = malloc(sizeof(token_t));
+    token_pointers[i] = new_ptr;
+    *new_ptr = tokens[i];
+  }
+  return token_pointers;
+}
+
+```
+
+indivdual copy to new allocated heap space
+```c
+#include "exercise.h"
+#include <stdlib.h>
+
+token_t **create_token_pointer_array(token_t *tokens, size_t count) {
+  token_t **token_pointers = malloc(count * sizeof(token_t *));
+  if (token_pointers == NULL) {
+    exit(1);
+  }
+  for (size_t i = 0; i < count; ++i) {
+    token_t *new_ptr = malloc(sizeof(token_t));
+    token_pointers[i] = new_ptr;
+    new_ptr->literal = tokens[i].literal;
+    new_ptr-> line = tokens[i].line;
+    new_ptr -> column = tokens[i].column;
+  }
+  return token_pointers;
+}
+
+```
+
+# Void Pointers
+
+We've already discussed `void`, which essentially means "nothing" in C. It's used in a few different contexts:
+
+- `void update_soldier(soldier_t *s)`: means the function returns nothing
+- `soldier_t new_soldier(void)`: means the function takes no arguments.
+
+And, because C likes re-using ideas but with slightly different meanings (the genius of the design can't be understood by us mere mortals) `void` also has another use!
+
+A `void *` "void pointer" tells the compiler that this pointer could point to **anything**. This is why void pointers are also known as a "generic pointer". Since void pointers do not have a specific data type, they cannot be directly dereferenced or used in pointer arithmetic without casting them to another pointer type first.
+
+## Casting to Void Pointers
+
+Casting to and from void pointers in C is unique because void pointers are type-agnostic. When casting a specific type pointer to a void pointer, no type information is retained, allowing the void pointer to point to any data type. However, you **must** cast a void pointer back to its original type before dereferencing it, as direct dereferencing is not possible.
+
+```c
+int number = 42;
+void *generic_ptr = &number;
+
+// This doesn't work
+printf("Value of number: %d\n", *generic_ptr);
+
+// This works: Cast to appropriate type before dereferencing
+printf("Value of number: %d\n", *(int*)generic_ptr);
+```
+
+A common pattern is to store generic data in one variable, and the type of that data in another variable. This is useful when you need to pass data around without knowing its type at compile time.
+
+```c
+typedef enum DATA_TYPE {
+  INT,
+  FLOAT
+} data_type_t;
+
+void printValue(void *ptr, data_type_t type) {
+  if (type == INT) {
+    printf("Value: %d\n", *(int*)ptr);
+  } else if (type == FLOAT) {
+    printf("Value: %f\n", *(float*)ptr);
+  }
+}
+
+int number = 42;
+printValue(&number, INT);
+
+float decimal = 3.14;
+printValue(&decimal, FLOAT);
+```
+
+## Assignment
+
+In Sneklang, we have to dynamically interpret Snek code and store the values in memory. The `snek_object_kind_t` enum defines the different types of objects that can be stored in memory.
+
+Complete the `snek_zero_out` function. It accepts a generic pointer to one of:
+
+- `snek_int_t`
+- `snek_float_t`
+- `snek_bool_t`
+
+It should "zero out" the `.value` field of the struct by setting it to the zero value of its type. Use the `kind` parameter to figure out which type of struct you are working with.
+
+When working with pointers and dereferencing them, parentheses usage is essential. Consider the following examples:
+
+- `((some_struct_t*)ptr)->field` means casting is applied to `ptr` and then the field is obtained.
+- `(some_struct_t*)ptr->field` means casting is applied to `ptr->field`.
+```c
+#include "exercise.h"
+
+void snek_zero_out(void *ptr, snek_object_kind_t kind) {
+  if (kind == INTEGER){
+    ((snek_int_t*)ptr)->value = 0;
+  }else if (kind == FLOAT) {
+    ((snek_float_t*)ptr)->value = 0.0;
+  }else {
+    ((snek_bool_t*)ptr)->value=0;
+  }
+}
+
+```
+```c
+typedef enum SnekObjectKind {
+  INTEGER,
+  FLOAT,
+  BOOL,
+} snek_object_kind_t;
+
+typedef struct SnekInt {
+  char *name;
+  int value;
+} snek_int_t;
+
+typedef struct SnekFloat {
+  char *name;
+  long _pad;
+  float value;
+} snek_float_t;
+
+typedef struct SnekBool {
+  char *name;
+  long _pad;
+  unsigned int value;
+} snek_bool_t;
+
+void snek_zero_out(void *ptr, snek_object_kind_t kind);
+
+```
+
+# Swapping Integers
+
+Sneklang makes it easy to swap two values:
+
+```py
+cool_person = "Lane"
+uncool_person = "TJ"
+cool_person, uncool_person = uncool_person, cool_person
+print(cool_person)  # TJ
+print(uncool_person)  # Lane
+# (get rekt lane)
+```
+
+## Assignment
+
+Before we do something more tricky, let's start with just swapping some integers. Complete the `swap_ints` function. It accepts two pointers to integers, and should swap the values of the integers they point to.
+
+_You'll need to use a temporary variable to store one of the values while you swap them_.
+
+```c
+void swap_ints(int *a, int *b) {
+  int temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+
+```
+
+# Swapping Strings
+
+Let's take it up a notch. (okay, a half-notch, but still).
+
+## Assignment
+
+Complete the `swap_strings` function. It swaps the values stored in the string pointers.
+
+Remember, `char **` is a `pointer` to a `char pointer`, which means we can simply switch the "address" that we're referencing in our `swap` function.
+
+_You won't need to use any `str_` specific functions for this swap implementation._
+
+
+```c
+void swap_strings(char **a, char **b) {
+  char *temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+```
+
+# Generic Swap
+
+For the previous `swap` implementations we've known the type of the data we want to swap. Because we knew the type, the compiler knew the sizes of the data we want to swap.
+
+However, to make a generic swap, we will need to provide the C compiler with the size of the data that we are swapping because `void *` loses that type info. Our new interface for `swap` will include the size:
+
+```c
+void swap(void *vp1, void *vp2, size_t size);
+```
+
+The other problem we're going to have is that directly assigning pointer values does not work the same way with `void *`. Instead of using `*ptr1 = *ptr2`, we will use [`memcpy`](https://en.cppreference.com/w/c/string/byte/memcpy), which is included in the `string.h` library:
+
+```c
+void *memcpy(void *destination, void* source, size_t size);
+```
+
+So to move the data from `ptr2` to `ptr1`, we will use the following:
+
+```c
+memcpy(ptr1, ptr2, size);
+```
+
+## Assignment
+
+Implement the generic `swap()` function.
+
+1. [ ] Allocate memory for a temporary buffer to store the data using [`malloc`](https://en.cppreference.com/w/c/memory/malloc).
+2. [ ] If the allocation fails (if it's `NULL`) return immediately.
+3. [ ] Use `memcpy` to shuffle the data around.
+4. [ ] Don't forget to [`free`](https://en.cppreference.com/w/c/memory/free) the temporary buffer.
+
+```c
+#include <stdlib.h>
+#include <string.h>
+
+void swap(void *vp1, void *vp2, size_t size) {
+  void *mem_ptr = malloc(size);
+  if (mem_ptr == NULL){
+    return;
+  }
+  memcpy(mem_ptr, vp1, size);
+  memcpy(vp1, vp2, size);
+  memcpy(vp2, mem_ptr, size);
+  free(mem_ptr);
+}
+
+```

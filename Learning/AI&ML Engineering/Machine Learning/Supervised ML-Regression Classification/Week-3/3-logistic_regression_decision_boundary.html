@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logistic Regression: Decision Boundary — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --text:#e8eaf6; --muted:#a6acc9;
+    --accent:#7c9dff; --accent2:#ff8a65; --green:#4fd1a5; --purple:#c792ea; --yellow:#ffd166;
+    --red:#ff6b6b; --blue:#5fb3ff; --border:#2b3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:linear-gradient(180deg,#0b0e1a,#12162a 40%,#0b0e1a);color:var(--text);
+    font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.55;padding:32px 16px 80px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:1.9rem;margin-bottom:4px;background:linear-gradient(90deg,var(--accent),var(--purple));
+     -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:1rem;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:22px;
+        box-shadow:0 4px 18px rgba(0,0,0,.25);}
+  .card h2{margin-top:0;font-size:1.25rem;display:flex;align-items:center;gap:10px;}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:600;
+         background:var(--card2);border:1px solid var(--border);color:var(--accent);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+  .formula{background:#0d1024;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:10px 0;
+           font-family:'Cambria Math','STIX Two Math',serif;font-size:1.05rem;overflow-x:auto;}
+  code, .code{font-family:'Fira Code',Consolas,monospace;background:#0d1024;border:1px solid var(--border);
+        border-radius:8px;padding:14px 16px;display:block;white-space:pre;overflow-x:auto;font-size:.88rem;color:#d7e0ff;}
+  .flow{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:16px 0;}
+  .flow-step{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-weight:600;}
+  .flow-arrow{color:var(--muted);font-size:1.3rem;}
+  ul{margin:8px 0 8px 0;padding-left:22px;}
+  li{margin-bottom:6px;}
+  .highlight{color:var(--yellow);font-weight:600;}
+  .pos{color:var(--red);font-weight:600;}
+  .neg{color:var(--blue);font-weight:600;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem;}
+  th,td{border:1px solid var(--border);padding:8px 12px;text-align:left;}
+  th{background:var(--card2);color:var(--accent);}
+  svg{background:#0d1024;border:1px solid var(--border);border-radius:10px;}
+  .caption{color:var(--muted);font-size:.85rem;text-align:center;margin-top:6px;}
+  .note{background:#1a1440;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .scenario{background:#0f1a2e;border-left:3px solid var(--green);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .toc{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+  .toc a{color:var(--accent);text-decoration:none;background:var(--card2);border:1px solid var(--border);
+         padding:6px 12px;border-radius:999px;font-size:.82rem;}
+  .toc a:hover{background:var(--accent);color:#0b0e1a;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Logistic Regression — Decision Boundary</h1>
+  <div class="subtitle">Visual summary: sigmoid → threshold → linear & non-linear decision boundaries → hands-on lab</div>
+
+  <div class="toc">
+    <a href="#step1">1. Model recap</a>
+    <a href="#step2">2. Threshold logic</a>
+    <a href="#step3">3. Linear boundary</a>
+    <a href="#step4">4. Non-linear boundaries</a>
+    <a href="#step5">5. Higher-order polynomials</a>
+    <a href="#lab">6. Hands-on lab (notebook)</a>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card" id="step1">
+    <h2>1. The Logistic Regression Model <span class="badge">recap</span></h2>
+    <div class="flow">
+      <div class="flow-step">x (features)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">z = w·x + b</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">g(z) = sigmoid</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">f(x) ∈ (0,1)</div>
+    </div>
+    <div class="formula">
+      f<sub>w,b</sub>(x) = g(w·x + b) = 1 / (1 + e<sup>−(w·x+b)</sup>) = P(y=1 | x; w, b)
+    </div>
+    <p>The output is interpreted as a <span class="highlight">probability</span> that y = 1 given x. E.g. f(x) = 0.7 means a 70% chance y=1; f(x)=0.3 means 30% chance y=1 (70% chance y=0).</p>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="step2">
+    <h2>2. Turning Probability into a 0/1 Prediction <span class="badge">threshold = 0.5</span></h2>
+    <svg viewBox="0 0 520 220" width="100%" height="220">
+      <line x1="40" y1="180" x2="480" y2="180" stroke="#a6acc9" stroke-width="1.5"/>
+      <line x1="260" y1="20" x2="260" y2="180" stroke="#a6acc9" stroke-width="1.5"/>
+      <path d="M 60 175 C 150 175, 220 30, 260 100 C 300 170, 370 25, 460 25" fill="none" stroke="#ff6b6b" stroke-width="3"/>
+      <line x1="40" y1="100" x2="480" y2="100" stroke="#ffd166" stroke-dasharray="5,4" stroke-width="1.5"/>
+      <text x="15" y="105" fill="#ffd166" font-size="12">0.5</text>
+      <text x="490" y="30" fill="#a6acc9" font-size="12">1</text>
+      <text x="490" y="185" fill="#a6acc9" font-size="12">0</text>
+      <text x="255" y="200" fill="#a6acc9" font-size="12">z=0</text>
+      <text x="60" y="15" fill="#e8eaf6" font-size="13">g(z) — sigmoid curve</text>
+    </svg>
+    <div class="caption">g(z) ≥ 0.5 exactly when z ≥ 0</div>
+
+    <table>
+      <tr><th>Condition</th><th>Decision</th></tr>
+      <tr><td>f(x) ≥ 0.5 → g(z) ≥ 0.5 → <strong>z ≥ 0</strong> → w·x + b ≥ 0</td><td class="pos">ŷ = 1</td></tr>
+      <tr><td>f(x) &lt; 0.5 → g(z) &lt; 0.5 → <strong>z &lt; 0</strong> → w·x + b &lt; 0</td><td class="neg">ŷ = 0</td></tr>
+    </table>
+    <div class="note">Chain of logic: <strong>f(x)≥0.5 ⟺ g(z)≥0.5 ⟺ z≥0 ⟺ w·x+b≥0</strong>. This is why the sign of w·x+b alone decides the class.</div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="step3">
+    <h2>3. Linear Decision Boundary <span class="badge">2 features example</span></h2>
+    <p>With two features x₁, x₂: z = w₁x₁ + w₂x₂ + b. Example parameters: <strong>w₁=1, w₂=1, b=−3</strong></p>
+    <div class="formula">Decision boundary: z = 0  →  x₁ + x₂ − 3 = 0  →  <span class="highlight">x₁ + x₂ = 3</span></div>
+
+    <svg viewBox="0 0 360 300" width="100%" height="300">
+      <line x1="40" y1="260" x2="330" y2="260" stroke="#a6acc9" stroke-width="1.5"/>
+      <line x1="40" y1="260" x2="40" y2="20" stroke="#a6acc9" stroke-width="1.5"/>
+      <text x="335" y="264" fill="#a6acc9" font-size="12">x₁</text>
+      <text x="20" y="20" fill="#a6acc9" font-size="12">x₂</text>
+      <!-- decision line x1+x2=3, scale 60px/unit -->
+      <line x1="40" y1="80" x2="220" y2="260" stroke="#c792ea" stroke-width="2.5"/>
+      <text x="150" y="90" fill="#c792ea" font-size="12">x₁+x₂=3</text>
+      <!-- y=1 region crosses -->
+      <text x="230" y="130" fill="#ff6b6b" font-size="14">✕</text>
+      <text x="255" y="110" fill="#ff6b6b" font-size="14">✕</text>
+      <text x="240" y="160" fill="#ff6b6b" font-size="14">✕</text>
+      <text x="270" y="150" fill="#ff6b6b" font-size="14">✕</text>
+      <text x="200" y="170" fill="#ff6b6b" font-size="14">✕</text>
+      <text x="290" y="200" fill="#ff6b6b" font-size="14">✕</text>
+      <text x="235" y="200" fill="#ff6b6b" font-size="10">ŷ=1</text>
+      <!-- y=0 region circles -->
+      <circle cx="90" cy="200" r="5" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="110" cy="220" r="5" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="80" cy="230" r="5" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="100" cy="240" r="5" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="70" cy="210" r="5" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <text x="65" y="250" fill="#5fb3ff" font-size="10">ŷ=0</text>
+    </svg>
+    <div class="caption">Right/above the purple line → predict 1. Left/below → predict 0.</div>
+    <p>General rule: with <em>only linear terms</em> (x₁, x₂, x₃, …, no powers/products), the decision boundary is <span class="highlight">always a straight line (or hyperplane)</span>.</p>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card" id="step4">
+    <h2>4. Non-linear Boundaries via Polynomial Features <span class="badge">circle example</span></h2>
+    <p>Add squared terms: z = w₁x₁² + w₂x₂² + b, with <strong>w₁=1, w₂=1, b=−1</strong></p>
+    <div class="formula">Boundary: x₁² + x₂² − 1 = 0  →  <span class="highlight">x₁² + x₂² = 1</span> (a unit circle)</div>
+    <svg viewBox="0 0 320 260" width="100%" height="260">
+      <line x1="30" y1="230" x2="300" y2="230" stroke="#a6acc9" stroke-width="1.5"/>
+      <line x1="165" y1="20" x2="165" y2="230" stroke="#a6acc9" stroke-width="1.5"/>
+      <circle cx="165" cy="130" r="70" fill="none" stroke="#c792ea" stroke-width="2.5"/>
+      <text x="200" y="70" fill="#c792ea" font-size="12">x₁²+x₂²=1</text>
+      <!-- inside circles y=0 -->
+      <circle cx="150" cy="120" r="4" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="175" cy="110" r="4" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="165" cy="150" r="4" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <circle cx="140" cy="150" r="4" fill="none" stroke="#5fb3ff" stroke-width="2"/>
+      <text x="150" y="185" fill="#5fb3ff" font-size="10">ŷ=0 inside</text>
+      <!-- outside crosses y=1 -->
+      <text x="50" y="50" fill="#ff6b6b" font-size="13">✕</text>
+      <text x="270" y="60" fill="#ff6b6b" font-size="13">✕</text>
+      <text x="40" y="200" fill="#ff6b6b" font-size="13">✕</text>
+      <text x="270" y="210" fill="#ff6b6b" font-size="13">✕</text>
+      <text x="165" y="40" fill="#ff6b6b" font-size="13">✕</text>
+      <text x="230" y="45" fill="#ff6b6b" font-size="10">ŷ=1 outside</text>
+    </svg>
+    <table>
+      <tr><th>Region</th><th>Condition</th><th>Prediction</th></tr>
+      <tr><td>Outside circle</td><td>x₁² + x₂² ≥ 1</td><td class="pos">ŷ = 1</td></tr>
+      <tr><td>Inside circle</td><td>x₁² + x₂² &lt; 1</td><td class="neg">ŷ = 0</td></tr>
+    </table>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="card" id="step5">
+    <h2>5. Even More Complex Boundaries <span class="badge">higher-order polynomials</span></h2>
+    <div class="formula">
+      z = w₁x₁ + w₂x₂ + w₃x₁² + w₄x₁x₂ + w₅x₂² + w₆x₁³ + ⋯ + b
+    </div>
+    <ul>
+      <li>With quadratic cross-terms → boundary can become an <span class="highlight">ellipse</span>.</li>
+      <li>With cubic/higher terms → boundary can become an arbitrary <span class="highlight">wiggly closed shape</span> (as shown in lecture with the kidney-bean-like curve).</li>
+      <li>The model always predicts <span class="pos">1 inside the shape</span> and <span class="neg">0 outside</span> (or vice versa, depending on sign conventions).</li>
+    </ul>
+    <div class="scenario"><strong>Real-life analogy:</strong> Think of classifying "is this tumor malignant?" from two measurements (size, texture). A straight-line boundary can only separate simple cases. If malignant tumors form a cluster surrounded by benign ones on a scatter plot, only a curved (polynomial) boundary — like the circle/ellipse above — can correctly wrap around that cluster.</div>
+    <div class="note">Key takeaway: logistic regression itself is linear in z, but by feeding it <strong>engineered polynomial features</strong> (x², x₁x₂, x³, …) it can represent highly non-linear boundaries — the same trick used in polynomial linear regression.</div>
+  </div>
+
+  <!-- LAB -->
+  <div class="card" id="lab">
+    <h2>6. Hands-on Lab: Plotting the Decision Boundary <span class="badge">notebook</span></h2>
+    <p><em>C1_W3_Lab03_Decision_Boundary_Soln.ipynb</em> — walks through the x₁+x₂=3 example with real code.</p>
+
+    <h3 style="color:var(--accent2)">Dataset (6 examples, 2 features)</h3>
+    <code>X = np.array([[0.5, 1.5], [1,1], [1.5, 0.5], [3, 0.5], [2, 2], [1, 2.5]])
+y = np.array([0, 0, 0, 1, 1, 1]).reshape(-1,1)</code>
+    <p>Plotted with red ✕ for y=1, blue ○ for y=0 (using helper <code style="display:inline;padding:2px 6px;">plot_data</code>).</p>
+
+    <h3 style="color:var(--accent2)">Trained model</h3>
+    <div class="formula">f(x) = g(x₀ + x₁ − 3),  with b=−3, w₀=1, w₁=1</div>
+
+    <h3 style="color:var(--accent2)">Step 1 — Confirm sigmoid threshold at z=0</h3>
+    <code>z = np.arange(-10,11)
+fig,ax = plt.subplots(1,1,figsize=(5,3))
+ax.plot(z, sigmoid(z), c="b")
+ax.set_title("Sigmoid function")
+ax.set_ylabel('sigmoid(z)')
+ax.set_xlabel('z')
+draw_vthresh(ax,0)   # marks g(z)=0.5 at z=0</code>
+
+    <h3 style="color:var(--accent2)">Step 2 — Plot the decision boundary line</h3>
+    <code>x0 = np.arange(0,6)
+x1 = 3 - x0                      # from x0 + x1 - 3 = 0
+
+fig,ax = plt.subplots(1,1,figsize=(5,4))
+ax.plot(x0, x1, c="b")           # the boundary line
+ax.axis([0, 4, 0, 3.5])
+
+ax.fill_between(x0, x1, alpha=0.2)   # shade region where prediction = 0
+
+plot_data(X, y, ax)               # overlay the training points
+ax.set_ylabel(r'$x_1$')
+ax.set_xlabel(r'$x_0$')
+plt.show()</code>
+
+    <div class="scenario">
+      <strong>Reading the plot:</strong> the blue line x₀+x₁=3 crosses the x₁-axis at 3 and the x₀-axis at 3.
+      The shaded region below/left of the line is where −3+x₀+x₁ &lt; 0 → model predicts <span class="neg">y=0</span>.
+      Everything on or above the line (unshaded) has −3+x₀+x₁ ≥ 0 → model predicts <span class="pos">y=1</span>.
+      All 6 training points fall on the correct side, confirming the fitted line separates the classes.
+    </div>
+
+    <div class="note">
+      Notebook also notes: using higher-order polynomial terms, e.g. f(x) = g(x₀² + x₁ − 1), lets logistic regression produce non-linear boundaries — same idea as sections 4–5 above.
+    </div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <h2 style="justify-content:center;">Next up</h2>
+    <p>Now that we know <em>what</em> f(x) can compute (linear or arbitrarily complex boundaries), the next topic is <span class="highlight">the cost function for logistic regression</span> and applying <span class="highlight">gradient descent</span> to actually learn w and b from data.</p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logistic Regression: Cost & Logistic Loss — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --text:#e8eaf6; --muted:#a6acc9;
+    --accent:#7c9dff; --accent2:#ff8a65; --green:#4fd1a5; --purple:#c792ea; --yellow:#ffd166;
+    --red:#ff6b6b; --blue:#5fb3ff; --border:#2b3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:linear-gradient(180deg,#0b0e1a,#12162a 40%,#0b0e1a);color:var(--text);
+    font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.55;padding:32px 16px 80px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:1.9rem;margin-bottom:4px;background:linear-gradient(90deg,var(--accent),var(--purple));
+     -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:1rem;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:22px;
+        box-shadow:0 4px 18px rgba(0,0,0,.25);}
+  .card h2{margin-top:0;font-size:1.25rem;display:flex;align-items:center;gap:10px;}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:600;
+         background:var(--card2);border:1px solid var(--border);color:var(--accent);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr;}}
+  .formula{background:#0d1024;border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:10px 0;
+           font-family:'Cambria Math','STIX Two Math',serif;font-size:1.05rem;overflow-x:auto;}
+  code, .code{font-family:'Fira Code',Consolas,monospace;background:#0d1024;border:1px solid var(--border);
+        border-radius:8px;padding:14px 16px;display:block;white-space:pre;overflow-x:auto;font-size:.88rem;color:#d7e0ff;}
+  ul{margin:8px 0 8px 0;padding-left:22px;}
+  li{margin-bottom:6px;}
+  .highlight{color:var(--yellow);font-weight:600;}
+  .pos{color:var(--red);font-weight:600;}
+  .neg{color:var(--blue);font-weight:600;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem;}
+  th,td{border:1px solid var(--border);padding:8px 12px;text-align:left;}
+  th{background:var(--card2);color:var(--accent);}
+  svg{background:#0d1024;border:1px solid var(--border);border-radius:10px;}
+  .caption{color:var(--muted);font-size:.85rem;text-align:center;margin-top:6px;}
+  .note{background:#1a1440;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .scenario{background:#0f1a2e;border-left:3px solid var(--green);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .warn{background:#2a1414;border-left:3px solid var(--red);padding:10px 14px;border-radius:6px;margin:12px 0;font-size:.9rem;}
+  .toc{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+  .toc a{color:var(--accent);text-decoration:none;background:var(--card2);border:1px solid var(--border);
+         padding:6px 12px;border-radius:999px;font-size:.82rem;}
+  .toc a:hover{background:var(--accent);color:#0b0e1a;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Logistic Regression — Cost Function & Logistic Loss</h1>
+  <div class="subtitle">Why squared error fails for classification, the logistic loss function, and the hands-on lab</div>
+
+  <div class="toc">
+    <a href="#step1">1. Training set setup</a>
+    <a href="#step2">2. Why squared error fails</a>
+    <a href="#step3">3. Logistic loss (piecewise)</a>
+    <a href="#step4">4. Loss curves intuition</a>
+    <a href="#step5">5. Unified cost function</a>
+    <a href="#lab">6. Lab walkthrough</a>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="card" id="step1">
+    <h2>1. Training Set for Classification <span class="badge">setup</span></h2>
+    <table>
+      <tr><th>i</th><th>x₁ (tumor size)</th><th>…</th><th>xₙ (age)</th><th>y (malignant?)</th></tr>
+      <tr><td>1</td><td>10</td><td>…</td><td>52</td><td class="pos">1</td></tr>
+      <tr><td>2</td><td>2</td><td>…</td><td>73</td><td class="neg">0</td></tr>
+      <tr><td>3</td><td>5</td><td>…</td><td>55</td><td class="neg">0</td></tr>
+      <tr><td>4</td><td>12</td><td>…</td><td>49</td><td class="pos">1</td></tr>
+      <tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+      <tr><td>m</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+    </table>
+    <p><strong>m</strong> = number of training examples (i = 1…m), <strong>n</strong> = number of features (j = 1…n). Target <strong>y</strong> is binary: 0 or 1. Question: given this data, how do we choose parameters <strong>w, b</strong>?</p>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card" id="step2">
+    <h2>2. Why Squared Error Doesn't Work Here <span class="badge">convex vs non-convex</span></h2>
+    <div class="formula">
+      J(w,b) = (1/m) Σᵢ [ ½ (f<sub>w,b</sub>(x⁽ⁱ⁾) − y⁽ⁱ⁾)² ]  ← same squared-error form used in linear regression
+    </div>
+    <div class="grid2">
+      <div>
+        <p><strong>Linear regression:</strong> f(x) = w·x + b (linear)</p>
+        <svg viewBox="0 0 260 160" width="100%" height="150">
+          <path d="M20 30 C 80 140, 150 140, 230 30" fill="none" stroke="#4fd1a5" stroke-width="3"/>
+          <circle cx="125" cy="128" r="5" fill="#4fd1a5"/>
+        </svg>
+        <div class="caption" style="color:var(--green)">Convex "soup bowl" → gradient descent always finds the global minimum</div>
+      </div>
+      <div>
+        <p><strong>Logistic regression:</strong> f(x) = sigmoid(w·x + b) (non-linear)</p>
+        <svg viewBox="0 0 260 160" width="100%" height="150">
+          <path d="M15 60 Q 45 20, 75 55 T 130 50 Q 160 20, 190 60 T 245 40" fill="none" stroke="#ff6b6b" stroke-width="3"/>
+          <circle cx="75" cy="55" r="4" fill="#ff6b6b"/>
+          <circle cx="190" cy="60" r="4" fill="#ff6b6b"/>
+        </svg>
+        <div class="caption" style="color:var(--red)">Non-convex, wiggly surface → gradient descent can get stuck in a local minimum</div>
+      </div>
+    </div>
+    <div class="warn">Plugging the sigmoid into the squared-error cost makes J(w,b) <strong>non-convex</strong> — many local minima, no guarantee of reaching the best (global) solution. We need a different loss function.</div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card" id="step3">
+    <h2>3. The Logistic Loss Function <span class="badge">piecewise definition</span></h2>
+    <p><strong>Loss</strong> = error on a single example. <strong>Cost</strong> = average loss over the whole training set.</p>
+    <div class="formula">
+      L(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾) =
+      <br>&nbsp;&nbsp;−log(f<sub>w,b</sub>(x⁽ⁱ⁾))&nbsp;&nbsp;&nbsp;&nbsp;if y⁽ⁱ⁾ = 1
+      <br>&nbsp;&nbsp;−log(1 − f<sub>w,b</sub>(x⁽ⁱ⁾))&nbsp;&nbsp;if y⁽ⁱ⁾ = 0
+    </div>
+    <div class="grid2">
+      <div>
+        <h3 style="color:var(--accent2)">Case y = 1</h3>
+        <svg viewBox="0 0 260 180" width="100%" height="180">
+          <line x1="20" y1="160" x2="240" y2="160" stroke="#a6acc9"/>
+          <line x1="20" y1="160" x2="20" y2="10" stroke="#a6acc9"/>
+          <path d="M25 20 C 60 60, 120 130, 235 155" fill="none" stroke="#5fb3ff" stroke-width="3"/>
+          <circle cx="235" cy="155" r="4" fill="#5fb3ff"/>
+          <text x="200" y="175" fill="#a6acc9" font-size="11">f→1</text>
+          <text x="15" y="15" fill="#a6acc9" font-size="11">loss→∞</text>
+        </svg>
+        <p style="font-size:.85rem">As f(x)→1: loss→0 (correct). As f(x)→0: loss→∞ (heavily penalized for confidently predicting wrong when y=1).</p>
+      </div>
+      <div>
+        <h3 style="color:var(--accent2)">Case y = 0</h3>
+        <svg viewBox="0 0 260 180" width="100%" height="180">
+          <line x1="20" y1="160" x2="240" y2="160" stroke="#a6acc9"/>
+          <line x1="20" y1="160" x2="20" y2="10" stroke="#a6acc9"/>
+          <path d="M25 155 C 140 130, 200 60, 235 20" fill="none" stroke="#ff8a65" stroke-width="3"/>
+          <circle cx="25" cy="155" r="4" fill="#ff8a65"/>
+          <text x="200" y="175" fill="#a6acc9" font-size="11">f→1</text>
+          <text x="15" y="15" fill="#a6acc9" font-size="11">loss→∞</text>
+        </svg>
+        <p style="font-size:.85rem">As f(x)→0: loss→0 (correct). As f(x)→1: loss→∞ (heavily penalized for confidently predicting wrong when y=0).</p>
+      </div>
+    </div>
+    <div class="scenario"><strong>Real-life analogy:</strong> a tumor is truly malignant (y=1) but the model says "99.9% chance benign" (f≈0.001) → loss ≈ −log(0.001) ≈ huge, a strong penalty. If instead the model says "95% malignant," loss is tiny — barely any penalty, correctly rewarding a confident, correct call.</div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card" id="step4">
+    <h2>4. Combined Behavior <span class="badge">two curves = one loss</span></h2>
+    <p>Together, the y=1 curve and the y=0 curve behave like the squared-error parabola: <span class="highlight">0 loss when prediction matches target, loss shoots up as prediction gets further away</span> — but now shaped correctly for probabilities bounded in (0,1), keeping the overall cost convex.</p>
+    <table>
+      <tr><th>True y</th><th>Model predicts</th><th>Loss</th><th>Interpretation</th></tr>
+      <tr><td class="pos">1</td><td>f(x) ≈ 1</td><td>≈ 0</td><td>Confident & correct — barely penalized</td></tr>
+      <tr><td class="pos">1</td><td>f(x) = 0.5</td><td>moderate</td><td>Unsure — some penalty</td></tr>
+      <tr><td class="pos">1</td><td>f(x) ≈ 0.1</td><td>high</td><td>Confidently wrong — heavily penalized</td></tr>
+      <tr><td class="neg">0</td><td>f(x) ≈ 0</td><td>≈ 0</td><td>Confident & correct — barely penalized</td></tr>
+      <tr><td class="neg">0</td><td>f(x) ≈ 0.999</td><td>→∞</td><td>Confidently wrong — extreme penalty</td></tr>
+    </table>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="card" id="step5">
+    <h2>5. Unified (Single-Line) Loss Formula <span class="badge">easy to code</span></h2>
+    <p>The piecewise definition can be rewritten as one algebraic expression — this is what you'll actually implement in code:</p>
+    <div class="formula">
+      L(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾) = −y⁽ⁱ⁾·log(f<sub>w,b</sub>(x⁽ⁱ⁾)) − (1 − y⁽ⁱ⁾)·log(1 − f<sub>w,b</sub>(x⁽ⁱ⁾))
+    </div>
+    <p>Because y is only ever 0 or 1, one of the two terms always vanishes:</p>
+    <ul>
+      <li>When y=0 → the first term (multiplied by y=0) disappears, leaving −log(1−f(x)).</li>
+      <li>When y=1 → the second term (multiplied by (1−y)=0) disappears, leaving −log(f(x)).</li>
+    </ul>
+    <div class="formula">
+      Cost: J(w,b) = (1/m) Σᵢ L(f<sub>w,b</sub>(x⁽ⁱ⁾), y⁽ⁱ⁾)  ← <span class="highlight">convex</span> ⇒ gradient descent reaches the global minimum
+    </div>
+    <div class="note">Goal: find w, b that minimize this cost J. Because the logistic loss makes J convex (unlike squared error), gradient descent is now guaranteed to converge on the best parameters.</div>
+  </div>
+
+  <!-- LAB -->
+  <div class="card" id="lab">
+    <h2>6. Hands-on Lab Walkthrough <span class="badge">C1_W3_Lab04_LogisticLoss_Soln.ipynb</span></h2>
+    <p>Goal of the lab: (1) show squared error is unsuitable for classification, (2) build & visualize the logistic loss.</p>
+
+    <h3 style="color:var(--accent2)">Setup</h3>
+    <code>import numpy as np
+%matplotlib widget
+import matplotlib.pyplot as plt
+from plt_logistic_loss import plt_logistic_cost, plt_two_logistic_loss_curves, plt_simple_example
+from plt_logistic_loss import soup_bowl, plt_logistic_squared_error
+plt.style.use('./deeplearning.mplstyle')</code>
+
+    <h3 style="color:var(--accent2)">Step 1 — Recall the linear regression "soup bowl"</h3>
+    <code>soup_bowl()</code>
+    <p>Reminder: squared error cost for linear regression is a smooth convex bowl — gradient descent trivially finds the bottom.</p>
+    <div class="formula">J(w,b) = (1/2m) Σ (f<sub>w,b</sub>(x⁽ⁱ⁾) − y⁽ⁱ⁾)²,  where f<sub>w,b</sub>(x⁽ⁱ⁾) = wx⁽ⁱ⁾ + b</div>
+
+    <h3 style="color:var(--accent2)">Step 2 — Try squared error WITH the sigmoid (classification data)</h3>
+    <code>x_train = np.array([0., 1, 2, 3, 4, 5], dtype=np.longdouble)
+y_train = np.array([0,  0, 0, 1, 1, 1], dtype=np.longdouble)
+plt_simple_example(x_train, y_train)
+
+plt.close('all')
+plt_logistic_squared_error(x_train, y_train)
+plt.show()</code>
+    <p>Now f<sub>w,b</sub>(x⁽ⁱ⁾) = sigmoid(wx⁽ⁱ⁾ + b). The resulting cost surface is <span class="pos">not a smooth bowl</span> — it's wiggly with potential local minima, confirming squared error is a poor fit for logistic regression.</p>
+
+    <h3 style="color:var(--accent2)">Step 3 — Visualize the two logistic loss curves</h3>
+    <code>plt_two_logistic_loss_curves()</code>
+    <p>Shows the −log(f) curve (for y=1) and −log(1−f) curve (for y=0) side by side — same intuition as Section 3/4 above. x-axis is f<sub>w,b</sub>, strictly between 0 and 1 (sigmoid output range).</p>
+
+    <h3 style="color:var(--accent2)">Step 4 — Plot the resulting cost surface with logistic loss</h3>
+    <code>plt.close('all')
+cst = plt_logistic_cost(x_train, y_train)</code>
+    <p>This new cost-vs-(w,b) surface is <span class="highlight">smooth and convex</span> — no plateaus, local minima, or discontinuities — well suited to gradient descent. (Both the cost and log(cost) are plotted to show the surface still has a usable slope even where cost is small.) The plot is interactive — rotate it with the mouse to inspect the shape.</p>
+
+    <div class="scenario"><strong>Lab conclusion:</strong> squared error loss is unsuitable for classification (non-convex once sigmoid is involved); the logistic loss function fixes this and produces a convex cost surface, which is exactly what gradient descent needs to reliably converge.</div>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <h2 style="justify-content:center;">Next up</h2>
+    <p>The next lecture/lab combines the per-example loss into the full <span class="highlight">cost function J(w,b)</span> for the whole training set, simplifies its form, and sets up <span class="highlight">gradient descent</span> to actually learn the optimal w, b for logistic regression.</p>
+  </div>
+
+</div>
+</body>
+</html>

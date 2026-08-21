@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L5: Process Inputs — Chaining Prompts — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;margin:10px 0;}
+  .flow .step{background:var(--card2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;}
+  .flow .arrow{color:var(--muted);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .chain{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0;}
+  .chain .node{background:var(--card2);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;font-size:12.5px;min-width:130px;text-align:center;}
+  .chain .arrow{color:var(--muted);font-size:18px;}
+</style>
+</head>
+<body>
+
+<h1>⛓️ L5 — Process Inputs: Chaining Prompts</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 5 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">🎯</span> Why Chain Prompts Instead of One Big Prompt?</h2>
+    <p>Rather than cramming an entire complex workflow into a single prompt (as in the L4 Chain-of-Thought approach), <b>break the task into a sequence of simpler prompts</b>, tracking system "state" externally between calls and injecting only the instructions relevant to the current state.</p>
+    <div class="example">🍳 <b>Analogy 1 — Cooking:</b> One giant prompt is like cooking an entire complex meal in one go, juggling every ingredient and timing at once. Chaining prompts is like cooking in stages — one component at a time, verified before moving to the next.</div>
+    <div class="example">🧩 <b>Analogy 2 — Code:</b> One long prompt is spaghetti code — ambiguous, tangled dependencies, hard to debug. Chained prompts are modular functions — each step has one clear job.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">✅</span> Benefits of Chaining</h2>
+    <ul>
+      <li>Each subtask only needs the instructions for its own state → simpler, more reliable</li>
+      <li>Lower cost — shorter prompts use fewer tokens per call</li>
+      <li>Easier to test/debug which specific step is failing</li>
+      <li>Easier to insert a human-in-the-loop at a specific step</li>
+      <li>Enables calling external tools (APIs, catalogs, knowledge bases) mid-workflow — not possible in a single prompt</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🧠</span> When Is a Problem "Complex"?</h2>
+    <p>A task is complex when there are many different instructions and <i>any</i> of them could potentially apply depending on context — making it hard for the model to reason about which rules matter right now. This is the signal to switch from one CoT mega-prompt to a chained, state-tracked workflow.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🔗</span> The Example Workflow (Retail Customer Service Bot)</h2>
+    <div class="chain">
+      <div class="node">1️⃣ Extract category/product list from user query<br><span style="color:var(--muted)">(structured JSON-like output)</span></div>
+      <span class="arrow">→</span>
+      <div class="node">2️⃣ Look up product details<br><span style="color:var(--muted)">by name / by category</span></div>
+      <span class="arrow">→</span>
+      <div class="node">3️⃣ Format looked-up info into a string</div>
+      <span class="arrow">→</span>
+      <div class="node">4️⃣ Final answer prompt<br><span style="color:var(--muted)">system + user + injected product info</span></div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">1️⃣</span> Step 1 — Extract Products/Categories</h2>
+    <p>System instructs the model to output a Python-list-of-objects, each with <code>category</code> and <code>products</code>, using only allowed values, or an empty list if nothing matches.</p>
+    <div class="example"><b>User:</b> "tell me about the smartx pro phone and the fotosnap camera, the dslr one. Also tell me about your TVs."<br>
+      <b>Model output:</b> <code>[{"category":"Smartphones and Accessories","products":["SmartX ProPhone"]}, {"category":"Cameras and Camcorders","products":["FotoSnap DSLR Camera"]}, {"category":"Televisions and Home Theater Systems","products":[]}]</code></div>
+    <div class="example"><b>User:</b> "my router isn't working" (no router in catalog) → <b>Model output:</b> <code>[]</code></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">2️⃣</span> Step 2 — Look Up Product Info (Helper Functions)</h2>
+    <pre>def get_product_by_name(name):
+    return products.get(name)
+
+def get_products_by_category(category):
+    return [p for p in products.values()
+            if p["category"] == category]</pre>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🔄</span> Parsing Model Output Safely</h2>
+    <pre>import json
+
+def read_string_to_list(s):
+    if s is None:
+        return None
+    try:
+        s = s.replace("'", '"')
+        return json.loads(s)
+    except json.JSONDecodeError:
+        print("Error: Could not decode.")
+        return None</pre>
+    <p>Converts the model's string output into a real Python list so it can drive the next step's lookups.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">3️⃣4️⃣</span> Steps 3–4 — Build Context, Then Answer</h2>
+    <p><code>generate_output_string()</code> loops over the extracted category/product list: for named products it fetches exact info; for bare categories (e.g. "Televisions") it fetches <i>all</i> products in that category. That string is injected into the final messages array as an <b>assistant</b> message containing "Relevant product information:\n" + the looked-up details, followed by a system message setting a friendly, concise, follow-up-question-asking tone.</p>
+    <div class="example"><b>Final response:</b> The model describes the SmartX ProPhone, the FotoSnap DSLR Camera, lists the available TVs, and asks a helpful follow-up question — all grounded in the looked-up product data instead of guessing.</div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">❓</span> Why Not Just Dump the Entire Catalog Into the Prompt?</h2>
+    <table>
+      <tr><th>Reason</th><th>Why it matters</th></tr>
+      <tr><td>Confusing context</td><td>Too much irrelevant info makes reasoning harder (less of an issue for stronger models with well-structured context)</td></tr>
+      <tr><td>Context window limits</td><td>A large catalog simply won't fit within the model's token limit</td></tr>
+      <tr><td>Cost</td><td>You pay per token — loading only what's relevant keeps costs down</td></tr>
+    </table>
+    <p><span class="pill info">Key mental model</span> Think of the LLM as a <b>reasoning agent</b> that needs the right context fed to it — not an oracle that already knows everything. This selective, dynamic context-loading is the seed idea behind tool use / plugins.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🔭</span> Looking Ahead: Embeddings & Semantic Search</h2>
+    <p>This lesson's lookup only works via <b>exact</b> name/category matching. The lesson previews <b>text embeddings</b> as a more powerful approach — enabling fuzzy/semantic search over a large product catalog so a query like "a mobile phone" can retrieve relevant products without needing the exact product name.</p>
+    <div class="example">💡 <b>Current-day note:</b> OpenAI's embeddings API (<code>client.embeddings.create(model="text-embedding-3-small", input=...)</code>) and vector-store-backed retrieval (e.g. via the Responses API's file_search / vector stores) are the modern way to implement this semantic lookup — worth checking OpenAI's current <a href="https://developers.openai.com/api/docs/guides/embeddings">embeddings guide</a> if extending this workflow beyond exact-match lookups.</div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Note on This Notebook's SDK Version</h2>
+    <p>No notebook cells were included with this transcript (only the video narration), so exact code couldn't be checked line-by-line this time. Based on L1–L4 from this same course, this notebook almost certainly uses the same legacy <code>openai.ChatCompletion.create(...)</code> / <code>response.choices[0].message["content"]</code> pattern (SDK v0.27.0) <span class="badge-old">deprecated</span>. If you share the actual <code>.ipynb</code>, it can be checked precisely and converted to the current <code>client.chat.completions.create(...)</code> / <code>response.choices[0].message.content</code> style, consistent with the fixes applied in L1–L4.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L5 lesson transcript (no notebook cells provided) · SDK guidance based on prior lessons' verified fixes and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>

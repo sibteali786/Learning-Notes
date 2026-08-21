@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Why C Isn't Sorted — Composite Index Explained</title>
+<style>
+  :root{
+    --bg:#0b0f0e; --panel:#111614; --panel2:#161d1a; --line:#26312c;
+    --text:#dfe8e2; --muted:#8a9993;
+    --green:#5fd98a; --amber:#e0b34a; --red:#e0654a; --blue:#5aa9e6;
+    --mono:'SF Mono','Fira Code','JetBrains Mono',Consolas,monospace;
+    --sans:'Inter','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:radial-gradient(circle at 15% 0%,#0f2a1c33,transparent 40%),var(--bg);
+    color:var(--text);font-family:var(--sans);padding:32px 20px 70px;}
+  .wrap{max-width:920px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);color:var(--green);font-size:12px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:clamp(26px,4vw,38px);margin:0 0 10px;line-height:1.15;
+    background:linear-gradient(90deg,#fff,#9fd9b4);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:15px;max-width:620px;margin-bottom:28px;}
+  .rule{height:1px;background:var(--line);margin:30px 0;}
+  section{margin-bottom:36px;}
+  .sec-title{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .sec-title .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+
+  .phonebook{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .pb-row{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center;padding:8px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;}
+  .pb-row.head{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--sans);}
+  .pb-row.grp{background:#122a1c;color:var(--green);font-weight:600;}
+  .pb-row .name{color:var(--text);}
+  .pb-row .far{color:var(--red);}
+
+  .nest{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .a-block{border:1px solid #2e4a38;border-radius:10px;padding:14px;margin-bottom:12px;background:#0f1613;}
+  .a-block > .tag{font-family:var(--mono);font-size:11px;color:var(--green);margin-bottom:10px;display:inline-block;background:#122a1c;padding:2px 8px;border-radius:5px;}
+  .b-block{border:1px dashed #4a4230;border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#171712;}
+  .b-block > .tag{font-family:var(--mono);font-size:10.5px;color:var(--amber);margin-bottom:8px;display:block;}
+  .c-row{font-family:var(--mono);font-size:12.5px;padding:3px 0;color:var(--muted);display:flex;justify-content:space-between;}
+  .c-row.hit{color:var(--green);}
+  .c-row.miss{color:var(--red);}
+  .c-row .val{font-weight:600;}
+  .reset-arrow{font-size:10px;color:var(--red);font-family:var(--mono);text-align:right;padding-top:2px;}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:760px){.compare{grid-template-columns:1fr;}}
+  .scenario-card{border-radius:12px;padding:18px 20px;border:1px solid var(--line);}
+  .scenario-card.bad{background:#1a1210;border-color:#3a2420;}
+  .scenario-card.good{background:#0f1a13;border-color:#2a4a34;}
+  .scenario-card h4{margin:0 0 4px;font-size:14px;}
+  .scenario-card .cond{font-family:var(--mono);font-size:12.5px;color:var(--blue);margin-bottom:10px;display:block;}
+  .scenario-card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.55;}
+  .verdict-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:700;
+    padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .verdict-pill.bad{background:#3a2020;color:var(--red);}
+  .verdict-pill.good{background:#1c3a2a;color:var(--green);}
+  .verdict-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .takeaway{background:var(--panel2);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:16px 20px;font-size:13.5px;color:var(--text);line-height:1.6;}
+  .takeaway code{font-family:var(--mono);color:var(--amber);}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:44px;font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">// composite index sort order</div>
+  <h1>Why C Isn't Globally Sorted</h1>
+  <p class="sub">Index on <code style="color:var(--amber);font-family:'SF Mono',monospace">(a, b, c)</code> sorts like <code style="color:var(--amber);font-family:'SF Mono',monospace">ORDER BY a, b, c</code> — each column only breaks ties <em>within</em> the one before it.</p>
+
+  <div class="rule"></div>
+
+  <section>
+    <div class="sec-title"><span class="dot"></span>The phone book analogy</div>
+    <div class="phonebook">
+      <div class="pb-row head"><span>Sort key</span><span>last_name, first_name</span></div>
+      <div class="pb-row grp"><span>Adams —</span><span>group starts</span></div>
+      <div class="pb-row"><span></span><span class="name">Adams, <b>John</b></span></div>
+      <div class="pb-row"><span></span><span class="name">Adams, Mary</span></div>
+      <div class="pb-row grp"><span>Smith —</span><span>group starts</span></div>
+      <div class="pb-row"><span></span><span class="name">Smith, Alice</span></div>
+      <div class="pb-row"><span></span><span class="name">Smith, <b>John</b></span></div>
+      <div class="pb-row grp"><span>Zimmerman —</span><span>group starts</span></div>
+      <div class="pb-row"><span></span><span class="name far">Zimmerman, <b>John</b></span></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:14px;line-height:1.6;">
+      "John" isn't sorted globally — <b>Adams, John</b> and <b>Zimmerman, John</b> are pages apart. First names only sort <i>within</i> a last name. Same reason <code style="color:var(--amber);font-family:'SF Mono',monospace">c</code> isn't globally sorted: it only sorts within one fixed <code style="color:var(--amber);font-family:'SF Mono',monospace">(a,b)</code> pair.
+    </p>
+  </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section>
+    <div class="sec-title"><span class="dot"></span>The index, unrolled — <span style="color:var(--blue);font-family:monospace;font-size:12px;">a=5 AND b&gt;=42 AND c&lt;77</span></div>
+    <div class="nest">
+      <div class="a-block">
+        <span class="tag">a = 5</span>
+        <div class="b-block">
+          <span class="tag">b = 42</span>
+          <div class="c-row hit"><span>c = 3</span><span class="val">✓ c&lt;77</span></div>
+          <div class="c-row hit"><span>c = 12</span><span class="val">✓ c&lt;77</span></div>
+          <div class="c-row miss"><span>c = 99</span><span class="val">✗ skip</span></div>
+        </div>
+        <div class="reset-arrow">↳ b changes → c resets to its own sorted order</div>
+        <div class="b-block">
+          <span class="tag">b = 43</span>
+          <div class="c-row hit"><span>c = 1</span><span class="val">✓ c&lt;77</span></div>
+          <div class="c-row hit"><span>c = 5</span><span class="val">✓ c&lt;77</span></div>
+          <div class="c-row miss"><span>c = 200</span><span class="val">✗ skip</span></div>
+        </div>
+        <div class="reset-arrow">↳ b changes → c resets again</div>
+        <div class="b-block">
+          <span class="tag">b = 44 … up to b = 999 (last a=5 entry)</span>
+          <div class="c-row miss"><span>c = 80</span><span class="val">✗ skip</span></div>
+          <div class="c-row hit"><span>c = 1</span><span class="val">✓ c&lt;77</span></div>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:14px 0 0;">
+        Every time <code style="color:var(--amber);font-family:'SF Mono',monospace">b</code> changes, <code style="color:var(--amber);font-family:'SF Mono',monospace">c</code>'s sort order <b>restarts from scratch</b>. Rows matching <code style="color:var(--amber);font-family:'SF Mono',monospace">c&lt;77</code> are scattered across every <code style="color:var(--amber);font-family:'SF Mono',monospace">b</code>-group — Postgres must walk the <b>entire</b> <code style="color:var(--amber);font-family:'SF Mono',monospace">a=5, b&gt;=42</code> range, checking <code style="color:var(--amber);font-family:'SF Mono',monospace">c</code> row by row. It skips the <i>heap</i> trip on a miss, but not the <i>index</i> walk.
+      </p>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section>
+    <div class="sec-title"><span class="dot"></span>Range vs. equality on B — does C help?</div>
+    <div class="compare">
+      <div class="scenario-card bad">
+        <span class="verdict-pill bad"><span class="dot"></span>C can't narrow range</span>
+        <h4>B is a range</h4>
+        <span class="cond">a=5 AND b&gt;=42 AND c&lt;77</span>
+        <p>Spans <b>many</b> b-groups (b=42, 43, 44...999). Each has its own independently-sorted c. Low-c rows are scattered — full walk required.</p>
+      </div>
+      <div class="scenario-card good">
+        <span class="verdict-pill good"><span class="dot"></span>C narrows the range!</span>
+        <h4>B is an equality</h4>
+        <span class="cond">a=5 AND b=42 AND c&lt;77</span>
+        <p>Only <b>one</b> b-group (b=42). Within it, c <i>is</i> sorted — Postgres can seek straight to the c&lt;77 portion. Fast.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <div class="takeaway">
+    <b>Rule:</b> as many <b>equality</b> columns as you have, left to right, plus <b>one trailing range/inequality</b> on the next column — that's what actually shrinks the scanned portion of the index. Everything after that first range condition is filtered <i>in-index</i> (saves heap trips) but does <b>not</b> reduce how much of the index gets walked.
+  </div>
+
+  <footer>B-tree composite index · sort order = column priority, left to right</footer>
+</div>
+</body>
+</html>

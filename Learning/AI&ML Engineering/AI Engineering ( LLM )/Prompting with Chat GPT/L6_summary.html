@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L6: Check Outputs — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .verdict{border-radius:10px;padding:10px 14px;font-size:13px;margin:6px 0;}
+  .verdict.yes{background:rgba(111,209,154,.1);border:1px solid var(--good);}
+  .verdict.no{background:rgba(255,139,139,.1);border:1px solid var(--warn);}
+</style>
+</head>
+<body>
+
+<h1>🔍 L6 — Check Outputs</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 6 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">🎯</span> Why Check Outputs Too?</h2>
+    <p>It's not enough to only evaluate <i>inputs</i> (L3) — you should also check the <i>outputs</i> your system generates before showing them to users, for quality, relevance, and safety. Two techniques: run generated responses through the <b>Moderation API</b>, and ask the model itself to <b>self-evaluate</b> its response against a rubric.</p>
+    <div class="example"><b>Real-world scenario:</b> A customer service bot generates a response that accidentally hallucinates a product feature or price — an output-checking step can catch and block that before it reaches the customer.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🚨</span> Moderation API on Outputs</h2>
+    <p>Same Moderation API from L3, just applied to the <b>generated response</b> instead of the user's input. A clean product-description response scored very low across all categories and wasn't flagged.</p>
+    <p><span class="pill info">Tip</span> For sensitive audiences (e.g. children's apps), tighten the flagging thresholds on outputs, not just inputs.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🤖</span> Self-Evaluation Prompt</h2>
+    <p>Feed the model: the customer's question, the retrieved product information, and the agent's generated response — then ask it to output a single <code>Y</code>/<code>N</code>: does the response sufficiently answer the question AND correctly use the product info?</p>
+    <p>Useful specifically to catch <b>hallucination</b> — the model inventing facts not grounded in the retrieved product data.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🧪</span> Worked Examples</h2>
+    <div class="verdict yes"><b>✅ Good response:</b> Detailed, accurate description of the SmartX ProPhone, FotoSnap DSLR Camera, and TVs, grounded in the real product catalog → model judged: <b>Y</b></div>
+    <div class="verdict no"><b>❌ Bad response:</b> "life is like a box of chocolates" (irrelevant, doesn't answer the question or use product info) → model judged: <b>N</b></div>
+    <p>Prompt structure:</p>
+    <pre>q_a_pair = f"""
+Customer message: ```{customer_message}```
+Product information: ```{product_information}```
+Agent response: ```{agent_response}```
+
+Does the response use the retrieved information correctly?
+Does the response sufficiently answer the question?
+
+Output Y or N
+"""</pre>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚖️</span> Should You Actually Do This in Production?</h2>
+    <table>
+      <tr><th>Do</th><th>Probably skip (usually)</th></tr>
+      <tr><td>Moderation API on outputs — cheap, free, good practice</td><td>Self-evaluation via an extra LLM call for every response</td></tr>
+    </table>
+    <p>Self-evaluation adds an extra model call → more <b>latency</b> and <b>cost</b> (extra tokens). The lesson's honest take: this is rarely used in production, and mostly only worth it if your error-rate tolerance is extremely low (e.g. ~0.0000001%). More capable models like GPT-4-class models make self-evaluation even less necessary. Other ideas mentioned: generate multiple candidate responses and have the model pick the best one, or use chain-of-thought / rubric-style grading prompts for more nuanced evaluation.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>Same legacy SDK pattern as prior lessons — and the notebook's moderation cell again errored with <code>RateLimitError</code> under the old client. Verified against <a href="https://developers.openai.com/api/docs/guides/moderation">OpenAI's Moderation guide</a> and <a href="https://developers.openai.com/api/reference/resources/moderations/methods/create">API reference</a>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code></td></tr>
+      <tr><td><code>openai.Moderation.create(input=...)</code></td><td><code>client.moderations.create(model="omni-moderation-latest", input=...)</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>response["results"][0]</code></td><td><code>response.results[0]</code></td></tr>
+    </table>
+    </div>
+    <p><b>Corrected code (drop-in replacements):</b></p>
+    <pre>from openai import OpenAI
+client = OpenAI()  # reads OPENAI_API_KEY from env automatically
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content
+
+response = client.moderations.create(
+    model="omni-moderation-latest",
+    input=final_response_to_customer,
+)
+moderation_output = response.results[0]
+print(moderation_output)</pre>
+    <p style="margin-top:8px;"><b>Also worth knowing:</b> for the self-evaluation "does this response follow policy/rubric" pattern, current OpenAI docs point toward purpose-built <a href="https://developers.openai.com/api/docs/guides/completions">evals tooling</a> (OpenAI Evals) for systematic grading of model outputs at scale, rather than a single ad-hoc Y/N judge prompt — worth checking if you're productionizing this beyond a one-off check.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L6_student.ipynb + lesson transcript · SDK claims verified against developers.openai.com Moderation guide & API reference, August 2026</div>
+
+</body>
+</html>

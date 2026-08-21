@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logistic Regression & the Sigmoid Function</title>
+<style>
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1220;color:#e8e8f0;margin:0;padding:30px;}
+  .container{max-width:980px;margin:0 auto;}
+  h1{color:#ffd166;font-size:28px;border-bottom:3px solid #ffd166;padding-bottom:10px;}
+  h2{color:#7ecbff;margin-top:40px;border-left:5px solid #7ecbff;padding-left:12px;}
+  .card{background:#1b1f38;border-radius:12px;padding:20px 24px;margin:18px 0;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;}
+  th,td{padding:10px 14px;border:1px solid #333865;text-align:left;}
+  th{background:#232847;color:#ffd166;}
+  code{background:#11142a;padding:2px 6px;border-radius:4px;color:#9be89b;font-family:Consolas,monospace;}
+  pre{background:#11142a;padding:16px;border-radius:8px;overflow-x:auto;color:#9be89b;font-size:13.5px;line-height:1.5;}
+  .callout{background:#3a2f10;border-left:5px solid #ffd166;padding:14px 18px;border-radius:6px;margin:16px 0;}
+  .fix{background:#0f3a1a;border-left:5px solid #4ade80;padding:14px 18px;border-radius:6px;margin:16px 0;}
+  .scenario{background:#1c2447;border:1px dashed #7ecbff;border-radius:8px;padding:14px 18px;margin:10px 0;font-size:14.5px;}
+  .badge{background:#7ecbff;color:#0f1220;font-weight:700;padding:2px 8px;border-radius:6px;font-size:12px;margin-right:8px;}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0;}
+  .flow .step{background:#232847;padding:10px 16px;border-radius:8px;text-align:center;}
+  .flow .arrow{color:#ffd166;font-size:20px;}
+  .formula{background:#11142a;border:1px solid #333865;border-radius:8px;padding:16px 20px;text-align:center;font-size:18px;margin:14px 0;color:#ffd166;}
+  .zgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+  .zgrid div{background:#232847;border-radius:10px;padding:12px;text-align:center;font-size:14px;}
+  ul,ol{line-height:1.85;}
+  svg{display:block;margin:10px auto;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📈 Logistic Regression & the Sigmoid Function</h1>
+  <p style="color:#aab;">Week 3 · Lecture + Optional Lab (C1_W3_Lab02_Sigmoid_function)</p>
+
+  <h2>1. Why We Need a New Function</h2>
+  <div class="card">
+    <p>Linear regression outputs <em>any</em> real number and produced an unstable decision boundary (see previous summary). Logistic regression fixes this by squashing the linear output through a curve that's always between 0 and 1.</p>
+    <svg width="560" height="180" viewBox="0 0 560 180">
+      <line x1="20" y1="150" x2="540" y2="150" stroke="#556" stroke-width="1"/>
+      <line x1="20" y1="10" x2="20" y2="150" stroke="#556" stroke-width="1"/>
+      <text x="10" y="20" fill="#ffd166" font-size="11">1</text>
+      <text x="10" y="150" fill="#7ecbff" font-size="11">0</text>
+      <path d="M 30 145 C 150 145, 220 20, 300 20 C 380 20, 450 20, 530 15" stroke="#ff5a5a" stroke-width="3" fill="none"/>
+      <text x="200" y="170" fill="#aab" font-size="12">z (input to sigmoid)</text>
+      <line x1="280" y1="15" x2="280" y2="150" stroke="#7ecbff" stroke-dasharray="4" stroke-width="1"/>
+      <circle cx="280" cy="82" r="4" fill="#ffd166"/>
+      <text x="290" y="86" fill="#ffd166" font-size="12">z=0 → g(z)=0.5</text>
+    </svg>
+    <p style="text-align:center;color:#aab;font-size:13px;">The "S-shaped" sigmoid curve — the heart of logistic regression</p>
+  </div>
+
+  <h2>2. The Sigmoid Function Formula</h2>
+  <div class="card">
+    <div class="formula">g(z) = 1 / (1 + e<sup>−z</sup>)</div>
+    <p>Also called the <strong>logistic function</strong>. It maps any real number <code>z</code> (positive or negative, huge or tiny) into a value strictly between 0 and 1.</p>
+    <div class="zgrid">
+      <div><strong>z = -100 (very negative)</strong><br>e<sup>-z</sup> = huge number<br>g(z) ≈ 1/(huge) ≈ <span style="color:#7ecbff">0</span></div>
+      <div><strong>z = 0</strong><br>e<sup>0</sup> = 1<br>g(z) = 1/(1+1) = <span style="color:#ffd166">0.5</span></div>
+      <div><strong>z = +100 (very positive)</strong><br>e<sup>-z</sup> ≈ tiny number<br>g(z) ≈ 1/(1+tiny) ≈ <span style="color:#4ade80">1</span></div>
+    </div>
+    <div class="callout">💡 This is exactly why the curve is pinned at 0.5 when z=0, approaches 0 on the far left, and approaches 1 on the far right — but <strong>never quite reaches</strong> 0 or 1.</div>
+  </div>
+
+  <h2>3. Building Logistic Regression (2 Steps)</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="step">Step 1<br><strong>z = w·x + b</strong><br><small>ordinary linear regression</small></div>
+      <div class="arrow">→</div>
+      <div class="step">Step 2<br><strong>g(z) = 1/(1+e⁻ᶻ)</strong><br><small>pass through sigmoid</small></div>
+      <div class="arrow">→</div>
+      <div class="step" style="border:2px solid #4ade80;">f(x)<br><small>output in [0,1]</small></div>
+    </div>
+    <div class="formula">f<sub>w,b</sub>(x) = g(w·x + b) = 1 / (1 + e<sup>−(w·x+b)</sup>)</div>
+    <p style="text-align:center;color:#aab;">This combined formula is called <strong>logistic regression</strong>.</p>
+  </div>
+
+  <h2>4. Interpreting the Output — It's a Probability!</h2>
+  <div class="card">
+    <div class="formula">f<sub>w,b</sub>(x) = P(y = 1 | x; w, b)</div>
+    <p>Read as: "the probability that y=1, given input x, with parameters w and b."</p>
+    <table>
+      <tr><th>Input</th><th>Model Output f(x)</th><th>Interpretation</th></tr>
+      <tr><td>Tumor size x</td><td>0.7</td><td>70% chance tumor is malignant (y=1)</td></tr>
+      <tr><td>—</td><td>1 − 0.7 = 0.3</td><td>30% chance it's benign (y=0)</td></tr>
+    </table>
+    <div class="callout">Since y can only be 0 or 1: <code>P(y=0) + P(y=1) = 1</code> — always. Knowing one tells you the other.</div>
+    <div class="scenario"><span class="badge">Real-world scenario</span>A radiologist enters a tumor's size into the model and gets f(x) = 0.85. Rather than a hard "yes/it's cancer," this tells the doctor "85% likelihood of malignancy" — useful for triage: high-probability cases get prioritized for biopsy, while borderline (~50%) cases might warrant more tests before deciding.</div>
+    <p style="font-size:13px;color:#aab;">Notation note: <code>f(x) = P(y=1|x;w,b)</code> — the semicolon just separates "given inputs" from "given parameters." Not required to memorize this notation for the course.</p>
+  </div>
+
+  <h2>5. Threshold & Decision Boundary Preview</h2>
+  <div class="card">
+    <p>From the annotated slide: with threshold = 0.5 (or any chosen cutoff, e.g. 0.7 shown in the notes), you convert probability → hard classification:</p>
+    <pre>if f(x) ≥ threshold → ŷ = 1 (malignant)
+if f(x) &lt;  threshold → ŷ = 0 (not malignant)</pre>
+    <div class="fix">✅ Unlike linear regression, adding new data points far to the right does <strong>not</strong> distort logistic regression's S-curve or shift the decision boundary unpredictably — the sigmoid naturally saturates near 0 and 1 instead of tilting a straight line.</div>
+  </div>
+
+  <h2>6. Optional Lab Walkthrough — <code>C1_W3_Lab02_Sigmoid_function</code></h2>
+  <div class="card">
+    <h3 style="color:#ffd166;margin-top:0;">Using NumPy's <code>exp()</code></h3>
+    <pre>input_array = np.array([1,2,3])
+exp_array = np.exp(input_array)
+# Output of exp: [ 2.72  7.39 20.09]
+
+input_val = 1
+exp_val = np.exp(input_val)
+# Output of exp: 2.718281828459045   (this is e)</pre>
+    <p><code>np.exp()</code> works on both arrays and single numbers — needed since sigmoid must handle one training example (scalar z) or many (vector z).</p>
+
+    <h3 style="color:#ffd166;">Implementing sigmoid</h3>
+    <pre>def sigmoid(z):
+    """
+    Compute the sigmoid of z
+    Args:
+        z (ndarray): A scalar, numpy array of any size.
+    Returns:
+        g (ndarray): sigmoid(z), with the same shape as z
+    """
+    g = 1/(1+np.exp(-z))
+    return g</pre>
+
+    <h3 style="color:#ffd166;">Verifying the range</h3>
+    <pre>z_tmp = np.arange(-10,11)
+y = sigmoid(z_tmp)
+# z=-10 → 4.54e-05   (≈0)
+# z=  0 → 0.5
+# z= 10 → 1.000      (≈1)</pre>
+    <p>Confirms: input ranges over all real numbers (-10 to 10 here), output is squashed into (0, 1).</p>
+
+    <h3 style="color:#ffd166;">Plotting the curve</h3>
+    <pre>fig,ax = plt.subplots(1,1,figsize=(5,3))
+ax.plot(z_tmp, y, c="b")
+ax.set_title("Sigmoid function")
+ax.set_ylabel('sigmoid(z)')
+ax.set_xlabel('z')
+draw_vthresh(ax,0)</pre>
+    <p>Produces the classic S-curve, with a vertical threshold line drawn at z=0 (where g(z)=0.5).</p>
+
+    <h3 style="color:#ffd166;">Applying to the tumor dataset</h3>
+    <pre>x_train = np.array([0., 1, 2, 3, 4, 5])
+y_train = np.array([0,  0, 0, 1, 1, 1])
+w_in = np.zeros((1))
+b_in = 0
+
+addpt = plt_one_addpt_onclick(x_train, y_train, w_in, b_in, logistic=True)</pre>
+    <ol>
+      <li>Click <strong>"Run Logistic Regression"</strong> → fits an S-curve that matches the data well. The orange line shown is <code>z = w·x + b</code> (the pre-sigmoid linear part) — different from the final curve.</li>
+      <li>Toggle the <strong>0.5 threshold</strong> → clean, correct predictions.</li>
+      <li>Add new malignant points near x=10 and rerun → <strong>unlike linear regression, predictions stay correct</strong> for all existing points. The sigmoid absorbs the new data without distorting the boundary.</li>
+    </ol>
+    <div class="fix">This is the lab's key demonstration: logistic regression is robust to new/extreme data points in a way linear regression is not.</div>
+  </div>
+
+  <h2>7. Quick Recap</h2>
+  <div class="card">
+    <table>
+      <tr><th>Concept</th><th>Key Point</th></tr>
+      <tr><td>Sigmoid / logistic function</td><td>g(z) = 1/(1+e⁻ᶻ); squashes any real number into (0, 1)</td></tr>
+      <tr><td>z</td><td>= w·x + b (the linear regression part), fed into g(z)</td></tr>
+      <tr><td>Logistic regression model</td><td>f(x) = g(w·x + b) = 1/(1+e⁻⁽ʷˣ⁺ᵇ⁾)</td></tr>
+      <tr><td>Output meaning</td><td>Probability that y=1 given x — e.g. 0.7 = 70% chance malignant</td></tr>
+      <tr><td>P(y=0) + P(y=1)</td><td>Always equals 1</td></tr>
+      <tr><td>Robustness</td><td>Unlike linear regression, adding extreme data points doesn't distort the decision boundary</td></tr>
+      <tr><td>Historical fun fact</td><td>A variant of logistic regression once drove much of internet advertising (predicting ad click probability)</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

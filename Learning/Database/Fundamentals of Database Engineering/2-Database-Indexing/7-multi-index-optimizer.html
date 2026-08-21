@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multiple Indexes — Query Optimizer Decisions</title>
+<style>
+  :root{
+    --bg:#0b0f0e; --panel:#111614; --panel2:#161d1a; --line:#26312c;
+    --text:#dfe8e2; --muted:#8a9993;
+    --green:#5fd98a; --amber:#e0b34a; --red:#e0654a; --blue:#5aa9e6;
+    --mono:'SF Mono','Fira Code','JetBrains Mono',Consolas,monospace;
+    --sans:'Inter','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:radial-gradient(circle at 15% 0%,#0f2a1c33,transparent 40%),var(--bg);
+    color:var(--text);font-family:var(--sans);padding:32px 20px 70px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);color:var(--green);font-size:12px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:clamp(26px,4vw,40px);margin:0 0 10px;line-height:1.15;
+    background:linear-gradient(90deg,#fff,#9fd9b4);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:15px;max-width:640px;margin-bottom:22px;}
+  .qbox{font-family:var(--mono);font-size:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 16px;display:inline-block;color:var(--blue);}
+  .qbox b{color:#fff;}
+  .rule{height:1px;background:var(--line);margin:30px 0;}
+  section{margin-bottom:34px;}
+  .sec-title{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .sec-title .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:18px;}
+  .case-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .case-num{font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;}
+  .case-num.c1{background:#1c3a2a;color:var(--green);}
+  .case-num.c2{background:#3a331c;color:var(--amber);}
+  .case-num.c3{background:#3a2020;color:var(--red);}
+  .case-head h3{margin:0;font-size:16px;}
+  .case-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+  .case-desc code{color:var(--amber);font-family:var(--mono);font-size:12px;}
+
+  /* index visual for case 1 */
+  .idx-flow{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap;}
+  .idx-col{flex:1;min-width:150px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;}
+  .idx-col h4{margin:0 0 8px;font-family:var(--mono);font-size:12px;color:var(--blue);}
+  .idx-col .row{font-family:var(--mono);font-size:12px;color:var(--muted);padding:2px 0;}
+  .idx-col .row.hit{color:var(--green);font-weight:600;}
+  .idx-col .row.miss{color:var(--red);text-decoration:line-through;opacity:.55;}
+  .merge-op{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;color:var(--text);font-weight:700;min-width:50px;}
+  .result-strip{margin-top:12px;background:#0f1a13;border:1px solid #2a4a34;border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:12.5px;color:var(--green);}
+
+  /* case 2 table walk */
+  .tablewalk{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:12px;}
+  .tablewalk .row{padding:2px 0;color:var(--muted);}
+  .tablewalk .row.match{color:var(--green);font-weight:600;}
+  .tablewalk .row.dim{opacity:.45;}
+
+  .verdict-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:10px;}
+  .verdict-pill.good{background:#1c3a2a;color:var(--green);}
+  .verdict-pill.mid{background:#3a331c;color:var(--amber);}
+  .verdict-pill.bad{background:#3a2020;color:var(--red);}
+  .verdict-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  /* stats callout */
+  .stats-callout{background:linear-gradient(135deg,#1a1210,#150e0c);border:1px solid #3a2420;border-radius:12px;padding:20px 22px;}
+  .stats-callout h4{margin:0 0 10px;font-size:15px;color:var(--red);display:flex;align-items:center;gap:8px;}
+  .stats-timeline{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap;}
+  .stats-step{flex:1;min-width:130px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:11.5px;color:var(--muted);position:relative;}
+  .stats-step .n{font-family:var(--mono);color:var(--amber);font-size:10px;display:block;margin-bottom:4px;}
+  .stats-step.danger{border-color:var(--red);background:#1f1310;}
+  .stats-callout p{font-size:13px;color:var(--muted);line-height:1.6;margin:0;}
+  .stats-callout code{font-family:var(--mono);color:var(--amber);}
+
+  .cmd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;}
+  .cmd-card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;}
+  .cmd-card .db{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .cmd-card code{font-family:var(--mono);font-size:12.5px;color:var(--green);}
+  @media(max-width:700px){.cmd-grid{grid-template-columns:1fr;}}
+
+  /* hints */
+  .hint-box{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:0 10px 10px 0;padding:18px 22px;}
+  .hint-box .qcode{font-family:var(--mono);font-size:13px;color:var(--green);background:#0a0d0c;padding:10px 14px;border-radius:8px;display:block;margin-bottom:12px;}
+  .hint-box p{font-size:13px;color:var(--muted);line-height:1.6;margin:0;}
+  .hint-box .warn{color:var(--amber);font-weight:600;}
+
+  /* real world */
+  .scenario{background:linear-gradient(135deg,#101a15,#0d1210);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .scenario h4{margin:0 0 8px;font-size:14px;display:flex;gap:8px;align-items:center;}
+  .scenario h4 .tag{font-family:var(--mono);font-size:10px;color:var(--bg);background:var(--green);padding:2px 7px;border-radius:5px;font-weight:700;}
+  .scenario p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .scenario code{color:var(--blue);font-family:var(--mono);font-size:12px;}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:44px;font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">// query optimizer · index selection</div>
+  <h1>Multiple Indexes:<br>How the Optimizer Chooses</h1>
+  <p class="sub">Table T has two <b>separate</b> single-column indexes — not a composite. Query: which index (or indexes) does Postgres/Oracle/SQL Server actually use?</p>
+  <div class="qbox">SELECT * FROM T WHERE <b>F1 = 1</b> AND <b>F2 = 4</b> &nbsp;→&nbsp; F1_IDX, F2_IDX</div>
+
+  <div class="rule"></div>
+
+  <!-- CASE 1 -->
+  <section>
+    <div class="case">
+      <div class="case-head">
+        <span class="case-num c1">CASE 1</span>
+        <h3>Both indexes used — merge the row IDs</h3>
+      </div>
+      <p class="case-desc">Each index is searched independently for its value, collecting matching row IDs. The two ID lists are then <b>intersected</b> (AND) or <b>unioned</b> (OR). Happens when the result set is <b>neither too small nor too large</b> — worth paying for two index searches.</p>
+      <div class="idx-flow">
+        <div class="idx-col">
+          <h4>F1_IDX → search 1</h4>
+          <div class="row">1 – row7</div>
+          <div class="row">1 – row8</div>
+          <div class="row">1 – row9</div>
+          <div class="row">1 – row10</div>
+        </div>
+        <div class="merge-op">AND</div>
+        <div class="idx-col">
+          <h4>F2_IDX → search 4</h4>
+          <div class="row">4 – row7</div>
+          <div class="row">4 – row22</div>
+          <div class="row">4 – row12</div>
+          <div class="row">4 – row10</div>
+        </div>
+      </div>
+      <div class="result-strip">✓ Intersection → result set = <b>row7, row10</b> (only rowIDs present in both lists)</div>
+    </div>
+  </section>
+
+  <!-- CASE 2 -->
+  <section>
+    <div class="case">
+      <div class="case-head">
+        <span class="case-num c2">CASE 2</span>
+        <h3>Only one index used — then filter</h3>
+      </div>
+      <p class="case-desc">Optimizer picks the index it trusts most (usually the one returning <b>fewer rows</b>, or a primary key) — searches it, fetches those rows from the table, then <b>re-filters</b> the rest of the WHERE clause in memory. Only works for <code>AND</code> — anything not matching F1 is already excluded.</p>
+      <div class="tablewalk">
+        <div class="row">F1_IDX → search 1 → rowIDs: row7, row8, row9, row10</div>
+        <div class="row" style="margin-top:8px;color:var(--text);">↓ fetch from table, then filter F2 = 4:</div>
+        <div class="row match">1 – 4 – row07 ✓ keep</div>
+        <div class="row dim">1 – 8 – row08 ✗ discard</div>
+        <div class="row dim">1 – 9 – row09 ✗ discard</div>
+        <div class="row match">1 – 4 – row10 ✓ keep</div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;">Typical trigger: <code>F1</code> is a primary key, or stats show F1 returns very few rows relative to F2.</p>
+    </div>
+  </section>
+
+  <!-- CASE 3 -->
+  <section>
+    <div class="case">
+      <div class="case-head">
+        <span class="case-num c3">CASE 3</span>
+        <h3>Neither index used — full table scan</h3>
+      </div>
+      <p class="case-desc">Optimizer estimates the combined condition will match <b>most of the table</b> (e.g. ~75%) — so searching either index is wasted work. Goes straight to a (often multi-threaded / parallel) table scan instead.</p>
+      <div class="tablewalk">
+        <div class="row" style="color:var(--red);">↓ full scan, top to bottom, filter both F1=1 and F2=4 inline</div>
+        <div class="row dim">3 – 9 – row01</div>
+        <div class="row dim">5 – 5 – row02</div>
+        <div class="row dim">1 – 3 – row03</div>
+        <div class="row match">1 – 4 – row07 ✓</div>
+        <div class="row dim">1 – 8 – row08</div>
+        <div class="row dim">1 – 9 – row09</div>
+        <div class="row match">1 – 4 – row10 ✓</div>
+        <div class="row dim">3 – 4 – row12</div>
+        <div class="row dim">4 – 4 – row22</div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;"><b>Table statistics are critical here</b> — this decision lives or dies on how accurate the row estimates are.</p>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- STATS TRAP -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>The stale-statistics trap</div>
+    <div class="stats-callout">
+      <h4>⚠ Got bitten by this? Here's why.</h4>
+      <div class="stats-timeline">
+        <div class="stats-step"><span class="n">01</span>Fresh empty table — stats say "0 rows"</div>
+        <div class="stats-step"><span class="n">02</span>Bulk insert 300M rows in one transaction</div>
+        <div class="stats-step danger"><span class="n">03</span>Query runs immediately — stats still say "~0 rows"</div>
+        <div class="stats-step danger"><span class="n">04</span>Optimizer: "table is tiny, just scan it" → full scan on 300M rows</div>
+      </div>
+      <p>Statistics update <b>asynchronously</b> — a bulk insert doesn't refresh them instantly. Always run an explicit refresh right after large data changes, before querying.</p>
+      <div class="cmd-grid">
+        <div class="cmd-card"><div class="db">PostgreSQL</div><code>VACUUM ANALYZE</code></div>
+        <div class="cmd-card"><div class="db">Oracle</div><code>GATHER SCHEMA STATS</code></div>
+        <div class="cmd-card"><div class="db">SQL Server</div><code>UPDATE STATISTICS</code></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- HINTS -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Overriding the optimizer — hints</div>
+    <div class="hint-box">
+      <code class="qcode">SELECT * FROM T /*+ INDEX(f1 F1_IDX) */ WHERE F1 = 1 AND F2 = 4</code>
+      <p>When you know something the optimizer doesn't — e.g. stats are stale right after a bulk load — a hint forces a specific index or plan. <span class="warn">Use with caution:</span> hints bypass the optimizer's judgment entirely, and a hint that's right today can become wrong as data shape changes.</p>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- REAL WORLD -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Real-world intuition</div>
+    <div class="scenario">
+      <h4><span class="tag">Sparsity</span>An index is only as good as how spread out the values are</h4>
+      <p>A <code>state</code> column index is useless if 99% of customers are in California — that query returns almost the whole table anyway (Case 3). But if only 3 rows have <code>state = 'Florida'</code>, that index is gold (Case 2/1).</p>
+    </div>
+    <div class="scenario">
+      <h4><span class="tag">Post-migration</span>Bulk data load followed by immediate reporting queries</h4>
+      <p>Classic stats-trap scenario: an ETL job inserts millions of rows, then a dashboard query runs seconds later and gets a full table scan because stats haven't caught up — run <code>ANALYZE</code>/equivalent as the last ETL step.</p>
+    </div>
+  </section>
+
+  <footer>Query optimizer index selection · Case 1 merge · Case 2 filter · Case 3 table scan · stats-driven, overridable via hints</footer>
+</div>
+</body>
+</html>

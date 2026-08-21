@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CREATE INDEX CONCURRENTLY — Postgres Field Guide</title>
+<style>
+  :root{
+    --bg:#0b0f0e; --panel:#111614; --panel2:#161d1a; --line:#26312c;
+    --text:#dfe8e2; --muted:#8a9993;
+    --green:#5fd98a; --amber:#e0b34a; --red:#e0654a; --blue:#5aa9e6;
+    --mono:'SF Mono','Fira Code','JetBrains Mono',Consolas,monospace;
+    --sans:'Inter','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:radial-gradient(circle at 15% 0%,#0f2a1c33,transparent 40%),var(--bg);
+    color:var(--text);font-family:var(--sans);padding:32px 20px 70px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);color:var(--green);font-size:12px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px;}
+  h1{font-size:clamp(26px,4vw,40px);margin:0 0 10px;line-height:1.15;
+    background:linear-gradient(90deg,#fff,#9fd9b4);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:15px;max-width:640px;margin-bottom:22px;}
+  .rule{height:1px;background:var(--line);margin:30px 0;}
+  section{margin-bottom:34px;}
+  .sec-title{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .sec-title .dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+
+  /* compare cards */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:760px){.compare{grid-template-columns:1fr;}}
+  .mode-card{border-radius:12px;padding:20px 22px;border:1px solid var(--line);}
+  .mode-card.bad{background:#1a1210;border-color:#3a2420;}
+  .mode-card.good{background:#0f1a13;border-color:#2a4a34;}
+  .mode-card h3{margin:0 0 4px;font-size:16px;}
+  .mode-card code.ddl{font-family:var(--mono);font-size:12.5px;color:var(--amber);background:#0a0d0c;padding:6px 10px;border-radius:6px;display:inline-block;margin:6px 0 14px;}
+  .status-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:13px;}
+  .status-row:first-of-type{border-top:none;}
+  .status-row .label{color:var(--muted);}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+  .pill.good{background:#1c3a2a;color:var(--green);}
+  .pill.bad{background:#3a2020;color:var(--red);}
+  .pill.mid{background:#3a331c;color:var(--amber);}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  /* timeline */
+  .timeline{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .tl-row{display:grid;grid-template-columns:140px 1fr;gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--line);}
+  .tl-row:first-child{border-top:none;}
+  .tl-label{font-family:var(--mono);font-size:12px;color:var(--blue);}
+  .tl-bar{height:26px;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-family:var(--mono);font-size:11px;color:var(--bg);font-weight:700;}
+  .tl-bar.scan1{background:var(--amber);width:30%;}
+  .tl-bar.wait{background:var(--red);width:20%;}
+  .tl-bar.scan2{background:var(--amber);width:30%;}
+  .tl-bar.scan3{background:var(--green);width:20%;}
+  .tl-track{display:flex;gap:2px;width:100%;}
+
+  /* risk cards */
+  .risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:760px){.risk-grid{grid-template-columns:1fr;}}
+  .risk-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;border-top:3px solid var(--red);}
+  .risk-card h4{margin:0 0 8px;font-size:13.5px;}
+  .risk-card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.55;}
+
+  /* invalid index flow */
+  .fail-flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .fail-step{flex:1;min-width:150px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12.5px;color:var(--muted);text-align:center;}
+  .fail-step.danger{border-color:var(--red);background:#1f1310;color:var(--red);}
+  .fail-arrow{color:var(--muted);font-family:var(--mono);font-size:14px;}
+  code.fix{font-family:var(--mono);font-size:12px;color:var(--green);background:#0a0d0c;padding:2px 8px;border-radius:5px;}
+
+  .takeaway{background:var(--panel2);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:16px 20px;font-size:13.5px;color:var(--text);line-height:1.6;}
+  .takeaway code{font-family:var(--mono);color:var(--amber);}
+
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:44px;font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">// postgres · zero-downtime indexing</div>
+  <h1>CREATE INDEX CONCURRENTLY</h1>
+  <p class="sub">Building an index on a large production table normally locks out writes for the whole duration. Postgres has a slower, safer alternative.</p>
+
+  <div class="rule"></div>
+
+  <!-- COMPARE -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Default vs. concurrent</div>
+    <div class="compare">
+      <div class="mode-card bad">
+        <h3>Default</h3>
+        <code class="ddl">CREATE INDEX g ON grades(id);</code>
+        <div class="status-row"><span class="label">Reads</span><span class="pill good"><span class="dot"></span>allowed</span></div>
+        <div class="status-row"><span class="label">Writes</span><span class="pill bad"><span class="dot"></span>blocked</span></div>
+        <div class="status-row"><span class="label">Build speed</span><span class="pill good"><span class="dot"></span>fast</span></div>
+        <div class="status-row"><span class="label">Table scans needed</span><span class="pill mid"><span class="dot"></span>single scan</span></div>
+      </div>
+      <div class="mode-card good">
+        <h3>Concurrently</h3>
+        <code class="ddl">CREATE INDEX CONCURRENTLY g ON grades(id);</code>
+        <div class="status-row"><span class="label">Reads</span><span class="pill good"><span class="dot"></span>allowed</span></div>
+        <div class="status-row"><span class="label">Writes</span><span class="pill good"><span class="dot"></span>allowed</span></div>
+        <div class="status-row"><span class="label">Build speed</span><span class="pill bad"><span class="dot"></span>much slower</span></div>
+        <div class="status-row"><span class="label">Table scans needed</span><span class="pill mid"><span class="dot"></span>multiple scans</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- TIMELINE -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>What happens under the hood</div>
+    <div class="timeline">
+      <div class="tl-row">
+        <span class="tl-label">Scan 1</span>
+        <div class="tl-track"><div class="tl-bar scan1">initial index build</div></div>
+      </div>
+      <div class="tl-row">
+        <span class="tl-label">Wait</span>
+        <div class="tl-track"><div class="tl-bar wait">pauses for in-flight write txns to finish</div></div>
+      </div>
+      <div class="tl-row">
+        <span class="tl-label">Scan 2</span>
+        <div class="tl-track"><div class="tl-bar scan2">catch up on rows changed during scan 1</div></div>
+      </div>
+      <div class="tl-row">
+        <span class="tl-label">Scan 3</span>
+        <div class="tl-track"><div class="tl-bar scan3">final validation pass</div></div>
+      </div>
+    </div>
+    <p style="font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.6;">Multiple passes over the table (instead of one) is exactly what buys the "no write lock" guarantee — and exactly why it costs more time, CPU, and memory.</p>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- COSTS -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>The trade-offs</div>
+    <div class="risk-grid">
+      <div class="risk-card">
+        <h4>⏱ Takes way longer</h4>
+        <p>Multiple full scans + waiting on writers means build time can be several times longer than a normal index build.</p>
+      </div>
+      <div class="risk-card">
+        <h4>🔥 More CPU &amp; memory</h4>
+        <p>Extra scans consume resources that could otherwise go to other queries running on the same production box.</p>
+      </div>
+      <div class="risk-card">
+        <h4>⚠ Can fail into an invalid index</h4>
+        <p>If a conflict happens mid-build (e.g. duplicate values for a unique index), the operation can leave a broken index behind.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAILURE FLOW -->
+  <section style="margin-top:22px;">
+    <div class="fail-flow">
+      <div class="fail-step">CREATE UNIQUE INDEX CONCURRENTLY running</div>
+      <span class="fail-arrow">→</span>
+      <div class="fail-step">Concurrent writer inserts a duplicate value</div>
+      <span class="fail-arrow">→</span>
+      <div class="fail-step danger">Build fails → index left in INVALID state</div>
+      <span class="fail-arrow">→</span>
+      <div class="fail-step">Fix: <code class="fix">DROP INDEX</code> then rebuild</div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <div class="takeaway">
+    <b>Rule of thumb:</b> on a live production table, the extra time <code>CONCURRENTLY</code> costs is almost always worth it — a slower background index build beats blocking every write on the table. Postgres has been trending toward making this closer to the default behavior for exactly this reason. Always check for <code>INVALID</code> indexes after a concurrent build (<code>\d</code> or <code>pg_index.indisvalid</code>) and drop/retry if one shows up.
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- REAL WORLD -->
+  <section>
+    <div class="sec-title"><span class="dot"></span>Real-world scenario</div>
+    <div style="background:linear-gradient(135deg,#101a15,#0d1210);border:1px solid var(--line);border-radius:12px;padding:18px 20px;">
+      <h4 style="margin:0 0 8px;font-size:14px;"><span style="font-family:var(--mono);font-size:10px;color:var(--bg);background:var(--green);padding:2px 7px;border-radius:5px;font-weight:700;">MIGRATION</span> &nbsp;Adding an index to a busy orders table</h4>
+      <p style="margin:0;font-size:12.5px;color:var(--muted);line-height:1.6;">A 50M-row <code style="color:var(--blue);font-family:monospace;font-size:12px;">orders</code> table needs a new index for a reporting query, but checkout writes to it constantly. A plain <code style="color:var(--blue);font-family:monospace;font-size:12px;">CREATE INDEX</code> would freeze checkout for the build duration — <code style="color:var(--blue);font-family:monospace;font-size:12px;">CONCURRENTLY</code> lets checkout keep running while the index builds in the background, at the cost of a longer migration window.</p>
+    </div>
+  </section>
+
+  <footer>PostgreSQL · CREATE INDEX CONCURRENTLY · zero-write-lock index builds</footer>
+</div>
+</body>
+</html>
