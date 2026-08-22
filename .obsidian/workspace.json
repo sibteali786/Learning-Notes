@@ -18,8 +18,21 @@
               "icon": "code-glyph",
               "title": "uuid-vs-ulid-summary"
             }
+          },
+          {
+            "id": "140baa0c627bd99d",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-08-22 00.50.23.excalidraw"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -78,7 +91,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 376.6920585632324,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,8 +198,9 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "cf31f2229a0bf3bb",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs",
     "Learning/Behavioural Interview Prep/decode_behavioral_interviews_summary.html",
@@ -196,7 +211,6 @@
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/11-gradient-descent-linear-regression-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/12-learning-rate-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/10-gradient-descent-derivative-intuition-summary.html",
     "conflict-files-obsidian-git.md",
     "Learning/System Design/InterviewBoard.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
@@ -229,7 +243,6 @@
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172716.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172709.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172704.png",
-    "Learning/Side Projects/2026-08-14-explanation-session-store.md",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141945.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
