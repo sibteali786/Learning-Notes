@@ -13,38 +13,13 @@
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html"
+                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/2-Classification-Vs-Regression.html"
               },
               "icon": "code-glyph",
-              "title": "5-simplified_cost_function_summary"
-            }
-          },
-          {
-            "id": "eaf3a020d6a6344b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "conflict-files-obsidian-git.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "conflict-files-obsidian-git"
+              "title": "2-Classification-Vs-Regression"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -209,8 +184,15 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "eaf3a020d6a6344b",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/C1_W3_Lab06_Gradient_Descent_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/C1_W3_Lab07_Scikit_Learn_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/1-logistic-gd.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/2-overfitting.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/2-Classification-Vs-Regression.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html",
     "conflict-files-obsidian-git.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
@@ -221,11 +203,6 @@
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs",
     "Learning/Behavioural Interview Prep/decode_behavioral_interviews_summary.html",
-    "Learning/Behavioural Interview Prep/behavioral_interview_summary.html",
-    "Learning/Behavioural Interview Prep/Vitals Vault - Behavioral Project Worksheet.xlsx",
-    "Learning/Behavioural Interview Prep",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
     "Personal/Me/Journal.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/identity-infra-open-concerns.md",
@@ -247,7 +224,6 @@
     "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
     "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
     "redis_geosearch_grid_vs_radius.svg",
-    "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Pasted image 20260813204431.png",
     "Pasted image 20260813204427.png",
