@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "5cbe24d5c67859a1",
+        "id": "ef392d202f8e5404",
         "type": "tabs",
         "children": [
           {
-            "id": "5a90d66154cdf42e",
+            "id": "8b9b4ccd180d78f0",
             "type": "leaf",
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html"
+                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html"
               },
               "icon": "code-glyph",
-              "title": "uuid-vs-ulid-summary"
+              "title": "5-simplified_cost_function_summary"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "Isolation Levels",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 526.0546875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
+                "file": "Personal/Maryam's Things.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2-First SQL Query.excalidraw"
+              "title": "Backlinks for Maryam's Things"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Prgamatism/Tips.md",
+                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Tips"
+              "title": "Outline of Notes"
             }
           },
           {
@@ -166,7 +166,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 328.8203125
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,59 +180,57 @@
       "obsidian-excalidraw-plugin:New drawing": false,
       "obsidian-git:Open Git source control": false,
       "publish:Publish changes...": false,
-      "audio-recorder:Start/stop recording": false,
-      "vault-lens:Vault Lens Dev: 打开当前文件": false
+      "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
+    "Learning/System Design/InterviewBoard.excalidraw.md",
+    "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs",
     "Learning/Behavioural Interview Prep/decode_behavioral_interviews_summary.html",
     "Learning/Behavioural Interview Prep/behavioral_interview_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/3-logistic_regression_decision_boundary.html",
+    "Learning/Behavioural Interview Prep/Vitals Vault - Behavioral Project Worksheet.xlsx",
+    "Learning/Behavioural Interview Prep",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/2-logistic_regression_sigmoid_fn.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab05_Cost_Function_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/11-gradient-descent-linear-regression-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/12-learning-rate-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/10-gradient-descent-derivative-intuition-summary.html",
-    "conflict-files-obsidian-git.md",
-    "Learning/System Design/InterviewBoard.excalidraw.md",
-    "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
-    "Learning/System Design/Core Concepts/8-Cap-Theorem/Summary.excalidraw.md",
-    "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-asia-builders-erp.md",
-    "Learning/Requirements Gathering/Work Hisotry Case Studies/case-study-multi-file-upload.md",
-    "Personal/Maryam's Things.md",
-    "Personal/Internal Trigger Chart.md",
-    "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
+    "Personal/Me/Journal.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/Key Ideas.md",
+    "conflict-files-obsidian-git.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/identity-infra-open-concerns.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-whatsnextplease.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-hcc.md",
     "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-email-module.md",
+    "Learning/Requirements Gathering/Work Hisotry Case Studies/engineering-problems-asia-builders-erp.md",
+    "Learning/Requirements Gathering/Work Hisotry Case Studies/case-study-multi-file-upload.md",
     "Learning/DSA/BFS/fundamentals.excalidraw.md",
     "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
+    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
+    "Learning/System Design/Practice/Ambigious Problem/BP Log Metric.md",
+    "Learning/System Design/Technologies/Redis/Key Ideas.md",
+    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
+    "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
+    "redis_geosearch_grid_vs_radius.svg",
+    "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
-    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
-    "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Learning/System Design/Practice/Ambigious Problem/BP Log Metric.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
     "Pasted image 20260813204431.png",
     "Pasted image 20260813204427.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172716.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172709.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172704.png",
-    "Learning/Side Projects/2026-08-14-explanation-session-store.md",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141945.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
-    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
+    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172709.png",
+    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172716.png",
+    "Pasted image 20260714215710.png",
+    "Pasted image 20260714215620.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
