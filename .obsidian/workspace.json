@@ -170,6 +170,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "vault-lens:Vault Lens Dev: 打开当前文件": false,
       "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
@@ -183,8 +184,10 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "8b9b4ccd180d78f0",
   "lastOpenFiles": [
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab05_Cost_Function_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html",
     "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
     "Learning/System Design/InterviewBoard.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
@@ -195,8 +198,6 @@
     "Learning/Behavioural Interview Prep/Vitals Vault - Behavioral Project Worksheet.xlsx",
     "Learning/Behavioural Interview Prep",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab05_Cost_Function_Soln.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
     "Personal/Me/Journal.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
@@ -222,7 +223,6 @@
     "redis_geosearch_grid_vs_radius.svg",
     "Learning/Backend Engineering/Memory Management in C/Stack Pointer.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Pasted image 20260813204431.png",
     "Pasted image 20260813204427.png",
