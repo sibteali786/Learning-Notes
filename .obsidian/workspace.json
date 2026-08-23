@@ -4,19 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "ba6e899c361bfdab",
+        "id": "136cf2ce9a5056aa",
         "type": "tabs",
         "children": [
           {
-            "id": "52e0cbfc6541a47f",
+            "id": "5c61fc7d7cccc6cc",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/5-simplified_cost_function_summary.html"
+                "file": "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Resources.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "code-glyph",
-              "title": "5-simplified_cost_function_summary"
+              "icon": "lucide-file",
+              "title": "Resources"
             }
           }
         ]
@@ -78,7 +90,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 595.3515625
+    "width": 299.2890625
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,20 +196,23 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "52e0cbfc6541a47f",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/regularization_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/4-gradient-descent-multiple-regression-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab09_Regularization_Soln.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/9-gradient-descent-implementation-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/11-gradient-descent-linear-regression-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/1-multiple-linear-regression-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/2-vectorization-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/3-vectorization-under-the-hood-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-2/7-gradient_descent_convergence_summary.html",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/notebooks/L9_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Evaluation/L9_summary.html",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Evaluation/L8_summary.html",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Resources.md",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Evaluation/L7_summary.html",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Evaluation",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/notebooks/L7_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/notebooks/L8_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/L6_summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Logistic_Regression.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/2-Classification-Vs-Regression.html",
+    "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md.tmp.539717.46a118eb3216",
+    "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md",
+    "Learning/AI&ML Engineering/what-is-machine-learning-summary.md",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/regularized_gd_summary.html",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "conflict-files-obsidian-git.md",
@@ -220,9 +235,6 @@
     "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
     "Learning/System Design/Practice/Ambigious Problem/BP Log Metric.md",
-    "Learning/System Design/Technologies/Redis/Key Ideas.md",
-    "Learning/System Design/Patterns/Scaling Reads/scaling reads important points.md",
-    "Learning/System Design/Practice/Bitly/System Design Bitly.excalidraw.md",
     "redis_geosearch_grid_vs_radius.svg",
     "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
     "Pasted image 20260813204431.png",
