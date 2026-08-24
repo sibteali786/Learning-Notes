@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Identifying an Element from Its Mass Spectrum — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8f0; --muted:#9aa0b4;
+    --blue:#5aa9ff; --orange:#ff9d5a; --green:#4fd995; --purple:#b48cff;
+  }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; margin:0; padding:40px 20px; line-height:1.6; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1,h2,h3 { font-family:'Syne',sans-serif; margin:0 0 12px; }
+  h1 { font-size:2em; font-weight:800; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  h2 { font-size:1.3em; margin-top:42px; padding-bottom:8px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .pill { display:inline-block; font-size:.72em; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .pill.blue{background:rgba(90,169,255,.15);color:var(--blue);border:1px solid rgba(90,169,255,.4);}
+  .pill.orange{background:rgba(255,157,90,.15);color:var(--orange);border:1px solid rgba(255,157,90,.4);}
+  .pill.green{background:rgba(79,217,149,.15);color:var(--green);border:1px solid rgba(79,217,149,.4);}
+  .pill.purple{background:rgba(180,140,255,.15);color:var(--purple);border:1px solid rgba(180,140,255,.4);}
+  code { background:#10131c; border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--green); font-size:.92em; }
+  .formula { background:#10131c; border-left:3px solid var(--blue); border-radius:6px; padding:12px 16px; margin:12px 0; color:var(--blue); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.92em; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:center; }
+  th { background:var(--card2); color:var(--orange); font-family:'Syne',sans-serif; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .example { border-left:3px solid var(--green); background:rgba(79,217,149,.06); border-radius:6px; padding:12px 16px; margin:12px 0; }
+  .example .tag{ color:var(--green); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .tip { border-left:3px solid var(--orange); background:rgba(255,157,90,.06); border-radius:6px; padding:12px 16px; margin:10px 0; }
+  .tip .tag{ color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  svg { display:block; margin:16px auto; max-width:100%; }
+  .caption { text-align:center; color:var(--muted); font-size:.85em; margin-top:-8px; }
+  ul{padding-left:20px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Identifying an Element from Its Mass Spectrum</h1>
+  <div class="subtitle">Worked example — Khan Academy video transcript</div>
+
+  <h2><span class="pill blue">Problem</span> What Are We Solving?</h2>
+  <div class="card">
+    Given a mystery pure element's mass spectrum (a set of peaks showing isotope atomic masses and their
+    relative abundances), calculate the <b>average atomic mass</b> and use it to identify the element
+    on the periodic table — without needing to know the element's identity up front.
+  </div>
+
+  <h2><span class="pill orange">Data</span> The Given Spectrum</h2>
+  <div class="card">
+    <table>
+      <tr><th>Isotope abundance</th><th>82%</th><th>7%</th><th>10%</th><th>1%</th></tr>
+      <tr><td>Atomic mass (u)</td><td>88</td><td>87</td><td>86</td><td>84</td></tr>
+    </table>
+    <p style="color:var(--muted); font-size:.9em;">Percentages sum to 100% (82+7+10+1).</p>
+  </div>
+
+  <h2><span class="pill purple">Diagram</span> Reading the Spectrum</h2>
+  <svg viewBox="0 0 560 240" xmlns="http://www.w3.org/2000/svg">
+    <line x1="50" y1="200" x2="530" y2="200" stroke="var(--border)" stroke-width="1.5"/>
+    <line x1="50" y1="200" x2="50" y2="20" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="10" y="115" fill="var(--muted)" font-family="JetBrains Mono" font-size="11" transform="rotate(-90 20,115)">Relative abundance (%)</text>
+    <text x="270" y="228" fill="var(--muted)" font-family="JetBrains Mono" font-size="11">Atomic mass (u)</text>
+
+    <rect x="120" y="185" width="26" height="15" fill="var(--orange)"/>
+    <text x="118" y="215" fill="var(--text)" font-size="11" font-family="JetBrains Mono">84</text>
+
+    <rect x="220" y="180" width="26" height="20" fill="var(--green)"/>
+    <text x="215" y="215" fill="var(--text)" font-size="11" font-family="JetBrains Mono">86</text>
+
+    <rect x="320" y="186" width="26" height="14" fill="var(--purple)"/>
+    <text x="315" y="215" fill="var(--text)" font-size="11" font-family="JetBrains Mono">87</text>
+
+    <rect x="420" y="35" width="26" height="165" fill="var(--blue)"/>
+    <text x="415" y="215" fill="var(--text)" font-size="11" font-family="JetBrains Mono">88</text>
+
+    <text x="415" y="25" fill="var(--blue)" font-size="12" font-weight="bold" font-family="JetBrains Mono">82%</text>
+    <text x="220" y="172" fill="var(--green)" font-size="11" font-family="JetBrains Mono">10%</text>
+    <text x="320" y="178" fill="var(--purple)" font-size="11" font-family="JetBrains Mono">7%</text>
+    <text x="120" y="178" fill="var(--orange)" font-size="11" font-family="JetBrains Mono">1%</text>
+  </svg>
+  <p class="caption">Peak height = relative abundance. The 88 u peak towers over the rest → dominates the average.</p>
+
+  <h2><span class="pill green">Formula</span> Weighted Average Calculation</h2>
+  <div class="card">
+    <div class="formula">avg atomic mass = Σ (relative abundance × atomic mass)</div>
+    <div class="formula">
+      = (0.82 × 88) + (0.07 × 87) + (0.10 × 86) + (0.01 × 84)
+    </div>
+    <p>You don't even need a calculator to get a good estimate — see the shortcut below.</p>
+  </div>
+
+  <h2><span class="pill orange">Shortcut</span> Estimating Without a Calculator</h2>
+  <div class="tip">
+    <span class="tag">Reasoning</span>
+    <p>82% of the sample sits at exactly 88 u — the heaviest weight by far. The other isotopes (87, 86, 84)
+    are all <i>lighter</i>, so they can only pull the average <b>down</b>, never up. So the answer must be
+    <b>a little less than 88</b>, never equal to or above it.</p>
+  </div>
+
+  <h2><span class="pill purple">Match</span> Identifying the Element</h2>
+  <div class="card">
+    <table>
+      <tr><th>Candidate</th><th>Periodic table mass</th><th>Fits?</th></tr>
+      <tr><td>Yttrium</td><td>88.91 u</td><td>❌ too high — no isotope shown exceeds 88</td></tr>
+      <tr><td>Strontium</td><td>87.62 u</td><td>✅ matches — slightly below 88</td></tr>
+      <tr><td>Rubidium</td><td>85.47 u</td><td>❌ too low — spectrum is dominated by mass-88 isotope</td></tr>
+    </table>
+  </div>
+
+  <div class="example">
+    <span class="tag">Takeaway</span>
+    <p>The mystery element is <b>Strontium (Sr)</b> — identified purely by comparing the weighted-average
+    estimate against known periodic table values, without ever running the full decimal calculation.</p>
+  </div>
+
+  <h2><span class="pill blue">Tips</span> Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> The average atomic mass always lands closest to whichever isotope has the highest abundance — use that as your first sanity check.</div>
+  <div class="tip"><span class="tag">Tip</span> Rule out candidate elements whose mass is <i>higher</i> than your heaviest observed isotope — the weighted average can never exceed the maximum isotope mass.</div>
+  <div class="tip"><span class="tag">Tip</span> Estimating before calculating catches arithmetic mistakes fast — if your final number doesn't land near the dominant peak, recheck your work.</div>
+
+</div>
+</body>
+</html>
