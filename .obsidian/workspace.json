@@ -4,35 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "5cbe24d5c67859a1",
+        "id": "b0d3ad2ee3382a86",
         "type": "tabs",
         "children": [
           {
-            "id": "5a90d66154cdf42e",
-            "type": "leaf",
-            "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html"
-              },
-              "icon": "code-glyph",
-              "title": "uuid-vs-ulid-summary"
-            }
-          },
-          {
-            "id": "140baa0c627bd99d",
+            "id": "1ef4db0c147bd4a2",
             "type": "leaf",
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md"
+                "file": "Learning/Frontend Interview Preparation/Coding/Like Button/intuition.excalidraw.md"
               },
               "icon": "excalidraw-icon",
-              "title": "Drawing 2026-08-22 00.50.23.excalidraw"
+              "title": "intuition.excalidraw"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -91,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324,
-    "collapsed": true
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -198,10 +184,27 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Like Button/intuition.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Like Button",
+    "Personal/Maryam/01-north-pakistan.png",
+    "Personal/Maryam/02-mansehra-hills.png",
+    "Personal/Maryam/05-makkah-1.png",
+    "Personal/Maryam/04-brothers-wedding.png",
+    "Test Driven Development/Guide and Resources.md",
+    "AI_PMS_Developer_Handout.docx",
+    "emailing_module_handoff.docx",
+    "Fundamentals+of+Networking+Engineering.pptx",
+    "graphql-summary.html",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Screenshot 2026-04-19 at 10.38.26 PM.png",
+    "Screenshot 2026-04-19 at 10.51.38 PM.png",
+    "Pasted Image 20260421133445_179.png",
+    "Pasted Image 20260419205204_621.png",
     "conflict-files-obsidian-git.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
     "Learning/AI&ML Engineering/what-is-machine-learning-summary.md",
     "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/regularized_gd_summary.html",
@@ -209,11 +212,6 @@
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/C1_W3_Lab07_Scikit_Learn_Soln.ipynb",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/C1_W3_Lab06_Gradient_Descent_Soln.ipynb",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/3-addressing-overfitting.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/2-overfitting.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/1-logistic-gd.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Logistic_Regression.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab09_Regularization_Soln.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Resources.md",
     "Learning/System Design/InterviewBoard.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
@@ -234,18 +232,6 @@
     "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/5-Pacific Atlantic Water Flow.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/4-Surrounded-Regions.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/Screenshot 2026-07-27 at 2.46.42 PM.png",
-    "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
-    "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Pasted image 20260813204431.png",
-    "Pasted image 20260813204427.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172716.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172709.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172704.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141945.png",
-    "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813141939.png",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
