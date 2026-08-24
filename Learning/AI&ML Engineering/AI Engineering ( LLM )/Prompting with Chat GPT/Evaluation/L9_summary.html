@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L9: Evaluation Part II — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .grade{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  .g{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;flex:1;min-width:150px;}
+  .g b{color:var(--accent2);}
+  .discrepancy{background:rgba(255,184,108,.1);border:1px solid var(--accent2);border-radius:10px;padding:10px 16px;font-size:13px;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<h1>📏 L9 — Evaluation Part II: No Single "Right Answer"</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 9 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">🎯</span> The Problem: Open-Ended Text Has No Single Right Answer</h2>
+    <p>L8 covered evaluation when there's one objectively correct output (extracted categories/products). But when the LLM generates free-form text — like a customer service reply — there can be many equally valid good answers, so a simple exact-match check doesn't work. This lesson covers two design patterns for evaluating that kind of output using <b>another LLM call</b> as the judge.</p>
+    <div class="example"><b>Real-world scenario:</b> Two different phrasings of "the SmartX ProPhone costs $899.99 with a 1-year warranty" are both correct — you can't just string-match against one canonical answer.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📋</span> Pattern 1 — Rubric-Based Evaluation</h2>
+    <p>Ask a second LLM call to judge the first LLM's answer against a checklist ("rubric"), grounded in the retrieved context (the actual product info) — <b>no human-written ideal answer required</b>.</p>
+    <ul>
+      <li>Is the response based only on the provided context? (Y/N)</li>
+      <li>Does it include info not in the context? (Y/N)</li>
+      <li>Is there disagreement between response and context? (Y/N)</li>
+      <li>How many questions did the user ask, and were they all answered?</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🥇</span> Pattern 2 — Compare Against an Expert ("Ideal") Answer</h2>
+    <p>When you <i>do</i> have a human-expert-written ideal answer, ask an LLM to compare the generated response against it and classify the relationship — rather than relying on classic NLP text-similarity metrics like <b>BLEU score</b>, which measure surface overlap but not factual correctness.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🧪</span> Rubric Evaluation — Worked Example</h2>
+    <p><b>User:</b> "tell me about the smartx pro phone and the fotosnap camera, the dslr one. Also, what TVs or TV related products do you have?"</p>
+    <p><b>Generated answer:</b> Full description of the SmartX ProPhone, FotoSnap DSLR Camera, and 5 TV/audio products with prices, ending in a helpful follow-up question.</p>
+    <p><b>Rubric evaluation output:</b></p>
+    <pre>- Is the response based only on the context? Y
+- Does it include info not in context? N
+- Is there disagreement? N
+- Questions asked: 2
+- Question 1 answered? Y   Question 2 answered? Y
+- Questions addressed: 2</pre>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🏆</span> A–E Grading Scale (from OpenAI's open-source Evals framework)</h2>
+    <p>This rubric prompt is adapted from <a href="https://github.com/openai/evals/blob/main/evals/registry/modelgraded/fact.yaml">OpenAI's open-source evals project</a> — a community-contributed library of model-graded evaluation templates.</p>
+    <div class="grade">
+      <div class="g"><b>A</b> — Submission is a subset of the expert answer, fully consistent</div>
+      <div class="g"><b>B</b> — Submission is a superset of the expert answer, fully consistent (may include extra facts)</div>
+      <div class="g"><b>C</b> — Submission contains all the same details as the expert answer</div>
+      <div class="g"><b>D</b> — Disagreement between submission and expert answer</div>
+      <div class="g"><b>E</b> — Answers differ, but the difference doesn't matter for factuality</div>
+    </div>
+    <p><b>"Life is like a box of chocolates" (irrelevant answer)</b> vs. the detailed expert answer → graded <b>D</b> (disagreement) — correctly identified as a bad response.</p>
+    <div class="discrepancy">📌 <b>Note on the notebook's actual output:</b> the video narration says the good, detailed assistant answer was graded <b>A</b> ("subset of the expert answer, fully consistent"). But re-running the same cells in this notebook produced <b>D</b> (disagreement) for that same good answer — likely because the current pricing in the generated answer (e.g. CineView 4K TV at $599.99) doesn't exactly match the pricing baked into the hard-coded "ideal answer" text in the notebook, or because model outputs for grading prompts like this aren't perfectly stable run-to-run even at temperature 0. Worth being aware that this style of LLM-as-judge evaluation is not fully deterministic — treat individual grades as noisy signals, not exact scores, especially for boundary cases.</div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🧠</span> Practical Advice from the Lesson</h2>
+    <ul>
+      <li><b>Use a stronger model to judge.</b> Even if your production system runs on GPT-3.5 Turbo for cost/speed, using GPT-4 for the (less frequent) evaluation calls gives a more rigorous, trustworthy judgment.</li>
+      <li><b>Both patterns are "LLM evaluates LLM."</b> The rubric pattern needs no ideal answer (just the retrieved context); the A–E pattern needs a human-written ideal answer but gives finer-grained comparison.</li>
+      <li>These evaluation tools apply both during <b>development</b> (tuning prompts) and in <b>production monitoring</b> (tracking quality over time as real traffic comes in).</li>
+    </ul>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>Same legacy <code>openai</code> Python SDK pattern as every prior lesson. Verified against <a href="https://github.com/openai/openai-python">openai/openai-python</a> and the <a href="https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create">official API reference</a>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code></td></tr>
+    </table>
+    </div>
+    <pre>from openai import OpenAI
+client = OpenAI()
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content</pre>
+    <p style="margin-top:8px;"><b>Also worth knowing:</b> the referenced <a href="https://github.com/openai/evals/blob/main/evals/registry/modelgraded/fact.yaml">OpenAI evals "fact.yaml" template</a> and framework are still maintained — worth checking the current version of the repo if adopting this pattern, since eval templates evolve. And for the "judge model" role specifically, current OpenAI docs suggest their most capable reasoning-tier models (rather than defaulting to GPT-4) tend to give the most reliable grading judgments, given how much LLM capability has advanced since this course was recorded.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L9_student.ipynb ("Evaluation Part II") + lesson transcript · SDK claims verified against openai/openai-python (GitHub) and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>

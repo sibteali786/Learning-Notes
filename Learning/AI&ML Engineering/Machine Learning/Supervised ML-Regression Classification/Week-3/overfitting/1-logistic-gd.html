@@ -1,0 +1,706 @@
+<title>Gradient Descent for Logistic Regression</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-2: #eeece2;
+    --ink: #211f1a;
+    --ink-soft: #55524a;
+    --line: #dcd8c9;
+    --blue: #2454a6;
+    --blue-soft: #e6edf9;
+    --purple: #6b4fa0;
+    --purple-soft: #efe9f7;
+    --orange: #c9701f;
+    --orange-soft: #fbeddd;
+    --red: #b3412f;
+    --red-soft: #f8e6e1;
+    --green: #3c7a5e;
+    --green-soft: #e5f1ea;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #17140f;
+      --surface: #211d16;
+      --surface-2: #2a251c;
+      --ink: #f2ede1;
+      --ink-soft: #b8b1a0;
+      --line: #3a3428;
+      --blue: #7ea6e8;
+      --blue-soft: #202c3d;
+      --purple: #b79fdd;
+      --purple-soft: #2b2438;
+      --orange: #e3a35c;
+      --orange-soft: #362a1a;
+      --red: #e08b7a;
+      --red-soft: #3a231e;
+      --green: #8fc4a9;
+      --green-soft: #1e332a;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #17140f;
+    --surface: #211d16;
+    --surface-2: #2a251c;
+    --ink: #f2ede1;
+    --ink-soft: #b8b1a0;
+    --line: #3a3428;
+    --blue: #7ea6e8;
+    --blue-soft: #202c3d;
+    --purple: #b79fdd;
+    --purple-soft: #2b2438;
+    --orange: #e3a35c;
+    --orange-soft: #362a1a;
+    --red: #e08b7a;
+    --red-soft: #3a231e;
+    --green: #8fc4a9;
+    --green-soft: #1e332a;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{
+    max-width:840px;
+    margin:0 auto;
+    padding:4rem 1.5rem 6rem;
+  }
+
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.78rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin:0 0 0.9rem;
+  }
+
+  h1{
+    font-family:"Fraunces", Georgia, serif;
+    font-weight:600;
+    font-size:clamp(2rem, 4.5vw, 2.9rem);
+    line-height:1.08;
+    letter-spacing:-0.01em;
+    margin:0 0 0.6rem;
+    text-wrap:balance;
+  }
+
+  .dek{
+    font-size:1.08rem;
+    color:var(--ink-soft);
+    max-width:60ch;
+    margin:0 0 2.6rem;
+  }
+
+  header.masthead{
+    border-bottom:1px solid var(--line);
+    padding-bottom:2.2rem;
+    margin-bottom:2.6rem;
+  }
+
+  section{margin-bottom:3.2rem;}
+
+  h2{
+    font-family:"Fraunces", Georgia, serif;
+    font-weight:600;
+    font-size:1.5rem;
+    letter-spacing:-0.005em;
+    margin:0 0 1.1rem;
+    display:flex;
+    align-items:baseline;
+    gap:0.6rem;
+  }
+  h2 .tag{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.68rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:0.2rem 0.5rem;
+    font-weight:500;
+  }
+
+  p{margin:0 0 1rem; max-width:66ch;}
+  p:last-child{margin-bottom:0;}
+
+  strong{color:var(--ink); font-weight:600;}
+  code{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.88em;
+    background:var(--surface-2);
+    padding:0.1em 0.35em;
+    border-radius:4px;
+  }
+
+  /* ---- equation blocks ---- */
+  .eqcard{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.6rem 1.7rem;
+    margin:1.2rem 0;
+    overflow-x:auto;
+  }
+  .eq{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:1.02rem;
+    display:flex;
+    align-items:center;
+    gap:0.45rem;
+    flex-wrap:nowrap;
+    white-space:nowrap;
+  }
+  .frac{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    vertical-align:middle;
+    margin:0 0.15rem;
+  }
+  .frac .num, .frac .den{
+    padding:0 0.2rem;
+    line-height:1.15;
+  }
+  .frac .num{border-bottom:1.4px solid currentColor;}
+  .sub{font-size:0.68em; vertical-align:sub;}
+  .sup{font-size:0.68em; vertical-align:super;}
+  .sum{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:1.5em;
+    line-height:0.7;
+    margin:0 0.1rem;
+    position:relative;
+    top:0.05em;
+  }
+  .sum .lim{font-size:0.4em; line-height:1;}
+  .c-w{color:var(--blue); font-weight:600;}
+  .c-b{color:var(--purple); font-weight:600;}
+  .c-x{color:var(--orange); font-weight:600;}
+  .c-y{color:var(--red); font-weight:600;}
+  .c-f{color:var(--green); font-weight:600;}
+
+  .eqlabel{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin-bottom:0.7rem;
+  }
+
+  .brace-note{
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-top:0.5rem;
+    font-style:italic;
+  }
+
+  /* ---- side-by-side comparison ---- */
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+    margin:1.2rem 0;
+  }
+  @media (max-width:620px){ .compare{grid-template-columns:1fr;} }
+  .compare .col{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.3rem 1.4rem;
+  }
+  .compare .col h3{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    margin:0 0 0.9rem;
+    color:var(--ink-soft);
+  }
+  .compare .col.linear{border-top:3px solid var(--blue);}
+  .compare .col.logistic{border-top:3px solid var(--orange);}
+
+  .same-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:0.4rem;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.75rem;
+    color:var(--green);
+    background:var(--green-soft);
+    border-radius:999px;
+    padding:0.3rem 0.75rem;
+    margin:0.8rem 0 0;
+  }
+
+  /* ---- callout ---- */
+  .callout{
+    background:var(--orange-soft);
+    border-left:3px solid var(--orange);
+    border-radius:0 10px 10px 0;
+    padding:1.2rem 1.4rem;
+    margin:1.4rem 0;
+  }
+  .callout .head{
+    font-family:"Fraunces", serif;
+    font-weight:600;
+    font-size:1.05rem;
+    margin:0 0 0.4rem;
+    color:var(--ink);
+  }
+  .callout p{margin:0; color:var(--ink-soft);}
+
+  .scenario{
+    background:var(--blue-soft);
+    border-radius:10px;
+    padding:1.4rem 1.5rem;
+    margin:1.2rem 0;
+  }
+  .scenario .head{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--blue);
+    margin:0 0 0.6rem;
+  }
+  .scenario p{color:var(--ink); margin:0;}
+
+  /* ---- checklist ---- */
+  .checklist{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:grid;
+    gap:0.55rem;
+  }
+  .checklist li{
+    display:flex;
+    gap:0.7rem;
+    align-items:flex-start;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:0.75rem 0.95rem;
+  }
+  .checklist .num{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.75rem;
+    color:var(--surface);
+    background:var(--blue);
+    border-radius:4px;
+    width:1.4rem;
+    height:1.4rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    margin-top:0.1rem;
+  }
+  .checklist b{display:block; font-size:0.95rem;}
+  .checklist span{color:var(--ink-soft); font-size:0.88rem;}
+
+  .pill-row{display:flex; gap:0.5rem; flex-wrap:wrap; margin:1rem 0 0;}
+  .pill{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.75rem;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:0.3rem 0.7rem;
+    color:var(--ink-soft);
+  }
+
+  footer{
+    margin-top:3rem;
+    padding-top:1.5rem;
+    border-top:1px solid var(--line);
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.78rem;
+    color:var(--ink-soft);
+  }
+
+  /* ---- code blocks ---- */
+  .codecard{
+    background:#1e1b14;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin:1.1rem 0;
+  }
+  :root[data-theme="light"] .codecard, :root:not([data-theme="dark"]):not(.force-dark) .codecard{
+    background:#1e1b14;
+  }
+  .codecard .bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0.55rem 1rem;
+    background:#2a251c;
+    border-bottom:1px solid #3a3428;
+  }
+  .codecard .bar span{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    color:#b8b1a0;
+    letter-spacing:0.04em;
+  }
+  .codecard pre{
+    margin:0;
+    padding:1.1rem 1.3rem;
+    overflow-x:auto;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.82rem;
+    line-height:1.62;
+    color:#f2ede1;
+  }
+  .codecard code{ background:none; padding:0; color:inherit; }
+  .tok-kw{color:#e3a35c;}
+  .tok-fn{color:#7ea6e8;}
+  .tok-str{color:#8fc4a9;}
+  .tok-cm{color:#8a8372; font-style:italic;}
+  .tok-num{color:#b79fdd;}
+
+  .outcard{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:0.9rem 1.1rem;
+    margin:0.7rem 0 1.1rem;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .outcard .label{
+    display:block;
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:0.68rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--green);
+    margin-bottom:0.4rem;
+  }
+
+  .lab-header{
+    display:flex;
+    align-items:center;
+    gap:0.7rem;
+    margin-bottom:0.3rem;
+  }
+  .lab-badge{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    font-weight:600;
+    background:var(--blue);
+    color:var(--surface);
+    border-radius:5px;
+    padding:0.25rem 0.55rem;
+    flex-shrink:0;
+  }
+  .lab-badge.sk{background:var(--orange);}
+
+  .dataset-note{
+    display:flex;
+    gap:1.2rem;
+    flex-wrap:wrap;
+    margin:0.9rem 0 1.2rem;
+  }
+  .dataset-note .pt{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.85rem;
+    display:flex;
+    align-items:center;
+    gap:0.4rem;
+  }
+  .dot{width:0.65rem; height:0.65rem; border-radius:50%; display:inline-block;}
+  .dot.red{background:var(--red);}
+  .dot.blue{background:var(--blue);}
+
+  .db-figure{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.3rem 1.4rem;
+    margin:1.1rem 0;
+  }
+  .db-figure svg{display:block; margin:0 auto;}
+  .db-figure .cap{
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-top:0.8rem;
+    text-align:center;
+  }
+
+  .steps{
+    counter-reset:step;
+    list-style:none;
+    margin:1rem 0;
+    padding:0;
+    display:grid;
+    gap:0.5rem;
+  }
+  .steps li{
+    counter-increment:step;
+    padding-left:2.1rem;
+    position:relative;
+    font-size:0.95rem;
+    color:var(--ink-soft);
+  }
+  .steps li::before{
+    content:counter(step);
+    position:absolute;
+    left:0; top:0.05rem;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    width:1.5rem; height:1.5rem;
+    border-radius:50%;
+    border:1px solid var(--line);
+    color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .steps li strong{color:var(--ink);}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">ML Engineering &middot; Supervised Learning &middot; Week 3 Notes</p>
+    <h1>Gradient Descent for Logistic Regression</h1>
+    <p class="dek">Same update rule you already know from linear regression &mdash; one different ingredient hiding inside <span class="c-f">f(x)</span> changes everything about what the model can do. Theory below, then the two hands-on labs: a from-scratch numpy implementation and the one-call scikit-learn version.</p>
+  </header>
+
+  <section>
+    <h2>The cost function <span class="tag">starting point</span></h2>
+    <p>Before gradient descent can minimize anything, it needs a cost <span class="c-f">J</span> to minimize. For logistic regression that's the <strong>log loss</strong> &mdash; it penalizes confident wrong predictions much harder than linear regression's squared error would.</p>
+    <div class="eqcard">
+      <div class="eqlabel">cost</div>
+      <div class="eq">
+        <span class="c-f">J</span>(w&#8407;, b) = &minus;<span class="frac"><span class="num">1</span><span class="den">m</span></span>
+        <span class="sum"><span class="lim">m</span>&Sigma;<span class="lim">i=1</span></span>
+        [ <span class="c-y">y</span><span class="sup">(i)</span> log(<span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;<span class="sup">(i)</span>)) + (1&minus;<span class="c-y">y</span><span class="sup">(i)</span>) log(1&minus;<span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;<span class="sup">(i)</span>)) ]
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The update rule <span class="tag">repeat until convergence</span></h2>
+    <p>Gradient descent takes the familiar shape: each parameter moves opposite its own partial derivative, scaled by learning rate <span class="c-b">&alpha;</span>. Both lines update <strong>simultaneously</strong> &mdash; compute both right-hand sides first, then overwrite both parameters together.</p>
+    <div class="eqcard">
+      <div class="eqlabel">repeat &#123; &nbsp; j = 1&hellip;n &nbsp; &#125;</div>
+      <div class="eq" style="margin-bottom:0.9rem;">
+        <span class="c-w">w<span class="sub">j</span></span> = <span class="c-w">w<span class="sub">j</span></span> &minus; <span class="c-b">&alpha;</span>
+        <span class="frac"><span class="num">&part;</span><span class="den">&part;w<span class="sub">j</span></span></span>
+        <span class="c-f">J</span>(w&#8407;, b)
+      </div>
+      <div class="eq">
+        <span class="c-b">b</span> = <span class="c-b">b</span> &minus; <span class="c-b">&alpha;</span>
+        <span class="frac"><span class="num">&part;</span><span class="den">&part;b</span></span>
+        <span class="c-f">J</span>(w&#8407;, b)
+      </div>
+      <div class="brace-note">simultaneous updates &mdash; not sequential</div>
+    </div>
+    <p>Working out the calculus for each partial derivative gives a surprisingly clean result:</p>
+    <div class="eqcard">
+      <div class="eqlabel">the gradients</div>
+      <div class="eq" style="margin-bottom:1rem;">
+        <span class="frac"><span class="num">&part;</span><span class="den">&part;w<span class="sub">j</span></span></span>
+        <span class="c-f">J</span>(w&#8407;,b) = <span class="frac"><span class="num">1</span><span class="den">m</span></span>
+        <span class="sum"><span class="lim">m</span>&Sigma;<span class="lim">i=1</span></span>
+        (<span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;<span class="sup">(i)</span>) &minus; <span class="c-y">y</span><span class="sup">(i)</span>) <span class="c-x">x<span class="sub">j</span><span class="sup">(i)</span></span>
+      </div>
+      <div class="eq">
+        <span class="frac"><span class="num">&part;</span><span class="den">&part;b</span></span>
+        <span class="c-f">J</span>(w&#8407;,b) = <span class="frac"><span class="num">1</span><span class="den">m</span></span>
+        <span class="sum"><span class="lim">m</span>&Sigma;<span class="lim">i=1</span></span>
+        (<span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;<span class="sup">(i)</span>) &minus; <span class="c-y">y</span><span class="sup">(i)</span>)
+      </div>
+    </div>
+    <p>Each term is the model's error on example <em>i</em> &mdash; predicted probability minus actual label &mdash; averaged over all <span class="c-b">m</span> examples, and (for the weight gradient) weighted by that feature's value <span class="c-x">x<span class="sub">j</span></span>.</p>
+  </section>
+
+  <section>
+    <h2>Wait &mdash; is this secretly linear regression? <span class="tag">the twist</span></h2>
+    <p>Squint at those two gradient formulas and they're <em>identical in form</em> to linear regression's. That's not a coincidence, and it's not a mistake either &mdash; it's the whole point of this lecture.</p>
+
+    <div class="compare">
+      <div class="col linear">
+        <h3>Linear regression</h3>
+        <div class="eq" style="font-size:0.95rem;">
+          <span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;) = w&#8407;&middot;x&#8407; + <span class="c-b">b</span>
+        </div>
+      </div>
+      <div class="col logistic">
+        <h3>Logistic regression</h3>
+        <div class="eq" style="font-size:0.95rem;">
+          <span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;) = <span class="frac"><span class="num">1</span><span class="den">1 + e<span class="sup">&minus;(w&#8407;&middot;x&#8407;+<span class="c-b">b</span>)</span></span></span>
+        </div>
+      </div>
+    </div>
+    <p>The update equations look the same because both were derived the same way. What's different &mdash; and it's everything &mdash; is what <span class="c-f">f(x)</span> actually computes. Linear regression's <span class="c-f">f</span> is a raw number that can run to &plusmn;&infin;. Logistic regression squashes that same linear combination through a <strong>sigmoid</strong>, so <span class="c-f">f</span> is always a probability between 0 and 1. Same-looking gradient descent loop, two genuinely different algorithms living inside it.</p>
+  </section>
+
+  <section>
+    <h2>What carries over unchanged <span class="tag">reuse, don't relearn</span></h2>
+    <p>Because the mechanics of gradient descent didn't change, neither did the tooling around it:</p>
+    <ul class="checklist">
+      <li><span class="num">1</span><div><b>Monitor convergence with a learning curve</b><span>Plot <span class="c-f">J(w,b)</span> against iteration count. It should fall every iteration; if it doesn't, &alpha; is usually too large.</span></div></li>
+      <li><span class="num">2</span><div><b>Vectorize the implementation</b><span>Replace the per-feature, per-example loops with matrix operations &mdash; same math, far faster in code.</span></div></li>
+      <li><span class="num">3</span><div><b>Scale your features</b><span>Rescaling features to a comparable range (e.g. &minus;1 to 1) still speeds up convergence, exactly as it did for linear regression.</span></div></li>
+    </ul>
+  </section>
+
+  <div class="callout">
+    <p class="head">Why this matters in practice</p>
+    <p>Because logistic regression reuses the exact gradient descent machinery you already trust, debugging it means debugging one thing at a time: if the learning curve misbehaves, the fix is almost always &alpha; or feature scaling &mdash; not the algorithm itself. That's what makes logistic regression such a dependable first classifier to reach for.</p>
+  </div>
+
+  <section>
+    <h2>Worked scenario</h2>
+    <div class="scenario">
+      <p class="head">Tumor classification, revisited</p>
+      <p>A hospital trains this model on patient records &mdash; tumor size and patient age as features <span class="c-x">x&#8407;</span>, malignant/benign as label <span class="c-y">y</span>. After gradient descent converges (learning curve flattens), a new patient arrives with a given tumor size and age. The trained <span class="c-w">w&#8407;</span> and <span class="c-b">b</span> plug into the sigmoid <span class="c-f">f</span><span class="sub">w&#8407;,b</span>(x&#8407;), producing not a yes/no but a <strong>probability</strong> &mdash; e.g. 0.83 &mdash; that the tumor is malignant, which the clinician then acts on.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="lab-header">
+      <span class="lab-badge">Lab 06</span>
+      <h2 style="margin:0;">Gradient descent, from scratch <span class="tag">numpy</span></h2>
+    </div>
+    <p>The optional lab implements equations (2) and (3) directly in numpy, then runs the update loop on the same two-feature tumor data set used earlier in the course.</p>
+
+    <div class="dataset-note">
+      <span class="pt"><span class="dot red"></span> y = 1 &nbsp;(malignant)</span>
+      <span class="pt"><span class="dot blue"></span> y = 0 &nbsp;(benign)</span>
+    </div>
+
+    <p><strong>Step 1 &mdash; compute the gradient.</strong> For every example, get the sigmoid prediction, subtract the true label to get the error, then accumulate that error into <code>dj_dw</code> (weighted by each feature) and <code>dj_db</code>:</p>
+    <div class="codecard">
+      <div class="bar"><span>compute_gradient_logistic.py</span></div>
+      <pre><code><span class="tok-kw">def</span> <span class="tok-fn">compute_gradient_logistic</span>(X, y, w, b):
+    m, n = X.shape
+    dj_dw = np.zeros((n,))
+    dj_db = <span class="tok-num">0.</span>
+
+    <span class="tok-kw">for</span> i <span class="tok-kw">in</span> range(m):
+        f_wb_i = sigmoid(np.dot(X[i], w) + b)   <span class="tok-cm"># prediction</span>
+        err_i  = f_wb_i - y[i]                  <span class="tok-cm"># error</span>
+        <span class="tok-kw">for</span> j <span class="tok-kw">in</span> range(n):
+            dj_dw[j] += err_i * X[i, j]
+        dj_db += err_i
+
+    dj_dw = dj_dw / m
+    dj_db = dj_db / m
+    <span class="tok-kw">return</span> dj_db, dj_dw</code></pre>
+    </div>
+    <div class="outcard"><span class="label">verified against expected output</span>dj_db: 0.49861806546328574
+dj_dw: [0.498333393278696, 0.49883942983996693]</div>
+
+    <p><strong>Step 2 &mdash; the outer loop.</strong> This is the same simultaneous-update pattern from the equations above, just wrapped to also log cost for a learning curve:</p>
+    <div class="codecard">
+      <div class="bar"><span>gradient_descent.py</span></div>
+      <pre><code><span class="tok-kw">for</span> i <span class="tok-kw">in</span> range(num_iters):
+    dj_db, dj_dw = compute_gradient_logistic(X, y, w, b)
+    w = w - alpha * dj_dw
+    b = b - alpha * dj_db
+    J_history.append(compute_cost_logistic(X, y, w, b))</code></pre>
+    </div>
+    <p>Run for 10,000 iterations at <span class="c-b">&alpha; = 0.1</span> on six training examples, two features:</p>
+    <div class="outcard"><span class="label">learning curve &mdash; cost falling every step</span>Iteration    0: Cost 0.6846
+Iteration 1000: Cost 0.1591
+Iteration 2000: Cost 0.0846
+Iteration 3000: Cost 0.0571
+Iteration 4000: Cost 0.0429
+Iteration 5000: Cost 0.0343
+Iteration 6000: Cost 0.0286
+Iteration 7000: Cost 0.0245
+Iteration 8000: Cost 0.0214
+Iteration 9000: Cost 0.0190
+
+updated parameters:  w = [5.28, 5.08]   b = -14.22</div>
+
+    <div class="db-figure">
+      <svg width="360" height="300" viewBox="0 0 360 300" role="img" aria-label="Decision boundary plot: red crosses (malignant) upper right, blue circles (benign) lower left, diagonal line separating them">
+        <line x1="40" y1="20" x2="40" y2="260" stroke="var(--line)" stroke-width="1"/>
+        <line x1="40" y1="260" x2="340" y2="260" stroke="var(--line)" stroke-width="1"/>
+        <text x="190" y="290" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-soft)">x&#8320;  (tumor size)</text>
+        <text x="16" y="140" text-anchor="middle" font-family="IBM Plex Mono" font-size="12" fill="var(--ink-soft)" transform="rotate(-90 16 140)">x&#8321;  (age)</text>
+        <!-- shaded probability regions -->
+        <polygon points="40,260 340,260 340,20 250,20" fill="var(--red-soft)" opacity="0.6"/>
+        <polygon points="40,260 250,20 40,20" fill="var(--blue-soft)" opacity="0.6"/>
+        <!-- decision boundary -->
+        <line x1="40" y1="20" x2="250" y2="20" stroke="var(--ink-soft)" stroke-width="0" />
+        <line x1="40" y1="260" x2="250" y2="20" stroke="var(--ink)" stroke-width="2" stroke-dasharray="0"/>
+        <!-- data points, y=0 blue -->
+        <circle cx="85" cy="200" r="7" fill="none" stroke="var(--blue)" stroke-width="2.5"/>
+        <circle cx="115" cy="170" r="7" fill="none" stroke="var(--blue)" stroke-width="2.5"/>
+        <circle cx="145" cy="200" r="7" fill="none" stroke="var(--blue)" stroke-width="2.5"/>
+        <!-- data points, y=1 red crosses -->
+        <g stroke="var(--red)" stroke-width="2.5">
+          <line x1="230" y1="192" x2="244" y2="206"/><line x1="244" y1="192" x2="230" y2="206"/>
+          <line x1="185" y1="102" x2="199" y2="116"/><line x1="199" y1="102" x2="185" y2="116"/>
+          <line x1="130" y1="70" x2="144" y2="84"/><line x1="144" y1="70" x2="130" y2="84"/>
+        </g>
+      </svg>
+      <p class="cap">Shading = predicted probability of malignancy; the boundary line is where that probability crosses 0.5 &mdash; exactly where gradient descent placed <span class="c-w">w&#8407;</span> and <span class="c-b">b</span> to separate the classes.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="lab-header">
+      <span class="lab-badge sk">Lab 07</span>
+      <h2 style="margin:0;">The same model, three lines of scikit-learn</h2>
+    </div>
+    <p>Every piece built by hand above &mdash; the sigmoid, the gradient, the update loop, the convergence check &mdash; is exactly what <code>sklearn.linear_model.LogisticRegression</code> does internally. The lab fits it on the identical data set:</p>
+    <div class="codecard">
+      <div class="bar"><span>scikit_learn_logistic.py</span></div>
+      <pre><code><span class="tok-kw">from</span> sklearn.linear_model <span class="tok-kw">import</span> LogisticRegression
+
+lr_model = LogisticRegression()
+lr_model.fit(X, y)
+
+y_pred = lr_model.predict(X)
+<span class="tok-fn">print</span>(<span class="tok-str">"Prediction on training set:"</span>, y_pred)
+<span class="tok-fn">print</span>(<span class="tok-str">"Accuracy on training set:"</span>, lr_model.score(X, y))</code></pre>
+    </div>
+    <div class="outcard"><span class="label">output</span>Prediction on training set: [0 0 0 1 1 1]
+Accuracy on training set: 1.0</div>
+    <p>Perfect recovery of the labels on this small, clean, linearly-separable set &mdash; consistent with the near-zero cost the from-scratch run converged to.</p>
+
+    <ol class="steps">
+      <li><strong>fit()</strong> replaces the entire hand-written gradient descent loop &mdash; scikit-learn picks its own solver and convergence criteria internally.</li>
+      <li><strong>predict()</strong> applies the learned decision boundary (probability &ge; 0.5 &rarr; class 1) to return hard labels, not raw probabilities.</li>
+      <li><strong>score()</strong> reports mean accuracy on whatever X, y you pass in &mdash; here it's re-scored on the training set itself, so this isn't a held-out estimate.</li>
+    </ol>
+  </section>
+
+  <div class="callout">
+    <p class="head">From-scratch vs. library, side by side</p>
+    <p>The from-scratch run needed 10,000 iterations, a chosen learning rate, and a hand-written gradient function to land near-zero cost. <code>LogisticRegression()</code> reaches the same decision boundary in one call &mdash; useful for production work, but the manual version is what makes it clear <em>why</em> the library call works, and what to debug if a learning curve elsewhere doesn't converge.</p>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill">lab 06 &middot; numpy gradient descent</span>
+    <span class="pill">lab 07 &middot; scikit-learn LogisticRegression</span>
+    <span class="pill">next: regularization</span>
+  </div>
+
+  <footer>Sources: lecture transcript &middot; C1_W3_Lab06_Gradient_Descent_Soln.ipynb &middot; C1_W3_Lab07_Scikit_Learn_Soln.ipynb &middot; summarized 2026-08-22</footer>
+
+</div>

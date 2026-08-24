@@ -1,0 +1,281 @@
+<title>Addressing Overfitting</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#f6f4ee; --surface:#ffffff; --surface-2:#eeece2;
+    --ink:#211f1a; --ink-soft:#55524a; --line:#dcd8c9;
+    --blue:#2454a6; --blue-soft:#e6edf9;
+    --green:#2f7a52; --green-soft:#e3f1e8;
+    --amber:#a6631f; --amber-soft:#f7ecdc;
+    --red:#b3412f; --red-soft:#f8e6e1;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17140f; --surface:#211d16; --surface-2:#2a251c;
+      --ink:#f2ede1; --ink-soft:#b8b1a0; --line:#3a3428;
+      --blue:#7ea6e8; --blue-soft:#202c3d;
+      --green:#7fce9f; --green-soft:#1a3327;
+      --amber:#e3ab5c; --amber-soft:#3a2c18;
+      --red:#e08b7a; --red-soft:#3a231e;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17140f; --surface:#211d16; --surface-2:#2a251c;
+    --ink:#f2ede1; --ink-soft:#b8b1a0; --line:#3a3428;
+    --blue:#7ea6e8; --blue-soft:#202c3d;
+    --green:#7fce9f; --green-soft:#1a3327;
+    --amber:#e3ab5c; --amber-soft:#3a2c18;
+    --red:#e08b7a; --red-soft:#3a231e;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px; margin:0 auto; padding:4rem 1.5rem 6rem;}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--green); margin:0 0 0.9rem;}
+  h1{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:clamp(2rem,4.5vw,2.9rem); line-height:1.08; letter-spacing:-0.01em; margin:0 0 0.6rem; text-wrap:balance;}
+  .dek{font-size:1.08rem; color:var(--ink-soft); max-width:66ch; margin:0 0 2.6rem;}
+  header.masthead{border-bottom:1px solid var(--line); padding-bottom:2.2rem; margin-bottom:2.6rem;}
+  section{margin-bottom:3.2rem;}
+  h2{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.5rem; letter-spacing:-0.005em; margin:0 0 1.1rem; display:flex; align-items:baseline; gap:0.6rem;}
+  h2 .tag{font-family:"IBM Plex Mono",monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:0.2rem 0.5rem; font-weight:500;}
+  p{margin:0 0 1rem; max-width:70ch;}
+  p:last-child{margin-bottom:0;}
+  strong{color:var(--ink); font-weight:600;}
+  code{font-family:"IBM Plex Mono",monospace; font-size:0.88em; background:var(--surface-2); padding:0.1em 0.35em; border-radius:4px;}
+
+  /* option ladder */
+  .ladder{display:grid; gap:1rem; margin:1.2rem 0;}
+  .option{
+    display:grid; grid-template-columns:3.2rem 1fr; gap:1.1rem;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:1.3rem 1.4rem;
+  }
+  .option .num{
+    font-family:"Fraunces",serif; font-weight:600; font-size:1.7rem;
+    color:var(--c); display:flex; align-items:flex-start; justify-content:center;
+  }
+  .option.o1{--c:var(--blue);} .option.o2{--c:var(--amber);} .option.o3{--c:var(--green);}
+  .option h3{font-family:"Fraunces",serif; font-weight:600; font-size:1.15rem; margin:0 0 0.35rem; color:var(--ink);}
+  .option .sub{font-family:"IBM Plex Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--c); margin-bottom:0.55rem; display:block;}
+  .option p{font-size:0.93rem; color:var(--ink-soft); margin:0;}
+
+  /* fit svg pair */
+  .fitpair{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.1rem 0;}
+  @media (max-width:620px){ .fitpair{grid-template-columns:1fr;} }
+  .fitpair .cell{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.2rem;}
+  .fitpair .cell .lbl{font-family:"IBM Plex Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem;}
+  .fitpair .cell.before .lbl{color:var(--red);}
+  .fitpair .cell.after .lbl{color:var(--green);}
+  .fitpair svg{display:block; width:100%; height:auto;}
+
+  /* feature table */
+  .feat-table{width:100%; border-collapse:collapse; margin:1.1rem 0; font-size:0.9rem;}
+  .feat-table th, .feat-table td{border:1px solid var(--line); padding:0.55rem 0.8rem; text-align:left;}
+  .feat-table thead th{background:var(--surface-2); font-family:"IBM Plex Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft);}
+  .feat-table td.sel{background:var(--green-soft); color:var(--green); font-weight:600;}
+  .feat-table td.cut{color:var(--ink-soft); text-decoration:line-through; opacity:0.6;}
+  .tbl-wrap{overflow-x:auto;}
+
+  /* regularization compare */
+  .regcompare{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.1rem 0;}
+  @media (max-width:660px){ .regcompare{grid-template-columns:1fr;} }
+  .regcompare .col{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1.2rem 1.3rem;}
+  .regcompare .col.over{border-top:3px solid var(--red);}
+  .regcompare .col.reg{border-top:3px solid var(--green);}
+  .regcompare h3{font-family:"IBM Plex Mono",monospace; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; margin:0 0 0.8rem;}
+  .regcompare .col.over h3{color:var(--red);}
+  .regcompare .col.reg h3{color:var(--green);}
+  .regcompare .eq{font-family:"IBM Plex Mono",monospace; font-size:0.8rem; line-height:1.7; margin-top:0.7rem;}
+  .wbig{color:var(--red); font-weight:700;}
+  .wsmall{color:var(--green); font-weight:700;}
+
+  .callout{background:var(--amber-soft); border-left:3px solid var(--amber); border-radius:0 10px 10px 0; padding:1.2rem 1.4rem; margin:1.4rem 0;}
+  .callout.good{background:var(--green-soft); border-left-color:var(--green);}
+  .callout .head{font-family:"Fraunces",serif; font-weight:600; font-size:1.05rem; margin:0 0 0.4rem; color:var(--ink);}
+  .callout p{margin:0; color:var(--ink-soft);}
+
+  .scenario{background:var(--blue-soft); border-radius:10px; padding:1.4rem 1.5rem; margin:1.2rem 0;}
+  .scenario .head{font-family:"IBM Plex Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--blue); margin:0 0 0.6rem;}
+  .scenario p{color:var(--ink); margin:0;}
+
+  .recap-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:0.9rem; margin:1.2rem 0;}
+  @media (max-width:660px){ .recap-grid{grid-template-columns:1fr;} }
+  .recap-grid .cell{border:1px solid var(--line); border-radius:8px; padding:0.9rem 1rem; background:var(--surface); border-top:3px solid var(--c);}
+  .recap-grid .cell:nth-child(1){--c:var(--blue);}
+  .recap-grid .cell:nth-child(2){--c:var(--amber);}
+  .recap-grid .cell:nth-child(3){--c:var(--green);}
+  .recap-grid .cell .k{font-family:"IBM Plex Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); margin-bottom:0.3rem;}
+  .recap-grid .cell .v{font-size:0.92rem;}
+
+  .pill-row{display:flex; gap:0.5rem; flex-wrap:wrap; margin:1rem 0 0;}
+  .pill{font-family:"IBM Plex Mono",monospace; font-size:0.75rem; border:1px solid var(--line); border-radius:999px; padding:0.3rem 0.7rem; color:var(--ink-soft);}
+
+  footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--ink-soft);}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">ML Engineering &middot; Supervised Learning &middot; Week 3 Notes</p>
+    <h1>Addressing Overfitting</h1>
+    <p class="dek">Once a model is overfit &mdash; high variance, wiggly, memorizing rather than learning &mdash; there are exactly three levers to pull. Each one trades off something different.</p>
+  </header>
+
+  <section>
+    <h2>Three options</h2>
+    <div class="ladder">
+      <div class="option o1">
+        <div class="num">1</div>
+        <div>
+          <span class="sub">most direct, not always possible</span>
+          <h3>Collect more training data</h3>
+          <p>More examples let even a high-order, many-feature model settle into a smoother, less wiggly fit &mdash; you don't have to simplify the model at all. The catch: sometimes there just isn't more data to collect (only so many houses have sold in a given location).</p>
+        </div>
+      </div>
+      <div class="option o2">
+        <div class="num">2</div>
+        <div>
+          <span class="sub">throws information away</span>
+          <h3>Select fewer features</h3>
+          <p>Use intuition (or, later, automatic feature selection) to keep only the most relevant features and drop the rest. Fewer features means less room to overfit &mdash; but any useful signal carried by a dropped feature is lost for good.</p>
+        </div>
+      </div>
+      <div class="option o3">
+        <div class="num">3</div>
+        <div>
+          <span class="sub">keeps every feature</span>
+          <h3>Regularization</h3>
+          <p>Keep all the features, but shrink the size of their weights <code>w&#8321;&hellip;w&#8344;</code> instead of eliminating any outright. Gentler than feature selection &mdash; nothing is thrown away, its influence is just dialed down.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Option 1, visualized <span class="tag">more data</span></h2>
+    <p>Same overfit quartic model, same features &mdash; the only thing that changes is how many training examples it sees.</p>
+    <div class="fitpair">
+      <div class="cell before">
+        <div class="lbl">sparse data &middot; wiggly fit</div>
+        <svg viewBox="0 0 260 170" aria-label="With few data points the curve swings wildly between them">
+          <line x1="25" y1="150" x2="25" y2="15" stroke="var(--line)" stroke-width="1"/>
+          <line x1="25" y1="150" x2="245" y2="150" stroke="var(--line)" stroke-width="1"/>
+          <path d="M30,90 Q50,140 70,105 Q90,60 115,95 Q140,130 160,70 Q185,35 210,55" fill="none" stroke="var(--red)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="2">
+            <path d="M40,80 l9,9 M40,89 l9,-9"/>
+            <path d="M105,80 l9,9 M105,89 l9,-9"/>
+            <path d="M150,120 l9,9 M150,129 l9,-9"/>
+            <path d="M195,50 l9,9 M195,59 l9,-9"/>
+          </g>
+        </svg>
+      </div>
+      <div class="cell after">
+        <div class="lbl">more examples &middot; smooth fit</div>
+        <svg viewBox="0 0 260 170" aria-label="With many data points the same model settles into a smooth diminishing-returns curve">
+          <line x1="25" y1="150" x2="25" y2="15" stroke="var(--line)" stroke-width="1"/>
+          <line x1="25" y1="150" x2="245" y2="150" stroke="var(--line)" stroke-width="1"/>
+          <path d="M30,140 Q70,40 230,30" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="1.6">
+            <path d="M40,132 l7,7 M40,139 l7,-7"/>
+            <path d="M62,105 l7,7 M62,112 l7,-7"/>
+            <path d="M80,85 l7,7 M80,92 l7,-7"/>
+            <path d="M100,65 l7,7 M100,72 l7,-7"/>
+            <path d="M125,52 l7,7 M125,59 l7,-7"/>
+            <path d="M150,45 l7,7 M150,52 l7,-7"/>
+            <path d="M175,38 l7,7 M175,45 l7,-7"/>
+            <path d="M200,35 l7,7 M200,42 l7,-7"/>
+            <path d="M220,32 l7,7 M220,39 l7,-7"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <p><strong>Number one tool against overfitting:</strong> when more labeled data is available, this is usually the highest-leverage fix &mdash; the model itself doesn't need to change.</p>
+  </section>
+
+  <section>
+    <h2>Option 2, visualized <span class="tag">feature selection</span></h2>
+    <p>A house-price model with 100 candidate features and too little data to support all of them will overfit. Picking a smaller, intuition-guided subset removes that pressure &mdash; at a cost.</p>
+    <div class="tbl-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr><th>size</th><th>bedrooms</th><th>floors</th><th>age</th><th>avg income</th><th>&hellip;</th><th>distance to coffee shop</th><th>price (y)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sel">x&#8321; &mdash; kept</td>
+            <td class="sel">x&#8322; &mdash; kept</td>
+            <td class="cut">x&#8323;</td>
+            <td class="sel">x&#8324; &mdash; kept</td>
+            <td class="cut">x&#8325;</td>
+            <td class="cut">&hellip;</td>
+            <td class="cut">x&#8321;&#8320;&#8320;</td>
+            <td>y</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="regcompare" style="grid-template-columns:1fr 1fr;">
+      <div class="col over" style="border-top-color:var(--blue);">
+        <h3>All 100 features</h3>
+        <p style="font-size:0.9rem; color:var(--ink-soft);">+ insufficient data to support them &rarr; <strong style="color:var(--red);">overfit</strong></p>
+      </div>
+      <div class="col reg">
+        <h3>Selected: size, bedrooms, age</h3>
+        <p style="font-size:0.9rem; color:var(--ink-soft);">"just right" subset &rarr; <strong style="color:var(--green);">generalizes better</strong></p>
+      </div>
+    </div>
+    <p><strong>The disadvantage:</strong> useful features can get lost. If all 100 actually carried some signal, throwing 97 of them away throws that information away too &mdash; permanently, unless you go back and re-add them. (Automatic feature-selection algorithms, covered later in the specialization, do this more systematically than intuition alone.)</p>
+  </section>
+
+  <section>
+    <h2>Option 3, visualized <span class="tag">regularization</span></h2>
+    <p>Regularization doesn't remove any feature &mdash; it shrinks the weights. Eliminating a feature is really just the extreme case of setting its weight to exactly 0; regularization achieves the same calming effect more gently, without forcing any weight all the way to zero.</p>
+    <div class="regcompare">
+      <div class="col over">
+        <h3>Overfit</h3>
+        <p style="font-size:0.9rem; color:var(--ink-soft);">Large parameter values swing the curve wildly between points.</p>
+        <div class="eq">f(x) = <span class="wbig">28</span>x &minus; <span class="wbig">385</span>x&sup2; + <span class="wbig">39</span>x&sup3; &minus; <span class="wbig">174</span>x&#8308; + 100</div>
+      </div>
+      <div class="col reg">
+        <h3>Regularized</h3>
+        <p style="font-size:0.9rem; color:var(--ink-soft);">Same polynomial, same features &mdash; just much smaller weights.</p>
+        <div class="eq">f(x) = <span class="wsmall">13</span>x &minus; <span class="wsmall">0.23</span>x&sup2; + <span class="wsmall">0.000014</span>x&sup3; &minus; <span class="wsmall">0.0001</span>x&#8308; + 10</div>
+      </div>
+    </div>
+    <p>By convention, regularization shrinks <code>w&#8321;&hellip;w&#8344;</code> only. Whether you also regularize <code>b</code> makes very little practical difference &mdash; most implementations, this one included, just leave it alone.</p>
+  </section>
+
+  <div class="callout good">
+    <p class="head">Why regularization is the default choice</p>
+    <p>Unlike feature selection, regularization keeps every feature's information available to the model &mdash; it just prevents any one of them from having an outsized effect. That's why it's used constantly in practice, including later in neural networks: you get the safety of a simpler-behaving model without deciding in advance which features to sacrifice.</p>
+  </div>
+
+  <section>
+    <h2>Worked scenario</h2>
+    <div class="scenario">
+      <p class="head">The same house-price model, three fixes</p>
+      <p>A model overfits on 50 house sales using a fourth-order polynomial of size. Team A waits and collects 500 more sales &mdash; the curve settles down on its own. Team B instead drops down to just <code>size</code> and <code>age</code>, sacrificing whatever signal <code>distance to coffee shop</code> might have carried. Team C keeps every feature but adds regularization, shrinking the higher-order weights toward zero without deciding by hand which features matter. All three curves end up far less wiggly than the original &mdash; they just got there by different trade-offs.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recap</h2>
+    <div class="recap-grid">
+      <div class="cell"><div class="k">1 &middot; More data</div><div class="v">Best when available; model stays as complex as it needs to be</div></div>
+      <div class="cell"><div class="k">2 &middot; Feature selection</div><div class="v">Simple, but risks discarding genuinely useful signal</div></div>
+      <div class="cell"><div class="k">3 &middot; Regularization</div><div class="v">Keeps all features, gently shrinks their influence &mdash; the workhorse default</div></div>
+    </div>
+  </section>
+
+  <div class="callout">
+    <p class="head">Coming next: the regularization math</p>
+    <p>The next lecture formalizes exactly how regularization is added to the cost function, and applies it concretely to both linear and logistic regression.</p>
+  </div>
+
+  <div class="pill-row">
+    <span class="pill">optional lab: interactive overfitting playground</span>
+    <span class="pill">next: regularized cost function</span>
+  </div>
+
+  <footer>Source: lecture transcript, "Addressing overfitting" &middot; summarized 2026-08-22</footer>
+
+</div>

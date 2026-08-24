@@ -1,0 +1,384 @@
+<title>Regularization, Intuitively</title>
+
+<style>
+:root{
+  --bg:#FAF8F3;
+  --bg-raised:#FFFFFF;
+  --ink:#1D1B26;
+  --ink-soft:#57536A;
+  --muted:#8B87A0;
+  --line:#E7E2D8;
+  --accent:#5B4FE8;
+  --accent-soft:#EEEBFC;
+  --warn:#D9622B;
+  --warn-soft:#FCEBE1;
+  --good:#1E8F6F;
+  --good-soft:#E5F5EF;
+  --mono-bg:#211F2E;
+  --mono-ink:#EDE9FB;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151420;
+    --bg-raised:#1D1C2C;
+    --ink:#EFEDF9;
+    --ink-soft:#B6B2CC;
+    --muted:#847FA0;
+    --line:#332F47;
+    --accent:#9C93FF;
+    --accent-soft:#26224A;
+    --warn:#F0895A;
+    --warn-soft:#3A2419;
+    --good:#57C79E;
+    --good-soft:#173229;
+    --mono-bg:#0E0D18;
+    --mono-ink:#E7E3FA;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151420;
+  --bg-raised:#1D1C2C;
+  --ink:#EFEDF9;
+  --ink-soft:#B6B2CC;
+  --muted:#847FA0;
+  --line:#332F47;
+  --accent:#9C93FF;
+  --accent-soft:#26224A;
+  --warn:#F0895A;
+  --warn-soft:#3A2419;
+  --good:#57C79E;
+  --good-soft:#173229;
+  --mono-bg:#0E0D18;
+  --mono-ink:#E7E3FA;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+  line-height:1.6;
+}
+.page{
+  max-width:880px;
+  margin:0 auto;
+  padding:56px 28px 96px;
+}
+h1,h2,h3{
+  font-family:'Fraunces', Georgia, 'Times New Roman', serif;
+  font-weight:600;
+  text-wrap:balance;
+  color:var(--ink);
+  margin:0;
+}
+.eyebrow{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 10px;
+}
+header.hero{
+  margin-bottom:52px;
+  padding-bottom:36px;
+  border-bottom:1px solid var(--line);
+}
+header.hero h1{
+  font-size:44px;
+  line-height:1.08;
+  margin-bottom:14px;
+}
+header.hero p.dek{
+  font-size:18px;
+  color:var(--ink-soft);
+  max-width:56ch;
+  margin:0;
+}
+section{
+  margin:52px 0;
+}
+section > .eyebrow{margin-bottom:6px;}
+section h2{
+  font-size:26px;
+  margin-bottom:18px;
+}
+p{
+  font-size:16px;
+  color:var(--ink-soft);
+  max-width:68ch;
+}
+strong{color:var(--ink);}
+.formula{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  background:var(--mono-bg);
+  color:var(--mono-ink);
+  border-radius:10px;
+  padding:20px 24px;
+  font-size:15px;
+  overflow-x:auto;
+  margin:18px 0;
+}
+.formula .term-fit{color:#8FE3D8;}
+.formula .term-reg{color:#F0A6FF;}
+.formula .lambda{color:#FFD08A;}
+
+.diagram-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin:22px 0;
+}
+@media (max-width:640px){ .diagram-row{grid-template-columns:1fr;} }
+.diagram-card{
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px 18px 14px;
+}
+.diagram-card .cap{
+  font-size:13px;
+  color:var(--muted);
+  text-align:center;
+  margin-top:8px;
+}
+.diagram-card svg{width:100%;height:auto;display:block;}
+
+.callout{
+  display:flex;
+  gap:14px;
+  border-radius:12px;
+  padding:16px 18px;
+  margin:18px 0;
+  align-items:flex-start;
+}
+.callout.warn{background:var(--warn-soft); border:1px solid color-mix(in srgb, var(--warn) 35%, transparent);}
+.callout.good{background:var(--good-soft); border:1px solid color-mix(in srgb, var(--good) 35%, transparent);}
+.callout .tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-weight:700;
+  padding:3px 8px;
+  border-radius:6px;
+  white-space:nowrap;
+}
+.callout.warn .tag{background:var(--warn); color:#2A1206;}
+.callout.good .tag{background:var(--good); color:#052A1E;}
+.callout p{margin:0;font-size:15px;color:var(--ink);}
+
+.lambda-scale{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin:22px 0;
+}
+@media (max-width:640px){ .lambda-scale{grid-template-columns:1fr;} }
+.lambda-card{
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+}
+.lambda-card .val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  color:var(--accent);
+  margin-bottom:6px;
+}
+.lambda-card h3{
+  font-size:18px;
+  margin-bottom:6px;
+}
+.lambda-card p{font-size:14px;margin:0;}
+.lambda-card svg{width:100%;height:70px;margin-top:10px;}
+
+.example-table{
+  width:100%;
+  border-collapse:collapse;
+  margin:18px 0;
+  font-size:14px;
+  background:var(--bg-raised);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+}
+.example-table th,.example-table td{
+  padding:10px 12px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+}
+.example-table th{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+  background:var(--accent-soft);
+}
+.example-table tr:last-child td{border-bottom:none;}
+.example-table td.num{font-variant-numeric:tabular-nums; color:var(--ink-soft);}
+
+.takeaway{
+  background:var(--accent-soft);
+  border-radius:16px;
+  padding:26px 28px;
+  margin-top:56px;
+}
+.takeaway .eyebrow{color:var(--accent);}
+.takeaway ul{margin:12px 0 0;padding-left:20px;}
+.takeaway li{font-size:15px;color:var(--ink);margin-bottom:8px;}
+.takeaway li:last-child{margin-bottom:0;}
+
+.footnote{
+  font-size:13px;
+  color:var(--muted);
+  margin-top:6px;
+}
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow">Machine Learning &middot; Regularization</p>
+    <h1>Why shrinking the weights fixes overfitting</h1>
+    <p class="dek">A high-order model can trace the training data perfectly and still be a bad model. Regularization is the fix: penalize large parameters in the cost function so the model stays only as complex as the data demands.</p>
+  </header>
+
+  <section>
+    <p class="eyebrow">01 &middot; The Intuition</p>
+    <h2>Force the extra weights toward zero</h2>
+    <p>Fitting a quadratic to house prices gives a sensible curve. Adding <code>x&sup3;</code> and <code>x&#8308;</code> terms lets the curve wiggle through every training point &mdash; a textbook overfit. But what if, instead of removing those terms, we just made <strong>w&#8323;</strong> and <strong>w&#8324;</strong> very small?</p>
+
+    <div class="diagram-row">
+      <div class="diagram-card">
+        <svg viewBox="0 0 260 160">
+          <line x1="30" y1="130" x2="30" y2="15" stroke="var(--muted)" stroke-width="1.5"/>
+          <line x1="30" y1="130" x2="245" y2="130" stroke="var(--muted)" stroke-width="1.5"/>
+          <path d="M35,120 Q80,35 160,30 T240,25" fill="none" stroke="var(--accent)" stroke-width="3"/>
+          <g fill="var(--warn)">
+            <circle cx="55" cy="105" r="4"/>
+            <circle cx="95" cy="60" r="4"/>
+            <circle cx="150" cy="45" r="4"/>
+            <circle cx="205" cy="40" r="4"/>
+          </g>
+          <text x="10" y="70" font-size="10" fill="var(--muted)" transform="rotate(-90 10 70)">price</text>
+          <text x="130" y="148" font-size="10" fill="var(--muted)" text-anchor="middle">size</text>
+        </svg>
+        <p class="cap">quadratic fit &mdash; w&#8321;x + w&#8322;x&sup2; + b</p>
+      </div>
+      <div class="diagram-card">
+        <svg viewBox="0 0 260 160">
+          <line x1="30" y1="130" x2="30" y2="15" stroke="var(--muted)" stroke-width="1.5"/>
+          <line x1="30" y1="130" x2="245" y2="130" stroke="var(--muted)" stroke-width="1.5"/>
+          <path d="M35,90 Q55,140 80,95 Q105,45 130,80 Q160,120 190,35 Q210,15 240,30" fill="none" stroke="var(--warn)" stroke-width="2.5"/>
+          <path d="M35,120 Q80,35 160,30 T240,25" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="1,0"/>
+          <g fill="var(--warn)">
+            <circle cx="55" cy="105" r="4"/>
+            <circle cx="95" cy="60" r="4"/>
+            <circle cx="150" cy="45" r="4"/>
+            <circle cx="205" cy="40" r="4"/>
+          </g>
+          <text x="10" y="70" font-size="10" fill="var(--muted)" transform="rotate(-90 10 70)">price</text>
+          <text x="130" y="148" font-size="10" fill="var(--muted)" text-anchor="middle">size</text>
+        </svg>
+        <p class="cap">4th-order fit &mdash; wiggly (orange) vs. what we want (violet)</p>
+      </div>
+    </div>
+
+    <p>Take the ordinary squared-error cost and bolt on a penalty: <strong>+1000&middot;w&#8323;&sup2; + 1000&middot;w&#8324;&sup2;</strong>. Minimizing the sum now only works if w&#8323; and w&#8324; are both close to 0 &mdash; any large value blows the cost up. The x&sup3; and x&#8308; terms effectively vanish, and the fit collapses back to the well-behaved quadratic.</p>
+
+    <div class="formula">min <span class="term-fit">(1/2m) &sum; (f(x&#8305;) &minus; y&#8305;)&sup2;</span> + <span class="term-reg">1000&middot;w&#8323;&sup2; + 1000&middot;w&#8324;&sup2;</span></div>
+
+    <div class="callout good">
+      <span class="tag">Key idea</span>
+      <p>Smaller parameter values &rarr; a simpler effective model &rarr; less prone to overfitting. You don't have to delete features to simplify a model &mdash; shrinking their weights does the same job.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">02 &middot; Scaling It Up</p>
+    <h2>Penalize every weight, not just the suspicious ones</h2>
+    <p>With 2 features you can eyeball which ones to shrink. With 100 features &mdash; size, bedrooms, floors, age, average income, distance to the nearest coffee shop &hellip; &mdash; you have no idea in advance which ones are causing the overfit. So regularization penalizes <strong>all</strong> of w&#8321; &hellip; w&#8345; together, and lets the optimizer decide how much to shrink each one.</p>
+
+    <table class="example-table">
+      <tr><th>size</th><th>bedrooms</th><th>floors</th><th>age</th><th>avg income</th><th>&hellip;</th><th>dist. to coffee shop</th><th>price</th></tr>
+      <tr><td>x&#8321;</td><td class="num">x&#8322;</td><td class="num">x&#8323;</td><td class="num">x&#8324;</td><td class="num">x&#8325;</td><td class="num">&hellip;</td><td class="num">x&#8321;&#8320;&#8320;</td><td>y</td></tr>
+    </table>
+    <p class="footnote">n = 100 features &rarr; parameters w&#8321; through w&#8321;&#8320;&#8320;, plus b.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">03 &middot; The Regularized Cost Function</p>
+    <h2>One equation, two competing goals</h2>
+    <div class="formula">J(w&#8407;,b) = <span class="term-fit">(1/2m) &sum;<sub>i=1..m</sub> (f<sub>w,b</sub>(x&#8407;&#8305;) &minus; y&#8305;)&sup2;</span> &nbsp;+&nbsp; <span class="term-reg"><span class="lambda">&lambda;</span>/2m &sum;<sub>j=1..n</sub> w<sub>j</sub>&sup2;</span></div>
+
+    <div class="diagram-row" style="grid-template-columns:1fr;">
+      <div class="diagram-card">
+        <div style="display:flex; gap:24px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:220px;">
+            <p class="eyebrow" style="color:#8FE3D8; font-size:11px;">Term 1 &mdash; Mean Squared Error</p>
+            <p style="margin:0; font-size:14px;">Fit the training data well. Minimizing this alone is what plain linear regression already does.</p>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <p class="eyebrow" style="color:#B78CFF; font-size:11px;">Term 2 &mdash; Regularization</p>
+            <p style="margin:0; font-size:14px;">Keep every w<sub>j</sub> small. On its own, this alone would push the model toward doing nothing at all.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p><strong>&lambda;</strong> (lambda), the <em>regularization parameter</em>, is the dial between the two: how much do you care about fitting the data versus keeping the weights small? Two conventions worth remembering:</p>
+
+    <div class="callout warn">
+      <span class="tag">Convention</span>
+      <p>Both terms are scaled by <strong>1/2m</strong>. This keeps the same &lambda; roughly appropriate even as your training set size m grows &mdash; without it you'd have to re-tune &lambda; every time you added data.</p>
+    </div>
+    <div class="callout warn">
+      <span class="tag">Convention</span>
+      <p>By convention, <strong>b is not penalized</strong> &mdash; only w&#8321; &hellip; w&#8345;. Some implementations do add a &lambda;/2m&middot;b&sup2; term, but in practice it makes very little difference either way.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">04 &middot; Choosing &lambda;</p>
+    <h2>Too little, too much, and just right</h2>
+    <div class="lambda-scale">
+      <div class="lambda-card">
+        <div class="val">&lambda; = 0</div>
+        <h3>No regularization</h3>
+        <p>The penalty term vanishes. The model is free to wiggle through every training point &mdash; classic <strong>overfitting</strong>.</p>
+        <svg viewBox="0 0 200 70"><path d="M10,55 Q30,15 50,50 Q65,68 80,45 Q95,10 115,35 Q135,60 155,15 Q170,5 190,20" fill="none" stroke="var(--warn)" stroke-width="2.5"/></svg>
+      </div>
+      <div class="lambda-card">
+        <div class="val">&lambda; &asymp; right</div>
+        <h3>Balanced</h3>
+        <p>Weights are small but not zero. The curve smooths out while still tracking the real trend &mdash; the goal.</p>
+        <svg viewBox="0 0 200 70"><path d="M10,55 Q60,10 110,25 T190,15" fill="none" stroke="var(--good)" stroke-width="2.5"/></svg>
+      </div>
+      <div class="lambda-card">
+        <div class="val">&lambda; = 10&sup1;&#8304;</div>
+        <h3>Way too much</h3>
+        <p>Every w&#8321;&hellip;w&#8345; is crushed to &asymp;0. f(x) collapses to <strong>f(x) = b</strong> &mdash; a flat line. Classic <strong>underfitting</strong>.</p>
+        <svg viewBox="0 0 200 70"><line x1="10" y1="35" x2="190" y2="35" stroke="var(--accent)" stroke-width="2.5"/></svg>
+      </div>
+    </div>
+    <p>The whole point of &lambda; is to sit between these extremes: small enough that the model can still fit real structure, large enough that it can't chase noise. Later, model-selection techniques give a systematic way to pick a good value rather than guessing.</p>
+  </section>
+
+  <div class="takeaway">
+    <p class="eyebrow">Takeaways</p>
+    <ul>
+      <li><strong>Small weights &asymp; a simpler model.</strong> You don't need to know which features are "bad" &mdash; shrinking every w<sub>j</sub> lets the optimizer figure that out.</li>
+      <li><strong>The cost function trades off two goals:</strong> fit the data (MSE term) vs. keep parameters small (regularization term), balanced by &lambda;.</li>
+      <li><strong>&lambda; = 0</strong> &rarr; overfit. <strong>&lambda; too large</strong> (e.g. 10&sup1;&#8304;) &rarr; underfit, model degenerates to f(x) = b.</li>
+      <li>Both cost terms are scaled by <strong>1/2m</strong>; by convention <strong>b is excluded</strong> from the penalty.</li>
+      <li>Next up: applying this regularized cost to <strong>linear regression</strong> and <strong>logistic regression</strong> with gradient descent.</li>
+    </ul>
+  </div>
+
+</div>

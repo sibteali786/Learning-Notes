@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L7: Build an End-to-End System — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .pipe{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .pstep{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;}
+  .pnum{background:var(--accent);color:#0f1220;font-weight:700;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;}
+  .pstep.gate{border-color:var(--warn);}
+  .pstep.gate .pnum{background:var(--warn);}
+</style>
+</head>
+<body>
+
+<h1>🏗️ L7 — Build an End-to-End System</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 7 summary</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">🎯</span> Putting It All Together</h2>
+    <p>This lesson combines every technique from the course — input moderation (L3), structured extraction & product lookup (L5), response generation, output moderation (L6), and self-evaluation (L6) — into one <code>process_user_message()</code> pipeline, wired up to a simple chat UI.</p>
+    <div class="example"><b>Real-world scenario:</b> This is essentially a minimal, complete customer-service chatbot backend — the kind of pipeline you'd put behind a "chat with us" widget on a retail site, with safety checks on both ends of the conversation.</div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🔗</span> The 7-Step Pipeline</h2>
+    <div class="pipe">
+      <div class="pstep gate"><span class="pnum">1</span><b>Moderate input</b> — run user message through Moderation API; if flagged, return a rejection immediately.</div>
+      <div class="pstep"><span class="pnum">2</span><b>Extract products/categories</b> — structured extraction from the user's message (from L5).</div>
+      <div class="pstep"><span class="pnum">3</span><b>Look up product info</b> — fetch full details for extracted products/categories; empty string if none found.</div>
+      <div class="pstep"><span class="pnum">4</span><b>Generate the answer</b> — system message + conversation history + user message + looked-up product info → model response.</div>
+      <div class="pstep gate"><span class="pnum">5</span><b>Moderate output</b> — run the generated response through Moderation API; if flagged, return a fallback message.</div>
+      <div class="pstep"><span class="pnum">6</span><b>Self-evaluate</b> — ask the model a separate Y/N question: does this response sufficiently answer the user?</div>
+      <div class="pstep gate"><span class="pnum">7</span><b>Decide</b> — if Y, return the response to the user; if N, hand off with "I'll connect you with a human representative."</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">💬</span> Conversation State</h2>
+    <p><code>all_messages</code> accumulates across turns, so follow-up questions like "which is the cheapest" or "tell me more about it" work correctly — the model has the prior turns as context, not just the latest message.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🖥️</span> Chat UI</h2>
+    <p>Built with the <code>panel</code> Python package: a text input, a button, and a scrolling column of message bubbles. <code>collect_messages()</code> reads the input, calls <code>process_user_message()</code>, and appends both the user and assistant turns to the display.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🧪</span> Example Conversation</h2>
+    <table>
+      <tr><th>Turn</th><th>User</th><th>Assistant (summarized)</th></tr>
+      <tr><td>1</td><td>"what TVs do you have"</td><td>Lists available TVs from the catalog</td></tr>
+      <tr><td>2</td><td>"which is the cheapest"</td><td>Identifies the cheapest TV-related product using prior context</td></tr>
+      <tr><td>3</td><td>"what's the most expensive"</td><td>CineView 8K TV</td></tr>
+      <tr><td>4</td><td>"tell me more about it"</td><td>Gives detailed specs for the CineView 8K TV</td></tr>
+    </table>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🔭</span> Where to Go From Here</h2>
+    <p>The lesson closes by framing this as a starting point, not a finished product: by monitoring quality across many real inputs, you can find which steps need better prompts, which steps might be unnecessary overhead, and where a better retrieval method (e.g. embeddings, per L5) could replace the simple exact-match lookup.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>Same legacy SDK throughout, plus this notebook combines <b>both</b> issues seen separately in earlier lessons: legacy chat completions <i>and</i> legacy moderation calls, twice each (input + output moderation). Verified against <a href="https://github.com/openai/openai-python">openai/openai-python</a>, <a href="https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create">Chat Completions reference</a>, and the <a href="https://developers.openai.com/api/docs/guides/moderation">Moderation guide</a>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code></td></tr>
+      <tr><td><code>openai.Moderation.create(input=...)</code></td><td><code>client.moderations.create(model="omni-moderation-latest", input=...)</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>moderation_output["flagged"]</code></td><td><code>moderation_output.flagged</code> (attribute, not dict key)</td></tr>
+    </table>
+    </div>
+    <p><b>Corrected <code>process_user_message</code> — key excerpts to replace:</b></p>
+    <pre>from openai import OpenAI
+client = OpenAI()
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content
+
+def process_user_message(user_input, all_messages, debug=True):
+    delimiter = "```"
+
+    # Step 1: moderate input
+    response = client.moderations.create(
+        model="omni-moderation-latest", input=user_input
+    )
+    moderation_output = response.results[0]
+    if moderation_output.flagged:
+        return "Sorry, we cannot process this request."
+
+    # ... steps 2-4 unchanged in structure ...
+
+    # Step 5: moderate output
+    response = client.moderations.create(
+        model="omni-moderation-latest", input=final_response
+    )
+    moderation_output = response.results[0]
+    if moderation_output.flagged:
+        return "Sorry, we cannot provide this information."</pre>
+    <p style="margin-top:8px;"><b>Also worth checking:</b> the <code>panel</code> chat UI code here predates OpenAI's newer <a href="https://developers.openai.com/api/docs/guides/completions">Responses API</a> and built-in guardrails options. For a production version of this pipeline today, it's worth checking whether OpenAI's Structured Outputs (step 2's extraction) and a dedicated moderation/guardrails layer would replace several of these hand-rolled steps.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from the correct L7_student.ipynb ("Build an End-to-End System") + matching transcript · SDK claims verified against openai/openai-python (GitHub) and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>

@@ -30,9 +30,33 @@
               "icon": "excalidraw-icon",
               "title": "Drawing 2026-08-22 00.50.23.excalidraw"
             }
+          },
+          {
+            "id": "87ccc74cd7960ec8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -198,20 +222,23 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "140baa0c627bd99d",
+  "active": "87ccc74cd7960ec8",
   "lastOpenFiles": [
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs",
-    "Learning/Behavioural Interview Prep/decode_behavioral_interviews_summary.html",
-    "Learning/Behavioural Interview Prep/behavioral_interview_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/3-logistic_regression_decision_boundary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/4-logistic_loss_summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/2-logistic_regression_sigmoid_fn.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/1-classification.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/11-gradient-descent-linear-regression-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/12-learning-rate-summary.html",
     "conflict-files-obsidian-git.md",
+    "Learning/AI&ML Engineering/what-is-machine-learning-summary.md",
+    "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/regularized_gd_summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/regularization_summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/C1_W3_Lab07_Scikit_Learn_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/C1_W3_Lab06_Gradient_Descent_Soln.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/3-addressing-overfitting.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/2-overfitting.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting/1-logistic-gd.html",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/overfitting",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Logistic_Regression.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-3/notebooks/C1_W3_Lab09_Regularization_Soln.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Resources.md",
     "Learning/System Design/InterviewBoard.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Summary.excalidraw.md",
@@ -236,8 +263,6 @@
     "Learning/DSA/Graphs/DFS/Matrices/Pasted Image 20260805153701_541.png",
     "Learning/Frontend Interview Preparation/Coding/StopWatch/StopWatch.excalidraw.md",
     "redis_geosearch_grid_vs_radius.svg",
-    "Learning/System Design/Practice/Ambigious Problem/BP Log Metric.md",
-    "Learning/Freelance/Builders's Website/Creds.md",
     "Pasted image 20260813204431.png",
     "Pasted image 20260813204427.png",
     "Learning/Backend Engineering/Memory Management in C/attachments/Pasted image 20260813172716.png",

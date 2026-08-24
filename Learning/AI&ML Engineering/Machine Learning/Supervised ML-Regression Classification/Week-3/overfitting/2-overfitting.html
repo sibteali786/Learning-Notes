@@ -1,0 +1,417 @@
+<title>Overfitting &amp; Underfitting</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-2: #eeece2;
+    --ink: #211f1a;
+    --ink-soft: #55524a;
+    --line: #dcd8c9;
+
+    --cold: #2f6fb0;
+    --cold-soft: #e5eef8;
+    --right: #2f8a5b;
+    --right-soft: #e3f3ea;
+    --hot: #c23f2d;
+    --hot-soft: #fbe6e2;
+    --accent: #9a5b1f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #17140f;
+      --surface: #211d16;
+      --surface-2: #2a251c;
+      --ink: #f2ede1;
+      --ink-soft: #b8b1a0;
+      --line: #3a3428;
+      --cold: #7fb3e8;
+      --cold-soft: #1c2c3d;
+      --right: #7fce9f;
+      --right-soft: #1a3327;
+      --hot: #e88e7c;
+      --hot-soft: #3a231e;
+      --accent: #dba25c;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #17140f;
+    --surface: #211d16;
+    --surface-2: #2a251c;
+    --ink: #f2ede1;
+    --ink-soft: #b8b1a0;
+    --line: #3a3428;
+    --cold: #7fb3e8;
+    --cold-soft: #1c2c3d;
+    --right: #7fce9f;
+    --right-soft: #1a3327;
+    --hot: #e88e7c;
+    --hot-soft: #3a231e;
+    --accent: #dba25c;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:4rem 1.5rem 6rem;}
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 0.9rem;
+  }
+  h1{
+    font-family:"Fraunces", Georgia, serif; font-weight:600;
+    font-size:clamp(2rem, 4.5vw, 2.9rem); line-height:1.08;
+    letter-spacing:-0.01em; margin:0 0 0.6rem; text-wrap:balance;
+  }
+  .dek{font-size:1.08rem; color:var(--ink-soft); max-width:66ch; margin:0 0 2.6rem;}
+  header.masthead{border-bottom:1px solid var(--line); padding-bottom:2.2rem; margin-bottom:2.6rem;}
+  section{margin-bottom:3.2rem;}
+  h2{
+    font-family:"Fraunces", Georgia, serif; font-weight:600; font-size:1.5rem;
+    letter-spacing:-0.005em; margin:0 0 1.1rem;
+  }
+  p{margin:0 0 1rem; max-width:70ch;}
+  p:last-child{margin-bottom:0;}
+  strong{color:var(--ink); font-weight:600;}
+  code{
+    font-family:"IBM Plex Mono", monospace; font-size:0.88em;
+    background:var(--surface-2); padding:0.1em 0.35em; border-radius:4px;
+  }
+
+  /* ---- Goldilocks triptych ---- */
+  .triptych{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1rem;
+    margin:1.4rem 0;
+  }
+  @media (max-width:760px){ .triptych{grid-template-columns:1fr;} }
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .panel .top{
+    padding:1.1rem 1.2rem 0.9rem;
+    border-top:4px solid var(--c);
+  }
+  .panel.cold .top{--c:var(--cold);}
+  .panel.right .top{--c:var(--right);}
+  .panel.hot .top{--c:var(--hot);}
+  .panel .kicker{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--ink-soft); margin-bottom:0.35rem;
+  }
+  .panel h3{
+    font-family:"Fraunces", serif; font-weight:600; font-size:1.15rem; margin:0 0 0.5rem;
+  }
+  .panel.cold h3{color:var(--cold);}
+  .panel.right h3{color:var(--right);}
+  .panel.hot h3{color:var(--hot);}
+  .panel svg{display:block; width:100%; height:auto;}
+  .panel .body{padding:0 1.2rem 1.2rem;}
+  .panel .body p{font-size:0.9rem; color:var(--ink-soft); margin:0 0 0.5rem;}
+  .panel .eq{
+    font-family:"IBM Plex Mono", monospace; font-size:0.82rem;
+    background:var(--surface-2); border-radius:6px; padding:0.5rem 0.7rem; margin:0 0 0.6rem;
+    overflow-x:auto; white-space:nowrap;
+  }
+  .panel .verdict{
+    display:inline-block;
+    font-family:"IBM Plex Mono", monospace; font-size:0.72rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em;
+    padding:0.25rem 0.6rem; border-radius:999px;
+  }
+  .panel.cold .verdict{background:var(--cold-soft); color:var(--cold);}
+  .panel.right .verdict{background:var(--right-soft); color:var(--right);}
+  .panel.hot .verdict{background:var(--hot-soft); color:var(--hot);}
+
+  /* ---- goldilocks aside ---- */
+  .goldi{
+    display:flex; align-items:center; gap:1rem;
+    background:var(--surface-2); border-radius:10px;
+    padding:1rem 1.3rem; margin:1.4rem 0;
+  }
+  .goldi .icon{font-size:1.8rem; flex-shrink:0;}
+  .goldi p{margin:0; font-size:0.92rem; color:var(--ink-soft);}
+
+  /* ---- term cards ---- */
+  .terms{
+    display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.2rem 0;
+  }
+  @media (max-width:620px){ .terms{grid-template-columns:1fr;} }
+  .term{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:1.2rem 1.3rem;
+  }
+  .term .names{
+    font-family:"IBM Plex Mono", monospace; font-size:0.8rem;
+    display:flex; gap:0.5rem; align-items:center; margin-bottom:0.6rem;
+  }
+  .term.bias .names{color:var(--cold);}
+  .term.variance .names{color:var(--hot);}
+  .term .names .eq-sign{color:var(--ink-soft); font-weight:400;}
+  .term p{font-size:0.92rem; color:var(--ink-soft); margin:0;}
+
+  /* ---- classification triptych reuse ---- */
+  .class-fig{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:1.3rem 1.4rem; margin:1.2rem 0;
+  }
+  .class-fig .cap{
+    font-family:"IBM Plex Sans", sans-serif; font-size:0.85rem;
+    color:var(--ink-soft); margin-top:0.9rem; text-align:center;
+  }
+
+  .callout{
+    background:var(--hot-soft); border-left:3px solid var(--hot);
+    border-radius:0 10px 10px 0; padding:1.2rem 1.4rem; margin:1.4rem 0;
+  }
+  .callout.good{background:var(--right-soft); border-left-color:var(--right);}
+  .callout .head{
+    font-family:"Fraunces", serif; font-weight:600; font-size:1.05rem;
+    margin:0 0 0.4rem; color:var(--ink);
+  }
+  .callout p{margin:0; color:var(--ink-soft);}
+
+  .scenario{background:var(--cold-soft); border-radius:10px; padding:1.4rem 1.5rem; margin:1.2rem 0;}
+  .scenario .head{
+    font-family:"IBM Plex Mono", monospace; font-size:0.72rem; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--cold); margin:0 0 0.6rem;
+  }
+  .scenario p{color:var(--ink); margin:0;}
+
+  .recap-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:0.9rem; margin:1.2rem 0;
+  }
+  @media (max-width:620px){ .recap-grid{grid-template-columns:1fr;} }
+  .recap-grid .cell{
+    border:1px solid var(--line); border-radius:8px; padding:0.9rem 1rem; background:var(--surface);
+  }
+  .recap-grid .cell .k{
+    font-family:"IBM Plex Mono", monospace; font-size:0.72rem; text-transform:uppercase;
+    letter-spacing:0.06em; color:var(--ink-soft); margin-bottom:0.3rem;
+  }
+  .recap-grid .cell .v{font-size:0.92rem;}
+
+  footer{
+    margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line);
+    font-family:"IBM Plex Mono", monospace; font-size:0.78rem; color:var(--ink-soft);
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">ML Engineering &middot; Supervised Learning &middot; Week 3 Notes</p>
+    <h1>Overfitting &amp; Underfitting</h1>
+    <p class="dek">Two models can both "work," and both be wrong in opposite directions. A Goldilocks problem: too little fit, too much fit, and the narrow zone in between that actually generalizes.</p>
+  </header>
+
+  <section>
+    <h2>Regression example &mdash; predicting house price from size</h2>
+    <p>Same data, three models of increasing complexity. Watch what happens to the fit as more polynomial terms get added.</p>
+
+    <div class="triptych">
+      <div class="panel cold">
+        <div class="top">
+          <div class="kicker">1 feature</div>
+          <h3>Underfit</h3>
+        </div>
+        <svg viewBox="0 0 260 160" aria-label="Underfit: straight line does not follow the curve of the data points">
+          <line x1="30" y1="130" x2="30" y2="15" stroke="var(--line)" stroke-width="1"/>
+          <line x1="30" y1="130" x2="245" y2="130" stroke="var(--line)" stroke-width="1"/>
+          <line x1="35" y1="115" x2="220" y2="30" stroke="var(--cold)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="2">
+            <path d="M45,95 L55,105 M45,105 L55,95"/>
+            <path d="M85,75 L95,85 M85,85 L95,75"/>
+            <path d="M120,60 L130,70 M120,70 L130,60"/>
+            <path d="M155,45 L165,55 M155,55 L165,45"/>
+            <path d="M195,38 L205,48 M195,48 L205,38"/>
+          </g>
+        </svg>
+        <div class="body">
+          <p>Ignores the flattening trend entirely &mdash; a straight line can't bend.</p>
+          <div class="eq">f(x) = w&#8321;x + b</div>
+          <span class="verdict">high bias</span>
+        </div>
+      </div>
+
+      <div class="panel right">
+        <div class="top">
+          <div class="kicker">2 features</div>
+          <h3>Just right</h3>
+        </div>
+        <svg viewBox="0 0 260 160" aria-label="Just right: curved line follows the data points closely without chasing every wiggle">
+          <line x1="30" y1="130" x2="30" y2="15" stroke="var(--line)" stroke-width="1"/>
+          <line x1="30" y1="130" x2="245" y2="130" stroke="var(--line)" stroke-width="1"/>
+          <path d="M35,120 Q90,45 220,35" fill="none" stroke="var(--right)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="2">
+            <path d="M45,95 L55,105 M45,105 L55,95"/>
+            <path d="M85,55 L95,65 M85,65 L95,55"/>
+            <path d="M120,42 L130,52 M120,52 L130,42"/>
+            <path d="M155,38 L165,48 M155,48 L165,38"/>
+            <path d="M195,32 L205,42 M195,42 L205,32"/>
+          </g>
+        </svg>
+        <div class="body">
+          <p>Captures the diminishing-returns curve without over-committing to noise.</p>
+          <div class="eq">f(x) = w&#8321;x + w&#8322;x&sup2; + b</div>
+          <span class="verdict">generalizes</span>
+        </div>
+      </div>
+
+      <div class="panel hot">
+        <div class="top">
+          <div class="kicker">4 features</div>
+          <h3>Overfit</h3>
+        </div>
+        <svg viewBox="0 0 260 160" aria-label="Overfit: wiggly line passes through every point exactly but swings wildly between them">
+          <line x1="30" y1="130" x2="30" y2="15" stroke="var(--line)" stroke-width="1"/>
+          <line x1="30" y1="130" x2="245" y2="130" stroke="var(--line)" stroke-width="1"/>
+          <path d="M35,60 Q60,120 90,80 Q110,45 130,68 Q150,95 165,45 Q185,20 205,38" fill="none" stroke="var(--hot)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--ink)" stroke-width="2">
+            <path d="M45,95 L55,105 M45,105 L55,95"/>
+            <path d="M85,75 L95,85 M85,85 L95,75"/>
+            <path d="M120,63 L130,73 M120,73 L130,63"/>
+            <path d="M155,90 L165,100 M155,100 L165,90"/>
+            <path d="M195,33 L205,43 M195,43 L205,33"/>
+          </g>
+        </svg>
+        <div class="body">
+          <p>Passes through every point exactly &mdash; cost is zero, but it swings wildly between them.</p>
+          <div class="eq">f(x) = w&#8321;x+w&#8322;x&sup2;+w&#8323;x&sup3;+w&#8324;x&#8308;+b</div>
+          <span class="verdict">high variance</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="goldi">
+      <span class="icon">&#127859;</span>
+      <p><strong>The Goldilocks read:</strong> too cold (underfit) and too hot (overfit) are both wrong for the same underlying reason &mdash; neither one reflects what the data actually looks like beyond the training examples. "Just right" isn't the model that fits training data best; it's the one likely to fit the <em>next</em> house too.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Two names for two failure modes</h2>
+    <div class="terms">
+      <div class="term bias">
+        <div class="names">underfitting <span class="eq-sign">=</span> high bias</div>
+        <p>The model has a strong, wrong preconception &mdash; e.g. "price is linear in size" &mdash; and can't fit the training set well even when given the chance. It doesn't have enough flexibility to capture a pattern that's clearly there.</p>
+      </div>
+      <div class="term variance">
+        <div class="names">overfitting <span class="eq-sign">=</span> high variance</div>
+        <p>The model fits <em>this</em> training set almost perfectly, but so tightly that a slightly different training set would swing it to a totally different curve. Two engineers, two datasets, wildly different models &mdash; that instability is the "variance."</p>
+      </div>
+    </div>
+    <p><strong>Note on "bias":</strong> in ML, "bias" has two distinct meanings &mdash; the fairness sense (an algorithm discriminating by gender or ethnicity, which must always be checked for) and this separate statistical sense (a model too rigid to fit the data). This note uses the second meaning throughout.</p>
+  </section>
+
+  <section>
+    <h2>The same story for classification</h2>
+    <p>Overfitting isn't unique to regression. Here the task is classifying tumors as malignant (&times;) or benign (&#9675;) from tumor size (x&#8321;) and age (x&#8322;) &mdash; the decision boundary plays the same role the curve played above.</p>
+
+    <div class="class-fig">
+      <svg viewBox="0 0 720 210" width="100%" aria-label="Three decision boundaries: straight line underfitting, smooth curve just right, and a wild loop overfitting">
+        <!-- panel 1: underfit -->
+        <g transform="translate(10,10)">
+          <line x1="20" y1="10" x2="20" y2="180" stroke="var(--line)"/>
+          <line x1="20" y1="180" x2="210" y2="180" stroke="var(--line)"/>
+          <line x1="30" y1="20" x2="190" y2="150" stroke="var(--cold)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--hot)" stroke-width="2">
+            <path d="M60,40 l10,10 M60,50 l10,-10"/><path d="M90,30 l10,10 M90,40 l10,-10"/>
+            <path d="M120,45 l10,10 M120,55 l10,-10"/><path d="M150,35 l10,10 M150,45 l10,-10"/>
+            <path d="M100,70 l10,10 M100,80 l10,-10"/>
+          </g>
+          <g fill="none" stroke="var(--cold)" stroke-width="2">
+            <circle cx="55" cy="120" r="6"/><circle cx="85" cy="140" r="6"/>
+            <circle cx="120" cy="130" r="6"/><circle cx="150" cy="150" r="6"/><circle cx="70" cy="95" r="6"/>
+          </g>
+          <text x="110" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--cold)">underfit</text>
+        </g>
+        <!-- panel 2: just right -->
+        <g transform="translate(255,10)">
+          <line x1="20" y1="10" x2="20" y2="180" stroke="var(--line)"/>
+          <line x1="20" y1="180" x2="210" y2="180" stroke="var(--line)"/>
+          <path d="M30,25 Q60,90 45,140 Q90,175 190,110" fill="none" stroke="var(--right)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--hot)" stroke-width="2">
+            <path d="M70,40 l10,10 M70,50 l10,-10"/><path d="M100,30 l10,10 M100,40 l10,-10"/>
+            <path d="M130,50 l10,10 M130,60 l10,-10"/><path d="M160,40 l10,10 M160,50 l10,-10"/>
+            <path d="M110,75 l10,10 M110,85 l10,-10"/>
+          </g>
+          <g fill="none" stroke="var(--cold)" stroke-width="2">
+            <circle cx="55" cy="130" r="6"/><circle cx="85" cy="150" r="6"/>
+            <circle cx="120" cy="145" r="6"/><circle cx="160" cy="155" r="6"/><circle cx="35" cy="100" r="6"/>
+          </g>
+          <text x="110" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--right)">just right</text>
+        </g>
+        <!-- panel 3: overfit -->
+        <g transform="translate(500,10)">
+          <line x1="20" y1="10" x2="20" y2="180" stroke="var(--line)"/>
+          <line x1="20" y1="180" x2="210" y2="180" stroke="var(--line)"/>
+          <path d="M25,30 Q70,20 90,60 Q60,80 85,95 Q110,70 120,90 Q95,110 115,120 Q140,100 150,75 Q180,60 195,100" fill="none" stroke="var(--hot)" stroke-width="2.5"/>
+          <g fill="none" stroke="var(--hot)" stroke-width="2">
+            <path d="M60,30 l10,10 M60,40 l10,-10"/><path d="M95,45 l10,10 M95,55 l10,-10"/>
+            <path d="M125,45 l10,10 M125,55 l10,-10"/><path d="M155,35 l10,10 M155,45 l10,-10"/>
+            <path d="M105,85 l10,10 M105,95 l10,-10"/>
+          </g>
+          <g fill="none" stroke="var(--cold)" stroke-width="2">
+            <circle cx="55" cy="130" r="6"/><circle cx="85" cy="150" r="6"/>
+            <circle cx="120" cy="100" r="6"/><circle cx="160" cy="150" r="6"/><circle cx="35" cy="105" r="6"/>
+          </g>
+          <text x="110" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="var(--hot)">overfit</text>
+        </g>
+      </svg>
+      <p class="cap">z = w&#8321;x&#8321;+w&#8322;x&#8322;+b (underfit) &nbsp;&rarr;&nbsp; adds x&#8321;&sup2;, x&#8322;&sup2;, x&#8321;x&#8322; (just right) &nbsp;&rarr;&nbsp; adds many higher-order interaction terms (overfit), f = g(z) throughout, g = sigmoid</p>
+    </div>
+  </section>
+
+  <div class="callout good">
+    <p class="head">Why "just right" still misclassifies some points</p>
+    <p>The middle model in both examples doesn't get everything right &mdash; a few crosses land among the circles. That's expected, and it's not a flaw: a boundary that <em>does</em> separate every training point perfectly is exactly the overfitting trap on the right. Tolerating a little training error is often the price of generalizing well.</p>
+  </div>
+
+  <section>
+    <h2>Worked scenario</h2>
+    <div class="scenario">
+      <p class="head">Two engineers, two datasets</p>
+      <p>Two ML engineers at the same hospital each collect their own set of five patient records and fit a fourth-order polynomial model to classify tumors. Because the model has so much flexibility, each one lands on a <em>different</em> wiggly decision boundary that perfectly separates their own five examples &mdash; yet the two boundaries disagree sharply on how to classify a sixth, unseen patient. That disagreement, driven purely by which five examples happened to get collected, is what "high variance" means in practice.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recap</h2>
+    <div class="recap-grid">
+      <div class="cell">
+        <div class="k">Too few features</div>
+        <div class="v">Underfits &middot; high bias &middot; doesn't even fit the training set well</div>
+      </div>
+      <div class="cell">
+        <div class="k">Right amount</div>
+        <div class="v">Fits training data well <em>and</em> generalizes to new examples</div>
+      </div>
+      <div class="cell">
+        <div class="k">Too many features</div>
+        <div class="v">Overfits &middot; high variance &middot; fits training data almost perfectly but won't generalize</div>
+      </div>
+    </div>
+    <p>This applies to both regression and classification &mdash; the mechanism (too little vs. too much model flexibility relative to the data) is identical, only the shape being fit (a curve vs. a decision boundary) changes.</p>
+  </section>
+
+  <div class="callout">
+    <p class="head">Coming next: regularization</p>
+    <p>The next lecture introduces <strong>regularization</strong> &mdash; a technique for taming overfitting without simply throwing away features, by discouraging the model from assigning any single weight too much power.</p>
+  </div>
+
+  <footer>Source: lecture transcript, "The problem of overfitting" &middot; summarized 2026-08-22</footer>
+
+</div>

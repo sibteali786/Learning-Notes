@@ -3811,3 +3811,378 @@ void swap(void *vp1, void *vp2, size_t size) {
 }
 
 ```
+
+# Low Level Stack
+
+If you've taken our data structures course, you've already implemented a [stack](https://en.wikipedia.org/wiki/Stack_\(abstract_data_type\)). We're going to implement a stack again, but this time we're going to do it while manually managing the memory of generic pointers!
+
+We'll get to have our first deeper exploration of "generics" in C (remember, that just means `void *`) as well as creating a data structure we will later use in our mark-and-sweep garbage collector.
+
+## Assignment
+
+Take a look at `snekstack.h`, specifically the `Stack` struct.
+
+- `count` is the number of elements in the stack.
+- `capacity` is the number of elements the stack can hold before it needs to be resized in memory.
+- `data` is a pointer to all the generic data.
+
+Implement the `stack_new` function:
+
+1. [ ] Allocate memory for a new `Stack` struct on the heap.
+2. [ ] If allocation fails, return `NULL`.
+3. [ ] Initialize the `count` to `0`.
+4. [ ] Initialize the `capacity` to the given value.
+5. [ ] Allocate enough memory for `capacity` number of `void *` pointers and assign it to the `data` field.
+6. [ ] If the `data` allocation fails, free the `Stack` struct and return `NULL`.
+7. [ ] Return the `Stack` struct pointer.
+```c
+#include "snekstack.h"
+#include <stdlib.h>
+
+stack_t *stack_new(size_t capacity) {
+  stack_t *new_ptr = malloc(sizeof(stack_t));
+  if (new_ptr == NULL){
+    return NULL;
+  }
+  new_ptr->count = 0;
+  new_ptr->capacity = capacity;
+  new_ptr->data = malloc(capacity * sizeof(void*));
+  if (new_ptr->data == NULL){
+    free(new_ptr);
+    return NULL;
+  }
+  return new_ptr;
+}
+
+
+```
+``
+```c
+#include <stddef.h>
+
+typedef struct Stack {
+  size_t count;
+  size_t capacity;
+  void **data;
+} stack_t;
+
+stack_t *stack_new(size_t capacity);
+
+```
+# Stack Push
+
+Ok, so let's actually store some data instead of just allocating memory for no practical purpose (a.k.a "haskell programming").
+
+## Making Room
+
+As you know, our stack has a `count` and a `capacity`... but what happens when the `count` is equal to the `capacity`? We need to make room for more data!
+
+We'll take a simple approach: whenever we run out of capacity, we'll double it. That way we don't have to reallocate memory on every push. For example:
+
+|Count|Capacity|Data|
+|---|---|---|
+|0|4|[-, -, -, -]|
+|1|4|[1, -, -, -]|
+|2|4|[1, 2, -, -]|
+|3|4|[1, 2, 3, -]|
+|4|4|[1, 2, 3, 4]|
+|5|8|[1, 2, 3, 4, 5, -, -, -]|
+
+## Assignment
+
+Complete the `stack_push` function. It safe(ish)ly adds a new object to the top of the stack. Remember: the size of the `data` array is the `capacity` of the stack, and the number of elements that are actually in the stack is the `count` (which is less than or equal to the `capacity`).
+
+1. [ ] If the stack's `count` is equal to the stack's `capacity`:
+    1. [ ] Double the stack's `capacity`
+    2. [ ] Reallocate enough memory for the stack's data using the new `capacity` (tip below on how to do this)
+    3. [ ] If `realloc` fails, set the stack's capacity back and return from the function. The old data is still valid.
+    4. [ ] If it succeeds, update the stack's `data` field to point to the new memory
+2. [ ] Add the new object to the top of the stack (the `count`-th element in the array)
+3. [ ] Increment the stack's `count`
+
+## Tip
+
+The [`realloc`](https://en.cppreference.com/w/c/memory/realloc) function is used to resize memory that was previously allocated with `malloc` or `calloc`. It takes a **pointer to the old memory** and the new size, and returns a pointer to the new memory:
+
+```c
+void *realloc(void *ptr, size_t size);
+```
+
+```c
+int *smol_boi = malloc(10 * sizeof(int));
+int *large_boi = realloc(smol_boi, 20 * sizeof(int));
+```
+
+
+```c
+#include "snekstack.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+void stack_push(stack_t *stack, void *obj) {
+  if (stack->count == stack->capacity){
+    size_t orig_capacity = stack->capacity;
+    stack->capacity = stack->capacity * 2;
+    void *new_mem = realloc(stack->data,stack->capacity * sizeof(void *));
+    if (new_mem == NULL){
+      stack->capacity = orig_capacity;
+      return ;
+    }
+    stack->data = new_mem;
+  }
+  stack->data[stack->count] = obj;
+  stack->count++;
+  
+}
+
+// don't touch below this line
+
+stack_t *stack_new(size_t capacity) {
+  stack_t *stack = malloc(sizeof(stack_t));
+  if (stack == NULL) {
+    return NULL;
+  }
+
+  stack->count = 0;
+  stack->capacity = capacity;
+  stack->data = malloc(stack->capacity * sizeof(void *));
+  if (stack->data == NULL) {
+    free(stack);
+    return NULL;
+  }
+
+  return stack;
+}
+
+```
+
+# Stack Pop
+
+As you _should_ know by now, items go on and off the stack from the same end. (last in, first out).
+
+Don't worry, the pop method is much simpler than the push method in our case, because we don't have to worry about resizing the stack.
+
+## Assignment
+
+Complete the `stack_pop` function.
+
+1. [ ] If the stack has no elements, return `NULL`.
+2. [ ] Decrement the stack's `count`.
+3. [ ] Return the top element of the stack (the `count`-th element in the array).
+
+```c
+#include "snekstack.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+void *stack_pop(stack_t *stack) {
+  if (stack->count == 0){
+    return NULL;
+  }
+  stack->count--;
+  return stack->data[stack->count];
+  
+}
+
+// don't touch below this line'
+
+void stack_push(stack_t *stack, void *obj) {
+  if (stack->count == stack->capacity) {
+    stack->capacity *= 2;
+    void **temp = realloc(stack->data, stack->capacity * sizeof(void *));
+    if (temp == NULL) {
+      stack->capacity /= 2;
+
+      exit(1);
+    }
+    stack->data = temp;
+  }
+  stack->data[stack->count] = obj;
+  stack->count++;
+  return;
+}
+
+stack_t *stack_new(size_t capacity) {
+  stack_t *stack = malloc(sizeof(stack_t));
+  if (stack == NULL) {
+    return NULL;
+  }
+
+  stack->count = 0;
+  stack->capacity = capacity;
+  stack->data = malloc(stack->capacity * sizeof(void *));
+  if (stack->data == NULL) {
+    free(stack);
+    return NULL;
+  }
+
+  return stack;
+}
+
+```
+# Stack free
+
+In C, we don't have a lot of abstractions at our disposal. There are no classes, destructors, functors, monads, made-up-category-theory-words, etc.
+
+We've got _data_. And we've got _functions_. Just the way ~~God~~ Dennis Ritchie intended.
+
+So, to make it easier to work with our `Stack`, we're going to build our own little `free` function that will clean up all the memory that we've allocated for our stack.
+
+## Assignment
+
+Complete the `stack_free` function.
+
+1. [ ] If the stack is `NULL`, return immediately.
+2. [ ] If the stack data is not `NULL`, free the stack data.
+3. [ ] Free the stack itself.
+
+You can assume all the elements inside the stack are already freed. That's not _our_ problem.
+
+```c
+#include "snekstack.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+void stack_free(stack_t *stack) {
+  if (stack == NULL){
+    return;
+  }
+  free(stack->data);
+  free(stack);
+}
+
+// don't touch below this line
+
+void *stack_pop(stack_t *stack) {
+  if (stack->count == 0) {
+    return NULL;
+  }
+
+  stack->count--;
+  return stack->data[stack->count];
+}
+
+void stack_push(stack_t *stack, void *obj) {
+  if (stack->count == stack->capacity) {
+    stack->capacity *= 2;
+    void **temp = realloc(stack->data, stack->capacity * sizeof(void *));
+    if (temp == NULL) {
+      stack->capacity /= 2;
+      exit(1);
+    }
+    stack->data = temp;
+  }
+  stack->data[stack->count] = obj;
+  stack->count++;
+  return;
+}
+
+stack_t *stack_new(size_t capacity) {
+  stack_t *stack = malloc(sizeof(stack_t));
+  if (stack == NULL) {
+    return NULL;
+  }
+
+  stack->count = 0;
+  stack->capacity = capacity;
+  stack->data = malloc(stack->capacity * sizeof(void *));
+  if (stack->data == NULL) {
+    free(stack);
+    return NULL;
+  }
+
+  return stack;
+}
+
+```
+
+
+# Dangerous Push
+
+Up until now, even though we made our stack with `void *`, you'll notice that we've only stored plain old `int` pointers. I want to show you that you can actually store _anything_ in the stack, even heterogeneous lists! That being said, this is usually a bad idea.
+
+TJ likes to use words like "heterogeneous" to keep kids-who-don't-read-good at bay. He meant to say, "you can actually store _anything_ in the stack, even lists of different types of data!"
+
+Now, we're going to do something _pretty gross_ to demonstrate the wise words of one of the philosophers of our time:
+
+> With great power comes great responsibility.
+> 
+> -- Uncle Ben
+
+I'm going to have you push an `int *` and a regular old `int` directly onto the stack (a bad idea). I just want to show you that you can store _anything_ in a `void *`, even values that aren't pointers at all.
+
+## Assignment
+
+Complete the `scary_double_push` function.
+
+1. [ ] Push the value `1337` directly onto the stack using the `stack_push` function. You'll need to [cast](https://en.cppreference.com/w/c/language/cast) the value to a `void *`.
+2. [ ] Allocate memory for a new `int` on the heap
+3. [ ] Set the value to which the address points to `1024`
+4. [ ] Push the int pointer onto the stack using the `stack_push` function
+
+```c
+#include "snekstack.h"
+#include "stdlib.h"
+
+void scary_double_push(stack_t *s) {
+  stack_push(s,(void *)1337);
+  int *new_ptr = malloc(sizeof(int));
+  int val = 1024;
+  *new_ptr = val;
+  stack_push(s, (void *)new_ptr);
+}
+
+```
+
+
+# Multiple Types
+
+So we saw that we _can_ push both `int` and `int *` types into the same stack (again, a **bad idea**).
+
+In this example, we'll see that not only can you push values and pointers into the same stack, but you can also push different types of values into the same stack.
+
+This is once again a terrible idea, but the thrust of what we're getting at here is:
+
+**C doesn't care what you put in memory, it's bytes all the way down.**
+
+Fortunately, C doesn't let you do these conversions automatically... but it still lets you do them. When you're working with `void *`, you're working with raw memory addresses, and you can cast them to whatever you want.
+
+## Assignment
+
+Complete the `stack_push_multiple_types` function.
+
+1. [ ] Allocate memory on the heap for a `float` and set the value to which it's pointed to `3.14`.
+2. [ ] Push the `float *` onto the stack using `stack_push`.
+3. [ ] Create a `char *` constant that points to the value: `Sneklang is blazingly slow!`
+4. [ ] Get the length of the string for memory allocation.
+    
+    Remember to leave room for the null terminator (`\0`)!
+    
+5. [ ] Allocate memory for a `char *`.
+6. [ ] Copy the value to the memory.
+7. [ ] Push the pointer to the memory onto the stack using `stack_push`.
+
+## Tip
+
+Don't forget to use the `string.h` library when working with `char *` types.
+
+```c
+#include "snekstack.h"
+#include "stdlib.h"
+#include <string.h>
+
+void stack_push_multiple_types(stack_t *s) {
+  float *new_ptr = malloc(sizeof(float));
+  *new_ptr = 3.14;
+  stack_push(s, (void *)new_ptr);
+  char *new_str = "Sneklang is blazingly slow!";
+  size_t len_str = strlen(new_str) + 1;
+  char *new_str_ptr = malloc(len_str);
+  strcpy(new_str_ptr, new_str);
+  stack_push(s, (void *)new_str_ptr);
+}
+
+```

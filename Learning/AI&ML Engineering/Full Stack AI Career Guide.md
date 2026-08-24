@@ -149,3 +149,6 @@ Expose one of your services as an MCP server using the **Node/TypeScript MCP SDK
 | Optional | AI Python for Beginners                           | Andrew Ng                              | Only if Python is rusty               |
 
 **How to use it:** take each course (concepts only, 1-2 hrs), then immediately rebuild the concept in the matching project. Courses 1-6 → Project A. 7-9 → Project B. 10-11 → Project C. 12 → Project D. Course language doesn't matter — the project's target stack (TS or Python, per the split above) is what you actually build in.
+
+
+

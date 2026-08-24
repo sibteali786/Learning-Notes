@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>L8: Evaluation Part I — Summary</title>
+<style>
+  :root{
+    --bg:#0f1220; --card:#171b2e; --card2:#1d2238; --accent:#7c9cff; --accent2:#ffb86b;
+    --text:#e8eaf6; --muted:#9aa1c4; --good:#6fd19a; --warn:#ff8b8b; --border:#2a3050;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0f1220,#161a30);color:var(--text);padding:32px;line-height:1.5;}
+  h1{font-size:26px;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:8px;font-size:14px;}
+  .notice{background:rgba(111,209,154,.1);border:1px solid var(--good);border-radius:10px;padding:10px 16px;font-size:13px;margin-bottom:24px;color:var(--text);}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .full{grid-column:1/-1;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+  .card h2{margin:0 0 12px;font-size:17px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+  .card h2 .icon{font-size:20px;}
+  p{margin:6px 0;font-size:14px;}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;}
+  li{margin:4px 0;}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0c0e1a;border:1px solid var(--border);border-radius:10px;padding:12px 14px;overflow-x:auto;font-size:12.5px;color:#c9e6ff;}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .pill.good{background:rgba(111,209,154,.15);color:var(--good);}
+  .pill.warn{background:rgba(255,139,139,.15);color:var(--warn);}
+  .pill.info{background:rgba(124,156,255,.15);color:var(--accent);}
+  .example{background:var(--card2);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:8px;margin:8px 0;font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--muted);font-weight:600;}
+  .badge-old{background:rgba(255,139,139,.15);color:var(--warn);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .badge-new{background:rgba(111,209,154,.15);color:var(--good);padding:2px 8px;border-radius:6px;font-size:11px;margin-left:6px;}
+  .footer{margin-top:24px;color:var(--muted);font-size:12px;text-align:center;}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;margin:10px 0;}
+  .flow .step{background:var(--card2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;text-align:center;}
+  .flow .arrow{color:var(--muted);}
+  .row-lbl{font-size:12.5px;color:var(--muted);width:110px;flex-shrink:0;}
+  .rowline{display:flex;align-items:center;gap:8px;margin:8px 0;}
+  .ladder{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .rung{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;}
+  .rnum{background:var(--accent);color:#0f1220;font-weight:700;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;}
+  .rung.stop{border-color:var(--good);}
+  .rung.stop .rnum{background:var(--good);}
+</style>
+</head>
+<body>
+
+<h1>📐 L8 — Evaluation Part I: Single "Right Answer" Cases</h1>
+<div class="subtitle">DeepLearning.AI · ChatGPT Prompt Engineering for Developers — Lesson 8 summary</div>
+<div class="notice">✅ This notebook and transcript now match correctly — thanks for re-sending the right pair.</div>
+
+<div class="grid">
+
+  <div class="card full">
+    <h2><span class="icon">⚡</span> Why Prompt-Based Dev Skips the Test-Set-First Habit</h2>
+    <p>Traditional supervised ML forces you to collect a large labeled dataset up front — so adding a dedicated test/dev set on top is a small incremental cost. Prompt-based development is fast enough (minutes to hours) that pausing to collect 1,000 test examples before you can even try anything would be a disproportionate drag. So the natural workflow is to build up your evaluation set <i>gradually</i>, as you go.</p>
+    <div class="rowline">
+      <div class="row-lbl">Supervised learning</div>
+      <div class="flow">
+        <div class="step">Get labeled data<br><span style="color:var(--muted)">~1 month</span></div><span class="arrow">→</span>
+        <div class="step">Train model<br><span style="color:var(--muted)">~3 months</span></div><span class="arrow">→</span>
+        <div class="step">Deploy & call model<br><span style="color:var(--muted)">~3 months</span></div>
+      </div>
+    </div>
+    <div class="rowline">
+      <div class="row-lbl">Prompt-based AI</div>
+      <div class="flow">
+        <div class="step">Specify prompt<br><span style="color:var(--muted)">minutes/hours</span></div><span class="arrow">→</span>
+        <div class="step">Call model<br><span style="color:var(--muted)">minutes/hours</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🪜</span> The 5-Step Evaluation Ladder</h2>
+    <p>You don't need to climb all 5 steps — stop wherever you have enough confidence for your use case. Many real deployed apps stop at step 1 or 2.</p>
+    <div class="ladder">
+      <div class="rung"><span class="rnum">1</span>Tune the prompt on a small handful of examples (1–5)</div>
+      <div class="rung"><span class="rnum">2</span>Add additional "tricky" examples opportunistically as you find failures</div>
+      <div class="rung"><span class="rnum">3</span>Develop metrics to measure performance on this growing example set (e.g. average accuracy)</div>
+      <div class="rung"><span class="rnum">4</span>Collect a randomly sampled development/hold-out cross-validation set — needed if you must detect smaller differences (e.g. 91% → 93% accuracy)</div>
+      <div class="rung"><span class="rnum">5</span>Collect and use a hold-out test set you never look at while tuning — needed for a truly unbiased performance estimate</div>
+    </div>
+    <p><span class="pill warn">Important caveat</span> For high-stakes / safety-critical applications (risk of bias or harm), rigorously collecting a proper test set (steps 4–5) becomes a responsibility, not optional polish. For low-risk personal-use tools, stopping early is often fine.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">1️⃣</span> Step 1 in Practice: Prompt v1</h2>
+    <p>A one-shot prompt (system message + one example user/assistant pair) asking the model to extract categories/products as JSON. Tested manually on 3 examples: a budget TV query, a phone charger query, and a "what computers do you have" query — all passed.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">2️⃣</span> Step 2 in Practice: Finding Tricky Failures</h2>
+    <p>Running v1 in informal testing surfaced two failure cases where the model appended extra explanatory text after the JSON — breaking programmatic parsing. These two failures were added to the growing example set (now 5 examples total, indices 0–4).</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">🩹</span> Fixing It: Prompt v2</h2>
+    <ul>
+      <li>Added explicit instruction: <i>"Do not output any additional text that is not in JSON format."</i></li>
+      <li>Added a <b>second few-shot example</b> (cheapest computer, alongside most expensive) — both examples show JSON-only responses.</li>
+    </ul>
+    <p>Re-running v2 on all 5 examples fixed the previously broken outputs. <span class="pill info">Regression testing</span> — critically, the lesson stresses re-checking the <i>original</i> passing examples (like example 0) too, to confirm the fix for the hard cases didn't break what already worked.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">3️⃣</span> Step 3 in Practice: Automating Evaluation with a Dev Set</h2>
+    <p>Manually eyeballing 5+ outputs becomes tedious — so the lesson builds a 10-example dev set of <code>{customer_msg, ideal_answer}</code> pairs (category → expected product set), including a deliberately irrelevant query ("I would like a hot tub time machine" → expects <code>[]</code>).</p>
+    <pre>{'customer_msg': "I need a charger for my smartphone",
+ 'ideal_answer': {
+    'Smartphones and Accessories': set(
+        ['MobiTech PowerCase', 'MobiTech Wireless Charger', 'SmartX EarBuds']
+    )}
+}</pre>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">✅</span> Scoring Function: <code>eval_response_with_ideal</code></h2>
+    <p>Parses the model's JSON-like string, compares each category's product <b>set</b> against the ideal set, returns the fraction of categories matched exactly. Debug mode reports whether a wrong answer was a subset or superset of the ideal — useful signal for how the prompt is failing, not just that it failed.</p>
+    <pre>def eval_response_with_ideal(response, ideal, debug=False):
+    json_like_str = response.replace("'", '"')  # single → double quotes for JSON
+    l_of_d = json.loads(json_like_str)
+
+    if l_of_d == [] and ideal == []:
+        return 1
+    elif l_of_d == [] or ideal == []:
+        return 0
+
+    correct = 0
+    for d in l_of_d:
+        cat, prod_l = d.get('category'), d.get('products')
+        if cat and prod_l:
+            prod_set = set(prod_l)
+            ideal_cat = ideal.get(cat)
+            if ideal_cat and prod_set == set(ideal_cat):
+                correct += 1
+    return correct / len(l_of_d)</pre>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">📈</span> Running the Full Test Suite</h2>
+    <pre>score_accum = 0
+for i, pair in enumerate(msg_ideal_pairs_set):
+    response = find_category_and_product_v2(pair['customer_msg'], products_and_category)
+    score = eval_response_with_ideal(response, pair['ideal_answer'])
+    score_accum += score
+
+fraction_correct = score_accum / len(msg_ideal_pairs_set)
+print(f"Fraction correct: {fraction_correct}")</pre>
+    <p><b>Result:</b> 9/10 correct = <b>90%</b>. Example 7 (gaming consoles for a racing-game fan) failed — the model returned only a subset of the ideal answer (3 of 5 expected products) rather than the full category list, illustrating exactly the kind of partial-match failure this evaluation approach is designed to surface.</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">💡</span> Key Takeaway</h2>
+    <p>The prompt-based workflow feels very different from classic supervised ML — much faster iteration, and even a "statistically invalid" set of 10 hand-curated tricky examples can be surprisingly effective for guiding prompt improvements. This lesson only covers evaluation with a single objectively "right" answer; the next lesson covers evaluating outputs where correctness is more ambiguous (open-ended answers).</p>
+  </div>
+
+  <div class="card full">
+    <h2><span class="icon">⚠️</span> Outdated Code in This Notebook <span class="badge-old">SDK v0.27.0 — deprecated</span></h2>
+    <p>Same legacy <code>openai</code> Python SDK pattern as every prior lesson. Verified against <a href="https://github.com/openai/openai-python">openai/openai-python</a> and the <a href="https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create">official API reference</a>.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Old (notebook, v0.27.0)</th><th>Current (v1.x+)</th></tr>
+      <tr><td><code>openai.api_key = os.environ['OPENAI_API_KEY']</code></td><td><code>client = openai.OpenAI(api_key=os.environ['OPENAI_API_KEY'])</code> <span class="badge-new">new</span></td></tr>
+      <tr><td><code>openai.ChatCompletion.create(...)</code></td><td><code>client.chat.completions.create(...)</code></td></tr>
+      <tr><td><code>response.choices[0].message["content"]</code></td><td><code>response.choices[0].message.content</code></td></tr>
+    </table>
+    </div>
+    <pre>from openai import OpenAI
+client = OpenAI()
+
+def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0, max_tokens=500):
+    response = client.chat.completions.create(
+        model=model, messages=messages,
+        temperature=temperature, max_tokens=max_tokens,
+    )
+    return response.choices[0].message.content</pre>
+    <p style="margin-top:8px;"><b>Also worth knowing:</b> for the exact "extract category/product JSON" task this lesson evaluates, current OpenAI docs recommend <a href="https://developers.openai.com/api/docs/guides/completions">Structured Outputs</a> (<code>response_format={"type": "json_schema", ...}</code>) instead of prompt instructions + <code>replace("'",'"')</code> + <code>json.loads()</code>. That would eliminate the whole class of "model added explanatory text after the JSON" failures this lesson's v1→v2 fix worked around, and avoid the fragile quote-replacement parsing (breaks on apostrophes in product text). For running this kind of dev-set evaluation loop at scale, OpenAI's <a href="https://developers.openai.com/api/docs/guides/completions">Evals</a> platform is also worth checking as a more robust alternative to the hand-rolled scoring loop shown here.</p>
+  </div>
+
+</div>
+
+<div class="footer">Generated from L8_student.ipynb ("Evaluation Part I") + matching transcript & slide · SDK claims verified against openai/openai-python (GitHub) and developers.openai.com docs, August 2026</div>
+
+</body>
+</html>
