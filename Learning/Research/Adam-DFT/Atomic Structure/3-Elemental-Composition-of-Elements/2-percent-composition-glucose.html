@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Percent Composition by Mass — Glucose — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8f0; --muted:#9aa0b4;
+    --blue:#5aa9ff; --orange:#ff9d5a; --green:#4fd995; --purple:#b48cff;
+  }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; margin:0; padding:40px 20px; line-height:1.6; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1,h2,h3 { font-family:'Syne',sans-serif; margin:0 0 12px; }
+  h1 { font-size:2em; font-weight:800; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  h2 { font-size:1.3em; margin-top:42px; padding-bottom:8px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .pill { display:inline-block; font-size:.72em; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .pill.blue{background:rgba(90,169,255,.15);color:var(--blue);border:1px solid rgba(90,169,255,.4);}
+  .pill.orange{background:rgba(255,157,90,.15);color:var(--orange);border:1px solid rgba(255,157,90,.4);}
+  .pill.green{background:rgba(79,217,149,.15);color:var(--green);border:1px solid rgba(79,217,149,.4);}
+  .pill.purple{background:rgba(180,140,255,.15);color:var(--purple);border:1px solid rgba(180,140,255,.4);}
+  code { background:#10131c; border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--green); font-size:.92em; }
+  .formula { background:#10131c; border-left:3px solid var(--blue); border-radius:6px; padding:12px 16px; margin:12px 0; color:var(--blue); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.92em; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:center; }
+  th { background:var(--card2); color:var(--orange); font-family:'Syne',sans-serif; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .example { border-left:3px solid var(--green); background:rgba(79,217,149,.06); border-radius:6px; padding:12px 16px; margin:12px 0; }
+  .example .tag{ color:var(--green); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .tip { border-left:3px solid var(--orange); background:rgba(255,157,90,.06); border-radius:6px; padding:12px 16px; margin:10px 0; }
+  .tip .tag{ color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .rule { border-left:3px solid var(--purple); background:rgba(180,140,255,.08); border-radius:6px; padding:14px 18px; margin:14px 0; }
+  .rule .tag { color:var(--purple); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  ul{padding-left:20px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Percent Composition by Mass</h1>
+  <div class="subtitle">Worked example — % Carbon in Glucose (C₆H₁₂O₆)</div>
+
+  <h2><span class="pill blue">Problem</span> What Are We Solving?</h2>
+  <div class="card">
+    Given only the molecular formula of glucose (<code>C₆H₁₂O₆</code>) and the average atomic masses of
+    C, H, and O — figure out what <b>percentage of glucose's total mass</b> comes from carbon alone.
+    The actual sample size doesn't matter; the percentage is the same whether you have a grain or a
+    mountain of glucose, so we assume <b>1 mole</b> to make the math clean.
+  </div>
+
+  <h2><span class="pill orange">Core</span> The Setup</h2>
+  <div class="card">
+    <table>
+      <tr><th>Element</th><th>Atoms per glucose molecule</th><th>Average atomic mass (u)</th><th>Molar mass (g/mol)</th></tr>
+      <tr><td>Carbon (C)</td><td>6</td><td>12.01</td><td>12.01</td></tr>
+      <tr><td>Hydrogen (H)</td><td>12</td><td>1.008</td><td>1.008</td></tr>
+      <tr><td>Oxygen (O)</td><td>6</td><td>16.00</td><td>16.00</td></tr>
+    </table>
+    <p style="color:var(--muted); font-size:.9em;">Assuming 1 mole of glucose → 6 mol C, 12 mol H, 6 mol O (ratios scale directly from the formula subscripts).</p>
+  </div>
+
+  <h2><span class="pill green">Formula</span> % by Mass = Part ÷ Whole</h2>
+  <div class="card">
+    <div class="formula">% C by mass = (mass of C in sample) / (mass of 1 mol glucose) × 100</div>
+    <div class="formula">
+      = (6 mol C × 12.01 g/mol) / [(6 mol C × 12.01 g/mol) + (12 mol H × 1.008 g/mol) + (6 mol O × 16.00 g/mol)]
+    </div>
+    <div class="example">
+      <span class="tag">Step by step</span>
+      <p>Numerator: 6 × 12.01 = <b>72.06 g</b></p>
+      <p>Denominator: 72.06 + (12 × 1.008 = 12.096) + (6 × 16.00 = 96.00) = <b>180.156 g</b></p>
+      <p>72.06 ÷ 180.156 = 0.4000 → <b>40.00% carbon by mass</b></p>
+    </div>
+  </div>
+
+  <h2><span class="pill purple">Rule</span> Significant Figures — How to Decide</h2>
+  <div class="rule">
+    <span class="tag">The rule to remember</span>
+    <p><b>Your final answer can never have more significant figures than your least precise input measurement.</b>
+    Every intermediate step should carry extra digits (don't round early), but the moment you report a
+    final answer, round it down to match your <i>least</i> precise starting value.</p>
+  </div>
+  <div class="card">
+    <ul>
+      <li><b>Multiplication/division:</b> result's sig figs = the sig figs of the input with the <i>fewest</i> sig figs.</li>
+      <li><b>Addition/subtraction:</b> result's decimal places = the input with the <i>fewest decimal places</i> (not sig figs directly).</li>
+      <li>In this problem: <code>12.01</code>, <code>1.008</code>, and <code>16.00</code> all have <b>4 significant figures</b> — that's the tightest constraint anywhere in the calculation, so the final answer is capped at <b>4 sig figs</b>: <code>40.00%</code>.</li>
+    </ul>
+    <div class="tip">
+      <span class="tag">Memory trick</span>
+      <p>Think of sig figs like a <b>weakest-link chain</b> — your answer's precision can never be stronger
+      than the least precise number you multiplied or divided by. Look at every input, find the one with
+      the fewest sig figs, and that number decides your final answer's precision.</p>
+    </div>
+  </div>
+
+  <h2><span class="pill orange">Tips</span> Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> Don't round intermediate values (like 72.06 or 180.156) — only round the very final answer, or errors compound.</div>
+  <div class="tip"><span class="tag">Tip</span> Percent composition is independent of sample size — always safe to assume "1 mole" to simplify arithmetic.</div>
+  <div class="tip"><span class="tag">Tip</span> Units should fully cancel (grams/grams) leaving a pure percentage — if they don't cancel, you've set up the ratio wrong.</div>
+
+</div>
+</body>
+</html>

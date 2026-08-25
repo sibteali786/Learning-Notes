@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Finding Empirical Formula from % Composition — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8f0; --muted:#9aa0b4;
+    --blue:#5aa9ff; --orange:#ff9d5a; --green:#4fd995; --purple:#b48cff;
+  }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; margin:0; padding:40px 20px; line-height:1.6; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1,h2,h3 { font-family:'Syne',sans-serif; margin:0 0 12px; }
+  h1 { font-size:2em; font-weight:800; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  h2 { font-size:1.3em; margin-top:42px; padding-bottom:8px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .pill { display:inline-block; font-size:.72em; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .pill.blue{background:rgba(90,169,255,.15);color:var(--blue);border:1px solid rgba(90,169,255,.4);}
+  .pill.orange{background:rgba(255,157,90,.15);color:var(--orange);border:1px solid rgba(255,157,90,.4);}
+  .pill.green{background:rgba(79,217,149,.15);color:var(--green);border:1px solid rgba(79,217,149,.4);}
+  .pill.purple{background:rgba(180,140,255,.15);color:var(--purple);border:1px solid rgba(180,140,255,.4);}
+  code { background:#10131c; border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--green); font-size:.92em; }
+  .formula { background:#10131c; border-left:3px solid var(--blue); border-radius:6px; padding:12px 16px; margin:12px 0; color:var(--blue); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.92em; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:center; }
+  th { background:var(--card2); color:var(--orange); font-family:'Syne',sans-serif; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .example { border-left:3px solid var(--green); background:rgba(79,217,149,.06); border-radius:6px; padding:12px 16px; margin:12px 0; }
+  .example .tag{ color:var(--green); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .tip { border-left:3px solid var(--orange); background:rgba(255,157,90,.06); border-radius:6px; padding:12px 16px; margin:10px 0; }
+  .tip .tag{ color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  svg { display:block; margin:16px auto; max-width:100%; }
+  .caption { text-align:center; color:var(--muted); font-size:.85em; margin-top:-8px; }
+  ul{padding-left:20px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Empirical Formula from % Composition</h1>
+  <div class="subtitle">Worked example — Mystery molecule: 73% Hg, 27% Cl</div>
+
+  <h2><span class="pill blue">Problem</span> What Are We Solving?</h2>
+  <div class="card">
+    A mystery molecule is measured to be <b>73% mercury by mass</b> and <b>27% chlorine by mass</b>.
+    Using only percent composition and a periodic table (average atomic masses), determine the likely
+    <b>empirical formula</b> — the simplest whole-number ratio of atoms in the molecule.
+  </div>
+
+  <h2><span class="pill orange">Core</span> The Trick: Assume 100 g</h2>
+  <div class="card">
+    Since we only have <i>percentages</i>, assume the sample is <b>100 g total</b>. This turns each
+    percentage directly into grams — 73% → 73 g Hg, 27% → 27 g Cl — making the moles calculation clean.
+    Any assumed mass works (5 g, 1000 g), but 100 g avoids extra arithmetic.
+  </div>
+
+  <h2><span class="pill green">Formula</span> Grams → Moles</h2>
+  <div class="card">
+    <div class="formula">moles = mass (g) × [1 / molar mass (g/mol)]</div>
+    <table>
+      <tr><th>Element</th><th>Assumed mass</th><th>Molar mass (g/mol)</th><th>Moles</th></tr>
+      <tr><td>Mercury (Hg)</td><td>73 g</td><td>200.59</td><td>73 ÷ 200.59 ≈ <b>0.36 mol</b></td></tr>
+      <tr><td>Chlorine (Cl)</td><td>27 g</td><td>35.45</td><td>27 ÷ 35.45 ≈ <b>0.76 mol</b></td></tr>
+    </table>
+    <p style="color:var(--muted); font-size:.9em;">Only 2 sig figs kept for the mole values since the original mass percentages (73%, 27%) only had 2 sig figs.</p>
+  </div>
+
+  <h2><span class="pill purple">Diagram</span> Moles → Simplest Ratio</h2>
+  <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+    <text x="30" y="40" fill="var(--orange)" font-family="JetBrains Mono" font-size="14">Hg: 0.36 mol</text>
+    <text x="30" y="90" fill="var(--purple)" font-family="JetBrains Mono" font-size="14">Cl: 0.76 mol</text>
+    <text x="230" y="65" fill="var(--muted)" font-family="JetBrains Mono" font-size="13">divide both by smaller (0.36)</text>
+    <path d="M210 40 L340 40" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <path d="M210 90 L340 90" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker></defs>
+    <text x="360" y="40" fill="var(--orange)" font-family="JetBrains Mono" font-size="14">Hg: 1.0</text>
+    <text x="360" y="90" fill="var(--purple)" font-family="JetBrains Mono" font-size="14">Cl: ≈2.11 → 2</text>
+    <text x="30" y="150" fill="var(--green)" font-family="JetBrains Mono" font-size="16" font-weight="bold">Ratio → 1 Hg : 2 Cl → HgCl₂</text>
+  </svg>
+  <p class="caption">2 × 0.36 ≈ 0.72, close enough to 0.76 — empirical analysis rarely gives exact ratios</p>
+
+  <div class="example">
+    <span class="tag">Result</span>
+    <p>The simplest whole-number ratio is <b>1 Hg : 2 Cl</b>, giving the empirical formula
+    <code>HgCl₂</code>. This compound is <b>mercury(II) chloride</b>.</p>
+  </div>
+
+  <h2><span class="pill blue">Compare</span> Empirical Formula Analysis — Key Ideas</h2>
+  <div class="card">
+    <ul>
+      <li><b>Moles</b> here directly represent the relative <i>number of atoms</i> (via Avogadro's number) — so a mole ratio is an atom ratio.</li>
+      <li>Empirical analysis from real experimental data is rarely exact — <b>round to the nearest sensible whole-number ratio</b>, don't chase perfect decimals.</li>
+      <li>The assumed sample size (100 g, 5 g, 1000 g) never changes the final ratio — percentages define ratios, not absolute amounts.</li>
+    </ul>
+  </div>
+
+  <h2><span class="pill orange">Tips</span> Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> Always divide every element's mole count by the <i>smallest</i> mole value in the set — this normalizes one element to exactly 1.0 and reveals the ratio.</div>
+  <div class="tip"><span class="tag">Tip</span> If a ratio comes out close to a simple fraction (like 2.11 ≈ 2, or 1.5 → multiply everything by 2), round to the nearest whole number or scale up — real lab data won't be perfectly clean.</div>
+  <div class="tip"><span class="tag">Tip</span> Track significant figures from your original percentages — they cap how many sig figs your mole values (and thus confidence in the ratio) can have.</div>
+
+</div>
+</body>
+</html>
