@@ -4186,3 +4186,761 @@ void stack_push_multiple_types(stack_t *s) {
 }
 
 ```
+
+
+# SnekObjects
+
+Objects in C?!? No. Way.
+
+_However_, Sneklang is built in C, and everything in Sneklang is an "object". To be clear, not a _class_ or _object-oriented programming_ object, but a higher-level data structure that _holds some metadata about itself_. For example, it will store:
+
+- What type of data it holds (int, float, string, etc.)
+- The size of the data it holds
+- The data itself
+- How many _references_ to itself exist (at least later, when we build our own garbage collector!)
+
+That last point is critical! Because Sneklang is a garbage-collected language, we need to know how many references to an object exist so we can free it when it's no longer needed.
+
+## Assignment
+
+**Complete the missing definitions in `snekobject.h`** Here's a breakdown of all that this file should define:
+
+1. [ ] An [enum](https://devdocs.io/c/language/enum) called `snek_object_kind_t` with a single value, `INTEGER`.
+2. [ ] A [union](https://devdocs.io/c/language/union) called `snek_object_data_t` with a single member, an integer named `v_int`.
+3. [ ] A [struct](https://devdocs.io/c/language/struct) declaration called `snek_object_t` with two members:
+    1. [ ] A member of type `snek_object_kind_t` named `kind`.
+    2. [ ] A member of type `snek_object_data_t` named `data`.
+
+```c
+typedef enum {
+  INTEGER
+} snek_object_kind_t;
+
+typedef union {
+  int v_int;
+} snek_object_data_t;
+
+typedef struct {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+```
+
+# Integer
+
+Let's start simple with a single integer object. The difference between a "snek integer" and a regular C integer is that the Snek integer:
+
+1. Is allocated on the heap
+2. Can store additional metadata about itself (for now, just its type)
+
+## Assignment
+
+**Complete the `new_snek_integer` function** in `snekobject.c`. It should:
+
+1. [ ] Use [`malloc`](https://en.cppreference.com/w/c/memory/malloc) to allocate heap memory for a new pointer to a `snek_object_t`.
+2. [ ] If the allocation fails, return `NULL`.
+3. [ ] Set the `kind` field of the new snek object to the `INTEGER` enum value (defined in `snekobject.h`).
+4. [ ] Set the `v_int` field of the new snek object to the integer value passed in.
+5. [ ] Return the pointer to the new snek object.
+
+If you're curious how this will be used, take a look at the `main.c` file (where the tests are). You'll see some code that looks like this:
+
+```c
+snek_object_t *int_object = new_snek_integer(42);
+```
+
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *new_ptr = malloc(sizeof(snek_object_t));
+  if (new_ptr == NULL){
+    return NULL;
+  }
+
+  new_ptr->kind = INTEGER;
+  new_ptr->data.v_int = value;
+  return new_ptr;
+}
+
+```
+
+# Float
+
+Sneklang needs floats (obviously). How else will all the crypto bros write weird floating-point bugs into their smart contracts?
+
+So how do we store both floats and ints into the same type?
+
+We're going to use the `union` and `enum` features in C to be able to do this, just like we discussed in previous chapters. You will need to extend the existing `snek_object_kind_t` and `snek_object_data_t` types to be able to include both `int`s and `float`s (and we will continue to add more types in the following chapters to exercise your newfound mastery of memory management).
+
+## Assignment
+
+You will need to edit _2 files_ in this lesson! `snekobject.c` and `snekobject.h`.
+
+1. [ ] In `snekobject.h`:
+    1. [ ] Add a new enum value to the `snek_object_kind_t` enum called `FLOAT`.
+    2. [ ] Add a new `float` field to `snek_object_data_t` called `v_float`.
+    3. [ ] Declare the `new_snek_float` function.
+2. [ ] In `snekobject.c`, complete the `new_snek_float` function. It should:
+    1. [ ] Allocate memory for a new pointer to a `snek_object_t`.
+    2. [ ] If the allocation fails, return `NULL`.
+    3. [ ] Set the `kind` field to the appropriate enum.
+    4. [ ] Store the float value in the object.
+    5. [ ] Return the pointer to the new snek object.
+
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+
+snek_object_t *new_snek_float(float value) {
+  snek_object_t *new_ptr = malloc(sizeof(snek_object_t));
+  if (new_ptr == NULL){
+    return NULL;
+  }
+
+  new_ptr->kind = FLOAT;
+  new_ptr->data.v_float = value;
+  return new_ptr;
+}
+
+// don't touch below this line
+
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = INTEGER;
+  obj->data.v_int = value;
+  return obj;
+}
+
+```
+
+```c
+typedef enum SnekObjectKind { INTEGER, FLOAT } snek_object_kind_t;
+
+typedef union SnekObjectData {
+  int v_int;
+  float v_float;
+} snek_object_data_t;
+
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+snek_object_t *new_snek_integer(int value);
+snek_object_t *new_snek_float(float value);
+```
+
+# String
+
+Now we're going to do our first object that has something... _additional_ allocated. When we allocate memory for a "snek object", that reserves memory for the object itself. Small data types like integers and floats are stored directly in the object, so there's no need for additional memory allocation.
+
+Strings, however, are a different story. Strings in C are just arrays of characters, and because they can be any length, we need to dynamically allocate memory for the string data separately from the object itself.
+
+```c
+char *my_string = "hello world";
+```
+
+In the example above, `my_string` is a pointer to a character array. The character array contains:
+
+```text
+h
+e
+l
+l
+o
+
+w
+o
+r
+l
+d
+\0
+```
+
+The extra spot at the end with the `\0` is the null terminator. It's how C knows where the string ends.
+
+## Assignment
+
+1. [ ] In `snekobject.h`:
+    1. [ ] Add a new enum value to the `snek_object_kind_t` enum called `STRING`.
+    2. [ ] Add a new string (`char *`) field to `snek_object_data_t` called `v_string`
+    3. [ ] Declare the `new_snek_string` function.
+2. [ ] In `snekobject.c`, complete the `new_snek_string` function. It should:
+    1. [ ] Allocate memory for a new pointer to a `snek_object_t`.
+    2. [ ] If the allocation fails, return `NULL`.
+    3. [ ] Calculate the length (in bytes using [`strlen`](https://devdocs.io/c/string/byte/strlen)) of the string passed in.
+    4. [ ] Allocate memory in a `char *` field equal to the length of the string plus one (for the null terminator).
+    5. [ ] If the allocation fails, [`free`](https://devdocs.io/c/memory/free) the memory allocated for the snek object, then return `NULL`.
+    6. [ ] Copy the data from the input value into the new string field you just allocated using [`strcpy`](https://devdocs.io/c/string/byte/strcpy).
+    7. [ ] Set the `kind` field to the appropriate enum.
+    8. [ ] Store the newly allocated string in the object.
+    9. [ ] Return the pointer to the new snek object.
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+snek_object_t *new_snek_string(char *value) {
+  snek_object_t *new_ptr = malloc(sizeof(snek_object_t));
+  if (new_ptr == NULL){
+    return NULL;
+  }
+
+  size_t str_len = strlen(value);
+  char *str_ptr = malloc(str_len+1);
+  if (str_ptr == NULL){
+    free(new_ptr);
+    return NULL;
+  }
+  strcpy(str_ptr, value);
+
+  new_ptr->kind = STRING;
+  new_ptr->data.v_string = str_ptr;
+  return new_ptr;
+}
+
+// don't touch below this line
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = INTEGER;
+  obj->data.v_int = value;
+  return obj;
+}
+
+snek_object_t *new_snek_float(float value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = FLOAT;
+  obj->data.v_float = value;
+  return obj;
+}
+
+```
+
+```c
+typedef enum SnekObjectKind {
+  INTEGER,
+  FLOAT,
+  STRING
+} snek_object_kind_t;
+
+typedef union SnekObjectData {
+  int v_int;
+  float v_float;
+  char *v_string;
+} snek_object_data_t;
+
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+snek_object_t *new_snek_integer(int value);
+snek_object_t *new_snek_float(float value);
+snek_object_t *new_snek_string(char *value);
+```
+
+
+# Vector3
+
+`Vector3` is going to be the first Snek Object that can hold a reference to another Snek Object. It's a collection type: a type that holds other types.
+
+Arrays, lists, dictionaries, and sets are all examples of collection types. We won't implement all of those types in this course, but they each will follow the same pattern that we're establishing here with `Vector3`.
+
+`Vector3` is similar to a Python tuple that contains _exactly_ 3 "SnekObject" elements.
+
+## Assignment
+
+1. In `snekobject.h`:
+    
+    1. [ ] Forward declare the `snek_object_t` struct at the top of the file. It will need to be used in a circular dependency between `snek_object_t -> snek_object_data_t -> snek_vector_t`.
+    2. [ ] Create a new [struct](https://devdocs.io/c/language/struct) called `snek_vector_t` that has three fields. Name the fields `x`, `y`, and `z`. Each field should be a Sneklang Object pointer (`snek_object_t *`).
+    3. [ ] Add a new enum value to the `snek_object_kind_t` enum called `VECTOR3`.
+    4. [ ] Add a new `snek_vector_t` field (the struct type you just created) to `snek_object_data_t` called `v_vector3`.
+    5. [ ] Declare the `new_snek_vector3` function.
+    
+    The `v_vector3` field is not a pointer to a `vector3`; it's directly allocated inside the struct. We can do this because we know the size of the vector (it's only 3 pointers wide) in advance.
+    
+2. In `snekobject.c`, complete the `new_snek_vector3` function:
+    
+    1. [ ] If any of the inputs are `NULL`, return `NULL`.
+    2. [ ] Allocate memory for a new pointer to a `snek_object_t`, and if the allocation fails return `NULL`.
+    3. [ ] Set the `kind` field to the appropriate enum.
+    4. [ ] Initialize the `v_vector3` field of the new snek object so that its `x`, `y`, and `z` members point to the input objects (for example, by creating a `snek_vector_t` with those fields and assigning it to `v_vector3`).
+    5. [ ] Return the pointer to the new snek object.
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y,
+                                snek_object_t *z) {
+  if (x == NULL || y == NULL || z == NULL) {
+    return NULL;
+  }
+  snek_object_t *new_ptr = malloc(sizeof(snek_object_t));
+  if (new_ptr == NULL){
+    return NULL;
+  }
+  new_ptr->kind = VECTOR3;
+  new_ptr->data.v_vector3.x = x;
+  new_ptr->data.v_vector3.y = y;
+  new_ptr->data.v_vector3.z = z;
+
+  return new_ptr;
+}
+
+// don't touch below this line
+
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = INTEGER;
+  obj->data.v_int = value;
+  return obj;
+}
+
+snek_object_t *new_snek_float(float value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = FLOAT;
+  obj->data.v_float = value;
+  return obj;
+}
+
+snek_object_t *new_snek_string(char *value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  int len = strlen(value);
+  char *dst = malloc(len + 1);
+  if (dst == NULL) {
+    free(obj);
+    return NULL;
+  }
+
+  strcpy(dst, value);
+
+  obj->kind = STRING;
+  obj->data.v_string = dst;
+  return obj;
+}
+
+```
+
+```c
+typedef struct SnekObject snek_object_t;
+typedef enum SnekObjectKind {
+  INTEGER,
+  FLOAT,
+  STRING,
+  VECTOR3,
+} snek_object_kind_t;
+
+typedef struct SnekVector {
+  snek_object_t *x;
+  snek_object_t *y;
+  snek_object_t *z;
+} snek_vector_t;
+
+typedef union SnekObjectData {
+  int v_int;
+  float v_float;
+  char *v_string;
+  snek_vector_t v_vector3;
+} snek_object_data_t;
+
+
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+snek_object_t *new_snek_integer(int value);
+snek_object_t *new_snek_float(float value);
+snek_object_t *new_snek_string(char *value);
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y, snek_object_t *z);
+
+```
+
+`v_vector3` is stored **by value**, embedded directly inside the union — not as a `snek_vector_t *` pointing somewhere else on the heap.
+
+Concretely:
+
+c
+
+```c
+typedef union SnekObjectData {
+  int v_int;
+  snek_vector_t v_vector3;   // <-- the actual struct lives here, inline
+} snek_object_data_t;
+```
+
+vs. what it's _not_:
+
+c
+
+```c
+typedef union SnekObjectData {
+  int v_int;
+  snek_vector_t *v_vector3;  // <-- this would be a pointer needing its own malloc
+} snek_object_data_t;
+```
+
+**Why this is possible:** `snek_vector_t` is just three pointers (`x`, `y`, `z` — each `snek_object_t *`). That's a small, fixed size known at compile time. So the compiler can reserve exactly that much space inside the union/struct itself — no separate heap allocation needed for the vector struct.
+
+This is why the union already grew big enough to hold it once you added `v_vector3` as a field type (not a field pointer-type) — `sizeof(snek_object_data_t)` just became `max(existing members, sizeof(snek_vector_t))`.
+
+**Contrast with the pointers _inside_ the vector:** `x`, `y`, `z` themselves are still pointers to separately-heap-allocated `snek_object_t`s (e.g. integers) — that part _is_ a reference. Only the _container_ (the 3-pointer-wide struct) is inline; what it points _to_ is not.
+
+
+# Array
+
+Let's add a dynamically sized array to Sneklang. We'll do it in multiple parts. First, we'll just create an empty array. In later lessons, we'll make it useful.
+
+## Assignment
+
+1. [ ] In `snekobject.h`:
+    1. [ ] Add a new enum value to the `snek_object_kind_t` enum called `ARRAY`.
+    2. [ ] Create a new [struct](https://devdocs.io/c/language/struct) called `snek_array_t` that has two fields:
+        1. [ ] `size` – the number of elements in the array, a [size_t](https://devdocs.io/c/types/size_t)
+        2. [ ] `elements` – a pointer to an array of snek object pointers, a `snek_object_t **`
+    3. [ ] Add a new `snek_array_t` field (the struct type you just created) to `snek_object_data_t` called `v_array`.
+    4. [ ] Declare the `new_snek_array` function.
+2. [ ] In `snekobject.c`, complete the `new_snek_array` function. It should:
+    1. [ ] Accept a `size` parameter.
+    2. [ ] Allocate memory for a new pointer to a `snek_object_t`, and if the allocation fails return `NULL`.
+    3. [ ] Allocate memory for a new pointer to an array of snek objects (`snek_object_t **`).
+        1. [ ] How much memory should you allocate? Think about it: probably the `sizeof` a pointer for each element in the array. We're not storing the actual snek objects in the array, just pointers to them.
+        2. [ ] If the allocation fails, `free` the first snek object allocation and return `NULL`.
+        3. [ ] Use [`calloc`](https://en.cppreference.com/w/c/memory/calloc) instead of `malloc` so there is no "junk" in our array to start, we want beautiful, pristine `NULL`s. Note that `calloc` takes two arguments: number of objects and the size of each object.
+    4. [ ] Set the `kind` field to the appropriate enum.
+    5. [ ] Create a new `snek_array_t` struct and set the `size` and `elements` fields.
+    6. [ ] Set the `v_array` field of the new snek object to the newly created `snek_array_t`.
+    7. [ ] Return the pointer to the new snek objec
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+snek_object_t *new_snek_array(size_t size) {
+  snek_object_t *new_ptr = malloc(sizeof(snek_object_t));
+  if (new_ptr == NULL){
+    return NULL;
+  }
+  snek_object_t **new_arr_ptr = calloc(size, sizeof(new_ptr));
+  if (new_arr_ptr == NULL){
+    free(new_ptr);
+    return NULL;
+  }
+
+  new_ptr->kind = ARRAY;
+  snek_array_t arr = {
+    .size = size,
+    .elements = new_arr_ptr,
+  };
+  new_ptr->data.v_array = arr;
+  return new_ptr;
+}
+
+// don't touch below this line
+
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y,
+                                snek_object_t *z) {
+  if (x == NULL || y == NULL || z == NULL) {
+    return NULL;
+  }
+
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = VECTOR3;
+  obj->data.v_vector3 = (snek_vector_t){.x = x, .y = y, .z = z};
+
+  return obj;
+}
+
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = INTEGER;
+  obj->data.v_int = value;
+  return obj;
+}
+
+snek_object_t *new_snek_float(float value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = FLOAT;
+  obj->data.v_float = value;
+  return obj;
+}
+
+snek_object_t *new_snek_string(char *value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  int len = strlen(value);
+  char *dst = malloc(len + 1);
+  if (dst == NULL) {
+    free(obj);
+    return NULL;
+  }
+
+  strcpy(dst, value);
+
+  obj->kind = STRING;
+  obj->data.v_string = dst;
+  return obj;
+}
+
+```
+
+```c
+#include <stddef.h>
+
+typedef struct SnekObject snek_object_t;
+
+typedef struct {
+  snek_object_t *x;
+  snek_object_t *y;
+  snek_object_t *z;
+} snek_vector_t;
+
+typedef struct {
+  size_t size;
+  snek_object_t **elements;
+} snek_array_t;
+
+typedef enum SnekObjectKind {
+  INTEGER,
+  FLOAT,
+  STRING,
+  VECTOR3,
+  ARRAY,
+} snek_object_kind_t;
+
+typedef union SnekObjectData {
+  int v_int;
+  float v_float;
+  char *v_string;
+  snek_vector_t v_vector3;
+  snek_array_t v_array;
+} snek_object_data_t;
+
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+snek_object_t *new_snek_integer(int value);
+snek_object_t *new_snek_float(float value);
+snek_object_t *new_snek_string(char *value);
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y,
+                                snek_object_t *z);
+snek_object_t *new_snek_array(size_t size);
+
+```
+
+# Set
+
+We can make empty arrays! ... which is kinda pointless, but at least the bones are there. Let's make our arrays useful by allowing us to _store values_ in them.
+
+`snek_array_set` sets a value at a specific index in the array. The equivalent in Python would be:
+
+```py
+array[3] = new_value
+```
+
+## Assignment
+
+Complete the `snek_array_set` function:
+
+1. [ ] If the object _or_ the new value is `NULL`, return `false`.
+2. [ ] If the object's `kind` is not `ARRAY`, return `false`.
+3. [ ] If the index is out of bounds, return `false`. _Remember, the `v_array` field has a `size` field._
+4. [ ] Set the value in the `elements` array at the specified index to the new value.
+5. [ ] Return `true`. _The return value is a boolean that indicates success._
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+bool snek_array_set(snek_object_t *snek_obj, size_t index,
+                    snek_object_t *value) {
+  if (snek_obj == NULL || value == NULL){
+    return false;
+  }
+  if (snek_obj->kind != ARRAY) {return false;}
+  if (index >= snek_obj->data.v_array.size){
+    return false;
+  }
+  snek_obj->data.v_array.elements[index] = value;
+  return true;
+}
+
+// don't touch below this line
+
+snek_object_t *new_snek_array(size_t size) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  snek_object_t **elements = calloc(size, sizeof(snek_object_t *));
+  if (elements == NULL) {
+    free(obj);
+    return NULL;
+  }
+
+  obj->kind = ARRAY;
+  obj->data.v_array = (snek_array_t){.size = size, .elements = elements};
+  return obj;
+}
+
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y,
+                                snek_object_t *z) {
+  if (x == NULL || y == NULL || z == NULL) {
+    return NULL;
+  }
+
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = VECTOR3;
+  obj->data.v_vector3 = (snek_vector_t){.x = x, .y = y, .z = z};
+
+  return obj;
+}
+
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = INTEGER;
+  obj->data.v_int = value;
+  return obj;
+}
+
+snek_object_t *new_snek_float(float value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = FLOAT;
+  obj->data.v_float = value;
+  return obj;
+}
+
+snek_object_t *new_snek_string(char *value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  int len = strlen(value);
+  char *dst = malloc(len + 1);
+  if (dst == NULL) {
+    free(obj);
+    return NULL;
+  }
+
+  strcpy(dst, value);
+
+  obj->kind = STRING;
+  obj->data.v_string = dst;
+  return obj;
+}
+
+```
+
+```c
+#include <stdbool.h>
+#include <stddef.h>
+
+typedef struct SnekObject snek_object_t;
+
+typedef struct {
+  size_t size;
+  snek_object_t **elements;
+} snek_array_t;
+
+typedef struct {
+  snek_object_t *x;
+  snek_object_t *y;
+  snek_object_t *z;
+} snek_vector_t;
+
+typedef enum SnekObjectKind {
+  INTEGER,
+  FLOAT,
+  STRING,
+  VECTOR3,
+  ARRAY,
+} snek_object_kind_t;
+
+typedef union SnekObjectData {
+  int v_int;
+  float v_float;
+  char *v_string;
+  snek_vector_t v_vector3;
+  snek_array_t v_array;
+} snek_object_data_t;
+
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+snek_object_t *new_snek_integer(int value);
+snek_object_t *new_snek_float(float value);
+snek_object_t *new_snek_string(char *value);
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y,
+                                snek_object_t *z);
+snek_object_t *new_snek_array(size_t size);
+bool snek_array_set(snek_object_t *array, size_t index, snek_object_t *value);
+
+```
+

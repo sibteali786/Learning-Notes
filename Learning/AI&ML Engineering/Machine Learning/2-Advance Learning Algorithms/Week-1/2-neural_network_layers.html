@@ -1,0 +1,280 @@
+<title>Neural Network Layers</title>
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f4f2ec; --ink:#20242c; --muted:#5c6270;
+  --line:#e4e0d6; --accent:#3454d1; --accent-soft:#ecf0fd; --accent-ink:#1e3aa8;
+  --amber:#c07a1e; --amber-soft:#faf1e2; --magenta:#b5197a; --magenta-soft:#fbeaf4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14161c; --surface:#1b1e26; --surface-2:#20232d; --ink:#edeff4; --muted:#9aa0ae;
+    --line:#2b2f3b; --accent:#8ba0ff; --accent-soft:#232a44; --accent-ink:#c3ceff;
+    --amber:#e0a94a; --amber-soft:#332a17; --magenta:#e56bb9; --magenta-soft:#3a1f30;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14161c; --surface:#1b1e26; --surface-2:#20232d; --ink:#edeff4; --muted:#9aa0ae;
+  --line:#2b2f3b; --accent:#8ba0ff; --accent-soft:#232a44; --accent-ink:#c3ceff;
+  --amber:#e0a94a; --amber-soft:#332a17; --magenta:#e56bb9; --magenta-soft:#3a1f30;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans", system-ui, sans-serif;
+  line-height:1.6;
+}
+.wrap{max-width:820px; margin:0 auto; padding:56px 24px 90px;}
+h1,h2,h3{font-family:"Source Serif 4", Georgia, serif; text-wrap:balance; font-weight:600; margin:0 0 8px;}
+h1{font-size:2.35rem; letter-spacing:-0.01em;}
+h2{font-size:1.5rem; color:var(--ink); margin-top:0;}
+h3{font-size:1.1rem; margin-bottom:6px;}
+.eyebrow{
+  display:inline-block; font-family:"IBM Plex Mono", monospace; font-size:0.72rem;
+  letter-spacing:0.14em; text-transform:uppercase; color:var(--accent-ink);
+  background:var(--accent-soft); padding:4px 10px; border-radius:5px; margin-bottom:14px;
+}
+.sub{color:var(--muted); font-size:1.05rem; max-width:62ch; margin:0 0 36px;}
+section{margin-bottom:44px;}
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:28px 30px;
+}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media (max-width:640px){.grid2{grid-template-columns:1fr;}}
+p{margin:0 0 14px;}
+p:last-child{margin-bottom:0;}
+.term-table{width:100%; border-collapse:collapse; font-size:0.95rem;}
+.term-table th{
+  text-align:left; font-family:"IBM Plex Mono", monospace; font-size:0.7rem;
+  letter-spacing:0.08em; text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid var(--line); padding:8px 10px 8px 0;
+}
+.term-table td{padding:12px 10px 12px 0; border-bottom:1px solid var(--line); vertical-align:top;}
+.term-table tr:last-child td{border-bottom:none;}
+.term-table td.term{font-weight:600; white-space:nowrap; color:var(--accent-ink);}
+code{
+  font-family:"IBM Plex Mono", monospace; background:var(--surface-2);
+  padding:1px 6px; border-radius:4px; font-size:0.9em;
+}
+.diagram-card{overflow-x:auto;}
+svg{display:block; margin:0 auto; max-width:100%; height:auto;}
+.diagram-caption{
+  text-align:center; color:var(--muted); font-size:0.85rem; margin-top:14px;
+  font-family:"IBM Plex Mono", monospace;
+}
+.callout{
+  border-left:3px solid var(--accent); background:var(--accent-soft);
+  border-radius:0 10px 10px 0; padding:18px 22px;
+}
+.callout.amber{border-left-color:var(--amber); background:var(--amber-soft);}
+.callout.magenta{border-left-color:var(--magenta); background:var(--magenta-soft);}
+.callout h3{margin-bottom:8px;}
+.compare{display:grid; grid-template-columns:1fr auto 1fr; gap:0; align-items:stretch;}
+@media (max-width:640px){.compare{grid-template-columns:1fr;}}
+.compare .col{padding:20px;}
+.compare .col.left{background:var(--surface-2); border-radius:12px 0 0 12px;}
+.compare .col.right{background:var(--accent-soft); border-radius:0 12px 12px 0;}
+@media (max-width:640px){.compare .col.left{border-radius:12px 12px 0 0;} .compare .col.right{border-radius:0 0 12px 12px;}}
+.compare .vs{
+  display:flex; align-items:center; justify-content:center; padding:0 14px;
+  font-family:"IBM Plex Mono", monospace; color:var(--muted); font-size:0.8rem;
+}
+@media (max-width:640px){.compare .vs{padding:10px 0;}}
+.compare ul{margin:10px 0 0; padding-left:20px;}
+.compare li{margin-bottom:6px;}
+.linkbox{
+  display:flex; align-items:center; gap:14px; margin-top:18px;
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  padding:14px 18px; text-decoration:none; color:var(--ink); transition:border-color .15s;
+}
+.linkbox:hover{border-color:var(--accent);}
+.linkbox .ico{
+  flex:0 0 auto; width:34px; height:34px; border-radius:8px; background:var(--accent-soft);
+  color:var(--accent-ink); display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono", monospace; font-weight:700;
+}
+.linkbox .txt strong{display:block; font-size:0.95rem;}
+.linkbox .txt span{font-size:0.82rem; color:var(--muted); font-family:"IBM Plex Mono", monospace;}
+.example{
+  background:var(--surface-2); border-radius:12px; padding:20px 24px; font-size:0.95rem;
+}
+.example .tag{
+  font-family:"IBM Plex Mono", monospace; font-size:0.7rem; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block;
+}
+footer{
+  margin-top:60px; padding-top:20px; border-top:1px solid var(--line);
+  color:var(--muted); font-size:0.82rem; font-family:"IBM Plex Mono", monospace;
+}
+</style>
+
+<div class="wrap">
+
+  <span class="eyebrow">Advanced Learning Algorithms · Week 1</span>
+  <h1>Neural Network Layers, from Logistic Regression to Hidden Layers</h1>
+  <p class="sub">How a single logistic-regression "neuron" becomes a layer, why the middle layer is called <em>hidden</em>, and why a network doesn't need you to hand-craft features like <code>x&#8321;&middot;x&#8322;</code> anymore.</p>
+
+  <section>
+    <div class="card diagram-card">
+      <h2>The T-shirt demand prediction network</h2>
+      <p>Four raw inputs feed a hidden layer of three neurons (affordability, awareness, perceived quality), which feed one output neuron: the probability this T-shirt becomes a top seller.</p>
+      <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of input layer, hidden layer, and output layer">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"></path>
+          </marker>
+        </defs>
+        <!-- input labels -->
+        <g font-family="IBM Plex Sans" font-size="15" fill="var(--ink)">
+          <text x="10" y="60">price</text>
+          <text x="10" y="140">shipping cost</text>
+          <text x="10" y="220">marketing</text>
+          <text x="10" y="300">material</text>
+        </g>
+        <!-- input dots -->
+        <g fill="var(--amber)">
+          <circle cx="150" cy="55" r="5"></circle>
+          <circle cx="150" cy="135" r="5"></circle>
+          <circle cx="150" cy="215" r="5"></circle>
+          <circle cx="150" cy="295" r="5"></circle>
+        </g>
+        <!-- connections input -> hidden (fully connected) -->
+        <g stroke="var(--line)" stroke-width="1.3">
+          <line x1="155" y1="55" x2="330" y2="90"></line>
+          <line x1="155" y1="55" x2="330" y2="180"></line>
+          <line x1="155" y1="55" x2="330" y2="270"></line>
+          <line x1="155" y1="135" x2="330" y2="90"></line>
+          <line x1="155" y1="135" x2="330" y2="180"></line>
+          <line x1="155" y1="135" x2="330" y2="270"></line>
+          <line x1="155" y1="215" x2="330" y2="90"></line>
+          <line x1="155" y1="215" x2="330" y2="180"></line>
+          <line x1="155" y1="215" x2="330" y2="270"></line>
+          <line x1="155" y1="295" x2="330" y2="90"></line>
+          <line x1="155" y1="295" x2="330" y2="180"></line>
+          <line x1="155" y1="295" x2="330" y2="270"></line>
+        </g>
+        <!-- hidden neurons -->
+        <g>
+          <circle cx="345" cy="90" r="26" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"></circle>
+          <circle cx="345" cy="180" r="26" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"></circle>
+          <circle cx="345" cy="270" r="26" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"></circle>
+        </g>
+        <g font-family="IBM Plex Sans" font-size="13.5" fill="var(--accent-ink)">
+          <text x="385" y="80">affordability</text>
+          <text x="385" y="175">awareness</text>
+          <text x="385" y="265">perceived quality</text>
+        </g>
+        <!-- connections hidden -> output -->
+        <g stroke="var(--line)" stroke-width="1.3">
+          <line x1="371" y1="90" x2="560" y2="180"></line>
+          <line x1="371" y1="180" x2="560" y2="180"></line>
+          <line x1="371" y1="270" x2="560" y2="180"></line>
+        </g>
+        <!-- output neuron -->
+        <circle cx="585" cy="180" r="28" fill="var(--surface)" stroke="var(--magenta)" stroke-width="2.5"></circle>
+        <line x1="613" y1="180" x2="670" y2="180" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow)"></line>
+        <g font-family="IBM Plex Sans" font-size="14" fill="var(--ink)">
+          <text x="678" y="176">P(top</text>
+          <text x="678" y="194">seller)</text>
+        </g>
+        <!-- layer labels -->
+        <g font-family="IBM Plex Mono" font-size="12" fill="var(--muted)" letter-spacing="0.06em">
+          <text x="120" y="335">INPUT LAYER</text>
+          <text x="300" y="335">HIDDEN LAYER</text>
+          <text x="545" y="335">OUTPUT LAYER</text>
+        </g>
+        <g font-family="IBM Plex Mono" font-size="12" fill="var(--muted)">
+          <text x="140" y="20">4 numbers (x&#8407;)</text>
+          <text x="320" y="20">3 activations (a&#8407;)</text>
+          <text x="560" y="20">1 number (a)</text>
+        </g>
+      </svg>
+      <p class="diagram-caption">x&#8407; &rarr; hidden layer &rarr; a&#8407; (affordability, awareness, perceived quality) &rarr; output layer &rarr; a (probability)</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Core vocabulary</h2>
+    <div class="card">
+      <table class="term-table">
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td class="term">Neuron</td><td>A tiny logistic-regression unit &mdash; takes in a few numbers, applies <code>1/(1+e<sup>&minus;(w&middot;x+b)</sup>)</code>, outputs one number. Loosely modeled on a biological neuron, but far simpler.</td></tr>
+        <tr><td class="term">Activation (a)</td><td>The output value a neuron sends downstream &mdash; e.g. "affordability = 0.83". Term borrowed from neuroscience.</td></tr>
+        <tr><td class="term">Layer</td><td>A group of neurons that take the same input vector and each output one activation value, together forming an output vector.</td></tr>
+        <tr><td class="term">Input layer</td><td>The raw feature vector x&#8407; (here: price, shipping cost, marketing, material &mdash; 4 numbers).</td></tr>
+        <tr><td class="term">Output layer</td><td>The final layer; its activation is the network's prediction.</td></tr>
+        <tr><td class="term">Hidden layer</td><td>Any layer between input and output. See below for why it's called "hidden".</td></tr>
+        <tr><td class="term">Fully connected</td><td>In practice, every neuron in a layer sees <em>every</em> value from the previous layer &mdash; the network learns via its weights which inputs to pay attention to, rather than a human wiring specific inputs to specific neurons.</td></tr>
+        <tr><td class="term">Architecture</td><td>The choice of how many hidden layers, and how many neurons per layer.</td></tr>
+        <tr><td class="term">Multilayer perceptron</td><td>Literature term for a neural network with this layered structure.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="callout">
+      <h3>Why is the hidden layer called "hidden"?</h3>
+      <p>Your training set gives you pairs <code>(x, y)</code> &mdash; the input features and the true label. It tells you the price, shipping cost, marketing spend, material, and whether the T-shirt actually became a top seller. What it <strong>does not</strong> tell you is the "correct" value of affordability, awareness, or perceived quality for each example &mdash; there's no column for those in your dataset.</p>
+      <p>Those intermediate values are never directly observed. They exist only inside the network, computed from the input layer and consumed by the output layer &mdash; invisible from the outside, which is exactly what "hidden" refers to: not secret or mysterious, just <em>not present in the training data</em>. The network invents its own internal representation to solve the problem, and you never have to label it.</p>
+      <p style="margin-top:10px;">A useful reframe: cover the input side of the diagram and look only at the hidden layer's outputs feeding the final neuron. That remaining piece is <em>just logistic regression</em> &mdash; but run on better, learned features instead of the raw ones.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Hidden layers learn features &mdash; you don't engineer them</h2>
+    <div class="compare">
+      <div class="col left">
+        <h3>Logistic / linear regression</h3>
+        <p style="color:var(--muted); font-size:0.85rem; margin-bottom:0;">Manual feature engineering</p>
+        <ul>
+          <li>You look at raw inputs (e.g. lot frontage <code>x&#8321;</code>, lot depth <code>x&#8322;</code>) and hand-design a better feature: <code>x&#8321;&middot;x&#8322;</code> = lot area.</li>
+          <li>Requires domain insight &mdash; you decide which combinations matter.</li>
+          <li>Doesn't scale: for many raw features, hand-crafting combinations becomes impractical.</li>
+        </ul>
+      </div>
+      <div class="vs">VS</div>
+      <div class="col right">
+        <h3>Neural network hidden layer</h3>
+        <p style="color:var(--accent-ink); font-size:0.85rem; margin-bottom:0;">Learned feature engineering</p>
+        <ul>
+          <li>The hidden layer is fed <em>all</em> raw inputs and learns, via its weights, its own intermediate features (affordability, awareness, perceived quality) that make the final prediction easier.</li>
+          <li>No one tells it "affordability = price + shipping" &mdash; training data and gradient descent discover that combination.</li>
+          <li>Scales to many features and many layers &mdash; this is a large part of why deep learning is so powerful.</li>
+        </ul>
+      </div>
+    </div>
+
+    <a class="linkbox" href="../../Supervised ML-Regression Classification/Week-2/9-feature_engineering_summary.html">
+      <span class="ico">FE</span>
+      <span class="txt">
+        <strong>Related note &middot; Feature Engineering summary</strong>
+        <span>Week 2 &middot; Supervised ML &mdash; the manual version of what hidden layers now do automatically</span>
+      </span>
+    </a>
+  </section>
+
+  <section>
+    <h2>Worked example: the lot-area feature, revisited</h2>
+    <div class="example">
+      <span class="tag">From the housing price example</span>
+      <p>In linear regression, predicting house price from frontage <code>x&#8321;</code> and depth <code>x&#8322;</code>, you'd manually engineer <code>x&#8321;&middot;x&#8322;</code> as a new "lot area" feature because you, the human, recognized that area (not frontage or depth alone) drives price.</p>
+      <p style="margin-bottom:0;">A neural network handed the same raw <code>x&#8321;, x&#8322;</code> in its input layer doesn't need that insight supplied: a hidden-layer neuron, through training, can learn a weighted combination that approximates "area" (or something even more useful) on its own &mdash; because it has access to both raw values and the freedom to combine them via its weights and bias.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Stacking multiple hidden layers</h2>
+    <div class="card">
+      <p>A network isn't limited to one hidden layer. Each layer just inputs a vector and outputs a vector:</p>
+      <p style="font-family:'IBM Plex Mono', monospace; font-size:0.92rem; background:var(--surface-2); padding:12px 16px; border-radius:8px;">
+        x&#8407; &rarr; [hidden layer 1: 4 neurons] &rarr; a&#8407;&#8321; &rarr; [hidden layer 2: 3 neurons] &rarr; a&#8407;&#8322; &rarr; [output layer: 1 neuron] &rarr; a
+      </p>
+      <p style="margin-bottom:0;">Choosing the number of hidden layers and neurons per layer is called the network's <strong>architecture</strong> &mdash; it materially affects performance and is covered later in the course.</p>
+    </div>
+  </section>
+
+  <footer>
+    Source: DeepLearning.AI &mdash; Advanced Learning Algorithms, Week 1 (Neural Network intuition &amp; layers) &middot; visual summary generated 2026-08-24
+  </footer>
+
+</div>
