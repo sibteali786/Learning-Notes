@@ -4,6 +4,7 @@
     "type": "split",
     "children": [
       {
+<<<<<<< HEAD
         "id": "836078f7c3961b0c",
         "type": "tabs",
         "children": [
@@ -17,6 +18,19 @@
               },
               "icon": "excalidraw-icon",
               "title": "B-tree-vs-B+tree.excalidraw"
+=======
+        "id": "6996ab8ad5d35b42",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8c4215113cc016d0",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+>>>>>>> 63385bb (vault change)
             }
           }
         ]
@@ -78,8 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324,
-    "collapsed": true
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -143,13 +156,17 @@
             "state": {
               "type": "outline",
               "state": {
+<<<<<<< HEAD
                 "file": "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
+=======
+>>>>>>> 63385bb (vault change)
                 "followCursor": true,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
               "title": "Outline"
+<<<<<<< HEAD
             }
           },
           {
@@ -160,10 +177,12 @@
               "state": {},
               "icon": "git-pull-request",
               "title": "Source Control"
+=======
+>>>>>>> 63385bb (vault change)
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -185,6 +204,7 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
+<<<<<<< HEAD
   "active": "35f3f208fc3e2771",
   "lastOpenFiles": [
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
@@ -199,6 +219,10 @@
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L7_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L6_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/Resources.md",
+=======
+  "active": "8c4215113cc016d0",
+  "lastOpenFiles": [
+>>>>>>> 63385bb (vault change)
     "Learning/Book Reading/Writing/Writing Skills.md",
     "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
     "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
