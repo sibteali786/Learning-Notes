@@ -4,7 +4,6 @@
     "type": "split",
     "children": [
       {
-<<<<<<< HEAD
         "id": "836078f7c3961b0c",
         "type": "tabs",
         "children": [
@@ -18,22 +17,34 @@
               },
               "icon": "excalidraw-icon",
               "title": "B-tree-vs-B+tree.excalidraw"
-=======
-        "id": "6996ab8ad5d35b42",
-        "type": "tabs",
-        "children": [
+            }
+          },
           {
-            "id": "8c4215113cc016d0",
+            "id": "08811c98c87126f5",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
               "icon": "lucide-file",
-              "title": "New tab"
->>>>>>> 63385bb (vault change)
+              "title": "conflict-files-obsidian-git"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -92,7 +103,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 376.6920585632324,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -156,17 +168,13 @@
             "state": {
               "type": "outline",
               "state": {
-<<<<<<< HEAD
-                "file": "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
-=======
->>>>>>> 63385bb (vault change)
+                "file": "conflict-files-obsidian-git.md",
                 "followCursor": true,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
               "title": "Outline"
-<<<<<<< HEAD
             }
           },
           {
@@ -177,12 +185,10 @@
               "state": {},
               "icon": "git-pull-request",
               "title": "Source Control"
-=======
->>>>>>> 63385bb (vault change)
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -204,29 +210,24 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-<<<<<<< HEAD
-  "active": "35f3f208fc3e2771",
+  "active": "08811c98c87126f5",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
+    "conflict-files-obsidian-git.md",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/SQL+Server+Index+Architecture+and+Design+Guide+-+SQL+Server+_+Microsoft+Docs.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-trees+vs+B+trees.pdf",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Isotopes and mass spectrometry (article) _ Khan Academy.html",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/01_document_loading.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L9_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L8_student.ipynb",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L7_student.ipynb",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L6_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/Resources.md",
-=======
-  "active": "8c4215113cc016d0",
-  "lastOpenFiles": [
->>>>>>> 63385bb (vault change)
     "Learning/Book Reading/Writing/Writing Skills.md",
     "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
     "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
-    "conflict-files-obsidian-git.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/attachments/Pasted Image 20260825232509_234.png",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/attachments/Pasted Image 20260825221441_074.png",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
