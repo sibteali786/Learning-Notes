@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "22eb1fced7b0a235",
+        "id": "6996ab8ad5d35b42",
         "type": "tabs",
         "children": [
           {
-            "id": "01b603ace7547ecf",
+            "id": "8c4215113cc016d0",
             "type": "leaf",
             "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html"
-              },
-              "icon": "code-glyph",
-              "title": "2-btree-plus"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -53,7 +51,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "Isolation Levels",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 389.8984375
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -94,7 +92,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Book Reading/Writing/Writing Skills.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +102,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks"
             }
           },
           {
@@ -113,12 +111,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Book Reading/Writing/Writing Skills.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cargo Bussiness"
+              "title": "Outgoing links"
             }
           },
           {
@@ -142,17 +140,16 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-                "followCursor": false,
-                "showSearch": false,
+                "followCursor": true,
+                "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Notes"
+              "title": "Outline"
             }
           },
           {
-            "id": "957dbb181bb46970",
+            "id": "88876276e2a2dd54",
             "type": "leaf",
             "state": {
               "type": "git-view",
@@ -166,11 +163,10 @@
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
-      "vault-lens:Vault Lens Dev: 打开当前文件": false,
       "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
@@ -181,57 +177,59 @@
       "obsidian-excalidraw-plugin:New drawing": false,
       "obsidian-git:Open Git source control": false,
       "publish:Publish changes...": false,
-      "audio-recorder:Start/stop recording": false
+      "audio-recorder:Start/stop recording": false,
+      "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "01b603ace7547ecf",
+  "active": "0df293f22dc87e75",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-index-scan-vs-index-only-scan.html",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Isotopes and mass spectrometry (article) _ Khan Academy.html",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/01_document_loading.ipynb",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-Cobining-Index.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/bloom-filters.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/multiple-indexes.pdf",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/Scaling_Probabilistic_Lookups.pptx",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/uuid-vs-ulid-summary.html",
-    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
-    "Learning/AI&ML Engineering/UsefullTools/Overview.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Screenshot 2026-06-12 at 10.29.20 AM.png",
-    "Pasted image 20260714215710.png",
-    "Pasted image 20260813204427.png",
-    "Pasted image 20260813204431.png",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Pasted image 20260714215620.png",
-    "Pasted Image 20260621125127_166.png",
-    "Pasted Image 20260621111658_267.png",
-    "Pasted Image 20260601100830_545.png",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/01_document_loading.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L9_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L8_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L7_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L6_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L5_student.ipynb",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/Resources.md",
+    "Learning/Book Reading/Writing/Writing Skills.md",
+    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
+    "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
+    "conflict-files-obsidian-git.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/attachments/Pasted Image 20260825232509_234.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/attachments/Pasted Image 20260825221441_074.png",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/3-Empirical-fromula-Hg-CL.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/2-Calculating-mass-percent.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/1-How does Logistic Regression links to Neural Neworks.md",
-    "conflict-files-obsidian-git.md",
-    "Learning/Frontend Interview Preparation/Coding/Like Button/intuition.excalidraw.md",
+    "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
     "Learning/Freelance/Builders's Website/Bank and Investment Module/Requirement Gathering.md",
-    "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Moles_MolarMass_practice.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/1-atomicmassunit.excalidraw.md",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/Resources.md",
-    "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md",
-    "Learning/AI&ML Engineering/what-is-machine-learning-summary.md",
-    "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
+    "Learning/Freelance/Builders's Website/Untitled.md",
+    "Learning/DSA/DFS/1-MaxDepth.excalidraw.md",
+    "Learning/DSA/BFS/fundamentals.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Like Button/intuition.excalidraw.md",
+    "Personal/Maryam/01-north-pakistan.png",
+    "Personal/Maryam/02-mansehra-hills.png",
+    "Personal/Maryam/05-makkah-1.png",
+    "Personal/Maryam/04-brothers-wedding.png",
+    "Test Driven Development/Guide and Resources.md",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Screenshot 2026-04-19 at 10.38.26 PM.png",
+    "Screenshot 2026-04-19 at 10.51.38 PM.png",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
+    "Learning/AI&ML Engineering/what-is-machine-learning-summary.md",
+    "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Resources.md",
     "Learning/System Design/InterviewBoard.excalidraw.md",
     "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
+    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
