@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>B-Tree Fundamentals</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--card:#161923;--border:#252938;
+    --blue:#5b9dff;--orange:#ff9d5c;--green:#5cffb0;--purple:#c792ff;
+    --text:#e7e9ee;--muted:#9aa0b4;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 20px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  .wrap{max-width:940px;margin:0 auto;}
+  header h1{font-size:28px;color:#fff;}
+  header p{color:var(--muted);font-size:13px;margin:6px 0 0;}
+  .section-label{display:flex;align-items:center;gap:10px;margin:38px 0 14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .bar.blue{background:var(--blue);}.bar.orange{background:var(--orange);}
+  .bar.green{background:var(--green);}.bar.purple{background:var(--purple);}
+  .section-label h2{font-size:18px;color:#fff;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;margin:2px 6px 2px 0;}
+  .pill.blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill.orange{background:rgba(255,157,92,.15);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+  .pill.green{background:rgba(92,255,176,.15);color:var(--green);border:1px solid rgba(92,255,176,.4);}
+  ul{padding-left:18px;margin:8px 0;font-size:13.5px;}
+  li{margin-bottom:6px;color:#dfe2ea;}
+  code,.inline-code{background:#1d2130;border:1px solid var(--border);padding:1px 6px;border-radius:5px;color:var(--green);font-size:12.5px;}
+  .diagram{background:#12141c;border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:10px;overflow-x:auto;}
+  .example{background:linear-gradient(135deg,rgba(91,157,255,.08),rgba(199,146,255,.05));border:1px solid rgba(91,157,255,.25);border-radius:10px;padding:16px 18px;margin-top:10px;}
+  .example .tag-title{font-size:11px;color:var(--purple);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;font-weight:600;}
+  .tip{background:rgba(92,255,176,.06);border-left:3px solid var(--green);padding:10px 14px;border-radius:6px;font-size:12.5px;margin-top:10px;color:#dfe2ea;}
+  .warn{background:rgba(255,157,92,.07);border-left:3px solid var(--orange);padding:10px 14px;border-radius:6px;font-size:12.5px;margin-top:10px;color:#dfe2ea;}
+  .compare-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+  .compare-table th{text-align:left;color:#fff;font-family:'Syne',sans-serif;font-size:12px;padding:8px;border-bottom:1px solid var(--border);}
+  .compare-table td{padding:8px;border-bottom:1px solid var(--border);color:#dfe2ea;}
+  footer{margin-top:40px;color:var(--muted);font-size:11.5px;text-align:center;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>B-Tree Fundamentals</h1>
+    <p>From "Full Table Scan" to "B-Tree Limitations" — Hussein Nasser, B-Trees vs B+Trees</p>
+  </header>
+
+  <!-- PROBLEM -->
+  <div class="section-label"><div class="bar blue"></div><h2>The Problem — Full Table Scan</h2></div>
+  <div class="card">
+    <ul>
+      <li>A table is stored as a data file made of fixed-size <b>pages</b> (Postgres = 8K by default, MySQL = 16K).</li>
+      <li>To find one row, the naive approach reads the table <b>page by page</b>, pulling each into memory and checking every row — that's a full table scan.</li>
+      <li>Cost = number of pages read. Worst case, the row you want is the very last one.</li>
+      <li>DBMS engines aren't dumb about it — they parallelize scans (multiple workers, top-down + bottom-up), but the scan is still O(n) in table size.</li>
+      <li><b>Goal:</b> shrink the search space so we don't touch every page — that's what a B-Tree is for.</li>
+    </ul>
+    <div class="tip">💡 Reading "8K from disk" isn't 1:1 with the underlying hardware either — disks have their own sector/SSD page sizes (e.g. 4K), which is a separate layer of complexity.</div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section-label"><div class="bar orange"></div><h2>How the B-Tree Works</h2></div>
+
+  <div class="card">
+    <h3 style="color:var(--orange)">Vocabulary</h3>
+    <span class="pill orange">node = 1 disk page</span>
+    <span class="pill orange">degree (m) = max children</span>
+    <span class="pill orange">m−1 = max elements/node</span>
+    <span class="pill orange">element = key + value</span>
+    <ul>
+      <li>A B-Tree has a <b>degree (m)</b> — the max number of child nodes a node can have. DBMS engines choose this automatically; you don't configure it.</li>
+      <li>A node with <code>m</code> children holds up to <code>m−1</code> elements (e.g. 3 children → 2 elements).</li>
+      <li>Every <b>element</b> = a <b>key</b> (what you search for) + a <b>value</b> (the "data pointer" to the actual row — sometimes called <code>α</code> in the original 1970 B-Tree paper).</li>
+      <li>Layers: <b>root node</b> → <b>internal nodes</b> → <b>leaf nodes</b> (leaves have no children).</li>
+    </ul>
+    <div class="warn">⚠️ Most textbook diagrams only draw the <i>key</i> and hide the <i>value</i>/data-pointer — which confuses B-Trees with B+Trees. In a real B-Tree, <b>every node at every level stores both key and value.</b></div>
+  </div>
+
+  <div class="card">
+    <h3 style="color:var(--blue)">Worked Example — searching for ID 3</h3>
+    <p style="font-size:13px;">Table: <code>ID, Name</code> with an internal Tuple ID (TID/RID) → <code>1:701 John, 2:702 Ali, 3:703 Rick, 4:704 Sara, 5:705 Edmond</code></p>
+    <div class="diagram">
+      <svg viewBox="0 0 620 230" width="100%" height="230">
+        <!-- root -->
+        <rect x="230" y="10" width="160" height="34" rx="6" fill="#1d2130" stroke="#5b9dff"/>
+        <text x="270" y="32" fill="#5b9dff" font-size="13">2:702</text>
+        <text x="350" y="32" fill="#5b9dff" font-size="13">4:704</text>
+        <!-- children -->
+        <rect x="20" y="110" width="150" height="34" rx="6" fill="#1d2130" stroke="#ff9d5c"/>
+        <text x="80" y="132" fill="#ff9d5c" font-size="13">1:701</text>
+        <rect x="235" y="110" width="150" height="34" rx="6" fill="#1d2130" stroke="#5cffb0"/>
+        <text x="295" y="132" fill="#5cffb0" font-size="13">3:703</text>
+        <rect x="450" y="110" width="150" height="34" rx="6" fill="#1d2130" stroke="#ff9d5c"/>
+        <text x="505" y="132" fill="#ff9d5c" font-size="13">5:705</text>
+        <!-- lines -->
+        <line x1="270" y1="44" x2="95" y2="110" stroke="#333a4d"/>
+        <line x1="310" y1="44" x2="310" y2="110" stroke="#333a4d"/>
+        <line x1="350" y1="44" x2="525" y2="110" stroke="#333a4d"/>
+        <text x="20" y="180" fill="#9aa0b4" font-size="12">Step 1: read root → 3 is between 2 and 4 → eliminate left &amp; right subtrees</text>
+        <text x="20" y="200" fill="#9aa0b4" font-size="12">Step 2: follow middle child pointer → land on leaf 3:703 → jump to TID 703 → "Rick"</text>
+      </svg>
+    </div>
+    <div class="example">
+      <div class="tag-title">Why this matters</div>
+      You never fetch the whole table — the key tells you <i>which page</i> to pull next. Each hop eliminates a whole branch, so a tree of thousands of nodes still resolves in a handful of I/Os (its height, not its size).
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="color:var(--purple)">Inserting &amp; Splitting</h3>
+    <ul>
+      <li>Adding elements 1→11 into a degree-3 tree (max 2 elements/node): once a node overflows, it <b>splits</b>, pushing a middle key up to the parent.</li>
+      <li>Splits are <b>expensive</b> — one reason engines try to keep nodes large (fewer splits needed) rather than tiny toy-sized nodes.</li>
+      <li><b>Insert order matters:</b> random keys land on scattered pages → more splits, slower inserts. Sequential/ordered keys (like an auto-increment ID) insert more cheaply since new rows always land at the "end."</li>
+    </ul>
+    <div class="diagram">
+      <svg viewBox="0 0 620 210" width="100%" height="210">
+        <rect x="220" y="10" width="180" height="34" rx="6" fill="#1d2130" stroke="#5b9dff"/>
+        <text x="255" y="32" fill="#5b9dff" font-size="13">4:704</text>
+        <text x="335" y="32" fill="#5b9dff" font-size="13">8:802</text>
+        <rect x="30" y="100" width="150" height="34" rx="6" fill="#1d2130" stroke="#c792ff"/>
+        <text x="60" y="122" fill="#c792ff" font-size="13">2:702</text>
+        <rect x="235" y="100" width="150" height="34" rx="6" fill="#1d2130" stroke="#c792ff"/>
+        <text x="265" y="122" fill="#c792ff" font-size="13">6:800</text>
+        <rect x="440" y="100" width="150" height="34" rx="6" fill="#1d2130" stroke="#c792ff"/>
+        <text x="465" y="122" fill="#c792ff" font-size="13">10:804</text>
+        <line x1="255" y1="44" x2="105" y2="100" stroke="#333a4d"/>
+        <line x1="290" y1="44" x2="310" y2="100" stroke="#333a4d"/>
+        <line x1="335" y1="44" x2="515" y2="100" stroke="#333a4d"/>
+        <text x="30" y="180" fill="#9aa0b4" font-size="12">Root: 4,8 | Internal: 2 / 6 / 10 | Leaves: 1,3 / 5,7 / 9,11 (each leaf = key:TID pair)</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- LIMITATIONS -->
+  <div class="section-label"><div class="bar green"></div><h2>Limitations of B-Trees</h2></div>
+  <div class="card">
+    <table class="compare-table">
+      <tr><th>Limitation</th><th>Why it happens</th></tr>
+      <tr>
+        <td><b>Wasted memory per node</b></td>
+        <td>Every node stores both key <i>and</i> value even when only the key is needed to route the search — space that could've held more elements.</td>
+      </tr>
+      <tr>
+        <td><b>Big values = fewer elements/page</b></td>
+        <td>A UUID or long string as the indexed key means larger key+value pairs → fewer fit per page → more pages → more I/O → slower traversal. (Think twice before indexing a UUID/string PK.)</td>
+      </tr>
+      <tr>
+        <td><b>Slow range queries</b></td>
+        <td>Values live scattered across every level, so "give me IDs 4–9" means separate top-to-bottom traversals for <i>each</i> key — even though 4,5,6,7,8,9 are logically adjacent.</td>
+      </tr>
+      <tr>
+        <td><b>Hard to cache internal nodes in memory</b></td>
+        <td>Since internal nodes also carry full values, they're heavier — costlier to keep the "routing layer" resident in RAM, especially with large key types.</td>
+      </tr>
+    </table>
+    <div class="example">
+      <div class="tag-title">Real-world example — range scan pain</div>
+      Finding IDs <b>4 through 9</b> in the example tree requires separate root→leaf walks for each value (4 is lucky/at root, 5 needs 3 hops, 6 might be cached, 7/8/9 each re-traverse) — despite the rows being contiguous. That thrashing is exactly the range-query weakness B+Trees were built to fix (leaf nodes get linked together).
+    </div>
+  </div>
+
+  <footer>Source: Hussein Nasser — "B-Trees vs B+Trees" (husseinnasser.com) · summarized through the B-Tree Limitations section</footer>
+</div>
+</body>
+</html>
