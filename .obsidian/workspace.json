@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "6996ab8ad5d35b42",
+        "id": "836078f7c3961b0c",
         "type": "tabs",
         "children": [
           {
-            "id": "8c4215113cc016d0",
+            "id": "35f3f208fc3e2771",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "B-tree-vs-B+tree.excalidraw"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 376.6920585632324,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -140,6 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
                 "followCursor": true,
                 "showSearch": true,
                 "searchQuery": ""
@@ -181,11 +185,12 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "0df293f22dc87e75",
+  "active": "35f3f208fc3e2771",
   "lastOpenFiles": [
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Isotopes and mass spectrometry (article) _ Khan Academy.html",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Isotopes and mass spectrometry (article) _ Khan Academy.html",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/01_document_loading.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain",
@@ -193,7 +198,6 @@
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L8_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L7_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L6_student.ipynb",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/notebooks/L5_student.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/Resources.md",
     "Learning/Book Reading/Writing/Writing Skills.md",
     "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
@@ -228,7 +232,6 @@
     "Learning/AI&ML Engineering/ml-reel-script-excalidraw.md",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/Prompting with Chat GPT/Resources.md",
     "Learning/System Design/InterviewBoard.excalidraw.md",
-    "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
