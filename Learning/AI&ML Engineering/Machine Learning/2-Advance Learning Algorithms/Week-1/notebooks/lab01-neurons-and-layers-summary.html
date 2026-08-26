@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neurons and Layers Lab</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff;}
+  .eq{background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:14px 18px; font-size:16px; text-align:center; margin:10px 0; color:#fbbf24;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .qcard{background:#151a2e; border:1.5px solid var(--purple); border-radius:14px; padding:20px 22px; margin-bottom:20px;}
+  .qtitle{color:var(--purple); font-weight:700; font-size:15px; margin-bottom:10px; display:flex; gap:8px; align-items:flex-start;}
+  .qtitle .qmark{background:var(--purple); color:#0f1117; border-radius:50%; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; flex:none;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Lab: Neurons and Layers</h1>
+  <p class="subtitle">C2 W1 Lab01 · TensorFlow/Keras — mapping Course 1's linear & logistic regression onto a single neuron</p>
+
+  <h2>What the Lab Does</h2>
+  <div class="card">
+    <p><span class="step-num">1</span><b>Linear neuron (no activation)</b> — builds a <code>Dense(units=1, activation='linear')</code> layer and shows it computes exactly <code>f(x) = w·x + b</code>, same as Course 1's linear regression.</p>
+    <p><span class="step-num">2</span><b>Logistic neuron (sigmoid activation)</b> — builds a <code>Sequential</code> model with one <code>Dense(1, activation='sigmoid')</code> layer, showing it computes <code>f(x) = sigmoid(w·x + b)</code>, same as Course 1's logistic regression.</p>
+    <p>In both cases, the lab manually sets <code>w</code> and <code>b</code> to values already known from Course 1, then verifies the Keras layer's output matches a hand-written NumPy computation of the same formula — proving Keras isn't doing anything magical under the hood.</p>
+  </div>
+
+  <h2>❓ Q1: Why get_weights() then set_weights() — how are values chosen?</h2>
+  <div class="qcard">
+    <div class="qtitle"><span class="qmark">?</span>In case of both linear and logistic regression we first used get_weights() and then set weights ourselves — how do we choose them?</div>
+    <p><b>Answer:</b> The values weren't invented — they're the values <b>already known from Course 1</b>, where these exact same regression problems were solved by hand or by gradient descent. This lab isn't training anything; it's <b>verifying</b> that a Keras neuron computes the identical formula.</p>
+
+    <table>
+      <tr><th>Model</th><th>Chosen w, b</th><th>Where they came from</th></tr>
+      <tr><td>Linear neuron<br><span class="mono" style="font-size:12px">house price example</span></td>
+          <td class="mono">w = 200, b = 100</td>
+          <td>The known solution to f(x)=200x+100 for the 2-point house-price dataset (from Course 1)</td></tr>
+      <tr><td>Logistic neuron<br><span class="mono" style="font-size:12px">pass/fail example</span></td>
+          <td class="mono">w = 2, b = -4.5</td>
+          <td>The known decision boundary from Course 1's logistic regression example (boundary at x=2.25)</td></tr>
+    </table>
+
+    <pre>linear_layer.get_weights()      # empty [] — weights don't exist yet!
+
+a1 = linear_layer(X_train[0].reshape(1,1))   # first call → triggers weight creation
+                                              # (Keras auto-initializes: random small w, b=0)
+
+set_w = np.array([[200]])
+set_b = np.array([100])
+linear_layer.set_weights([set_w, set_b])     # overwrite with known-correct values</pre>
+
+    <div class="scenario">
+      <div class="scenario-title">🎯 Why this order matters</div>
+      <p style="font-size:13.5px; margin:0">A Keras <code>Dense</code> layer doesn't know its input/output shapes until it sees actual data — so <code>get_weights()</code> right after creating the layer returns an <b>empty list</b> (no weights yet). Only after the first call (<code>linear_layer(X_train[0]...)</code>) does Keras allocate weight arrays with the correct shape and initialize them (small random <code>w</code>, <code>b=0</code>). <b>Then</b> you can call <code>set_weights()</code> to overwrite those random values with the ones you already know are correct — purely for demonstration purposes here, not because that's how real training works. In real training, you'd never hand-pick <code>w, b</code> like this — gradient descent finds them.</p>
+    </div>
+  </div>
+
+  <h2>❓ Q2: How do we get the same result for different w, b?</h2>
+  <div class="qcard">
+    <div class="qtitle"><span class="qmark">?</span>How do we get same result for different values of w and b?</div>
+    <p><b>Answer:</b> This is a slight misread of the lab — the lab does <b>not</b> get the same result from different w/b. It does the opposite: it takes <b>one fixed w, b</b> and shows <b>two different computation methods</b> (the Keras layer, and a manual NumPy formula) produce the <b>same output</b>. That's the actual comparison being made.</p>
+
+    <pre>a1 = linear_layer(X_train[0].reshape(1,1))                 # Method 1: Keras layer
+print(a1)                                                    # → same w, b used internally
+
+alin = np.dot(set_w, X_train[0].reshape(1,1)) + set_b        # Method 2: raw NumPy formula
+print(alin)                                                  # w·x + b, computed by hand
+
+# Both print the SAME number — proving Dense(activation='linear') == w·x + b</pre>
+
+    <p style="font-size:13.5px">Same pattern repeats for the logistic neuron:</p>
+    <pre>a1 = model.predict(X_train[0].reshape(1,1))                          # Keras sigmoid layer
+alog = sigmoidnp(np.dot(set_w, X_train[0].reshape(1,1)) + set_b)     # manual sigmoid(w·x+b)
+# again — identical values</pre>
+
+    <div class="scenario">
+      <div class="scenario-title">🎯 Real-world takeaway</div>
+      <p style="font-size:13.5px; margin:0">This is the core "aha" of the lab: a Keras <code>Dense</code> layer with 1 unit is <b>literally</b> the regression equation you already know from Course 1 — just wrapped in a framework built to scale up to hundreds of neurons and layers. Same w, same b, same math — just two different code paths (Keras's optimized internals vs. your own NumPy) arriving at the identical number.</p>
+    </div>
+  </div>
+
+  <h2>Quick Reference: Linear vs Logistic Neuron</h2>
+  <div class="card">
+    <table>
+      <tr><th>Aspect</th><th>Linear neuron</th><th>Logistic neuron</th></tr>
+      <tr><td>Formula</td><td class="mono">f(x) = w·x + b</td><td class="mono">f(x) = sigmoid(w·x + b)</td></tr>
+      <tr><td>Keras layer</td><td class="mono">Dense(1, activation='linear')</td><td class="mono">Dense(1, activation='sigmoid')</td></tr>
+      <tr><td>Used for</td><td>Regression (predicting a continuous value, e.g. price)</td><td>Classification (predicting probability, e.g. pass/fail)</td></tr>
+      <tr><td>Course 1 equivalent</td><td>Linear regression</td><td>Logistic regression</td></tr>
+      <tr><td>w, b in this lab</td><td class="mono">200, 100</td><td class="mono">2, -4.5</td></tr>
+    </table>
+  </div>
+
+  <div class="footer-note">
+    <b>Big picture:</b> A single neuron with no activation = linear regression. A single neuron with sigmoid activation = logistic regression. Stack many of these together (next lessons) and you get a neural network — each neuron still just doing one of these two familiar computations.
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neural Network Layer</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height:1.55;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+  h1{
+    font-size:28px; margin:0 0 4px; color:#fff;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:20px 22px; margin-bottom:16px;
+  }
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  .eq{
+    background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:14px 18px; font-size:16px; text-align:center; margin:10px 0; color:#fbbf24;
+  }
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; margin:18px 0;}
+  .box{
+    border:2px solid var(--blue); border-radius:10px; padding:10px 16px;
+    background:#111426; font-weight:600; text-align:center; min-width:90px;
+  }
+  .box.small{border-color:var(--purple); font-size:13px; padding:8px 12px;}
+  .arrow{color:var(--muted); font-size:20px;}
+  .layer-diagram{
+    display:flex; align-items:center; justify-content:center; gap:18px;
+    flex-wrap:wrap; margin:20px 0; padding:20px; background:#0d0f16;
+    border-radius:12px; border:1px solid var(--border);
+  }
+  .neuron-col{display:flex; flex-direction:column; gap:10px; align-items:center;
+    border:2px solid var(--blue); border-radius:10px; padding:14px 18px; background:#111426;}
+  .neuron{width:42px; height:42px; border-radius:50%; border:3px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--blue);}
+  .neuron.out{border-color:var(--pink); color:var(--pink);}
+  .label{font-size:12px; color:var(--muted); text-align:center; margin-top:6px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .tag{
+    display:inline-block; padding:2px 9px; border-radius:20px; font-size:11.5px;
+    background:rgba(79,140,255,.15); color:var(--blue); font-weight:600; margin-right:6px;
+  }
+  .scenario{
+    background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;
+  }
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  ul{margin:8px 0; padding-left:20px;}
+  li{margin-bottom:6px; font-size:14.5px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .step-num{
+    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;
+  }
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Neural Network Layer</h1>
+  <p class="subtitle">Lesson 3 · How a single layer of neurons computes its output</p>
+
+  <h2>Big Picture</h2>
+  <div class="card">
+    <p>A neural network is built from <span class="highlight">layers</span>. Each layer is just a bunch of <span class="highlight">logistic regression units</span> (neurons) stacked side by side, each with its own parameters <code>w</code> and <code>b</code>. A layer takes a vector of numbers in, and outputs a new vector of numbers.</p>
+    <div class="flow">
+      <div class="box">Layer 0<br><span class="mono" style="font-weight:400;font-size:12px">input x</span></div>
+      <span class="arrow">→</span>
+      <div class="box">Layer 1<br><span class="mono" style="font-weight:400;font-size:12px">3 neurons (hidden)</span></div>
+      <span class="arrow">→</span>
+      <div class="box">Layer 2<br><span class="mono" style="font-weight:400;font-size:12px">1 neuron (output)</span></div>
+    </div>
+    <p style="font-size:13.5px;color:var(--muted)">Example used throughout: predicting whether a t‑shirt will be a <em>top seller</em>, from 4 input features (price, shipping cost, marketing, material).</p>
+  </div>
+
+  <h2>Notation Convention</h2>
+  <div class="card">
+    <table>
+      <tr><th>Symbol</th><th>Meaning</th></tr>
+      <tr><td class="mono">superscript [l]</td><td>Which <b>layer</b> the quantity belongs to (layer 0 = input, layer 1, layer 2…)</td></tr>
+      <tr><td class="mono">subscript j</td><td>Which <b>neuron/unit</b> within that layer</td></tr>
+      <tr><td class="mono">w<sub>j</sub><sup>[l]</sup>, b<sub>j</sub><sup>[l]</sup></td><td>Parameters of neuron j in layer l</td></tr>
+      <tr><td class="mono">a<sub>j</sub><sup>[l]</sup></td><td>Activation output of neuron j in layer l</td></tr>
+      <tr><td class="mono">a<sup>[l]</sup> (vector)</td><td>Full activation vector output by layer l → becomes the <b>input</b> to layer l+1</td></tr>
+    </table>
+  </div>
+
+  <h2>Layer 1 — The Hidden Layer</h2>
+  <div class="card">
+    <p>Input <code>x</code> (4 features) is fed to <span class="highlight">all 3 neurons</span> in layer 1. Each neuron is an independent little logistic regression unit:</p>
+    <div class="eq">a<sub>1</sub><sup>[1]</sup> = g( w<sub>1</sub><sup>[1]</sup> · x + b<sub>1</sub><sup>[1]</sup> ) = 0.3</div>
+    <div class="eq">a<sub>2</sub><sup>[1]</sup> = g( w<sub>2</sub><sup>[1]</sup> · x + b<sub>2</sub><sup>[1]</sup> ) = 0.7</div>
+    <div class="eq">a<sub>3</sub><sup>[1]</sup> = g( w<sub>3</sub><sup>[1]</sup> · x + b<sub>3</sub><sup>[1]</sup> ) = 0.2</div>
+    <p style="font-size:13px;color:var(--muted)">where g(z) = 1 / (1 + e<sup>-z</sup>) — the sigmoid/logistic function, and <code>z = w·x + b</code> (the familiar term from logistic regression).</p>
+
+    <div class="layer-diagram">
+      <div class="box small">x<br><span style="color:var(--orange)">[4 features]</span></div>
+      <span class="arrow">→</span>
+      <div class="neuron-col">
+        <div class="neuron">0.3</div>
+        <div class="neuron">0.7</div>
+        <div class="neuron">0.2</div>
+        <div class="label">Layer 1<br>(3 neurons)</div>
+      </div>
+      <span class="arrow">→</span>
+      <div class="box small">a<sup>[1]</sup> = [0.3, 0.7, 0.2]</div>
+    </div>
+
+    <div class="scenario">
+      <div class="scenario-title">🎯 Real-world reading</div>
+      <p style="font-size:13.5px; margin:0">Each hidden neuron can be thought of as learning its own "concept" from the raw features — e.g. neuron 1 → probability of "affordability" (0.3), neuron 2 → probability of "awareness" (0.7), neuron 3 → probability of "perceived quality" (0.2). The network isn't told these labels — it discovers useful intermediate features on its own during training.</p>
+    </div>
+  </div>
+
+  <h2>Layer 2 — The Output Layer</h2>
+  <div class="card">
+    <p>Layer 2 has just <b>one neuron</b>. Its input isn't the raw <code>x</code> anymore — it's <code>a<sup>[1]</sup></code>, the output vector from layer 1:</p>
+    <div class="eq">a<sub>1</sub><sup>[2]</sup> = g( w<sub>1</sub><sup>[2]</sup> · a<sup>[1]</sup> + b<sub>1</sub><sup>[2]</sup> ) = 0.84</div>
+
+    <div class="layer-diagram">
+      <div class="box small">a<sup>[1]</sup> = [0.3, 0.7, 0.2]</div>
+      <span class="arrow">→</span>
+      <div class="neuron-col">
+        <div class="neuron out">0.84</div>
+        <div class="label">Layer 2<br>(output)</div>
+      </div>
+      <span class="arrow">→</span>
+      <div class="box small">a<sup>[2]</sup> = 0.84<br><span style="color:var(--muted);font-weight:400;font-size:11px">(scalar, not a vector)</span></div>
+    </div>
+    <p style="font-size:13.5px;color:var(--muted)">Because this layer has only 1 neuron, its output is a single number (scalar), not a vector.</p>
+  </div>
+
+  <h2>Optional Final Step — Thresholding</h2>
+  <div class="card">
+    <p>If you want a hard yes/no prediction instead of a probability, threshold <code>a<sup>[2]</sup></code> at 0.5:</p>
+    <div class="eq">is a<sup>[2]</sup> ≥ 0.5 ?</div>
+    <div class="flow">
+      <div class="box small" style="border-color:var(--green)">a<sup>[2]</sup> = 0.84 ≥ 0.5</div>
+      <span class="arrow">→</span>
+      <div class="box small" style="border-color:var(--green);color:var(--green)">ŷ = 1<br><span style="font-size:11px;color:var(--muted)">"Yes, top seller"</span></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted)">Same thresholding rule used in plain logistic regression — nothing new here.</p>
+  </div>
+
+  <h2>Putting It Together</h2>
+  <div class="card">
+    <p><span class="step-num">1</span>Layer inputs a vector of numbers.</p>
+    <p><span class="step-num">2</span>Each neuron in that layer runs its own logistic regression: <code>g(w·input + b)</code>.</p>
+    <p><span class="step-num">3</span>All neuron outputs combine into a new vector — the layer's activation vector <code>a<sup>[l]</sup></code>.</p>
+    <p><span class="step-num">4</span>That vector becomes the input to the next layer. Repeat until the final (output) layer.</p>
+    <p><span class="step-num">5</span>Optionally threshold the final output to get a 0/1 prediction.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Key takeaway:</b> A "layer" is nothing exotic — it's a set of logistic regression units run in parallel on the same input, whose outputs get bundled into a vector and passed forward. Stack enough of these and you get a deep neural network.
+  </div>
+
+</div>
+</body>
+</html>
