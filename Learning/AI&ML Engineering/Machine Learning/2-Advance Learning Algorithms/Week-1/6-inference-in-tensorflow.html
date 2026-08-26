@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inference in TensorFlow</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff; margin:10px 0;}
+  .eq{background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:14px 18px; font-size:16px; text-align:center; margin:10px 0; color:#fbbf24;}
+  .flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; margin:18px 0;}
+  .box{border:2px solid var(--blue); border-radius:10px; padding:10px 14px;
+    background:#111426; font-weight:600; text-align:center; min-width:80px; font-size:13.5px;}
+  .box .sub{font-size:11px; color:var(--muted); font-weight:400; display:block; margin-top:2px;}
+  .arrow{color:var(--muted); font-size:18px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .plot{position:relative; width:100%; max-width:420px; height:260px; margin:16px auto; background:#0d0f16; border:1px solid var(--border); border-radius:10px;}
+  .plot .axis-label{position:absolute; font-size:11px; color:var(--muted);}
+  .plot .x{color:var(--pink); position:absolute; font-weight:700; font-size:14px;}
+  .plot .o{color:var(--blue); position:absolute; font-weight:700; font-size:14px;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Inference in TensorFlow</h1>
+  <p class="subtitle">Lesson 6 · Coffee Roasting example + Digit Classification, written in actual Keras code</p>
+
+  <h2>Framework Note</h2>
+  <div class="card">
+    <p>This specialization uses <span class="highlight">TensorFlow</span> (Google, Keras interface). The other major framework is <span class="highlight">PyTorch</span> — both are widely used in industry.</p>
+  </div>
+
+  <h2>Example 1: Coffee Roasting Classification</h2>
+  <div class="card">
+    <p>Goal: given <b>temperature</b> and <b>duration</b>, predict if the resulting coffee is good (y=1) or bad (y=0).</p>
+    <p style="font-size:13.5px; color:var(--muted)">Good coffee only happens in a narrow "triangle" of temp/duration combos — too low temp or too short duration → undercooked; too high temp or too long duration → overcooked/burnt.</p>
+
+    <table>
+      <tr><th>Region</th><th>Outcome</th></tr>
+      <tr><td>Low temp / short duration</td><td>Undercooked ❌</td></tr>
+      <tr><td>High temp / long duration</td><td>Overcooked ❌</td></tr>
+      <tr><td>Middle "triangle"</td><td>Good coffee ✅</td></tr>
+    </table>
+
+    <p>Network: <b>2 inputs → 3-unit hidden layer → 1-unit output layer</b>, both using sigmoid.</p>
+
+    <pre>x = np.array([[200.0, 17.0]])                       # temp=200°C, duration=17 min
+
+layer_1 = Dense(units=3, activation='sigmoid')
+a1 = layer_1(x)                                       # e.g. [0.2, 0.7, 0.3]
+
+layer_2 = Dense(units=1, activation='sigmoid')
+a2 = layer_2(a1)                                      # e.g. [0.8]
+
+if a2 >= 0.5:
+    yhat = 1        # predicted good coffee
+else:
+    yhat = 0</pre>
+
+    <p style="font-size:13px; color:var(--muted)">In this example, a2 = 0.8 ≥ 0.5 → predicted ŷ = 1 ("good coffee"), even though the true label for that particular point was actually a red ✗ (bad) — illustrating the model can make an incorrect prediction, which is normal and part of why we train/evaluate models.</p>
+  </div>
+
+  <h2>Example 2: Handwritten Digit Classification</h2>
+  <div class="card">
+    <p>Same pattern, bigger network — <b>64 pixel inputs → 25 units → 15 units → 1 unit</b>, all sigmoid.</p>
+    <pre>x = np.array([[0.0, ..., 245, ..., 240, ..., 0.0]])   # 64 pixel intensities
+
+layer_1 = Dense(units=25, activation='sigmoid')
+a1 = layer_1(x)
+
+layer_2 = Dense(units=15, activation='sigmoid')
+a2 = layer_2(a1)
+
+layer_3 = Dense(units=1, activation='sigmoid')
+a3 = layer_3(a2)
+
+if a3 >= 0.5:
+    yhat = 1
+else:
+    yhat = 0</pre>
+  </div>
+
+  <h2>The Pattern to Notice</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="box">x</div><span class="arrow">→</span>
+      <div class="box">layer_1(x)<span class="sub">→ a1</span></div><span class="arrow">→</span>
+      <div class="box">layer_2(a1)<span class="sub">→ a2</span></div><span class="arrow">→</span>
+      <div class="box">layer_3(a2)<span class="sub">→ a3</span></div><span class="arrow">→</span>
+      <div class="box" style="border-color:var(--pink)">threshold<span class="sub">→ ŷ</span></div>
+    </div>
+    <p style="font-size:13.5px">Every layer:</p>
+    <p><span class="step-num">1</span>Created once: <code>Dense(units=N, activation='sigmoid')</code></p>
+    <p><span class="step-num">2</span>Called on the <b>previous</b> layer's output: <code>a_next = layer(a_prev)</code></p>
+    <p><span class="step-num">3</span>Chained in order — exactly forward propagation from the earlier lesson, now in actual code.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">This coffee-roasting example is simplified, but ML-based coffee roast optimization is a real thing companies use — tuning roast profiles (temp/time curves) to hit a target flavor consistently. The same <code>Dense → Dense → Dense</code> pattern you're writing here scales directly to problems like the digit classifier, spam detection, or fraud detection — same code shape, different input features and layer sizes.</p>
+  </div>
+
+  <h2>Heads Up: NumPy Array Shapes</h2>
+  <div class="card">
+    <p>Note both examples wrap inputs in <b>double brackets</b>: <code>np.array([[200.0, 17.0]])</code>, not <code>np.array([200.0, 17.0])</code>.</p>
+    <p style="font-size:13.5px; color:var(--muted)">That's the same 2D-shape requirement covered earlier — TensorFlow expects <code>(num_samples, num_features)</code>. Here it's 1 sample with 2 features, so shape (1, 2). The next lesson digs into this data-shape convention in more detail.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> A closer look at how TensorFlow expects data to be shaped (rows = samples, columns = features) — worth reviewing carefully since shape mismatches are one of the most common bugs when starting out.
+  </div>
+
+</div>
+</body>
+</html>
