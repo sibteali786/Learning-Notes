@@ -5314,3 +5314,161 @@ snek_object_t *new_snek_string(char *value) {
 
 ```
 
+# Garbage Collector
+
+Click to hide video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: garbage collection video
+
+As you're painfully aware, we've been manually managing memory throughout this course with our C code. However, Sneklang, the language we're building, has _automatic memory management_. Specifically, it makes use of a [garbage collector](https://en.wikipedia.org/wiki/Garbage_collection_\(computer_science\)).
+
+- In C and C++, management of heap memory is done manually with `malloc` and `free` (and `new` and `delete` in C++).
+- Rust has a compile-time system that ensures memory safety.
+- Zig gives the programmer access to "allocators" to manage memory.
+
+These are all examples of "manual memory management" – the programmer has to write code that keeps track of and frees memory.
+
+## So What's a Garbage Collector?
+
+A garbage collector is a program (or part of a program) that automatically frees memory that is no longer in use. Languages like Python, Java, JavaScript, OCaml, and even Go use garbage collectors _as the code is running_ to manage memory. It's "automatic memory management". Automatic memory management can be a huge productivity boost for developers (less code, and sometimes fewer memory-related bugs) but it typically comes with a performance cost because, like Forrest Gump, the garbage collector is always running.
+
+It's no coincidence that C, C++, Rust, and Zig are all great choices when you need to squeeze every last drop of performance out of your code.
+
+# Refcounting
+
+One of the simplest ways to implement a garbage collector is to use a [reference counting](https://en.wikipedia.org/wiki/Garbage_collection_\(computer_science\)#Reference_counting) algorithm. It goes something like this:
+
+- All objects keep track of a `reference_count` integer.
+- When that object is referenced, its reference count is incremented.
+- When an object is garbage collected, the reference count of any object it references is decremented.
+- When any object's reference count reaches zero, the object is garbage collected.
+
+## Assignment
+
+1. [ ] In `snekobject.h`: add a new integer field named `refcount` to `snek_object_t`.
+2. [ ] In `snekobject.c`: complete the `_new_snek_object` function:
+    1. [ ] Allocate a `snek_object_t` on the heap using `calloc` so its memory is zero-initialized.
+    2. [ ] If the allocation fails, return `NULL`.
+    3. [ ] Set the `refcount` to `1`.
+    4. [ ] Return the pointer to the new object.
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+snek_object_t *_new_snek_object(void) {
+  snek_object_t *new_obj = calloc(1,sizeof(snek_object_t));
+  if (new_obj == NULL){
+    return NULL;
+  }
+
+  new_obj->refcount = 1;
+  return new_obj;
+}
+```
+
+```c
+typedef struct SnekObject {
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+  int refcount;
+} snek_object_t;
+```
+
+# Increment
+
+We need to be able to increment the reference count of a `SnekObject` any time a new reference to it is created.
+
+## Assignment
+
+Complete the `refcount_inc` function. It should increment the `refcount` of a `SnekObject`. If the object is `NULL`, it should do nothing (but safely).
+
+```c
+#include "snekobject.h"
+#include "assert.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void refcount_inc(snek_object_t *obj) {
+  if (obj == NULL){
+    return;
+  }
+  obj->refcount++;
+}
+
+```
+
+# Decrement and free
+
+Now things are going to get a touch more complicated. In a refcounting GC, the interesting stuff happens when the refcount equals `0`. That's when the garbage gets collected.
+
+When the refcount reaches 0, there are no references to this object anymore! So, we need to `free` the memory _automagically_ -- that's the whole point of a garbage collector.
+
+For our first pass at this, we will only handle integers, floats and strings to keep things simple. As we go a little further, we'll implement it for the rest of the SnekObject types.
+
+## Assignment
+
+1. [ ] Complete the `refcount_dec` function:
+    1. [ ] Handle `NULL` objects gracefully.
+    2. [ ] Decrement the `refcount`
+    3. [ ] Then check if the `refcount` has reached 0, and if so, call `refcount_free` on the object.
+2. [ ] Complete the `refcount_free` function:
+    1. [ ] If the object is an `INTEGER` or a `FLOAT`, free the object itself (we don't need to worry about the data inside the object because it's stored directly in the object).
+    2. [ ] If the object is a `STRING`, free the `char*` data inside the object, then free the object itself.
+    3. [ ] If it's any other type, do nothing for now.
+
+
+
+**INTEGER/FLOAT** — the value is stored directly inside the object (`obj->data.v_int` / `obj->data.v_float`). One `malloc`, one block of memory. Freeing `obj` frees everything:
+
+```c
+free(obj);
+```
+
+**STRING** — `obj->data.v_string` is a `char*`, a separate heap allocation:
+
+```c
+char *dst = malloc(len + 1);   // separate malloc, in new_snek_string
+...
+obj->data.v_string = dst;
+```
+
+So a string object is **two** allocations: the `snek_object_t` struct itself, and the string buffer it points to. `free(obj)` alone only frees the struct — the buffer becomes a memory leak (nothing else references it, so it can never be freed).
+
+So order matters: free the inner pointer first, then the struct that held it.
+
+```c
+free(obj->data.v_string);
+free(obj);
+```
+
+(Reversed order would also work here technically — `free(obj)` doesn't erase the pointer value — but freeing outer-before-inner is generally unsafe practice since you'd lose access to `obj->data.v_string` after freeing `obj`. Free inner first, always.)
+
+```c
+#include "snekobject.h"
+#include "assert.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void refcount_dec(snek_object_t *obj) {
+  if (obj == NULL){
+    return;
+  }
+  obj->refcount--;
+  if(obj->refcount == 0){
+    refcount_free(obj);
+  }
+}
+
+void refcount_free(snek_object_t *obj) {
+  if (obj->kind == INTEGER || obj->kind == FLOAT){
+    free(obj);
+  }else if (obj->kind == STRING){
+    free(obj->data.v_string);
+    free(obj);
+  }
+}
+```

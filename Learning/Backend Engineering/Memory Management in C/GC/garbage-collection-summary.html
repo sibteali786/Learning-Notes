@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Garbage Collection — Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#0f1117;
+    --card:#161925;
+    --card-border:#242838;
+    --blue:#5b8cff;
+    --orange:#ff9d5c;
+    --green:#5ce0a0;
+    --purple:#b985f4;
+    --text:#e6e8f0;
+    --muted:#8b90a8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Mono',monospace;
+    margin:0;
+    padding:32px 20px 60px;
+  }
+  h1{
+    font-family:'Syne',sans-serif;
+    font-weight:800;
+    font-size:2rem;
+    margin:0 0 4px;
+  }
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:.9rem;}
+  .container{max-width:900px;margin:0 auto;}
+
+  .section-label{
+    font-family:'Syne',sans-serif;
+    font-weight:600;
+    font-size:.75rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:36px 0 14px;
+  }
+  .section-label::before{
+    content:"";
+    width:4px;height:18px;
+    background:var(--accent,var(--blue));
+    border-radius:2px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:14px;
+  }
+  .card p{margin:0;font-size:.92rem;line-height:1.6;color:var(--text);}
+
+  .pill{
+    display:inline-block;
+    font-size:.72rem;
+    padding:3px 10px;
+    border-radius:999px;
+    font-weight:600;
+    margin-right:6px;
+  }
+  .pill.blue{background:rgba(91,140,255,.15);color:var(--blue);}
+  .pill.orange{background:rgba(255,157,92,.15);color:var(--orange);}
+  .pill.green{background:rgba(92,224,160,.15);color:var(--green);}
+  .pill.purple{background:rgba(185,133,244,.15);color:var(--purple);}
+
+  .compare-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+
+  .compare-card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:18px;
+  }
+  .compare-card h3{
+    font-family:'Syne',sans-serif;
+    margin:0 0 10px;
+    font-size:1rem;
+  }
+  .compare-card ul{margin:0;padding-left:18px;font-size:.85rem;line-height:1.7;color:var(--muted);}
+  .compare-card ul li b{color:var(--text);}
+
+  code, .inline-code{
+    background:#1d2130;
+    color:var(--green);
+    padding:2px 6px;
+    border-radius:4px;
+    font-size:.85rem;
+  }
+
+  .example{
+    border-left:3px solid var(--orange);
+    padding:10px 16px;
+    background:rgba(255,157,92,.06);
+    border-radius:0 8px 8px 0;
+    font-size:.85rem;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  .example b{color:var(--orange);}
+
+  svg{display:block;margin:10px auto;max-width:100%;}
+  .diagram-caption{text-align:center;color:var(--muted);font-size:.78rem;margin-top:-6px;}
+
+  .tip{
+    background:rgba(185,133,244,.08);
+    border:1px solid rgba(185,133,244,.25);
+    border-radius:10px;
+    padding:14px 18px;
+    font-size:.85rem;
+    line-height:1.6;
+  }
+  .tip b{color:var(--purple);}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Garbage Collection</h1>
+  <div class="subtitle">How languages reclaim memory without manual free()</div>
+
+  <div class="section-label" style="--accent:var(--blue)">Problem Statement</div>
+  <div class="card">
+    <p>In C, you manage memory manually — error-prone. Rust's borrow checker figures out object lifetimes <b>at compile time</b>. Garbage-collected languages (Python, JS, Go) figure out <span class="inline-code">is this value still alive?</span> <b>at runtime</b>, automatically freeing memory that's no longer reachable ("live").</p>
+  </div>
+
+  <div class="section-label" style="--accent:var(--orange)">Where the Cost Goes</div>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3><span class="pill blue">C</span> Manual</h3>
+      <ul><li>Programmer calls <code>free()</code></li><li>Cost paid at <b>dev time</b></li><li>Easy to forget → leaks/bugs</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3><span class="pill purple">Rust</span> Borrow Checker</h3>
+      <ul><li>Compiler tracks lifetimes</li><li>Cost paid at <b>compile time</b></li><li>No runtime GC pause</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3><span class="pill green">GC Langs</span> Automatic</h3>
+      <ul><li>Runtime decides liveness</li><li>Cost paid at <b>runtime</b></li><li>Convenient, but pauses happen</li></ul>
+    </div>
+  </div>
+
+  <div class="section-label" style="--accent:var(--green)">Algorithm 1 — Reference Counting</div>
+  <div class="card">
+    <p>Every object has a hidden <span class="inline-code">count</span> field. Referencing it (assigning, adding to a list) increments the count; removing a reference decrements it. When count hits <b>0</b>, memory is freed immediately.</p>
+    <div class="example"><b>Example:</b> <code>foo</code> is created (count=1), then appended to a list (count=2). Pop it from the list → count=1. Function returns, last reference gone → count=0 → freed.</div>
+  </div>
+
+  <div class="compare-card" style="max-width:100%">
+    <h3><span class="pill orange">Downsides</span></h3>
+    <ul>
+      <li>Can't detect <b>cycles</b> (A → B → A never hits 0)</li>
+      <li>Expensive — every touch updates counts</li>
+    </ul>
+  </div>
+
+  <div class="section-label" style="--accent:var(--purple)">Algorithm 2 — Mark & Sweep</div>
+  <div class="card">
+    <p><b>Mark:</b> start from "roots" (stack frame variables) and trace every reachable object. <b>Sweep:</b> anything not marked is unreachable → reclaim it. Runs periodically as a <span class="inline-code">GC pause</span>, not on every operation.</p>
+  </div>
+
+  <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+    <text x="20" y="24" fill="#8b90a8" font-family="IBM Plex Mono" font-size="12">ROOTS (stack frame)</text>
+    <rect x="20" y="40" width="90" height="34" rx="6" fill="#161925" stroke="#5b8cff"/>
+    <text x="65" y="62" fill="#5b8cff" font-family="IBM Plex Mono" font-size="12" text-anchor="middle">root A</text>
+
+    <rect x="220" y="40" width="90" height="34" rx="6" fill="#161925" stroke="#5ce0a0"/>
+    <text x="265" y="62" fill="#5ce0a0" font-family="IBM Plex Mono" font-size="12" text-anchor="middle">List X</text>
+
+    <rect x="420" y="40" width="90" height="34" rx="6" fill="#161925" stroke="#5ce0a0"/>
+    <text x="465" y="62" fill="#5ce0a0" font-family="IBM Plex Mono" font-size="12" text-anchor="middle">List Y</text>
+
+    <line x1="110" y1="57" x2="220" y2="57" stroke="#5b8cff" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M310 50 C 370 20, 370 20, 420 50" stroke="#5ce0a0" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <path d="M420 64 C 370 100, 370 100, 310 64" stroke="#5ce0a0" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+    <rect x="20" y="130" width="90" height="34" rx="6" fill="#1d2130" stroke="#ff9d5c" stroke-dasharray="4"/>
+    <text x="65" y="152" fill="#ff9d5c" font-family="IBM Plex Mono" font-size="12" text-anchor="middle">unreachable</text>
+    <text x="20" y="185" fill="#8b90a8" font-family="IBM Plex Mono" font-size="11">→ swept (freed), even without any root pointing to it</text>
+
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 z" fill="#5ce0a0"/>
+      </marker>
+    </defs>
+  </svg>
+  <div class="diagram-caption">List X ↔ List Y form a cycle but are reachable from root → both kept. A lonely cyclic pair with no root reference gets swept.</div>
+
+  <div class="example"><b>Key win over ref counting:</b> List A references List B, List B references List A (a cycle). Reference counts never hit zero, but if neither is reachable from any root, mark &amp; sweep still frees both.</div>
+
+  <div class="section-label" style="--accent:var(--blue)">Key Distinctions</div>
+  <div class="card">
+    <p><span class="pill blue">Ref Counting</span> works incrementally, per-operation, misses cycles.<br>
+    <span class="pill purple">Mark &amp; Sweep</span> works in batches (GC pauses), handles cycles, costs more per pause but less per operation.</p>
+  </div>
+
+  <div class="section-label" style="--accent:var(--orange)">Real-World Note</div>
+  <div class="card">
+    <p>CPython's garbage collector itself is written in <b>C</b> (a different language than the one it's managing memory for) — Python uses ref counting as primary, with a cycle-detecting mark-and-sweep-style collector as backup for exactly the cycle problem above.</p>
+  </div>
+
+  <div class="section-label" style="--accent:var(--purple)">Takeaway / Tip</div>
+  <div class="tip">
+    GC is never free — the question is only <b>when</b> you pay: <span class="inline-code">dev time</span> (C), <span class="inline-code">compile time</span> (Rust), or <span class="inline-code">runtime</span> (Python/JS/Go). Language choice = choosing where that cost lands.
+  </div>
+</div>
+</body>
+</html>
