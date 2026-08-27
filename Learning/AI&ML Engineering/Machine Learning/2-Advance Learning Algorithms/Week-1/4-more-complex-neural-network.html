@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>More Complex Neural Network</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:940px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  .eq{background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:14px 18px; font-size:16px; text-align:center; margin:10px 0; color:#fbbf24;}
+  .eq.big{font-size:19px; color:var(--pink); border-color:var(--pink);}
+  .flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; margin:18px 0;}
+  .box{border:2px solid var(--blue); border-radius:10px; padding:10px 14px;
+    background:#111426; font-weight:600; text-align:center; min-width:80px; font-size:13.5px;}
+  .box .sub{font-size:11px; color:var(--muted); font-weight:400; display:block; margin-top:2px;}
+  .arrow{color:var(--muted); font-size:18px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .warn{background:rgba(244,114,182,.08); border:1px solid rgba(244,114,182,.35); border-radius:12px; padding:14px 18px; margin-top:12px;}
+  .warn-title{color:var(--pink); font-weight:700; font-size:13px; margin-bottom:6px;}
+  .quiz{background:#0d0f16; border:1px dashed var(--purple); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .quiz-opt{padding:6px 10px; margin:4px 0; border-radius:6px; font-size:13.5px; border:1px solid var(--border);}
+  .quiz-opt.correct{border-color:var(--green); color:var(--green); background:rgba(52,211,153,.08);}
+  .quiz-opt.wrong{border-color:var(--pink); color:var(--pink); background:rgba(244,114,182,.06); text-decoration:line-through; opacity:.75;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Building a More Complex Neural Network</h1>
+  <p class="subtitle">Lesson 4 · General notation for activations across any layer</p>
+
+  <h2>The Example Network</h2>
+  <div class="card">
+    <p>A network with <span class="highlight">4 layers</span> (by convention: hidden + output layers are counted, input layer is not).</p>
+    <div class="flow">
+      <div class="box">x<span class="sub">Layer 0 (input)</span></div>
+      <span class="arrow">→</span>
+      <div class="box">4 neurons<span class="sub">Layer 1 (hidden)</span></div>
+      <span class="arrow">→</span>
+      <div class="box">5 neurons<span class="sub">Layer 2 (hidden)</span></div>
+      <span class="arrow">→</span>
+      <div class="box">3 neurons<span class="sub">Layer 3 (hidden)</span></div>
+      <span class="arrow">→</span>
+      <div class="box">1 neuron<span class="sub">Layer 4 (output)</span></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted)">"A 4-layer neural network" = 3 hidden layers + 1 output layer. The input layer is never counted.</p>
+  </div>
+
+  <h2>Zooming into Layer 3</h2>
+  <div class="card">
+    <p>Layer 3 takes <code>a<sup>[2]</sup></code> (the vector output by layer 2) as input, and has 3 neurons/units, so it outputs a new vector <code>a<sup>[3]</sup></code>:</p>
+    <div class="eq">a<sub>1</sub><sup>[3]</sup> = g( w<sub>1</sub><sup>[3]</sup> · a<sup>[2]</sup> + b<sub>1</sub><sup>[3]</sup> )</div>
+    <div class="eq">a<sub>2</sub><sup>[3]</sup> = g( w<sub>2</sub><sup>[3]</sup> · a<sup>[2]</sup> + b<sub>2</sub><sup>[3]</sup> )</div>
+    <div class="eq">a<sub>3</sub><sup>[3]</sup> = g( w<sub>3</sub><sup>[3]</sup> · a<sup>[2]</sup> + b<sub>3</sub><sup>[3]</sup> )</div>
+    <p>Output of layer 3 → <code>a<sup>[3]</sup> = [a<sub>1</sub><sup>[3]</sup>, a<sub>2</sub><sup>[3]</sup>, a<sub>3</sub><sup>[3]</sup>]</code>, which then becomes the input to layer 4.</p>
+  </div>
+
+  <h2>Quick Self-Check (from the video)</h2>
+  <div class="card">
+    <p style="font-size:13.5px">Fill in the missing sub/superscripts for the <b>2nd neuron in layer 3</b>:</p>
+    <div class="quiz">
+      <div class="mono" style="font-size:15px; margin-bottom:10px;">a<sub>2</sub><sup>[3]</sup> = g( w<sub>2</sub><sup>[3]</sup> · <b>?</b> + b<sub>2</sub><sup>[3]</sup> )</div>
+      <div class="quiz-opt correct">✅ a<sup>[2]</sup> — correct: input is the <b>output vector of the previous layer</b> (layer 2)</div>
+      <div class="quiz-opt wrong">❌ a<sup>[3]</sup> — wrong layer; that's this layer's own output, not its input</div>
+      <div class="quiz-opt wrong">❌ a<sub>2</sub><sup>[2]</sup> — wrong; this is a single number, but the input must be the full <b>vector</b> a<sup>[2]</sup></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted)">Rule of thumb: parameters (w, b) carry the <b>current</b> layer's superscript; the input vector carries the <b>previous</b> layer's superscript.</p>
+  </div>
+
+  <h2>The General Formula</h2>
+  <div class="card">
+    <div class="eq big">a<sub>j</sub><sup>[l]</sup> = g( w<sub>j</sub><sup>[l]</sup> · a<sup>[l−1]</sup> + b<sub>j</sub><sup>[l]</sup> )</div>
+    <table>
+      <tr><th>Symbol</th><th>Meaning</th></tr>
+      <tr><td class="mono">l</td><td>Current layer number</td></tr>
+      <tr><td class="mono">j</td><td>Unit / neuron number within that layer</td></tr>
+      <tr><td class="mono">a<sub>j</sub><sup>[l]</sup></td><td>Activation of unit j in layer l (this neuron's output)</td></tr>
+      <tr><td class="mono">w<sub>j</sub><sup>[l]</sup>, b<sub>j</sub><sup>[l]</sup></td><td>Parameters of unit j in layer l</td></tr>
+      <tr><td class="mono">a<sup>[l−1]</sup></td><td>Output vector of the <b>previous</b> layer = input to this layer</td></tr>
+      <tr><td class="mono">g</td><td>The <b>activation function</b> (so far, sigmoid — later, other functions too)</td></tr>
+    </table>
+    <div class="warn">
+      <div class="warn-title">⚠️ Easy mistake to avoid</div>
+      <p style="font-size:13.5px; margin:0">The input term uses <code>l − 1</code>, not <code>l</code>. You're dot-producting with the <b>previous</b> layer's output, even though the weights/bias use the <b>current</b> layer's index.</p>
+    </div>
+  </div>
+
+  <h2>One Notation Trick: x = a⁰</h2>
+  <div class="card">
+    <p>To make the formula work uniformly for <b>every</b> layer including the first one, the input features <code>x</code> are renamed <code>a<sup>[0]</sup></code>:</p>
+    <div class="eq">a<sup>[1]</sup> = g( w<sup>[1]</sup> · a<sup>[0]</sup> + b<sup>[1]</sup> )   where a<sup>[0]</sup> = x</div>
+    <p style="font-size:13.5px;color:var(--muted)">Now the same general equation applies whether l = 1 (using raw input) or l = 4 (using output of layer 3) — no special-casing needed.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">Think of it like an assembly line: each layer takes the "product" (vector) handed off by the previous station, applies its own set of workers (neurons) with their own tools (weights/bias), and passes a new product forward. Layer 1 is the only station that receives raw material (<code>x</code>) instead of a half-finished product from another station — which is exactly why we relabel <code>x</code> as <code>a<sup>[0]</sup></code>, so every station follows the identical rule.</p>
+  </div>
+
+  <h2>Recap</h2>
+  <div class="card">
+    <p><span class="step-num">1</span>Layer count = hidden layers + output layer (input layer, "layer 0", is never counted).</p>
+    <p><span class="step-num">2</span>Every neuron's activation: <code>a<sub>j</sub><sup>[l]</sup> = g(w<sub>j</sub><sup>[l]</sup> · a<sup>[l−1]</sup> + b<sub>j</sub><sup>[l]</sup>)</code>.</p>
+    <p><span class="step-num">3</span>Weights/bias superscript = current layer; input vector superscript = previous layer.</p>
+    <p><span class="step-num">4</span><code>x = a<sup>[0]</sup></code> makes the formula consistent from layer 1 all the way to the output layer.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> Turning this activation formula into a full <b>inference algorithm</b> — how a trained network makes a prediction end-to-end, layer by layer.
+  </div>
+
+</div>
+</body>
+</html>
