@@ -4944,3 +4944,373 @@ bool snek_array_set(snek_object_t *array, size_t index, snek_object_t *value);
 
 ```
 
+# Get
+
+Now that we can store values in arrays, we need a way to _retrieve_ them. `snek_array_get` returns the value at a specific index in the array. The equivalent in Python would be:
+
+```py
+array[7]
+```
+
+## Assignment
+
+Complete the `snek_array_get` function:
+
+1. [ ] If the object is `NULL`, return `NULL`.
+2. [ ] If the object's `kind` is not `ARRAY`, return `NULL`.
+3. [ ] If the index is out of bounds, return `NULL`.
+4. [ ] Return the value in the `elements` array at the specified index.
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+snek_object_t *snek_array_get(snek_object_t *snek_obj, size_t index) {
+  if (snek_obj == NULL){
+    return NULL;
+  }
+  if (snek_obj->kind != ARRAY){
+    return NULL;
+  }
+  if (index >= snek_obj->data.v_array.size){
+    return NULL;
+  }
+  
+  return snek_obj->data.v_array.elements[index];
+}
+```
+# Length
+
+Now that we have all sorts of Snek Objects (integers, floats, strings, arrays, etc.), we need a convenient way to get the `length` of _any_ Snek Object. In Python (Sneklang's dreaded competitor) it's as easy as:
+
+```python
+print(len(x))
+```
+
+As a Python dev, you don't have to know the value of `x` ahead of time because Python keeps track of it under-the-hood for you. We want the same capability in Sneklang.
+
+## Assignment
+
+In `snekobject.c`, complete the `snek_length` function:
+
+1. [ ] If the input is `NULL` return `-1` (which we've chosen to indicate failure).
+2. [ ] If the input is an integer, its size is always `1`.
+3. [ ] If the input is a float, its size is always `1`.
+4. [ ] If the input is a string, its size is the [length of the string in bytes](https://devdocs.io/c/string/byte/strlen).
+5. [ ] If the input is a `VECTOR3`, its size is always `3`.
+6. [ ] If the input is an array, its size is stored in the `v_array.size` field.
+7. [ ] If the input is none of the above, return `-1`.
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+int snek_length(snek_object_t *obj) {
+  if (obj == NULL){
+    return -1;
+  }
+
+  if (obj->kind == INTEGER || obj->kind == FLOAT){
+    return 1;
+  }
+
+  if (obj->kind == STRING){
+    return strlen(obj->data.v_string);
+  }
+
+  if (obj->kind == VECTOR3){
+    return 3;
+  }
+
+  if (obj->kind == ARRAY){
+    return obj->data.v_array.size;
+  }
+
+  return -1;
+  
+}
+```
+
+# Add
+
+If you're familiar with Python, you'll be familiar with how Python objects can have an `__add__` method. It allows developers to specify custom logic for different types of objects. For example, adding two integers we want to behave like this:
+
+```py
+3 + 5
+# 8
+```
+
+But with an array, we probably want it to work like this:
+
+```py
+[3] + [5]
+# [3, 5]
+```
+
+## Assignment
+
+_This is the final lesson on objects, and it's a big one. Take your time – you'll be using a lot of the functions that you wrote in past chapters to complete this one_.
+
+Complete the `snek_add` function. It accepts two pointers to `snek_object_t` objects ("a" and "b") and returns a pointer to a new `snek_object_t` object (the result of the sum):
+
+1. [ ] If either input is `NULL`, return `NULL`.
+2. [ ] If "a" is an integer:
+    1. [ ] If "b" is an integer, return a `new_snek_integer` with the sum of the two integers.
+    2. [ ] If "b" is a float, return a `new_snek_float` with the sum of the integer and float.
+    3. [ ] Anything else, invalid operation, return `NULL`.
+3. [ ] If "a" is a float:
+    1. [ ] If "b" is an integer, return a `new_snek_float` with the sum of the float and integer.
+    2. [ ] If "b" is a float, return a `new_snek_float` with the sum of the two floats.
+    3. [ ] Anything else, invalid operation, return `NULL`.
+4. [ ] If "a" is a string:
+    1. [ ] If "b" is not a string, invalid operation, return `NULL`.
+    2. [ ] Otherwise:
+        1. [ ] Calculate the length of the new string by combining the length of the two strings (properly handling the null terminator)
+        2. [ ] Allocate memory for a new temporary string using [calloc](https://devdocs.io/c/memory/calloc)
+        3. [ ] Use [strcat](https://devdocs.io/c/string/byte/strcat) to append the data from a and then b to the temporary string.
+        4. [ ] Create a `new_snek_string` and pass in the temporary string.
+        5. [ ] Free the memory for the temporary string and return the new string object.
+5. [ ] If "a" is a vector3:
+    1. [ ] If "b" is not a `VECTOR3`, invalid operation, return `NULL`.
+    2. [ ] Otherwise:
+        1. [ ] Create a `new_snek_vector3`.
+        2. [ ] Recursively call `snek_add` for each of the x, y, and z fields. For example, a vector [1,2,3]+[4,5,6] should result in a new vector [5,7,9].
+        3. [ ] Return the new vector struct.
+6. [ ] If "a" is an array:
+    1. [ ] If "b" is not an array, invalid operation, return `NULL`.
+    2. [ ] Otherwise:
+        1. [ ] Create a `new_snek_array` with the combined length of the two arrays.
+        2. [ ] Iterate over each index in "a" and use `snek_array_set` and `snek_array_get` to copy the values from "a" to the new array.
+        3. [ ] Do the same for "b".
+        4. [ ] Return the new array object.
+7. [ ] If "a" is none of the above, invalid operation, return `NULL`.
+
+_We won't implement `subtract`, `multiply`, or `divide` but each of these would follow the same pattern_. This is how arithmetic operations work in Sneklang!
+
+
+```c
+#include "snekobject.h"
+#include <stdlib.h>
+#include <string.h>
+
+snek_object_t *snek_add(snek_object_t *a, snek_object_t *b) {
+  if (a == NULL || b == NULL){
+    return NULL;
+  }
+  if (a->kind == INTEGER){
+    if (b->kind == INTEGER){
+      int result = b->data.v_int + a->data.v_int;
+      return new_snek_integer(result);
+    }else if (b->kind == FLOAT){
+      float result = a->data.v_int + b->data.v_float;
+      return new_snek_float(result);
+    }else {
+      return NULL;
+    }
+  }
+  
+  if (a->kind == FLOAT){
+    if (b->kind == INTEGER){
+      int result = a->data.v_float + b->data.v_int;
+      return new_snek_float(result);
+    }else if (b->kind == FLOAT){
+      float result = a->data.v_float + b->data.v_float;
+      return new_snek_float(result);
+    }else {
+      return NULL;
+    }
+  }
+
+  if (a->kind == STRING){
+    if (b->kind != STRING) {
+      return NULL;
+    }else {
+      size_t new_str_len = strlen(a->data.v_string) + strlen(b->data.v_string) + 1 + 1; // 1+1 for two null terminators
+      char *new_ptr = calloc(new_str_len,sizeof(char));
+      if (new_ptr == NULL){
+        return NULL;
+      }
+      strcat(new_ptr, a->data.v_string);
+      strcat(new_ptr, b->data.v_string);
+      snek_object_t *str = new_snek_string(new_ptr);
+      free(new_ptr);
+      return str;
+    }    
+  }
+
+  if (a->kind == VECTOR3){
+    if(b->kind != VECTOR3){
+      return NULL;
+    }else {
+      snek_object_t *x = snek_add(a->data.v_vector3.x, b->data.v_vector3.x);  
+      snek_object_t *y = snek_add(a->data.v_vector3.y, b->data.v_vector3.y);  
+      snek_object_t *z = snek_add(a->data.v_vector3.z, b->data.v_vector3.z);  
+      return new_snek_vector3(x, y, z);
+    }
+  }
+
+  if (a->kind == ARRAY){
+    if (b->kind != ARRAY){
+      return NULL;
+    }else {
+      size_t a_len = a->data.v_array.size;
+      size_t b_len = b->data.v_array.size;
+      snek_object_t *new_arr = new_snek_array(a_len+b_len);
+      if(new_arr == NULL){
+        return NULL;
+      }
+      // copy values from a to new_arr
+      for (size_t i = 0; i < a_len; i++){
+        snek_object_t *val = snek_array_get(a, i);
+        snek_array_set(new_arr, i, val);
+      }
+
+      // copy values from b to new_arr
+      for (size_t i = 0; i < b_len; i++){
+        snek_object_t *val = snek_array_get(b, i);
+        snek_array_set(new_arr, a_len+i, val);
+      }
+
+      return new_arr;
+    }
+  }
+  return NULL;
+  
+}
+
+// don't touch below this line
+
+int snek_length(snek_object_t *obj) {
+  if (obj == NULL) {
+    return -1;
+  }
+
+  switch (obj->kind) {
+  case INTEGER:
+    return 1;
+  case FLOAT:
+    return 1;
+  case STRING:
+    return strlen(obj->data.v_string);
+  case VECTOR3:
+    return 3;
+  case ARRAY:
+    return obj->data.v_array.size;
+  default:
+    return -1;
+  }
+}
+
+snek_object_t *new_snek_array(size_t size) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  snek_object_t **elements = calloc(size, sizeof(snek_object_t *));
+  if (elements == NULL) {
+    free(obj);
+    return NULL;
+  }
+
+  obj->kind = ARRAY;
+  obj->data.v_array = (snek_array_t){.size = size, .elements = elements};
+  return obj;
+}
+
+bool snek_array_set(snek_object_t *array, size_t index, snek_object_t *value) {
+  if (array == NULL || value == NULL) {
+    return false;
+  }
+
+  if (array->kind != ARRAY) {
+    return false;
+  }
+
+  if (index >= array->data.v_array.size) {
+    return false;
+  }
+
+  array->data.v_array.elements[index] = value;
+  return true;
+}
+
+snek_object_t *snek_array_get(snek_object_t *array, size_t index) {
+  if (array == NULL) {
+    return NULL;
+  }
+
+  if (array->kind != ARRAY) {
+    return NULL;
+  }
+
+  if (index >= array->data.v_array.size) {
+    return NULL;
+  }
+
+  return array->data.v_array.elements[index];
+}
+
+snek_object_t *new_snek_vector3(snek_object_t *x, snek_object_t *y,
+                                snek_object_t *z) {
+  if (x == NULL || y == NULL || z == NULL) {
+    return NULL;
+  }
+
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = VECTOR3;
+  obj->data.v_vector3 = (snek_vector_t){.x = x, .y = y, .z = z};
+
+  return obj;
+}
+
+snek_object_t *new_snek_integer(int value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = INTEGER;
+  obj->data.v_int = value;
+  return obj;
+}
+
+snek_object_t *new_snek_float(float value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  obj->kind = FLOAT;
+  obj->data.v_float = value;
+  return obj;
+}
+
+snek_object_t *new_snek_string(char *value) {
+  snek_object_t *obj = malloc(sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+
+  int len = strlen(value);
+  char *dst = malloc(len + 1);
+  if (dst == NULL) {
+    free(obj);
+    return NULL;
+  }
+
+  strcpy(dst, value);
+
+  obj->kind = STRING;
+  obj->data.v_string = dst;
+  return obj;
+}
+
+```
+
