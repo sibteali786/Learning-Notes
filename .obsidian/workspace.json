@@ -8,18 +8,31 @@
         "type": "tabs",
         "children": [
           {
-            "id": "01b603ace7547ecf",
+            "id": "96ada418799da1d1",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html"
+                "file": "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/calc-mass-subs-inmixture.md"
               },
-              "icon": "code-glyph",
-              "title": "2-btree-plus"
+              "icon": "excalidraw-icon",
+              "title": "calc-mass-subs-inmixture"
+            }
+          },
+          {
+            "id": "c6f043c0d2d3630a",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Practice.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -78,7 +91,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 389.8984375
+    "width": 389.8984375,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,20 +198,26 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "c6f043c0d2d3630a",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/SQL+Server+Index+Architecture+and+Design+Guide+-+SQL+Server+_+Microsoft+Docs.pdf",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/identifying-contaminant-percent-cl-summary.html",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/calc-mass-subs-inmixture.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md",
+    "Learning/Second Brain/Topics to read or learn about.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments",
+    "redis_geosearch_grid_vs_radius.svg",
+    "Pasted image 20260813204431.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-trees+vs+B+trees.pdf",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
+    "Learning/Second Brain",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/SQL+Server+Index+Architecture+and+Design+Guide+-+SQL+Server+_+Microsoft+Docs.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-index-scan-vs-index-only-scan.html",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Isotopes and mass spectrometry (article) _ Khan Academy.html",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/01_document_loading.ipynb",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/6-Cobining-Index.html",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/bloom-filters.html",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/Bloom Filters/multiple-indexes.pdf",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
     "Learning/AI&ML Engineering/UsefullTools/Overview.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
@@ -205,12 +225,9 @@
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Pasted image 20260714215710.png",
     "Pasted image 20260813204427.png",
-    "Pasted image 20260813204431.png",
-    "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260714215620.png",
     "Pasted Image 20260621125127_166.png",
     "Pasted Image 20260621111658_267.png",
-    "Pasted Image 20260601100830_545.png",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/3-Empirical-fromula-Hg-CL.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/2-Calculating-mass-percent.excalidraw.md",
@@ -229,9 +246,6 @@
     "Learning/AI&ML Engineering/what-is-machine-learning-summary.md",
     "Learning/AI&ML Engineering/Machine Learning/Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
-    "Learning/System Design/InterviewBoard.excalidraw.md",
-    "Learning/System Design/Core Concepts/8-Cap-Theorem/Drawing 2026-08-19 21.51.39.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

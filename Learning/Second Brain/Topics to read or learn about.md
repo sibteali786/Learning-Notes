@@ -1,0 +1,9 @@
+- metacognition  
+- neuroplasticity  
+- zeigarnik effect  
+- learned helplessness  
+- self-contradiction  
+- confirmation bias  
+- hedonic treadmill  
+- dunning-kruger effect  
+- the ship of theseus
