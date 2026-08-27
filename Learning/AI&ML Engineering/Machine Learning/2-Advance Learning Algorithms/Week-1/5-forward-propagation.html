@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Forward Propagation</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  .eq{background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:14px 18px; font-size:16px; text-align:center; margin:10px 0; color:#fbbf24;}
+  .eq.big{font-size:19px; color:var(--pink); border-color:var(--pink);}
+  .flow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; margin:18px 0;}
+  .box{border:2px solid var(--blue); border-radius:10px; padding:10px 14px;
+    background:#111426; font-weight:600; text-align:center; min-width:80px; font-size:13.5px;}
+  .box .sub{font-size:11px; color:var(--muted); font-weight:400; display:block; margin-top:2px;}
+  .arrow{color:var(--muted); font-size:20px;}
+  .arrow.forward{color:var(--orange); font-weight:700;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .grid8{display:grid; grid-template-columns:repeat(8,1fr); gap:2px; max-width:340px; margin:14px auto; font-size:10px; text-align:center;}
+  .grid8 div{background:#111426; border:1px solid var(--border); padding:4px 0; border-radius:2px;}
+  .grid8 div.dark{background:#3a2f1f; color:var(--orange); font-weight:700;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .pipeline{display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; margin:16px 0;}
+  .pbox{border:2px solid var(--purple); border-radius:10px; padding:8px 14px; background:#1a1330; font-weight:700; font-size:14px;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Neural Network Inference — Forward Propagation</h1>
+  <p class="subtitle">Lesson 5 · Putting the layer computations together into a full prediction algorithm</p>
+
+  <h2>Motivating Example: Handwritten Digit Recognition</h2>
+  <div class="card">
+    <p>Binary classification: given an image, is it the digit <span class="highlight">0</span> or <span class="highlight">1</span>?</p>
+    <p>Each image is <b>8×8 pixels = 64 input features</b>. Each pixel is an intensity value from 0 (black) to 255 (bright white), with grays in between.</p>
+    <div class="grid8">
+      <div>255</div><div>255</div><div>255</div><div>255</div><div>255</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div>255</div><div class="dark">0</div><div>255</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div class="dark">0</div><div class="dark">0</div><div>255</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div>255</div><div class="dark">0</div><div>255</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div>255</div><div class="dark">0</div><div>255</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div>255</div><div class="dark">0</div><div>255</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div class="dark">0</div><div class="dark">0</div><div class="dark">0</div><div>255</div><div>255</div><div>255</div>
+      <div>255</div><div>255</div><div>255</div><div>255</div><div>255</div><div>255</div><div>255</div><div>255</div>
+    </div>
+    <p style="font-size:12.5px; color:var(--muted); text-align:center;">8×8 grid → flattened into a 64-value input vector x, this one representing a handwritten "1"</p>
+  </div>
+
+  <h2>The Network Architecture</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="box">x<span class="sub">64 features</span></div>
+      <span class="arrow">→</span>
+      <div class="box">25 units<span class="sub">Layer 1</span></div>
+      <span class="arrow">→</span>
+      <div class="box">15 units<span class="sub">Layer 2</span></div>
+      <span class="arrow">→</span>
+      <div class="box">1 unit<span class="sub">Layer 3 (output)</span></div>
+      <span class="arrow">→</span>
+      <div class="box" style="border-color:var(--pink)">P(digit = 1)</div>
+    </div>
+    <p style="font-size:13px; color:var(--muted); text-align:center;">This shrinking pattern — more units early, fewer near output — is a common architecture choice.</p>
+  </div>
+
+  <h2>Step-by-Step: Forward Propagation</h2>
+  <div class="card">
+    <p><span class="step-num">1</span><b>x → a<sup>[1]</sup></b> (Layer 1, 25 units, so a<sup>[1]</sup> is a 25-number vector)</p>
+    <div class="eq">a<sup>[1]</sup> = [ g(w<sub>1</sub><sup>[1]</sup>·x + b<sub>1</sub><sup>[1]</sup>) , … , g(w<sub>25</sub><sup>[1]</sup>·x + b<sub>25</sub><sup>[1]</sup>) ]</div>
+    <p style="font-size:13px;color:var(--muted)">Note: <code>x</code> could equally be written as <code>a<sup>[0]</sup></code>, by convention.</p>
+
+    <p><span class="step-num">2</span><b>a<sup>[1]</sup> → a<sup>[2]</sup></b> (Layer 2, 15 units, so a<sup>[2]</sup> is a 15-number vector)</p>
+    <div class="eq">a<sup>[2]</sup> = [ g(w<sub>1</sub><sup>[2]</sup>·a<sup>[1]</sup> + b<sub>1</sub><sup>[2]</sup>) , … , g(w<sub>15</sub><sup>[2]</sup>·a<sup>[1]</sup> + b<sub>15</sub><sup>[2]</sup>) ]</div>
+
+    <p><span class="step-num">3</span><b>a<sup>[2]</sup> → a<sup>[3]</sup></b> (Layer 3 = output layer, 1 unit, so a<sup>[3]</sup> is a scalar)</p>
+    <div class="eq">a<sup>[3]</sup> = g( w<sub>1</sub><sup>[3]</sup> · a<sup>[2]</sup> + b<sub>1</sub><sup>[3]</sup> )</div>
+
+    <p><span class="step-num">4</span><b>Optional threshold</b> to get a hard label:</p>
+    <div class="eq">is a<sub>1</sub><sup>[3]</sup> ≥ 0.5 ?  →  yes: ŷ = 1 (digit is "1")   |   no: ŷ = 0 (not a "1")</div>
+  </div>
+
+  <h2>The Full Pipeline</h2>
+  <div class="card">
+    <div class="pipeline">
+      <div class="pbox">x</div>
+      <span class="arrow forward">→</span>
+      <div class="pbox">a<sup>[1]</sup></div>
+      <span class="arrow forward">→</span>
+      <div class="pbox">a<sup>[2]</sup></div>
+      <span class="arrow forward">→</span>
+      <div class="pbox">a<sup>[3]</sup> = f(x)</div>
+    </div>
+    <p style="text-align:center; font-size:13.5px;">Just like <code>f(x)</code> denoted the output of linear/logistic regression, <code>f(x)</code> now denotes the neural network's output.</p>
+  </div>
+
+  <h2>Why It's Called "Forward" Propagation</h2>
+  <div class="card">
+    <p>Computations flow strictly <b>left → right</b>: x → a<sup>[1]</sup> → a<sup>[2]</sup> → a<sup>[3]</sup>. Activations "propagate" forward through the network.</p>
+    <table>
+      <tr><th>Algorithm</th><th>Direction</th><th>Purpose</th></tr>
+      <tr><td>Forward propagation</td><td>Left → right</td><td><b>Inference</b> — making predictions with a trained network</td></tr>
+      <tr><td>Backward propagation</td><td>Right → left</td><td><b>Learning</b> — training/updating the network's parameters (covered next week)</td></tr>
+    </table>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">Forward propagation is exactly what happens every time you use a pretrained model: you download someone else's trained weights (w, b for every layer), feed in your new data as <code>x</code>, and run this same left-to-right computation to get a prediction — no training required. This is the "inference" step you'll hit constantly when using any pretrained model, not just this toy digit classifier.</p>
+  </div>
+
+  <h2>Recap</h2>
+  <div class="card">
+    <p><span class="step-num">1</span>Forward propagation = computing a<sup>[1]</sup>, a<sup>[2]</sup>, … a<sup>[L]</sup> in order, left to right.</p>
+    <p><span class="step-num">2</span>Each layer's computation only needs the <b>previous</b> layer's activation vector + its own w, b.</p>
+    <p><span class="step-num">3</span>The final activation a<sup>[L]</sup> = f(x) is the network's prediction.</p>
+    <p><span class="step-num">4</span>This is <b>inference</b> — using a trained network. Training the weights themselves uses backpropagation (next topic).</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> Implementing this forward propagation in TensorFlow.
+  </div>
+
+</div>
+</body>
+</html>

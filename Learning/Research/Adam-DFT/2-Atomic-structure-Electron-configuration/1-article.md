@@ -1,0 +1,1 @@
+[Khan Academy Periodic Tbale, shells and Orbitals](https://www.khanacademy.org/science/ap-chemistry-beta/x2eef969c74e0d802:atomic-structure-and-properties/x2eef969c74e0d802:atomic-structure-and-electron-configuration/a/the-periodic-table-electron-shells-and-orbitals-article)

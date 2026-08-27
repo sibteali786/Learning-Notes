@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Data in NumPy and TensorFlow</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff; margin:10px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .matrix-row{display:flex; gap:24px; flex-wrap:wrap; justify-content:center; margin:16px 0;}
+  .matrix-block{text-align:center;}
+  .mat{display:inline-grid; border:2px solid var(--blue); border-radius:6px; padding:10px 14px; font-family:'Cascadia Code',monospace; font-size:14px; background:#0d0f16;}
+  .mat-label{font-size:12px; color:var(--muted); margin-top:6px;}
+  .dim-tag{display:inline-block; background:rgba(79,140,255,.15); color:var(--blue); font-weight:700; padding:2px 10px; border-radius:14px; font-size:12px; margin-top:4px;}
+  .qcard{background:#151a2e; border:1.5px solid var(--purple); border-radius:14px; padding:20px 22px; margin-bottom:20px;}
+  .qtitle{color:var(--purple); font-weight:700; font-size:15px; margin-bottom:10px; display:flex; gap:8px; align-items:flex-start;}
+  .qtitle .qmark{background:var(--purple); color:#0f1117; border-radius:50%; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-size:12px; flex:none;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .warn{background:rgba(244,114,182,.08); border:1px solid rgba(244,114,182,.35); border-radius:12px; padding:14px 18px; margin-top:12px;}
+  .warn-title{color:var(--pink); font-weight:700; font-size:13px; margin-bottom:6px;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>How Data is Represented: NumPy vs TensorFlow</h1>
+  <p class="subtitle">Lesson 7 · Matrices, shapes, and why double brackets matter</p>
+
+  <h2>Why This Matters</h2>
+  <div class="card">
+    <p>NumPy (linear algebra library) and TensorFlow (Google's deep learning library) were built years apart by different teams, so their conventions for representing data <span class="highlight">don't perfectly match</span>. Getting this straight avoids a huge class of shape-mismatch bugs.</p>
+  </div>
+
+  <h2>Matrix Basics — Rows × Columns</h2>
+  <div class="card">
+    <p>A matrix's dimensions are always written as <b>(number of rows) × (number of columns)</b>.</p>
+    <div class="matrix-row">
+      <div class="matrix-block">
+        <div class="mat">1&nbsp;&nbsp;2&nbsp;&nbsp;3<br>4&nbsp;&nbsp;5&nbsp;&nbsp;6</div>
+        <div class="mat-label"><code>np.array([[1,2,3],[4,5,6]])</code></div>
+        <div class="dim-tag">2 × 3 matrix</div>
+      </div>
+      <div class="matrix-block">
+        <div class="mat">0.1&nbsp;&nbsp;0.2<br>-3&nbsp;&nbsp;&nbsp;-4<br>-.5&nbsp;&nbsp;-.6<br>7&nbsp;&nbsp;&nbsp;&nbsp;8</div>
+        <div class="mat-label"><code>np.array([[0.1,0.2],[-3,-4],...])</code></div>
+        <div class="dim-tag">4 × 2 matrix</div>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--muted); text-align:center;">Each inner <code>[...]</code> is one row; the outer <code>[...]</code> groups all rows together.</p>
+  </div>
+
+  <h2>Row Vector vs Column Vector vs 1D Array</h2>
+  <div class="card">
+    <div class="matrix-row">
+      <div class="matrix-block">
+        <div class="mat">200&nbsp;&nbsp;17</div>
+        <div class="mat-label"><code>np.array([[200, 17]])</code></div>
+        <div class="dim-tag">1 × 2 — row vector</div>
+      </div>
+      <div class="matrix-block">
+        <div class="mat">200<br>17</div>
+        <div class="mat-label"><code>np.array([[200],[17]])</code></div>
+        <div class="dim-tag">2 × 1 — column vector</div>
+      </div>
+      <div class="matrix-block">
+        <div class="mat">200&nbsp;&nbsp;17</div>
+        <div class="mat-label"><code>np.array([200, 17])</code></div>
+        <div class="dim-tag" style="background:rgba(244,114,182,.15);color:var(--pink)">1D array — no rows/cols</div>
+      </div>
+    </div>
+    <table>
+      <tr><th>Syntax</th><th>Brackets</th><th>Result</th></tr>
+      <tr><td class="mono">[[200, 17]]</td><td>Double</td><td>2D matrix, shape (1,2) — a <b>row vector</b></td></tr>
+      <tr><td class="mono">[[200],[17]]</td><td>Double</td><td>2D matrix, shape (2,1) — a <b>column vector</b></td></tr>
+      <tr><td class="mono">[200, 17]</td><td>Single</td><td>1D array — just a flat list, no row/column structure at all</td></tr>
+    </table>
+    <div class="warn">
+      <div class="warn-title">⚠️ Course 1 vs Course 2 convention shift</div>
+      <p style="font-size:13.5px; margin:0">Course 1 (linear/logistic regression) used <b>1D arrays</b> (<code>[200, 17]</code>) to represent feature vectors. TensorFlow (Course 2) prefers <b>2D matrices</b> (<code>[[200, 17]]</code>) — because representing data as matrices lets TensorFlow run large datasets more computationally efficiently internally.</p>
+    </div>
+  </div>
+
+  <h2>Applying This to the Coffee Example</h2>
+  <div class="card">
+    <p>For a single training example — temp=200°C, duration=17 min — written the TensorFlow way:</p>
+    <pre>x = np.array([[200.0, 17.0]])   # shape (1, 2) — 1 row, 2 columns (1 example, 2 features)</pre>
+    <p style="font-size:13.5px; color:var(--muted)">The double bracket isn't a typo — it's deliberately making this a 1×2 <b>matrix</b>, not a bare 1D list, to match TensorFlow's expected input format of <code>(num_samples, num_features)</code>.</p>
+  </div>
+
+  <h2>Tensors: TensorFlow's Own Data Type</h2>
+  <div class="card">
+    <p>When a Dense layer processes input, its output isn't a NumPy array — it's a <b>tensor</b>, TensorFlow's internal data structure for efficiently storing/computing on matrices.</p>
+
+    <pre>x = np.array([[200.0, 17.0]])
+layer_1 = Dense(units=3, activation='sigmoid')
+a1 = layer_1(x)
+print(a1)
+# tf.Tensor([[0.2 0.7 0.3]], shape=(1, 3), dtype=float32)</pre>
+
+    <table>
+      <tr><th>Piece</th><th>Meaning</th></tr>
+      <tr><td class="mono">shape=(1, 3)</td><td>1 row × 3 columns — matches layer_1's 3 units</td></tr>
+      <tr><td class="mono">dtype=float32</td><td>32-bit floating point number (decimal-capable)</td></tr>
+      <tr><td>Tensor</td><td>TensorFlow's term for "matrix" (technically more general, but treat it as a matrix for this course)</td></tr>
+    </table>
+
+    <pre>layer_2 = Dense(units=1, activation='sigmoid')
+a2 = layer_2(a1)
+print(a2)
+# tf.Tensor([[0.8]], shape=(1, 1), dtype=float32)</pre>
+    <p style="font-size:13.5px; color:var(--muted)">Even a single number like 0.8 comes back as a 1×1 matrix, not a bare scalar — TensorFlow is consistent about wrapping everything in matrix form.</p>
+  </div>
+
+  <h2>Converting Between Tensor ↔ NumPy</h2>
+  <div class="card">
+    <pre>a1.numpy()   # tf.Tensor → NumPy array
+# array([[0.2, 0.7, 0.3]], dtype=float32)
+
+a2.numpy()
+# array([[0.8]], dtype=float32)</pre>
+    <p style="font-size:13.5px">You'll go back and forth constantly: load/manipulate data in NumPy → pass into TensorFlow (auto-converts to tensor) → optionally convert results back to NumPy with <code>.numpy()</code>.</p>
+  </div>
+
+  <h2>❓ Recap Q&A</h2>
+  <div class="qcard">
+    <div class="qtitle"><span class="qmark">?</span>Why does x need double square brackets?</div>
+    <p style="font-size:13.5px; margin:0"><b>Answer:</b> Single brackets (<code>[200, 17]</code>) create a 1D array with no row/column structure — that's the Course 1 convention. Double brackets (<code>[[200, 17]]</code>) create a proper 2D matrix of shape (1,2), which is what TensorFlow expects: <code>(num_samples, num_features)</code>.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">This isn't a quirky one-off — every time you feed a batch of data into a Keras model (even a batch of size 1), it must arrive as a 2D matrix. Forgetting this and passing a 1D array is one of the most common shape-related errors beginners hit, so it's worth internalizing: <b>rows = samples, columns = features</b>, always.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> Building an actual neural network end-to-end (defining layers, chaining them, compiling and training) using everything covered so far.
+  </div>
+
+</div>
+</body>
+</html>

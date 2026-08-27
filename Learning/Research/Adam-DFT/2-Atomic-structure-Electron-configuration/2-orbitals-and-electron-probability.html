@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Orbitals & Electron Probability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;}
+  th,td{border:1px solid var(--card-border);padding:9px 12px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Orbitals & Electron Probability</h1>
+<p class="subtitle">AP Chemistry · Atomic Structure · Source: Khan Academy (video)</p>
+
+<h2><span class="pill pill-blue">Problem</span> Why not just say electrons orbit like planets?</h2>
+<div class="card">
+Early models (protons/neutrons in the center, electrons circling like planets) were intuitive — opposite charges attract, so electrons stay near the positive nucleus. But this turned out to be <strong>wrong</strong>. Electrons don't travel in fixed circular/elliptical paths. At any instant you can't know exactly where one is — you can only describe the <strong>probability</strong> of finding it in a given region.
+<div class="tip">
+<div class="tip-title">Key shift in thinking</div>
+Replace "electron orbit" (a path) with "electron orbital" (a 3D probability cloud — the region where the electron is found ~90% of the time).
+</div>
+</div>
+
+<h2><span class="pill pill-orange">Model</span> The Hydrogen Atom — Simplest Case</h2>
+<div class="card">
+Orbital math is best worked out for hydrogen because it's the simplest atom: one proton, no neutrons (in the common isotope), one electron.
+
+<svg viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="230" cy="110" r="80" fill="#5b9dff" opacity="0.15"/>
+  <circle cx="230" cy="110" r="14" fill="#ff9d4d"/>
+  <text x="230" y="114" text-anchor="middle" font-size="10" fill="#0f1117" font-weight="700">p+</text>
+  <circle cx="280" cy="70" r="4" fill="#4ade80"/>
+  <text x="330" y="40" font-size="11" fill="#9aa1b4">electron: 90% chance found</text>
+  <text x="330" y="55" font-size="11" fill="#9aa1b4">somewhere in this sphere</text>
+</svg>
+
+The lone electron isn't literally circling the proton — it's "smeared" across a probability cloud. The sphere drawn is just the boundary containing 90% of that probability.
+</div>
+
+<h2><span class="pill pill-green">Concept</span> Adding Energy = Quantum Jumps</h2>
+<div class="card">
+With a planet or satellite, adding energy grows the orbit <em>gradually</em>. Electrons don't work that way — <strong>quantum</strong> means discrete packets, not "small." An electron doesn't gradually drift outward; it <strong>jumps</strong> to the next energy level once given exactly enough energy.
+
+<table>
+<tr><th>Energy added</th><th>Result</th><th>Shape</th></tr>
+<tr><td>None (ground state)</td><td>Stays in <code>1s</code></td><td>Sphere, close to nucleus</td></tr>
+<tr><td>Enough to reach 2nd shell</td><td>Jumps to <code>2s</code></td><td>Larger sphere</td></tr>
+<tr><td>More, within 2nd shell</td><td>Jumps to <code>2p</code></td><td>Dumbbell</td></tr>
+<tr><td>Even more</td><td>3rd shell, <code>d</code> orbitals, etc.</td><td>Increasingly exotic shapes</td></tr>
+</table>
+
+<div class="example">
+<div class="example-title">Why dumbbells and weird shapes?</div>
+Electrons have wave-like properties, similar to standing waves on a shaken rope or a drum membrane. Just as a vibrating membrane forms nodes and peaks, higher-energy electron "waves" form more complex 3D standing-wave patterns — that's where <code>p</code>, <code>d</code>, <code>f</code> shapes come from.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Terminology</span> Shell vs Subshell vs Orbital</h2>
+<div class="card">
+These three words are often confused — here's the hierarchy:
+
+<table>
+<tr><th>Term</th><th>What it means</th><th>Example</th></tr>
+<tr><td><strong>Shell</strong> (= energy level)</td><td>A whole energy tier</td><td>1st shell, 2nd shell</td></tr>
+<tr><td><strong>Subshell</strong> (= sublevel)</td><td>A type within a shell</td><td><code>s</code>, <code>p</code>, <code>d</code>, <code>f</code></td></tr>
+<tr><td><strong>Orbital</strong></td><td>A specific region holding ≤2 electrons</td><td><code>2px</code>, <code>2py</code>, <code>2pz</code></td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">Shell 1 is a special case</div>
+The first shell has only ONE subshell (<code>1s</code>), which has only ONE orbital. So for shell 1, "shell," "subshell," and "orbital" all refer to the same thing. Starting at shell 2, they diverge: shell 2 has <code>2s</code> (1 orbital) AND <code>2p</code> (3 orbitals: <code>2px</code>, <code>2py</code>, <code>2pz</code>).
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Reference</span> Filling Order (Hydrogen Example)</h2>
+<div class="card">
+<ul>
+<li><code>1s</code> holds up to 2 electrons (fills first — lowest energy)</li>
+<li>Once <code>1s</code> is full, the 3rd electron goes to <code>2s</code></li>
+<li><code>2s</code> holds up to 2 more → 4 electrons total between <code>1s</code> + <code>2s</code></li>
+<li>The 5th electron must go into one of the three <code>2p</code> orbitals</li>
+</ul>
+<div class="muted" style="font-size:.85rem;">Electrons repel each other — that's why a 2nd electron won't crowd into an already-occupied orbital until lower-energy spots are full.</div>
+</div>
+
+<h2><span class="pill pill-green">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th>Old (planetary) model</th><th>Orbital (quantum) model</th></tr>
+<tr><td>Electron follows a fixed path</td><td>Electron location is probabilistic</td></tr>
+<tr><td>Energy added → orbit grows smoothly</td><td>Energy added → discrete jump to new level</td></tr>
+<tr><td>All orbits are circles/ellipses</td><td>Orbital shapes vary: sphere, dumbbell, more complex</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-orange">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>"Orbital" = probability region, NOT a path. Don't picture electrons as tiny planets.</li>
+<li><code>s</code> orbitals are always spherical, at every shell — they just get bigger at higher shells (<code>1s</code> vs <code>2s</code>).</li>
+<li>Each orbital holds a max of <strong>2 electrons</strong> — this is true regardless of shape.</li>
+<li>Shell = energy level = row-ish concept; subshell = shape type (<code>s,p,d,f</code>); orbital = the individual "slot."</li>
+<li>Remember the numbering trick: shell number appears before the letter (<code>2p</code> = p subshell of the 2nd shell).</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

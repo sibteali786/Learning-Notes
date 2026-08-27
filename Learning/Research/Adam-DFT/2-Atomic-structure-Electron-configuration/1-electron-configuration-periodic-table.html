@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Electron Configuration & Periodic Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;
+    --card:#171a23;
+    --card-border:#262b3a;
+    --text:#e6e8ef;
+    --muted:#9aa1b4;
+    --blue:#5b9dff;
+    --orange:#ff9d4d;
+    --green:#4ade80;
+    --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono',monospace;
+    margin:0;
+    padding:32px 16px 80px;
+    line-height:1.55;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{
+    font-family:'Syne',sans-serif;
+    font-weight:800;
+    font-size:2.2rem;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:4px;
+  }
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{
+    font-family:'Syne',sans-serif;
+    font-weight:700;
+    font-size:1.35rem;
+    margin:40px 0 16px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .pill{
+    display:inline-block;
+    font-size:.68rem;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:999px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:20px 22px;
+    margin-bottom:16px;
+  }
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  code, .code-inline{
+    background:var(--code-bg);
+    border:1px solid var(--card-border);
+    border-radius:5px;
+    padding:1px 6px;
+    color:var(--orange);
+    font-size:.92em;
+  }
+  .formula-block{
+    background:var(--code-bg);
+    border:1px solid var(--card-border);
+    border-left:3px solid var(--blue);
+    border-radius:6px;
+    padding:12px 16px;
+    margin:12px 0;
+    font-size:1.05rem;
+    color:var(--green);
+  }
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;}
+  th,td{border:1px solid var(--card-border);padding:9px 12px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{
+    background:rgba(74,222,128,.08);
+    border:1px solid rgba(74,222,128,.35);
+    border-radius:10px;
+    padding:14px 18px;
+    margin:14px 0;
+  }
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{
+    background:rgba(192,132,252,.08);
+    border:1px solid rgba(192,132,252,.35);
+    border-radius:10px;
+    padding:14px 18px;
+    margin:14px 0;
+  }
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Electron Configuration & the Periodic Table</h1>
+<p class="subtitle">AP Chemistry · Atomic Structure · Source: Khan Academy</p>
+
+<h2><span class="pill pill-blue">Problem</span> Why does this matter?</h2>
+<div class="card">
+Memorizing element names doesn't tell you how an element <em>behaves</em>. The periodic table is a filing system — an element's position tells you its <strong>electron configuration</strong>, which predicts its <strong>reactivity</strong>: will it bond, lose electrons, gain electrons, or stay inert?
+<div class="tip">
+<div class="tip-title">Core idea</div>
+Reactivity = pattern of an atom's electrons. The periodic table is organized specifically to expose that pattern at a glance.
+</div>
+</div>
+
+<h2><span class="pill pill-orange">Model 1</span> The Bohr Model — Shells</h2>
+<div class="card">
+Proposed by <strong>Niels Bohr (1913)</strong>. Electrons orbit the nucleus in circular <strong>shells</strong> (energy levels), like planets around the sun. Shells closer to the nucleus = lower energy.
+
+<svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="240" cy="120" r="16" fill="#5b9dff"/>
+  <text x="240" y="125" text-anchor="middle" font-size="11" fill="#0f1117" font-weight="700">H</text>
+  <circle cx="240" cy="120" r="45" fill="none" stroke="#ff9d4d" stroke-width="1.5"/>
+  <circle cx="240" cy="120" r="80" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+  <circle cx="240" cy="120" r="115" fill="none" stroke="#c084fc" stroke-width="1.5"/>
+  <text x="290" y="80" font-size="12" fill="#ff9d4d">1n</text>
+  <text x="325" y="50" font-size="12" fill="#4ade80">2n</text>
+  <text x="360" y="20" font-size="12" fill="#c084fc">3n</text>
+  <circle cx="285" cy="120" r="5" fill="#e6e8ef"/>
+  <text x="200" y="230" font-size="11" fill="#9aa1b4">Electron absorbs energy → jumps outward. Releases energy → falls inward.</text>
+</svg>
+
+<table>
+<tr><th>Shell</th><th>Max electrons</th></tr>
+<tr><td><code>1n</code></td><td>2</td></tr>
+<tr><td><code>2n</code></td><td>8</td></tr>
+<tr><td><code>3n</code></td><td>18 (but only 8 needed for stability — see orbitals below)</td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">Octet Rule</div>
+Most atoms important to biology/chemistry are stable with <strong>8 electrons</strong> in their outermost (valence) shell. Full valence shell = low reactivity.
+</div>
+</div>
+
+<h2><span class="pill pill-green">Pattern</span> Periodic Table = Shell + Column Map</h2>
+<div class="card">
+<strong>Row (Period)</strong> → which shell is being filled.<br>
+<strong>Column (Group)</strong> → number of valence electrons (and thus reactivity).
+
+<table>
+<tr><th>Group</th><th>Valence electrons</th><th>Behavior</th><th>Examples</th></tr>
+<tr><td>1</td><td>1</td><td>Loses 1 e⁻ → becomes +1 ion</td><td><code>H, Li, Na</code></td></tr>
+<tr><td>14</td><td>4</td><td>Shares electrons (covalent bonds)</td><td><code>C, Si</code></td></tr>
+<tr><td>17</td><td>7</td><td>Gains 1 e⁻ → becomes −1 ion</td><td><code>F, Cl</code></td></tr>
+<tr><td>18</td><td>8 (or 2 for He)</td><td>Full shell → inert / noble gas</td><td><code>He, Ne, Ar</code></td></tr>
+</table>
+
+<div class="example">
+<div class="example-title">Real-world scenario: table salt</div>
+Sodium (<code>Na</code>, group 1, 1 valence e⁻) desperately wants to lose that lone electron. Chlorine (<code>Cl</code>, group 17, 7 valence e⁻) desperately wants one more electron to complete its octet. Na hands its electron to Cl → <code>Na⁺</code> and <code>Cl⁻</code> form and stick together electrostatically → <strong>NaCl, table salt</strong>. This is exactly why group number predicts reactivity.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Model 2</span> Orbitals — The More Accurate Picture</h2>
+<div class="card">
+The Bohr model is a useful simplification but electrons don't actually circle the nucleus in neat rings. Instead they occupy <strong>orbitals</strong>: 3D regions of space where an electron is most likely (90% of the time) to be found. Each orbital holds up to <strong>2 electrons</strong>.
+
+Shells are made of <strong>subshells</strong>, and subshells are made of orbitals:
+
+<table>
+<tr><th>Subshell</th><th>Shape</th><th># orbitals</th><th>Max electrons</th></tr>
+<tr><td><code>s</code></td><td>sphere</td><td>1</td><td>2</td></tr>
+<tr><td><code>p</code></td><td>dumbbell (×3, at right angles)</td><td>3</td><td>6</td></tr>
+<tr><td><code>d</code></td><td>complex</td><td>5</td><td>10</td></tr>
+<tr><td><code>f</code></td><td>complex</td><td>7</td><td>14</td></tr>
+</table>
+
+<svg viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="230" cy="130" rx="70" ry="70" fill="#5b9dff" opacity="0.25"/>
+  <circle cx="230" cy="130" r="18" fill="#5b9dff"/>
+  <ellipse cx="230" cy="60" rx="26" ry="55" fill="#ff9d4d" opacity="0.6"/>
+  <ellipse cx="230" cy="200" rx="26" ry="55" fill="#ff9d4d" opacity="0.6"/>
+  <ellipse cx="150" cy="150" rx="55" ry="24" fill="#4ade80" opacity="0.6" transform="rotate(-25 150 150)"/>
+  <ellipse cx="310" cy="110" rx="55" ry="24" fill="#4ade80" opacity="0.6" transform="rotate(-25 310 110)"/>
+  <text x="235" y="30" font-size="11" fill="#ff9d4d">p orbital (vertical)</text>
+  <text x="340" y="90" font-size="11" fill="#4ade80">p orbital</text>
+  <text x="330" y="200" font-size="11" fill="#5b9dff">s orbital (sphere)</text>
+</svg>
+<div class="muted" style="font-size:.85rem;">1 s orbital + 3 p orbitals shown together — this is the shape of a filled 2n shell.</div>
+</div>
+
+<h2><span class="pill pill-blue">Reference</span> Electron Configurations</h2>
+<div class="card">
+<div class="formula-block">H&nbsp;&nbsp;→ 1s¹</div>
+<div class="formula-block">He → 1s²</div>
+<div class="formula-block">Li &nbsp;→ 1s² 2s¹</div>
+<div class="formula-block">Ne → 1s² 2s² 2p⁶</div>
+<p class="muted">Fill order: lowest energy orbital first (<code>1s</code> before <code>2s</code> before <code>2p</code>...). This is why Period 1 has only 2 elements (H, He) — only <code>1s</code> is available.</p>
+
+<div class="tip">
+<div class="tip-title">Why is Argon stable with only 8, not 18, electrons?</div>
+The 3n shell's <code>d</code> orbital is much higher energy and doesn't start filling until Period 4. So for Period 3 elements, filling just <code>3s</code> + <code>3p</code> (8 electrons total) is already the lowest-energy stable state — satisfying the octet rule even though 3n could technically hold 18.
+</div>
+</div>
+
+<h2><span class="pill pill-orange">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th>Concept</th><th>Bohr Model</th><th>Orbital Model</th></tr>
+<tr><td>What it describes</td><td>Electrons in circular shells</td><td>Electrons in 3D probability regions</td></tr>
+<tr><td>Accuracy</td><td>Simplified, good for teaching</td><td>Mathematically accurate</td></tr>
+<tr><td>Unit of organization</td><td>Shell (<code>1n, 2n, 3n</code>)</td><td>Subshell → Orbital (<code>s, p, d, f</code>)</td></tr>
+<tr><td>Capacity per unit</td><td>Shell holds 2/8/18</td><td>Orbital holds 2 electrons each</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-green">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Row number = highest shell being filled (Period 2 → 2n is filling).</li>
+<li>Group number (1, 14, 17, 18 especially) = valence electron count → predicts ion charge or bonding style directly.</li>
+<li>Metals (left side, e.g. group 1) tend to <strong>lose</strong> electrons → form <strong>cations (+)</strong>.</li>
+<li>Nonmetals (right side, e.g. group 17) tend to <strong>gain</strong> electrons → form <strong>anions (−)</strong>.</li>
+<li>Noble gases (group 18) = full valence shell = essentially unreactive. Great "stable reference point" when reasoning about why other elements react the way they do.</li>
+<li>When writing electron configurations, fill in order of increasing energy: <code>1s → 2s → 2p → 3s → 3p...</code></li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

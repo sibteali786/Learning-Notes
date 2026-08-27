@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aufbau Principle & Periodic Table Blocks</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1117;
+        --card: #171a23;
+        --card-border: #262b3a;
+        --text: #e6e8ef;
+        --muted: #9aa1b4;
+        --blue: #5b9dff;
+        --orange: #ff9d4d;
+        --green: #4ade80;
+        --purple: #c084fc;
+        --code-bg: #0b0d13;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        margin: 0;
+        padding: 32px 16px 80px;
+        line-height: 1.55;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 2.2rem;
+        background: linear-gradient(90deg, var(--blue), var(--purple));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 4px;
+      }
+      .subtitle {
+        color: var(--muted);
+        margin-bottom: 32px;
+        font-size: 0.95rem;
+      }
+      h2 {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 1.35rem;
+        margin: 40px 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .pill {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .pill-blue {
+        background: rgba(91, 157, 255, 0.15);
+        color: var(--blue);
+        border: 1px solid rgba(91, 157, 255, 0.4);
+      }
+      .pill-orange {
+        background: rgba(255, 157, 77, 0.15);
+        color: var(--orange);
+        border: 1px solid rgba(255, 157, 77, 0.4);
+      }
+      .pill-green {
+        background: rgba(74, 222, 128, 0.15);
+        color: var(--green);
+        border: 1px solid rgba(74, 222, 128, 0.4);
+      }
+      .pill-purple {
+        background: rgba(192, 132, 252, 0.15);
+        color: var(--purple);
+        border: 1px solid rgba(192, 132, 252, 0.4);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 20px 22px;
+        margin-bottom: 16px;
+      }
+      code {
+        background: var(--code-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 5px;
+        padding: 1px 6px;
+        color: var(--orange);
+        font-size: 0.92em;
+      }
+      .formula-block {
+        background: var(--code-bg);
+        border: 1px solid var(--card-border);
+        border-left: 3px solid var(--blue);
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin: 8px 0;
+        font-size: 1.05rem;
+        color: var(--green);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--card-border);
+        padding: 9px 12px;
+        text-align: left;
+      }
+      th {
+        background: #1c2030;
+        color: var(--blue);
+        font-family: "Syne", sans-serif;
+      }
+      tr:nth-child(even) td {
+        background: #141722;
+      }
+      .tip {
+        background: rgba(74, 222, 128, 0.08);
+        border: 1px solid rgba(74, 222, 128, 0.35);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin: 14px 0;
+      }
+      .tip-title {
+        color: var(--green);
+        font-weight: 700;
+        font-family: "Syne", sans-serif;
+        margin-bottom: 4px;
+      }
+      .example {
+        background: rgba(192, 132, 252, 0.08);
+        border: 1px solid rgba(192, 132, 252, 0.35);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin: 14px 0;
+      }
+      .example-title {
+        color: var(--purple);
+        font-weight: 700;
+        font-family: "Syne", sans-serif;
+        margin-bottom: 4px;
+      }
+      .warn {
+        background: rgba(255, 157, 77, 0.08);
+        border: 1px solid rgba(255, 157, 77, 0.35);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin: 14px 0;
+      }
+      .warn-title {
+        color: var(--orange);
+        font-weight: 700;
+        font-family: "Syne", sans-serif;
+        margin-bottom: 4px;
+      }
+      svg {
+        max-width: 100%;
+        height: auto;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      ul {
+        padding-left: 20px;
+      }
+      li {
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Aufbau Principle & Periodic Table Blocks</h1>
+      <p class="subtitle">
+        AP Chemistry · Atomic Structure · Source: Khan Academy (video)
+      </p>
+
+      <h2>
+        <span class="pill pill-blue">Problem</span> Filling order stops being
+        obvious past calcium
+      </h2>
+      <div class="card">
+        Up through argon, filling order is predictable:
+        <code>1s → 2s → 2p → 3s → 3p</code>. But at potassium/calcium, the
+        "obvious" next subshell (<code>3d</code>) is skipped in favor of
+        <code>4s</code>. The <strong>Aufbau principle</strong> ("building-up
+        principle," German) is the diagonal-filling diagram that predicts this
+        correctly for electron configuration purposes.
+      </div>
+
+      <h2>
+        <span class="pill pill-orange">Diagram</span> The Aufbau Filling Order
+      </h2>
+      <div class="card">
+        <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
+          <text x="20" y="30" font-size="16" fill="#5b9dff">1s</text>
+          <text x="20" y="70" font-size="16" fill="#5b9dff">2s</text>
+          <text x="90" y="70" font-size="16" fill="#ff9d4d">2p</text>
+          <text x="20" y="110" font-size="16" fill="#5b9dff">3s</text>
+          <text x="90" y="110" font-size="16" fill="#ff9d4d">3p</text>
+          <text x="160" y="110" font-size="16" fill="#c084fc">3d</text>
+          <text x="20" y="150" font-size="16" fill="#5b9dff">4s</text>
+          <text x="90" y="150" font-size="16" fill="#ff9d4d">4p</text>
+          <text x="160" y="150" font-size="16" fill="#c084fc">4d</text>
+          <text x="20" y="190" font-size="16" fill="#5b9dff">5s</text>
+          <line
+            x1="180"
+            y1="40"
+            x2="20"
+            y2="150"
+            stroke="#4ade80"
+            stroke-width="2"
+          />
+          <text x="200" y="230" font-size="12" fill="#9aa1b4">
+            Follow diagonal arrows: 1s → 2s → 2p → 3s → 3p → 4s → 3d → 4p → 5s
+            ...
+          </text>
+        </svg>
+        <div class="tip">
+          <div class="tip-title">How to read it</div>
+          Draw diagonal arrows through the grid of subshells. The order you
+          cross them = the fill order. Notice <code>4s</code> is crossed
+          <strong>before</strong> <code>3d</code> — that's the surprising part.
+        </div>
+      </div>
+
+      <h2>
+        <span class="pill pill-green">Walkthrough</span> Ne → Ar → Ca → Sc
+      </h2>
+      <div class="card">
+        <div class="formula-block">Ne (10 e⁻) → 1s² 2s² 2p⁶</div>
+        <div class="formula-block">Ar (18 e⁻) → [Ne] 3s² 3p⁶</div>
+        <div class="formula-block">
+          Ca (20 e⁻) → [Ar] 4s² &nbsp;<span
+            class="muted"
+            style="font-size: 0.8rem"
+            >— NOT 3d², despite 3d existing</span
+          >
+        </div>
+        <div class="formula-block">
+          Sc (21 e⁻) → [Ar] 3d¹ 4s² &nbsp;<span
+            class="muted"
+            style="font-size: 0.8rem"
+            >— now 3d starts filling</span
+          >
+        </div>
+
+        <div class="warn">
+          <div class="warn-title">The catch at calcium</div>
+          Even though the <code>3d</code> subshell technically exists, calcium's
+          extra 2 electrons go into <code>4s</code> instead — <code>4s</code> is
+          lower energy at this point on the periodic table. This is exactly what
+          the Aufbau diagonal predicts.
+        </div>
+      </div>
+
+      <h2>
+        <span class="pill pill-purple">Nuance</span> Aufbau Is a Useful Model,
+        Not Perfect Truth
+      </h2>
+      <div class="card">
+        The Aufbau principle is taught in virtually every intro chemistry course
+        and is <strong>correct for writing electron configurations</strong>. But
+        it implies you fill <code>4s</code> completely before touching
+        <code>3d</code> when "building" an atom electron by electron — which
+        isn't literally how ionization/removal works.
+
+        <div class="example">
+          <div class="example-title">Real nuance: building a scandium ion</div>
+          If you start from a bare Sc nucleus and add electrons one at a time to
+          build up to neutral scandium, the very first electron added (on a
+          Sc¹⁸⁺-like core) actually goes into <code>3d</code>, not
+          <code>4s</code> — contrary to what the simple diagram suggests. For
+          AP-level electron configuration writing, though, the standard Aufbau
+          order still gives the correct final answer.
+        </div>
+      </div>
+
+      <h2>
+        <span class="pill pill-blue">Pattern</span> The Periodic Table as Blocks
+      </h2>
+      <div class="card">
+        Each region of the periodic table corresponds to which subshell is being
+        filled:
+
+        <table>
+          <tr>
+            <th>Block</th>
+            <th>Subshell being filled</th>
+            <th>Location</th>
+          </tr>
+          <tr>
+            <td><strong>s-block</strong></td>
+            <td><code>s</code></td>
+            <td>Groups 1–2 (+ He, by config)</td>
+          </tr>
+          <tr>
+            <td><strong>p-block</strong></td>
+            <td><code>p</code></td>
+            <td>Groups 13–18</td>
+          </tr>
+          <tr>
+            <td><strong>d-block</strong></td>
+            <td><code>d</code></td>
+            <td>Groups 3–12 (transition metals, incl. Sc)</td>
+          </tr>
+          <tr>
+            <td><strong>f-block</strong></td>
+            <td><code>f</code></td>
+            <td>Lanthanides / actinides (bottom rows)</td>
+          </tr>
+        </table>
+
+        <div class="tip">
+          <div class="tip-title">Why helium sits with the s-block</div>
+          Even though helium is drawn in group 18 on the standard table
+          (matching its noble-gas chemistry), by electron configuration
+          (<code>1s²</code>) it belongs with the s-block — it's filling an s
+          subshell, same as H, Li, Be, etc.
+        </div>
+      </div>
+
+      <h2><span class="pill pill-green">Key Distinctions</span></h2>
+      <div class="card">
+        <table>
+          <tr>
+            <th>Concept</th>
+            <th>What it tells you</th>
+          </tr>
+          <tr>
+            <td>Row (period)</td>
+            <td>Roughly which shell is active</td>
+          </tr>
+          <tr>
+            <td>Block (s/p/d/f)</td>
+            <td>Which subshell type is currently filling</td>
+          </tr>
+          <tr>
+            <td>Aufbau diagonal</td>
+            <td>The actual fill <em>order</em> across shells/subshells</td>
+          </tr>
+        </table>
+      </div>
+
+      <h2><span class="pill pill-orange">Practical Tips</span></h2>
+      <div class="card">
+        <ul>
+          <li>
+            Memorize the Aufbau order through at least:
+            <code>1s 2s 2p 3s 3p 4s 3d 4p 5s</code>.
+          </li>
+          <li>
+            Watch for the <code>4s</code>-before-<code>3d</code> trap — it's a
+            very common exam point.
+          </li>
+          <li>
+            Use noble gas notation to skip repetitive core electrons: e.g. Sc →
+            <code>[Ar] 3d¹ 4s²</code>.
+          </li>
+          <li>
+            To identify a block quickly: locate the element on the table, then
+            check which column-type region it's in (s/p/d/f) — that tells you
+            the last subshell being filled.
+          </li>
+          <li>
+            Know that this is a simplified model — exceptions and ion-formation
+            order can deviate, but for AP Chem electron configuration questions,
+            standard Aufbau order is the expected answer.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
