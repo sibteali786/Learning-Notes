@@ -4,19 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "0d8ef5004ba64107",
+        "id": "4f2c1a007a3639f8",
         "type": "tabs",
         "children": [
           {
-            "id": "ff4e9e20fdfd2556",
+            "id": "abcb52b39f28d828",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/6-inference-in-tensorflow.html"
+                "file": "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md"
               },
-              "icon": "code-glyph",
-              "title": "6-inference-in-tensorflow"
+              "icon": "excalidraw-icon",
+              "title": "4-Maximum Width of Binary Tree.excalidraw"
+            }
+          },
+          {
+            "id": "c067c4fc976a38c7",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "3-ZigZag-Level-traversal.excalidraw"
             }
           }
         ]
@@ -184,22 +196,23 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "ff4e9e20fdfd2556",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
+    "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
+    "Learning/DSA/DFS/dfs-tree.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/6-inference-in-tensorflow.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/8-building-nn-tensorflow.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/7-data-numpy-tensorflow.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/5-forward-propagation.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/4-more-complex-neural-network.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/6-inference-in-tensorflow.html",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/3-electron-configuration-buildup.html",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/5-valence-and-core-electrons.html",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-aufbau-principle-periodic-blocks.html",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-aufbau-principle-periodic-blocks.html~",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-electron-configuration-periodic-table.html",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/2-orbitals-and-electron-probability.html",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-article.md",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Learn_ The periodic table, electron shells, and orbitals.html",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/Practice.excalidraw.md",
@@ -208,7 +221,6 @@
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
-    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/1-Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/1-calc-mass-subs-inmixture.md",
     "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
@@ -231,7 +243,6 @@
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/3-Empirical-fromula-Hg-CL.md",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/2-Calculating-mass-percent.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/1-How does Logistic Regression links to Neural Neworks.md",
-    "Learning/Frontend Interview Preparation/Coding/Like Button/intuition.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

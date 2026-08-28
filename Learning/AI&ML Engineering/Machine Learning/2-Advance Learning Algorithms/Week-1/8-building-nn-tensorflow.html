@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Building a Neural Network in TensorFlow</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff; margin:10px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .before-after{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:14px 0;}
+  @media(max-width:700px){.before-after{grid-template-columns:1fr;}}
+  .col-title{font-size:12.5px; font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em;}
+  .col-before .col-title{color:var(--muted)}
+  .col-after .col-title{color:var(--green)}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .warn{background:rgba(244,114,182,.08); border:1px solid rgba(244,114,182,.35); border-radius:12px; padding:14px 18px; margin-top:12px;}
+  .warn-title{color:var(--pink); font-weight:700; font-size:13px; margin-bottom:6px;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Building a Neural Network in TensorFlow</h1>
+  <p class="subtitle">Lesson 8 · The Sequential API — from manual layer-by-layer forward prop to model.compile / fit / predict</p>
+
+  <h2>What You Did Before (Manual Forward Prop)</h2>
+  <div class="card">
+    <pre>x = np.array([[200.0, 17.0]])
+layer_1 = Dense(units=3, activation="sigmoid")
+a1 = layer_1(x)
+
+layer_2 = Dense(units=1, activation="sigmoid")
+a2 = layer_2(a1)</pre>
+    <p style="font-size:13.5px; color:var(--muted)">You manually passed data into layer 1, took its output, and fed it into layer 2 yourself — explicit, step-by-step forward propagation.</p>
+  </div>
+
+  <h2>The New Way: Sequential()</h2>
+  <div class="card">
+    <p>Instead of manually chaining layers yourself, tell TensorFlow to <span class="highlight">string the layers together</span> into a model:</p>
+    <pre>layer_1 = Dense(units=3, activation="sigmoid")
+layer_2 = Dense(units=1, activation="sigmoid")
+
+model = Sequential([layer_1, layer_2])</pre>
+    <p>Now TensorFlow handles passing data from one layer to the next internally — you no longer call each layer by hand.</p>
+  </div>
+
+  <h2>Training Data Setup (Coffee Example)</h2>
+  <div class="card">
+    <table>
+      <tr><th>Temp</th><th>Duration</th><th>y (good coffee?)</th></tr>
+      <tr><td>200</td><td>17</td><td>1</td></tr>
+      <tr><td>120</td><td>5</td><td>0</td></tr>
+      <tr><td>425</td><td>20</td><td>0</td></tr>
+      <tr><td>212</td><td>18</td><td>1</td></tr>
+    </table>
+    <pre>x = np.array([[200.0, 17.0],
+              [120.0,  5.0],
+              [425.0, 20.0],
+              [212.0, 18.0]])    # 4×2 matrix — 4 examples, 2 features
+
+y = np.array([1, 0, 0, 1])       # 1-D array of 4 target labels</pre>
+    <p style="font-size:13px; color:var(--muted)">Note: X is a 2D matrix (rows=examples), but Y here is a plain 1D array — Keras accepts targets in this simpler form.</p>
+  </div>
+
+  <h2>Train and Predict — Just 4 Lines</h2>
+  <div class="card">
+    <pre>model.compile(...)      # configure the training process — details next week
+model.fit(x, y)          # train the model on your data — details next week
+model.predict(x_new)     # run forward propagation → get a prediction</pre>
+    <p><span class="step-num">1</span><code>model.compile(...)</code> — sets up how the model will learn (loss function, optimizer)</p>
+    <p><span class="step-num">2</span><code>model.fit(x, y)</code> — actually trains the weights on your data</p>
+    <p><span class="step-num">3</span><code>model.predict(x_new)</code> — runs forward propagation on new data and returns the output (replaces manually calling each layer)</p>
+    <p style="font-size:13px; color:var(--muted)">compile/fit internals are covered next week — for now just know these are the two calls needed to train.</p>
+  </div>
+
+  <h2>The Common Convention (Inline Layers)</h2>
+  <div class="card">
+    <p>In practice, you rarely see layers assigned to separate variables first. The idiomatic style inlines them directly inside <code>Sequential([...])</code>:</p>
+
+    <div class="before-after">
+      <div class="col-before">
+        <div class="col-title">Explicit (what you learned first)</div>
+        <pre>layer_1 = Dense(units=3, activation="sigmoid")
+layer_2 = Dense(units=1, activation="sigmoid")
+model = Sequential([layer_1, layer_2])</pre>
+      </div>
+      <div class="col-after">
+        <div class="col-title">Idiomatic (what you'll see in real code)</div>
+        <pre>model = Sequential([
+    Dense(units=3, activation="sigmoid"),
+    Dense(units=1, activation="sigmoid")
+])</pre>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--muted)">Functionally identical — just fewer named variables cluttering the code.</p>
+  </div>
+
+  <h2>Same Pattern, Bigger Network: Digit Classification</h2>
+  <div class="card">
+    <pre>model = Sequential([
+    Dense(units=25, activation="sigmoid"),
+    Dense(units=15, activation="sigmoid"),
+    Dense(units=1,  activation="sigmoid")
+])
+
+model.compile(...)
+
+x = np.array([[0..., 245, ..., 17], [0..., 200, ..., 184]])   # pixel data, multiple examples
+y = np.array([1, 0])                                          # labels
+
+model.fit(x, y)
+model.predict(x_new)</pre>
+    <p style="font-size:13.5px; color:var(--muted)">Same 4-step recipe regardless of network size: define layers → Sequential() → compile → fit → predict.</p>
+  </div>
+
+  <h2>The Full Recipe</h2>
+  <div class="card">
+    <p><span class="step-num">1</span>Define your layers: <code>Dense(units=N, activation=...)</code></p>
+    <p><span class="step-num">2</span>String them together: <code>model = Sequential([...])</code></p>
+    <p><span class="step-num">3</span>Configure training: <code>model.compile(...)</code></p>
+    <p><span class="step-num">4</span>Train: <code>model.fit(x, y)</code></p>
+    <p><span class="step-num">5</span>Predict on new data: <code>model.predict(x_new)</code></p>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">⚠️ A note the instructor makes explicitly</div>
+    <p style="font-size:13.5px; margin:0">It's easy to type these ~5 lines, get a working "state of the art" network, and not actually understand what's happening underneath. The point of this course isn't just to memorize the API — it's to understand forward propagation well enough that when something breaks, you can reason about it. That's why the <b>next lesson implements forward propagation from scratch in plain Python/NumPy</b> — no Keras — purely to build that intuition, even though in practice you'd almost always just use TensorFlow/PyTorch.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">This <code>Sequential → compile → fit → predict</code> pattern is the actual backbone of real Keras projects — image classifiers, recommendation systems, NLP models. What changes across projects is mostly the layer types/sizes and the data; the training loop shape stays this same.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> Implementing forward propagation from scratch in plain Python (no TensorFlow) — to see exactly what's happening under the hood.
+  </div>
+
+</div>
+</body>
+</html>
