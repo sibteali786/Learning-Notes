@@ -2694,7 +2694,7 @@ Decorators
 Remember function transformations, where a (higher-order) function takes a function and returns a function with new behavior? Python decorators offer a kind of syntactic sugar around that. ("Syntactic sugar" just means "a more convenient syntax.")
 
 Example:
-
+```python
 from collections.abc import Callable
 
 
@@ -2719,6 +2719,8 @@ def process_doc(doc: str) -> None:
 
 
 process_doc("What")
+```
+
 # Vowel count: 1
 # Document: What
 

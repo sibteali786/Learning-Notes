@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FastAPI — Phase 0 Learnings</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #1c1c1e;
+    --sub: #6b6b70;
+    --border: #e6e5e2;
+    --accent: #2f6f4f;
+    --accent-soft: #e8f3ec;
+    --warn: #b5541a;
+    --warn-soft: #fbeee3;
+    --code-bg: #f2f1ee;
+    --blue: #2f5f9e;
+    --blue-soft: #e9f0fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a;
+      --card: #202124;
+      --ink: #e9e9ea;
+      --sub: #9a9a9e;
+      --border: #34353a;
+      --accent: #5fbf8f;
+      --accent-soft: #1c2e26;
+      --warn: #e0935a;
+      --warn-soft: #2e2319;
+      --code-bg: #2a2b2f;
+      --blue: #7aa8e0;
+      --blue-soft: #1c2733;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 26px;
+    margin: 6px 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .date {
+    color: var(--sub);
+    font-size: 14px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 16px;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    background: var(--accent-soft);
+    font-size: 13px;
+    flex: none;
+  }
+
+  p { line-height: 1.55; font-size: 14.5px; color: var(--ink); margin: 6px 0; }
+  .sub { color: var(--sub); font-size: 13.5px; }
+
+  code, .code-inline {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-size: 12.8px;
+    line-height: 1.5;
+    margin: 10px 0 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: auto;
+  }
+  .pill.concept { background: var(--blue-soft); color: var(--blue); }
+  .pill.gotcha { background: var(--warn-soft); color: var(--warn); }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .flow .step {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .flow .arrow { color: var(--sub); font-size: 13px; }
+
+  .gotcha-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .gotcha-item {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+  }
+  .gotcha-item .title { font-weight: 600; font-size: 13.5px; margin-bottom: 3px; }
+  .gotcha-item .desc { font-size: 13px; color: var(--ink); opacity: 0.85; }
+
+  .checklist { list-style: none; margin: 0; padding: 0; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check { color: var(--accent); font-weight: 700; flex: none; }
+
+  footer {
+    text-align: center;
+    color: var(--sub);
+    font-size: 12.5px;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Live Feed Engine · Phase 0</div>
+    <h1>FastAPI, learned by building</h1>
+    <div class="date">2026-08-29 — <code>GET /feed</code> endpoint over real Postgres data</div>
+  </header>
+
+  <div class="card">
+    <h2><span class="badge">🏗️</span>The app object <span class="pill concept">concept</span></h2>
+    <p>Everything attaches to one <code>FastAPI()</code> instance. Uvicorn runs it via <code>main:app</code> — module name, colon, variable name.</p>
+    <pre><code>app = FastAPI(title="feed-engine-api")
+
+@app.get("/feed")
+async def get_feed():
+    ...</code></pre>
+    <p class="sub">Free bonus: <code>/docs</code> auto-generates interactive Swagger UI from your route signatures.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🔎</span>Query params from the signature <span class="pill concept">concept</span></h2>
+    <p>No manual parsing. Type hints do validation for you.</p>
+    <div class="flow">
+      <span class="step">region: str</span><span class="arrow">→</span><span class="step">required</span>
+    </div>
+    <div class="flow">
+      <span class="step">limit: int = Query(20, ge=1, le=100)</span><span class="arrow">→</span><span class="step">optional + bounded</span>
+    </div>
+    <p class="sub">A bad type (<code>?limit=abc</code>) → automatic <code>422</code>, no code needed.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">📦</span>Pydantic response models <span class="pill concept">concept</span></h2>
+    <p><code>response_model=list[FeedItem]</code> defines the exact output shape and validates every response against it before it's serialized — a mismatch fails loudly instead of shipping malformed JSON.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🔌</span>asyncpg connection pool <span class="pill concept">concept</span></h2>
+    <p>One pool opened at startup, reused for every request — never a connection per request.</p>
+    <div class="flow">
+      <span class="step">lifespan()</span><span class="arrow">→</span>
+      <span class="step">create_pool() before yield</span><span class="arrow">→</span>
+      <span class="step">pool.close() after yield</span>
+    </div>
+    <p class="sub"><code>pool.acquire()</code> in an <code>async with</code> block borrows + auto-returns a connection. <code>min_size</code>/<code>max_size</code> bound how many real Postgres connections exist — the thing that saturates under load in Phase 1.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🧭</span>Cursor pagination, not offset <span class="pill concept">concept</span></h2>
+    <p><code>article.id</code> is <code>BIGSERIAL</code> — strictly increasing — so paging by it never drifts even if rows are inserted concurrently.</p>
+    <pre><code>WHERE region = $1 AND id &lt; $2   -- cursor = last id seen
+ORDER BY id DESC
+LIMIT $3</code></pre>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">⚠️</span>Gotchas that actually cost debugging time <span class="pill gotcha">gotcha</span></h2>
+    <div class="gotcha-row">
+      <div class="gotcha-item">
+        <div class="title">asyncpg.Record ≠ dict, for Pydantic's purposes</div>
+        <div class="desc">Record supports <code>record["id"]</code> (mapping access) but not <code>record.id</code> (attribute access). Pydantic validates via attribute access by default → every field reported "missing" even though the data was right there. Fix: <code>dict(r)</code> or <code>FeedItem(**r)</code> before returning.</div>
+      </div>
+      <div class="gotcha-item">
+        <div class="title">Postgres lowercases unquoted aliases</div>
+        <div class="desc"><code>AS publisherName</code> silently becomes <code>publishername</code>. Needed <code>AS "publisherName"</code> (quoted) to match the camelCase Pydantic field exactly.</div>
+      </div>
+      <div class="gotcha-item">
+        <div class="title">Pydantic v2 won't coerce datetime → str</div>
+        <div class="desc">It'll happily parse a string into a datetime, but not the reverse — that direction isn't a guessable format. Fix: type the field as <code>datetime</code>, not <code>str</code>; Pydantic serializes it to ISO-8601 automatically in the JSON output.</div>
+      </div>
+      <div class="gotcha-item">
+        <div class="title">LSP import errors ≠ real errors</div>
+        <div class="desc">nvim's Pyright was resolving against the system Python, not <code>.venv</code>, so it flagged fastapi/pydantic/asyncpg as unresolved even though the app ran fine. Fixed with a <code>pyrightconfig.json</code> pointing <code>venvPath</code>/<code>venv</code> at <code>.venv</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">✅</span>What's confirmed working</h2>
+    <ul class="checklist">
+      <li><span class="check">✓</span> Real RSS ingestion → Postgres (BBC, TechCrunch, Hacker News)</li>
+      <li><span class="check">✓</span> <code>GET /feed?region=&amp;limit=&amp;cursor=</code> returns correctly-shaped JSON</li>
+      <li><span class="check">✓</span> Cursor pagination verified — no overlap, no drift between pages</li>
+      <li><span class="check">✓</span> DB connection via env var (<code>DATABASE_URL</code>), ready to containerize</li>
+    </ul>
+  </div>
+
+  <footer>Live Feed Engine — Phase 0 · next up: Dockerfile, docker-compose wiring, k6/wrk load test</footer>
+
+</div>
+</body>
+</html>
