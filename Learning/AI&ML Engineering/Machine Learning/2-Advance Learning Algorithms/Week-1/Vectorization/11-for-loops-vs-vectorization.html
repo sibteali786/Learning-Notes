@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For Loops vs Vectorization</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:980px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff; margin:10px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .before-after{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:14px 0;}
+  @media(max-width:700px){.before-after{grid-template-columns:1fr;}}
+  .col-title{font-size:12.5px; font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em;}
+  .col-before .col-title{color:var(--muted)}
+  .col-after .col-title{color:var(--green)}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>For Loops vs. Vectorization</h1>
+  <p class="subtitle">Lesson 11 · Replacing the neuron loop with a single matrix multiplication</p>
+
+  <h2>Why This Matters</h2>
+  <div class="card">
+    <p>One of the biggest reasons deep learning scaled to huge networks over the past decade: neural network computations can be <span class="highlight">vectorized</span> — expressed as matrix multiplications instead of loops. GPUs (and even some CPU instructions) are extremely good at large matrix multiplications, running them far faster and in parallel compared to a Python for-loop.</p>
+    <p style="font-size:13.5px; color:var(--muted)">Without this, today's large-scale deep learning simply wouldn't be computationally feasible.</p>
+  </div>
+
+  <h2>Loop-Based vs Vectorized dense()</h2>
+  <div class="card">
+    <div class="before-after">
+      <div class="col-before">
+        <div class="col-title">Loop-based (previous lesson)</div>
+        <pre>x = np.array([200, 17])
+W = np.array([[1, -3, 5],
+              [-2, 4, -6]])
+b = np.array([-1, 1, 2])
+
+def dense(a_in, W, b):
+    units = W.shape[1]
+    a_out = np.zeros(units)
+    for j in range(units):
+        w = W[:, j]
+        z = np.dot(w, a_in) + b[j]
+        a_out[j] = g(z)
+    return a_out
+
+# → [1, 0, 1]</pre>
+      </div>
+      <div class="col-after">
+        <div class="col-title">Vectorized (this lesson)</div>
+        <pre>X = np.array([[200, 17]])     # 2D! (1,2)
+W = np.array([[1, -3, 5],
+              [-2, 4, -6]])    # same as before
+B = np.array([[-1, 1, 2]])    # 2D! (1,3)
+
+def dense(A_in, W, B):
+    Z = np.matmul(A_in, W) + B
+    A_out = g(Z)
+    return A_out</pre>
+      </div>
+    </div>
+    <p style="font-size:13.5px">The entire <code>for j in range(units)</code> loop collapses into <b>one line</b>: <code>np.matmul(A_in, W)</code>.</p>
+  </div>
+
+  <h2>What Changed — Everything Becomes 2D</h2>
+  <div class="card">
+    <table>
+      <tr><th>Variable</th><th>Loop version</th><th>Vectorized version</th></tr>
+      <tr><td class="mono">x / X</td><td>1D: <code>[200, 17]</code></td><td>2D: <code>[[200, 17]]</code> — matches TensorFlow's convention</td></tr>
+      <tr><td class="mono">W</td><td>2D matrix</td><td>Same — unchanged</td></tr>
+      <tr><td class="mono">b / B</td><td>1D: <code>[-1, 1, 2]</code></td><td>2D: <code>[[-1, 1, 2]]</code> — a 1×3 matrix</td></tr>
+      <tr><td class="mono">z / Z</td><td>Scalar per neuron</td><td>2D matrix — the whole layer's z-values at once</td></tr>
+      <tr><td class="mono">a_out / A_out</td><td>1D array</td><td>2D matrix</td></tr>
+    </table>
+    <p style="font-size:13.5px; color:var(--muted)">Every quantity — input, weights, bias, z, output — is now a matrix. This uniformity is exactly what lets <code>np.matmul</code> do the whole layer's computation in one call.</p>
+  </div>
+
+  <h2>What np.matmul Is Doing</h2>
+  <div class="card">
+    <pre>Z = np.matmul(A_in, W) + B      # matrix multiplication, then add bias matrix
+A_out = g(Z)                    # sigmoid applied element-wise to the whole matrix</pre>
+    <p><span class="step-num">1</span><code>np.matmul(A_in, W)</code> multiplies the input matrix by the weight matrix — this single operation computes <b>all three neurons' weighted sums at once</b>, replacing the loop entirely.</p>
+    <p><span class="step-num">2</span><code>+ B</code> adds all three biases in one step (matrix addition).</p>
+    <p><span class="step-num">3</span><code>g(Z)</code> applies sigmoid <b>element-wise</b> across the whole matrix — every entry gets sigmoid'd independently, still in one call.</p>
+    <p style="font-size:13px; color:var(--muted)">The mechanics of matrix multiplication itself (why this actually computes the right dot products) are covered in the next two optional videos — skippable if you already know linear algebra.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">This is exactly why frameworks like TensorFlow insist on 2D arrays everywhere, even for a single example — it's not arbitrary convention, it's what makes the underlying vectorized matrix-multiply implementation possible. A GPU processing one big matrix multiplication is dramatically faster than looping over neurons in Python, and this speedup compounds massively as networks grow to millions/billions of parameters.</p>
+  </div>
+
+  <h2>Recap</h2>
+  <div class="card">
+    <p><span class="step-num">1</span>Loop-based <code>dense()</code>: correct, but slow — computes one neuron at a time.</p>
+    <p><span class="step-num">2</span>Vectorized <code>dense()</code>: same math, but the whole layer computed in one <code>np.matmul</code> call.</p>
+    <p><span class="step-num">3</span>Requires everything (X, W, B, Z, A_out) to be 2D matrices — no more 1D arrays.</p>
+    <p><span class="step-num">4</span>Vectorization is a core reason deep learning can scale to today's massive models.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up (optional):</b> Two videos on matrix multiplication mechanics — how <code>np.matmul</code> actually produces these results — followed by a deeper dive into the vectorized implementation.
+  </div>
+
+</div>
+</body>
+</html>

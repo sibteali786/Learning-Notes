@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "473ba558044dd053",
+        "id": "85d7f0ff99bd4f6d",
         "type": "tabs",
         "children": [
           {
-            "id": "4ea777b39ba2d2fe",
+            "id": "51c50f2b892e309d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Distributed Systems/Lecture 1/lecture1-summary.html"
               },
-              "icon": "lucide-file",
-              "title": "MIT- Coursework Spring 2026"
+              "icon": "code-glyph",
+              "title": "lecture1-summary"
             }
           }
         ]
@@ -90,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 311.32421875
+    "width": 443.79296875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -196,23 +185,23 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "51c50f2b892e309d",
   "lastOpenFiles": [
-    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
     "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
-    "Learning/Distributed Systems/Lecture 1/lecture1-summary.html",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
-    "Learning/Distributed Systems/Lecture 1",
-    "Learning/Distributed Systems",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/SQL+Server+Index+Architecture+and+Design+Guide+-+SQL+Server+_+Microsoft+Docs.pdf",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-trees+vs+B+trees.pdf",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/assignment-reshape-broadcasting-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/Vectorization/11-for-loops-vs-vectorization.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/14-vectorized-dense-layer.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/Vectorization/12-matrix-multiplication.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/Vectorization/13-matrix-multiplication-rules.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/notebooks/C2_W1_Lab02_CoffeeRoasting_TF.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/notebooks/C2_W1_Lab03_CoffeeRoasting_Numpy.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/notebooks/lab02-coffee-roasting-tf-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/8-building-nn-tensorflow.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/9-forward-prop-from-scratch.html",
+    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-    "Learning/Backend Engineering/Python/FastAPI/fastapi-phase0-learnings.html",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
-    "Learning/Backend Engineering/Python/FastAPI/fastapi-phase0-learnings.html.tmp.3556129.d1bfe5968cdb",
-    "Learning/Backend Engineering/Python/FastAPI",
     "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
     "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
@@ -243,7 +232,6 @@
     "Pasted image 20260813204427.png",
     "Pasted image 20260714215620.png",
     "Pasted Image 20260621125127_166.png",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

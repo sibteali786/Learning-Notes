@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Assignment Summary: Reshape & Broadcasting</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:980px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff; margin:10px 0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .warn{background:rgba(244,114,182,.08); border:1px solid rgba(244,114,182,.35); border-radius:12px; padding:14px 18px; margin-top:12px;}
+  .warn-title{color:var(--pink); font-weight:700; font-size:13px; margin-bottom:6px;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+  .mat{display:inline-grid; border:2px solid var(--blue); border-radius:6px; padding:8px 12px; font-family:'Cascadia Code',monospace; font-size:13px; background:#0d0f16; text-align:center;}
+  .matrix-row{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; align-items:center; margin:14px 0;}
+  .arrow{color:var(--muted); font-size:18px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Assignment Recap: Reshape Patterns & Broadcasting</h1>
+  <p class="subtitle">C2 W1 Assignment · Digit recognition (0 vs 1) — every reshape call explained + the broadcasting tutorial</p>
+
+  <h2>Assignment Overview</h2>
+  <div class="card">
+    <p>Binary digit classifier (0 vs 1) built three ways, all producing the same result:</p>
+    <table>
+      <tr><th>Section</th><th>Approach</th></tr>
+      <tr><td>2.4</td><td>TensorFlow <code>Sequential</code> model — 400→25→15→1, sigmoid throughout</td></tr>
+      <tr><td>2.5</td><td>From-scratch NumPy, loop-based <code>my_dense()</code> — one neuron at a time</td></tr>
+      <tr><td>2.6</td><td>From-scratch NumPy, <b>vectorized</b> <code>my_dense_v()</code> — whole layer via matmul</td></tr>
+      <tr><td>2.8</td><td>Optional tutorial: NumPy broadcasting — why <code>Z = XW + b</code> works despite shape mismatch</td></tr>
+    </table>
+  </div>
+
+  <h2>Every reshape() Call in the Notebook — What & Why</h2>
+  <div class="card">
+    <table>
+      <tr><th>Code</th><th>Input shape</th><th>Output shape</th><th>Why</th></tr>
+      <tr>
+        <td class="mono">model.predict(X[0].reshape(1,400))</td>
+        <td class="mono">(400,)</td>
+        <td class="mono">(1,400)</td>
+        <td>Keras <code>predict()</code> needs 2D input: (batch, features). One image = one sample, 400 pixels.</td>
+      </tr>
+      <tr>
+        <td class="mono">X[random_index].reshape((20,20)).T</td>
+        <td class="mono">(400,)</td>
+        <td class="mono">(20,20)</td>
+        <td>Un-flatten the pixel vector back into a square image grid for <code>plt.imshow()</code>. The <code>.T</code> corrects the orientation (rows/cols swapped) so the digit displays right-side-up.</td>
+      </tr>
+      <tr>
+        <td class="mono">x = X[0].reshape(-1,1)</td>
+        <td class="mono">(400,)</td>
+        <td class="mono">(400,1)</td>
+        <td>Builds a <b>column vector</b> matching the math-notation convention (a as a column) from the matrix multiplication lessons — then <code>x.T</code> flips it to a row for the actual matmul.</td>
+      </tr>
+      <tr>
+        <td class="mono">x_tst = ...reshape(2,)</td>
+        <td>flat</td>
+        <td class="mono">(2,)</td>
+        <td>Quick test input for <code>my_dense()</code> (loop version) — 1D, matching that function's expected 1D convention.</td>
+      </tr>
+      <tr>
+        <td class="mono">W_tst = ...reshape(2,3)</td>
+        <td>flat</td>
+        <td class="mono">(2,3)</td>
+        <td>2 inputs → 3 units, matching W's <code>(s_in, s_out)</code> shape rule from the model representation section.</td>
+      </tr>
+      <tr>
+        <td class="mono">X_tst = ...reshape(4,2)</td>
+        <td>flat</td>
+        <td class="mono">(4,2)</td>
+        <td>Test input for the <b>vectorized</b> <code>my_dense_v()</code> — now 2D since the whole point is processing multiple examples (4) at once via matmul.</td>
+      </tr>
+      <tr>
+        <td class="mono">b_tst = ...reshape(1,3)</td>
+        <td>flat</td>
+        <td class="mono">(1,3)</td>
+        <td>Bias as a 1×3 <b>2D</b> row (not 1D like before) — needed for the broadcasting trick covered next.</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>NumPy Broadcasting (Section 2.8)</h2>
+  <div class="card">
+    <p><span class="step-num">1</span><b>The problem it solves:</b> <code>Z = XW + b</code>, where <code>XW</code> comes out as shape <code>(m, j2)</code> — one row of z-values per training example — but <code>b</code> is only shape <code>(1, j2)</code> (or even 1D). Shapes don't match, yet <code>+</code> still works.</p>
+    <p><span class="step-num">2</span><b>What broadcasting does:</b> NumPy automatically "stretches" the smaller array by replicating it, so <code>b</code> conceptually gets copied to all <code>m</code> rows before the addition — without you writing that copy loop yourself.</p>
+
+    <div class="matrix-row">
+      <div class="mat">z<sub>1</sub><br>z<sub>2</sub><br>...<br>z<sub>m</sub></div>
+      <span style="color:var(--muted)">XW: (m, j2)</span>
+      <span class="arrow">+</span>
+      <div class="mat">b</div>
+      <span style="color:var(--muted)">b: (1, j2)</span>
+      <span class="arrow">→</span>
+      <div class="mat">b copied to all m rows</div>
+    </div>
+
+    <p><b>Compatibility rule</b> (checked from the rightmost dimension going left): two dimensions are compatible if they're <b>equal</b>, or <b>one of them is 1</b>. If neither, NumPy throws a shape error.</p>
+
+    <h3 style="font-size:14px; color:var(--purple); margin-top:20px;">Worked Examples from the Notebook</h3>
+    <pre>a = np.array([1,2,3]).reshape(-1,1)   # shape (3,1)
+b = 5                                  # scalar
+a + b   # → shape (3,1); the scalar 5 is broadcast to all 3 rows</pre>
+
+    <pre>a = np.array([1,2,3,4]).reshape(-1,1)  # shape (4,1)
+b = np.array([1,2,3]).reshape(1,-1)    # shape (1,3)
+a + b   # → shape (4,3)! Both dimensions stretch — a's single column
+        #   repeats across 3 columns, b's single row repeats across 4 rows</pre>
+
+    <p style="font-size:13.5px; color:var(--muted)">This last example is the general case: a (4,1) and a (1,3) array combine into a full (4,3) grid — each gets stretched along the dimension where it's size 1.</p>
+  </div>
+
+  <h2>Why This Matters for the Dense Layer</h2>
+  <div class="card">
+    <p>This is <b>exactly</b> the scenario in <code>my_dense_v()</code>: <code>XW</code> is shape <code>(m, j2)</code> and <code>b</code> is shape <code>(1, j2)</code> (a 1D vector conceptually). Broadcasting is what silently makes <code>XW + b</code> valid — it stretches the single bias row to apply to every one of the <code>m</code> training examples' z-values, without you writing a loop or manually tiling <code>b</code>.</p>
+    <div class="scenario">
+      <div class="scenario-title">🎯 Connects back to</div>
+      <p style="font-size:13.5px; margin:0">This is the same instinct as <code>np.tile</code> from the Coffee Roasting lab — both are ways NumPy/TensorFlow avoid manually duplicating data — but broadcasting does it <b>implicitly and automatically</b> during arithmetic, whereas <code>np.tile</code> is an explicit, deliberate duplication you call yourself.</p>
+    </div>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">⚠️ Bias convention note (from the notebook)</div>
+    <p style="font-size:13.5px; margin:0">The bias vector <code>b</code> can technically be represented as either 1D <code>(n,)</code> or 2D <code>(1,n)</code> — mathematically equivalent for broadcasting purposes. TensorFlow itself uses the 1D convention, and this assignment follows that same choice for consistency.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Big picture:</b> Every reshape in this notebook serves one of three purposes — (1) adding a batch dimension for Keras, (2) un-flattening a pixel vector for display, or (3) matching the row/column convention needed for a particular matmul. Broadcasting then quietly handles the shape mismatch between a matrix of z-values and a single bias vector, which is why the bias addition in your dense layer "just works" despite the shapes not technically matching.
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Forward Prop from Scratch</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  pre{background:#0d0f16; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+     overflow-x:auto; font-size:13px; color:#c9e8ff; margin:10px 0;}
+  .eq{background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:12px 16px; font-size:15px; text-align:center; margin:10px 0; color:#fbbf24;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .warn{background:rgba(244,114,182,.08); border:1px solid rgba(244,114,182,.35); border-radius:12px; padding:14px 18px; margin-top:12px;}
+  .warn-title{color:var(--pink); font-weight:700; font-size:13px; margin-bottom:6px;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Forward Propagation from Scratch (Plain Python)</h1>
+  <p class="subtitle">Lesson 9 · Implementing a single layer's forward pass with no TensorFlow — pure NumPy</p>
+
+  <h2>Purpose</h2>
+  <div class="card">
+    <p>Goal: build intuition for what TensorFlow/PyTorch actually do internally by <span class="highlight">hand-coding one layer of forward propagation</span> using nothing but <code>np.array</code>, <code>np.dot</code>, and a sigmoid function.</p>
+    <p style="font-size:13.5px; color:var(--muted)">This is explicitly a learning exercise, not something done in real projects — but understanding it means you can reason about what's going wrong if something ever breaks in a real framework.</p>
+  </div>
+
+  <h2>Key Convention Shift: 1D Arrays, Not 2D</h2>
+  <div class="card">
+    <p>Unlike the TensorFlow examples (which used double brackets → 2D matrices), this from-scratch code uses <b>1D arrays</b> — single square brackets — for every vector and parameter:</p>
+    <pre>x = np.array([200, 17])          # 1D array, not [[200, 17]]</pre>
+    <p style="font-size:13.5px; color:var(--muted)">This matches Course 1's convention rather than TensorFlow's — since this is manual math, not a Keras call, there's no requirement to keep the batch dimension.</p>
+  </div>
+
+  <h2>Notation Used in Code</h2>
+  <div class="card">
+    <table>
+      <tr><th>Math notation</th><th>Code variable</th><th>Meaning</th></tr>
+      <tr><td class="mono">w<sub>1</sub><sup>[1]</sup></td><td class="mono">w1_1</td><td>Weights, layer 1, neuron 1 (subscript after underscore)</td></tr>
+      <tr><td class="mono">b<sub>1</sub><sup>[1]</sup></td><td class="mono">b1_1</td><td>Bias, layer 1, neuron 1</td></tr>
+      <tr><td class="mono">w<sub>1</sub><sup>[2]</sup></td><td class="mono">w2_1</td><td>Weights, layer 2, neuron 1</td></tr>
+    </table>
+    <p style="font-size:13px; color:var(--muted)">Reading convention: the number right after the underscore is the <b>subscript</b> (neuron index); the layer number is baked into the variable name itself (<code>w1_</code> = layer 1, <code>w2_</code> = layer 2).</p>
+  </div>
+
+  <h2>Layer 1: Computing a1_1, a1_2, a1_3 by Hand</h2>
+  <div class="card">
+    <div class="eq">a<sub>j</sub><sup>[1]</sup> = g( w<sub>j</sub><sup>[1]</sup> · x + b<sub>j</sub><sup>[1]</sup> )</div>
+
+    <pre>x = np.array([200, 17])
+
+# Neuron 1
+w1_1 = np.array([1, 2]);   b1_1 = np.array([-1])
+z1_1 = np.dot(w1_1, x) + b1_1
+a1_1 = sigmoid(z1_1)
+
+# Neuron 2
+w1_2 = np.array([-3, 4]);  b1_2 = np.array([1])
+z1_2 = np.dot(w1_2, x) + b1_2
+a1_2 = sigmoid(z1_2)
+
+# Neuron 3
+w1_3 = np.array([5, -6]);  b1_3 = np.array([2])
+z1_3 = np.dot(w1_3, x) + b1_3
+a1_3 = sigmoid(z1_3)
+
+# Collect into layer 1's output vector
+a1 = np.array([a1_1, a1_2, a1_3])</pre>
+
+    <p><span class="step-num">1</span>Each neuron computes its own <code>z = np.dot(w, x) + b</code></p>
+    <p><span class="step-num">2</span>Then applies sigmoid: <code>a = sigmoid(z)</code></p>
+    <p><span class="step-num">3</span>All three outputs get bundled into one array — <code>a1</code> — which becomes the input to layer 2</p>
+  </div>
+
+  <h2>Layer 2: Computing a2_1</h2>
+  <div class="card">
+    <div class="eq">a<sub>1</sub><sup>[2]</sup> = g( w<sub>1</sub><sup>[2]</sup> · a<sup>[1]</sup> + b<sub>1</sub><sup>[2]</sup> )</div>
+
+    <pre>w2_1 = np.array([-7, 8, 9])   # 3 weights — matches a1's 3 elements
+b2_1 = np.array([3])
+
+z2_1 = np.dot(w2_1, a1) + b2_1
+a2_1 = sigmoid(z2_1)</pre>
+
+    <p style="font-size:13.5px">Notice the key difference: layer 2's dot product uses <code>a1</code> (layer 1's <b>output</b>) as its input — not the original <code>x</code>. This is the same "l−1" input rule from the general activation formula, just written out concretely.</p>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">⚠️ Why this is tedious</div>
+    <p style="font-size:13.5px; margin:0">Notice every neuron needed its own hardcoded <code>w1_1</code>, <code>b1_1</code>, <code>z1_1</code>, <code>a1_1</code> variables — this doesn't scale. A layer with 25 neurons would need 25 sets of these lines written out by hand. The next lesson fixes this by generalizing into a loop-based, reusable function that works for any layer size.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">This is essentially what a "from-scratch" mini deep learning library looks like at its core: a bunch of dot products, additions, and activation functions chained together. Every framework — TensorFlow, PyTorch, even hand-rolled research code — boils down to exactly this, just wrapped in far more efficient, vectorized, GPU-accelerated machinery.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> Generalizing this into a reusable function that computes any layer's output, regardless of how many neurons it has — no more one-off variables per neuron.
+  </div>
+
+</div>
+</body>
+</html>

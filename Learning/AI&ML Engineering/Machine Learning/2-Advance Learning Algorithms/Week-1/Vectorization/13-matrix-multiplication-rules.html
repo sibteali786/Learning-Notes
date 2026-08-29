@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Matrix Multiplication Rules</title>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#2a2f3d;
+    --blue:#4f8cff; --purple:#a78bfa; --pink:#f472b6;
+    --orange:#fb923c; --green:#34d399; --text:#e5e7eb; --muted:#9ca3af;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif; line-height:1.55;}
+  .wrap{max-width:980px; margin:0 auto;}
+  h1{font-size:28px; margin:0 0 4px;
+    background:linear-gradient(90deg,var(--blue),var(--purple));
+    -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:14px;}
+  h2{font-size:18px; color:var(--blue); margin:36px 0 14px; display:flex; align-items:center; gap:8px;}
+  h2::before{content:''; width:6px; height:20px; background:var(--blue); border-radius:3px; display:inline-block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  code, .mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace; font-size:13.5px;}
+  .eq{background:#0d0f16; border:1px solid var(--border); border-radius:10px;
+    padding:14px 18px; font-size:16px; text-align:center; margin:10px 0; color:#fbbf24;}
+  .mat{display:inline-grid; border:2px solid var(--blue); border-radius:6px; padding:10px 14px; font-family:'Cascadia Code',monospace; font-size:14px; background:#0d0f16; text-align:center;}
+  .matrix-row{display:flex; gap:20px; flex-wrap:wrap; justify-content:center; align-items:center; margin:16px 0;}
+  .arrow{color:var(--muted); font-size:20px;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th,td{padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--blue); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;}
+  .step-num{display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--blue); color:#fff; font-size:12px; font-weight:700; margin-right:8px;}
+  .highlight{color:var(--orange); font-weight:600;}
+  .quiz{background:#0d0f16; border:1px dashed var(--purple); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .warn{background:rgba(244,114,182,.08); border:1px solid rgba(244,114,182,.35); border-radius:12px; padding:14px 18px; margin-top:12px;}
+  .warn-title{color:var(--pink); font-weight:700; font-size:13px; margin-bottom:6px;}
+  .scenario{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(52,211,153,.35); border-radius:12px; padding:16px 20px; margin-top:10px;}
+  .scenario-title{color:var(--green); font-weight:700; font-size:13.5px; margin-bottom:8px; display:flex; gap:6px; align-items:center;}
+  .footer-note{margin-top:36px; padding:14px 18px; background:#0d0f16; border-left:3px solid var(--purple); border-radius:6px; font-size:13.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Matrix Multiplication — General Rules</h1>
+  <p class="subtitle">Lesson 13 (optional) · Larger example + the shape-compatibility rule</p>
+
+  <h2>The Setup</h2>
+  <div class="card">
+    <p>A is 2×3, so think of it as 3 column vectors: a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>.</p>
+    <p>W is 2×4, so think of it as 4 column vectors: w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>.</p>
+    <div class="matrix-row">
+      <div class="mat">1&nbsp;&nbsp;-1&nbsp;&nbsp;0.1<br>2&nbsp;&nbsp;-2&nbsp;&nbsp;0.2</div>
+      <span style="color:var(--muted)">A (2×3)</span>
+    </div>
+    <div class="matrix-row">
+      <div class="mat">3&nbsp;&nbsp;5&nbsp;&nbsp;7&nbsp;&nbsp;9<br>4&nbsp;&nbsp;6&nbsp;&nbsp;8&nbsp;&nbsp;0</div>
+      <span style="color:var(--muted)">W (2×4)</span>
+    </div>
+    <p style="font-size:13.5px">A<sup>T</sup> is formed by laying each column of A on its side, becoming rows: row 1 = a<sub>1</sub><sup>T</sup>, row 2 = a<sub>2</sub><sup>T</sup>, row 3 = a<sub>3</sub><sup>T</sup> → shape 3×2.</p>
+  </div>
+
+  <h2>The General Rule: Row × Column</h2>
+  <div class="card">
+    <div class="eq">Z[row i][col j] = (row i of A<sup>T</sup>) · (column j of W)</div>
+    <p style="font-size:13.5px">Every single entry of the output matrix Z is its own dot product between one row of A<sup>T</sup> and one column of W.</p>
+
+    <table>
+      <tr><th>Z position</th><th>Which row / column</th><th>Computation</th><th>Result</th></tr>
+      <tr><td>Row 1, Col 1</td><td>a<sub>1</sub><sup>T</sup> · w<sub>1</sub></td><td class="mono">(1×3)+(2×4)</td><td class="highlight">11</td></tr>
+      <tr><td>Row 3, Col 2</td><td>a<sub>3</sub><sup>T</sup> · w<sub>2</sub></td><td class="mono">(0.1×5)+(0.2×6)</td><td class="highlight">1.7</td></tr>
+      <tr><td>Row 2, Col 3</td><td>a<sub>2</sub><sup>T</sup> · w<sub>3</sub></td><td class="mono">(-1×7)+(-2×8)</td><td class="highlight">-23</td></tr>
+    </table>
+
+    <div class="quiz">
+      <p style="font-size:13px; color:var(--muted); margin:0 0 8px;">The video poses this as a self-check: given Z's position, identify which row of A<sup>T</sup> and column of W to dot together. Pattern: <b>row index of Z → row of A<sup>T</sup></b>, <b>column index of Z → column of W</b>.</p>
+    </div>
+
+    <p>Full result — Z is a <b>3×4 matrix</b>:</p>
+    <div class="matrix-row">
+      <div class="mat">11&nbsp;&nbsp;&nbsp;17&nbsp;&nbsp;&nbsp;23&nbsp;&nbsp;&nbsp;9<br>-11&nbsp;-17&nbsp;-23&nbsp;-9<br>1.1&nbsp;&nbsp;1.7&nbsp;&nbsp;2.3&nbsp;&nbsp;0.9</div>
+    </div>
+  </div>
+
+  <h2>The Shape-Compatibility Rule</h2>
+  <div class="card">
+    <p><b>Core requirement:</b> you can only take a dot product between two vectors of the <b>same length</b>.</p>
+    <p style="font-size:13.5px">E.g. <code>[0.1, 0.2]</code> (length 2) can dot with <code>[5, 6]</code> (length 2) — but not with a length-3 vector.</p>
+
+    <div class="eq">A<sup>T</sup> is 3×2 &nbsp;&nbsp;&nbsp; W is 2×4 &nbsp;&nbsp;&nbsp; → &nbsp;&nbsp;&nbsp; inner dimensions (2 and 2) must match</div>
+
+    <table>
+      <tr><th>Rule</th><th>Explanation</th></tr>
+      <tr><td>Compatibility</td><td># columns of A<sup>T</sup> must equal # rows of W (both = 2 here) — so every row/column pair being dotted has matching length</td></tr>
+      <tr><td>Result shape</td><td>Z's <b>rows</b> = A<sup>T</sup>'s rows (3); Z's <b>columns</b> = W's columns (4) → Z is 3×4</td></tr>
+    </table>
+
+    <div class="warn">
+      <div class="warn-title">⚠️ Easy mistake</div>
+      <p style="font-size:13.5px; margin:0">The "inner" numbers (columns of first matrix, rows of second) must match for the multiplication to even be valid — trying to multiply a 3×2 by a 3×4 would fail. The "outer" numbers (rows of first, columns of second) become the output's shape.</p>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-title">🎯 Real-world reading</div>
+    <p style="font-size:13.5px; margin:0">This shape rule is exactly why shape-mismatch errors happen in Keras/TensorFlow — if your input's feature count doesn't match a layer's expected input dimension, the underlying matrix multiplication is literally invalid, and TensorFlow throws a shape error. Understanding this rule turns a cryptic error message into something you can immediately diagnose.</p>
+  </div>
+
+  <h2>Instructor's Note</h2>
+  <div class="card">
+    <p style="font-size:13.5px">The instructor shares that the first time they implemented the vectorized version of a neural network (using matrix multiplication instead of loops), it ran <span class="highlight">dramatically faster</span> than their previous loop-based implementations — a genuine "aha" moment even for an experienced practitioner.</p>
+  </div>
+
+  <div class="footer-note">
+    <b>Next up:</b> Applying all of this matrix multiplication machinery back to the vectorized neural network implementation — tying <code>np.matmul(A_in, W)</code> directly to what's covered in these two lessons.
+  </div>
+
+</div>
+</body>
+</html>
