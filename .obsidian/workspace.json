@@ -4,17 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "405269061b908bdc",
+        "id": "473ba558044dd053",
         "type": "tabs",
         "children": [
           {
-            "id": "51a4aea52bf3af59",
+            "id": "4ea777b39ba2d2fe",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "MIT- Coursework Spring 2026"
             }
           }
         ]
@@ -184,20 +198,23 @@
   },
   "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
+    "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
+    "Learning/Distributed Systems/Lecture 1/lecture1-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/1-btree-fundamentals.html",
+    "Learning/Distributed Systems/Lecture 1",
+    "Learning/Distributed Systems",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/SQL+Server+Index+Architecture+and+Design+Guide+-+SQL+Server+_+Microsoft+Docs.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-trees+vs+B+trees.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/2-btree-plus.html",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/Backend Engineering/Python/FastAPI/fastapi-phase0-learnings.html",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/Backend Engineering/Python/FastAPI/fastapi-phase0-learnings.html.tmp.3556129.d1bfe5968cdb",
     "Learning/Backend Engineering/Python/FastAPI",
-    "Learning/System Design/Practice/News Aggregator/part2_news_aggregator.html",
-    "Learning/System Design/Practice/News Aggregator/part1_news_aggregator.html",
     "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
     "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
-    "Learning/DSA/DFS/dfs-tree.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/6-inference-in-tensorflow.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/8-building-nn-tensorflow.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/7-data-numpy-tensorflow.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/5-forward-propagation.html",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-article.md",
@@ -207,7 +224,6 @@
     "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md",
     "conflict-files-obsidian-git.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/1-Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/1-calc-mass-subs-inmixture.md",
@@ -228,8 +244,6 @@
     "Pasted image 20260714215620.png",
     "Pasted Image 20260621125127_166.png",
     "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/3-Empirical-fromula-Hg-CL.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/2-Calculating-mass-percent.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

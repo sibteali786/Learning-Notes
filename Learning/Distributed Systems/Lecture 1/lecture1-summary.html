@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MIT 6.824 — Lecture 1 Summary</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --border:#2a2f3a; --text:#e6e9ef; --muted:#9aa4b2;
+    --accent:#5b9dff; --accent2:#ffb454; --accent3:#5fd papers; --good:#5fd68d; --warn:#ff8a65;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
+  header{padding:32px 24px 16px;text-align:center;border-bottom:1px solid var(--border);}
+  header h1{margin:0 0 6px;font-size:26px;}
+  header p{margin:0;color:var(--muted);font-size:14px;}
+  .wrap{max-width:960px;margin:0 auto;padding:24px;}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+  .toc a{background:var(--card);border:1px solid var(--border);color:var(--accent);text-decoration:none;
+    padding:6px 12px;border-radius:20px;font-size:12.5px;white-space:nowrap;}
+  .chapter{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:20px;}
+  .chapter h2{margin:0 0 4px;font-size:19px;display:flex;align-items:center;gap:10px;}
+  .ts{background:var(--accent);color:#0f1115;font-size:12px;font-weight:700;padding:2px 9px;border-radius:6px;}
+  .chapter .sub{color:var(--muted);font-size:12.5px;margin-bottom:14px;}
+  ul{margin:8px 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:14.5px;}
+  .example{margin-top:10px;background:#11151d;border-left:3px solid var(--accent2);padding:10px 14px;border-radius:0 8px 8px 0;font-size:14px;color:#dcd;}
+  .example b{color:var(--accent2);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+  .box{background:#11151d;border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .box h4{margin:0 0 6px;font-size:13.5px;color:var(--accent);}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;font-size:13.5px;}
+  .node{background:#11151d;border:1px solid var(--border);padding:8px 12px;border-radius:8px;}
+  .arrow{color:var(--muted);}
+  .tag{display:inline-block;background:#1e2430;color:var(--accent);border-radius:6px;padding:1px 8px;font-size:11.5px;margin-right:6px;}
+  .tag.good{color:var(--good);}
+  .tag.warn{color:var(--warn);}
+  .keypoints{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;}
+  .kp{flex:1 1 150px;background:#11151d;border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center;}
+  .kp .n{font-size:20px;}
+  .kp .l{font-size:11.5px;color:var(--muted);}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:30px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>MIT 6.824 — Distributed Systems</h1>
+  <p>Lecture 1 · Introduction & MapReduce · Chapter-by-chapter visual summary</p>
+</header>
+
+<div class="wrap">
+
+  <div class="toc">
+    <a href="#c1">0:00 Distributed Systems</a>
+    <a href="#c2">7:58 Course Overview</a>
+    <a href="#c3">12:12 Programming Labs</a>
+    <a href="#c4">17:33 Infrastructure</a>
+    <a href="#c5">20:57 Topics</a>
+    <a href="#c6">23:17 Scalability</a>
+    <a href="#c7">29:21 Failure</a>
+    <a href="#c8">31:33 Availability</a>
+    <a href="#c9">37:15 Consistency</a>
+    <a href="#c10">46:50 MapReduce Model</a>
+    <a href="#c11">50:04 MapReduce Internals</a>
+    <a href="#c12">57:13 Q&A / Wrap</a>
+  </div>
+
+  <div class="chapter" id="c1">
+    <h2><span class="ts">0:00</span> Distributed Systems — Why Bother?</h2>
+    <div class="sub">Definition, motivations, and what makes them hard</div>
+    <ul>
+      <li><b>Definition:</b> cooperating computers communicating over a network to accomplish a coherent task (storage for big websites, MapReduce-style big data, P2P systems).</li>
+      <li><b>Rule #1:</b> if a single computer can do the job — do it that way. Distributed systems are never simpler.</li>
+    </ul>
+    <div class="grid2">
+      <div class="box"><h4>4 Reasons to Go Distributed</h4>
+        <ul>
+          <li>Performance via parallelism (CPUs, disks, memory)</li>
+          <li>Fault tolerance (failover between replicas)</li>
+          <li>Physical necessity (data inherently spread out, e.g. banks in different cities)</li>
+          <li>Security / isolation (untrusted code split across machines)</li>
+        </ul>
+      </div>
+      <div class="box"><h4>3 Reasons They're Hard</h4>
+        <ul>
+          <li>Concurrency — many parts executing at once</li>
+          <li><b>Partial failures</b> — some pieces work, others don't (unlike a single PC which mostly just works or crashes)</li>
+          <li>Hard to actually achieve promised speed-up</li>
+        </ul>
+      </div>
+    </div>
+    <div class="example"><b>Real-life example:</b> a bank transfer between NYC and London isn't a design choice — the computers are physically in different places and must cooperate over a network.</div>
+  </div>
+
+  <div class="chapter" id="c2">
+    <h2><span class="ts">7:58</span> Course Overview</h2>
+    <div class="sub">Structure, staff, grading philosophy</div>
+    <ul>
+      <li>Taught by Robert Morris + 4 TAs; course site + Piazza for Q&A.</li>
+      <li>Components: <b>lectures</b> (paper-driven case studies), <b>2 exams</b> (midterm + final, based on papers & labs — old exams posted as study aid), <b>4 programming labs</b>, optional <b>final project</b> instead of Lab 4.</li>
+      <li>One reading/question/answer due per paper, midnight before lecture — come having <i>read</i> the paper.</li>
+      <li>Labs are graded by running the exact same tests students are given — no hidden tests.</li>
+    </ul>
+  </div>
+
+  <div class="chapter" id="c3">
+    <h2><span class="ts">12:12</span> Programming Labs</h2>
+    <div class="sub">The 4-lab arc, building one system on top of the last</div>
+    <div class="flow">
+      <div class="node">Lab 1<br><span class="tag">MapReduce</span></div><span class="arrow">→</span>
+      <div class="node">Lab 2<br><span class="tag">Raft</span></div><span class="arrow">→</span>
+      <div class="node">Lab 3<br><span class="tag">Fault-tolerant KV store</span></div><span class="arrow">→</span>
+      <div class="node">Lab 4<br><span class="tag">Sharded KV service</span></div>
+    </div>
+    <ul>
+      <li><b>Lab 1:</b> implement your own MapReduce (today's topic).</li>
+      <li><b>Lab 2:</b> Raft — replicate any system for fault tolerance, with automatic failover.</li>
+      <li><b>Lab 3:</b> use Raft to build a replicated, fault-tolerant key-value server.</li>
+      <li><b>Lab 4:</b> shard (partition) the KV store across replica groups for parallel speed-up; handle live data migration.</li>
+      <li><b>Alternative:</b> a team project (2–3 people) instead of Lab 4 — pick your own distributed-systems idea, get it approved, build + demo + report.</li>
+    </ul>
+    <div class="example"><b>Tip from lecture:</b> start early — distributed bugs are timing-dependent and painful to debug at the last minute.</div>
+  </div>
+
+  <div class="chapter" id="c4">
+    <h2><span class="ts">17:33</span> Infrastructure for Applications</h2>
+    <div class="sub">Storage, computation, communication — and the abstraction "dream"</div>
+    <ul>
+      <li>Course focuses mainly on <b>storage</b> (well-defined abstraction) and <b>computation</b> (e.g. MapReduce); communication is treated as a tool, not the focus (that's 6.829).</li>
+      <li><b>The dream:</b> give applications an interface that <i>looks</i> like a normal single-machine file/storage system, while underneath it's a massive, fault-tolerant, distributed system. Rarely fully achieved — but the goal driving most designs in this course.</li>
+    </ul>
+  </div>
+
+  <div class="chapter" id="c5">
+    <h2><span class="ts">20:57</span> Recurring Topics</h2>
+    <div class="sub">The toolbox used throughout the course</div>
+    <div class="keypoints">
+      <div class="kp"><div class="n">⚙️</div><div class="l">Implementation<br>RPC, threads, locks</div></div>
+      <div class="kp"><div class="n">📈</div><div class="l">Performance<br>scalable speedup</div></div>
+      <div class="kp"><div class="n">🛡️</div><div class="l">Fault tolerance<br>availability & recovery</div></div>
+      <div class="kp"><div class="n">🔄</div><div class="l">Consistency<br>what reads/writes mean</div></div>
+    </div>
+  </div>
+
+  <div class="chapter" id="c6">
+    <h2><span class="ts">23:17</span> Scalability</h2>
+    <div class="sub">2x computers → 2x performance (the dream, and why it breaks)</div>
+    <ul>
+      <li><b>Scalable speedup:</b> doubling machines should double throughput — huge win because you buy it with money, not costly re-engineering.</li>
+      <li>Classic pattern: add more web servers in front of a single shared database. Works great — until the database becomes the bottleneck.</li>
+    </ul>
+    <div class="flow">
+      <div class="node">Browsers</div><span class="arrow">→</span>
+      <div class="node">Web server 1</div><span class="arrow">↘</span>
+      <div class="node">Web server 2 …N</div><span class="arrow">↘</span>
+      <div class="node">Single Database <span class="tag warn">bottleneck</span></div>
+    </div>
+    <div class="example"><b>Real-life example:</b> Reddit-style site adds 100 web servers to handle traffic — fine, until all 100 hammer one database and reads/writes start queueing. Fixing it means redesigning storage (sharding), which is real engineering work, not just "buy more machines."</div>
+  </div>
+
+  <div class="chapter" id="c7">
+    <h2><span class="ts">29:21</span> Failure at Scale</h2>
+    <div class="sub">Why rare events become routine</div>
+    <ul>
+      <li>A single reliable server might run for years without a crash.</li>
+      <li>With <b>1,000 servers</b>, even at "1 failure/year/machine," you get roughly <b>~3 failures every day</b> — something is always broken.</li>
+      <li>Failure-handling must be a first-class part of the design, not an afterthought — because it's not "if," it's "constantly."</li>
+    </ul>
+  </div>
+
+  <div class="chapter" id="c8">
+    <h2><span class="ts">31:33</span> Availability & Recoverability</h2>
+    <div class="sub">Two flavors of fault tolerance, and the two big tools</div>
+    <div class="grid2">
+      <div class="box"><h4>Availability</h4><p style="font-size:14px;margin:0;">System keeps serving correctly through certain failures (e.g., one replica dies, the other keeps going).</p></div>
+      <div class="box"><h4>Recoverability</h4><p style="font-size:14px;margin:0;">System may stop entirely on failure, but resumes correctly once repaired (e.g., after power comes back).</p></div>
+    </div>
+    <ul>
+      <li><b>Tool 1 — Non-volatile storage:</b> checkpoints/logs on disk so you can recover state after a crash (writing it is expensive, so a lot of engineering goes into minimizing this).</li>
+      <li><b>Tool 2 — Replication:</b> keep multiple copies; the hard part is keeping replicas from silently drifting out of sync.</li>
+    </ul>
+  </div>
+
+  <div class="chapter" id="c9">
+    <h2><span class="ts">37:15</span> Consistency</h2>
+    <div class="sub">What should get(key) actually return?</div>
+    <ul>
+      <li>With one copy of data, put/get semantics are obvious. With <b>replicas</b>, they're not — a crash mid-update can leave replicas disagreeing.</li>
+      <li><b>Strong consistency:</b> a get returns the value of the most recently completed put. Simple to reason about, but expensive — often requires contacting every replica.</li>
+      <li><b>Weak consistency:</b> gets may return stale data for an unbounded time, in exchange for much lower latency/communication cost.</li>
+      <li>Geographically distant replicas (different cities, for independent failure domains) make strong consistency very costly — tens of milliseconds per operation just from speed-of-light network delay.</li>
+    </ul>
+    <div class="example"><b>Real-life example:</b> a client writes key=1 → 21 to Replica A, then crashes before updating Replica B (still holds 20). A later <code>get(1)</code> may return 21 or 20 depending on which replica answers — inconsistent unless the system enforces a strong-consistency rule.</div>
+  </div>
+
+  <div class="chapter" id="c10">
+    <h2><span class="ts">46:50</span> MapReduce — The Programming Model</h2>
+    <div class="sub">Google's answer: let engineers write map/reduce, not distributed systems</div>
+    <ul>
+      <li><b>Origin:</b> Google, ~2004, built to index/analyze the entire web (tens of TB) without every engineer becoming a distributed-systems expert.</li>
+      <li><b>Idea:</b> programmer writes a simple <code>map(k,v)</code> and <code>reduce(k, values[])</code>; the framework handles parallelism, data movement, and failures.</li>
+    </ul>
+    <div class="flow">
+      <div class="node">Input files</div><span class="arrow">→</span>
+      <div class="node">Map tasks<br><span class="tag good">parallel</span></div><span class="arrow">→</span>
+      <div class="node">Shuffle<br>(group by key)</div><span class="arrow">→</span>
+      <div class="node">Reduce tasks<br><span class="tag good">parallel</span></div><span class="arrow">→</span>
+      <div class="node">Output files</div>
+    </div>
+    <div class="example"><b>Worked example — Word Count:</b><br>
+      map("f1", "a b") → (a,1) (b,1) &nbsp;|&nbsp; map("f2", "b") → (b,1) &nbsp;|&nbsp; map("f3", "a c") → (a,1) (c,1)<br>
+      Shuffle groups by key: a→[1,1], b→[1,1], c→[1]<br>
+      reduce("a",[1,1]) → 2 &nbsp;|&nbsp; reduce("b",[1,1]) → 2 &nbsp;|&nbsp; reduce("c",[1]) → 1
+    </div>
+    <ul>
+      <li>A full run is a <b>job</b>; each map or reduce call is a <b>task</b>.</li>
+      <li>Chained MapReduce jobs are common (e.g. Google's PageRank ran as repeated MapReduce iterations).</li>
+      <li><b>Limitation:</b> only fits "map → shuffle → reduce" shaped computations; multi-stage pipelines need several chained jobs (later systems generalize this).</li>
+    </ul>
+  </div>
+
+  <div class="chapter" id="c11">
+    <h2><span class="ts">50:04</span> MapReduce — Under the Hood</h2>
+    <div class="sub">Master/worker architecture, GFS, and the network bottleneck</div>
+    <ul>
+      <li><b>Master + workers:</b> a master server assigns map/reduce tasks to worker machines.</li>
+      <li><b>Map output</b> is written to the local disk of the worker that ran it (no network needed yet).</li>
+      <li><b>Shuffle</b> is where the network gets hit hard: each reduce worker must fetch its key's data from every map worker's local disk — output size ≈ input size (e.g., 10 TB in → 10 TB shuffled).</li>
+      <li><b>GFS (Google File System):</b> cluster file system splitting big files into 64MB chunks across the same machines that run MapReduce, keeping 2–3 replicas for fault tolerance.</li>
+    </ul>
+    <div class="box"><h4>Key optimization (2004-era)</h4>
+      <p style="font-size:14px;margin:4px 0 0;">Network was the bottleneck (~50 Mbps/machine share of the root switch). Google's fix: co-locate GFS and MapReduce on the same machines, and schedule each map task on the machine that already stores its input — turning network reads into local disk reads. Reduce output still had to cross the network once, to satisfy GFS's replication.</p>
+    </div>
+    <div class="example"><b>Real-life example:</b> modern data centers use multiple root switches instead of one, giving far more bandwidth — which is why later MapReduce versions stopped bothering to co-locate compute with data at all.</div>
+  </div>
+
+  <div class="chapter" id="c12">
+    <h2><span class="ts">57:13</span> Q&A & Wrap-up</h2>
+    <div class="sub">Loose ends</div>
+    <ul>
+      <li>Chained MapReduce jobs: yes, routine — output of one job feeds the next (e.g., iterative PageRank).</li>
+      <li>Map/Reduce <i>functions</i> (programmer's code) vs. map/reduce <i>workers</i> (the framework processes actually running them) — distinct concepts.</li>
+      <li>A streaming (non-batch) version of reduce was floated as a "what if" — modern successors to MapReduce do move toward stream processing.</li>
+      <li>Lab 1 (a simplified MapReduce implementation) due end of next week.</li>
+    </ul>
+  </div>
+
+</div>
+<footer>Generated summary · MIT 6.824 Distributed Systems, Lecture 1</footer>
+</body>
+</html>
