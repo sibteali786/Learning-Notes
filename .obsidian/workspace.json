@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "85d7f0ff99bd4f6d",
+        "id": "b7c63f554a380f43",
         "type": "tabs",
         "children": [
           {
-            "id": "51c50f2b892e309d",
+            "id": "b87182ae780743fc",
             "type": "leaf",
             "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/Distributed Systems/Lecture 1/lecture1-summary.html"
-              },
-              "icon": "code-glyph",
-              "title": "lecture1-summary"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -53,7 +51,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "Isolation Levels",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875,
-    "collapsed": true
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -95,7 +92,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Book Reading/Writing/Writing Skills.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks"
             }
           },
           {
@@ -114,12 +111,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Book Reading/Writing/Writing Skills.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cargo Bussiness"
+              "title": "Outgoing links"
             }
           },
           {
@@ -143,17 +140,17 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-                "followCursor": false,
-                "showSearch": false,
+                "file": "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/4-more-complex-neural-network.html",
+                "followCursor": true,
+                "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Notes"
+              "title": "Outline"
             }
           },
           {
-            "id": "957dbb181bb46970",
+            "id": "88876276e2a2dd54",
             "type": "leaf",
             "state": {
               "type": "git-view",
@@ -167,11 +164,10 @@
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
-      "vault-lens:Vault Lens Dev: 打开当前文件": false,
       "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
@@ -182,56 +178,59 @@
       "obsidian-excalidraw-plugin:New drawing": false,
       "obsidian-git:Open Git source control": false,
       "publish:Publish changes...": false,
-      "audio-recorder:Start/stop recording": false
+      "audio-recorder:Start/stop recording": false,
+      "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "51c50f2b892e309d",
+  "active": "88876276e2a2dd54",
   "lastOpenFiles": [
-    "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/assignment-reshape-broadcasting-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/Vectorization/11-for-loops-vs-vectorization.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/14-vectorized-dense-layer.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/Vectorization/12-matrix-multiplication.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/Vectorization/13-matrix-multiplication-rules.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/notebooks/C2_W1_Lab02_CoffeeRoasting_TF.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/notebooks/C2_W1_Lab03_CoffeeRoasting_Numpy.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/notebooks/lab02-coffee-roasting-tf-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/8-building-nn-tensorflow.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/9-forward-prop-from-scratch.html",
-    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-    "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
-    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
-    "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-article.md",
-    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/Practice.excalidraw.md",
+    "Learning/Second Brain/Topics to read or learn about.md",
+    "Learning/Second Brain",
+    "Learning/Robotics/Resoucres.md",
+    "Learning/Robotics",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments",
     "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/2-identifying-contaminant-percent-cl-summary.html",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/1-calc-mass-subs-inmixture.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures",
+    "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/isotopes-mass-spectrometry-summary.html",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/5-valence-and-core-electrons.html",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-aufbau-principle-periodic-blocks.html",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/3-electron-configuration-buildup.html",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/2-orbitals-and-electron-probability.html",
+    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-article.md",
+    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
+    "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
+    "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
+    "Learning/Backend Engineering/Memory Management in C/practice-2.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/1-How does Logistic Regression links to Neural Neworks.md",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
     "conflict-files-obsidian-git.md",
+    "Learning/AI&ML Engineering/AI Engineering ( LLM )/2-Prompting with Chat GPT/Resources.md",
+    "Learning/Book Reading/Writing/Writing Skills.md",
+    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
+    "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/attachments/Pasted Image 20260825232509_234.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/attachments/Pasted Image 20260825221441_074.png",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/3-Empirical-fromula-Hg-CL.md",
+    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/2-Calculating-mass-percent.excalidraw.md",
+    "Learning/DSA/BFS/1-Level-order-Sum.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/1-Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/1-calc-mass-subs-inmixture.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Backend Engineering/Memory Management in C/practice-2.excalidraw.md",
-    "Learning/Robotics/Resoucres.md",
-    "Learning/Second Brain/Topics to read or learn about.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Pasted image 20260813204431.png",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/AI&ML Engineering/UsefullTools/Overview.md",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Screenshot 2026-06-12 at 10.29.20 AM.png",
-    "Pasted image 20260714215710.png",
-    "Pasted image 20260813204427.png",
-    "Pasted image 20260714215620.png",
-    "Pasted Image 20260621125127_166.png",
+    "Learning/Freelance/Builders's Website/Bank and Investment Module/Requirement Gathering.md",
+    "Learning/Freelance/Builders's Website/Untitled.md",
+    "Personal/Maryam/01-north-pakistan.png",
+    "Personal/Maryam/02-mansehra-hills.png",
+    "Personal/Maryam/05-makkah-1.png",
+    "Personal/Maryam/04-brothers-wedding.png",
+    "Screenshot 2026-03-20 at 3.14.04 AM.png",
+    "Screenshot 2026-04-06 at 11.24.37 AM.png",
+    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
