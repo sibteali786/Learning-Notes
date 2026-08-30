@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scaling Writes — System Design Reference</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3140;
+    --text:#e6edf3; --muted:#8b96a5; --accent:#58a6ff; --accent2:#f78166;
+    --good:#3fb950; --warn:#d29922; --bad:#f85149; --purple:#bc8cff;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; margin:0; padding:0 0 60px;}
+  .wrap{max-width:1100px; margin:0 auto; padding:24px;}
+  h1{font-size:28px; margin-bottom:4px;}
+  .subtitle{color:var(--muted); margin-top:0; margin-bottom:28px; font-size:14px;}
+  h2{font-size:20px; border-left:4px solid var(--accent); padding-left:12px; margin-top:48px;}
+  h3{font-size:16px; color:var(--accent2); margin-top:24px;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); border-radius:20px; padding:3px 12px; font-size:12px; color:var(--muted); margin-right:6px;}
+  .callout{background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:16px 18px; margin:16px 0;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.bad{border-left-color:var(--bad);}
+  .callout.good{border-left-color:var(--good);}
+  .callout .lbl{font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:6px;}
+  .grid{display:grid; gap:16px; margin:20px 0;}
+  .grid.cols2{grid-template-columns:1fr 1fr;}
+  .grid.cols3{grid-template-columns:repeat(3,1fr);}
+  .grid.cols4{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:800px){.grid.cols2,.grid.cols3,.grid.cols4{grid-template-columns:1fr;}}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .card h4{margin:0 0 8px; color:var(--accent); font-size:15px;}
+  .card p{margin:4px 0; font-size:13.5px; color:#c9d1d9; line-height:1.5;}
+  .card .tag{font-size:11px; padding:2px 8px; border-radius:12px; font-weight:600;}
+  .tag.good{background:rgba(63,185,80,.15); color:var(--good);}
+  .tag.warn{background:rgba(210,153,34,.15); color:var(--warn);}
+  .tag.bad{background:rgba(248,81,73,.15); color:var(--bad);}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left; vertical-align:top;}
+  th{background:var(--panel2); color:var(--accent);}
+  tr:nth-child(even){background:rgba(255,255,255,.02);}
+  code, pre{font-family:'Fira Code',Consolas,monospace;}
+  pre{background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-size:13px; line-height:1.6; color:#c9d1d9;}
+  code.inline{background:#0a0e14; padding:1px 6px; border-radius:4px; color:var(--accent2); font-size:13px;}
+  svg{background:var(--panel); border:1px solid var(--border); border-radius:10px; width:100%; height:auto;}
+  .example{background:linear-gradient(135deg,#1a2233,#161b22); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .example .who{font-weight:700; color:var(--purple); font-size:13px; text-transform:uppercase; letter-spacing:.04em;}
+  .toc{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:12px;}
+  .toc a{color:var(--accent); text-decoration:none; font-size:13.5px;}
+  .toc ul{margin:6px 0 0; padding-left:18px; line-height:1.9;}
+  .order-step{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 16px; margin:8px 0;}
+  .order-step .n{background:var(--accent); color:#000; font-weight:700; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;}
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:50px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>⚡ Scaling Writes — System Design Interview Reference</h1>
+<p class="subtitle">Source: Hello Interview — "How to Scale Writes" · The harder half of the read/write scaling coin</p>
+
+<div class="toc">
+  <strong>📍 Contents</strong>
+  <ul>
+    <li><a href="#problem">1. The Problem — Chirp</a></li>
+    <li><a href="#strategies">2. Four Core Strategies</a></li>
+    <li><a href="#deepdives">3. Deep Dives: Resharding & Hot Keys</a></li>
+    <li><a href="#interview">4. How to Bring This Up in an Interview</a></li>
+    <li><a href="#glossary">5. Glossary</a></li>
+  </ul>
+</div>
+
+<h2 id="problem">🎯 1. The Problem Statement</h2>
+<p>Reads are the easy half of scaling — replicas, caches, CDNs solve most of it. <strong>Writes are what interviewers actually probe</strong>, because most candidates aren't ready for that half of the conversation.</p>
+
+<div class="example">
+  <div class="who">Running example: Chirp</div>
+  <p style="margin:6px 0 0; font-size:14px;">A Twitter-like app. Users post short updates; others like/comment/view. Starting point: <strong>1 app server → 1 Postgres DB</strong>. A modest Postgres instance handles ~<strong>10,000 writes/sec</strong>. Fine at small scale — but Chirp is growing: new country launch, a celebrity joins, a post goes viral.</p>
+</div>
+
+<div class="callout bad">
+  <div class="lbl">Why it breaks</div>
+  App servers are stateless → just add more behind a load balancer, done. <strong>The database is not stateless</strong> — it's the single bottleneck for the whole product. When it saturates, posts time out and likes fail to register — right when the app matters most.
+</div>
+
+<h2 id="strategies">🧱 2. Four Core Strategies (in interview order)</h2>
+<p style="color:var(--muted); font-size:13.5px;">You rarely use all four — usually 2–3 combined. Go through them in <em>this</em> order: hardware/DB choice → sharding → queues/load shedding → batching/aggregation (only in extreme cases).</p>
+
+<h3>① Vertical Scaling & Database Choice</h3>
+<div class="grid cols2">
+  <div class="card">
+    <h4>Use What You Have <span class="tag good">Start here</span></h4>
+    <p>Before touching architecture: move Postgres to a bigger box (more CPU/RAM/faster disks). Skipping straight to sharding is a common candidate mistake — it signals over-engineering.</p>
+    <p><strong>Do the math first.</strong> Modern hardware is underestimated — 200-CPU boxes with 10 Gbps networking are common. Check whether your actual required write-throughput fits on one beefy machine.</p>
+  </div>
+  <div class="card">
+    <h4>Pick the Right DB</h4>
+    <p><strong>Postgres:</strong> updates a B-tree per insert → random disk seeks → slower writes, fast/rich reads.</p>
+    <p><strong>Cassandra:</strong> appends to a log → sequential I/O → tens of thousands of writes/sec per node, scales linearly into millions across a cluster. Trade-off: reads are slower (scans/merges multiple files).</p>
+    <p><strong>Good fit example:</strong> Chirp "view events" (append-only, never updated) → Cassandra sweet spot. Same logic applies to time-series DBs (InfluxDB) and column stores (ClickHouse).</p>
+  </div>
+</div>
+<div class="callout warn"><div class="lbl">Caveat</div>Most interview rubrics are built assuming you eventually need non-vertical scaling. Make the case for a bigger box, then move on — don't stop there.</div>
+
+<h3>② Sharding (Horizontal Scaling)</h3>
+<p>10 servers handling a slice each ≈ 10× the throughput of one — you pay ~10× the infra cost for ~linear capacity gain.</p>
+
+<div class="callout">
+  <div class="lbl">Two questions sharding forces you to answer</div>
+  1. Which shard does a piece of data go on? &nbsp;·&nbsp; 2. How does the app know which shard to talk to?
+</div>
+
+<svg viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="28" fill="#e6edf3" font-size="14" font-weight="700">Redis Cluster style routing</text>
+  <rect x="20" y="60" width="140" height="46" rx="8" fill="#1c2330" stroke="#2a3140"/>
+  <text x="90" y="88" fill="#c9d1d9" font-size="12" text-anchor="middle">Client</text>
+  <rect x="220" y="60" width="180" height="46" rx="8" fill="#1c2330" stroke="#58a6ff"/>
+  <text x="310" y="80" fill="#58a6ff" font-size="11" text-anchor="middle">Hash key (CRC)</text>
+  <text x="310" y="94" fill="#8b96a5" font-size="10" text-anchor="middle">→ slot number</text>
+  <rect x="460" y="10" width="120" height="46" rx="8" fill="#161b22" stroke="#3fb950"/>
+  <text x="520" y="38" fill="#3fb950" font-size="12" text-anchor="middle">Shard A</text>
+  <rect x="460" y="90" width="120" height="46" rx="8" fill="#161b22" stroke="#3fb950"/>
+  <text x="520" y="118" fill="#3fb950" font-size="12" text-anchor="middle">Shard B</text>
+  <rect x="460" y="170" width="120" height="46" rx="8" fill="#161b22" stroke="#3fb950"/>
+  <text x="520" y="198" fill="#3fb950" font-size="12" text-anchor="middle">Shard C</text>
+  <path d="M160,83 H220" stroke="#8b96a5" fill="none" marker-end="url(#ar)"/>
+  <path d="M400,83 C430,83 430,33 460,33" stroke="#8b96a5" fill="none" marker-end="url(#ar)"/>
+  <path d="M400,83 C430,83 430,113 460,113" stroke="#8b96a5" fill="none" marker-end="url(#ar)"/>
+  <path d="M400,83 C430,83 430,193 460,193" stroke="#8b96a5" fill="none" marker-end="url(#ar)"/>
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8b96a5"/></marker></defs>
+  <text x="700" y="60" fill="#8b96a5" font-size="11" width="180">Slots assigned to</text>
+  <text x="700" y="76" fill="#8b96a5" font-size="11">nodes. Client sends</text>
+  <text x="700" y="92" fill="#8b96a5" font-size="11">read/write directly</text>
+  <text x="700" y="108" fill="#8b96a5" font-size="11">to the owning node.</text>
+</svg>
+
+<h4 style="color:var(--accent2); margin-top:20px;">Picking a Partition Key — the part interviewers actually grade</h4>
+<div class="grid cols2">
+  <div class="card">
+    <h4><span class="tag bad">Bad</span> Partition by Country</h4>
+    <p>China shard gets hammered (huge population), New Zealand shard sits idle. Uneven load defeats the purpose of sharding entirely.</p>
+  </div>
+  <div class="card">
+    <h4><span class="tag good">Good</span> Partition by User ID / Post ID</h4>
+    <p>Pick a key with high cardinality and even distribution — usually the primary identifier of the entity being written.</p>
+  </div>
+</div>
+
+<div class="callout">
+  <div class="lbl">Related concept — Vertical Partitioning</div>
+  Sharding splits <strong>rows</strong> across servers. Vertical partitioning splits <strong>columns</strong> of the same logical entity across specialized databases, because different fields have different access patterns.
+  <br><br>
+  <strong>Chirp post table example:</strong> a naive design jams text, media URLs, like counts, and comment counts into one row → hammered from every direction (creation, likes, views, analytics all collide).
+  <table>
+    <tr><th>Field</th><th>Moves to</th><th>Why</th></tr>
+    <tr><td>Post text/content</td><td>Postgres</td><td>Write once, read many — B-tree indexes shine here</td></tr>
+    <tr><td>Like/comment counters</td><td>Redis</td><td>High-frequency in-memory increments</td></tr>
+    <tr><td>View/engagement events</td><td>Cassandra / column store</td><td>Append-only stream, optimized for sequential writes</td></tr>
+  </table>
+</div>
+
+<h3>③ Queues & Load Shedding — handling bursty traffic</h3>
+<p>Real write traffic isn't steady — Black Friday, Super Bowl spikes. <strong>Auto-scaling doesn't save you here</strong>: spinning up new boxes takes minutes, and database scaling usually means downtime — the opposite of what a live traffic surge needs.</p>
+
+<div class="grid cols2">
+  <div class="card">
+    <h4>Option A — Buffer (Queue)</h4>
+    <p>Put Kafka/SQS between app server and DB. App accepts the write, drops it on the queue, responds "got it" immediately. Workers drain the queue into the DB async (seconds–minutes later).</p>
+    <p><span class="tag warn">Trade-off</span> Client only knows the write was <em>accepted</em>, not committed — may need a way to check status. If write rate &gt; drain rate, the queue grows unboundedly. <strong>Queues absorb short bursts — they are not a patch for a DB that can't handle steady-state load.</strong></p>
+  </div>
+  <div class="card">
+    <h4>Option B — Load Shedding (drop writes)</h4>
+    <p>Deliberately drop the <em>least valuable</em> writes so the system keeps serving important ones.</p>
+    <p><strong>Real example:</strong> Uber/Strava location pings every few seconds — dropping one stale update is harmless since a fresher one lands in seconds. A release valve that trades a slightly worse UX for a few minutes over total system collapse.</p>
+  </div>
+</div>
+
+<h3>④ Batching & Hierarchical Aggregation — extreme cases only</h3>
+<p>Every write has fixed overhead (network round trip, transaction setup, index updates). Databases process batches far more efficiently than individual writes — group writes together for a free throughput win.</p>
+
+<div class="grid cols3">
+  <div class="card">
+    <h4>App-layer batching</h4>
+    <p>Buffer writes in memory briefly, flush as one batch. <span class="tag bad">Risk</span> Crash mid-batch = data loss. Only safe if loss is tolerable or the source is replayable (e.g. Kafka).</p>
+  </div>
+  <div class="card">
+    <h4>New batching layer</h4>
+    <p><strong>Like batcher example:</strong> reads a window of like events, sums per post (+1+1+1 → +5, +15), forwards one write instead of 100. A chirp with 100 likes/min → 1 DB write instead of 100 (100× reduction). Only helps if a key gets multiple events per window — 1 like/hour on a 1-min window gives zero benefit.</p>
+  </div>
+  <div class="card">
+    <h4>DB-layer flush tuning</h4>
+    <p>Tune how often the DB flushes memory → disk. Same safety trade-off as app-layer batching: in-memory writes die with the server.</p>
+  </div>
+</div>
+
+<div class="example">
+  <div class="who">Real example — viral Chirp thread (1M concurrent viewers)</div>
+  <p>Naive design: every viewer writes to one central service, which fans out to every other viewer → 1M-to-1 fan-in <em>and</em> 1-to-1M fan-out simultaneously. Ugly, but eventual consistency is fine here (everyone sees "roughly" the same feed).</p>
+  <p><strong>Fix — Hierarchical Aggregation:</strong> assign viewers to broadcast nodes via consistent hashing (now writing to M nodes instead of N viewers). On the way <em>in</em>, a layer of write processors (hashed by comment ID) aggregate likes over a window and forward batches to the root, which merges them. Aggregating in + disaggregating out = dramatically less load per node, at the cost of a little extra latency from the hops.</p>
+</div>
+
+<h2 id="deepdives">🔍 3. The Two Deep Dives Interviewers Always Push</h2>
+
+<h3>A. Resharding — scaling shards without downtime</h3>
+<div class="callout">
+  <div class="lbl">Scenario</div>
+  Chirp's post table has run on 8 shards for years. Busiest shard hits 80% CPU → need to double capacity to 16 shards, with zero downtime.
+</div>
+<div class="callout bad"><div class="lbl">❌ Naive approach</div>Take everything offline → rehash → copy to new shards → bring back up. Hours of downtime — unacceptable in production.</div>
+
+<div class="order-step"><div class="n">1</div><div>Stand up the new 16-shard cluster <strong>alongside</strong> the old 8-shard one.</div></div>
+<div class="order-step"><div class="n">2</div><div><strong>Dual writes</strong> — every chirp/like/view goes to both the old shard and its new home. This is the key step that prevents data loss.</div></div>
+<div class="order-step"><div class="n">3</div><div>In the background, copy historical data into the new cluster.</div></div>
+<div class="order-step"><div class="n">4</div><div>Reads keep going to the old cluster until you're confident the new one is fully caught up.</div></div>
+<div class="order-step"><div class="n">5</div><div>Flip reads over to the new cluster, then decommission the old shards.</div></div>
+
+<h3>B. Hot Keys — one key overwhelms one shard</h3>
+<div class="callout warn"><div class="lbl">Scenario</div>You've sharded well, load is spread evenly — then one celebrity chirp gets 100,000 likes/sec. One shard is on fire; the other 99 are idle.</div>
+
+<table>
+  <tr><th>Approach</th><th>How it works</th><th>Verdict</th></tr>
+  <tr><td><strong>Fixed key splitting</strong></td><td>Split every key into K subkeys upfront (<code class="inline">post1_likes_0 … post1_likes_K-1</code>) spread across K shards.</td><td><span class="tag warn">Costly always-on</span> Multiplies dataset size by K, and every read must fan out to K subkeys and sum them — even for keys that were never hot.</td></tr>
+  <tr><td><strong>Dynamic splitting</strong></td><td>Most keys stay single-shard. Writers detect a key going hot and start spreading its writes across subkeys on the fly.</td><td><span class="tag good">Efficient</span> Read amplification (K reads) only paid on keys that actually need it. Harder: readers &amp; writers must agree which keys are currently split.</td></tr>
+</table>
+
+<div class="grid cols2">
+  <div class="card">
+    <h4>Simple fix</h4>
+    <p>Readers always check all subkeys for every key — effectively reduces to fixed splitting, but simpler to reason about.</p>
+  </div>
+  <div class="card">
+    <h4>Fancier fix</h4>
+    <p>Writers announce splits as they happen (a coordination record readers consult). Lower steady-state cost, more moving parts. <strong>Most production systems in practice just check all subkeys on read.</strong></p>
+  </div>
+</div>
+<div class="callout"><div class="lbl">Important limit</div>Both hot-key fixes only work for <strong>aggregatable</strong> data (likes, views, counts). They don't work for atomic data like a user profile — but atomic data rarely sees this kind of write pressure anyway.</div>
+
+<h2 id="interview">🎤 4. How to Bring This Up in an Interview</h2>
+<div class="callout good">
+  <div class="lbl">Don't wait to be asked</div>
+  Identify the bottleneck yourself. Right after your HLD + non-functional requirements, run back-of-envelope math on write throughput. If numbers are tame, don't over-engineer. If you're looking at millions of writes/sec, <strong>you</strong> raise scaling — not the interviewer.
+</div>
+
+<div class="order-step"><div class="n">1</div><div>Hardware & database choice — cheapest lever, shows judgment</div></div>
+<div class="order-step"><div class="n">2</div><div>Sharding + partition key selection — the "real" scaling lever</div></div>
+<div class="order-step"><div class="n">3</div><div>Queues / load shedding — for bursty traffic, when sharding alone isn't enough</div></div>
+<div class="order-step"><div class="n">4</div><div>Batching / hierarchical aggregation — only for the most extreme, high fan-in/out cases</div></div>
+
+<div class="callout bad">
+  <div class="lbl">Watch out</div>
+  Every strategy has a trade-off — say it out loud. Queues → async + eventual consistency. Partitioning → can compromise reads. Introducing a heavy strategy to solve a problem that doesn't exist yet reads as over-engineering to the interviewer, not sophistication.
+</div>
+
+<h2 id="glossary">🧠 5. Glossary (so nothing is assumed)</h2>
+<table>
+  <tr><th>Term</th><th>Plain definition</th></tr>
+  <tr><td>Vertical scaling</td><td>Making one machine bigger (more CPU/RAM/disk) instead of adding more machines.</td></tr>
+  <tr><td>Horizontal scaling / Sharding</td><td>Splitting data across many independent database instances ("shards"), each owning a slice of the data.</td></tr>
+  <tr><td>Partition key</td><td>The field on a row that gets hashed to decide which shard the row lives on. Picking this well is the crux of good sharding.</td></tr>
+  <tr><td>Vertical partitioning</td><td>Splitting columns of one logical entity across different specialized databases, as opposed to sharding which splits rows.</td></tr>
+  <tr><td>B-tree (Postgres)</td><td>A balanced tree index structure updated on every insert — supports fast reads, but writes require random disk seeks.</td></tr>
+  <tr><td>Log-structured append (Cassandra)</td><td>New writes are appended sequentially to a log rather than updating an index in place — much faster writes, slower reads (multiple files to merge).</td></tr>
+  <tr><td>Load shedding</td><td>Deliberately dropping the least valuable writes/requests during overload so the system keeps functioning for what matters.</td></tr>
+  <tr><td>Batching</td><td>Grouping multiple writes into one operation to amortize per-write overhead (network round trip, transaction setup, index updates).</td></tr>
+  <tr><td>Hierarchical aggregation</td><td>Using intermediate layers of nodes to aggregate writes on the way in and fan out reads on the way out, instead of one node handling all N clients directly.</td></tr>
+  <tr><td>Consistent hashing</td><td>A hashing scheme where adding/removing nodes only remaps a small fraction of keys, instead of reshuffling everything (used here to assign viewers to broadcast nodes).</td></tr>
+  <tr><td>Resharding</td><td>Increasing the number of shards in a live system without downtime, typically via a dual-write migration.</td></tr>
+  <tr><td>Dual writes</td><td>During a migration, writing every update to both the old and new system so neither falls out of sync until cutover.</td></tr>
+  <tr><td>Hot key</td><td>A single key/partition that receives disproportionate traffic, overwhelming its shard while others sit idle.</td></tr>
+  <tr><td>Read amplification</td><td>The cost increase on reads caused by a fix applied on the write side (e.g. needing K reads to reconstruct one value after key-splitting).</td></tr>
+</table>
+
+<footer>Reference summary compiled from Hello Interview — "How to Scale Writes in Your System Design Interview"</footer>
+</div>
+</body>
+</html>
