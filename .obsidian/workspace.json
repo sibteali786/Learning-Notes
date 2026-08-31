@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "85d7f0ff99bd4f6d",
+        "id": "c31bdaa307ebce40",
         "type": "tabs",
         "children": [
           {
-            "id": "51c50f2b892e309d",
+            "id": "d2d945bc993f8b4a",
             "type": "leaf",
             "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/DSA/Graphs/graphs-overview.html"
-              },
-              "icon": "code-glyph",
-              "title": "graphs-overview"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -78,8 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875,
-    "collapsed": true
+    "width": 443.79296875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -185,8 +182,9 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "51c50f2b892e309d",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
+    "Learning/Research/Adam-DFT/Chemistry",
     "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
     "Learning/DSA/Graphs/BFS/overview.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
@@ -220,11 +218,10 @@
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
     "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
-    "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-article.md",
-    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
+    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
+    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-article.md",
+    "Learning/Research/Adam-DFT/Chemistry/Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
