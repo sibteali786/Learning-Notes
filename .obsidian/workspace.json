@@ -11,28 +11,15 @@
             "id": "51c50f2b892e309d",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md"
+                "file": "Learning/DSA/Graphs/graphs-overview.html"
               },
-              "icon": "excalidraw-icon",
-              "title": "Image-Carousel.excalidraw"
-            }
-          },
-          {
-            "id": "74f61620ce4dbbfb",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/Frontend Interview Preparation/Coding/Image Carousel/II.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "II.excalidraw"
+              "icon": "code-glyph",
+              "title": "graphs-overview"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -91,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875
+    "width": 443.79296875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -197,8 +185,16 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "51c50f2b892e309d",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
+    "Learning/DSA/Graphs/BFS/overview.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
+    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
+    "Learning/DSA/Graphs/graphs-overview.html",
+    "Learning/DSA/Graphs/BFS/bfs_graphs_cheatsheet.html",
+    "Learning/DSA/BFS/Drawing 2026-08-31 13.10.16.excalidraw.md",
+    "Learning/DSA/Graphs/BFS",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/II.excalidraw.md",
     "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
@@ -212,15 +208,12 @@
     "Learning/System Design/Practice/TicketMaster/Ticket Master .excalidraw.md",
     "Learning/System Design/Practice/TicketMaster",
     "Learning/System Design/Patterns/Scaling Writes/scaling-writes.html",
-    "Learning/System Design/Patterns/Scaling Writes",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Resources.md",
     "Learning/System Design/Case Studies.md",
     "Learning/Database/Interviews/Resources.md",
-    "Learning/Database/Interviews",
     "Learning/Backend Engineering/Reources.md",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/Resources.md",
     "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/assignment-reshape-broadcasting-summary.html",
     "Learning/Distributed Systems/Lecture 1/Papers to read.md",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
@@ -231,11 +224,6 @@
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/2-Atomic-structure-Electron-configuration/1-article.md",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/Practice.excalidraw.md",
-    "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/1-Supervised ML-Regression Classification/Week-1/1-Basics.excalidraw.md",
     "Learning/Research/Adam-DFT/Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",
