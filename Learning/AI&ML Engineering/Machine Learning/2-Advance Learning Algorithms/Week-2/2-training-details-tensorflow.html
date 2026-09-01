@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Training Details: What's Really Happening in TensorFlow</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{
+    text-align:center;color:var(--red);font-size:1.9rem;
+    border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;
+  }
+  .section{
+    background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);
+  }
+  .section h2{margin-top:0;color:var(--blue);font-size:1.25rem;}
+  pre{background:#1e1e2e;color:#e6e6e6;padding:14px;border-radius:10px;overflow-x:auto;font-size:0.88rem;line-height:1.55;font-family:'Cascadia Code','Consolas',monospace;}
+  .kw{color:#ff7edb;} .fn{color:#7dd3fc;} .str{color:#a3e635;} .num{color:#fbbf24;} .cmt{color:#8a8a9c;}
+  .compare{
+    display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px;
+  }
+  @media(max-width:700px){.compare{grid-template-columns:1fr;}}
+  .col{border-radius:12px;padding:14px 16px;}
+  .col.lr{background:#fdf1f1;border:2px solid var(--red);}
+  .col.nn{background:#eef4ff;border:2px solid var(--blue);}
+  .col h3{margin-top:0;font-size:1rem;}
+  .col.lr h3{color:var(--red);}
+  .col.nn h3{color:var(--blue);}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:14px;}
+  .step-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;position:relative;}
+  .step-num{position:absolute;top:-14px;left:14px;background:var(--teal);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.9rem;}
+  .step-card h3{margin:6px 0 8px;color:var(--teal);font-size:1rem;}
+  .formula{
+    background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;
+    padding:10px 16px;margin:10px 0;font-size:1.05rem;text-align:center;
+  }
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  .flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-weight:600;margin-top:10px;}
+  .flow div{background:#eef4ff;border:2px solid var(--blue);border-radius:10px;padding:8px 14px;}
+  .flow .arrow{color:var(--red);font-size:1.3rem;}
+  .net{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:10px 0;}
+  .layer{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #444;border-radius:12px;padding:12px 10px;}
+  .unit{width:30px;height:30px;border-radius:50%;border:2.5px solid var(--blue);background:#eaf2ff;}
+  .unit.out{border-color:var(--pink);background:#ffeaf3;}
+  .layer-label{font-weight:600;color:var(--purple);font-size:0.8rem;}
+  .param-tag{font-size:0.72rem;color:var(--teal);font-weight:600;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.92rem;}
+  th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>⚙️ Training Details — What TensorFlow Is Actually Doing</h1>
+
+  <div class="section">
+    <h2>🔁 The Same 3 Steps as Logistic Regression</h2>
+    <p>Training a neural network in TensorFlow follows <strong>exactly the same 3-step recipe</strong> you used for logistic regression in Course 1 — just applied to a bigger, layered function.</p>
+    <div class="compare">
+      <div class="col lr">
+        <h3>① Logistic Regression</h3>
+        <p><code>z = np.dot(w,x) + b</code></p>
+        <p><code>f_x = 1/(1+np.exp(-z))</code></p>
+        <div class="formula">f<sub>w,b</sub>(x) = ?</div>
+      </div>
+      <div class="col nn">
+        <h3>① Neural Network</h3>
+        <pre style="margin:0;"><span class="fn">model</span> = Sequential([
+  Dense(...),
+  Dense(...),
+  Dense(...),
+])</pre>
+      </div>
+      <div class="col lr">
+        <h3>② Logistic Loss</h3>
+        <p><code>loss = -y*log(f_x)<br>&nbsp;&nbsp;&nbsp;-(1-y)*log(1-f_x)</code></p>
+      </div>
+      <div class="col nn">
+        <h3>② Binary Cross-Entropy</h3>
+        <pre style="margin:0;">model.<span class="fn">compile</span>(
+  loss=BinaryCrossentropy())</pre>
+      </div>
+      <div class="col lr">
+        <h3>③ Gradient Descent</h3>
+        <p><code>w = w - alpha*dj_dw</code></p>
+        <p><code>b = b - alpha*dj_db</code></p>
+      </div>
+      <div class="col nn">
+        <h3>③ model.fit</h3>
+        <pre style="margin:0;">model.<span class="fn">fit</span>(X, y, epochs=<span class="num">100</span>)</pre>
+      </div>
+    </div>
+    <p class="callout">💡 Same underlying math (loss → cost → gradient descent) — TensorFlow just handles the derivatives and updates for you across <em>every layer</em> instead of a single w, b.</p>
+  </div>
+
+  <div class="section">
+    <h2>1️⃣ Create the Model — Specify f(x)</h2>
+    <p>The <code>Sequential([...])</code> code snippet fully specifies the network's architecture — and by doing so, tells TensorFlow exactly what parameters exist at each layer: <strong>W<sup>[1]</sup>, b<sup>[1]</sup></strong>, <strong>W<sup>[2]</sup>, b<sup>[2]</sup></strong>, <strong>W<sup>[3]</sup>, b<sup>[3]</sup></strong>.</p>
+    <div class="net">
+      <div class="layer">
+        <div class="param-tag">W<sup>[1]</sup>, b<sup>[1]</sup></div>
+        <div class="unit"></div><div class="unit"></div><div>⋮</div><div class="unit"></div>
+        <div class="layer-label">25 units</div>
+      </div>
+      <div>→ a<sup>[1]</sup> →</div>
+      <div class="layer">
+        <div class="param-tag">W<sup>[2]</sup>, b<sup>[2]</sup></div>
+        <div class="unit"></div><div class="unit"></div>
+        <div class="layer-label">15 units</div>
+      </div>
+      <div>→ a<sup>[2]</sup> →</div>
+      <div class="layer">
+        <div class="param-tag">W<sup>[3]</sup>, b<sup>[3]</sup></div>
+        <div class="unit out"></div>
+        <div class="layer-label">1 unit</div>
+      </div>
+      <div>→ a<sup>[3]</sup> = f(x)</div>
+    </div>
+    <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> <span class="fn">Sequential</span>
+<span class="kw">from</span> tensorflow.keras.layers <span class="kw">import</span> <span class="fn">Dense</span>
+
+model = <span class="fn">Sequential</span>([
+    <span class="fn">Dense</span>(units=<span class="num">25</span>, activation=<span class="str">'sigmoid'</span>),
+    <span class="fn">Dense</span>(units=<span class="num">15</span>, activation=<span class="str">'sigmoid'</span>),
+    <span class="fn">Dense</span>(units=<span class="num">1</span>,  activation=<span class="str">'sigmoid'</span>),
+])</pre>
+  </div>
+
+  <div class="section">
+    <h2>2️⃣ Loss and Cost Functions</h2>
+    <p>For binary classification (0 vs 1), the loss is the <strong>same logistic loss</strong> from Course 1 — just applied to the neural network's output <code>f(x)</code> instead of logistic regression's output:</p>
+    <div class="formula">L(f(x), y) = −y·log(f(x)) − (1−y)·log(1−f(x))</div>
+    <p>In TensorFlow, this is called <strong>Binary Cross-Entropy</strong> ("cross-entropy" from statistics, "binary" because each label is 0 or 1).</p>
+    <p>Averaging the loss over all <em>m</em> training examples gives the <strong>cost function</strong> — now a function of <em>all</em> parameters in the network:</p>
+    <div class="formula">J(W, B) = (1/m) · Σᵢ L(f(x⁽ⁱ⁾), y⁽ⁱ⁾)</div>
+    <p style="text-align:center;">where <strong>W</strong> = {W<sup>[1]</sup>, W<sup>[2]</sup>, W<sup>[3]</sup>} and <strong>B</strong> = {b<sup>[1]</sup>, b<sup>[2]</sup>, b<sup>[3]</sup>}</p>
+    <pre><span class="kw">from</span> tensorflow.keras.losses <span class="kw">import</span> <span class="fn">BinaryCrossentropy</span>
+model.<span class="fn">compile</span>(loss=<span class="fn">BinaryCrossentropy</span>())</pre>
+
+    <h3 style="color:var(--teal);margin-bottom:4px;">Regression instead of classification?</h3>
+    <p>Swap the loss for <strong>Mean Squared Error</strong>:</p>
+    <pre><span class="kw">from</span> tensorflow.keras.losses <span class="kw">import</span> <span class="fn">MeanSquaredError</span>
+model.<span class="fn">compile</span>(loss=<span class="fn">MeanSquaredError</span>())</pre>
+    <table>
+      <tr><th>Problem type</th><th>Loss function</th></tr>
+      <tr><td>Binary classification (0/1)</td><td><code>BinaryCrossentropy()</code></td></tr>
+      <tr><td>Regression (predicting numbers)</td><td><code>MeanSquaredError()</code></td></tr>
+    </table>
+    <p class="callout">🔍 Fun fact from Andrew: he doesn't memorize every TensorFlow loss function name either — he just searches for the right one and plugs it in. Totally normal workflow.</p>
+  </div>
+
+  <div class="section">
+    <h2>3️⃣ Gradient Descent — Minimizing the Cost</h2>
+    <p>Same gradient descent update rule as before, but now applied to <strong>every parameter in every layer</strong>:</p>
+    <div class="formula">
+      repeat {<br>
+      &nbsp;&nbsp;w<sub>j</sub><sup>[l]</sup> = w<sub>j</sub><sup>[l]</sup> − α · ∂J(W,B)/∂w<sub>j</sub><sup>[l]</sup><br>
+      &nbsp;&nbsp;b<sub>j</sub><sup>[l]</sup> = b<sub>j</sub><sup>[l]</sup> − α · ∂J(W,B)/∂b<sub>j</sub><sup>[l]</sup><br>
+      }
+    </div>
+    <p>The hard part is computing all those partial derivative terms. TensorFlow does this using an algorithm called <strong>backpropagation</strong> — and it's all bundled inside <code>fit()</code>:</p>
+    <pre>model.<span class="fn">fit</span>(X, y, epochs=<span class="num">100</span>)</pre>
+    <p class="callout">✨ Bonus: TensorFlow can also use algorithms slightly <strong>faster than plain gradient descent</strong> (more on that later this week — hint: Adam optimizer).</p>
+  </div>
+
+  <div class="section">
+    <h2>🗺️ Full Picture — 3 Steps Side by Side</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Define f(x)</h3>
+        <p>Specify architecture → TensorFlow infers all W's and b's needed.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Define Loss → Cost</h3>
+        <p>Loss = error on 1 example. Cost J(W,B) = average loss over all m examples.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Minimize Cost</h3>
+        <p>Gradient descent + backpropagation (computed automatically by <code>fit</code>).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Think of it like <strong>coaching a sports team across multiple positions</strong> (layers) instead of just one player (logistic regression):</p>
+    <ul>
+      <li><strong>Step 1 (architecture):</strong> You decide how many players are on each line — defense (25), midfield (15), striker (1) — and how each position passes the ball forward.</li>
+      <li><strong>Step 2 (loss/cost):</strong> After each match, you score how badly the team's <em>overall</em> result (win/loss prediction) missed the actual outcome — averaged across the whole season (all training examples).</li>
+      <li><strong>Step 3 (gradient descent + backprop):</strong> You adjust <em>every player's</em> technique, working backward from the striker's miss through midfield to defense, tiny step by tiny step, over 100 practice sessions (epochs) — this backward-adjustment process is exactly what <strong>backpropagation</strong> does.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>💭 Why Use Libraries Instead of Coding From Scratch?</h2>
+    <p>Andrew's broader point: as a field matures, engineers move from implementing everything by hand to relying on mature libraries — just like nobody writes their own sorting algorithm or square-root function anymore.</p>
+    <div class="flow">
+      <div>Early deep learning</div>
+      <div class="arrow">→</div>
+      <div>Hand-coded in Python/C++</div>
+      <div class="arrow">→</div>
+      <div>Today: TensorFlow / PyTorch</div>
+    </div>
+    <p class="callout">⚠️ Still worth understanding the internals (loss, cost, gradient descent, backprop) — when training breaks unexpectedly, that mental model is what helps you debug.</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 2 — "Training Details" <span class="tag">Loss · Cost · Backpropagation</span></div>
+
+</div>
+</body>
+</html>

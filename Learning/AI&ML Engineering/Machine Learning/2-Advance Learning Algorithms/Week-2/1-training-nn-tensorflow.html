@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Training a Neural Network in TensorFlow</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI', system-ui, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    margin:0;
+    padding:24px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{
+    text-align:center;
+    color:var(--red);
+    font-size:2rem;
+    border:3px solid var(--red);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:24px;
+    background:#fff;
+  }
+  .section{
+    background:var(--card);
+    border-radius:14px;
+    padding:20px 24px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    border-left:6px solid var(--blue);
+  }
+  .section h2{
+    margin-top:0;
+    color:var(--blue);
+    font-size:1.3rem;
+  }
+  .netdiagram{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    flex-wrap:wrap;
+    padding:16px 0;
+  }
+  .layer{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    border:2px solid #444;
+    border-radius:14px;
+    padding:14px 10px;
+  }
+  .unit{
+    width:34px;height:34px;border-radius:50%;
+    border:2.5px solid var(--blue);
+    background:#eaf2ff;
+  }
+  .unit.out{border-color:var(--pink);background:#ffeaf3;width:40px;height:40px;}
+  .layer-label{font-weight:600;color:var(--purple);font-size:0.85rem;}
+  .arrow{font-size:1.4rem;color:#555;}
+  code, pre{
+    font-family:'Cascadia Code','Consolas',monospace;
+  }
+  pre{
+    background:#1e1e2e;
+    color:#e6e6e6;
+    padding:16px;
+    border-radius:10px;
+    overflow-x:auto;
+    font-size:0.92rem;
+    line-height:1.6;
+  }
+  .kw{color:#ff7edb;}
+  .fn{color:#7dd3fc;}
+  .str{color:#a3e635;}
+  .num{color:#fbbf24;}
+  .cmt{color:#8a8a9c;}
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+    gap:16px;
+    margin-top:14px;
+  }
+  .step-card{
+    border:2px solid var(--teal);
+    border-radius:12px;
+    padding:16px;
+    background:#f2fbfa;
+    position:relative;
+  }
+  .step-num{
+    position:absolute;top:-14px;left:14px;
+    background:var(--teal);color:#fff;
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;font-size:0.9rem;
+  }
+  .step-card h3{margin:6px 0 8px;color:var(--teal);font-size:1.05rem;}
+  .step-card code{
+    background:#e0f2f1;padding:2px 6px;border-radius:4px;
+  }
+  .analogy{
+    background:#fff8e1;
+    border:2px dashed #e0a800;
+    border-radius:12px;
+    padding:14px 18px;
+    margin-top:14px;
+  }
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{
+    background:#eef4ff;
+    border-left:5px solid var(--blue);
+    padding:10px 14px;
+    border-radius:8px;
+    margin-top:12px;
+    font-size:0.95rem;
+  }
+  .flow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    font-weight:600;
+    margin-top:10px;
+  }
+  .flow div{
+    background:#eef4ff;
+    border:2px solid var(--blue);
+    border-radius:10px;
+    padding:8px 14px;
+  }
+  .flow .arrow{color:var(--red);font-size:1.3rem;}
+  .tag{
+    display:inline-block;
+    background:var(--purple);
+    color:#fff;
+    padding:2px 10px;
+    border-radius:999px;
+    font-size:0.75rem;
+    margin-left:8px;
+    vertical-align:middle;
+  }
+  ul{padding-left:22px;}
+  li{margin-bottom:6px;}
+  .footer-note{
+    text-align:center;
+    color:#777;
+    font-size:0.85rem;
+    margin-top:24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧠 Training a Neural Network in TensorFlow</h1>
+
+  <div class="section">
+    <h2>📌 The Setup</h2>
+    <p>Same digit-recognition example from last week (0 vs 1). Given a training set of <code>(x, y)</code> examples — images <code>x</code> and ground-truth labels <code>y</code> — the question this week is:
+    <strong>how do you actually train the parameters of this network?</strong></p>
+
+    <div class="netdiagram">
+      <div class="layer">
+        <div class="layer-label">Input x</div>
+        <div class="unit"></div>
+        <div class="unit"></div>
+        <div>⋮</div>
+        <div class="unit"></div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="layer">
+        <div class="layer-label">25 units</div>
+        <div class="unit"></div>
+        <div class="unit"></div>
+        <div>⋮</div>
+        <div class="unit"></div>
+      </div>
+      <div class="arrow">→ a<sup>[1]</sup> →</div>
+      <div class="layer">
+        <div class="layer-label">15 units</div>
+        <div class="unit"></div>
+        <div class="unit"></div>
+      </div>
+      <div class="arrow">→ a<sup>[2]</sup> →</div>
+      <div class="layer">
+        <div class="layer-label">1 unit</div>
+        <div class="unit out"></div>
+      </div>
+      <div class="arrow">→ a<sup>[3]</sup></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>💻 The Full Code</h2>
+    <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> <span class="fn">Sequential</span>
+<span class="kw">from</span> tensorflow.keras.layers <span class="kw">import</span> <span class="fn">Dense</span>
+
+<span class="cmt"># Step 1 — specify the model (architecture)</span>
+model = <span class="fn">Sequential</span>([
+    <span class="fn">Dense</span>(units=<span class="num">25</span>, activation=<span class="str">'sigmoid'</span>),
+    <span class="fn">Dense</span>(units=<span class="num">15</span>, activation=<span class="str">'sigmoid'</span>),
+    <span class="fn">Dense</span>(units=<span class="num">1</span>,  activation=<span class="str">'sigmoid'</span>),
+])
+
+<span class="kw">from</span> tensorflow.keras.losses <span class="kw">import</span> <span class="fn">BinaryCrossentropy</span>
+
+<span class="cmt"># Step 2 — compile the model (specify the loss function)</span>
+model.<span class="fn">compile</span>(loss=<span class="fn">BinaryCrossentropy</span>())
+
+<span class="cmt"># Step 3 — train the model (fit to data)</span>
+model.<span class="fn">fit</span>(X, Y, epochs=<span class="num">100</span>)</pre>
+    <p class="callout">Nothing new in the architecture part (<code>Sequential</code> + <code>Dense</code> layers) — that's exactly what you built last week for <em>inference</em>. What's new this week is <strong>compile</strong> and <strong>fit</strong>.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔢 The 3 Steps to Train a Neural Network</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Specify the Model</h3>
+        <p>Tell TensorFlow the <strong>architecture</strong> — how to string layers together to compute inference (forward propagation).</p>
+        <p><code>model = Sequential([...])</code></p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Compile the Model</h3>
+        <p>Specify the <strong>loss function</strong> — here, <code>BinaryCrossentropy()</code>, since this is a binary classification problem (0 or 1).</p>
+        <p><code>model.compile(loss=...)</code></p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Fit / Train the Model</h3>
+        <p>Actually train on data <code>X, Y</code> using the loss from Step 2, running gradient descent for a set number of <strong>epochs</strong>.</p>
+        <p><code>model.fit(X, Y, epochs=100)</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>⏱️ What is an "Epoch"?</h2>
+    <p><strong>Epoch</strong> = the technical term for <strong>how many steps of gradient descent</strong> to run — same idea as "how long to run gradient descent" from Course 1.</p>
+    <div class="flow">
+      <div>epochs = 100</div>
+      <div class="arrow">=</div>
+      <div>Run gradient descent for 100 steps</div>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Think of training a neural network like <strong>teaching a student to recognize handwriting</strong>:</p>
+    <ul>
+      <li><strong>Step 1 (Specify model):</strong> Decide the structure of the "student's brain" — how many layers of reasoning, how many neurons at each stage.</li>
+      <li><strong>Step 2 (Compile):</strong> Decide how you'll <em>grade</em> the student's mistakes — the loss function measures "how wrong" a prediction is.</li>
+      <li><strong>Step 3 (Fit):</strong> Actually run the practice sessions — the student sees examples, gets graded, adjusts, and repeats for <code>epochs</code> rounds until it improves.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🗺️ The Big Picture</h2>
+    <div class="flow">
+      <div>1️⃣ Specify Architecture</div>
+      <div class="arrow">→</div>
+      <div>2️⃣ Compile with Loss Fn</div>
+      <div class="arrow">→</div>
+      <div>3️⃣ Fit on (X, Y)</div>
+    </div>
+    <p class="callout">💡 Andrew's key advice: don't just <em>call</em> these three lines blindly — understand <strong>what's happening behind them</strong>. That conceptual model is what helps you debug when training doesn't go as expected. The next videos dive into what <code>compile</code> and <code>fit</code> are really doing under the hood.</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 1 — "TensorFlow Implementation" <span class="tag">Neural Network Training</span></div>
+
+</div>
+</body>
+</html>

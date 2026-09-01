@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Why Do We Need Activation Functions?</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.9rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.25rem;}
+  .net{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 0;}
+  .layer{display:flex;flex-direction:column;align-items:center;gap:8px;border:2px solid #444;border-radius:12px;padding:12px 10px;}
+  .unit{width:32px;height:32px;border-radius:50%;border:2.5px solid var(--blue);background:#eaf2ff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--red);font-weight:700;}
+  .unit.out{border-color:var(--pink);background:#ffeaf3;width:38px;height:38px;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1.05rem;text-align:center;}
+  .derivation{
+    background:#f2fbfa;border:2px solid var(--teal);border-radius:12px;padding:16px 20px;margin-top:12px;
+  }
+  .derivation .line{padding:4px 0;font-size:1rem;}
+  .derivation .arrow-down{text-align:center;color:var(--teal);font-size:1.2rem;}
+  .conclusion{
+    background:#fdf1f1;border:2px solid var(--red);border-radius:10px;padding:12px 16px;margin-top:12px;font-weight:600;text-align:center;
+  }
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:14px;}
+  .choice-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;}
+  .choice-card h3{margin:0 0 8px;color:var(--teal);font-size:1.05rem;}
+  svg{background:#fff;border-radius:8px;}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.92rem;}
+  th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>❓ Why Do We Need Activation Functions?</h1>
+
+  <div class="section">
+    <h2>🚨 The Big Claim</h2>
+    <p>If every neuron in a neural network uses the <strong>linear activation function</strong> g(z) = z, the whole network collapses into being <strong>exactly equivalent to plain linear regression</strong> — no matter how many layers or units you stack. This defeats the entire purpose of building a neural network.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔬 Proof With a Simple Example</h2>
+    <p>Take the simplest possible network: input <code>x</code> is a single number, one hidden unit (w<sup>[1]</sup>, b<sup>[1]</sup>) outputs a<sup>[1]</sup>, and one output unit (w<sup>[2]</sup>, b<sup>[2]</sup>) outputs a<sup>[2]</sup> = f(x). Use g(z) = z everywhere.</p>
+    <div class="net">
+      <div class="layer"><div class="unit">g</div></div>
+      <div>→ a<sup>[1]</sup> →</div>
+      <div class="layer"><div class="unit out">g</div></div>
+      <div>→ a<sup>[2]</sup></div>
+    </div>
+
+    <div class="derivation">
+      <div class="line">1️⃣ &nbsp; a<sup>[1]</sup> = g(w<sub>1</sub><sup>[1]</sup>x + b<sub>1</sub><sup>[1]</sup>) = <strong>w<sub>1</sub><sup>[1]</sup>x + b<sub>1</sub><sup>[1]</sup></strong> &nbsp;(since g(z)=z)</div>
+      <div class="arrow-down">↓ substitute into next layer</div>
+      <div class="line">2️⃣ &nbsp; a<sup>[2]</sup> = w<sub>1</sub><sup>[2]</sup>·a<sup>[1]</sup> + b<sub>1</sub><sup>[2]</sup> = w<sub>1</sub><sup>[2]</sup>(w<sub>1</sub><sup>[1]</sup>x + b<sub>1</sub><sup>[1]</sup>) + b<sub>1</sub><sup>[2]</sup></div>
+      <div class="arrow-down">↓ expand and group terms</div>
+      <div class="line">3️⃣ &nbsp; a<sup>[2]</sup> = (w<sub>1</sub><sup>[2]</sup>w<sub>1</sub><sup>[1]</sup>)·x &nbsp;+&nbsp; (w<sub>1</sub><sup>[2]</sup>b<sub>1</sub><sup>[1]</sup> + b<sub>1</sub><sup>[2]</sup>)</div>
+      <div class="arrow-down">↓ let w = w<sub>1</sub><sup>[2]</sup>w<sub>1</sub><sup>[1]</sup>, b = w<sub>1</sub><sup>[2]</sup>b<sub>1</sub><sup>[1]</sup> + b<sub>1</sub><sup>[2]</sup></div>
+      <div class="line">4️⃣ &nbsp; <strong>a<sup>[2]</sup> = w·x + b</strong></div>
+    </div>
+    <div class="conclusion">a two-layer "neural network" with linear activations = just linear regression, f(x) = wx + b</div>
+    <p class="callout">📐 Linear algebra intuition: a linear function of a linear function is still just a linear function. Stacking layers adds no new expressive power if every g(z) = z.</p>
+  </div>
+
+  <div class="section">
+    <h2>📊 The General Case (4-Layer Network)</h2>
+    <div class="choices">
+      <div class="choice-card">
+        <h3>All layers linear (incl. output)</h3>
+        <div class="formula">a<sup>[4]</sup> = w<sub>1</sub><sup>[4]</sup>·a<sup>[3]</sup> + b<sub>1</sub><sup>[4]</sup></div>
+        <p style="text-align:center;font-weight:600;color:var(--red);">≡ Linear Regression</p>
+      </div>
+      <div class="choice-card">
+        <h3>Hidden layers linear, output = sigmoid</h3>
+        <div class="formula" style="font-size:0.95rem;">a<sup>[4]</sup> = 1 / (1 + e<sup>−(w<sub>1</sub><sup>[4]</sup>·a<sup>[3]</sup> + b<sub>1</sub><sup>[4]</sup>)</sup>)</div>
+        <p style="text-align:center;font-weight:600;color:var(--red);">≡ Logistic Regression</p>
+      </div>
+    </div>
+    <p>Either way — even with 3 hidden layers full of neurons — the network can't compute anything a single logistic/linear regression model couldn't already do. All the "depth" is wasted.</p>
+  </div>
+
+  <div class="section">
+    <h2>🎯 Back to Demand Prediction</h2>
+    <p>If every neuron (affordability, awareness, perceived quality → top seller) used a linear g(z), the whole pipeline reduces to:</p>
+    <div class="formula">f(x) = w⃗ · x⃗ + b</div>
+    <p>...exactly what plain linear regression on price, shipping cost, marketing, and material would give you directly — the hidden layer adds nothing.</p>
+  </div>
+
+  <div class="section">
+    <h2>✅ The Rule of Thumb</h2>
+    <ul>
+      <li><strong>Never</strong> use the linear activation function in hidden layers.</li>
+      <li><strong>ReLU</strong> is the safe, effective default for hidden layers (as covered in the previous lesson).</li>
+      <li>Linear activation is fine <em>only</em> at the output layer, for regression problems where y can be negative or positive.</li>
+    </ul>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Imagine a relay race where each runner (layer) is supposed to add something new — speed, strategy, terrain-handling. If every runner just <strong>hands the baton over unchanged</strong> (a linear pass-through), it doesn't matter how many runners you add to the team — the final result is identical to having just one runner do the whole race alone.</p>
+    <p>Activation functions like ReLU are what let each "runner" actually <em>transform</em> the baton — bending, reshaping, and combining signals in non-linear ways — which is what lets multi-layer networks learn things a single-layer model never could (like complex image or speech patterns).</p>
+  </div>
+
+  <div class="section">
+    <h2>➡️ Coming Up Next</h2>
+    <p>So far: binary classification (y = 0/1) and regression (y ± or y ≥ 0). Next lesson: <strong>multi-class classification</strong> — when y can take on 3, 4, 10, or more categories — and how to build a neural network for that using <strong>softmax</strong>.</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 5 — "Why Do We Need Activation Functions?" <span class="tag">Linear Collapse Proof</span></div>
+
+</div>
+</body>
+</html>

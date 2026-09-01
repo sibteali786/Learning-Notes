@@ -11,10 +11,12 @@
             "id": "ae80cb99c15a9b91",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/System Design/Practice/TicketMaster/Ticket Master .excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Ticket Master .excalidraw"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875
+    "width": 443.79296875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,30 +185,30 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "ae80cb99c15a9b91",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/6-relu-piecewise-linear.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Notebooks/C2_W2_Relu.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Notebooks",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/5-why-need-activation-functions.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/4-choosing-activation-functions.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/3-activation-functions.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/2-training-details-tensorflow.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/1-training-nn-tensorflow.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/valence-electrons-from-position-{TIPS}.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend",
-    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/5-valence-and-core-electrons.html",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
-    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/2-orbitals-and-electron-probability.html",
-    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-electron-configuration-periodic-table.html",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-article.md",
-    "Learning/Research/Adam-DFT/Chemistry",
     "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
     "Learning/DSA/Graphs/BFS/overview.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
-    "Learning/DSA/Graphs/graphs-overview.html",
-    "Learning/DSA/Graphs/BFS/bfs_graphs_cheatsheet.html",
     "Learning/DSA/BFS/Drawing 2026-08-31 13.10.16.excalidraw.md",
-    "Learning/DSA/Graphs/BFS",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/II.excalidraw.md",
     "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/redis_deep_dive_summary.html",
     "conflict-files-obsidian-git.md",
     "Learning/System Design/Resources.md",
     "Learning/System Design/Practice/TicketMaster/Ticket Master .excalidraw.md",

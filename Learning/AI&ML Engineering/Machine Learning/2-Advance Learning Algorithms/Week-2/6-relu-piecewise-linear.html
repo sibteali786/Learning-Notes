@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ReLU: Stitching Linear Segments Together</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.85rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.2rem;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1.02rem;text-align:center;}
+  svg{background:#fff;border-radius:8px;display:block;margin:0 auto;}
+  .units{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:14px;}
+  .unit-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;position:relative;}
+  .unit-num{position:absolute;top:-14px;left:14px;background:var(--teal);color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.85rem;}
+  .unit-card h3{margin:6px 0 8px;color:var(--teal);font-size:1rem;}
+  .unit-card .eq{font-family:'Cascadia Code',monospace;background:#fff;border:1px solid #cde;border-radius:6px;padding:6px 8px;margin:4px 0;font-size:0.85rem;}
+  .status{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;}
+  .off{background:#fde8e8;color:var(--red);}
+  .on{background:#e6f7ec;color:#1e7d3a;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.9rem;}
+  th,td{border:1px solid #ddd;padding:7px 9px;text-align:center;}
+  th{background:#eef4ff;color:var(--blue);}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.93rem;}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧩 ReLU: Stitching Linear Segments Together</h1>
+
+  <div class="section">
+    <h2>🎯 The Goal</h2>
+    <p>Build a piecewise-linear target curve using <strong>3 ReLU units</strong>, each contributing one segment, added together at the output:</p>
+    <svg viewBox="0 0 420 200" width="100%" height="200">
+      <line x1="20" y1="180" x2="400" y2="180" stroke="#333" stroke-width="1.5"/>
+      <line x1="20" y1="10" x2="20" y2="190" stroke="#333" stroke-width="1.5"/>
+      <path d="M 20 180 L 140 150 L 260 90 L 380 10" fill="none" stroke="#8b1e1e" stroke-width="3.5"/>
+      <line x1="140" y1="185" x2="140" y2="175" stroke="#333"/>
+      <line x1="260" y1="185" x2="260" y2="175" stroke="#333"/>
+      <line x1="380" y1="185" x2="380" y2="175" stroke="#333"/>
+      <text x="135" y="198" font-size="12">1</text>
+      <text x="255" y="198" font-size="12">2</text>
+      <text x="375" y="198" font-size="12">3</text>
+      <text x="4" y="14" font-size="12">y</text>
+      <text x="405" y="184" font-size="12">x</text>
+      <text x="60" y="170" font-size="11" fill="#1a5fb4">seg 1 (slope 1)</text>
+      <text x="165" y="115" font-size="11" fill="#1a5fb4">seg 2 (slope 2)</text>
+      <text x="280" y="55" font-size="11" fill="#1a5fb4">seg 3 (slope 3)</text>
+    </svg>
+    <div class="formula">output = a0 + a1 + a2 &nbsp;&nbsp;where each&nbsp; aᵢ = max(0, wᵢ·x + bᵢ)</div>
+  </div>
+
+  <div class="section">
+    <h2>🔑 The Core Idea</h2>
+    <ul>
+      <li><strong>Weight (w)</strong> → controls <em>how steep</em> a unit's contribution is once switched on</li>
+      <li><strong>Bias (b)</strong> → controls <em>where</em> (at what x) the unit switches on/off</li>
+      <li><strong>ReLU</strong> → forces the unit's contribution to be exactly <strong>0</strong> before its threshold, so it doesn't interfere with earlier segments</li>
+    </ul>
+    <p class="callout">💡 Each unit only needs to add its <em>extra</em> slope on top of whatever the previous units already contribute — not the full target slope.</p>
+  </div>
+
+  <div class="section">
+    <h2>⚙️ Worked Example — 3 Units, 3 Segments</h2>
+    <div class="units">
+      <div class="unit-card">
+        <div class="unit-num">0</div>
+        <h3>Unit 0 — Segment 1 (slope 1)</h3>
+        <div class="eq">z0 = 1·x + 0</div>
+        <div class="eq">a0 = max(0, x)</div>
+        <p style="font-size:0.85rem;">Active from x=0 onward, slope 1. Its line keeps rising after x=1 too — that's fine, later units correct for it.</p>
+      </div>
+      <div class="unit-card">
+        <div class="unit-num">1</div>
+        <h3>Unit 1 — Segment 2 (slope 2)</h3>
+        <div class="eq">z1 = 1·x − 1</div>
+        <div class="eq">a1 = max(0, x − 1)</div>
+        <p style="font-size:0.85rem;"><span class="status off">OFF</span> for x&lt;1 (z1 negative → clipped to 0)<br><span class="status on">ON</span> for x≥1, adds +1 slope → total becomes 1+1=2 ✅</p>
+      </div>
+      <div class="unit-card">
+        <div class="unit-num">2</div>
+        <h3>Unit 2 — Segment 3 (slope 3)</h3>
+        <div class="eq">z2 = 1·x − 2</div>
+        <div class="eq">a2 = max(0, x − 2)</div>
+        <p style="font-size:0.85rem;"><span class="status off">OFF</span> for x&lt;2<br><span class="status on">ON</span> for x≥2, adds +1 slope → total becomes 2+1=3 ✅</p>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>Range</th><th>Unit 0</th><th>Unit 1</th><th>Unit 2</th><th>Total slope</th></tr>
+      <tr><td>0 ≤ x &lt; 1</td><td>ON (slope 1)</td><td>OFF</td><td>OFF</td><td><strong>1</strong></td></tr>
+      <tr><td>1 ≤ x &lt; 2</td><td>ON</td><td>ON (+1)</td><td>OFF</td><td><strong>2</strong></td></tr>
+      <tr><td>x ≥ 2</td><td>ON</td><td>ON</td><td>ON (+1)</td><td><strong>3</strong></td></tr>
+    </table>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy — Income Tax Brackets</h3>
+    <ul>
+      <li><strong>Bracket 1:</strong> first $10k taxed at 10% — always active from $0.</li>
+      <li><strong>Bracket 2:</strong> +20% on income <em>above</em> $10k — "off" (contributes $0 extra tax) until income crosses $10k, exactly like ReLU clipping.</li>
+      <li><strong>Bracket 3:</strong> +30% on income above $40k — stays off until that threshold, then switches on.</li>
+    </ul>
+    <p>The <strong>threshold</strong> ($10k, $40k) = the bias. The <strong>rate</strong> (10%, 20%, 30%) = the weight. Summing all brackets' contributions gives the same kind of piecewise-linear curve as the ReLU units — each bracket dormant until its turn, just like each ReLU unit.</p>
+  </div>
+
+  <div class="section">
+    <h2>✅ Takeaway</h2>
+    <p>The ReLU's "off until threshold" behavior is exactly what makes it <strong>non-linear</strong> and useful: it lets each hidden unit stay silent until its segment begins, so multiple simple straight-line units can be stitched together into one complex, curved (piecewise-linear) function.</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Optional Lab — "Why Non-Linear Activations? (ReLU)" <span class="tag">Piecewise Linear Stitching</span></div>
+
+</div>
+</body>
+</html>
