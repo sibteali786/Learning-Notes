@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BFS on Graphs — Cheatsheet</title>
+<style>
+  :root{
+    --ink:#0d1b2a;
+    --deep:#13293d;
+    --panel:#16324f;
+    --line:#2c4c6e;
+    --ripple1:#4fd1c5;
+    --ripple2:#3a9fdb;
+    --ripple3:#7c6fdb;
+    --amber:#e8a548;
+    --paper:#eef3f7;
+    --dim:#9db4c9;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Georgia','Iowan Old Style',serif;
+    line-height:1.5;
+    padding:40px 24px 80px;
+  }
+  .wrap{max-width:880px;margin:0 auto}
+  h1{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-weight:700;
+    font-size:2.4rem;
+    letter-spacing:-0.01em;
+    margin:0 0 4px;
+    color:#fff;
+  }
+  .sub{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    color:var(--dim);
+    font-size:1rem;
+    margin-bottom:36px;
+    max-width:60ch;
+  }
+  h2{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:1.05rem;
+    color:var(--ripple1);
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+    margin:48px 0 18px;
+  }
+  p{font-size:1rem;color:#dbe6ee;}
+  .problem{
+    background:var(--panel);
+    border-left:3px solid var(--amber);
+    padding:18px 22px;
+    border-radius:2px;
+    font-size:1.05rem;
+  }
+  .problem b{color:var(--amber)}
+
+  /* Compare grid */
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.92rem;
+  }
+  .compare > div{background:var(--deep);padding:16px 18px}
+  .compare .head{
+    background:var(--panel);
+    font-weight:700;
+    color:#fff;
+  }
+  .compare .dfs-h{color:var(--ripple3)}
+  .compare .bfs-h{color:var(--ripple1)}
+
+  /* Ripple diagram */
+  .ripple-card{
+    background:var(--deep);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:24px;
+    display:flex;
+    gap:28px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .ripple-caption{font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.9rem;color:var(--dim);max-width:280px}
+
+  /* Queue animation frames (static SVG-like grid) */
+  .frames{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+  .frame{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.85rem;color:var(--dim);
+  }
+  .frame .label{width:80px;flex-shrink:0;color:#fff}
+  .queue-box{display:flex;gap:4px}
+  .q-item{
+    width:28px;height:28px;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.85rem;color:var(--ink);
+  }
+  .lvl0{background:var(--amber)}
+  .lvl1{background:var(--ripple1)}
+  .lvl2{background:var(--ripple2)}
+
+  /* Key distinctions list */
+  .kd{
+    display:grid;
+    gap:10px;
+  }
+  .kd .row{
+    display:grid;
+    grid-template-columns:170px 1fr;
+    gap:16px;
+    background:var(--deep);
+    border:1px solid var(--line);
+    padding:12px 16px;
+    border-radius:4px;
+    align-items:start;
+  }
+  .kd .k{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-weight:700;
+    color:var(--ripple1);
+    font-size:0.9rem;
+  }
+  .kd .v{font-size:0.95rem;color:#dbe6ee}
+  code{
+    background:#0a1621;
+    padding:2px 6px;
+    border-radius:3px;
+    font-family:'SF Mono',Consolas,monospace;
+    font-size:0.88em;
+    color:var(--ripple1);
+  }
+  pre{
+    background:#0a1621;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 20px;
+    overflow-x:auto;
+    font-family:'SF Mono',Consolas,monospace;
+    font-size:0.85rem;
+    color:#cfe3f0;
+    line-height:1.6;
+  }
+  pre .cmt{color:var(--dim)}
+  pre .kw{color:var(--ripple3)}
+  pre .crit{color:var(--amber);font-weight:700}
+
+  /* Real world cards */
+  .world{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .world .card{
+    background:var(--panel);
+    border-radius:6px;
+    padding:16px 18px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+  }
+  .world .card .t{font-size:1.6rem;margin-bottom:6px}
+  .world .card .h{font-weight:700;color:#fff;font-size:0.92rem;margin-bottom:4px}
+  .world .card .d{font-size:0.83rem;color:var(--dim)}
+
+  /* Complexity strip */
+  .complexity{
+    display:flex;gap:14px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+  }
+  .complexity .box{
+    flex:1;
+    background:var(--deep);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px;
+    text-align:center;
+  }
+  .complexity .box .big{font-size:1.5rem;color:var(--ripple1);font-weight:700}
+  .complexity .box .lbl{font-size:0.8rem;color:var(--dim);margin-top:4px}
+
+  /* Tips */
+  .tips{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .tips li{
+    padding-left:28px;
+    position:relative;
+    font-size:0.98rem;
+    color:#dbe6ee;
+  }
+  .tips li::before{
+    content:'→';
+    position:absolute;left:0;top:0;
+    color:var(--amber);font-weight:700;
+  }
+
+  .practice{
+    display:flex;flex-wrap:wrap;gap:8px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+  }
+  .practice span{
+    background:var(--panel);
+    color:var(--ripple1);
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:0.83rem;
+    border:1px solid var(--line);
+  }
+
+  @media(max-width:640px){
+    .compare{grid-template-columns:1fr}
+    .world{grid-template-columns:1fr}
+    .complexity{flex-direction:column}
+    .kd .row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Breadth-First Search</h1>
+  <div class="sub">Level-by-level graph traversal — the tool for "fewest steps" and "shortest path" problems on unweighted graphs.</div>
+
+  <h2>Problem Statement</h2>
+  <div class="problem">
+    Given a graph (adjacency list) or grid, find the <b>minimum number of steps / edges</b> to reach a target from a start node — e.g. fewest connections between two people in a social network, or the shortest route through a maze. Any time a problem asks for the <b>minimum moves</b> or <b>shortest distance in an unweighted graph</b>, this is a BFS signal.
+  </div>
+
+  <h2>How It Works — DFS vs BFS</h2>
+  <div class="compare">
+    <div class="head dfs-h">DFS</div>
+    <div class="head bfs-h">BFS</div>
+    <div>Picks one direction and follows it as far as possible before backtracking.</div>
+    <div>Fans out evenly — visits every neighbor at the current distance before going further.</div>
+    <div>Uses a <b>stack</b> (or recursion).</div>
+    <div>Uses a <b>queue</b> — first in, first out, so earlier-discovered nodes get processed first.</div>
+    <div>Can overshoot: wanders down a long path before trying a shorter alternative.</div>
+    <div>Guaranteed to find the target along the <b>shortest possible route</b>, because it clears distance 1 before distance 2, distance 2 before distance 3, etc.</div>
+  </div>
+
+  <h2>The Ripple Effect</h2>
+  <div class="ripple-card">
+    <svg width="220" height="180" viewBox="0 0 220 180">
+      <circle cx="110" cy="90" r="70" fill="none" stroke="#7c6fdb" stroke-width="1.5" opacity="0.5"/>
+      <circle cx="110" cy="90" r="46" fill="none" stroke="#3a9fdb" stroke-width="1.5" opacity="0.7"/>
+      <circle cx="110" cy="90" r="22" fill="none" stroke="#4fd1c5" stroke-width="1.5"/>
+      <circle cx="110" cy="90" r="6" fill="#e8a548"/>
+      <text x="110" y="94" font-size="9" fill="#0d1b2a" font-family="Helvetica" font-weight="700" text-anchor="middle">S</text>
+      <text x="110" y="52" font-size="10" fill="#4fd1c5" font-family="Helvetica" text-anchor="middle">d=1</text>
+      <text x="110" y="28" font-size="10" fill="#3a9fdb" font-family="Helvetica" text-anchor="middle">d=2</text>
+      <text x="110" y="6" font-size="10" fill="#7c6fdb" font-family="Helvetica" text-anchor="middle">d=3</text>
+    </svg>
+    <div class="ripple-caption">
+      On a grid, checking the 4 directions (up/down/left/right) from the start cell spreads outward like a ripple on water. Cells one step away light up first, then two steps, then three. <b style="color:#fff">Each ring = one BFS level</b>, and separating those rings is the key to almost every BFS problem.
+    </div>
+  </div>
+
+  <h2>The Level-Size Trick (in code)</h2>
+  <p>Before pulling from the queue each round, capture <code>levelSize = queue.length</code>. That number is exactly how many nodes belong to the current ring. Loop that many times — any new neighbors pushed during the loop belong to the <i>next</i> ring and wait their turn.</p>
+
+  <div class="frames">
+    <div class="frame"><span class="label">Level 0</span><div class="queue-box"><div class="q-item lvl0">1</div></div><span>levelSize = 1</span></div>
+    <div class="frame"><span class="label">Level 1</span><div class="queue-box"><div class="q-item lvl1">2</div><div class="q-item lvl1">4</div></div><span>levelSize = 2</span></div>
+    <div class="frame"><span class="label">Level 2</span><div class="queue-box"><div class="q-item lvl2">3</div><div class="q-item lvl2">5</div></div><span>levelSize = 2</span></div>
+    <div class="frame"><span class="label">Level 3</span><div class="queue-box"></div><span>queue drains — done</span></div>
+  </div>
+
+  <h2>Pseudocode</h2>
+  <pre><span class="kw">function</span> bfsLevels(graph, start):
+    queue &lt;- [start]
+    visited &lt;- {start}
+    levels &lt;- []
+
+    <span class="cmt">// outer loop: one iteration per distance layer</span>
+    <span class="kw">while</span> queue is not empty:
+        <span class="crit">levelSize &lt;- queue.length</span>   <span class="cmt">// locks in this ring's node count</span>
+        currentLevel &lt;- []
+
+        <span class="kw">for</span> i in 0..levelSize:
+            node &lt;- queue.popFront()
+            currentLevel.append(node)
+
+            <span class="kw">for</span> neighbor in graph[node]:
+                <span class="kw">if</span> neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.pushBack(neighbor)
+
+        levels.append(currentLevel)
+
+    <span class="kw">return</span> levels</pre>
+
+  <h2>Key Distinctions</h2>
+  <div class="kd">
+    <div class="row"><div class="k">Data structure</div><div class="v">Queue (FIFO) — not a stack. FIFO order is what keeps nodes processed layer by layer.</div></div>
+    <div class="row"><div class="k">Visited tracking</div><div class="v">Mark visited the moment a node is <i>pushed</i> onto the queue (mark-on-push), not when it's popped — otherwise the same node can be queued multiple times by different neighbors before it's processed.</div></div>
+    <div class="row"><div class="k">Grid vs graph</div><div class="v">Same algorithm — a grid is just a graph where each cell's "neighbors" are the 4 (or 8) adjacent cells instead of an adjacency list.</div></div>
+    <div class="row"><div class="k">Shortest path guarantee</div><div class="v">Only holds for <b>unweighted</b> graphs. For weighted shortest paths you need Dijkstra's algorithm instead.</div></div>
+  </div>
+
+  <h2>Complexity</h2>
+  <div class="complexity">
+    <div class="box"><div class="big">O(V + E)</div><div class="lbl">Time — every node visited once, every edge examined once</div></div>
+    <div class="box"><div class="big">O(V)</div><div class="lbl">Space — queue + visited set; worst case an entire level sits in the queue at once</div></div>
+  </div>
+
+  <h2>Alternative Approaches</h2>
+  <div class="kd">
+    <div class="row"><div class="k">DFS</div><div class="v">Simpler to write recursively, less memory pressure in some cases, but does <b>not</b> guarantee shortest path — only use when you need reachability/connectivity, not minimum distance.</div></div>
+    <div class="row"><div class="k">Dijkstra</div><div class="v">Generalizes BFS to weighted graphs using a min-heap instead of a plain queue. Reduces to BFS when all weights are equal.</div></div>
+    <div class="row"><div class="k">Bidirectional BFS</div><div class="v">Run BFS from both start and target simultaneously, meet in the middle. Cuts search space roughly in half for large graphs — worth mentioning in interviews as an optimization.</div></div>
+    <div class="row"><div class="k">A*</div><div class="v">BFS/Dijkstra + a heuristic to bias the search toward the target faster. Overkill for most interview problems but good to know exists.</div></div>
+  </div>
+
+  <h2>Real-World Examples</h2>
+  <div class="world">
+    <div class="card"><div class="t">🔗</div><div class="h">Social networks</div><div class="d">"Degrees of separation" between two people — LinkedIn's "2nd/3rd connection" labels are BFS distance.</div></div>
+    <div class="card"><div class="t">🗺️</div><div class="h">Maze / map routing</div><div class="d">Shortest route through an unweighted grid, e.g. GPS routing when every road segment counts as one step.</div></div>
+    <div class="card"><div class="t">🌐</div><div class="h">Web crawlers</div><div class="d">Crawling pages level by level from a seed URL, exploring nearby pages before distant ones.</div></div>
+  </div>
+
+  <h2>Interview / Practical Tips</h2>
+  <ul class="tips">
+    <li>Trigger words to watch for: "fewest," "minimum steps," "shortest path" + "unweighted" — that combination screams BFS.</li>
+    <li>State out loud why DFS wouldn't work first (no shortest-path guarantee) — interviewers want to hear that reasoning, not just the correct code.</li>
+    <li>Always clarify: is the graph weighted? Directed? Can it have cycles? Grid or adjacency list?</li>
+    <li>Narrate the level-size trick explicitly — it's the one line interviewers check for in "minimum steps" grid problems.</li>
+    <li>Mark visited on push, not on pop — this is the most common BFS bug and worth saying out loud as you write it.</li>
+  </ul>
+
+  <h2>Practice Problems</h2>
+  <div class="practice">
+    <span>Rotting Oranges</span>
+    <span>0-1 Matrix</span>
+    <span>Word Ladder</span>
+    <span>Number of Islands</span>
+    <span>Shortest Path in Binary Matrix</span>
+    <span>Course Schedule (topological, BFS variant)</span>
+  </div>
+
+</div>
+</body>
+</html>

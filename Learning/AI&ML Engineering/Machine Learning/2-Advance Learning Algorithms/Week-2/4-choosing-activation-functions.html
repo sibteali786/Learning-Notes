@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Choosing Activation Functions</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.9rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.25rem;}
+  .net{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 0;}
+  .layer{display:flex;flex-direction:column;align-items:center;gap:8px;border:2px solid #444;border-radius:12px;padding:12px 10px;}
+  .unit{width:32px;height:32px;border-radius:50%;border:2.5px solid var(--blue);background:#eaf2ff;}
+  .unit.out{border-color:var(--pink);background:#ffeaf3;width:38px;height:38px;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1.05rem;text-align:center;}
+  .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:14px;}
+  .choice-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;}
+  .choice-card h3{margin:0 0 8px;color:var(--teal);font-size:1.05rem;}
+  .choice-card .rule{font-size:0.85rem;color:#555;margin-bottom:8px;}
+  svg{background:#fff;border-radius:8px;}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  pre{background:#1e1e2e;color:#e6e6e6;padding:14px;border-radius:10px;overflow-x:auto;font-size:0.88rem;line-height:1.55;font-family:'Cascadia Code','Consolas',monospace;}
+  .kw{color:#ff7edb;} .fn{color:#7dd3fc;} .str{color:#a3e635;} .num{color:#fbbf24;} .cmt{color:#8a8a9c;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.92rem;}
+  th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Choosing Activation Functions (Output vs Hidden Layers)</h1>
+
+  <div class="section">
+    <h2>1. Output Layer - Pick Based on What Y Is</h2>
+    <div class="net">
+      <div class="layer"><div class="unit"></div><div class="unit"></div></div>
+      <div>-&gt; a[1] -&gt;</div>
+      <div class="layer"><div class="unit"></div><div class="unit"></div></div>
+      <div>-&gt; a[2] -&gt;</div>
+      <div class="layer"><div class="unit out"></div></div>
+    </div>
+    <div class="formula">a[3] = f(x) = a1[3] = g(z1[3])</div>
+
+    <div class="choices">
+      <div class="choice-card">
+        <h3>Binary Classification</h3>
+        <div class="rule">Y = 0 or 1</div>
+        <svg viewBox="0 0 200 120" width="100%" height="110">
+          <line x1="10" y1="105" x2="190" y2="105" stroke="#333"/>
+          <line x1="100" y1="10" x2="100" y2="115" stroke="#333"/>
+          <path d="M 15 100 C 60 100, 80 15, 100 55 C 120 15, 140 10, 185 10" fill="none" stroke="#8b1e1e" stroke-width="3"/>
+        </svg>
+        <p style="text-align:center;"><strong>-&gt; Sigmoid</strong></p>
+        <p style="font-size:0.85rem;">Network learns P(Y=1) - a probability between 0 and 1, same as logistic regression.</p>
+      </div>
+      <div class="choice-card">
+        <h3>Regression (+/-)</h3>
+        <div class="rule">Y can be negative or positive - e.g. tomorrow's stock price change: -1.2, +1.5, -0.4</div>
+        <svg viewBox="0 0 200 120" width="100%" height="110">
+          <line x1="10" y1="105" x2="190" y2="105" stroke="#333"/>
+          <line x1="100" y1="10" x2="100" y2="115" stroke="#333"/>
+          <path d="M 30 115 L 175 10" fill="none" stroke="#8b1e1e" stroke-width="3"/>
+        </svg>
+        <p style="text-align:center;"><strong>-&gt; Linear</strong></p>
+        <p style="font-size:0.85rem;">g(z) = z allows both positive and negative outputs.</p>
+      </div>
+      <div class="choice-card">
+        <h3>Regression (non-negative)</h3>
+        <div class="rule">Y &ge; 0 - e.g. house price: +150, +420, +230</div>
+        <svg viewBox="0 0 200 120" width="100%" height="110">
+          <line x1="10" y1="105" x2="190" y2="105" stroke="#333"/>
+          <line x1="100" y1="10" x2="100" y2="115" stroke="#333"/>
+          <path d="M 15 105 L 100 105 L 185 10" fill="none" stroke="#8b1e1e" stroke-width="3"/>
+        </svg>
+        <p style="text-align:center;"><strong>-&gt; ReLU</strong></p>
+        <p style="font-size:0.85rem;">g(z) = max(0,z) - never gives negative predictions, matching a price that can't be negative.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>2. Hidden Layers - Default to ReLU</h2>
+    <p>Even though neural nets historically used sigmoid everywhere, modern practice almost always uses <strong>ReLU</strong> in hidden layers. Two reasons:</p>
+    <div class="choices">
+      <div class="choice-card">
+        <h3>Reason 1 - Speed</h3>
+        <p style="font-size:0.9rem;">ReLU is just <code>max(0, z)</code>. Sigmoid needs an exponentiation + division - more expensive to compute.</p>
+      </div>
+      <div class="choice-card">
+        <h3>Reason 2 - Flatness slows gradient descent</h3>
+        <p style="font-size:0.9rem;">Sigmoid is flat on <strong>both sides</strong> (very negative <em>and</em> very positive z). ReLU is flat on <strong>only one side</strong> (z &lt; 0).</p>
+      </div>
+    </div>
+    <div class="formula">Flat g(z) -&gt; dJ(W,B)/dw is approx 0 -&gt; gradient descent crawls</div>
+    <p>Since the cost function J(W,B) is built from these activations, more flat regions in g(z) means more flat regions in J - and gradient descent barely moves when the slope is near zero. ReLU's cost surface has fewer flat "dead zones," so training converges <strong>faster</strong>.</p>
+    <p class="callout">Note: still use <strong>sigmoid at the output layer</strong> for binary classification. ReLU is for hidden layers.</p>
+  </div>
+
+  <div class="section">
+    <h2>Choosing Activation - Summary</h2>
+    <table>
+      <tr><th>Layer</th><th>Situation</th><th>Activation</th><th>Keras syntax</th></tr>
+      <tr><td>Output</td><td>Binary classification</td><td>Sigmoid</td><td><code>activation='sigmoid'</code></td></tr>
+      <tr><td>Output</td><td>Regression, Y can be +/- </td><td>Linear</td><td><code>activation='linear'</code></td></tr>
+      <tr><td>Output</td><td>Regression, Y &ge; 0</td><td>ReLU</td><td><code>activation='relu'</code></td></tr>
+      <tr><td>Hidden (all)</td><td>Default choice</td><td>ReLU</td><td><code>activation='relu'</code></td></tr>
+    </table>
+    <pre><span class="kw">from</span> tf.keras.layers <span class="kw">import</span> <span class="fn">Dense</span>
+
+model = <span class="fn">Sequential</span>([
+    <span class="fn">Dense</span>(units=<span class="num">25</span>, activation=<span class="str">'relu'</span>),    <span class="cmt"># layer 1 - hidden</span>
+    <span class="fn">Dense</span>(units=<span class="num">15</span>, activation=<span class="str">'relu'</span>),    <span class="cmt"># layer 2 - hidden</span>
+    <span class="fn">Dense</span>(units=<span class="num">1</span>,  activation=<span class="str">'sigmoid'</span>), <span class="cmt"># layer 3 - output (or 'linear' / 'relu')</span>
+])</pre>
+  </div>
+
+  <div class="analogy">
+    <h3>Real-World Analogy</h3>
+    <p>Think of choosing the <strong>output layer</strong> activation like choosing the right <strong>measuring instrument</strong> for the job:</p>
+    <ul style="padding-left:22px;">
+      <li><strong>Sigmoid</strong> = a yes/no probability dial - perfect for "will this email be spam?"</li>
+      <li><strong>Linear</strong> = an open-ended thermometer that reads above or below zero - perfect for "temperature change" or "stock move."</li>
+      <li><strong>ReLU</strong> = a car odometer - can't go negative, only 0 or up - perfect for "distance traveled" or "house price."</li>
+    </ul>
+    <p>For <strong>hidden layers</strong>, ReLU became the default the way a Phillips-head screwdriver became the default in most toolkits - not always technically the only option (tanh, leaky ReLU, swish exist for special cases), but reliable, fast, and good enough for the vast majority of jobs.</p>
+  </div>
+
+  <div class="section">
+    <h2>Other Activation Functions (Good to Know)</h2>
+    <ul>
+      <li><strong>tanh</strong> - sigmoid-shaped but ranges (-1, 1) instead of (0, 1)</li>
+      <li><strong>Leaky ReLU</strong> - like ReLU but with a small slope for z &lt; 0 instead of a hard 0; Andrew mentions using it occasionally with small gains over ReLU</li>
+      <li><strong>Swish</strong> - a smoother, more recent alternative researchers sometimes use</li>
+    </ul>
+    <p class="callout">Coming up next: a 4th activation function, <strong>softmax</strong>, for multi-class classification - later this week.</p>
+  </div>
+
+  <div class="section">
+    <h2>Open Question for Next Video</h2>
+    <p>Why do we even need activation functions at all? Why not just use linear (or "no activation") everywhere? Spoiler: <strong>it completely breaks the network's ability to learn anything beyond a linear model</strong> - explained in the next lesson.</p>
+  </div>
+
+  <div class="footer-note">Course 2 &middot; Week 2 &middot; Lesson 4 - "Choosing Activation Functions" <span class="tag">Sigmoid / Linear / ReLU</span></div>
+
+</div>
+</body>
+</html>

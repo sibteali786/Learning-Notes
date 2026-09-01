@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Finding Valence Electrons from Position</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.1rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  .formula-block{background:var(--code-bg);border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;margin:8px 0;font-size:1.05rem;color:var(--green);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  th,td{border:1px solid var(--card-border);padding:8px 10px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .warn{background:rgba(255,157,77,.08);border:1px solid rgba(255,157,77,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .warn-title{color:var(--orange);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Finding Valence Electrons from Position</h1>
+<p class="subtitle">AP Chemistry · Atomic Structure · Reference / Quick Recall</p>
+
+<h2><span class="pill pill-blue">Problem</span> Given any main-group element, find its valence config fast</h2>
+<div class="card">
+For s-block and p-block elements you never need to write the full electron configuration to get valence electrons — <strong>row = shell number</strong>, <strong>group = valence electron count</strong>. Two lookups, done.
+</div>
+
+<h2><span class="pill pill-orange">Rule 1</span> Row Number → Outermost Shell (n)</h2>
+<div class="card">
+The period (row) an element sits in <strong>is</strong> its outermost shell number.
+
+<table>
+<tr><th>Row</th><th>Outermost shell (n)</th></tr>
+<tr><td>1</td><td>n = 1</td></tr>
+<tr><td>2</td><td>n = 2</td></tr>
+<tr><td>3</td><td>n = 3</td></tr>
+<tr><td>4</td><td>n = 4</td></tr>
+<tr><td>5</td><td>n = 5</td></tr>
+<tr><td>6</td><td>n = 6</td></tr>
+<tr><td>7</td><td>n = 7</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-green">Rule 2</span> Group Number → Valence Electron Count</h2>
+<div class="card">
+<table>
+<tr><th>Group</th><th>Valence e⁻</th><th>Subshell split</th></tr>
+<tr><td>1</td><td>1</td><td><code>ns¹</code></td></tr>
+<tr><td>2</td><td>2</td><td><code>ns²</code></td></tr>
+<tr><td>13</td><td>3</td><td><code>ns² np¹</code></td></tr>
+<tr><td>14</td><td>4</td><td><code>ns² np²</code></td></tr>
+<tr><td>15</td><td>5</td><td><code>ns² np³</code></td></tr>
+<tr><td>16</td><td>6</td><td><code>ns² np⁴</code></td></tr>
+<tr><td>17</td><td>7</td><td><code>ns² np⁵</code></td></tr>
+<tr><td>18</td><td>8 (2 for He)</td><td><code>ns² np⁶</code></td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">Why <code>ns²</code> always comes first</div>
+Within any shell, <code>s</code> fills before <code>p</code> (lower energy). So the first 2 valence electrons always go into <code>ns²</code>; anything beyond 2 spills into <code>np</code>.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Worked Example</span> Bismuth (Bi)</h2>
+<div class="card">
+Bi → row 6, group 15.
+
+<div class="formula-block">Row 6 → n = 6</div>
+<div class="formula-block">Group 15 → 5 valence electrons</div>
+<div class="formula-block">Split: 6s² (2) + 6p³ (3) = 5 ✓</div>
+
+<div class="example">
+<div class="example-title">Common wrong answers to watch for</div>
+<ul>
+<li>Including core electrons like <code>4f¹⁴ 5d¹⁰</code> — those are inner-shell, not valence.</li>
+<li>Writing only <code>6p³</code> and dropping <code>6s²</code> — both subshells of the outer shell count.</li>
+<li>Writing <code>6s² 6p⁶</code> (8 electrons) — that's a full octet, i.e. the next noble gas, not Bi itself.</li>
+</ul>
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th>Term</th><th>What it includes</th></tr>
+<tr><td>Full electron configuration</td><td>Every electron, core + valence</td></tr>
+<tr><td>Valence electron configuration</td><td>Only electrons in the outermost shell (all subshells of that shell)</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-orange">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>This shortcut (row = n, group = valence count) only works cleanly for <strong>s-block and p-block</strong> elements — skip it for transition metals (d-block electrons behave differently).</li>
+<li>Quick sanity check: valence electron count should never exceed 8 (except He, capped at 2).</li>
+<li>To split valence count into subshells: first 2 always go to <code>ns</code>, the rest go to <code>np</code>.</li>
+<li>If a question shows options with <code>f</code> or <code>d</code> subshells for a p-block element, that option is describing core electrons — it's a trap, not the answer.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>
