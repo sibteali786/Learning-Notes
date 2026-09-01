@@ -2,889 +2,304 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Real-time Updates — System Design</title>
+<title>Real-Time Updates — System Design Reference</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
-
-  :root {
-    --bg: #0d0f14;
-    --surface: #141720;
-    --surface2: #1c2030;
-    --border: #2a2f42;
-    --accent: #5b8fff;
-    --accent2: #ff6b6b;
-    --accent3: #43e97b;
-    --accent4: #f7b731;
-    --accent5: #a29bfe;
-    --text: #e8eaf0;
-    --muted: #7b82a0;
-    --tag-bg: #1e2438;
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3140;
+    --text:#e6edf3; --muted:#8b96a5; --accent:#58a6ff; --accent2:#f78166;
+    --good:#3fb950; --warn:#d29922; --bad:#f85149; --purple:#bc8cff;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    padding: 40px 32px;
-    max-width: 1280px;
-    margin: 0 auto;
-    line-height: 1.5;
-  }
-
-  /* ── HEADER ── */
-  .page-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 40px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-  }
-  .page-header h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .page-header h1 span { color: var(--accent); }
-  .tag {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 4px;
-    border: 1px solid;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-  .tag-blue  { color: var(--accent);  border-color: var(--accent);  background: rgba(91,143,255,.08); }
-  .tag-red   { color: var(--accent2); border-color: var(--accent2); background: rgba(255,107,107,.08); }
-  .tag-green { color: var(--accent3); border-color: var(--accent3); background: rgba(67,233,123,.08); }
-  .tag-yellow{ color: var(--accent4); border-color: var(--accent4); background: rgba(247,183,49,.08); }
-  .tag-purple{ color: var(--accent5); border-color: var(--accent5); background: rgba(162,155,254,.08); }
-
-  /* ── GRID LAYOUTS ── */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-
-  /* ── CARD ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-  }
-  .card.blue::before   { background: var(--accent); }
-  .card.red::before    { background: var(--accent2); }
-  .card.green::before  { background: var(--accent3); }
-  .card.yellow::before { background: var(--accent4); }
-  .card.purple::before { background: var(--accent5); }
-
-  .card-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .card-label.blue   { color: var(--accent); }
-  .card-label.red    { color: var(--accent2); }
-  .card-label.green  { color: var(--accent3); }
-  .card-label.yellow { color: var(--accent4); }
-  .card-label.purple { color: var(--accent5); }
-
-  .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
-  .card p, .card li { font-size: 0.875rem; color: #c0c6d8; margin-bottom: 6px; }
-  .card ul { padding-left: 16px; }
-  .card li { margin-bottom: 4px; }
-
-  /* ── SECTION TITLE ── */
-  .section-title {
-    font-size: 0.7rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ── TWO HOPS DIAGRAM ── */
-  .hops-diagram {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    flex-wrap: wrap;
-  }
-  .hop-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 20px;
-    text-align: center;
-    min-width: 130px;
-  }
-  .hop-box .label { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
-  .hop-box .name  { font-weight: 700; font-size: 0.95rem; }
-  .hop-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 12px;
-  }
-  .hop-arrow .hop-label {
-    font-size: 0.7rem;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 4px;
-    white-space: nowrap;
-  }
-  .hop-arrow .arrow { font-size: 1.4rem; color: var(--accent); }
-
-  /* ── PROTOCOL COMPARE TABLE ── */
-  .compare-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 24px;
-    font-size: 0.83rem;
-  }
-  .compare-table th {
-    background: var(--surface2);
-    padding: 10px 14px;
-    text-align: left;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-  }
-  .compare-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-  }
-  .compare-table tr:last-child td { border-bottom: none; }
-  .compare-table tr:hover td { background: rgba(255,255,255,0.02); }
-  .compare-table .proto-name { font-weight: 700; }
-  .check  { color: var(--accent3); font-weight: 700; }
-  .cross  { color: var(--accent2); font-weight: 700; }
-  .star   { color: var(--accent4); font-weight: 700; }
-
-  /* ── CODE SNIPPET ── */
-  .code-block {
-    background: #0a0c10;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.78rem;
-    line-height: 1.6;
-    overflow-x: auto;
-    color: #abb2bf;
-    margin-top: 8px;
-  }
-  .code-block .kw  { color: #c678dd; }
-  .code-block .fn  { color: #61afef; }
-  .code-block .str { color: #98c379; }
-  .code-block .cm  { color: #5c6370; font-style: italic; }
-  .code-block .num { color: #d19a66; }
-
-  /* ── FLOWCHART ── */
-  .flowchart {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-  }
-  .flow-row { display: flex; align-items: center; gap: 0; }
-  .flow-node {
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 16px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    white-space: nowrap;
-    background: var(--surface2);
-  }
-  .flow-node.decision {
-    transform: rotate(0deg);
-    border-color: var(--accent4);
-    color: var(--accent4);
-  }
-  .flow-node.result { border-color: var(--accent3); color: var(--accent3); }
-  .flow-down { color: var(--muted); font-size: 1.2rem; padding: 2px 0; align-self: center; }
-  .flow-right { color: var(--muted); font-size: 1.2rem; padding: 0 6px; }
-  .flow-label { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; padding: 0 4px; }
-  .flow-indent { padding-left: 32px; display: flex; flex-direction: column; gap: 0; }
-
-  /* ── PRO/CON GRID ── */
-  .procon { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
-  .pros, .cons {
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 0.8rem;
-  }
-  .pros { background: rgba(67,233,123,.07); border: 1px solid rgba(67,233,123,.2); }
-  .cons { background: rgba(255,107,107,.07); border: 1px solid rgba(255,107,107,.2); }
-  .pros .head { color: var(--accent3); font-weight: 700; margin-bottom: 6px; font-size: 0.75rem; }
-  .cons .head { color: var(--accent2); font-weight: 700; margin-bottom: 6px; font-size: 0.75rem; }
-  .pros li, .cons li { color: #c0c6d8; margin-bottom: 3px; padding-left: 14px; list-style: none; position: relative; }
-  .pros li::before { content: '✓'; position: absolute; left: 0; color: var(--accent3); }
-  .cons li::before { content: '✗'; position: absolute; left: 0; color: var(--accent2); }
-
-  /* ── STAR CALLOUT ── */
-  .star-callout {
-    background: rgba(247,183,49,.07);
-    border: 1px solid rgba(247,183,49,.3);
-    border-left: 4px solid var(--accent4);
-    border-radius: 0 8px 8px 0;
-    padding: 10px 14px;
-    margin: 12px 0;
-    font-size: 0.83rem;
-    color: #e0c97a;
-  }
-  .star-callout .star-head {
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-    color: var(--accent4);
-  }
-
-  /* ── SERVER-SIDE PUSH CARDS ── */
-  .push-method {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .push-method h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-  .push-method p { font-size: 0.83rem; color: var(--muted); }
-
-  /* ── INTERVIEW TIPS ── */
-  .tip-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
-  .tip-num {
-    min-width: 26px; height: 26px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    flex-shrink: 0;
-  }
-  .tip-text { font-size: 0.83rem; color: #c0c6d8; padding-top: 3px; }
-
-  /* full-width card */
-  .full { grid-column: 1 / -1; }
-
-  @media (max-width: 900px) {
-    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 600px) {
-    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; margin:0; padding:0 0 60px;}
+  .wrap{max-width:1100px; margin:0 auto; padding:24px;}
+  h1{font-size:28px; margin-bottom:4px;}
+  .subtitle{color:var(--muted); margin-top:0; margin-bottom:28px; font-size:14px;}
+  h2{font-size:20px; border-left:4px solid var(--accent); padding-left:12px; margin-top:48px;}
+  h3{font-size:16px; color:var(--accent2); margin-top:24px;}
+  .callout{background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:16px 18px; margin:16px 0;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.bad{border-left-color:var(--bad);}
+  .callout.good{border-left-color:var(--good);}
+  .callout .lbl{font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:6px;}
+  .grid{display:grid; gap:16px; margin:20px 0;}
+  .grid.cols2{grid-template-columns:1fr 1fr;}
+  .grid.cols3{grid-template-columns:repeat(3,1fr);}
+  .grid.cols5{grid-template-columns:repeat(5,1fr);}
+  @media(max-width:900px){.grid.cols2,.grid.cols3,.grid.cols5{grid-template-columns:1fr;}}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .card h4{margin:0 0 8px; color:var(--accent); font-size:15px;}
+  .card p{margin:4px 0; font-size:13.5px; color:#c9d1d9; line-height:1.5;}
+  .tag{font-size:11px; padding:2px 8px; border-radius:12px; font-weight:600;}
+  .tag.good{background:rgba(63,185,80,.15); color:var(--good);}
+  .tag.warn{background:rgba(210,153,34,.15); color:var(--warn);}
+  .tag.bad{background:rgba(248,81,73,.15); color:var(--bad);}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left; vertical-align:top;}
+  th{background:var(--panel2); color:var(--accent);}
+  tr:nth-child(even){background:rgba(255,255,255,.02);}
+  code.inline{background:#0a0e14; padding:1px 6px; border-radius:4px; color:var(--accent2); font-size:13px;}
+  svg{background:var(--panel); border:1px solid var(--border); border-radius:10px; width:100%; height:auto;}
+  .example{background:linear-gradient(135deg,#1a2233,#161b22); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .example .who{font-weight:700; color:var(--purple); font-size:13px; text-transform:uppercase; letter-spacing:.04em;}
+  .toc{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:12px;}
+  .toc ul{margin:6px 0 0; padding-left:18px; line-height:1.9;}
+  .toc a{color:var(--accent); text-decoration:none; font-size:13.5px;}
+  .order-step{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 16px; margin:8px 0;}
+  .order-step .n{background:var(--accent); color:#000; font-weight:700; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;}
+  .decision{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:18px; margin:16px 0;}
+  .decision .q{color:var(--accent2); font-weight:700; font-size:14px;}
+  .decision .a{margin:6px 0 10px 16px; font-size:13.5px; color:#c9d1d9;}
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:50px;}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- ══════════════════════════════
-     HEADER
-══════════════════════════════ -->
-<div class="page-header">
-  <div>
-    <h1>⚡ <span>Real-time Updates</span></h1>
-    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span class="tag tag-blue">System Design Pattern</span>
-      <span class="tag tag-green">Two Hops Problem</span>
-      <span class="tag tag-yellow">★ Interview Hot Topic</span>
-    </div>
+<h1>🔄 Real-Time Updates — System Design Interview Reference</h1>
+<p class="subtitle">Source: Hello Interview — "Real-time Updates Pattern" · Google Docs, Uber driver notifications, live comments — how they all work</p>
+
+<div class="toc">
+  <strong>📍 Contents</strong>
+  <ul>
+    <li><a href="#problem">1. The Problem — Two Hops</a></li>
+    <li><a href="#hop1">2. Hop 1 — Server → Client (protocols)</a></li>
+    <li><a href="#hop2">3. Hop 2 — Getting the update to the right server</a></li>
+    <li><a href="#combine">4. Putting It Together — Real Examples</a></li>
+    <li><a href="#interview">5. Interview Tips</a></li>
+    <li><a href="#glossary">6. Glossary</a></li>
+  </ul>
+</div>
+
+<h2 id="problem">🎯 1. The Problem — Why This Is Hard</h2>
+<p>Real-time updates show up everywhere: Google Docs collaborative typing, Uber "your driver is ready," live comments on a stream. Candidates bungle this <strong>not because they're bad engineers</strong>, but because it touches networking concepts (WebSockets, pub/sub) most people never build from scratch.</p>
+
+<div class="callout good">
+  <div class="lbl">The Two Hops framework</div>
+  Break the problem into two independent sub-problems with completely different trade-offs:
+  <ul>
+    <li><strong>Hop 1:</strong> How do updates get from server → client? (a networking/protocol question)</li>
+    <li><strong>Hop 2:</strong> How does the update reach <em>the specific server</em> that's holding the connection to the right client? (a routing question — the server that generates the data often isn't the server the client is connected to)</li>
+  </ul>
+</div>
+
+<div class="example">
+  <div class="who">Why Hop 2 exists — Uber example</div>
+  <p style="margin:6px 0 0;">A rider requests a driver. The rider's app is connected to Server A; the matched driver's location update might be produced by Server B. The backend has to figure out how to route "driver found" from B to A. This is a <em>natural partition</em> — the two hops are solved with entirely different tools.</p>
+</div>
+
+<div class="callout warn">
+  <div class="lbl">Start here — Polling is the default</div>
+  Simple, stateless, works with any infra. Most interview problems <strong>don't</strong> need sub-second updates — a stock price refreshing every 3s or a dashboard every 5s is usually fine. Ask your interviewer how real-time "real-time" needs to be before reaching for anything fancier.
+</div>
+
+<h3>Why naive polling breaks for something like Google Docs</h3>
+<p>Every "any updates?" HTTP poll pays hidden networking overhead — and 90% of the time the answer is "no":</p>
+
+<svg viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="24" fill="#e6edf3" font-size="13" font-weight="700">Cost of one polling request</text>
+  <rect x="20" y="45" width="140" height="40" rx="6" fill="#1c2330" stroke="#58a6ff"/>
+  <text x="90" y="69" fill="#c9d1d9" font-size="11" text-anchor="middle">DNS lookup</text>
+  <rect x="180" y="45" width="180" height="40" rx="6" fill="#1c2330" stroke="#f78166"/>
+  <text x="270" y="63" fill="#c9d1d9" font-size="11" text-anchor="middle">TCP 3-way handshake</text>
+  <text x="270" y="77" fill="#8b96a5" font-size="9" text-anchor="middle">SYN → SYN-ACK → ACK</text>
+  <rect x="380" y="45" width="140" height="40" rx="6" fill="#1c2330" stroke="#3fb950"/>
+  <text x="450" y="69" fill="#c9d1d9" font-size="11" text-anchor="middle">HTTP req/resp</text>
+  <rect x="540" y="45" width="180" height="40" rx="6" fill="#1c2330" stroke="#f85149"/>
+  <text x="630" y="63" fill="#c9d1d9" font-size="11" text-anchor="middle">TCP 4-way teardown</text>
+  <text x="630" y="77" fill="#8b96a5" font-size="9" text-anchor="middle">FIN → ACK → FIN → ACK</text>
+  <text x="20" y="115" fill="#8b96a5" font-size="12">→ ~90% of the time: response is "nothing new" — all that overhead burned for zero payload.</text>
+  <text x="20" y="140" fill="#8b96a5" font-size="12">→ Multiply by millions of users polling every few ms = infrastructure meltdown.</text>
+</svg>
+
+<h2 id="hop1">📡 2. Hop 1 — Server → Client Protocols</h2>
+
+<div class="grid cols5">
+  <div class="card"><h4>Polling</h4><p><span class="tag good">Default</span> Stateless, simple. Client asks every N seconds.</p></div>
+  <div class="card"><h4>Long Polling</h4><p><span class="tag warn">Stateful</span> Server holds request open until data or timeout.</p></div>
+  <div class="card"><h4>SSE</h4><p><span class="tag good">Best for 1-way push</span> Chunked HTTP response, multiple events per connection.</p></div>
+  <div class="card"><h4>WebSockets</h4><p><span class="tag warn">Last resort</span> Full bidirectional TCP abstraction, no req/resp needed.</p></div>
+  <div class="card"><h4>WebRTC</h4><p><span class="tag bad">Esoteric</span> Peer-to-peer, for audio/video/gaming only.</p></div>
+</div>
+
+<h3>Long Polling — a clever hack, with a latency catch</h3>
+<p>Instead of instantly replying "no updates," the server holds the request open until data is available or it times out. Cuts down wasted round trips — but introduces <strong>state</strong> (something you usually want to minimize) and a subtle latency problem:</p>
+
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="24" fill="#e6edf3" font-size="13" font-weight="700">Long polling: latency on the 2nd of two rapid updates</text>
+  <line x1="20" y1="60" x2="880" y2="60" stroke="#2a3140"/>
+  <text x="20" y="52" fill="#8b96a5" font-size="10">Client</text>
+  <line x1="20" y1="140" x2="880" y2="140" stroke="#2a3140"/>
+  <text x="20" y="132" fill="#8b96a5" font-size="10">Server</text>
+
+  <line x1="80" y1="60" x2="80" y2="140" stroke="#58a6ff" stroke-dasharray="3,3"/>
+  <text x="85" y="75" fill="#58a6ff" font-size="10">request (waits...)</text>
+  <circle cx="300" cy="140" r="4" fill="#3fb950"/>
+  <text x="300" y="128" fill="#3fb950" font-size="10" text-anchor="middle">update #1 ready</text>
+  <line x1="300" y1="140" x2="300" y2="60" stroke="#3fb950"/>
+  <text x="305" y="105" fill="#3fb950" font-size="10">response sent (unavoidable latency)</text>
+
+  <circle cx="340" cy="140" r="4" fill="#f78166"/>
+  <text x="340" y="155" fill="#f78166" font-size="10" text-anchor="middle">update #2 ready</text>
+  <text x="340" y="168" fill="#8b96a5" font-size="9" text-anchor="middle">(no open request!)</text>
+
+  <line x1="300" y1="60" x2="460" y2="60" stroke="#8b96a5" stroke-dasharray="2,2"/>
+  <text x="345" y="52" fill="#8b96a5" font-size="9">client processes #1</text>
+  <line x1="460" y1="60" x2="460" y2="140" stroke="#58a6ff" stroke-dasharray="3,3"/>
+  <text x="465" y="75" fill="#58a6ff" font-size="10">new request sent</text>
+  <line x1="460" y1="140" x2="600" y2="140" stroke="#f78166" stroke-dasharray="2,2"/>
+  <line x1="600" y1="140" x2="600" y2="60" stroke="#f78166"/>
+  <text x="605" y="105" fill="#f78166" font-size="10">response #2 (extra RTT of delay)</text>
+
+  <text x="20" y="230" fill="#8b96a5" font-size="11">Update #1's latency = time to respond (unavoidable). Update #2 had to wait for the client to notice</text>
+  <text x="20" y="246" fill="#8b96a5" font-size="11">the response and call back again → extra round trip of delay. Bad fit for high-frequency updates.</text>
+</svg>
+
+<h3>SSE (Server-Sent Events)</h3>
+<div class="grid cols2">
+  <div class="card">
+    <h4>How it works</h4>
+    <p>HTTP responses don't have to arrive as one packet — a <strong>chunked encoding</strong> response type lets the browser keep the connection open and receive multiple events over time. Client side: <code class="inline">EventSource</code> API with a callback per event.</p>
+    <p>Server sets <code class="inline">Content-Type: text/event-stream</code> (and often chunked encoding), marks the response uncacheable, then keeps writing new events down the same open response.</p>
+  </div>
+  <div class="card">
+    <h4>Why it's often the best pick</h4>
+    <p>Works out of the box with existing HTTP infra (just make sure your load balancer/API gateway doesn't kill long-lived connections). Unlike long polling, <strong>no callback-and-wait problem</strong> — multiple events can stream down one response. Great default for high-frequency, one-directional (server→client) pushes.</p>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     THE TWO HOPS MENTAL MODEL
-══════════════════════════════ -->
-<div class="section-title">The Core Mental Model</div>
+<h3>WebSockets</h3>
+<div class="callout">
+  <div class="lbl">What it actually is</div>
+  An abstraction over a raw TCP channel — bytes flow either direction, no request/response pairing required. You get TCP's guarantees (ordering, delivery ack) and build your own protocol on top (e.g. client sends <code class="inline">subscribe</code>, server pushes <code class="inline">ticker_update</code>).
+</div>
+<div class="grid cols2">
+  <div class="card">
+    <h4>Infra implications</h4>
+    <p>Connections can stay open for <strong>hours</strong>, unlike SSE's periodic reconnects. Best practice: terminate WebSockets early in your infra (one dedicated service) so not every backend service needs to hold stateful connections.</p>
+  </div>
+  <div class="card">
+    <h4>Load balancer choice</h4>
+    <p>Use a <strong>Layer 4</strong> load balancer — WebSockets are a bare TCP connection, so Layer 7 features (inspecting/routing HTTP packets) don't apply. Layer 7 LBs that support WebSockets exist and are fine too; interviewers rarely grade hard on this specific choice.</p>
+  </div>
+</div>
+<div class="callout warn"><div class="lbl">When to reach for it</div>Bidirectional + low-latency requirements. If it's server→client only, prefer SSE — it's simpler infra.</div>
 
-<div class="hops-diagram">
-  <div class="hop-box" style="border-color: var(--accent5);">
-    <div class="label">SOURCE</div>
-    <div class="name" style="color:var(--accent5);">Updates</div>
+<h3>WebRTC — narrow, esoteric, mostly skip it</h3>
+<p>Peer-to-peer connections between <em>clients</em> — surprisingly involves a lot of backend setup:</p>
+<div class="order-step"><div class="n">1</div><div><strong>Signaling server</strong> — tells each peer who else is connectable. Can be regionalized if you never want cross-region peers. Called only during the initial handshake, so latency isn't critical here.</div></div>
+<div class="order-step"><div class="n">2</div><div><strong>STUN</strong> — clients normally don't listen for inbound traffic (security). STUN helps open a publicly addressable port on each client.</div></div>
+<div class="order-step"><div class="n">3</div><div>Signaling server shares those public addresses between peers → clients connect directly to each other.</div></div>
+<div class="order-step"><div class="n">4</div><div><strong>TURN (fallback)</strong> — if peer-to-peer can't be established (e.g. behind a corporate firewall), traffic is relayed through a central server — the least desirable mode, since it reintroduces the server-in-the-middle cost WebRTC was trying to avoid.</div></div>
+<div class="callout bad"><div class="lbl">When to actually use it</div>Only when a server-in-the-middle's added latency/bandwidth cost is prohibitive — <strong>video calling (Google Meet) or multiplayer gaming</strong>. For nearly everything else, WebSockets are simpler (server control, no STUN/TURN, no malicious-peer risk).</div>
+
+<h3>Hop 1 Decision Flow</h3>
+<div class="decision">
+  <div class="q">Q1: Am I truly latency-sensitive?</div>
+  <div class="a">No (5s is fine) → <strong>Polling</strong>. Careful: a lot of production systems that "feel" real-time are actually just polling under the hood.</div>
+  <div class="q">Q2: Is communication frequent AND bidirectional?</div>
+  <div class="a">No (mostly server→client) → <strong>SSE</strong> (~75% of real-time use cases land here).</div>
+  <div class="q">Q3: Do I have audio/video requirements?</div>
+  <div class="a">Yes → <strong>WebRTC</strong>. No, but frequent + bidirectional → <strong>WebSockets</strong> (treat as last resort, not first instinct).</div>
+</div>
+
+<h2 id="hop2">🧭 3. Hop 2 — Routing the Update to the Right Server</h2>
+<p>Now that the client can receive pushes, the harder question: the update was generated somewhere else in your backend — how does it find the exact server holding that client's connection?</p>
+
+<h3>Option A — Server-Side Polling <span class="tag warn">uncommon / stopgap</span></h3>
+<p>The client-facing server (already connected via SSE/WebSocket) itself polls the DB for changes at its own frequency — lower latency than client polling since it's inside the data center, but still introduces latency and requires storage for updates to land in. <strong>Usually a hack when there's no time to build the full solution</strong> — interviewers expect near-zero latency, not "polling but faster."</p>
+
+<h3>Option B — Consistent Hashing <span class="tag good">stateful services</span></h3>
+<div class="grid cols2">
+  <div class="card">
+    <h4>Mechanism</h4>
+    <p>Hash a user ID onto a ring of server positions; each server owns an arc of the ring. Removing/adding a node only reshuffles the neighboring arc's users — not everyone — avoiding a load spike concentrated on one server.</p>
   </div>
-  <div class="hop-arrow">
-    <div class="hop-label">HOP 2 — Trigger</div>
-    <div class="arrow">→</div>
-    <div style="font-size:0.65rem;color:var(--muted);text-align:center;">Pull / Hash / Pub-Sub</div>
-  </div>
-  <div class="hop-box" style="border-color: var(--accent4);">
-    <div class="label">INFRA</div>
-    <div class="name" style="color:var(--accent4);">Server</div>
-  </div>
-  <div class="hop-arrow">
-    <div class="hop-label">HOP 1 — Delivery</div>
-    <div class="arrow">→</div>
-    <div style="font-size:0.65rem;color:var(--muted);text-align:center;">Poll / Long-Poll / SSE / WS / WebRTC</div>
-  </div>
-  <div class="hop-box" style="border-color: var(--accent3);">
-    <div class="label">RECEIVER</div>
-    <div class="name" style="color:var(--accent3);">Client</div>
+  <div class="card">
+    <h4>Implementation pieces</h4>
+    <p><strong>Ring state store:</strong> an ordered list of servers + agreed hash function — Zookeeper (via lightweight Z-nodes) is a good fit for propagating this.<br><strong>Client routing:</strong> either (a) a lightweight lookup service hashes the user and redirects them to the right server, or (b) Redis-style: client connects to any node, that node says "yes, that's me" or redirects to the correct owner.</p>
   </div>
 </div>
 
-<div class="star-callout">
-  <div class="star-head">★ Interview Insight</div>
-  Every real-time problem splits into these two distinct hops. Solve them separately and communicate that separation clearly — most candidates blur them together.
+<svg viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="240" cy="240" r="180" fill="none" stroke="#2a3140" stroke-width="2"/>
+  <circle cx="240" cy="60" r="10" fill="#58a6ff"/><text x="240" y="42" fill="#c9d1d9" font-size="11" text-anchor="middle">N1</text>
+  <circle cx="367" cy="113" r="10" fill="#58a6ff"/><text x="390" y="105" fill="#c9d1d9" font-size="11" text-anchor="middle">N2</text>
+  <circle cx="420" cy="240" r="10" fill="#58a6ff"/><text x="452" y="244" fill="#c9d1d9" font-size="11" text-anchor="middle">N3</text>
+  <circle cx="367" cy="367" r="10" fill="#f85149" stroke="#f85149" stroke-width="2" fill-opacity="0.3"/><text x="392" y="390" fill="#f85149" font-size="11" text-anchor="middle">N8 (removed)</text>
+  <circle cx="240" cy="420" r="10" fill="#58a6ff"/><text x="240" y="446" fill="#c9d1d9" font-size="11" text-anchor="middle">N5</text>
+  <circle cx="113" cy="367" r="10" fill="#58a6ff"/><text x="88" y="390" fill="#c9d1d9" font-size="11" text-anchor="middle">N6</text>
+  <circle cx="60" cy="240" r="10" fill="#3fb950" stroke="#3fb950" stroke-width="2"/><text x="30" y="244" fill="#3fb950" font-size="11" text-anchor="middle">N7 (absorbs N8's users)</text>
+  <circle cx="113" cy="113" r="10" fill="#58a6ff"/><text x="90" y="98" fill="#c9d1d9" font-size="11" text-anchor="middle">N4</text>
+  <path d="M367,367 A180,180 0 0,1 113,367" fill="none" stroke="#3fb950" stroke-width="4" stroke-dasharray="6,4"/>
+  <text x="240" y="240" fill="#8b96a5" font-size="11" text-anchor="middle">Only the neighboring</text>
+  <text x="240" y="256" fill="#8b96a5" font-size="11" text-anchor="middle">arc absorbs load —</text>
+  <text x="240" y="272" fill="#8b96a5" font-size="11" text-anchor="middle">not a full reshuffle</text>
+</svg>
+
+<div class="callout warn">
+  <div class="lbl">Operational deep dives interviewers push on</div>
+  <ul style="margin:6px 0 0;">
+    <li>During scaling, servers must know about <em>both</em> the old and new ring layout until the transition finishes.</li>
+    <li><strong>Thundering herd risk:</strong> don't dump all reassigned users on the new server at once — <strong>drain connections gradually</strong> with back-pressure/feedback on uptake rate.</li>
+  </ul>
 </div>
+<div class="callout bad"><div class="lbl">Trade-off to name explicitly</div>Consistent hashing opens a lot of deep-dive surface area (ring management, drain/thundering herd, Zookeeper dependency). If real-time delivery isn't the core focus of the problem, this complexity may not be worth it.</div>
 
-<!-- ══════════════════════════════
-     NETWORKING PRIMER
-══════════════════════════════ -->
-<div class="section-title">Networking Layers (What Matters)</div>
+<h3>Option C — Pub/Sub <span class="tag good">default when services aren't already stateful</span></h3>
+<div class="order-step"><div class="n">1</div><div>Client connects to <strong>any</strong> endpoint server (plain load balancer, no ring bookkeeping needed).</div></div>
+<div class="order-step"><div class="n">2</div><div>That server <strong>subscribes</strong> to a topic (e.g. the user's ID) on the pub/sub backend.</div></div>
+<div class="order-step"><div class="n">3</div><div>When an update happens elsewhere, the producing server <strong>publishes</strong> to that topic.</div></div>
+<div class="order-step"><div class="n">4</div><div>The pub/sub system pushes it to whichever endpoint server(s) are subscribed; that server forwards it down the local WebSocket/SSE connection it already holds.</div></div>
 
-<div class="grid-3">
-  <div class="card blue">
-    <div class="card-label blue">Layer 3 — Network</div>
-    <h3>IP</h3>
-    <p>Routing and addressing. Breaks data into packets. <strong>No guarantees</strong> — packets can be lost, duplicated, or reordered.</p>
-    <p style="margin-top:8px;color:var(--muted);font-size:0.8rem;">Think of it as: the postal system — delivers envelopes but doesn't guarantee arrival.</p>
-  </div>
-  <div class="card yellow">
-    <div class="card-label yellow">Layer 4 — Transport</div>
-    <h3>TCP vs UDP</h3>
-    <p><strong>TCP</strong> — Connection-oriented. Reliable, ordered delivery. Needs 3-way handshake before data flows. State on both sides.</p>
-    <p style="margin-top:6px;"><strong>UDP</strong> — Connectionless. Spray and pray. Fast, no guarantees. Good for gaming/video.</p>
-  </div>
-  <div class="card green">
-    <div class="card-label green">Layer 7 — Application</div>
-    <h3>HTTP, WS, SSE, WebRTC</h3>
-    <p>What you actually code against. Sits on top of TCP. Each protocol makes different trade-offs on connection lifecycle and directionality.</p>
-    <p style="margin-top:8px;color:var(--muted);font-size:0.8rem;">Think of it as: the language you speak once the phone call is connected.</p>
-  </div>
-</div>
-
-<!-- TCP Lifecycle mini -->
-<div class="card blue" style="margin-bottom:20px;">
-  <div class="card-label blue">TCP Handshake — Why Latency Exists</div>
-  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:4px; font-family:'JetBrains Mono',monospace; font-size:0.8rem;">
-    <span style="color:var(--accent3);">SYN →</span>
-    <span style="color:var(--muted);">client initiates</span>
-    <span style="color:var(--accent);">← SYN-ACK</span>
-    <span style="color:var(--muted);">server agrees</span>
-    <span style="color:var(--accent3);">ACK →</span>
-    <span style="color:var(--muted);">connection established</span>
-    <span style="color:var(--accent4);">// now HTTP can flow</span>
-  </div>
-  <p style="margin-top:10px;font-size:0.83rem;">Each round-trip = latency. This is why persistent connections matter — you amortize setup cost over many messages.</p>
-</div>
-
-<!-- L4 vs L7 Load Balancer -->
-<div class="section-title">Load Balancer Choice Matters</div>
-
-<div class="grid-2" style="margin-bottom:24px;">
-  <div class="card yellow">
-    <div class="card-label yellow">L4 Load Balancer</div>
-    <h3>e.g. AWS NLB</h3>
-    <p>Routes at TCP level (IP + port). Acts as if client has a <strong>direct TCP connection</strong> to a single backend. Maintains persistent connections.</p>
-    <div class="procon" style="margin-top:12px;">
-      <div class="pros">
-        <div class="head">✓ PROS</div>
-        <ul>
-          <li>Native WebSocket support</li>
-          <li>Fast, minimal inspection</li>
-          <li>Sticky connections</li>
-        </ul>
-      </div>
-      <div class="cons">
-        <div class="head">✗ CONS</div>
-        <ul>
-          <li>No content-based routing</li>
-          <li>Less flexible</li>
-        </ul>
-      </div>
-    </div>
-    <div class="star-callout" style="margin-top:12px;">
-      <div class="star-head">★ Use for WebSockets</div>
-      L4 is the right choice when you need stateful persistent connections. WebSocket servers behind L4 = same TCP connection throughout.
-    </div>
-  </div>
-  <div class="card purple">
-    <div class="card-label purple">L7 Load Balancer</div>
-    <h3>e.g. AWS ALB</h3>
-    <p>Terminates incoming connections, <strong>creates new ones</strong> to backend. Understands HTTP — can route on URL, headers, cookies.</p>
-    <div class="procon" style="margin-top:12px;">
-      <div class="pros">
-        <div class="head">✓ PROS</div>
-        <ul>
-          <li>URL/header-based routing</li>
-          <li>SSL termination</li>
-          <li>Great for HTTP polling/SSE</li>
-        </ul>
-      </div>
-      <div class="cons">
-        <div class="head">✗ CONS</div>
-        <ul>
-          <li>Spotty WebSocket support</li>
-          <li>More CPU intensive</li>
-        </ul>
-      </div>
-    </div>
-    <div class="star-callout" style="margin-top:12px;">
-      <div class="star-head">★ Use for Long Polling / SSE</div>
-      L7 handles HTTP-based real-time well. Just ensure your LB timeout > polling interval (e.g. LB at 60s, long-poll at 15-30s).
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════
-     HOP 1 — CLIENT PROTOCOLS
-══════════════════════════════ -->
-<div class="section-title">Hop 1 — Client-Server Protocols</div>
-
-<!-- Compare Table -->
-<div style="overflow-x:auto; margin-bottom:20px;">
-<table class="compare-table">
-  <thead>
-    <tr>
-      <th>Protocol</th>
-      <th>Direction</th>
-      <th>Latency</th>
-      <th>Infra Need</th>
-      <th>State</th>
-      <th>Best For</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><span class="proto-name" style="color:var(--muted);">Simple Polling</span></td>
-      <td>Client → Server</td>
-      <td><span class="cross">High</span> (poll interval)</td>
-      <td><span class="check">None</span></td>
-      <td>Stateless</td>
-      <td>Non-latency sensitive, short update windows</td>
-    </tr>
-    <tr>
-      <td><span class="proto-name" style="color:var(--accent4);">Long Polling</span></td>
-      <td>Client → Server (held)</td>
-      <td><span class="star">Medium</span></td>
-      <td><span class="check">None</span></td>
-      <td>Stateless</td>
-      <td>Infrequent updates, payment status awaiting</td>
-    </tr>
-    <tr>
-      <td><span class="proto-name" style="color:var(--accent3);">SSE</span></td>
-      <td>Server → Client only</td>
-      <td><span class="check">Low</span></td>
-      <td>Streaming proxies</td>
-      <td>Semi-stateful</td>
-      <td>Dashboards, AI token streaming, 1-way feeds</td>
-    </tr>
-    <tr>
-      <td><span class="proto-name" style="color:var(--accent);">WebSockets</span></td>
-      <td>Full Duplex</td>
-      <td><span class="check">Lowest</span></td>
-      <td><span class="cross">Special infra (L4)</span></td>
-      <td><span class="cross">Stateful</span></td>
-      <td>Chat, collab editing, gaming, live trading</td>
-    </tr>
-    <tr>
-      <td><span class="proto-name" style="color:var(--accent5);">WebRTC</span></td>
-      <td>Peer-to-Peer</td>
-      <td><span class="check">Lowest P2P</span></td>
-      <td><span class="cross">STUN/TURN/Signaling</span></td>
-      <td><span class="cross">Most complex</span></td>
-      <td>Video calls, screen share, P2P collab (Canva)</td>
-    </tr>
-  </tbody>
+<table>
+  <tr><th>Backend</th><th>Durability</th><th>Best for</th></tr>
+  <tr><td><strong>Redis Pub/Sub</strong></td><td>None — fire-and-forget, in-memory</td><td>Stock ticker style updates where only the <em>latest</em> value matters (e.g. Yahoo Finance) — old prices live elsewhere if needed.</td></tr>
+  <tr><td><strong>Kafka</strong></td><td>Full replay log</td><td>Cases where every update must eventually reach the user (e.g. chat) — reconnecting clients can replay missed messages. (See Hello Interview's WhatsApp guide for a worked example combining Pub/Sub for low-latency delivery + DB storage for the message archive.)</td></tr>
 </table>
+
+<h3>Hop 2 Decision Flow</h3>
+<div class="decision">
+  <div class="q">Q1: Am I latency-sensitive?</div>
+  <div class="a">Rarely "no" if you're even considering real-time — if it is, server-side polling might suffice.</div>
+  <div class="q">Q2: Are my services already stateful?</div>
+  <div class="a">Yes (e.g. collaborative editor where co-editors must share a server for CRDT/OT broadcasting) → <strong>Consistent hashing</strong>.<br>No → <strong>Pub/Sub</strong> is the simpler default — no ring registry, no Zookeeper, connect anywhere.</div>
 </div>
 
-<!-- Protocol Detail Cards -->
-<div class="grid-2">
+<h2 id="combine">🧩 4. Putting It Together — Worked Examples</h2>
+<table>
+  <tr><th>Application</th><th>Hop 1 (server→client)</th><th>Hop 2 (routing)</th><th>Why</th></tr>
+  <tr><td><strong>Live dashboard / stock ticker</strong></td><td>Polling (if &gt;5s tolerable) or SSE (if under 5s)</td><td>Pub/Sub</td><td>One-directional, broadcast-style; cheap to fan out via topics per ticker symbol.</td></tr>
+  <tr><td><strong>Collaborative editor (Google Docs)</strong></td><td>WebSockets</td><td>Consistent hashing</td><td>Already need all editors of a doc on the same server for CRDT/OT — simplifies both the edit algorithm and the broadcast.</td></tr>
+  <tr><td><strong>Chat application</strong></td><td>SSE (receive) + REST call (send, low frequency)</td><td>Pub/Sub <em>preferred</em> over consistent hashing</td><td>Bidirectional but not high-frequency. Consistent hashing risks the <strong>celebrity problem</strong>: a room with millions of users would all land on one server if hashed together — Pub/Sub avoids that concentration.</td></tr>
+</table>
 
-  <div class="card yellow">
-    <div class="card-label yellow">Long Polling</div>
-    <h3>The Easy Near-Realtime</h3>
-    <p>Client sends HTTP request → Server <strong>holds it open</strong> until data arrives → Server responds → Client immediately re-requests.</p>
-    <div class="code-block">
-<span class="kw">async function</span> <span class="fn">longPoll</span>() {
-  <span class="kw">while</span> (<span class="kw">true</span>) {
-    <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/updates'</span>);
-    <span class="fn">processData</span>(<span class="kw">await</span> res.<span class="fn">json</span>());
-    <span class="cm">// immediately fires next request</span>
-  }
-}</div>
-    <div class="star-callout">
-      <div class="star-head">★ High-Freq Latency Trap</div>
-      2 updates 10ms apart = update #2 can be 290ms late (90ms finish + 100ms re-request + 100ms response). Use SSE if frequency is high.
-    </div>
-    <p style="font-size:0.8rem;color:var(--accent4);margin-top:8px;">Real-world: Stripe/payment status polling before success page.</p>
-  </div>
-
-  <div class="card green">
-    <div class="card-label green">SSE — Server-Sent Events</div>
-    <h3>The Efficient One-Way Street</h3>
-    <p>Uses <code style="font-family:'JetBrains Mono',monospace;color:var(--accent3);">Transfer-Encoding: chunked</code> — server keeps connection open and streams chunks. Browser's <strong>EventSource</strong> handles reconnection automatically.</p>
-    <div class="code-block">
-<span class="cm">// Client</span>
-<span class="kw">const</span> es = <span class="kw">new</span> <span class="fn">EventSource</span>(<span class="str">'/api/updates'</span>);
-es.<span class="fn">onmessage</span> = (e) => <span class="fn">updateUI</span>(<span class="fn">JSON.parse</span>(e.data));
-
-<span class="cm">// Server (Express)</span>
-res.<span class="fn">setHeader</span>(<span class="str">'Content-Type'</span>, <span class="str">'text/event-stream'</span>);
-res.<span class="fn">write</span>(<span class="str">`data: ${JSON.stringify(data)}\n\n`</span>);</div>
-    <div class="star-callout">
-      <div class="star-head">★ Proxy Gotcha</div>
-      Many proxies buffer streaming responses — effectively blocking your stream silently. Hard to debug! Confirm your infra supports chunked transfer.
-    </div>
-    <p style="font-size:0.8rem;color:var(--accent3);margin-top:8px;">Real-world: ChatGPT/Claude streaming tokens to browser.</p>
-  </div>
-
-  <div class="card blue">
-    <div class="card-label blue">WebSockets</div>
-    <h3>The Full-Duplex Champion</h3>
-    <p>HTTP "upgrade" handshake converts TCP connection to WS protocol. Both sides send messages freely. No headers per message = low overhead.</p>
-    <div class="code-block">
-<span class="cm">// Client</span>
-<span class="kw">const</span> ws = <span class="kw">new</span> <span class="fn">WebSocket</span>(<span class="str">'ws://api.example.com/ws'</span>);
-ws.<span class="fn">onmessage</span> = (e) => <span class="fn">handle</span>(<span class="fn">JSON.parse</span>(e.data));
-ws.<span class="fn">onclose</span>  = () => <span class="fn">setTimeout</span>(reconnect, <span class="num">1000</span>);</div>
-    <div class="procon">
-      <div class="pros">
-        <div class="head">✓ PROS</div>
-        <ul>
-          <li>True bidirectional</li>
-          <li>Lowest overhead</li>
-          <li>Wide browser support</li>
-        </ul>
-      </div>
-      <div class="cons">
-        <div class="head">✗ CONS</div>
-        <ul>
-          <li>Stateful = complex scaling</li>
-          <li>Deployment churn kills connections</li>
-          <li>Needs L4 LB ideally</li>
-        </ul>
-      </div>
-    </div>
-    <div class="star-callout">
-      <div class="star-head">★ Architecture Tip</div>
-      Terminate WebSockets in a dedicated WS service early in infra. Rest of system stays stateless. WS service changes rarely = fewer connection disruptions.
-    </div>
-  </div>
-
-  <div class="card purple">
-    <div class="card-label purple">WebRTC</div>
-    <h3>The Peer-to-Peer Solution</h3>
-    <p>Clients find each other via <strong>Signaling Server</strong>, exchange ICE candidates, then connect directly. STUN handles NAT traversal; TURN relays when direct fails.</p>
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; font-size:0.78rem; font-family:'JetBrains Mono',monospace;">
-      <span style="background:rgba(162,155,254,.15);color:var(--accent5);padding:3px 8px;border-radius:4px;">Signaling Server</span>
-      <span style="color:var(--muted);">→ find peers →</span>
-      <span style="background:rgba(162,155,254,.15);color:var(--accent5);padding:3px 8px;border-radius:4px;">STUN</span>
-      <span style="color:var(--muted);">→ public addr →</span>
-      <span style="background:rgba(162,155,254,.15);color:var(--accent5);padding:3px 8px;border-radius:4px;">Direct P2P</span>
-      <span style="color:var(--muted);">or</span>
-      <span style="background:rgba(255,107,107,.15);color:var(--accent2);padding:3px 8px;border-radius:4px;">TURN relay</span>
-    </div>
-    <p style="font-size:0.8rem;color:var(--accent5);">Real-world: Zoom, Google Meet, Canva cursor presence sharing.</p>
-    <div class="star-callout">
-      <div class="star-head">★ Rare in Interviews</div>
-      Use only when the question clearly involves audio/video OR scale demands P2P offload. Signaling server itself needs SSE/WS — it's real-time updates all the way down!
-    </div>
-  </div>
-
+<h2 id="interview">🎤 5. Interview Tips</h2>
+<div class="callout good">
+  <div class="lbl">Default posture</div>
+  Start with polling. Escalate only when you've justified why polling's latency isn't acceptable. Then walk Hop 1 and Hop 2 as <strong>separate</strong> decisions — don't conflate "which protocol" with "which routing strategy," they solve different problems.
+</div>
+<div class="callout">
+  <div class="lbl">What interviewers actually want</div>
+  Most engineers — even good ones — haven't built this from scratch because a platform team usually owns it. The bar is knowing the <em>menu of options</em> and justifying your pick with a clear trade-off, not reciting a "correct" architecture from memory.
 </div>
 
-<!-- ══════════════════════════════
-     DECISION FLOWCHART
-══════════════════════════════ -->
-<div class="section-title">Protocol Decision Tree</div>
+<h2 id="glossary">🧠 6. Glossary</h2>
+<table>
+  <tr><th>Term</th><th>Plain definition</th></tr>
+  <tr><td>Long polling</td><td>Server holds an HTTP request open until data is ready or a timeout hits, instead of replying immediately with "nothing new."</td></tr>
+  <tr><td>SSE (Server-Sent Events)</td><td>A chunked HTTP response the browser keeps open, letting the server stream multiple discrete events down one connection. One-directional (server→client).</td></tr>
+  <tr><td>WebSocket</td><td>A bidirectional abstraction over a raw TCP connection — no request/response pairing required, you define your own message protocol on top.</td></tr>
+  <tr><td>WebRTC</td><td>A peer-to-peer connection protocol between clients, set up via a signaling server plus STUN/TURN; used for audio/video/gaming.</td></tr>
+  <tr><td>STUN</td><td>A server that helps a client discover/open a publicly reachable address/port so peers can connect directly (bypasses the fact that clients don't normally listen for inbound traffic).</td></tr>
+  <tr><td>TURN</td><td>A fallback relay server used when direct peer-to-peer (STUN) connection fails — routes all traffic through a central server, the least desirable WebRTC mode.</td></tr>
+  <tr><td>Consistent hashing</td><td>A hashing scheme that places servers on a ring so adding/removing a node only remaps its neighboring arc of users, not the whole population.</td></tr>
+  <tr><td>Thundering herd</td><td>A spike of simultaneous reconnections/load caused by disconnecting too many clients from a server at once — mitigated by gradual connection draining.</td></tr>
+  <tr><td>Pub/Sub</td><td>A messaging pattern where publishers send to a topic/channel and any subscribed servers receive it — decouples "who has the data" from "who holds the client connection."</td></tr>
+  <tr><td>Celebrity problem</td><td>When one entity (a huge chat room, a viral post) attracts disproportionate traffic — can overload a single server if using consistent hashing to co-locate all related users.</td></tr>
+  <tr><td>Layer 4 vs Layer 7 load balancer</td><td>L4 routes based on raw TCP/IP info (works for stateful WebSocket connections); L7 inspects HTTP-level content to route (less applicable once a connection is a bare TCP/WebSocket stream).</td></tr>
+</table>
 
-<div class="card" style="margin-bottom:24px;border-color:var(--accent4);">
-  <div style="display:flex;flex-direction:column;gap:0;align-items:flex-start;">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <div class="flow-node decision">Latency Sensitive?</div>
-    </div>
-    <div style="display:flex;gap:32px;margin-top:8px;padding-left:16px;">
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">NO ↓</span>
-        <div class="flow-node result">Simple Polling</div>
-        <span style="font-size:0.75rem;color:var(--muted);">setInterval every 2-5s</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">YES →</span>
-        <div class="flow-node decision">Frequent Bi-Directional?</div>
-        <div style="display:flex;gap:24px;margin-top:8px;padding-left:16px;">
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">NO ↓</span>
-            <div class="flow-node result" style="border-color:var(--accent3);color:var(--accent3);">SSE</div>
-            <span style="font-size:0.75rem;color:var(--muted);">1-way push</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">YES →</span>
-            <div class="flow-node decision">P2P / Audio / Video?</div>
-            <div style="display:flex;gap:24px;margin-top:8px;padding-left:16px;">
-              <div>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">NO ↓</span>
-                <div class="flow-node result" style="border-color:var(--accent);color:var(--accent);margin-top:4px;">WebSocket</div>
-              </div>
-              <div>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);">YES →</span>
-                <div class="flow-node result" style="border-color:var(--accent5);color:var(--accent5);margin-top:4px;">WebRTC</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<footer>Reference summary compiled from Hello Interview — "Real-time Updates Pattern for System Design Interviews"</footer>
 </div>
-
-<!-- ══════════════════════════════
-     HOP 2 — SERVER SIDE
-══════════════════════════════ -->
-<div class="section-title">Hop 2 — Server-Side Trigger Mechanisms</div>
-
-<div class="grid-3">
-
-  <div class="card" style="border-color:var(--muted);">
-    <div class="card-label" style="color:var(--muted);">Approach 1</div>
-    <h3>Pull via Polling</h3>
-    <p>Client polls server → server reads from DB → DB written to by update source. <strong>Decoupled by the DB.</strong></p>
-    <div style="margin:12px 0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:var(--muted);">
-      Update Source → <span style="color:var(--accent4);">DB</span> ← Server ← Client
-    </div>
-    <div class="procon">
-      <div class="pros"><div class="head">✓</div><ul><li>Simplest possible</li><li>State only in DB</li></ul></div>
-      <div class="cons"><div class="head">✗</div><ul><li>High latency</li><li>DB hammered on idle</li></ul></div>
-    </div>
-    <p style="font-size:0.78rem;color:var(--muted);margin-top:8px;">⚠️ 1M clients × poll/10s = <strong>100k TPS</strong> read volume. Easy to forget.</p>
-  </div>
-
-  <div class="card blue">
-    <div class="card-label blue">Approach 2</div>
-    <h3>Push via Consistent Hashing</h3>
-    <p>Hash user ID → deterministic server assignment. Each user's persistent connection always lands on the same server. Zookeeper/etcd tracks server registry.</p>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;margin:10px 0;line-height:1.8;">
-      <span style="color:var(--accent);">user_id % N</span> → <span style="color:var(--accent4);">server_n</span><br>
-      <span style="color:var(--muted);">// consistent hash ring when N changes</span><br>
-      <span style="color:var(--accent3);">// only affected segment reconnects</span>
-    </div>
-    <div class="procon">
-      <div class="pros"><div class="head">✓</div><ul><li>Predictable routing</li><li>Minimal churn on scale</li></ul></div>
-      <div class="cons"><div class="head">✗</div><ul><li>Zookeeper coordination needed</li><li>Complex scaling events</li></ul></div>
-    </div>
-    <div class="star-callout">
-      <div class="star-head">★ Use When</div>
-      Connections carry expensive per-user state (e.g. Google Docs: document loaded + ops applied). Worth the coordination overhead.
-    </div>
-  </div>
-
-  <div class="card green">
-    <div class="card-label green">Approach 3</div>
-    <h3>Push via Pub/Sub</h3>
-    <p>Update source publishes to topic → Pub/Sub (Redis/Kafka) broadcasts → Endpoint servers subscribed forward to connected clients.</p>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;margin:10px 0;line-height:1.8;">
-      <span style="color:var(--accent5);">UpdateServer</span> →
-      <span style="color:var(--accent3);">Redis PubSub</span> →
-      <span style="color:var(--accent4);">EndpointServer</span> →
-      <span style="color:var(--accent);">Client</span>
-    </div>
-    <div class="procon">
-      <div class="pros"><div class="head">✓</div><ul><li>Stateless endpoint servers</li><li>Any server can serve any client</li><li>&lt;10ms extra latency</li></ul></div>
-      <div class="cons"><div class="head">✗</div><ul><li>Redis = SPOF if not clustered</li><li>Many-to-many connections</li></ul></div>
-    </div>
-    <div class="star-callout">
-      <div class="star-head">★ Default Choice</div>
-      Best balance for most systems. Use "least connections" LB strategy. Scale with Redis Cluster (shard subscriptions by key).
-    </div>
-  </div>
-
-</div>
-
-<!-- Hashing vs Pub/Sub comparison -->
-<div class="card" style="margin-bottom:24px;border-color:var(--border);">
-  <div class="card-label" style="color:var(--muted);">Consistent Hashing vs Pub/Sub — When to Choose</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px;">
-    <div>
-      <p style="color:var(--accent);font-weight:700;font-size:0.85rem;margin-bottom:8px;">Use Consistent Hashing when…</p>
-      <ul style="font-size:0.83rem;color:#c0c6d8;padding-left:16px;">
-        <li style="margin-bottom:4px;">Connection carries heavy per-user state</li>
-        <li style="margin-bottom:4px;">Rebuilding state on reconnect is expensive</li>
-        <li style="margin-bottom:4px;">E.g. Google Docs — document + ops history loaded per connection</li>
-      </ul>
-    </div>
-    <div>
-      <p style="color:var(--accent3);font-weight:700;font-size:0.85rem;margin-bottom:8px;">Use Pub/Sub when…</p>
-      <ul style="font-size:0.83rem;color:#c0c6d8;padding-left:16px;">
-        <li style="margin-bottom:4px;">Passing small messages, little server-side state</li>
-        <li style="margin-bottom:4px;">Need to broadcast to many subscribers</li>
-        <li style="margin-bottom:4px;">E.g. Chat app, live feed, Uber driver location</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════
-     COMMON DEEP DIVES
-══════════════════════════════ -->
-<div class="section-title">Common Interview Deep Dives</div>
-
-<div class="grid-2">
-  <div class="card red">
-    <div class="card-label red">Deep Dive 1</div>
-    <h3>Connection Failures & Reconnection</h3>
-    <p>WebSockets don't always signal when they break ("zombie connections"). Use <strong>heartbeat/ping-pong</strong> to detect stale connections.</p>
-    <p style="margin-top:8px;">Track sequence numbers or last-event-ID per user. On reconnect, replay missed messages. <strong>Redis Streams</strong> is a popular option for this buffer.</p>
-    <p style="margin-top:8px;color:var(--accent4);font-size:0.8rem;">SSE has built-in last-event-id reconnect in EventSource API. WebSockets need manual implementation.</p>
-  </div>
-
-  <div class="card yellow">
-    <div class="card-label yellow">Deep Dive 2</div>
-    <h3>Celebrity / Fan-Out Problem</h3>
-    <p>Elon Musk tweets → 100M users need that update. Naive fan-out = system crash.</p>
-    <p style="margin-top:8px;"><strong>Solution:</strong> Hierarchical aggregation. Cache update once, distribute through regional layers. Broadcast nodes aggregate writes for last N seconds before pushing to clients.</p>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;margin-top:8px;color:var(--muted);">
-      Write Processors → Root Processor → Broadcast Nodes → Clients
-    </div>
-  </div>
-
-  <div class="card purple">
-    <div class="card-label purple">Deep Dive 3</div>
-    <h3>Message Ordering Across Servers</h3>
-    <p>Two messages sent 10ms apart can arrive out of order across distributed servers.</p>
-    <p style="margin-top:8px;"><strong>Simple answer:</strong> Route all messages for an entity through a single server/partition — total order becomes trivial.</p>
-    <p style="margin-top:8px;"><strong>Advanced:</strong> Vector clocks / logical timestamps for distributed ordering — but this is infra-level, not typical product design questions.</p>
-  </div>
-
-  <div class="card blue">
-    <div class="card-label blue">Deep Dive 4</div>
-    <h3>WebSocket Deployment Challenges</h3>
-    <p>Server restarts sever all connections. Two strategies:</p>
-    <p style="margin-top:8px;"><strong>Preferred:</strong> Gracefully close connections → clients reconnect to new instance. Simple, resilient.</p>
-    <p style="margin-top:8px;"><strong>Advanced:</strong> Zero-downtime handoff — new server takes over connections. Complex, rarely worth it.</p>
-    <p style="margin-top:8px;color:var(--accent4);font-size:0.8rem;">★ Isolate WS service — changes less often = fewer restarts = less churn.</p>
-  </div>
-</div>
-
-<!-- ══════════════════════════════
-     INTERVIEW TIPS
-══════════════════════════════ -->
-<div class="section-title">★ Interview Strategy</div>
-
-<div class="card" style="border-color:var(--accent4);margin-bottom:24px;">
-  <div class="card-label yellow">Interview Playbook</div>
-  <div style="margin-top:8px;">
-    <div class="tip-row">
-      <div class="tip-num">1</div>
-      <div class="tip-text"><strong>Start with polling</strong> — "I'll use simple polling here to keep things simple. We can upgrade to SSE/WebSockets if we find latency is an issue." Preserve mental energy for harder parts.</div>
-    </div>
-    <div class="tip-row">
-      <div class="tip-num">2</div>
-      <div class="tip-text"><strong>Name both hops explicitly</strong> — "There are two separate concerns: how the client receives updates, and how the server learns about them." Interviewers love structured thinking.</div>
-    </div>
-    <div class="tip-row">
-      <div class="tip-num">3</div>
-      <div class="tip-text"><strong>Don't default to WebSockets</strong> — Most candidates over-engineer. If you don't need bidirectional high-frequency, SSE is simpler, lower infra overhead, and still impressive to mention.</div>
-    </div>
-    <div class="tip-row">
-      <div class="tip-num">4</div>
-      <div class="tip-text"><strong>Mention load balancer implications</strong> — "We'd use an L4 LB here since WebSockets need sticky connections." This signals depth most candidates lack.</div>
-    </div>
-    <div class="tip-row">
-      <div class="tip-num">5</div>
-      <div class="tip-text"><strong>Manage statefulness at senior/staff level</strong> — Talk about minimizing state spread. "The WS service handles connection state; everything downstream stays stateless."</div>
-    </div>
-  </div>
-</div>
-
-<!-- Use-case cheatsheet -->
-<div class="section-title">Use-Case Cheatsheet</div>
-
-<div class="grid-4">
-  <div class="card" style="border-color:var(--accent);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">💬</div>
-    <h3 style="font-size:0.9rem;">Chat App</h3>
-    <p style="font-size:0.8rem;">WebSocket + Pub/Sub (Redis per-user topic)</p>
-    <span class="tag tag-blue" style="margin-top:8px;display:inline-block;">WS + Pub/Sub</span>
-  </div>
-  <div class="card" style="border-color:var(--accent3);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">📊</div>
-    <h3 style="font-size:0.9rem;">Live Dashboard</h3>
-    <p style="font-size:0.8rem;">SSE from server + DB polling on backend</p>
-    <span class="tag tag-green" style="margin-top:8px;display:inline-block;">SSE</span>
-  </div>
-  <div class="card" style="border-color:var(--accent4);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">📝</div>
-    <h3 style="font-size:0.9rem;">Google Docs</h3>
-    <p style="font-size:0.8rem;">WebSocket + Consistent Hashing (expensive doc state)</p>
-    <span class="tag tag-yellow" style="margin-top:8px;display:inline-block;">WS + Consistent Hash</span>
-  </div>
-  <div class="card" style="border-color:var(--accent5);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">🎥</div>
-    <h3 style="font-size:0.9rem;">Video Call</h3>
-    <p style="font-size:0.8rem;">WebRTC (P2P) + WebSocket signaling server</p>
-    <span class="tag tag-purple" style="margin-top:8px;display:inline-block;">WebRTC</span>
-  </div>
-  <div class="card" style="border-color:var(--accent2);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">🚗</div>
-    <h3 style="font-size:0.9rem;">Uber Ride Tracking</h3>
-    <p style="font-size:0.8rem;">WebSocket Service + L4 LB (reference arch)</p>
-    <span class="tag tag-red" style="margin-top:8px;display:inline-block;">WS + L4 LB</span>
-  </div>
-  <div class="card" style="border-color:var(--accent4);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">💳</div>
-    <h3 style="font-size:0.9rem;">Payment Status</h3>
-    <p style="font-size:0.8rem;">Long Polling — wait for async job to finish</p>
-    <span class="tag tag-yellow" style="margin-top:8px;display:inline-block;">Long Poll</span>
-  </div>
-  <div class="card" style="border-color:var(--accent3);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">🤖</div>
-    <h3 style="font-size:0.9rem;">AI Token Streaming</h3>
-    <p style="font-size:0.8rem;">SSE — server pushes tokens as generated</p>
-    <span class="tag tag-green" style="margin-top:8px;display:inline-block;">SSE</span>
-  </div>
-  <div class="card" style="border-color:var(--accent);">
-    <div style="font-size:1.5rem;margin-bottom:8px;">🎮</div>
-    <h3 style="font-size:0.9rem;">Multiplayer Game</h3>
-    <p style="font-size:0.8rem;">WebRTC for P2P, WS for server coordination</p>
-    <span class="tag tag-blue" style="margin-top:8px;display:inline-block;">WebRTC + WS</span>
-  </div>
-</div>
-
 </body>
 </html>

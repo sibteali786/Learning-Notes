@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dealing With Contention — System Design Reference</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3140;
+    --text:#e6edf3; --muted:#8b96a5; --accent:#58a6ff; --accent2:#f78166;
+    --good:#3fb950; --warn:#d29922; --bad:#f85149; --purple:#bc8cff;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; margin:0; padding:0 0 60px;}
+  .wrap{max-width:1100px; margin:0 auto; padding:24px;}
+  h1{font-size:28px; margin-bottom:4px;}
+  .subtitle{color:var(--muted); margin-top:0; margin-bottom:28px; font-size:14px;}
+  h2{font-size:20px; border-left:4px solid var(--accent); padding-left:12px; margin-top:48px;}
+  h3{font-size:16px; color:var(--accent2); margin-top:24px;}
+  .callout{background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:16px 18px; margin:16px 0;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.bad{border-left-color:var(--bad);}
+  .callout.good{border-left-color:var(--good);}
+  .callout .lbl{font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:6px;}
+  .grid{display:grid; gap:16px; margin:20px 0;}
+  .grid.cols2{grid-template-columns:1fr 1fr;}
+  .grid.cols3{grid-template-columns:repeat(3,1fr);}
+  .grid.cols4{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:900px){.grid.cols2,.grid.cols3,.grid.cols4{grid-template-columns:1fr;}}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .card h4{margin:0 0 8px; color:var(--accent); font-size:15px;}
+  .card p{margin:4px 0; font-size:13.5px; color:#c9d1d9; line-height:1.5;}
+  .tag{font-size:11px; padding:2px 8px; border-radius:12px; font-weight:600;}
+  .tag.good{background:rgba(63,185,80,.15); color:var(--good);}
+  .tag.warn{background:rgba(210,153,34,.15); color:var(--warn);}
+  .tag.bad{background:rgba(248,81,73,.15); color:var(--bad);}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left; vertical-align:top;}
+  th{background:var(--panel2); color:var(--accent);}
+  tr:nth-child(even){background:rgba(255,255,255,.02);}
+  code.inline{background:#0a0e14; padding:1px 6px; border-radius:4px; color:var(--accent2); font-size:13px;}
+  pre{background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-size:12.5px; line-height:1.6; color:#c9d1d9;}
+  svg{background:var(--panel); border:1px solid var(--border); border-radius:10px; width:100%; height:auto;}
+  .example{background:linear-gradient(135deg,#1a2233,#161b22); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .example .who{font-weight:700; color:var(--purple); font-size:13px; text-transform:uppercase; letter-spacing:.04em;}
+  .toc{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:12px;}
+  .toc ul{margin:6px 0 0; padding-left:18px; line-height:1.9;}
+  .toc a{color:var(--accent); text-decoration:none; font-size:13.5px;}
+  .order-step{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 16px; margin:8px 0;}
+  .order-step .n{background:var(--accent); color:#000; font-weight:700; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;}
+  .decision{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:18px; margin:16px 0;}
+  .decision .q{color:var(--accent2); font-weight:700; font-size:14px;}
+  .decision .a{margin:6px 0 10px 16px; font-size:13.5px; color:#c9d1d9;}
+  .ladder{display:flex; flex-direction:column; gap:6px; margin:16px 0;}
+  .rung{border-radius:8px; padding:12px 16px; border:1px solid var(--border); font-size:13.5px;}
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:50px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🎟️ Dealing With Contention — System Design Interview Reference</h1>
+<p class="subtitle">Source: Hello Interview — "Dealing with Contention Pattern" · One of the most common deep-dive topics in system design interviews</p>
+
+<div class="toc">
+  <strong>📍 Contents</strong>
+  <ul>
+    <li><a href="#problem">1. The Problem — Lost Updates</a></li>
+    <li><a href="#toolkit">2. The Toolkit, in Escalating Order</a></li>
+    <li><a href="#writeskew">3. Write Skew & Isolation Levels</a></li>
+    <li><a href="#distlock">4. Distributed Locks (holds that outlive a transaction)</a></li>
+    <li><a href="#matrix">5. Decision Matrix</a></li>
+    <li><a href="#deepdives">6. Deep Dives: Deadlocks, ABA, Scale</a></li>
+    <li><a href="#glossary">7. Glossary</a></li>
+  </ul>
+</div>
+
+<h2 id="problem">🎯 1. The Problem — Two People, One Ticket</h2>
+<p><strong>Contention</strong> = multiple processes competing for the same resource at the exact same instant. Two shoppers racing for the last flash-sale item, two fans hitting "buy" on the last concert ticket.</p>
+
+<div class="example">
+  <div class="who">Running example: TicketMaster, last GA ticket</div>
+  <p style="margin:6px 0 0;">Naive flow: app server asks DB "how many left?" → gets 1 → checks it's &gt;0 in app code → sends a second query to decrement. The decision happens in the <strong>app server</strong>, not atomically in the database.</p>
+</div>
+
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="24" fill="#e6edf3" font-size="13" font-weight="700">The lost update: Alice & Bob both buy the last ticket</text>
+  <line x1="20" y1="55" x2="880" y2="55" stroke="#2a3140"/><text x="20" y="47" fill="#8b96a5" font-size="10">Alice</text>
+  <line x1="20" y1="130" x2="880" y2="130" stroke="#2a3140"/><text x="20" y="122" fill="#8b96a5" font-size="10">Database (count=1)</text>
+  <line x1="20" y1="205" x2="880" y2="205" stroke="#2a3140"/><text x="20" y="197" fill="#8b96a5" font-size="10">Bob</text>
+
+  <line x1="80" y1="55" x2="80" y2="130" stroke="#58a6ff"/><text x="85" y="70" fill="#58a6ff" font-size="10">read count</text>
+  <line x1="80" y1="130" x2="80" y2="205" stroke="#58a6ff"/>
+  <line x1="140" y1="205" x2="140" y2="130" stroke="#f78166"/><text x="145" y="120" fill="#f78166" font-size="10">read count</text>
+  <line x1="140" y1="130" x2="140" y2="55" stroke="#f78166"/>
+  <text x="200" y="95" fill="#c9d1d9" font-size="11">both see count = 1 → both think it's safe to buy</text>
+
+  <line x1="300" y1="55" x2="300" y2="130" stroke="#3fb950" stroke-width="2"/><text x="305" y="70" fill="#3fb950" font-size="10">decrement → 0 ✅ Alice gets ticket</text>
+  <line x1="420" y1="205" x2="420" y2="130" stroke="#f85149" stroke-width="2"/><text x="425" y="195" fill="#f85149" font-size="10">decrement → -1 ❌ Bob "gets" it too</text>
+  <text x="20" y="245" fill="#8b96a5" font-size="11">Same seat sold twice. Root cause: read → app-code decision → write, with a gap in between.</text>
+</svg>
+
+<div class="callout bad">
+  <div class="lbl">Root cause — every fix targets this</div>
+  <strong>Read → Modify → Write</strong> is the shape where contention lives. Any second request can slip into the gap between read and write and act on stale data. Every solution below is just a different way of making that gap safe: either <strong>collapse</strong> read+write into one atomic step (compare-and-set), or <strong>hold the data still</strong> while deciding (locking).
+</div>
+
+<h2 id="toolkit">🧰 2. The Toolkit — In the Order You'd Reach For Them</h2>
+<p style="color:var(--muted); font-size:13.5px;">Complexity escalates left → right. Start simple, escalate only when you actually need to — reaching for a lock when a WHERE clause would do reads as over-engineering to interviewers.</p>
+
+<div class="ladder">
+  <div class="rung" style="background:rgba(63,185,80,.08); border-color:var(--good);"><strong style="color:var(--good);">① Conditional Write</strong> — decision is a simple predicate on the row itself (counter, status flag, claim)</div>
+  <div class="rung" style="background:rgba(210,153,34,.08); border-color:var(--warn);"><strong style="color:var(--warn);">② Pessimistic Lock</strong> — app logic needed between read & write, collisions are common</div>
+  <div class="rung" style="background:rgba(88,166,255,.08); border-color:var(--accent);"><strong style="color:var(--accent);">③ Optimistic Concurrency Control</strong> — app logic needed, collisions are rare</div>
+  <div class="rung" style="background:rgba(188,140,255,.08); border-color:var(--purple);"><strong style="color:var(--purple);">④ Serializable Isolation</strong> — invariant spans multiple rows that never collide directly (write skew)</div>
+  <div class="rung" style="background:rgba(248,81,73,.08); border-color:var(--bad);"><strong style="color:var(--bad);">⑤ Distributed Lock</strong> — the hold needs to outlive a single transaction</div>
+</div>
+
+<h3>① Conditional Writes — the tool that solves most interview contention</h3>
+<div class="grid cols2">
+  <div class="card">
+    <h4>The fix</h4>
+    <p>Stop checking in app code — let the database check as part of the write itself, via a <code class="inline">WHERE</code> clause:</p>
+    <pre>UPDATE tickets
+SET count = count - 1
+WHERE count > 0;</pre>
+  </div>
+  <div class="card">
+    <h4>Why it's contention-safe</h4>
+    <p>Every SQL database takes an <strong>exclusive row lock</strong> automatically on any write, held until commit — this is built into ACID's Isolation guarantee. Other writers to that row simply wait their turn. (Postgres does it via single-threaded execution; DynamoDB via optimistic checks — different mechanisms, same single-writer effect.)</p>
+    <p>Bob's write runs against the row <em>Alice already changed</em>, not the row he originally read — his WHERE clause matches nothing, so it silently affects 0 rows.</p>
+  </div>
+</div>
+
+<div class="callout warn">
+  <div class="lbl">Gotcha — "0 rows changed" ≠ failure</div>
+  A conditional UPDATE that matches nothing still reports <em>success</em> — it just changed 0 rows. If you wrap a decrement + an INSERT (new ticket row) in one transaction, the transaction won't auto-rollback just because the decrement affected 0 rows. <strong>Fix:</strong> make the INSERT depend on the UPDATE's affected-row-count, or chain the insert off the row the update actually returned.
+</div>
+
+<div class="callout bad">
+  <div class="lbl">Gotcha — guard the thing people are actually fighting over</div>
+  A WHERE clause on <code class="inline">count &gt; 0</code> guarantees a seat was left — it says nothing about <em>which</em> seat. If tickets are assigned seats (A15, A16...), Alice and Bob can both pass the counter check and both write a row for A15. <strong>Fix:</strong> point the conditional write at the specific contended resource (the seat row), not a proxy for it (the counter).
+</div>
+
+<div class="callout good">
+  <div class="lbl">What this generalizes to</div>
+  Decrementing inventory, flipping status available→sold, claiming an unassigned task, accepting a bid only if it's higher than current. Same shape exists outside SQL: DynamoDB conditional expressions, Redis <code class="inline">SET NX</code>.
+</div>
+
+<h3>② Pessimistic Locking — when the decision needs real app logic</h3>
+<p>Some decisions can't be expressed in a single WHERE clause — e.g. "find 4 adjacent open seats for a group." The decision depends on reading <em>many</em> rows at once, so it can't collapse into one atomic write.</p>
+<div class="example">
+  <div class="who">Example — group of 4 wanting to sit together</div>
+  <p>Two groups both read the seat map, both land on A15–A18, both try to claim before either commits → lost update again, this time across a set of rows instead of one.</p>
+</div>
+<div class="card">
+  <h4>The fix — <code class="inline">SELECT ... FOR UPDATE</code></h4>
+  <p>Assume the conflict will happen and block up front. Every row the query returns is explicitly locked; a second group running the same query simply waits, and by the time it's their turn A15–A18 are already gone from the result set.</p>
+</div>
+<div class="callout">
+  <div class="lbl">Other real examples</div>
+  Routing a support ticket to the least-busy agent (read all agents' queue depths, pick one, lock it before anyone else grabs the same agent).
+</div>
+<div class="callout warn"><div class="lbl">Rule of thumb</div>If the logic ever simplifies back down to a single WHERE-clause predicate, drop the lock and go back to a conditional write — no reason to pay the locking penalty you don't need.</div>
+
+<h3>③ Optimistic Concurrency Control (OCC)</h3>
+<p>Opposite bet from pessimistic locking: assume conflicts are <strong>rare</strong>, let everyone proceed, detect collisions only at commit time.</p>
+<div class="grid cols2">
+  <div class="card">
+    <h4>Mechanism — version numbers</h4>
+    <p>Read the row, note its version (e.g. 42). On write: <code class="inline">WHERE version = 42</code>, and bump it to 43 in the same statement. If someone else wrote first, your WHERE clause matches nothing → 0 rows changed → you know you lost the race → retry or fail gracefully.</p>
+    <p>Same shape appears outside SQL: HTTP ETags + <code class="inline">If-Match</code> headers, CRDT revisions, DynamoDB's version attribute.</p>
+  </div>
+  <div class="card">
+    <h4>OCC vs Pessimistic — pick by collision rate</h4>
+    <p><strong>High collision rate</strong> → pessimistic locking (OCC's losers all retry from scratch and pile up).<br><strong>Low collision rate</strong> (most e-commerce traffic) → OCC, since you happily eat the occasional retry without paying an upfront locking cost.</p>
+  </div>
+</div>
+
+<div class="callout bad">
+  <div class="lbl">What NOT to use as your version — and why</div>
+  <table style="margin:8px 0 0;">
+    <tr><th>Candidate</th><th>Risk</th></tr>
+    <tr><td>Dedicated monotonic version column</td><td><span class="tag good">Safest</span> — increments by exactly 1 on every write. Default choice.</td></tr>
+    <tr><td>Last-updated timestamp</td><td>Safe only if clock resolution is fine enough that two rapid writes can never land on the identical value.</td></tr>
+    <tr><td>A business value already on the row (e.g. current highest bid)</td><td>Safe <strong>only if it strictly moves one direction</strong>. Otherwise exposed to the <strong>ABA problem</strong> (value goes A→B→A, equality check sees no change — see Deep Dives).</td></tr>
+  </table>
+</div>
+
+<h2 id="writeskew">🔀 3. Write Skew & Isolation Levels — the sneaky case</h2>
+<p>So far every conflict guarded the <em>same</em> row being written. Write skew is different: <strong>neither transaction writes to the same row</strong> — the conflict is hidden in what each one <em>read</em>.</p>
+
+<div class="example">
+  <div class="who">Example — on-call schedule, "at least 1 engineer on call at all times"</div>
+  <p>Alice and Bob are both on call. Both get sick and check the schedule simultaneously. Alice reads "Bob is still on call" → decides it's safe to step down. Bob reads "Alice is still on call" → decides the same. Both commit. <strong>Nobody is on call.</strong> No single row was double-written, so a row-level lock or version check catches nothing.</p>
+</div>
+
+<div class="callout bad">
+  <div class="lbl">Why this is easy to miss</div>
+  Nothing flags that those <em>reads</em> are what the decision depends on. This is called <strong>write skew</strong>, and the only reliable way to catch it automatically is having the database track read/write dependencies — i.e. isolation levels.
+</div>
+
+<table>
+  <tr><th>Isolation Level</th><th>Guarantee</th><th>Catches write skew?</th></tr>
+  <tr><td>Read Uncommitted</td><td>Can see other transactions' uncommitted changes — dangerous, rarely used</td><td><span class="tag bad">No</span></td></tr>
+  <tr><td><strong>Read Committed</strong> <span style="color:var(--muted); font-size:11px;">(Postgres default)</span></td><td>Only ever sees committed data</td><td><span class="tag bad">No</span></td></tr>
+  <tr><td><strong>Repeatable Read</strong> <span style="color:var(--muted); font-size:11px;">(MySQL default)</span></td><td>Data you've already read stays stable for the transaction's life</td><td><span class="tag bad">No</span> — common misconception! Only catches two writes on the <em>same</em> row.</td></tr>
+  <tr><td><strong>Serializable</strong></td><td>Outcome identical to running all transactions one at a time</td><td><span class="tag good">Yes</span> — but expensive: DB must track every read/write to detect conflicts, and aborts throw away work that must be redone.</td></tr>
+</table>
+
+<div class="callout good">
+  <div class="lbl">The holy grail fix — materialize the invariant onto one row</div>
+  Instead of paying for serializable isolation, restructure the problem so the conflict lands on a single row: keep an <code class="inline">on_call_count</code> on the team row, decrement it as part of stepping down, or take a <code class="inline">FOR UPDATE</code> lock on the team row before anyone leaves. Both transactions now touch the same row — back to tools you already have.
+</div>
+
+<h2 id="distlock">🔐 4. Distributed Locks — holds that outlive a transaction</h2>
+<p>Everything above lives inside a single DB transaction; a lock only lasts as long as that transaction. But some holds need to survive longer.</p>
+<div class="example">
+  <div class="who">Example — holding a seat for checkout</div>
+  <p>Picking seat A15 needs to hold that seat for ~10 minutes while the buyer enters payment details. A <code class="inline">FOR UPDATE</code> lock can't hold that long — it would pin the DB connection for the full 10 minutes and stall every other transaction needing that row.</p>
+</div>
+<div class="callout">
+  <div class="lbl">The idea</div>
+  Instead of holding the lock as an open transaction, hold it <strong>as data</strong> — a record of who has the seat and when the hold expires. Any server can read that record with no open transaction required. Same concept as pessimistic locking, just with a lifetime beyond one transaction.
+</div>
+
+<div class="grid cols3">
+  <div class="card">
+    <h4>Option 1 — Redis <span class="tag good">fast, most popular</span></h4>
+    <p><code class="inline">SET key value NX EX 600</code> — <code class="inline">NX</code> = set only if key doesn't exist (same safety as a conditional write); <code class="inline">EX</code> = TTL auto-releases the lock.</p>
+    <p><span class="tag warn">Caveat</span> TTL expiry isn't perfectly precise — GC pauses/slow networks can cause a rare double-grant at the boundary. Harmless here since the actual purchase still goes through a conditional write. If a double-grant would corrupt data, add a <strong>fencing token</strong> (a number that climbs with every grant, checked by the resource before accepting a write).</p>
+  </div>
+  <div class="card">
+    <h4>Option 2 — Lease row in your existing DB <span class="tag warn">simple, slower</span></h4>
+    <p>New column/table: who holds the lock + expiry. Acquiring is just another conditional write (claim WHERE reservation is empty or expired) — essentially free to build. Downside: this row can become a hotspot under heavy load (10k–100k concurrent claimants) since a single DB row can't match Redis's throughput.</p>
+  </div>
+  <div class="card">
+    <h4>Option 3 — Zookeeper / etcd <span class="tag bad">heavy machinery</span></h4>
+    <p>Consensus-backed coordination, survives partitions/node failures, self-cleans on crash. Only reach for this when a double-grant is truly unacceptable <em>and</em> your database isn't a viable home — brings a whole new system to operate.</p>
+  </div>
+</div>
+
+<h2 id="matrix">🧭 5. Decision Matrix</h2>
+<div class="decision">
+  <div class="q">Q1: Is the check a predicate on the row being written (counter, status, claim)?</div>
+  <div class="a">Yes → <strong>Conditional write</strong>. Done.</div>
+  <div class="q">Q2: Decision needs app logic between read and write — how often do writes collide?</div>
+  <div class="a">Often → <strong>Pessimistic lock</strong> (<code class="inline">FOR UPDATE</code>). Rarely → <strong>OCC</strong> with a version column.</div>
+  <div class="q">Q3: Does the invariant span multiple rows that never directly collide?</div>
+  <div class="a">→ That's <strong>write skew</strong>. Use <strong>Serializable isolation</strong>, or better: materialize the invariant onto a single row you can lock/guard normally.</div>
+  <div class="q">Q4: Does the hold need to outlive a single transaction (e.g. a 10-min checkout window)?</div>
+  <div class="a">→ <strong>Distributed lock</strong>. Pick its home by expected throughput and how bad a double-grant would be (Redis → DB lease row → Zookeeper/etcd, in that order of escalation).</div>
+</div>
+<div class="callout bad">
+  <div class="lbl">Common mistake to avoid</div>
+  Hearing "concurrency" and reflexively reaching for a heavy pessimistic or distributed lock. A single modern Postgres instance absorbs far more contention via a simple conditional write than most candidates assume. <strong>Start simple, escalate only when you hit a real limit.</strong>
+</div>
+<div class="callout">
+  <div class="lbl">Where this pattern ends</div>
+  Once a single atomic operation has to span <strong>multiple databases</strong> (e.g. a transfer between accounts on different shards), you've left contention-land and entered distributed transactions — sagas, outbox pattern, etc. (covered separately in the multi-step processes pattern).
+</div>
+
+<h2 id="deepdives">🔍 6. Deep Dives Interviewers Push On</h2>
+
+<h3>A. Preventing Deadlocks with Pessimistic Locking</h3>
+<div class="example">
+  <div class="who">Example — simultaneous transfers</div>
+  <p>Alice sends Bob $100 while Bob sends Alice $50. Transaction A locks Alice's row, then wants Bob's. Transaction B has already locked Bob's row, then wants Alice's. Each holds what the other needs → <strong>deadlock</strong>.</p>
+</div>
+<div class="callout bad"><div class="lbl">❌ Tempting but wrong fix</div>A lock-wait timeout just repeats the problem — the retried transaction can grab locks in the same order again and deadlock again.</div>
+<div class="callout good"><div class="lbl">✅ Real fix — deterministic lock ordering</div>Always sort the rows you need to lock by a deterministic key (e.g. user ID) and acquire them in that order every time. Both transfers now try to lock the lower ID first — one simply waits, no cycle can form.</div>
+<div class="callout"><div class="lbl">Bonus point to mention</div>Every major database detects deadlocks automatically and resolves them by killing one transaction with a catchable error you can retry. Still best practice to order locks and avoid the deadlock in the first place.</div>
+
+<h3>B. The ABA Problem with OCC</h3>
+<p>A value changes A → B → A between your read and your write. Within one round trip it looks unchanged — but it wasn't.</p>
+<div class="example">
+  <div class="who">Example — Yelp review count as a naive "version"</div>
+  <p>You read a review count of 100 (using it as your OCC version). Between your read and write, someone deletes a review (99), then a new one lands (100 again). Your check "<code class="inline">WHERE count = 100</code>" passes — but you've just silently overwritten someone else's intervening change.</p>
+</div>
+<div class="callout good"><div class="lbl">Fix</div>Never reuse a business value as your OCC version unless it's guaranteed monotonic in one direction. Use a dedicated version column that increments by exactly 1 on every write.</div>
+
+<h3>C. Scale — everyone wants the same resource at once</h3>
+<div class="example">
+  <div class="who">Example — Taylor Swift surprise show, viral collectible drop</div>
+  <p>The instinctive reflex is "shard it" — but sharding splits <em>different</em> rows across DBs; here everyone wants the <strong>same row</strong>, so there's nothing to split. Read replicas take load off reads, but all writes still contend for the single primary row.</p>
+</div>
+<div class="order-step"><div class="n">1</div><div><strong>Push back on the question first:</strong> do all these requests actually need to contend for the exact same thing? A drop of 10 different collectibles could become 10 separate rows — dividing contention by 10.</div></div>
+<div class="order-step"><div class="n">2</div><div>Ask if strict consistency is even required — can a follower count be eventually consistent / batched instead of exact-to-the-second?</div></div>
+<div class="order-step"><div class="n">3</div><div>If you genuinely need strong consistency on one hot row: put a <strong>queue</strong> in front of the database. Requests line up serially; a single worker drains and applies updates one at a time — contention disappears entirely.</div></div>
+<div class="callout warn"><div class="lbl">The trade-off to name out loud</div>Queueing caps throughput to whatever speed that single worker can sustain. You can have accurate contention handling <em>or</em> high throughput on a hot row — not both simultaneously.</div>
+
+<h2 id="glossary">🧠 7. Glossary</h2>
+<table>
+  <tr><th>Term</th><th>Plain definition</th></tr>
+  <tr><td>Contention</td><td>Multiple processes competing to read/modify the same resource at nearly the same instant.</td></tr>
+  <tr><td>Lost update</td><td>Two writers both read a stale value and both write, with the second write silently overwriting/duplicating the first's effect.</td></tr>
+  <tr><td>Conditional write (compare-and-set)</td><td>A write that only applies if a condition on the current row state still holds, checked atomically inside the database via a WHERE clause (or DynamoDB conditional expression, Redis SET NX).</td></tr>
+  <tr><td>Row-level locking</td><td>A database's automatic exclusive lock on any row being written, held until commit — the mechanism that makes conditional writes safe.</td></tr>
+  <tr><td>Pessimistic locking (<code class="inline">SELECT FOR UPDATE</code>)</td><td>Assume a conflict will happen; explicitly lock rows up front so no one else can act on them until you're done.</td></tr>
+  <tr><td>Optimistic Concurrency Control (OCC)</td><td>Assume conflicts are rare; let everyone proceed, detect a conflict only at write time via a version check, and retry on failure.</td></tr>
+  <tr><td>Version number</td><td>A value on a row (ideally a dedicated monotonic counter) checked-and-bumped atomically on write, used by OCC to detect if the row changed since it was read.</td></tr>
+  <tr><td>ABA problem</td><td>A value changes A→B→A between read and write; a simple equality check on the value sees no change even though one occurred — defeats naive OCC "versions."</td></tr>
+  <tr><td>Write skew</td><td>Two transactions each write to a <em>different</em> row, but each one's write invalidates the assumption the other one's decision was based on — an invariant spanning multiple rows breaks even though no single row was double-written.</td></tr>
+  <tr><td>Isolation level</td><td>A SQL setting controlling how much of another in-flight transaction's work is visible to you; ranges from Read Uncommitted (weakest) to Serializable (strongest, only level guaranteed to catch write skew).</td></tr>
+  <tr><td>Serializable isolation</td><td>Strongest isolation level — guarantees the outcome is as if all transactions ran one at a time. Expensive: requires tracking all reads/writes and re-running aborted transactions.</td></tr>
+  <tr><td>Distributed lock</td><td>A lock represented as a data record (with an expiry) rather than an open DB transaction, so it can safely outlive a single transaction's lifetime.</td></tr>
+  <tr><td>Fencing token</td><td>A monotonically increasing number attached to each lock grant, used by the protected resource to reject stale/late writers even if a lock was briefly double-granted.</td></tr>
+  <tr><td>Deadlock</td><td>Two transactions each hold a lock the other needs, and each is waiting on the other — neither can proceed. Prevented by acquiring locks in a consistent, deterministic order.</td></tr>
+</table>
+
+<footer>Reference summary compiled from Hello Interview — "Dealing with Contention Pattern for System Design Interviews"</footer>
+</div>
+</body>
+</html>
