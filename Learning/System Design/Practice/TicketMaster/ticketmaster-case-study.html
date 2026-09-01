@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Design Ticketmaster — Full Case Study Reference</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2a3140;
+    --text:#e6edf3; --muted:#8b96a5; --accent:#58a6ff; --accent2:#f78166;
+    --good:#3fb950; --warn:#d29922; --bad:#f85149; --purple:#bc8cff;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; margin:0; padding:0 0 60px;}
+  .wrap{max-width:1120px; margin:0 auto; padding:24px;}
+  h1{font-size:28px; margin-bottom:4px;}
+  .subtitle{color:var(--muted); margin-top:0; margin-bottom:20px; font-size:14px;}
+  .partband{background:linear-gradient(90deg,#1c2330,#0d1117); border:1px solid var(--border); border-radius:12px; padding:18px 22px; margin:36px 0 12px; }
+  .partband h2{margin:0; border:none; padding:0; font-size:22px; color:var(--accent);}
+  .partband p{margin:4px 0 0; color:var(--muted); font-size:13px;}
+  h2{font-size:20px; border-left:4px solid var(--accent); padding-left:12px; margin-top:44px;}
+  h3{font-size:16px; color:var(--accent2); margin-top:24px;}
+  h4.inline{color:var(--accent); font-size:14px; margin:14px 0 6px;}
+  .callout{background:var(--panel); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:16px 18px; margin:16px 0;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.bad{border-left-color:var(--bad);}
+  .callout.good{border-left-color:var(--good);}
+  .callout.tip{border-left-color:var(--purple);}
+  .callout .lbl{font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:6px;}
+  .grid{display:grid; gap:16px; margin:20px 0;}
+  .grid.cols2{grid-template-columns:1fr 1fr;}
+  .grid.cols3{grid-template-columns:repeat(3,1fr);}
+  .grid.cols4{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:900px){.grid.cols2,.grid.cols3,.grid.cols4{grid-template-columns:1fr;}}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .card h4{margin:0 0 8px; color:var(--accent); font-size:15px;}
+  .card p{margin:4px 0; font-size:13.5px; color:#c9d1d9; line-height:1.5;}
+  .tag{font-size:11px; padding:2px 8px; border-radius:12px; font-weight:600;}
+  .tag.good{background:rgba(63,185,80,.15); color:var(--good);}
+  .tag.warn{background:rgba(210,153,34,.15); color:var(--warn);}
+  .tag.bad{background:rgba(248,81,73,.15); color:var(--bad);}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left; vertical-align:top;}
+  th{background:var(--panel2); color:var(--accent);}
+  tr:nth-child(even){background:rgba(255,255,255,.02);}
+  code.inline{background:#0a0e14; padding:1px 6px; border-radius:4px; color:var(--accent2); font-size:13px;}
+  pre{background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:14px; overflow-x:auto; font-size:12.5px; line-height:1.6; color:#c9d1d9;}
+  svg{background:var(--panel); border:1px solid var(--border); border-radius:10px; width:100%; height:auto;}
+  .example{background:linear-gradient(135deg,#1a2233,#161b22); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin:14px 0;}
+  .example .who{font-weight:700; color:var(--purple); font-size:13px; text-transform:uppercase; letter-spacing:.04em;}
+  .toc{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:12px;}
+  .toc ul{margin:6px 0 0; padding-left:18px; line-height:1.85;}
+  .toc a{color:var(--accent); text-decoration:none; font-size:13.5px;}
+  .order-step{display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:10px 16px; margin:8px 0;}
+  .order-step .n{background:var(--accent); color:#000; font-weight:700; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px;}
+  .evolution{display:flex; flex-direction:column; gap:10px; margin:16px 0;}
+  .evo-step{border-radius:8px; padding:12px 16px; border:1px solid var(--border); font-size:13.5px;}
+  .interview-tip{background:rgba(188,140,255,.06); border:1px dashed var(--purple); border-radius:8px; padding:10px 14px; margin:10px 0; font-size:13px; color:#d9c9ff;}
+  .interview-tip strong{color:var(--purple);}
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:50px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🎫 Design Ticketmaster — Full System Design Case Study</h1>
+<p class="subtitle">Source: Hello Interview — "Design a Ticket Booking Site Like Ticketmaster" (Meta product design interview favorite) · Full breakdown, nothing trimmed</p>
+
+<div class="toc">
+  <strong>📍 Contents</strong>
+  <ul>
+    <li><strong>Part 1 — Requirements → High-Level Design</strong>
+      <ul>
+        <li><a href="#roadmap">The Interview Roadmap</a></li>
+        <li><a href="#freq">Functional Requirements</a></li>
+        <li><a href="#nfreq">Non-Functional Requirements</a></li>
+        <li><a href="#entities">Core Entities</a></li>
+        <li><a href="#api">API Design</a></li>
+        <li><a href="#hld">High-Level Design (view / search / book)</a></li>
+        <li><a href="#reservation">Reservation Expiry — 3 Evolving Solutions</a></li>
+      </ul>
+    </li>
+    <li><strong>Part 2 — Deep Dives</strong>
+      <ul>
+        <li><a href="#search-dd">Deep Dive: Low-Latency Search</a></li>
+        <li><a href="#scale-dd">Deep Dive: Real-Time Seat Map + Traffic Surges</a></li>
+        <li><a href="#general-scale">General Scaling & Caching</a></li>
+        <li><a href="#wrapup">Wrap-up & Grading Rubric</a></li>
+        <li><a href="#glossary">Glossary</a></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<div class="partband"><h2>PART 1 — Requirements → High-Level Design</h2><p>~15 minutes of a 45-minute interview</p></div>
+
+<h2 id="roadmap">🗺️ The Interview Roadmap</h2>
+<p>Follow this order for any user-facing product design interview:</p>
+<div class="order-step"><div class="n">1</div><div><strong>Requirements</strong> — functional (features) + non-functional (qualities)</div></div>
+<div class="order-step"><div class="n">2</div><div><strong>Core entities</strong> — what data is persisted/exchanged</div></div>
+<div class="order-step"><div class="n">3</div><div><strong>APIs</strong> — client-facing endpoints that satisfy the functional requirements</div></div>
+<div class="order-step"><div class="n">4</div><div><strong>High-level design</strong> — simplest architecture that satisfies functional requirements</div></div>
+<div class="order-step"><div class="n">5</div><div><strong>Deep dives</strong> — go deeper to satisfy the non-functional requirements</div></div>
+
+<h2 id="freq">✅ Functional Requirements</h2>
+<p>Work backwards through the user flow to find the 3 core features:</p>
+<table>
+  <tr><th>#</th><th>Requirement</th><th>Reasoning</th></tr>
+  <tr><td>1</td><td><strong>Search</strong> for events</td><td>How does a user even discover an event? (worked backwards from booking)</td></tr>
+  <tr><td>2</td><td><strong>View</strong> an event (details, seat map)</td><td>Needed before you can pick a seat</td></tr>
+  <tr><td>3</td><td><strong>Book</strong> a ticket</td><td>The core value-generating action</td></tr>
+</table>
+<div class="interview-tip"><strong>Interview tip:</strong> if you're unsure which features matter, ask the interviewer about the system's most important functionality before listing requirements.</div>
+
+<div class="callout warn">
+  <div class="lbl">Below-the-line functional requirements (out of scope, noted explicitly)</div>
+  Not every feature you think of belongs in your top 3 — note the rest below the line so the interviewer sees you considered them:
+  <ul style="margin:6px 0 0;">
+    <li><strong>Admins adding/managing events</strong> — this design covers only the user-facing booking flow, not the event-creation/admin side.</li>
+  </ul>
+</div>
+
+<h2 id="nfreq">⚖️ Non-Functional Requirements</h2>
+<div class="callout bad">
+  <div class="lbl">The #1 mistake candidates make here</div>
+  Just writing "scalability," "availability," "reliability" as bare words. Every system has those qualities — that's not interesting to an interviewer. The value is in identifying <strong>what makes THIS system unique</strong>, in context.
+</div>
+
+<div class="grid cols2">
+  <div class="card">
+    <h4>CAP Theorem — Consistency vs Availability</h4>
+    <p><span class="tag warn">Mid-level answer</span> "Prioritize consistency" — no double-booking, one seat can't go to two people.</p>
+    <p><span class="tag good">Senior-level answer</span> These aren't mutually exclusive <em>across different parts of the system</em>: <strong>strong consistency for booking</strong>, but <strong>high availability for search/viewing</strong> — it's fine if a just-added event doesn't show up for a couple seconds, it's <em>not</em> fine if two people both think a seat is free.</p>
+  </div>
+  <div class="card">
+    <h4>Read:Write Ratio</h4>
+    <p>Far more people search/view than actually buy — roughly <strong>100:1</strong> (maybe even 1000:1) if the booking conversion rate is ~1%. This has real design consequences (caching, search infra) covered in the deep dives.</p>
+  </div>
+  <div class="card">
+    <h4>Query Access Pattern</h4>
+    <p>Traffic is normally light and even — until a Taylor Swift tour or World Cup goes on sale, and you get <strong>tens to hundreds of millions</strong> of people hitting the same handful of events at once. Scalability here specifically means <strong>handling surges from popular events</strong>, not generic "the system should scale."</p>
+  </div>
+  <div class="card">
+    <h4>Explicitly Out of Scope</h4>
+    <p>GDPR compliance, general fault tolerance, etc. — note these below the line rather than ignoring them silently. Then check in: <em>"Here's what I'm prioritizing and what I've left out of scope — want me to reprioritize anything?"</em></p>
+  </div>
+</div>
+<div class="interview-tip"><strong>Interview tip:</strong> checking in like this signals product thinking <em>and</em> focus — you know the full landscape but you're deliberately scoping.</div>
+
+<h2 id="entities">🧱 Core Entities</h2>
+<p>Spend ~2 minutes here — just get the shape right, don't over-specify fields yet (they'll evolve naturally once you're in the HLD).</p>
+<div class="grid cols4">
+  <div class="card"><h4>Event</h4><p>The thing being sold — added by admins (out of scope here).</p></div>
+  <div class="card"><h4>Venue</h4><p>Where the event is hosted (stadium, arena).</p></div>
+  <div class="card"><h4>Performer</h4><p>Who's performing.</p></div>
+  <div class="card"><h4>Ticket</h4><p>One per seat per event — availability, purchaser, price all live here.</p></div>
+</div>
+<div class="callout">
+  <div class="lbl">A 5th entity worth naming explicitly — Booking / Reservation</div>
+  The transcript builds this implicitly rather than naming it up front: booking a ticket isn't just a status flip on the Ticket row, it's its own concept with a lifecycle (who reserved it, when, has payment been confirmed). In an interview it's worth calling this out as its own entity — <strong>Booking</strong>: <code class="inline">id, ticketId, userId, status (reserved/confirmed/expired), reservedAt, paymentIntentId</code> — even if, as the design evolves, its state ends up split between the Ticket row (for the final <code class="inline">booked</code> status + owning user) and the distributed lock in Redis (for the temporary 10-minute hold). Naming it early avoids conflating "a ticket" (the seat/inventory) with "a booking" (one user's claim on that seat, which can expire or fail).
+</div>
+
+<h2 id="api">🔌 API Design</h2>
+<p>For each functional requirement, derive an endpoint. Exchange the core entities as payloads.</p>
+
+<h4 class="inline">View an Event</h4>
+<pre>GET /event/{eventId}
+→ { event, venue, performer, tickets[] }</pre>
+<p style="font-size:13px; color:var(--muted);">Returns everything needed to render the page: event details + venue + performer (via joins) + the ticket list to draw the seat map.</p>
+
+<h4 class="inline">Search for Events</h4>
+<pre>GET /search?term={text}&location={lat,lng}&type={category}&dateRange={...}
+→ PartialEvent[]</pre>
+<p style="font-size:13px; color:var(--muted);">Returns <em>partial</em> events (name, description, performer) — just enough for search-result cards; clicking one hits the full <code class="inline">GET /event/{id}</code>.</p>
+
+<h4 class="inline">Book a Ticket — Two-Phase Process</h4>
+<div class="callout">
+  <div class="lbl">Why two phases</div>
+  Just like TicketMaster or an airline booking flow in real life: pick a seat → it's held for you (e.g. 10 minutes) → you go to a payment page → confirm. A single "book" endpoint misses this — flagging the two-phase nature is a strong signal in an interview, but not disqualifying if you miss it initially (interviewer will nudge you).
+</div>
+<pre>PUT /booking/reserve         body: { ticketId }
+PUT /booking/confirm         body: { ticketId, paymentDetails }</pre>
+<div class="callout warn">
+  <div class="lbl">Security detail worth stating out loud</div>
+  <strong>No <code class="inline">userId</code> in the request body.</strong> Putting it there lets anyone forge a request "on behalf of" another user. User identity comes from the auth header (JWT / session token) instead — small detail, but it signals technical maturity.
+</div>
+<p style="font-size:13px; color:var(--muted);">Confirm hands off payment to Stripe (payment intents); Stripe processes asynchronously and calls back via a registered webhook rather than responding to your original request directly.</p>
+
+<h2 id="hld">🏗️ High-Level Design</h2>
+<p>Architecture choice: <strong>microservices</strong> behind an <strong>API Gateway</strong> (routing + auth + rate limiting) — the default, safe choice for these interviews unless you have a strong reason otherwise.</p>
+
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="100" width="100" height="50" rx="8" fill="#1c2330" stroke="#2a3140"/><text x="70" y="130" fill="#c9d1d9" font-size="12" text-anchor="middle">Client</text>
+  <rect x="170" y="100" width="130" height="50" rx="8" fill="#1c2330" stroke="#58a6ff"/><text x="235" y="122" fill="#58a6ff" font-size="11" text-anchor="middle">API Gateway</text><text x="235" y="138" fill="#8b96a5" font-size="9" text-anchor="middle">auth · rate limit · route</text>
+  <rect x="360" y="20" width="150" height="46" rx="8" fill="#161b22" stroke="#3fb950"/><text x="435" y="48" fill="#3fb950" font-size="11" text-anchor="middle">Event CRUD Service</text>
+  <rect x="360" y="100" width="150" height="46" rx="8" fill="#161b22" stroke="#f78166"/><text x="435" y="128" fill="#f78166" font-size="11" text-anchor="middle">Search Service</text>
+  <rect x="360" y="180" width="150" height="46" rx="8" fill="#161b22" stroke="#bc8cff"/><text x="435" y="208" fill="#bc8cff" font-size="11" text-anchor="middle">Booking Service</text>
+  <rect x="600" y="90" width="150" height="70" rx="8" fill="#161b22" stroke="#d29922"/><text x="675" y="118" fill="#d29922" font-size="11" text-anchor="middle">Postgres</text><text x="675" y="134" fill="#8b96a5" font-size="9" text-anchor="middle">events, venues,</text><text x="675" y="148" fill="#8b96a5" font-size="9" text-anchor="middle">performers, tickets</text>
+  <rect x="600" y="180" width="150" height="46" rx="8" fill="#161b22" stroke="#f85149"/><text x="675" y="208" fill="#f85149" font-size="11" text-anchor="middle">Redis (ticket lock)</text>
+  <line x1="120" y1="125" x2="170" y2="125" stroke="#8b96a5"/>
+  <line x1="300" y1="115" x2="360" y2="43" stroke="#8b96a5"/>
+  <line x1="300" y1="125" x2="360" y2="123" stroke="#8b96a5"/>
+  <line x1="300" y1="135" x2="360" y2="203" stroke="#8b96a5"/>
+  <line x1="510" y1="43" x2="600" y2="110" stroke="#8b96a5"/>
+  <line x1="510" y1="123" x2="600" y2="123" stroke="#8b96a5"/>
+  <line x1="510" y1="203" x2="600" y2="150" stroke="#8b96a5"/>
+  <line x1="510" y1="210" x2="600" y2="203" stroke="#f85149"/>
+</svg>
+
+<h3>① Viewing an Event</h3>
+<p>Client → API Gateway → <strong>Event CRUD Service</strong> → Postgres. Reads the event, joins venue + performer, includes the ticket list. Simple.</p>
+
+<div class="callout">
+  <div class="lbl">Postgres field sketch (evolves naturally as you design)</div>
+  <table>
+    <tr><th>Table</th><th>Key fields</th></tr>
+    <tr><td>Event</td><td>id, venueId (FK), performerId (FK), name, description, … , tickets (1-to-many)</td></tr>
+    <tr><td>Venue</td><td>id, location, seat map, …</td></tr>
+    <tr><td>Performer</td><td>id, …</td></tr>
+    <tr><td>Ticket</td><td>id, eventId (FK), seat, price, <strong>status</strong> (available/reserved/booked)</td></tr>
+  </table>
+</div>
+
+<div class="callout good">
+  <div class="lbl">SQL vs NoSQL — the senior-level framing</div>
+  Postgres chosen here for ACID transactions on tickets + the relational joins (event↔venue↔performer). But the SQL-vs-NoSQL debate itself is largely outdated — <strong>most modern NoSQL DBs (e.g. DynamoDB) can offer ACID guarantees too.</strong> A senior candidate names the <em>qualities</em> they need (transactions, relationships) rather than picking a side in an old debate. Either family could work here.
+</div>
+
+<h3>② Searching for Events</h3>
+<p>Naive first pass, intentionally left rough to fix in deep dives:</p>
+<pre>SELECT * FROM events WHERE type IN (...) AND name LIKE '%term%'</pre>
+<div class="callout bad"><div class="lbl">Why this is bad</div>The wildcard <code class="inline">LIKE</code> forces a full table scan on every search. Call this out explicitly in the interview and say you'll come back to optimize it once the functional requirements are satisfied — that sequencing itself is a good signal.</div>
+
+<h3>③ Booking a Ticket (happy path first)</h3>
+<div class="order-step"><div class="n">1</div><div><strong>Reserve:</strong> <code class="inline">PUT /booking/reserve {ticketId}</code> → update the ticket row's <code class="inline">status</code> to <code class="inline">reserved</code> → return 200.</div></div>
+<div class="order-step"><div class="n">2</div><div><strong>Confirm:</strong> client goes to payment page → <code class="inline">PUT /booking/confirm {ticketId, paymentDetails}</code> → Booking Service calls Stripe → Stripe processes async and calls back via webhook.</div></div>
+<div class="order-step"><div class="n">3</div><div>On successful payment: update ticket <code class="inline">status</code> → <code class="inline">booked</code>, attach <code class="inline">userId</code>. (Sending a confirmation email etc. — out of scope.)</div></div>
+
+<h2 id="reservation">⏱️ The Reservation Expiry Problem — 3 Evolving Solutions</h2>
+<div class="callout bad">
+  <div class="lbl">The bug in the happy path</div>
+  What if the user closes their laptop mid-payment, or the 10-minute window lapses? Status stays <code class="inline">reserved</code> forever — that seat is infinitely locked away from everyone else. This is the single most important thing interviewers watch for candidates to catch.
+</div>
+
+<div class="evolution">
+  <div class="evo-step" style="background:rgba(248,81,73,.06); border-color:var(--bad);">
+    <strong style="color:var(--bad);">① Timestamp check</strong> <span class="tag bad">Confusing data model</span><br>
+    Add a <code class="inline">reservedTimestamp</code> column. Read query becomes <code class="inline">WHERE status='available' OR (status='reserved' AND reservedTimestamp &lt; now() - 10min)</code>. Works, but the row's <code class="inline">status</code> field lies about reality — two fields now need to stay conceptually consistent with each other, which is fragile and confusing.
+  </div>
+  <div class="evo-step" style="background:rgba(210,153,34,.06); border-color:var(--warn);">
+    <strong style="color:var(--warn);">② Cron job</strong> <span class="tag warn">Passing for mid-level, not senior</span><br>
+    A job runs every ~10 minutes, finds all <code class="inline">reserved</code> tickets past their timestamp, flips them back to <code class="inline">available</code>.<br>
+    <strong>The problem:</strong> introduces a drift window Δ between when a ticket <em>should</em> free up and when the cron actually runs. If it should expire at 12:00 but cron runs at 12:09, that seat was wrongly locked for 19 minutes instead of 10 — bad for a high-surge system.
+  </div>
+  <div class="evo-step" style="background:rgba(63,185,80,.08); border-color:var(--good);">
+    <strong style="color:var(--good);">③ Distributed lock (Redis) — the senior-level answer</strong> <span class="tag good">Real-time, elegant</span><br>
+    Drop the status/timestamp columns entirely for reservation purposes. On reserve: write <code class="inline">ticketId → true</code> into Redis with a <strong>TTL of 10 minutes</strong> — nothing touches Postgres at reserve time. On expiry, Redis auto-deletes the key — instantly, no polling delay.<br>
+    To check availability: query Postgres for <code class="inline">status='available'</code> tickets, then cross-reference each against the Redis lock — anything currently locked gets excluded from what's shown to the client.
+  </div>
+</div>
+
+<div class="callout">
+  <div class="lbl">Why Redis specifically, not just an in-memory map in the Booking Service?</div>
+  The Booking Service horizontally scales to multiple instances. They all need a <strong>single consistent view</strong> of which tickets are locked — an in-process map on one instance wouldn't be visible to the others. A shared external store (Redis) gives every instance the same view.
+</div>
+
+<div class="callout warn">
+  <div class="lbl">Deep-dive question interviewers love: what if the Redis lock goes down?</div>
+  Bring up a new instance immediately — but any reservations made in roughly the last 10 minutes are lost, so several users could simultaneously reach the payment page for the same seat. Postgres's ACID guarantees on the final <code class="inline">status</code> write still prevent <em>double-booking</em> — whoever's confirm-purchase write lands first wins, the other gets an error. Consistency is preserved; a small window of users just get a bad experience. <strong>Worth explicitly flagging this trade-off to the interviewer/product team rather than silently assuming it away.</strong>
+</div>
+
+<div class="partband"><h2>PART 2 — Deep Dives</h2><p>Where senior/staff candidates earn their keep — go 1–3 levels deep, not everywhere</p></div>
+
+<div class="interview-tip"><strong>Interview tip:</strong> Process for choosing where to go deep — look back at your non-functional requirements and find what's still unmet. Here: low-latency search (never addressed) and scalability for popular-event surges (only partially addressed) are the two obvious gaps.</div>
+
+<h2 id="search-dd">🔍 Deep Dive 1: Low-Latency Search</h2>
+<div class="callout bad"><div class="lbl">Why the current solution is slow</div>The <code class="inline">LIKE '%term%'</code> query forces a full table scan across every event row on every search.</div>
+
+<h3>Elasticsearch — the standard fix</h3>
+<p>Builds an <strong>inverted index</strong>: tokenize event text (name, description) into terms, map each term → the documents (events) containing it.</p>
+<div class="example">
+  <div class="who">Worked example</div>
+  <p>"The Philadelphia Eagles are playing in a wild card matchup against the Broncos" tokenizes into terms like <em>Philadelphia</em>, <em>Eagles</em>, <em>playoff</em>, <em>wildcard</em>. A search for "playoff" instantly returns every event whose index contains that term — no table scan. Elasticsearch also supports <strong>geospatial queries</strong> (via quad-trees/geohashing) so location + term + date can all be combined efficiently.</p>
+</div>
+
+<h4 class="inline">Keeping Elasticsearch in sync with Postgres</h4>
+<div class="callout bad"><div class="lbl">Important caveat</div>Don't use Elasticsearch as your primary data store — weak durability guarantees and no real transaction support (learned the hard way from real production experience, per the source).</div>
+<table>
+  <tr><th>Sync method</th><th>How</th><th>Trade-off</th></tr>
+  <tr><td>Dual write in app code</td><td>On event write, write to Postgres <em>and</em> Elasticsearch in the same code path.</td><td>Simple, but you own the failure logic — what happens if the ES write fails after Postgres succeeds? Needs retry/rollback handling.</td></tr>
+  <tr><td><strong>Change Data Capture (CDC)</strong></td><td>Changes to Postgres are emitted onto a stream; a consumer applies them to Elasticsearch.</td><td>Decouples the two stores. Often abstracted as a black box in interviews — fine to note that abstraction explicitly. Elasticsearch has a write-rate ceiling (index updates per write), so high-volume domains would need batching/queueing — <strong>not needed here</strong> since events/venues/performers change rarely (an admin adds maybe thousands a day, at most).</td></tr>
+</table>
+
+<h3>Making popular searches (Taylor Swift) even faster — caching layers</h3>
+<div class="callout good"><div class="lbl">Key precondition for caching</div>No personalized ranking/recommendations in this system — two users searching the same term get identical results. That's what makes caching safe and effective here.</div>
+<div class="grid cols3">
+  <div class="card"><h4>Node/shard query cache</h4><p>If using AWS OpenSearch (managed Elasticsearch), each shard can cache its top ~10K queries (LRU) — often just a config flag. Quick and easy.</p></div>
+  <div class="card"><h4>Redis / Memcached</h4><p>Cache a normalized search term → results. Requires explicit invalidation on relevant updates.</p></div>
+  <div class="card"><h4>CDN (the pick made here)</h4><p>Cache the search API response itself for a short TTL (30s–1min), geographically close to users — very fast, and infra you likely already have for static assets.</p></div>
+</div>
+<div class="callout warn">
+  <div class="lbl">CDN caching's real limitation</div>
+  Works great with few, coarse query parameters (city-level location). Breaks down with high-cardinality parameters like raw lat/lng — near-zero cache-hit overlap between users, so you're just wasting CDN space. Also stops working entirely the moment the system adds personalized recommendations, since then identical queries should return different results per user.
+</div>
+
+<h2 id="scale-dd">📈 Deep Dive 2: Real-Time Seat Map & Traffic Surges</h2>
+
+<h3>Problem — a stale seat map</h3>
+<p>The client loads the seat map once via the view-event call. Seconds to minutes later, other users have booked seats — the client's view is now stale, and users click on seats that error out. Bad experience, worse at scale.</p>
+
+<h4 class="inline">Making the map real-time</h4>
+<table>
+  <tr><th>Option</th><th>Fit</th></tr>
+  <tr><td><strong>Long polling</strong></td><td><span class="tag good">Simplest</span> Cheap, no extra infra, request held ~30s–1min in a loop. Great if users are on the page for a few minutes.</td></tr>
+  <tr><td><strong>SSE (Server-Sent Events)</strong></td><td><span class="tag good">Better for long sessions</span> Persistent, server→client only push — exactly what's needed here (client never needs to push seat data back over this channel). Preferred over WebSockets since bidirectionality isn't required.</td></tr>
+</table>
+<div class="interview-tip"><strong>Interview tip:</strong> the choice between these should be justified by data — if analytics show users linger 5–30+ minutes on this page, the more sophisticated persistent-connection approach earns its complexity; for short visits, long polling suffices. (See the separate Real-Time Updates pattern reference for the full protocol decision tree.)</div>
+
+<h3>The real problem at extreme scale — the "instant sellout blackout"</h3>
+<div class="example">
+  <div class="who">Taylor Swift / Super Bowl / World Cup scenario</div>
+  <p>100,000–1,000,000 people hit the event page simultaneously, fighting over 10,000–100,000 seats. The seat map loads, then goes black within milliseconds as everything gets booked — a terrible experience even with real-time updates working correctly.</p>
+</div>
+
+<h3>Solution — Virtual Waiting Queue</h3>
+<div class="callout good"><div class="lbl">The core idea</div>Introduce a choke point in front of the backend to protect it <strong>and</strong> improve UX — instead of everyone hitting the event page at once, they enter a queue and get a "you're in line, we'll notify you" message.</div>
+
+<div class="order-step"><div class="n">1</div><div>Feature is opt-in/admin-enabled — only turned on for events expected to surge.</div></div>
+<div class="order-step"><div class="n">2</div><div>Queue implemented in Redis — a sorted set as a priority queue by arrival time (or randomized for fairness, so users geographically closer to your servers don't have an unfair head start).</div></div>
+<div class="order-step"><div class="n">3</div><div>Event-driven admission: as seats get booked (e.g. every time 100 book), pull the next batch of users off the queue.</div></div>
+<div class="order-step"><div class="n">4</div><div>Notify admitted users over the same SSE connection already established — they're let into the event page to actually book.</div></div>
+
+<div class="callout tip">
+  <div class="lbl">Why this deep dive is a great one to lead with</div>
+  It demonstrates that the <em>best</em> answer isn't always the most technically complex one — a virtual queue is conceptually simple (a Redis sorted set + event-driven admission) but elegantly solves a genuinely hard UX and load problem. Signals maturity, not just technical vocabulary.
+</div>
+
+<h2 id="general-scale">⚙️ General Scaling, Sharding & Caching</h2>
+<div class="callout warn">
+  <div class="lbl">On back-of-envelope math — a deliberate choice</div>
+  The source intentionally skips generic QPS/DAU/storage math right after non-functional requirements — doing math with no bearing on the design ("it's a lot, so it's a big system") teaches the interviewer nothing about you. <strong>Only calculate when the result will directly change a design decision</strong> — e.g. sizing whether Postgres needs sharding, done at the point in the design where that decision actually matters.
+</div>
+
+<div class="grid cols2">
+  <div class="card">
+    <h4>Compute scaling</h4>
+    <p>API Gateway and each microservice sit behind managed load balancers (e.g. AWS-managed), scaling horizontally on CPU/memory automatically. This part of the conversation is usually the least interesting — call it out briefly and move on.</p>
+  </div>
+  <div class="card">
+    <h4>Database sharding — if the math says you need it</h4>
+    <p>Natural shard key candidates: <strong>event ID</strong> (matches the majority of query patterns) or <strong>venue ID</strong> (if there's strong geographic correlation between users and nearby venues, letting you distribute shards geographically). No universally right answer — a trade-off discussion with the interviewer.</p>
+  </div>
+  <div class="card">
+    <h4>Reducing read load — cache aggressively</h4>
+    <p>Given the ~100:1 read:write ratio, and that event/venue/performer records rarely change: cache them heavily in Redis (event ID → event+venue+performer). No eviction policy even strictly needed if the working set is small enough, or bound it to upcoming events only. Only ticket status stays uncached, since it's the genuinely dynamic piece.</p>
+  </div>
+  <div class="card">
+    <h4>Net effect</h4>
+    <p>The view-event call becomes very fast: static metadata served from cache, only the dynamic ticket-availability portion hits the database/lock layer.</p>
+  </div>
+</div>
+
+<h2 id="wrapup">🏁 Wrap-up & How This Gets Graded</h2>
+<table>
+  <tr><th>Level</th><th>Bar to clear</th></tr>
+  <tr><td>Mid-level</td><td>Complete HLD satisfying the 3 functional requirements; the cron-job version of reservation expiry is a passing answer. Bonus if you reach the Redis lock. Expect the interviewer to prompt you toward scaling/search questions rather than you leading there yourself.</td></tr>
+  <tr><td>Senior</td><td>Reach the Redis distributed lock unprompted; lead 1–3 deep dives yourself (search + surge handling is a strong pair); explicitly separate consistency needs (booking) from availability needs (search/view).</td></tr>
+  <tr><td>Staff / Principal</td><td>Same technical depth as senior, plus demonstrated judgment: knowing when math matters, pushing back appropriately, framing trade-offs as product conversations (e.g. "is this UX degradation during a lock outage acceptable?") rather than purely technical choices.</td></tr>
+</table>
+<div class="callout good">
+  <div class="lbl">Final self-check before ending the interview</div>
+  Can you say "yes" to both: does this design satisfy every functional requirement? Does it satisfy every non-functional requirement? If yes to both, you're in good shape.
+</div>
+
+<h2 id="glossary">🧠 Glossary</h2>
+<table>
+  <tr><th>Term</th><th>Plain definition</th></tr>
+  <tr><td>Functional requirement</td><td>A feature/capability of the system — phrased as "users should be able to ___."</td></tr>
+  <tr><td>Non-functional requirement</td><td>A quality of the system (consistency, availability, latency, scale) — most valuable when tied to what's actually unique about this specific system, not generic buzzwords.</td></tr>
+  <tr><td>CAP theorem</td><td>A distributed system can't simultaneously guarantee Consistency, Availability, and Partition tolerance — you pick which to prioritize under a network partition. Different subsystems can make different choices.</td></tr>
+  <tr><td>Two-phase booking</td><td>Reserve (temporary hold) → Confirm (payment finalizes it) — mirrors real airline/ticket booking flows, avoids permanently locking a seat before payment is guaranteed.</td></tr>
+  <tr><td>Distributed lock (TTL-based)</td><td>A lock represented as a key with an expiry in a shared store (e.g. Redis), visible to all instances of a horizontally-scaled service, auto-releasing without needing a background job.</td></tr>
+  <tr><td>Cron-job expiry drift (Δ)</td><td>The gap between when a reservation *should* expire and when a periodic job actually notices and expires it — grows with the job's interval, a key weakness of the cron approach.</td></tr>
+  <tr><td>Inverted index</td><td>A search-index structure mapping each term to the set of documents containing it, enabling near-instant term lookups instead of scanning every document (used by Elasticsearch).</td></tr>
+  <tr><td>Change Data Capture (CDC)</td><td>A pattern where changes to a primary datastore are emitted onto a stream, consumed by a worker to propagate the change elsewhere (e.g. into a search index) — decouples the write path from the sync logic.</td></tr>
+  <tr><td>Virtual waiting queue</td><td>A choke point placed in front of a high-demand resource; users are queued (e.g. in a Redis sorted set) and admitted in controlled batches rather than all hitting the backend simultaneously.</td></tr>
+  <tr><td>Long polling</td><td>Client holds an HTTP request open; server responds when new data is ready or a timeout hits — cheap, no new infra, good for shorter sessions.</td></tr>
+  <tr><td>SSE (Server-Sent Events)</td><td>A persistent, one-directional (server→client) HTTP connection for pushing updates — fits the seat-map use case since the client never needs to push data back over that channel.</td></tr>
+  <tr><td>Sharding key</td><td>The field a database is partitioned on; choice should follow the dominant query pattern (e.g. event ID) or a distribution goal (e.g. venue ID for geographic locality).</td></tr>
+  <tr><td>"Math without a purpose"</td><td>Back-of-envelope estimation done reflexively rather than to inform an actual design decision — the source explicitly advises against this as a box-checking exercise.</td></tr>
+</table>
+
+<footer>Reference summary compiled from Hello Interview — "Design a Ticket Booking Site Like Ticketmaster"</footer>
+</div>
+</body>
+</html>
