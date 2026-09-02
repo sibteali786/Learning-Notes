@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Numerically Stable Softmax &amp; Logistic Loss</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1060px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.8rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.2rem;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1rem;text-align:center;}
+  pre{background:#1e1e2e;color:#e6e6e6;padding:14px;border-radius:10px;overflow-x:auto;font-size:0.85rem;line-height:1.55;font-family:'Cascadia Code','Consolas',monospace;}
+  .kw{color:#ff7edb;} .fn{color:#7dd3fc;} .str{color:#a3e635;} .num{color:#fbbf24;} .cmt{color:#8a8a9c;}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px;}
+  @media(max-width:700px){.compare{grid-template-columns:1fr;}}
+  .col{border-radius:12px;padding:14px 16px;}
+  .col.old{background:#fdf1f1;border:2px solid var(--red);}
+  .col.new{background:#eef4ff;border:2px solid var(--blue);}
+  .col h3{margin-top:0;font-size:1rem;}
+  .col.old h3{color:var(--red);}
+  .col.new h3{color:var(--blue);}
+  .flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-weight:600;margin-top:10px;font-size:0.9rem;}
+  .flow div{background:#eef4ff;border:2px solid var(--blue);border-radius:10px;padding:8px 12px;}
+  .flow .arrow{color:var(--red);font-size:1.2rem;}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.9rem;}
+  th,td{border:1px solid #ddd;padding:7px 9px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🎯 Numerically Stable Softmax &amp; Logistic Loss</h1>
+
+  <div class="section">
+    <h2>🐛 The Bug: Floating-Point Round-off</h2>
+    <p>Computers store numbers with finite precision. The <em>order of operations</em> to compute the same value can change how much rounding error creeps in.</p>
+    <div class="compare">
+      <div class="col old">
+        <h3>Option 1 — Direct</h3>
+        <pre style="margin:0;">x1 = 2.0 / 10000
+<span class="cmt"># 0.000200000000000000</span></pre>
+      </div>
+      <div class="col new">
+        <h3>Option 2 — Indirect (same value)</h3>
+        <pre style="margin:0;">x2 = (1+1/10000) - (1-1/10000)
+<span class="cmt"># 0.000199999999999978</span></pre>
+      </div>
+    </div>
+    <p class="callout">📌 Same mathematical answer, different computation path → different round-off error. This exact issue shows up when computing the softmax/sigmoid loss the "obvious" two-step way.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔧 Fix for Logistic Regression</h2>
+    <div class="compare">
+      <div class="col old">
+        <h3>❌ Original (2 steps)</h3>
+        <div class="formula" style="font-size:0.9rem;">a = g(z) = 1/(1+e<sup>−z</sup>)</div>
+        <div class="formula" style="font-size:0.9rem;">loss = −y·log(a) − (1−y)·log(1−a)</div>
+        <pre style="margin:0;font-size:0.78rem;">Dense(units=1, activation=<span class="str">'sigmoid'</span>)
+model.compile(loss=BinaryCrossentropy())</pre>
+      </div>
+      <div class="col new">
+        <h3>✅ Recommended (1 fused step)</h3>
+        <div class="formula" style="font-size:0.85rem;">loss = −y·log(1/(1+e<sup>−z</sup>)) − (1−y)·log(1−1/(1+e<sup>−z</sup>))</div>
+        <pre style="margin:0;font-size:0.78rem;">Dense(units=1, activation=<span class="str">'linear'</span>)
+model.compile(loss=BinaryCrossentropy(
+    from_logits=<span class="kw">True</span>))</pre>
+      </div>
+    </div>
+    <p class="callout">💡 <strong>"logit"</strong> = the raw z value, before any activation is applied.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔧 Fix for Softmax Regression (same idea, N classes)</h2>
+    <div class="compare">
+      <div class="col old">
+        <h3>❌ Original</h3>
+        <div class="formula" style="font-size:0.85rem;">(a₁,...,a₁₀) = g(z₁,...,z₁₀)</div>
+        <div class="formula" style="font-size:0.8rem;">loss = −log(a<sub>j</sub>) &nbsp;where j = true label</div>
+        <pre style="margin:0;font-size:0.75rem;">Dense(units=10, activation=<span class="str">'softmax'</span>)
+model.compile(loss=
+  SparseCategoricalCrossentropy())</pre>
+      </div>
+      <div class="col new">
+        <h3>✅ Recommended</h3>
+        <div class="formula" style="font-size:0.8rem;">loss = −log( e<sup>z<sub>j</sub></sup> / (e<sup>z₁</sup>+⋯+e<sup>z₁₀</sup>) )</div>
+        <pre style="margin:0;font-size:0.75rem;">Dense(units=10, activation=<span class="str">'linear'</span>)
+model.compile(loss=SparseCategorical
+  Crossentropy(from_logits=<span class="kw">True</span>))</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="border-left-color:var(--teal);">
+    <h2>❓ Q&amp;A — "How does linear + from_logits move the 'a' computation into the loss step?"</h2>
+    <p style="font-style:italic;color:#555;">Question: How does applying a linear activation to the last layer, then using <code>from_logits=True</code>, "send" the calculation of <em>a</em> — which normally happens at the last layer — to instead be calculated inside the loss function step?</p>
+
+    <p><strong>Normally</strong> (two separate steps):</p>
+    <div class="flow">
+      <div>Layer applies sigmoid</div><div class="arrow">→</div>
+      <div>a is computed &amp; stored</div><div class="arrow">→</div>
+      <div>Loss reads stored a</div>
+    </div>
+    <p style="font-size:0.9rem;">Here, <code>a</code> is fully computed and rounded off <strong>before</strong> the loss function ever touches it. That rounding error is now locked in — the loss can't undo it.</p>
+
+    <p><strong>With <code>activation='linear'</code> + <code>from_logits=True</code>:</strong></p>
+    <div class="flow">
+      <div>Layer outputs raw z (no activation applied)</div><div class="arrow">→</div>
+      <div>Loss fn receives z directly</div><div class="arrow">→</div>
+      <div>Loss fn computes sigmoid(z) AND the log-loss together, as one expression</div>
+    </div>
+    <p style="font-size:0.9rem;"><code>activation='linear'</code> means the last layer literally skips applying sigmoid/softmax — it just hands over <strong>z</strong> (the logit). <code>from_logits=True</code> then tells the loss function: "what you're getting isn't a probability, it's a raw z — compute the whole formula <code>-y·log(sigmoid(z)) - (1-y)·log(1-sigmoid(z))</code> yourself, in one go."</p>
+
+    <p><strong>Why that helps:</strong> because it's now one combined symbolic expression instead of two separate rounded steps, TensorFlow's math backend can algebraically simplify it internally before evaluating — substituting <code>sigmoid(z)=1/(1+e⁻ᶻ)</code> straight into the log terms and cancelling/rearranging so it never needs to store a dangerously large or small intermediate number.</p>
+
+    <div class="callout">🔑 <strong>Bottom line:</strong> <em>a</em> is never actually computed and stored as its own number anymore. It only exists <em>symbolically</em>, folded inside the bigger loss formula — which is evaluated as a whole, giving TensorFlow room to pick a numerically safer path to the same final answer (exactly like the <code>2/10000</code> vs. indirect-subtraction example above).</div>
+  </div>
+
+  <div class="section">
+    <h2>🧠 Why Fusing Helps (Mechanism)</h2>
+    <div class="flow">
+      <div>Layer outputs raw z (logit)</div><div class="arrow">→</div>
+      <div>Loss fn receives z, not a</div><div class="arrow">→</div>
+      <div>TF builds ONE combined formula</div><div class="arrow">→</div>
+      <div>TF rearranges algebraically</div><div class="arrow">→</div>
+      <div>Avoids tiny/huge intermediate e^z values</div>
+    </div>
+    <p class="callout">🔑 <strong>Key insight:</strong> "a" is never separately computed and stored. It only exists symbolically inside the full loss expression — so TensorFlow can pick a numerically safer path to the same final number, the same way <code>2/10000</code> beat the indirect subtraction above.</p>
+  </div>
+
+  <div class="section">
+    <h2>⚠️ One Extra Step at Prediction Time</h2>
+    <p>Since the last layer now outputs raw <strong>logits</strong> (z), not probabilities (a), you must manually apply the activation after predicting:</p>
+    <table>
+      <tr><th>Model type</th><th>Prediction code</th></tr>
+      <tr><td>Binary (logistic)</td><td><code>logit = model(X)</code><br><code>f_x = tf.nn.sigmoid(logit)</code></td></tr>
+      <tr><td>Multiclass (softmax)</td><td><code>logits = model(X)</code><br><code>f_x = tf.nn.softmax(logits)</code></td></tr>
+    </table>
+    <p class="callout">📌 <code>model(X)</code> now returns z₁...z₁₀ — not a₁...a₁₀ — so this manual softmax/sigmoid call is required to get back actual probabilities.</p>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Think of it like <strong>doing a multi-step arithmetic word problem</strong>:</p>
+    <ul>
+      <li><strong>Old way:</strong> Round your answer after every single step, then feed that rounded number into the next step — errors compound.</li>
+      <li><strong>New way:</strong> Write out the <em>entire</em> equation symbolically first, simplify algebraically (cancel terms, combine fractions), and only round once at the very end — much less error accumulates.</li>
+    </ul>
+    <p>TensorFlow's <code>from_logits=True</code> is exactly this: "don't round off after computing the probability — give me the raw score and let me simplify the whole formula before computing anything."</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 9 — "Improved Implementation of Softmax" <span class="tag">from_logits=True</span></div>
+
+</div>
+</body>
+</html>

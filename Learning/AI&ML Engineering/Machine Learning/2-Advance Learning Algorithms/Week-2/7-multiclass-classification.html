@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multiclass Classification</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00; --orange:#e08e00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.9rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.25rem;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1.02rem;text-align:center;}
+  .digits{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+  .digit{
+    width:44px;height:52px;border:2px solid var(--blue);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--blue);background:#eaf2ff;
+  }
+  .examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:14px;}
+  .ex-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;}
+  .ex-card h3{margin:0 0 8px;color:var(--teal);font-size:1.02rem;}
+  svg{background:#fff;border-radius:8px;display:block;margin:0 auto;}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.92rem;}
+  th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔢 Multiclass Classification</h1>
+
+  <div class="section">
+    <h2>📌 What's New</h2>
+    <p>Until now, classification meant <strong>binary</strong> — Y is 0 or 1. <strong>Multiclass classification</strong> is still a classification problem (Y takes a small number of discrete categories), but now <strong>Y can take on more than 2 possible values</strong>.</p>
+    <div class="digits">
+      <div class="digit">0</div><div class="digit">1</div><div class="digit">2</div><div class="digit">3</div><div class="digit">4</div>
+      <div class="digit">5</div><div class="digit">6</div><div class="digit">7</div><div class="digit">8</div><div class="digit">9</div>
+    </div>
+    <p style="text-align:center;">MNIST example — instead of just recognizing 0 vs 1, now recognize all 10 digits. Given an image <strong>x</strong> of a handwritten "7", the network should output <strong>y = 7</strong>.</p>
+  </div>
+
+  <div class="section">
+    <h2>🌍 Real-World Examples</h2>
+    <div class="examples">
+      <div class="ex-card">
+        <h3>📮 Postal / Zip Codes</h3>
+        <p style="font-size:0.9rem;">Reading digits on an envelope — 10 possible classes (0–9).</p>
+      </div>
+      <div class="ex-card">
+        <h3>🏥 Disease Diagnosis</h3>
+        <p style="font-size:0.9rem;">Classifying a patient into one of 3–5 possible diseases.</p>
+      </div>
+      <div class="ex-card">
+        <h3>💊 Visual Defect Inspection</h3>
+        <p style="font-size:0.9rem;">Classifying a manufactured pill as having a scratch, discoloration, or chip defect.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📊 Binary vs Multiclass — Decision Boundaries</h2>
+    <div class="examples">
+      <div class="ex-card">
+        <h3>Binary Classification (2 classes)</h3>
+        <svg viewBox="0 0 260 220" width="100%" height="200">
+          <line x1="20" y1="200" x2="240" y2="200" stroke="#333"/>
+          <line x1="20" y1="10" x2="20" y2="200" stroke="#333"/>
+          <text x="0" y="120" font-size="12">x₂</text>
+          <text x="225" y="215" font-size="12">x₁</text>
+          <text x="90" y="60" font-size="20" fill="#c1440e">✕</text>
+          <text x="110" y="80" font-size="20" fill="#c1440e">✕</text>
+          <text x="70" y="90" font-size="20" fill="#c1440e">✕</text>
+          <text x="90" y="105" font-size="20" fill="#c1440e">✕</text>
+          <circle cx="60" cy="150" r="9" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <circle cx="85" cy="165" r="9" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <circle cx="55" cy="180" r="9" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <circle cx="100" cy="140" r="9" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <line x1="35" y1="115" x2="215" y2="180" stroke="#1a5fb4" stroke-width="2.5"/>
+        </svg>
+        <p style="font-size:0.85rem;text-align:center;">One line divides the space into <strong>2</strong> regions: "class 1" vs "not 1"</p>
+      </div>
+      <div class="ex-card">
+        <h3>Multiclass Classification (4 classes)</h3>
+        <svg viewBox="0 0 300 220" width="100%" height="200">
+          <line x1="20" y1="200" x2="280" y2="200" stroke="#333"/>
+          <line x1="20" y1="10" x2="20" y2="200" stroke="#333"/>
+          <text x="130" y="80" font-size="18" fill="#c1440e">✕</text>
+          <text x="150" y="100" font-size="18" fill="#c1440e">✕</text>
+          <text x="110" y="110" font-size="18" fill="#c1440e">✕</text>
+          <text x="130" y="130" font-size="18" fill="#c1440e">✕</text>
+          <rect x="220" y="70" width="16" height="16" fill="none" stroke="#e08e00" stroke-width="2"/>
+          <rect x="245" y="60" width="16" height="16" fill="none" stroke="#e08e00" stroke-width="2"/>
+          <rect x="240" y="90" width="16" height="16" fill="none" stroke="#e08e00" stroke-width="2"/>
+          <circle cx="55" cy="130" r="8" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <circle cx="75" cy="150" r="8" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <circle cx="50" cy="165" r="8" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <circle cx="90" cy="120" r="8" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <polygon points="220,150 232,175 208,175" fill="none" stroke="#7b3fae" stroke-width="2"/>
+          <polygon points="250,155 262,180 238,180" fill="none" stroke="#7b3fae" stroke-width="2"/>
+          <path d="M 40 95 L 175 140 L 165 30" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <path d="M 165 30 L 175 140 L 280 130" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+          <path d="M 175 140 L 130 200" fill="none" stroke="#1a5fb4" stroke-width="2"/>
+        </svg>
+        <p style="font-size:0.85rem;text-align:center;">Multiple boundaries divide the space into <strong>4</strong> regions — one per class</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎲 From "Probability of 1" to "Probability of Each Class"</h2>
+    <p><strong>Binary (logistic regression):</strong> estimate a single probability</p>
+    <div class="formula">P(y = 1 | x⃗)</div>
+    <p><strong>Multiclass:</strong> estimate a probability for <em>each</em> possible class</p>
+    <div class="formula">P(y=1|x⃗), &nbsp; P(y=2|x⃗), &nbsp; P(y=3|x⃗), &nbsp; P(y=4|x⃗), &nbsp; ...</div>
+    <p class="callout">📈 Each region in the 4-class plot corresponds to where one of these probabilities is highest — the model picks whichever class has the greatest P(y=k | x⃗).</p>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Binary classification is like a <strong>yes/no bouncer</strong> at a club door — "are you on the list or not?" Multiclass classification is like a <strong>mail sorting machine</strong> at a post office: instead of just "domestic vs international," it has to sort every letter into one of many bins — by zip code digit, by region, by class of mail — picking exactly one bin out of many possible ones for each letter.</p>
+  </div>
+
+  <div class="section">
+    <h2>➡️ Coming Up Next</h2>
+    <ul>
+      <li><strong>Softmax regression</strong> — a generalization of logistic regression for multiple classes</li>
+      <li>Then: plugging softmax into a <strong>neural network</strong> so it can be trained end-to-end for multiclass classification</li>
+    </ul>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 6 — "Multiclass Classification" <span class="tag">Intro to Softmax</span></div>
+
+</div>
+</body>
+</html>
