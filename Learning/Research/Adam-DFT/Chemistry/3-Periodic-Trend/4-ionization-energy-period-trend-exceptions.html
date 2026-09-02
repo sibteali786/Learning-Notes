@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ionization Energy Across a Period (with Exceptions)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.95rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  .formula-block{background:var(--code-bg);border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;margin:8px 0;font-size:1.05rem;color:var(--green);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.85rem;}
+  th,td{border:1px solid var(--card-border);padding:7px 9px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .warn{background:rgba(255,157,77,.08);border:1px solid rgba(255,157,77,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .warn-title{color:var(--orange);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+  .highlight{color:var(--orange);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Ionization Energy Across a Period — Two Exceptions</h1>
+<p class="subtitle">AP Chemistry · Periodic Trends · Source: Khan Academy (video)</p>
+
+<h2><span class="pill pill-blue">Problem</span> The period trend isn't a smooth increase</h2>
+<div class="card">
+Going left-to-right across Li → Ne, ionization energy generally <strong>increases</strong> due to rising Zeff. But the real data has two dips — Be→B and N→O — that break the pattern. Understanding why reveals a deeper layer of orbital-level detail beyond simple Zeff.
+
+<table>
+<tr><th>Element</th><th>Li</th><th>Be</th><th>B</th><th>C</th><th>N</th><th>O</th><th>F</th><th>Ne</th></tr>
+<tr><td>IE (kJ/mol)</td><td>520</td><td>900</td><td class="highlight">800</td><td>1086</td><td>1402</td><td class="highlight">1314</td><td>1681</td><td>2081</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-orange">Baseline</span> Why IE Generally Rises Across a Period</h2>
+<div class="card">
+<div class="formula-block">Zeff = Z − S &nbsp;(S = shielding/core electrons)</div>
+
+<table>
+<tr><th>Atom</th><th>Config</th><th>Z</th><th>Core e⁻ (S)</th><th>Zeff (simple)</th><th>Zeff (actual)</th></tr>
+<tr><td>Li</td><td>1s² 2s¹</td><td>3</td><td>2</td><td>+1</td><td>~1.3</td></tr>
+<tr><td>Be</td><td>1s² 2s²</td><td>4</td><td>2</td><td>+2</td><td>~1.9</td></tr>
+</table>
+
+Same number of core (shielding) electrons for both, but Be has one more proton — so Be's outer electrons feel a stronger net pull. Stronger pull → harder to remove → higher IE (900 vs 520).
+
+<div class="tip">
+<div class="tip-title">Why actual Zeff differs from the simple estimate</div>
+The crude formula treats all core electrons as perfect shields (S = integer). In reality shielding is partial, and other valence electrons contribute a small amount too — which is why Be's actual Zeff (~1.9) is a bit lower than the naive +2 estimate.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Exception 1</span> Be → B Dip (900 → 800)</h2>
+<div class="card">
+<div class="formula-block">B (5 e⁻) → 1s² 2s² 2p¹</div>
+
+Boron's 5th electron goes into a <strong>2p</strong> orbital, which is higher energy (and farther out, on average) than the 2s orbital.
+
+<div class="example">
+<div class="example-title">Extra shielding from the 2s pair</div>
+Be's electron configuration is fully in the 2s subshell (<code>2s²</code>). Boron adds one electron to a *different*, higher-energy 2p orbital. The two 2s electrons sit closer to the nucleus and partially shield the more distant 2p electron. That extra shielding makes B's outermost electron easier to remove than expected — despite B having one more proton than Be.
+</div>
+</div>
+
+<h2><span class="pill pill-green">Exception 2</span> N → O Dip (1402 → 1314)</h2>
+<div class="card">
+<div class="formula-block">N (7 e⁻) → 1s² 2s² 2p³ &nbsp;(each 2p orbital singly occupied)</div>
+<div class="formula-block">O (8 e⁻) → 1s² 2s² 2p⁴ &nbsp;(one 2p orbital now has 2 electrons)</div>
+
+<svg viewBox="0 0 420 140" xmlns="http://www.w3.org/2000/svg">
+  <text x="20" y="20" font-size="12" fill="#4ade80">Nitrogen 2p³</text>
+  <rect x="20" y="30" width="30" height="30" fill="none" stroke="#4ade80"/><text x="35" y="50" text-anchor="middle" fill="#4ade80">↑</text>
+  <rect x="55" y="30" width="30" height="30" fill="none" stroke="#4ade80"/><text x="70" y="50" text-anchor="middle" fill="#4ade80">↑</text>
+  <rect x="90" y="30" width="30" height="30" fill="none" stroke="#4ade80"/><text x="105" y="50" text-anchor="middle" fill="#4ade80">↑</text>
+
+  <text x="220" y="20" font-size="12" fill="#ff9d4d">Oxygen 2p⁴</text>
+  <rect x="220" y="30" width="30" height="30" fill="none" stroke="#ff9d4d"/><text x="228" y="50" fill="#ff9d4d">↑↓</text>
+  <rect x="255" y="30" width="30" height="30" fill="none" stroke="#ff9d4d"/><text x="270" y="50" text-anchor="middle" fill="#ff9d4d">↑</text>
+  <rect x="290" y="30" width="30" height="30" fill="none" stroke="#ff9d4d"/><text x="305" y="50" text-anchor="middle" fill="#ff9d4d">↑</text>
+</svg>
+
+<div class="example">
+<div class="example-title">Electron-electron repulsion in a paired orbital</div>
+Nitrogen has one electron in each of its three 2p orbitals (Hund's rule, no pairing needed). Oxygen's 4th 2p electron must <strong>pair up</strong> with one already there. Two electrons crammed into the same orbital repel each other (same charge) — this repulsion makes it <em>easier</em> to remove one of that pair, despite oxygen having one more proton than nitrogen.
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th>Exception</th><th>Root cause</th><th>Net effect</th></tr>
+<tr><td>Be → B</td><td>2p electron shielded by 2s pair, plus higher orbital energy</td><td>Small IE decrease</td></tr>
+<tr><td>N → O</td><td>Electron pairing forces repulsion within one 2p orbital</td><td>Small IE decrease</td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">General pattern to remember</div>
+Both dips occur right when a subshell configuration shifts unfavorably: going from an empty-to-singly-filled p subshell (B) or from half-filled-stable to now-pairing (O). Half-filled (<code>p³</code>) and fully-filled (<code>p⁶</code>) subshells tend to be extra stable reference points — dips tend to occur right after crossing them.
+</div>
+</div>
+
+<h2><span class="pill pill-orange">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Overall period trend: IE increases left→right due to rising Zeff — memorize this as the default.</li>
+<li>Memorize the two standard exceptions: <strong>group 2→13 (like Be→B)</strong> and <strong>group 15→16 (like N→O)</strong> — these are heavily tested.</li>
+<li>Both exceptions trace back to subshell-level detail (2s vs 2p energy, or orbital pairing) — not to Zeff itself decreasing.</li>
+<li>Quick mnemonic: dips happen right after a "comfortable" half-filled or fully-filled state is disturbed by the next added electron.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

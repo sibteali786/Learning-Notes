@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Electron Affinity vs Ionization Energy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161925; --border:#262b3d;
+    --blue:#5eb3f6; --orange:#ff9d5c; --green:#6fd98f; --purple:#c084fc; --pink:#ff6fae; --text:#e6e8ef; --muted:#9aa1b5;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:40px 20px;line-height:1.6;}
+  .wrap{max-width:940px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2em;margin-bottom:4px;
+     background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:30px;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.25em;margin-top:44px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68em;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;}
+  .pill-blue{background:rgba(94,179,246,.15);color:var(--blue);border:1px solid rgba(94,179,246,.4);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+  .pill-green{background:rgba(111,217,143,.15);color:var(--green);border:1px solid rgba(111,217,143,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .pill-pink{background:rgba(255,111,174,.15);color:var(--pink);border:1px solid rgba(255,111,174,.4);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin:14px 0;}
+  .callout{border-radius:10px;padding:14px 18px;margin:16px 0;border-left:4px solid;}
+  .tip{background:rgba(111,217,143,.08);border-color:var(--green);}
+  .warn{background:rgba(255,157,92,.08);border-color:var(--orange);}
+  .example{background:rgba(94,179,246,.08);border-color:var(--blue);}
+  .fix{background:rgba(255,111,174,.08);border-color:var(--pink);}
+  code, .code{font-family:'JetBrains Mono',monospace;background:#1c2030;padding:2px 7px;border-radius:5px;color:var(--orange);}
+  table{width:100%;border-collapse:collapse;margin:10px 0;}
+  th,td{padding:10px 12px;border:1px solid var(--border);text-align:left;font-size:.93em;}
+  th{background:#1c2030;color:var(--blue);}
+  svg{display:block;margin:16px auto;max-width:100%;}
+  ul{padding-left:22px;}
+  .strike{text-decoration:line-through;color:var(--muted);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Electron Affinity vs. Ionization Energy</h1>
+<div class="subtitle">Two sides of the same electron-attraction coin — plus a Zeff shielding correction</div>
+
+<h2><span class="pill pill-blue">Problem</span> Two processes, opposite direction</h2>
+<div class="card">
+<b>Ionization Energy (IE):</b> energy needed to <i>remove</i> an electron from a neutral atom.<br>
+<b>Electron Affinity (EA):</b> energy change when an electron is <i>added</i> to a neutral atom.<br><br>
+Both describe how strongly the nucleus attracts an electron — IE via removal, EA via addition.
+</div>
+
+<h2><span class="pill pill-orange">How it works</span> Lithium: IE vs EA</h2>
+<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- IE side -->
+  <circle cx="180" cy="120" r="90" fill="none" stroke="#333a52"/>
+  <circle cx="180" cy="120" r="40" fill="none" stroke="#333a52"/>
+  <circle cx="180" cy="120" r="15" fill="none" stroke="var(--blue)"/>
+  <text x="180" y="125" fill="var(--blue)" font-size="13" text-anchor="middle" font-family="JetBrains Mono">+3</text>
+  <circle cx="150" cy="98" r="5" fill="var(--blue)"/><circle cx="210" cy="98" r="5" fill="var(--blue)"/>
+  <circle cx="180" cy="205" r="6" fill="var(--pink)"/>
+  <path d="M180 195 L180 155" stroke="var(--pink)" stroke-width="2" marker-end="url(#arrOut)"/>
+  <text x="180" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">Li → Li⁺ + e⁻</text>
+  <text x="180" y="25" fill="var(--pink)" font-size="13" text-anchor="middle">IE = +520 kJ/mol (energy IN)</text>
+
+  <!-- EA side -->
+  <circle cx="650" cy="120" r="90" fill="none" stroke="#333a52"/>
+  <circle cx="650" cy="120" r="40" fill="none" stroke="#333a52"/>
+  <circle cx="650" cy="120" r="15" fill="none" stroke="var(--blue)"/>
+  <text x="650" y="125" fill="var(--blue)" font-size="13" text-anchor="middle" font-family="JetBrains Mono">+3</text>
+  <circle cx="620" cy="98" r="5" fill="var(--blue)"/><circle cx="680" cy="98" r="5" fill="var(--blue)"/>
+  <circle cx="650" cy="205" r="6" fill="var(--green)"/>
+  <circle cx="695" cy="150" r="6" fill="var(--green)"/>
+  <path d="M760 120 L710 145" stroke="var(--green)" stroke-width="2" marker-end="url(#arrIn)"/>
+  <text x="650" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">Li + e⁻ → Li⁻</text>
+  <text x="650" y="25" fill="var(--green)" font-size="13" text-anchor="middle">EA = −60 kJ/mol (energy OUT)</text>
+
+  <defs>
+    <marker id="arrOut" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--pink)"/></marker>
+    <marker id="arrIn" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--green)"/></marker>
+  </defs>
+</svg>
+
+<div class="callout example">
+<b>IE:</b> pulling the valence e⁻ away fights the nucleus's attraction → costs energy (+).<br>
+<b>EA:</b> the incoming e⁻ is still pulled in by the nucleus → releases energy (−), <i>as long as there's real attraction left</i>.
+</div>
+
+<h2><span class="pill pill-purple">Key Distinctions</span></h2>
+<table>
+<tr><th></th><th>Ionization Energy</th><th>Electron Affinity</th></tr>
+<tr><td><b>Direction</b></td><td>Removes e⁻</td><td>Adds e⁻</td></tr>
+<tr><td><b>Sign convention</b></td><td>Always positive (endothermic)</td><td>Usually negative (exothermic) — but not always</td></tr>
+<tr><td><b>Period trend</b></td><td>Clean, consistent increase L→R</td><td>General increase L→R, but many exceptions</td></tr>
+<tr><td><b>Key exceptions</b></td><td>Few (mainly 4s/3d nuances)</td><td>Full subshells (Be, Ne) and half-filled p³ (N)</td></tr>
+</table>
+
+<h2><span class="pill pill-orange">Exceptions in EA</span> Why Be, N, Ne break the trend</h2>
+<div class="card">
+<ul>
+<li><b>Be</b> (1s²2s²) → adding e⁻ forces it into a new, higher-energy <span class="code">2p</span> orbital → poor attraction → EA ≈ 0 (slightly endothermic)</li>
+<li><b>Ne</b> (1s²2s²2p⁶) → adding e⁻ forces it into a whole new shell (<span class="code">3s</span>) → Zeff ≈ 0 on that electron → EA ≈ 0, no affinity (explains noble gas inertness)</li>
+<li><b>N</b> (1s²2s²2p³, half-filled p) → added e⁻ must pair up in an already-occupied p orbital → extra electron-electron repulsion → weaker-than-expected EA</li>
+</ul>
+</div>
+
+<h2><span class="pill pill-pink">Correction</span> Why F has such a large (very negative) EA</h2>
+
+<div class="callout fix">
+<b>Common mistake:</b> <span class="strike">For F (1s² 2s² 2p⁵), shielding = 4 (the 2s²2p³ electrons already there), so Zeff = 9 − 4 = +5, and that's why EA is large.</span>
+</div>
+
+<div class="card">
+<b>Correct simple-model logic (Z − S, video's convention):</b> shielding electrons are only the <b>inner, complete shell</b> — same-shell electrons are not counted as core shielders.
+<table>
+<tr><th>Element</th><th>Config</th><th>Core shielders (S)</th><th>Zeff = Z − S</th><th>EA (kJ/mol)</th></tr>
+<tr><td>Li</td><td>1s² 2s¹</td><td>2 (the 1s² core)</td><td>3 − 2 = <b>+1</b></td><td>−60</td></tr>
+<tr><td>F</td><td>1s² 2s² 2p⁵</td><td>2 (the 1s² core)</td><td>9 − 2 = <b>+7</b></td><td>−328</td></tr>
+</table>
+F's incoming electron lands in the <b>same</b> shell (n=2) as the 2s²2p⁵ electrons already there — those aren't
+"shielding" in this model, they're same-level electrons. Only the tight, inner <span class="code">1s²</span> core actually screens
+the nucleus. A small core (2 e⁻) + large nuclear charge (+9) = a big Zeff (+7) pulling hard on the incoming
+electron → large energy released → very negative EA.
+</div>
+
+<div class="callout warn">
+<b>Caveat:</b> Z − S with "only inner shell counts" is a simplification used for quick visual reasoning.
+Real <b>Slater's rules</b> give same-shell electrons partial shielding credit (~0.35 each), so F's actual Zeff
+on its 2p electrons is closer to <span class="code">~+5.1–5.8</span>, not a clean +7. The <i>direction</i> of the
+reasoning — small core, high Z, big Zeff, big EA — is still correct; it's the precision that's approximate.
+</div>
+
+<h2><span class="pill pill-green">Real-World Scenario</span></h2>
+<div class="card">
+This Zeff logic is exactly why <b>halogens (F, Cl, Br, I) are the most reactive nonmetals</b> — a small,
+efficient core and a strong pull on incoming electrons makes them eager to grab one more electron and complete
+their octet, forming stable −1 anions (F⁻, Cl⁻) in salts like NaF and NaCl.
+</div>
+
+<h2><span class="pill pill-purple">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>When estimating Zeff by hand, only subtract electrons from <b>completed inner shells</b> — don't count same-shell (valence) electrons as shielders in the quick model.</li>
+<li>EA ≈ 0 is your signal for: newly-opened shell/subshell (Be, Ne) or a shell that's now completely full (noble gases).</li>
+<li>A dip at N mid-period is your signal for: electron pairing repulsion in a half-filled subshell.</li>
+<li>For exam-level precision beyond this quick model, mention Slater's rules — same-shell electrons contribute partial (not zero) shielding.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

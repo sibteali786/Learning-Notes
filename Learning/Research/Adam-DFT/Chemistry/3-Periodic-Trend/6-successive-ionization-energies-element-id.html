@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Successive Ionization Energies — Identifying Elements</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161925; --border:#262b3d;
+    --blue:#5eb3f6; --orange:#ff9d5c; --green:#6fd98f; --purple:#c084fc; --pink:#ff6fae; --text:#e6e8ef; --muted:#9aa1b5;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:40px 20px;line-height:1.6;}
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.05em;margin-bottom:4px;
+     background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:30px;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.3em;margin-top:44px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.7em;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;}
+  .pill-blue{background:rgba(94,179,246,.15);color:var(--blue);border:1px solid rgba(94,179,246,.4);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+  .pill-green{background:rgba(111,217,143,.15);color:var(--green);border:1px solid rgba(111,217,143,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin:14px 0;}
+  .callout{border-radius:10px;padding:14px 18px;margin:16px 0;border-left:4px solid;}
+  .tip{background:rgba(111,217,143,.08);border-color:var(--green);}
+  .warn{background:rgba(255,157,92,.08);border-color:var(--orange);}
+  .example{background:rgba(94,179,246,.08);border-color:var(--blue);}
+  code, .code{font-family:'JetBrains Mono',monospace;background:#1c2030;padding:2px 7px;border-radius:5px;color:var(--orange);}
+  table{width:100%;border-collapse:collapse;margin:10px 0;}
+  th,td{padding:10px 12px;border:1px solid var(--border);text-align:left;font-size:.95em;}
+  th{background:#1c2030;color:var(--blue);}
+  .jump{color:var(--pink);font-weight:700;}
+  svg{display:block;margin:16px auto;max-width:100%;}
+  ul{padding-left:22px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Identifying an Element from Ionization Energies</h1>
+<div class="subtitle">Reading the "jump" in successive IE values to find valence electron count</div>
+
+<h2><span class="pill pill-blue">Problem</span> Given: 5 ionization energies of a period‑3 element</h2>
+<div class="card">
+<table>
+<tr><th>Step</th><th>Energy (kJ/mol)</th><th>Electron removed</th></tr>
+<tr><td>IE₁</td><td>578</td><td>1st</td></tr>
+<tr><td>IE₂</td><td>1,817</td><td>2nd</td></tr>
+<tr><td>IE₃</td><td>2,745</td><td>3rd</td></tr>
+<tr><td>IE₄</td><td class="jump">11,577</td><td>4th ← huge jump</td></tr>
+<tr><td>IE₅</td><td class="jump">14,842</td><td>5th</td></tr>
+</table>
+Question: <b>which period-3 element is this?</b>
+</div>
+
+<h2><span class="pill pill-orange">How it works</span> Spot where the jump happens</h2>
+<svg viewBox="0 0 820 260" xmlns="http://www.w3.org/2000/svg">
+  <line x1="60" y1="220" x2="780" y2="220" stroke="#333a52"/>
+  <line x1="60" y1="220" x2="60" y2="20" stroke="#333a52"/>
+  <!-- bars (log-ish scaled manually) -->
+  <rect x="100" y="200" width="60" height="20" fill="var(--blue)"/>
+  <text x="130" y="195" fill="var(--blue)" font-size="13" text-anchor="middle">578</text>
+  <rect x="220" y="175" width="60" height="45" fill="var(--blue)"/>
+  <text x="250" y="170" fill="var(--blue)" font-size="13" text-anchor="middle">1,817</text>
+  <rect x="340" y="150" width="60" height="70" fill="var(--blue)"/>
+  <text x="370" y="145" fill="var(--blue)" font-size="13" text-anchor="middle">2,745</text>
+  <rect x="460" y="40" width="60" height="180" fill="var(--pink)"/>
+  <text x="490" y="35" fill="var(--pink)" font-size="13" text-anchor="middle">11,577</text>
+  <rect x="580" y="20" width="60" height="200" fill="var(--pink)"/>
+  <text x="610" y="15" fill="var(--pink)" font-size="13" text-anchor="middle">14,842</text>
+  <text x="130" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">IE₁</text>
+  <text x="250" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">IE₂</text>
+  <text x="370" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">IE₃</text>
+  <text x="490" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">IE₄</text>
+  <text x="610" y="240" fill="var(--muted)" font-size="12" text-anchor="middle">IE₅</text>
+  <path d="M395 130 Q430 90 460 60" stroke="var(--green)" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+  <text x="430" y="80" fill="var(--green)" font-size="13">valence → core jump</text>
+</svg>
+
+<div class="callout example">
+IE₁ → IE₂ → IE₃ rise <b>gradually</b> (removing valence electrons, one at a time, from an increasingly
+positive ion). IE₃ → IE₄ jumps <b>~4×</b> — that's the signal you've run out of valence electrons and started
+pulling from the full, lower (core) shell, which is much closer to the nucleus and unshielded.
+</div>
+
+<h2><span class="pill pill-purple">Key Distinction</span> Valence electrons vs. core electrons</h2>
+<table>
+<tr><th></th><th>Valence electrons</th><th>Core electrons</th></tr>
+<tr><td><b>Shell</b></td><td>Outermost, incomplete</td><td>Inner, complete (noble-gas-like)</td></tr>
+<tr><td><b>Shielding</b></td><td>Shielded by core → lower Z<sub>eff</sub></td><td>No electrons shield them → higher Z<sub>eff</sub></td></tr>
+<tr><td><b>Removal cost</b></td><td>Relatively low, rises slowly</td><td>Very high, rises sharply</td></tr>
+<tr><td><b>Signal in data</b></td><td>Gradual IE increases</td><td>Sudden large jump</td></tr>
+</table>
+
+<div class="callout tip">
+<b>Rule of thumb:</b> the position of the big jump = number of valence electrons.
+Jump after removing the <b>n</b>th electron → element has <b>n</b> valence electrons.
+</div>
+
+<h2><span class="pill pill-green">Solving it</span></h2>
+<div class="card">
+Jump occurs between IE₃ and IE₄ → element has <b>3 valence electrons</b>.<br>
+Period 3 elements by valence electron count: Na (1), Mg (2), <b>Al (3)</b>, Si (4)...<br><br>
+→ <b>Identity: Aluminum (Al)</b>, configuration <span class="code">[Ne] 3s² 3p¹</span> — removing 3s²3p¹ (3 electrons)
+is "cheap," removing from the filled <span class="code">[Ne]</span> core is very expensive.
+</div>
+
+<h2><span class="pill pill-orange">Real-World Scenario</span></h2>
+<div class="card">
+This is exactly how chemists predict <b>oxidation states</b> without memorizing them. See a huge IE jump after
+electron #2 → the element behaves like Mg, forming a stable 2+ ion (e.g. Ca²⁺, Mg²⁺) and essentially never
+going to 3+, because that next removal would require breaching the noble-gas core.
+</div>
+
+<h2><span class="pill pill-purple">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Always compare <b>consecutive ratios</b>, not raw numbers — a jump of 3–5× (or more) between consecutive IEs is the "core" signal.</li>
+<li>Cross-check with the periodic table: valence electron count = group number for main-group elements (with s/p block adjustments).</li>
+<li>This same logic explains why transition metals commonly form 2+ ions (losing ns² first) before touching (n−1)d electrons.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

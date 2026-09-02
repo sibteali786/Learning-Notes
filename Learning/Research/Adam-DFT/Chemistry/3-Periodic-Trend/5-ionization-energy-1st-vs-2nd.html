@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IE1 vs IE2 — Lithium</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161925; --border:#262b3d;
+    --blue:#5eb3f6; --orange:#ff9d5c; --green:#6fd98f; --purple:#c084fc; --pink:#ff6fae; --text:#e6e8ef; --muted:#9aa1b5;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:40px 20px;line-height:1.6;}
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.1em;margin-bottom:4px;
+     background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:30px;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.3em;margin-top:44px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.7em;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;}
+  .pill-blue{background:rgba(94,179,246,.15);color:var(--blue);border:1px solid rgba(94,179,246,.4);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+  .pill-green{background:rgba(111,217,143,.15);color:var(--green);border:1px solid rgba(111,217,143,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin:14px 0;}
+  .callout{border-radius:10px;padding:14px 18px;margin:16px 0;border-left:4px solid;}
+  .tip{background:rgba(111,217,143,.08);border-color:var(--green);}
+  .warn{background:rgba(255,157,92,.08);border-color:var(--orange);}
+  .example{background:rgba(94,179,246,.08);border-color:var(--blue);}
+  code, .code{font-family:'JetBrains Mono',monospace;background:#1c2030;padding:2px 7px;border-radius:5px;color:var(--orange);}
+  table{width:100%;border-collapse:collapse;margin:10px 0;}
+  th,td{padding:10px 12px;border:1px solid var(--border);text-align:left;font-size:.95em;}
+  th{background:#1c2030;color:var(--blue);}
+  svg{display:block;margin:16px auto;max-width:100%;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+  ul{padding-left:22px;}
+  .num{color:var(--purple);font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>First vs. Second Ionization Energy</h1>
+<div class="subtitle">Why removing electron #2 costs way more than #1 — Lithium as the case study</div>
+
+<h2><span class="pill pill-blue">Problem</span> Why does IE jump so much?</h2>
+<div class="card">
+Lithium's <b>first</b> ionization energy is <span class="code">+520 kJ/mol</span>, but its <b>second</b> is
+<span class="code">+7,298 kJ/mol</span> — over <b>14× larger</b>. Same nucleus, wildly different cost.
+Understanding why explains <i>which ions elements actually form</i> (e.g. why Li forms Li⁺, never Li²⁺).
+</div>
+
+<h2><span class="pill pill-orange">Setup</span> The Lithium electron configuration</h2>
+<div class="card">
+Li has atomic number 3 → 3 protons, 3 electrons (neutral) → config <span class="code">1s² 2s¹</span>
+<ul>
+<li><b>1s²</b> — 2 inner-shell electrons, close to nucleus</li>
+<li><b>2s¹</b> — 1 outer-shell (valence) electron, far from nucleus</li>
+</ul>
+</div>
+
+<h2><span class="pill pill-green">How it works</span> Removing electron 1 vs electron 2</h2>
+
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg">
+  <!-- Neutral Li -->
+  <circle cx="150" cy="130" r="95" fill="none" stroke="#333a52"/>
+  <circle cx="150" cy="130" r="45" fill="none" stroke="#333a52"/>
+  <circle cx="150" cy="130" r="16" fill="none" stroke="var(--blue)"/>
+  <text x="150" y="135" fill="var(--blue)" font-size="14" text-anchor="middle" font-family="JetBrains Mono">+3</text>
+  <circle cx="115" cy="105" r="6" fill="var(--blue)"/>
+  <circle cx="185" cy="105" r="6" fill="var(--blue)"/>
+  <circle cx="150" cy="222" r="7" fill="var(--pink)"/>
+  <text x="150" y="255" fill="var(--muted)" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Li  1s² 2s¹</text>
+
+  <path d="M255 130 L340 130" stroke="var(--purple)" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="297" y="115" fill="var(--purple)" font-size="13" text-anchor="middle">IE₁ = 520</text>
+
+  <!-- Li+ -->
+  <circle cx="450" cy="130" r="95" fill="none" stroke="#333a52"/>
+  <circle cx="450" cy="130" r="45" fill="none" stroke="#333a52"/>
+  <circle cx="450" cy="130" r="16" fill="none" stroke="var(--blue)"/>
+  <text x="450" y="135" fill="var(--blue)" font-size="14" text-anchor="middle" font-family="JetBrains Mono">+3</text>
+  <circle cx="415" cy="105" r="6" fill="var(--blue)"/>
+  <circle cx="485" cy="105" r="6" fill="var(--blue)"/>
+  <text x="450" y="255" fill="var(--muted)" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Li⁺  1s²</text>
+
+  <path d="M555 130 L640 130" stroke="var(--orange)" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="597" y="115" fill="var(--orange)" font-size="13" text-anchor="middle">IE₂ = 7,298</text>
+
+  <!-- Li2+ -->
+  <circle cx="750" cy="130" r="45" fill="none" stroke="#333a52"/>
+  <circle cx="750" cy="130" r="16" fill="none" stroke="var(--blue)"/>
+  <text x="750" y="135" fill="var(--blue)" font-size="14" text-anchor="middle" font-family="JetBrains Mono">+3</text>
+  <circle cx="785" cy="105" r="6" fill="var(--blue)"/>
+  <text x="750" y="200" fill="var(--muted)" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Li²⁺  1s¹</text>
+
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--muted)"/></marker></defs>
+</svg>
+
+<div class="callout example">
+<b>Step 1 (IE₁):</b> Remove the lone 2s electron → charge balance 3p⁺ − 2e⁻ = <b>+1</b> → forms Li⁺ (1s²).<br>
+<b>Step 2 (IE₂):</b> Remove one of the 1s electrons → 3p⁺ − 1e⁻ = <b>+2</b> → forms Li²⁺ (1s¹).
+</div>
+
+<h2><span class="pill pill-purple">Key Distinctions</span> The 3 factors driving the gap</h2>
+<table>
+<tr><th>Factor</th><th>1st electron removed (2s¹)</th><th>2nd electron removed (1s, from Li⁺)</th></tr>
+<tr><td><b>Nuclear charge</b></td><td>+3 protons (same both times)</td><td>+3 protons (same both times)</td></tr>
+<tr><td><b>Shielding</b></td><td>Shielded by 2 inner 1s electrons → Z<sub>eff</sub> ≈ +1.3</td><td>No inner electrons left to shield it → feels nearly full +3</td></tr>
+<tr><td><b>Distance</b></td><td>In 2nd energy level — farther from nucleus</td><td>In 1st energy level — much closer to nucleus</td></tr>
+<tr><td><b>Result</b></td><td>Weak attraction → easy to remove (520 kJ/mol)</td><td>Strong attraction → very hard to remove (7,298 kJ/mol)</td></tr>
+</table>
+
+<div class="callout tip">
+<b>Quick Z<sub>eff</sub> formula:</b> <span class="code">Z_eff = Z − (shielding electrons)</span>.
+For the 2s electron in Li: <span class="code">3 − 2 = +1</span> (actual ≈ +1.3 with more precise calculations).
+</div>
+
+<h2><span class="pill pill-orange">Real-World Scenario</span></h2>
+<div class="card">
+This is exactly why <b>Group 1 metals (Li, Na, K...) form +1 ions, never +2</b>. Their single valence
+electron is easy to strip (low IE₁), but the next electron sits in a full, closer-in noble-gas-like shell —
+removing it costs an enormous amount of energy. It's also why table salt is <span class="code">Na⁺Cl⁻</span>
+and never <span class="code">Na²⁺Cl₂</span>: sodium simply "stops" losing electrons after the first, because
+IE₂ for Na is similarly gigantic.
+</div>
+
+<h2><span class="pill pill-green">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>A <b>big jump</b> between consecutive ionization energies tells you exactly where the "core" electrons begin — that's how you identify an element's typical ion charge / group number.</li>
+<li>Always check: did the electron just removed come from a <b>new, lower shell</b>? If yes, expect a huge IE jump.</li>
+<li>Don't confuse "more protons" with "more effective pull" — after ionization, proton count doesn't change; what changes is shielding and distance.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>
