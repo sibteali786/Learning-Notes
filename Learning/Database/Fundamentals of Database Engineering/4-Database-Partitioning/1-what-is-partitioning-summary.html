@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>What is Partitioning?</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --red:#e5533d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{
+    margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;
+  }
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2);}
+  .tag.red{background:var(--red);}
+  code, .sql{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  .sqlblock{
+    background:#0c0e13; border-left:3px solid var(--accent); padding:12px 16px;
+    border-radius:6px; font-family:'Fira Code','Consolas',monospace; font-size:0.88rem;
+    color:#d7e6ff; margin:10px 0; line-height:1.6;
+  }
+  .kw{color:#7fb3ff; font-weight:600;}
+  .flow{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:16px 0;
+  }
+  .box{
+    background:#1e2330; border:1px solid var(--border); border-radius:10px;
+    padding:12px 16px; text-align:center; font-size:0.85rem; min-width:110px;
+  }
+  .arrow{color:var(--muted); font-size:1.3rem;}
+  .partition-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px; margin-top:14px;
+  }
+  .part{
+    border:1px solid var(--border); border-radius:10px; padding:10px 12px;
+    background:#1b1f29; font-size:0.8rem;
+  }
+  .part.hit{ border-color:var(--accent2); background:#16261e; box-shadow:0 0 0 1px var(--accent2); }
+  .part .range{color:var(--accent2); font-weight:700; font-size:0.75rem; margin-bottom:6px; display:block;}
+  .part.hit .range{color:#7fe0ab;}
+  table{width:100%; border-collapse:collapse; font-size:0.78rem; margin-top:4px;}
+  th,td{padding:4px 6px; text-align:left; border-bottom:1px solid #2a2f3a;}
+  th{color:var(--muted); font-weight:600;}
+  .highlight-row{background:rgba(229,83,61,0.18); outline:1px solid var(--red); }
+  .compare{
+    display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px;
+  }
+  @media (max-width:640px){.compare{grid-template-columns:1fr;}}
+  .compare .side{
+    border-radius:10px; padding:14px; border:1px solid var(--border); background:#1b1f29;
+  }
+  .compare .side h3{margin:0 0 8px; font-size:0.95rem;}
+  .compare .side.bad{border-color:rgba(229,83,61,0.4);}
+  .compare .side.good{border-color:rgba(76,175,125,0.4);}
+  ul{margin:8px 0 0; padding-left:20px;}
+  li{margin-bottom:6px; line-height:1.5; font-size:0.9rem;}
+  .quote{
+    font-style:italic; color:#cfd6e4; border-left:3px solid var(--accent2);
+    padding:10px 16px; margin:14px 0; background:#151a22; border-radius:0 8px 8px 0;
+  }
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.88rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .stepnum{
+    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--accent); color:#fff; font-size:0.75rem; font-weight:700;
+    margin-right:8px; flex-shrink:0;
+  }
+  .step{display:flex; gap:6px; align-items:flex-start; margin-bottom:10px; font-size:0.88rem;}
+  .disk{font-size:0.8rem; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧩 What is Partitioning?</h1>
+  <div class="sub">Database concept summary — splitting large tables for faster queries</div>
+
+  <!-- THE PROBLEM -->
+  <div class="card">
+    <h2><span class="tag red">The Problem</span> Querying a huge table</h2>
+    <p>You have a <b>CUSTOMERS</b> table with <b>1 million rows</b>. You want one row:</p>
+    <div class="sqlblock">
+      <span class="kw">SELECT</span> Name<br>
+      <span class="kw">FROM</span> CUSTOMERS_TABLE<br>
+      <span class="kw">WHERE</span> ID = 700,001
+    </div>
+    <div class="flow">
+      <div class="box">💻 Query sent</div>
+      <span class="arrow">→</span>
+      <div class="box">🗄️ One big table<br><span class="disk">(1,000,000 rows)</span></div>
+    </div>
+    <ul>
+      <li><b>With an index:</b> DB jumps straight to the row on disk — fast, but the index itself grows huge over billions of rows and gets slower to maintain/traverse.</li>
+      <li><b>Without an index:</b> DB does a <b>sequential scan</b> — checks every single row until it finds ID 700,001. Worst case.</li>
+      <li>Now imagine this table has <b>10 million, 1 billion</b> rows — even indexed lookups and maintenance overhead start dragging.</li>
+    </ul>
+    <div class="quote">"The quickest way to query a table with a billion rows is to avoid querying a table with a billion rows."</div>
+  </div>
+
+  <!-- THE SOLUTION -->
+  <div class="card">
+    <h2><span class="tag green">The Solution</span> Partitioning</h2>
+    <p>Break the 1M-row table into <b>smaller tables called partitions</b> — each with the <b>same schema</b>, holding a slice of the ID range. The original table becomes a "parent" with no data of its own; it just points to its partitions.</p>
+
+    <div class="partition-grid">
+      <div class="part"><span class="range">1 – 200,000</span>CUSTOMERS_200K</div>
+      <div class="part"><span class="range">200,001 – 400,000</span>CUSTOMERS_400K</div>
+      <div class="part"><span class="range">400,001 – 600,000</span>CUSTOMERS_600K</div>
+      <div class="part hit"><span class="range">600,001 – 800,000</span>CUSTOMERS_800K ✅</div>
+      <div class="part"><span class="range">800,001 – 1,000,000</span>CUSTOMERS_1M</div>
+    </div>
+
+    <div class="example">
+      🏠 <b>Real-world analogy:</b> Think of a giant library with 1 million books shelved in <i>one</i> continuous row.
+      Finding book #700,001 means walking past 700,000 books (or using a catalog card = index).
+      Now split the library into 5 rooms by book number range. To find #700,001, you instantly know
+      "that's in Room 4 (600,001–800,000)" — you never even enter the other 4 rooms.
+    </div>
+  </div>
+
+  <!-- HOW THE QUERY BEHAVES AFTER PARTITIONING -->
+  <div class="card">
+    <h2><span class="tag">How the query runs now</span></h2>
+    <div class="step"><span class="stepnum">1</span> Same query is sent: <code>WHERE ID = 700,001</code></div>
+    <div class="step"><span class="stepnum">2</span> The DB checks partition <b>metadata</b> (the ID ranges each partition owns) — a very cheap check, not a data scan.</div>
+    <div class="step"><span class="stepnum">3</span> It determines: 700,001 falls in the <b>600,001–800,000</b> range → routes straight to <code>CUSTOMERS_800K</code>.</div>
+    <div class="step"><span class="stepnum">4</span> The DB now searches only <b>200,000 rows</b> instead of 1,000,000 — a 5x smaller haystack.</div>
+    <div class="step"><span class="stepnum">5</span> If that partition also has an index, it jumps straight to the row: <b>ID 700,001 → "Kim"</b>.</div>
+
+    <table>
+      <tr><th>id</th><th>NAME</th></tr>
+      <tr><td>600,001</td><td>Nada</td></tr>
+      <tr><td>…</td><td>…</td></tr>
+      <tr class="highlight-row"><td>700,001</td><td>Kim</td></tr>
+      <tr><td>…</td><td>…</td></tr>
+      <tr><td>800,000</td><td>Tyler</td></tr>
+    </table>
+  </div>
+
+  <!-- BEFORE VS AFTER -->
+  <div class="card">
+    <h2><span class="tag">Before vs After</span></h2>
+    <div class="compare">
+      <div class="side bad">
+        <h3>❌ Without Partitioning</h3>
+        <ul>
+          <li>One table, 1M rows</li>
+          <li>Sequential scan = check up to all 1,000,000 rows</li>
+          <li>Even indexed lookups slow down as the table (and index) keeps growing</li>
+        </ul>
+      </div>
+      <div class="side good">
+        <h3>✅ With Partitioning</h3>
+        <ul>
+          <li>5 tables, 200K rows each, same schema</li>
+          <li>DB uses cheap metadata check to pick 1 partition</li>
+          <li>Query only touches 200,000 rows — smaller, faster searches (and index, if any, is smaller too)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERTICAL VS HORIZONTAL -->
+  <div class="card">
+    <h2><span class="tag">Vertical vs Horizontal Partitioning</span></h2>
+
+    <div class="compare">
+      <div class="side good">
+        <h3>↔️ Horizontal Partitioning</h3>
+        <p style="margin:0 0 8px;">Splits the table by <b>rows</b> — like slicing the table with a knife across the middle, again and again.</p>
+        <ul>
+          <li>Customers with ID 1–200,000 → one partition</li>
+          <li>Customers with ID 200,001–400,000 → another partition</li>
+          <li>Every partition keeps the <b>same columns/schema</b>, just a different slice of rows</li>
+          <li>This is exactly what we saw with CUSTOMERS_200K, 400K, 600K, 800K, 1M</li>
+        </ul>
+      </div>
+      <div class="side bad">
+        <h3>↕️ Vertical Partitioning</h3>
+        <p style="margin:0 0 8px;">Splits the table by <b>columns</b> — slicing top to bottom, separating certain columns into their own partition/table.</p>
+        <ul>
+          <li>Useful when a table has a large column (e.g. a <b>blob</b>/document) that's rarely queried</li>
+          <li>That heavy column is moved into its own tablespace — its own storage, possibly on slower/cheaper disk</li>
+          <li>The "master" table keeps only the fast, frequently-accessed columns, compact and lean</li>
+          <li>When a query needs the blob, the DB knows to jump into that separate table to fetch it</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="example">
+      🏠 <b>Real-world analogy:</b> Imagine a customer record with a fast-access <code>id, name, email</code>
+      plus a rarely-opened <code>signed_contract_pdf</code> blob.
+      <br><br>
+      <b>Horizontal:</b> like splitting a phonebook into separate volumes — Volume A–M, Volume N–Z — same columns (name, number) in each, just different row ranges.
+      <br><br>
+      <b>Vertical:</b> like keeping a compact index card per customer (name, phone) in your desk drawer for quick access, while their full paper contracts sit in a filing cabinet in another room — you only walk over there when someone specifically needs the contract.
+    </div>
+
+    <div class="flow" style="margin-top:16px;">
+      <div class="box">📇 Fast columns<br><span class="disk">id, name, email</span><br><span class="disk" style="color:var(--accent2)">→ fast SSD</span></div>
+      <span class="arrow">＋</span>
+      <div class="box">📦 Blob column<br><span class="disk">contract_pdf</span><br><span class="disk" style="color:var(--red)">→ own tablespace</span></div>
+    </div>
+
+    <p style="margin-top:10px;"><b>Benefit:</b> the "hot" table stays small and compact → faster scans, faster access, and precious fast storage isn't wasted on rarely-touched large data.</p>
+  </div>
+
+  <!-- PARTITIONING TYPES (reference) -->
+  <div class="card">
+    <h2><span class="tag">Partitioning Types (how horizontal partitions are defined)</span></h2>
+    <ul>
+      <li><b>By Range:</b> dates or IDs — e.g. by <code>logdate</code> or <code>customer_id</code> from X to Y (what we saw with CUSTOMERS_200K…1M)</li>
+      <li><b>By List:</b> discrete values — e.g. zip code 90205 in one partition, 91111 in another; or states CA, AL, etc.</li>
+      <li><b>By Hash:</b> using a hash function (consistent hashing) to assign rows to partitions</li>
+    </ul>
+  </div>
+
+  <!-- KEY TAKEAWAY -->
+  <div class="card">
+    <h2><span class="tag green">Key Idea</span></h2>
+    <ul>
+      <li><b>Partitioning</b> = splitting one large table into multiple smaller tables ("partitions"), each responsible for a defined slice of data.</li>
+      <li><b>Horizontal partitioning</b> splits by rows (same schema, different row ranges) — by range, list, or hash.</li>
+      <li><b>Vertical partitioning</b> splits by columns — separating large/rarely-used columns (like blobs) into their own tablespace.</li>
+      <li>The main/parent table has no data itself — partitions hold the actual rows.</li>
+      <li>The database uses lightweight metadata to route a query to the <i>right</i> partition instead of scanning everything.</li>
+      <li>This is essential at scale (millions → billions of rows), where even a well-indexed single table becomes a bottleneck.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

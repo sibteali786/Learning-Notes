@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Partitioning vs Sharding</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2);}
+  .tag.red{background:var(--red);}
+  .tag.purple{background:var(--purple);}
+  code{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px;}
+  @media (max-width:640px){.compare{grid-template-columns:1fr;}}
+  .side{border-radius:12px; padding:16px; border:1px solid var(--border); background:#1b1f29;}
+  .side.part{border-color:rgba(76,175,125,0.4);}
+  .side.shard{border-color:rgba(168,120,255,0.4);}
+  .side h3{margin:0 0 10px; font-size:1rem; display:flex; align-items:center; gap:8px;}
+  .side ul{margin:0; padding-left:18px;}
+  .side li{font-size:0.85rem; margin-bottom:7px; line-height:1.5;}
+  .diagram{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0; justify-content:center;
+  }
+  .box{
+    background:#0f1319; border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; text-align:center; font-size:0.78rem; min-width:100px;
+  }
+  .box.db{border-color:var(--accent2); color:#bfeccf;}
+  .box.server{border-color:var(--purple); color:#dcc9ff;}
+  .arrow{color:var(--muted); font-size:1.1rem;}
+  table{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:12px;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid #2a2f3a;}
+  th{color:var(--muted); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
+  td.good{color:#7fe0ab;}
+  td.warn{color:#f0a27a;}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.88rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .quote{
+    font-style:italic; color:#cfd6e4; border-left:3px solid var(--red);
+    padding:10px 16px; margin:14px 0; background:#151a22; border-radius:0 8px 8px 0; font-size:0.88rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>⚖️ Partitioning vs Sharding</h1>
+  <div class="sub">Same-sounding, very different architectures</div>
+
+  <div class="card">
+    <h2><span class="tag">Core Difference</span></h2>
+    <div class="compare">
+      <div class="side part">
+        <h3>🧩 Horizontal Partitioning</h3>
+        <ul>
+          <li>Splits a big table into multiple tables <b>within the same database (server)</b></li>
+          <li>The database engine manages routing internally</li>
+          <li><b>Client is agnostic</b> — you send one query, the DB decides which partition to hit based on the WHERE clause</li>
+          <li>Table names/schema on the backend actually change (multiple partition tables exist)</li>
+        </ul>
+      </div>
+      <div class="side shard">
+        <h3>🌐 Sharding</h3>
+        <ul>
+          <li>Splits a big table into multiple tables across <b>completely different database servers</b></li>
+          <li>Used for distributed processing and reducing latency (e.g. geo-based)</li>
+          <li><b>Client is aware</b> of the shard — a proxy (e.g. ProxySQL) or app logic must route you to the correct server</li>
+          <li>Table name/schema stays the same everywhere — only the <b>server</b> you hit changes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="tag purple">Visualizing it</span></h2>
+    <p style="font-size:0.85rem; color:var(--muted); margin-bottom:6px;">Partitioning — one server, multiple internal tables:</p>
+    <div class="diagram">
+      <div class="box">💻 Client query</div>
+      <span class="arrow">→</span>
+      <div class="box db">🗄️ Single DB server<br><span style="color:var(--muted);">(routes internally to the right partition)</span></div>
+    </div>
+
+    <p style="font-size:0.85rem; color:var(--muted); margin:14px 0 6px;">Sharding — different servers entirely, client/proxy picks one:</p>
+    <div class="diagram">
+      <div class="box">💻 Client (California)</div>
+      <span class="arrow">→</span>
+      <div class="box">🔀 ProxySQL<br><span style="color:var(--muted);">(detects IP)</span></div>
+      <span class="arrow">→</span>
+      <div class="box server">🗄️ CA Server<br><span style="color:var(--muted);">IP: X</span></div>
+    </div>
+    <div class="diagram">
+      <div class="box">💻 Client (Asia)</div>
+      <span class="arrow">→</span>
+      <div class="box">🔀 ProxySQL<br><span style="color:var(--muted);">(detects IP)</span></div>
+      <span class="arrow">→</span>
+      <div class="box server">🗄️ Asia Server<br><span style="color:var(--muted);">IP: Y</span></div>
+    </div>
+
+    <div class="example">
+      🏠 <b>Real-world analogy:</b> Partitioning is like one giant warehouse with labeled aisles — 
+      you tell the front desk what you need, and their internal system tells a forklift which aisle to grab it from; you never see the aisles.
+      <br><br>
+      Sharding is like having <b>separate warehouses in different cities</b> — a dispatcher (proxy) looks at your delivery address and routes your order to the nearest warehouse entirely. Different building, different address, same catalog of products.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="tag red">Trade-off to know</span></h2>
+    <div class="quote">"The client is aware of the shard — that's a big no-no in sharding. Tools like Vitess try to solve this, but it's still a big investment for backend engineers."</div>
+    <p style="font-size:0.88rem; color:#cfd6e4;">Partitioning keeps complexity hidden inside the database. Sharding pushes that complexity out to the application/proxy layer — powerful for scaling across servers and reducing latency, but harder to build and maintain.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="tag green">Side-by-side Summary</span></h2>
+    <table>
+      <tr><th></th><th>Partitioning</th><th>Sharding</th></tr>
+      <tr><td>Where data lives</td><td class="good">Same database server</td><td class="warn">Multiple different servers</td></tr>
+      <tr><td>Who manages routing</td><td class="good">The database engine</td><td class="warn">App logic / proxy (e.g. ProxySQL)</td></tr>
+      <tr><td>Client awareness</td><td class="good">Agnostic — client has no idea</td><td class="warn">Aware — must route to correct server</td></tr>
+      <tr><td>Table name</td><td class="good">Changes (multiple partition tables)</td><td class="warn">Stays the same across shards</td></tr>
+      <tr><td>Main use case</td><td class="good">Faster queries on one big table</td><td class="warn">Distributed scale, geo-latency</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

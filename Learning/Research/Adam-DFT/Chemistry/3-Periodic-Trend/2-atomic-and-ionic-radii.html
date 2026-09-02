@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Atomic & Ionic Radii</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.1rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  .formula-block{background:var(--code-bg);border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;margin:8px 0;font-size:1.05rem;color:var(--green);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  th,td{border:1px solid var(--card-border);padding:8px 10px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .warn{background:rgba(255,157,77,.08);border:1px solid rgba(255,157,77,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .warn-title{color:var(--orange);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Atomic & Ionic Radii</h1>
+<p class="subtitle">AP Chemistry · Periodic Trends · Source: Khan Academy (video)</p>
+
+<h2><span class="pill pill-blue">Problem</span> Atoms don't have a fixed edge — so how do we measure them?</h2>
+<div class="card">
+An atom isn't a hard sphere — it's a nucleus surrounded by a fuzzy electron probability cloud with no clean boundary. Chemists work around this with a practical trick: measure between two <strong>identical bonded atoms</strong>, then take half.
+
+<div class="formula-block">atomic radius ≈ (distance between two identical bonded nuclei) ÷ 2</div>
+</div>
+
+<h2><span class="pill pill-orange">Trend 1</span> Down a Group — Radius Increases</h2>
+<div class="card">
+<svg viewBox="0 0 460 200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="120" cy="100" r="35" fill="none" stroke="#5b9dff"/>
+  <text x="120" y="105" text-anchor="middle" font-size="12" fill="#5b9dff">H</text>
+  <text x="120" y="150" text-anchor="middle" font-size="11" fill="#9aa1b4">1 shell</text>
+
+  <circle cx="320" cy="100" r="65" fill="none" stroke="#4ade80"/>
+  <text x="320" y="105" text-anchor="middle" font-size="12" fill="#4ade80">Li</text>
+  <text x="320" y="180" text-anchor="middle" font-size="11" fill="#9aa1b4">2 shells → bigger</text>
+</svg>
+
+Going from H → Li (down group 1), an extra shell is added farther from the nucleus. More "stuff," farther out → larger atom.
+
+<div class="tip">
+<div class="tip-title">Simple takeaway</div>
+Adding a new outer shell always increases radius — this is the most intuitive of the trends.
+</div>
+</div>
+
+<h2><span class="pill pill-green">Trend 2</span> Across a Period — Radius Decreases</h2>
+<div class="card">
+This one is less obvious: you're <em>adding</em> electrons left-to-right, yet the atom gets <strong>smaller</strong>.
+
+<div class="example">
+<div class="example-title">Li vs Be — same shell count, different nuclear pull</div>
+Li has 3 protons (+3), Be has 4 protons (+4). Both have 2 core electrons in the inner shell doing the same amount of <strong>shielding</strong>. But Be's higher nuclear charge pulls its outer electrons in <em>harder</em>, since the shielding didn't increase to compensate. Result: Be is smaller than Li, despite having one more electron.
+</div>
+
+<table>
+<tr><th>Force on outer electron</th><th>Source</th><th>Effect</th></tr>
+<tr><td>Attraction</td><td>Positively charged nucleus</td><td>Pulls outer electron inward</td></tr>
+<tr><td>Repulsion (shielding)</td><td>Inner-shell (core) electrons</td><td>Pushes outer electron outward</td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">Why outer electrons don't shield each other</div>
+Outer-shell electrons are all roughly the same distance from the nucleus, so they don't meaningfully block the nuclear pull on each other. Only <strong>inner</strong> (core) electrons provide real shielding.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Ionic Radius</span> Cations Shrink</h2>
+<div class="card">
+<svg viewBox="0 0 460 180" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="120" cy="90" r="55" fill="none" stroke="#c084fc"/>
+  <text x="120" y="95" text-anchor="middle" font-size="12" fill="#c084fc">Li</text>
+  <text x="120" y="160" text-anchor="middle" font-size="11" fill="#9aa1b4">neutral (3e⁻)</text>
+
+  <path d="M200 90 L280 90" stroke="#9aa1b4" marker-end="url(#a2)"/>
+  <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#9aa1b4"/></marker></defs>
+  <text x="240" y="80" text-anchor="middle" font-size="10" fill="#9aa1b4">lose e⁻</text>
+
+  <circle cx="360" cy="90" r="30" fill="none" stroke="#ff9d4d"/>
+  <text x="360" y="95" text-anchor="middle" font-size="12" fill="#ff9d4d">Li⁺</text>
+  <text x="360" y="150" text-anchor="middle" font-size="11" fill="#9aa1b4">cation (2e⁻) — smaller</text>
+</svg>
+
+<div class="formula-block">Li → Li⁺ + e⁻</div>
+
+Losing the outer electron leaves the same +3 nuclear charge pulling on fewer, now-innermost electrons. No more outer shell to occupy → the ion shrinks noticeably compared to the neutral atom.
+
+<div class="tip">
+<div class="tip-title">General rule</div>
+Cation (positive ion) is always <strong>smaller</strong> than its neutral parent atom.
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Ionic Radius</span> Anions Grow</h2>
+<div class="card">
+<div class="formula-block">Cl (neutral) → [Ne] 3s² 3p⁵ &nbsp;(7 valence e⁻)</div>
+<div class="formula-block">Cl⁻ (anion) → [Ne] 3s² 3p⁶ &nbsp;(8 valence e⁻)</div>
+
+Adding an electron makes the ion <strong>larger</strong> than the neutral atom — the opposite of cations.
+
+<div class="warn">
+<div class="warn-title">The explanation is genuinely debated</div>
+The common textbook explanation: with 8 electrons instead of 7 in the outer shell, there's more electron-electron repulsion, pushing the cloud outward. This is a reasonable intuition, but some chemists dispute it as the full/correct mechanism, and no clean alternative has fully replaced it. For exam purposes, just remember the outcome: <strong>anions are larger than their neutral atom.</strong>
+</div>
+</div>
+
+<h2><span class="pill pill-green">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th>Change</th><th>Effect on radius</th><th>Why</th></tr>
+<tr><td>Down a group</td><td>Increases</td><td>New outer shell added</td></tr>
+<tr><td>Across a period (L→R)</td><td>Decreases</td><td>Nuclear charge increases, shielding stays constant</td></tr>
+<tr><td>Neutral → cation</td><td>Decreases</td><td>Outer electron(s) removed, remaining electrons pulled in tighter</td></tr>
+<tr><td>Neutral → anion</td><td>Increases</td><td>Extra electron added, more electron-electron repulsion (commonly cited reason)</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-orange">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Atomic radius definition (half the internuclear distance between two identical bonded atoms) is worth memorizing verbatim — it's a common short-answer question.</li>
+<li>When comparing sizes across a period, always frame it as "same shielding, more nuclear charge" — that's the reasoning graders look for.</li>
+<li>Cation smaller, anion larger than the parent neutral atom — a quick two-word rule that covers most exam questions.</li>
+<li>Ionic radius questions get trickier for larger charge differences (e.g. 2+ vs 3+) — the core logic (more charge pulling on fewer electrons = smaller) still applies, just scaled.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

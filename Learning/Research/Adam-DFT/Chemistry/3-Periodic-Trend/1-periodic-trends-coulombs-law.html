@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Periodic Trends via Coulomb's Law</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.1rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  .formula-block{background:var(--code-bg);border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;margin:8px 0;font-size:1.05rem;color:var(--green);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;}
+  th,td{border:1px solid var(--card-border);padding:8px 10px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .warn{background:rgba(255,157,77,.08);border:1px solid rgba(255,157,77,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .warn-title{color:var(--orange);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Periodic Trends via Coulomb's Law</h1>
+<p class="subtitle">AP Chemistry · Periodic Trends · Source: Khan Academy (video)</p>
+
+<h2><span class="pill pill-blue">Problem</span> One equation explains almost every periodic trend</h2>
+<div class="card">
+Instead of memorizing separate rules for atomic radius, ionization energy, electron affinity, and electronegativity, all of them fall out of a single idea: <strong>Coulomb's Law</strong> — the force between charges.
+
+<div class="formula-block">F ∝ (q₁ × q₂) / r²</div>
+
+Here <code>q1</code> = effective nuclear charge felt by an electron, <code>q2</code> = electron's charge (constant), <code>r</code> = distance from nucleus to that electron. Everything below is about how <code>q1</code> (Zeff) and <code>r</code> change across the table.
+</div>
+
+<h2><span class="pill pill-orange">Core Concept</span> Effective Nuclear Charge (Zeff)</h2>
+<div class="card">
+<div class="formula-block">Zeff ≈ Z − (# core electrons)</div>
+
+Core electrons sit between the nucleus and the valence electrons, <strong>shielding</strong> valence electrons from the full nuclear pull. Zeff is the "net" positive charge a valence electron actually feels.
+
+<table>
+<tr><th>Element</th><th>Config</th><th>Core e⁻</th><th>Valence e⁻</th><th>Zeff ≈ Z − core</th></tr>
+<tr><td>Li</td><td>1s² 2s¹</td><td>2</td><td>1</td><td>3 − 2 = 1</td></tr>
+<tr><td>F</td><td>1s² 2s² 2p⁵</td><td>2</td><td>7</td><td>9 − 2 = 7</td></tr>
+<tr><td>Na</td><td>1s² 2s² 2p⁶ 3s¹</td><td>10</td><td>1</td><td>11 − 10 = 1</td></tr>
+<tr><td>Ne</td><td>1s² 2s² 2p⁶</td><td>2</td><td>8</td><td>10 − 2 = 8</td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">Why group 1 elements all "feel" similar</div>
+Li and Na have very different atomic numbers, but both land at Zeff ≈ 1. Core electrons scale up right alongside the nucleus down a group — so the <em>net</em> pull on the valence electron stays roughly constant. This is why elements in the same group react similarly.
+</div>
+</div>
+
+<h2><span class="pill pill-green">Trend 1</span> Atomic Radius</h2>
+<div class="card">
+<svg viewBox="0 0 460 200" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="420" height="160" fill="none" stroke="#262b3a"/>
+  <text x="30" y="15" font-size="11" fill="#9aa1b4">← Left (low Zeff)                Right (high Zeff) →</text>
+  <path d="M60 40 L400 160" stroke="#4ade80" stroke-width="2" marker-end="url(#a1)"/>
+  <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#4ade80"/></marker></defs>
+  <text x="60" y="35" font-size="11" fill="#4ade80">Large radius</text>
+  <text x="300" y="175" font-size="11" fill="#4ade80">Small radius</text>
+  <text x="30" y="100" font-size="11" fill="#9aa1b4" transform="rotate(-90 30 100)">↑ shell increases (down group)</text>
+</svg>
+
+<table>
+<tr><th>Direction</th><th>Effect</th><th>Why</th></tr>
+<tr><td>Left → Right (across a row)</td><td>Radius decreases</td><td>Zeff increases while shell stays same → stronger pull inward</td></tr>
+<tr><td>Top → Bottom (down a group)</td><td>Radius increases</td><td>New outer shell added each row → electrons further from nucleus</td></tr>
+</table>
+
+<div class="example">
+<div class="example-title">Extremes</div>
+Helium = smallest atom (top-right). Francium = largest atom (bottom-left). Overall trend: radius shrinks as you move up-and-right.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Trend 2</span> Ionization Energy</h2>
+<div class="card">
+Energy needed to remove the first (outermost/valence) electron. High when Coulomb force is strong → <strong>high Zeff + low radius</strong> = same corner as smallest atoms.
+
+<div class="tip">
+<div class="tip-title">Highest ionization energy: top-right (noble gases, halogens)</div>
+Makes intuitive sense: noble gases are already stable and "don't want" to lose an electron. Halogens are one electron away from a full octet, so removing one is costly too.
+</div>
+
+<div class="example">
+<div class="example-title">Lowest: bottom-left (e.g. francium)</div>
+One valence electron, far from the nucleus, heavily shielded by many core electrons (low Zeff despite huge atomic number) → easy to remove.
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Trend 3</span> Electron Affinity</h2>
+<div class="card">
+Energy <strong>released</strong> when an electron is added to a neutral atom. High electron affinity = atom "wants" an extra electron = strong Coulomb attraction = high Zeff + low radius → <strong>same top-right region</strong>, with one exception.
+
+<div class="warn">
+<div class="warn-title">Noble gas exception</div>
+Even though noble gases have high Zeff, they don't want extra electrons (already full shell) — so the true electron-affinity "hot zone" is the top-right <em>excluding</em> noble gases, especially halogens like F and Cl.
+</div>
+
+<div class="tip">
+<div class="tip-title">Sign convention gotcha</div>
+"High electron affinity" in casual usage means "releases a lot of energy." But by convention, released energy is recorded as a <strong>negative</strong> number. Don't let the negative sign confuse you into thinking it means "low affinity."
+</div>
+</div>
+
+<h2><span class="pill pill-green">Trend 4</span> Electronegativity</h2>
+<div class="card">
+How strongly an atom <strong>hogs a shared pair of electrons</strong> in a bond — closely related to (and follows the same trend as) electron affinity, but conceptually different.
+
+<table>
+<tr><th></th><th>Electron affinity</th><th>Electronegativity</th></tr>
+<tr><td>Measures</td><td>Energy released gaining an electron (isolated atom)</td><td>Pull on a shared electron pair within a bond</td></tr>
+<tr><td>Measurable how</td><td>Directly, in kJ/mol (gas phase)</td><td>No single direct measurement — more of a relative/derived scale</td></tr>
+<tr><td>Trend</td><td>High top-right (excl. noble gases)</td><td>High top-right (excl. noble gases)</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-orange">Master Summary</span> All Trends at a Glance</h2>
+<div class="card">
+<table>
+<tr><th>Property</th><th>Increases toward</th><th>Driven by</th></tr>
+<tr><td>Atomic radius</td><td>Bottom-left</td><td>Low Zeff + more shells</td></tr>
+<tr><td>Ionization energy</td><td>Top-right</td><td>High Zeff + low radius</td></tr>
+<tr><td>Electron affinity</td><td>Top-right (excl. noble gases)</td><td>High Zeff + low radius</td></tr>
+<tr><td>Electronegativity</td><td>Top-right (excl. noble gases)</td><td>Same as electron affinity</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-purple">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Almost every trend question reduces to: "is Zeff high or low here, and is r large or small?" Work it out from Coulomb's law rather than memorizing arrows.</li>
+<li>Zeff ≈ atomic number − core electron count. Quick to compute from any electron configuration.</li>
+<li>Remember the noble-gas carve-out for electron affinity/electronegativity — they buck the "top-right is highest" pattern because they don't want extra electrons at all.</li>
+<li>Ionization energy and electron affinity are "mirror" concepts: one is about removing an electron, the other about adding one — but both are maximized by the same high-Zeff, low-radius conditions.</li>
+<li>Watch the sign convention: negative electron affinity values usually mean energy was <em>released</em>, i.e. a strong (high) affinity — not weak.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

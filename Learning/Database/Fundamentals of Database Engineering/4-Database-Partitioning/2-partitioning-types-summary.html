@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Partitioning Types</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2);}
+  .tag.purple{background:var(--purple);}
+  code{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  .types-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:16px; margin-top:14px;
+  }
+  .type-card{
+    border:1px solid var(--border); border-radius:12px; padding:16px;
+    background:#1b1f29;
+  }
+  .type-card h3{margin:0 0 8px; font-size:1rem; display:flex; align-items:center; gap:8px;}
+  .type-card .icon{font-size:1.3rem;}
+  .type-card p{font-size:0.85rem; color:#cfd6e4; margin:0 0 8px; line-height:1.5;}
+  .type-card ul{margin:0; padding-left:18px;}
+  .type-card li{font-size:0.82rem; margin-bottom:5px; line-height:1.4;}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.88rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .flow{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0;
+  }
+  .box{
+    background:#0f1319; border:1px solid var(--border); border-radius:8px;
+    padding:8px 12px; text-align:center; font-size:0.78rem;
+  }
+  .box.archive{border-color:var(--muted); color:var(--muted);}
+  .arrow{color:var(--muted); font-size:1.1rem;}
+  .quote{
+    font-style:italic; color:#cfd6e4; border-left:3px solid var(--accent2);
+    padding:10px 16px; margin:14px 0; background:#151a22; border-radius:0 8px 8px 0; font-size:0.88rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🗂️ Partitioning Types</h1>
+  <div class="sub">Three ways to decide which partition a row belongs to (horizontal partitioning)</div>
+
+  <div class="card">
+    <h2><span class="tag">Overview</span></h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">When splitting a table by rows (horizontal partitioning), the database needs a rule to decide which partition each row lands in. There are three common strategies:</p>
+
+    <div class="types-grid">
+
+      <div class="type-card">
+        <h3><span class="icon">📏</span> By Range</h3>
+        <p>Rows are grouped by a continuous range of values — most commonly <b>dates</b> or <b>IDs</b>.</p>
+        <ul>
+          <li>e.g. customer <code>ID 1–200,000</code> → Partition 1</li>
+          <li>e.g. IoT sensor <code>logdate</code> → partition per year, quarter, or month (2012 data, 2013 data, 2020 data...)</li>
+        </ul>
+      </div>
+
+      <div class="type-card">
+        <h3><span class="icon">📋</span> By List</h3>
+        <p>Rows are grouped by <b>discrete values</b>, not a range.</p>
+        <ul>
+          <li>e.g. all California customers → Partition CA</li>
+          <li>e.g. all Alabama customers → Partition AL</li>
+          <li>Same idea works for zip codes or countries</li>
+        </ul>
+      </div>
+
+      <div class="type-card">
+        <h3><span class="icon">🔢</span> By Hash</h3>
+        <p>A <b>hash function</b> spreads rows across partitions based on the hashed value of a key.</p>
+        <ul>
+          <li>Hash of the value → determines which partition it lands in</li>
+          <li>Popular in Cassandra for spreading data evenly</li>
+          <li>Similar idea to <b>IP hashing</b> in load balancers/proxies — hash of client IP decides which backend server gets the request</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="tag green">Real-world payoff: Range partitioning + archiving</span></h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">One big advantage of <b>range</b> partitioning by date: old partitions can be identified and moved off fast storage since nobody queries them anymore.</p>
+    <div class="flow">
+      <div class="box">🗄️ 1995 data partition</div>
+      <span class="arrow">→</span>
+      <div class="box archive">🐢 Slow archive storage<br><span style="font-size:0.72rem;">("running on tape somewhere")</span></div>
+    </div>
+    <div class="quote">"Who's going to query 1995 data anymore? So let's move it into a slower archive — if it's slow, I don't care."</div>
+    <div class="example">
+      🏠 <b>Real-world analogy:</b> An IoT company logging sensor readings every second keeps this year's
+      partition on fast SSD for active dashboards, but ships 2019's partition off to cheap cold storage — 
+      it's rarely touched, so speed doesn't matter there.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="tag purple">Quick Comparison</span></h2>
+    <div class="types-grid">
+      <div class="type-card">
+        <h3>📏 Range</h3>
+        <p><b>Best for:</b> ordered data (dates, sequential IDs). <b>Bonus:</b> easy to archive old partitions.</p>
+      </div>
+      <div class="type-card">
+        <h3>📋 List</h3>
+        <p><b>Best for:</b> categorical/discrete values (state, country, zip) where grouping by known value makes sense.</p>
+      </div>
+      <div class="type-card">
+        <h3>🔢 Hash</h3>
+        <p><b>Best for:</b> evenly spreading load/data when there's no natural range or category to split on (e.g. Cassandra, load balancer IP hashing).</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "e332911ca5c065b5",
+        "id": "f10325be55d90560",
         "type": "tabs",
         "children": [
           {
-            "id": "e1bd6e384fd9e9f7",
+            "id": "feab5df49c6008c5",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "html-view",
+              "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/6-demo-postgres-partition-pruning-summary.html"
+              },
+              "icon": "code-glyph",
+              "title": "6-demo-postgres-partition-pruning-summary"
             }
           }
         ]
@@ -184,21 +186,24 @@
   },
   "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "conflict-files-obsidian-git.md",
-    "Learning/System Design/Practice/TicketMaster/My Practice.excalidraw",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/5-demo-postgres-creating-partitions-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/4-demo-postgres-setup-baseline-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/3-partitioning-vs-sharding-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/2-partitioning-types-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/1-what-is-partitioning-summary.html",
+    "Untitled.md",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/6-demo-postgres-partition-pruning-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/files/6-demo-postgres-partition-pruning-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/files/5-demo-postgres-creating-partitions-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/files/4-demo-postgres-setup-baseline-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/files/3-partitioning-vs-sharding-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
+    "Learning/Backend Engineering/Reources.md",
     "Learning/System Design/Practice/TicketMaster/Ticket Master .excalidraw.md",
+    "conflict-files-obsidian-git.md",
     "Learning/System Design/Practice/TicketMaster/Practice.excalidraw.md",
-    "Learning/System Design/Practice/TicketMaster/ticketmaster-case-study.html",
-    "Learning/System Design/Patterns/Contention/contention-summary.html",
-    "Learning/System Design/Patterns/Contention",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel II.excalidraw.md",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/6-relu-piecewise-linear.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Notebooks/C2_W2_Relu.ipynb",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Notebooks",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/5-why-need-activation-functions.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/4-choosing-activation-functions.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/3-activation-functions.html",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-article.md",
@@ -214,12 +219,9 @@
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Resources.md",
     "Learning/System Design/Case Studies.md",
     "Learning/Database/Interviews/Resources.md",
-    "Learning/Backend Engineering/Reources.md",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/Resources.md",
     "Learning/Distributed Systems/MIT- Coursework Spring 2026.md",
     "Learning/Distributed Systems/Lecture 1/Papers to read.md",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Demo: Partition Pruning & Index Size</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --yellow:#e5b53d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2);}
+  .tag.red{background:var(--red);}
+  .tag.purple{background:var(--purple);}
+  code{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  pre{
+    background:#0c0e13; border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-family:'Fira Code','Consolas',monospace; font-size:0.78rem;
+    overflow-x:auto; color:#c9d6ea; line-height:1.5; margin:8px 0 0;
+  }
+  .kw{color:#7fb3ff;}
+  .comment{color:#6b7484;}
+  .highlight{color:#f0a27a;}
+  table{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:12px;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid #2a2f3a;}
+  th{color:var(--muted); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
+  td.num{font-family:'Fira Code',monospace; color:#9fd4ff;}
+  td.good{color:#7fe0ab;}
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0; justify-content:center;}
+  .box{
+    background:#0f1319; border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; text-align:center; font-size:0.78rem; min-width:90px;
+  }
+  .box.hit{border-color:var(--accent2); color:#bfeccf;}
+  .box.skip{border-color:var(--muted); color:var(--muted); opacity:0.5;}
+  .arrow{color:var(--muted); font-size:1.1rem;}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.88rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .quote{
+    font-style:italic; color:#cfd6e4; border-left:3px solid var(--accent2);
+    padding:10px 16px; margin:14px 0; background:#151a22; border-radius:0 8px 8px 0; font-size:0.88rem;
+  }
+  .warning{
+    border-left:3px solid var(--red); background:#221417; padding:10px 16px; border-radius:0 8px 8px 0;
+    font-size:0.88rem; color:#f3c9c0; margin-top:10px;
+  }
+  .metric{
+    display:inline-block; background:#0f1319; border:1px solid var(--border); border-radius:6px;
+    padding:4px 10px; font-size:0.78rem; margin:4px 6px 0 0; font-family:'Fira Code',monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔍 Demo: Partition Pruning & Index Size</h1>
+  <div class="sub">Verifying that queries hit only the right partition — and why that matters at scale</div>
+
+  <!-- QUERY ON PARTITIONED TABLE -->
+  <div class="card">
+    <h2><span class="tag">Query test</span> <code>g = 30</code> on the partitioned table</h2>
+    <pre><span class="kw">explain</span> <span class="kw">select count</span>(*) <span class="kw">from</span> grades_parts <span class="kw">where</span> g = 30;</pre>
+    <p style="font-size:0.9rem; color:#cfd6e4;">Result: only <b>one</b> partition is touched —</p>
+    <div class="flow">
+      <div class="box hit">g0035 ✅<br><span style="font-size:0.7rem;">Index Only Scan</span></div>
+      <div class="box skip">g3560</div>
+      <div class="box skip">g6080</div>
+      <div class="box skip">g80100</div>
+    </div>
+    <p style="font-size:0.85rem; color:var(--muted);">Since g = 30 falls in range 0–35, Postgres knows to go straight to <code>g0035_g_idx</code> and ignore the other three partitions entirely.</p>
+  </div>
+
+  <!-- SURPRISING RESULT -->
+  <div class="card">
+    <h2><span class="tag red">Surprising result: not much faster (on this machine)</span></h2>
+    <table>
+      <tr><th>Query</th><th>Execution Time</th></tr>
+      <tr><td>Original table (<code>grades_org</code>), g = 30</td><td class="num">~75.97 ms</td></tr>
+      <tr><td>Partitioned table (<code>grades_parts</code>), g = 30</td><td class="num">~43.3 ms</td></tr>
+    </table>
+    <div class="quote">"Hussein, you said partitions are great and are going to be faster — not really, if you think about it."</div>
+    <p style="font-size:0.9rem; color:#cfd6e4;">Why the gap isn't dramatic here: the demo machine (16GB RAM) has no memory or I/O limits on the Docker container. Both the full 69MB index and the smaller per-partition indexes comfortably fit in memory — so there's little difference to observe.</p>
+    <p style="font-size:0.9rem; color:#cfd6e4;"><b>Where it would matter:</b> if the container were memory-constrained (e.g. capped at 500MB) and the original index didn't fit in memory, hitting a huge index vs. a small one would show a real, visible performance gap.</p>
+  </div>
+
+  <!-- INDEX/TABLE SIZE COMPARISON -->
+  <div class="card">
+    <h2><span class="tag purple">Checking actual sizes with <code>pg_relation_size</code></span></h2>
+    <pre><span class="kw">select</span> pg_relation_size(oid), relname
+<span class="kw">from</span> pg_class
+<span class="kw">order by</span> pg_relation_size(oid) <span class="kw">desc</span>;</pre>
+
+    <table>
+      <tr><th>Object</th><th>Size</th><th>Type</th></tr>
+      <tr><td>grades_org</td><td class="num">362.5 MB</td><td>Original table</td></tr>
+      <tr><td>g0035</td><td class="num">126.9 MB</td><td>Partition (0–35, most popular grade range)</td></tr>
+      <tr><td>g3560</td><td class="num">90.7 MB</td><td>Partition</td></tr>
+      <tr><td>g6080</td><td class="num">72.5 MB</td><td>Partition</td></tr>
+      <tr><td>g80100</td><td class="num">72.5 MB</td><td>Partition</td></tr>
+      <tr><td>grades_org_index</td><td class="num highlight">69.4 MB</td><td>Original single index</td></tr>
+      <tr><td>g0035_g_idx</td><td class="num good">24.3 MB</td><td>Partition index</td></tr>
+      <tr><td>g3560_g_idx</td><td class="num good">17.4 MB</td><td>Partition index</td></tr>
+      <tr><td>g6080_g_idx</td><td class="num good">13.9 MB</td><td>Partition index</td></tr>
+      <tr><td>g80100_g_idx</td><td class="num good">13.9 MB</td><td>Partition index</td></tr>
+    </table>
+
+    <p style="font-size:0.9rem; color:#cfd6e4; margin-top:10px;">The single original index (69.4 MB) is <b>~3x larger</b> than any individual partition index (13.9–24.3 MB). Smaller indexes are cheaper to scan, cheaper to keep in memory, and cheaper to maintain.</p>
+
+    <div class="example">
+      🏠 <b>Real-world takeaway:</b> at 10M rows the difference is minor on a beefy machine. But scale this up to 100M–500M+ rows, or run it on a resource-constrained server (like a typical production container with memory limits), and a 3x smaller index can mean the difference between an index living fully in RAM vs. spilling to disk — a massive real-world performance gap.
+    </div>
+  </div>
+
+  <!-- PARTITION PRUNING -->
+  <div class="card">
+    <h2><span class="tag green">The setting that makes it all work: <code>enable_partition_pruning</code></span></h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">This Postgres setting controls whether the planner is allowed to skip irrelevant partitions. It should always be <b>on</b> (the default).</p>
+
+    <pre><span class="comment">-- turning it off to demonstrate the danger</span>
+<span class="kw">set</span> enable_partition_pruning = off;
+<span class="kw">explain select count</span>(*) <span class="kw">from</span> grades_parts <span class="kw">where</span> g = 30;</pre>
+
+    <div class="warning">
+      ⚠️ With pruning <b>OFF</b>: the query hit <b>all four</b> partitions (g0035, g3560, g6080, g80100) — even though only one could possibly contain g = 30. This defeats the entire purpose of partitioning.
+    </div>
+
+    <div class="flow">
+      <div class="box hit">g0035 ✅</div>
+      <div class="box hit">g3560 ❌ wasted</div>
+      <div class="box hit">g6080 ❌ wasted</div>
+      <div class="box hit">g80100 ❌ wasted</div>
+    </div>
+
+    <pre><span class="comment">-- restoring correct behavior</span>
+<span class="kw">set</span> enable_partition_pruning = on;
+<span class="kw">explain select count</span>(*) <span class="kw">from</span> grades_parts <span class="kw">where</span> g = 30;
+<span class="comment">-- back to hitting only g0035</span></pre>
+
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:8px;">The presenter notes he's unsure why this "off" option even exists — possibly a safeguard for edge cases — but stresses it should always be left <b>on</b> in practice.</p>
+  </div>
+
+  <!-- KEY TAKEAWAYS -->
+  <div class="card">
+    <h2><span class="tag green">Key Takeaways</span></h2>
+    <ul style="font-size:0.9rem; line-height:1.6; padding-left:20px;">
+      <li>A correctly pruned query on a partitioned table touches <b>only the relevant partition(s)</b> — verified via <code>EXPLAIN</code> showing a single Index Only Scan.</li>
+      <li>Performance gains from partitioning may not be dramatic on an unconstrained machine — they become much more visible under real memory/I/O limits.</li>
+      <li>Partition indexes are individually much smaller than one giant index — this matters more as data scales into hundreds of millions of rows.</li>
+      <li><code>enable_partition_pruning</code> must stay <b>ON</b> — otherwise Postgres scans every partition anyway, and you lose the entire benefit of partitioning.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

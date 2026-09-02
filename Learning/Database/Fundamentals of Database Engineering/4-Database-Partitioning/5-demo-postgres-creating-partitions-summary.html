@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Demo: Creating Partitions in Postgres</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --yellow:#e5b53d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2);}
+  .tag.purple{background:var(--purple);}
+  .tag.yellow{background:var(--yellow); color:#241d00;}
+  code{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  .step{display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;}
+  .stepnum{
+    display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px;
+    border-radius:50%; background:var(--accent); color:#fff; font-size:0.78rem; font-weight:700;
+    flex-shrink:0; margin-top:2px;
+  }
+  .steptext{font-size:0.9rem; line-height:1.55;}
+  .steptext b{color:#fff;}
+  pre{
+    background:#0c0e13; border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-family:'Fira Code','Consolas',monospace; font-size:0.8rem;
+    overflow-x:auto; color:#c9d6ea; line-height:1.5; margin:8px 0 0;
+  }
+  .kw{color:#7fb3ff;}
+  .comment{color:#6b7484;}
+  .partition-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px; margin-top:14px;
+  }
+  .part{
+    border:1px solid var(--border); border-radius:10px; padding:12px; background:#1b1f29; font-size:0.82rem;
+  }
+  .part .range{color:var(--accent2); font-weight:700; font-size:0.78rem; display:block; margin-bottom:6px;}
+  .part .rows{color:var(--muted); font-size:0.78rem; margin-top:6px;}
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0;}
+  .box{
+    background:#0f1319; border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; text-align:center; font-size:0.78rem;
+  }
+  .box.master{border-color:var(--purple); color:#dcc9ff;}
+  .arrow{color:var(--muted); font-size:1.1rem;}
+  table{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:12px;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid #2a2f3a;}
+  th{color:var(--muted); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
+  td.num{font-family:'Fira Code',monospace; color:#9fd4ff;}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.88rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .quote{
+    font-style:italic; color:#cfd6e4; border-left:3px solid var(--accent2);
+    padding:10px 16px; margin:14px 0; background:#151a22; border-radius:0 8px 8px 0; font-size:0.88rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧪 Demo: Creating Partitions in Postgres</h1>
+  <div class="sub">Continuing the demo — building 4 range partitions, populating them, and indexing them</div>
+
+  <!-- STEP 1: MASTER TABLE -->
+  <div class="card">
+    <h2><span class="tag">Step 1</span> Create the partitioned "master" table</h2>
+    <div class="step">
+      <span class="stepnum">1</span>
+      <div class="steptext">Same columns as before (<code>id</code>, <code>g</code>, both NOT NULL), but declared with <code>PARTITION BY RANGE(g)</code>. This table itself stays <b>empty</b> — it's just the parent that routes rows.</div>
+    </div>
+    <pre><span class="kw">create table</span> grades_parts (
+  id <span class="kw">serial not null</span>,
+  g <span class="kw">int not null</span>
+) <span class="kw">partition by range</span>(g);</pre>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:8px;">Postgres does <b>not</b> auto-create the partitions — you're responsible for defining each range yourself.</p>
+  </div>
+
+  <!-- STEP 2: CREATE PARTITIONS -->
+  <div class="card">
+    <h2><span class="tag">Step 2</span> Create 4 partition tables</h2>
+    <div class="step">
+      <span class="stepnum">2</span>
+      <div class="steptext">Each partition is created with <code>LIKE grades_parts INCLUDING INDEXES</code> — copies the structure. No indexes exist yet since none exist on the master at this point.</div>
+    </div>
+    <pre><span class="kw">create table</span> g0035  (<span class="kw">like</span> grades_parts <span class="kw">including indexes</span>);
+<span class="kw">create table</span> g3560  (<span class="kw">like</span> grades_parts <span class="kw">including indexes</span>);
+<span class="kw">create table</span> g6080  (<span class="kw">like</span> grades_parts <span class="kw">including indexes</span>);
+<span class="kw">create table</span> g80100 (<span class="kw">like</span> grades_parts <span class="kw">including indexes</span>);</pre>
+
+    <div class="partition-grid">
+      <div class="part"><span class="range">g0035</span>Grades 0 – 35</div>
+      <div class="part"><span class="range">g3560</span>Grades 35 – 60</div>
+      <div class="part"><span class="range">g6080</span>Grades 60 – 80</div>
+      <div class="part"><span class="range">g80100</span>Grades 80 – 100</div>
+    </div>
+  </div>
+
+  <!-- STEP 3: ATTACH -->
+  <div class="card">
+    <h2><span class="tag">Step 3</span> Attach each partition to the master table</h2>
+    <div class="step">
+      <span class="stepnum">3</span>
+      <div class="steptext">Each partition is attached with an explicit value range using <code>ALTER TABLE ... ATTACH PARTITION ... FOR VALUES FROM (x) TO (y)</code>.</div>
+    </div>
+    <pre><span class="kw">alter table</span> grades_parts <span class="kw">attach partition</span> g0035  <span class="kw">for values from</span> (0)  <span class="kw">to</span> (35);
+<span class="kw">alter table</span> grades_parts <span class="kw">attach partition</span> g3560  <span class="kw">for values from</span> (35) <span class="kw">to</span> (60);
+<span class="kw">alter table</span> grades_parts <span class="kw">attach partition</span> g6080  <span class="kw">for values from</span> (60) <span class="kw">to</span> (80);
+<span class="kw">alter table</span> grades_parts <span class="kw">attach partition</span> g80100 <span class="kw">for values from</span> (80) <span class="kw">to</span> (100);</pre>
+    <div class="flow">
+      <div class="box master">grades_parts<br><span style="font-size:0.7rem;">(empty parent)</span></div>
+      <span class="arrow">⟵ attached ⟶</span>
+      <div class="box">g0035</div>
+      <div class="box">g3560</div>
+      <div class="box">g6080</div>
+      <div class="box">g80100</div>
+    </div>
+    <p style="font-size:0.85rem; color:var(--muted);">At this point, partitions are wired up, but the master table (and all partitions) are still completely <b>empty</b> — no indexes anywhere yet.</p>
+  </div>
+
+  <!-- STEP 4: POPULATE -->
+  <div class="card">
+    <h2><span class="tag green">Step 4</span> Populate by copying from the original table</h2>
+    <pre><span class="kw">insert into</span> grades_parts
+<span class="kw">select</span> * <span class="kw">from</span> grades_org;</pre>
+    <p style="font-size:0.9rem; color:#cfd6e4;">This copies all <b>10,000,001 rows</b> row-by-row. The key magic: for every row inserted, <b>Postgres automatically decides which partition it belongs to</b> based on the value of <code>g</code>.</p>
+    <div class="quote">If g = 20, it lands in g0035 (since 20 is between 0 and 35) — and so on automatically for every row.</div>
+
+    <p style="font-size:0.9rem; color:#cfd6e4; margin-top:12px;"><b>Verifying the distribution:</b></p>
+    <pre><span class="kw">select count</span>(*) <span class="kw">from</span> grades_parts;   <span class="comment">-- 10,000,001 (matches original)</span>
+<span class="kw">select max</span>(g)   <span class="kw">from</span> grades_parts;   <span class="comment">-- 99 (max grade overall)</span>
+
+<span class="kw">select count</span>(*) <span class="kw">from</span> g0035;         <span class="comment">-- ~3,000,000 rows</span>
+<span class="kw">select count</span>(*) <span class="kw">from</span> g3560;         <span class="comment">-- ~2,000,000 rows</span>
+<span class="kw">select max</span>(g)   <span class="kw">from</span> g3560;         <span class="comment">-- 59 (largest value that fits this range)</span></pre>
+
+    <table>
+      <tr><th>Partition</th><th>Range</th><th>Approx. rows</th></tr>
+      <tr><td>g0035</td><td class="num">0 – 35</td><td class="num">~3,000,000</td></tr>
+      <tr><td>g3560</td><td class="num">35 – 60</td><td class="num">~2,000,000</td></tr>
+      <tr><td>g6080</td><td class="num">60 – 80</td><td class="num">(remainder, distributed)</td></tr>
+      <tr><td>g80100</td><td class="num">80 – 100</td><td class="num">(remainder, distributed)</td></tr>
+    </table>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:8px;">Distribution is essentially random since grades were randomly generated — real-world range partitions (e.g. by date) would distribute more predictably over time.</p>
+  </div>
+
+  <!-- STEP 5: INDEX -->
+  <div class="card">
+    <h2><span class="tag purple">Step 5</span> Create ONE index — it cascades to all partitions</h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">Before Postgres 11, you had to index every partition individually. From Postgres 11/12+, creating an index on the <b>master (leader) partition table</b> automatically creates the matching index on <b>every partition</b>.</p>
+    <pre><span class="kw">create index</span> grades_parts_idx <span class="kw">on</span> grades_parts(g);</pre>
+
+    <div class="example">
+      ✅ <b>Result:</b> Checking <code>\d grades_parts</code> shows the index on the parent, and checking any partition
+      (e.g. <code>\d g0035</code>) shows <code>g0035_g_idx</code> — an index Postgres created <b>automatically</b>, even though it was never created manually on that specific partition table.
+    </div>
+  </div>
+
+  <!-- KEY TAKEAWAY -->
+  <div class="card">
+    <h2><span class="tag green">Key Takeaways</span></h2>
+    <ul style="font-size:0.9rem; line-height:1.6; padding-left:20px;">
+      <li>Postgres requires <b>manual definition</b> of each partition range — it won't auto-generate them.</li>
+      <li>The parent/master table stays <b>empty</b>; it only exists to route rows and hold shared metadata (like indexes).</li>
+      <li>Inserting into the master table automatically routes each row to the correct partition based on its range.</li>
+      <li>Creating an index once on the master table <b>propagates it to every partition</b> — no need to repeat it per partition.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

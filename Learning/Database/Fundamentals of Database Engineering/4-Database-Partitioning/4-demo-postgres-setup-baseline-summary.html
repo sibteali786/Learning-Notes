@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Demo: Postgres Setup (Before Partitioning)</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --yellow:#e5b53d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2);}
+  .tag.purple{background:var(--purple);}
+  .tag.yellow{background:var(--yellow); color:#241d00;}
+  .step{display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;}
+  .stepnum{
+    display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px;
+    border-radius:50%; background:var(--accent); color:#fff; font-size:0.78rem; font-weight:700;
+    flex-shrink:0; margin-top:2px;
+  }
+  .steptext{font-size:0.9rem; line-height:1.55;}
+  .steptext b{color:#fff;}
+  pre{
+    background:#0c0e13; border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-family:'Fira Code','Consolas',monospace; font-size:0.8rem;
+    overflow-x:auto; color:#c9d6ea; line-height:1.5; margin:8px 0 0;
+  }
+  .kw{color:#7fb3ff;}
+  .str{color:#9fd4ff;}
+  .comment{color:#6b7484;}
+  table{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:12px;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid #2a2f3a;}
+  th{color:var(--muted); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
+  td.num{font-family:'Fira Code',monospace; color:#9fd4ff;}
+  .result-card{
+    background:#141922; border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+    margin-top:12px;
+  }
+  .result-card h4{margin:0 0 8px; font-size:0.9rem; display:flex; align-items:center; gap:6px;}
+  .metric{
+    display:inline-block; background:#0f1319; border:1px solid var(--border); border-radius:6px;
+    padding:4px 10px; font-size:0.78rem; margin:4px 6px 0 0; font-family:'Fira Code',monospace;
+  }
+  .metric.slow{color:#f0a27a; border-color:rgba(229,83,61,0.4);}
+  .metric.plan{color:#7fe0ab; border-color:rgba(76,175,125,0.4);}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.88rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .note{
+    font-size:0.82rem; color:var(--muted); margin-top:8px; font-style:italic;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧪 Demo: Postgres Setup (Before Partitioning)</h1>
+  <div class="sub">Spinning up a 10M-row table to establish a baseline — partitioning comes next</div>
+
+  <!-- SETUP -->
+  <div class="card">
+    <h2><span class="tag">Setup</span> Spin up Postgres with Docker</h2>
+    <div class="step">
+      <span class="stepnum">1</span>
+      <div class="steptext">Run a Postgres container (no port exposure needed — we'll bash directly into the container to run SQL).</div>
+    </div>
+    <pre><span class="comment"># from host terminal</span>
+docker run --name pg_main -d -e POSTGRES_PASSWORD=postgres postgres
+
+docker exec -it pg_main bash
+psql -U postgres</pre>
+
+    <div class="step" style="margin-top:14px;">
+      <span class="stepnum">2</span>
+      <div class="steptext">Create a simple <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">grades_org</code> table — an ID and a grade column. <b>Both columns must be NOT NULL</b> — this is a requirement for partitioning later.</div>
+    </div>
+    <pre><span class="kw">create table</span> grades_org (
+  id <span class="kw">serial not null</span>,
+  g <span class="kw">int not null</span>
+);</pre>
+
+    <div class="step" style="margin-top:14px;">
+      <span class="stepnum">3</span>
+      <div class="steptext">Insert <b>10 million rows</b> with random grades (0–99), generated using <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">generate_series</code> + <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">random()</code>.</div>
+    </div>
+    <pre><span class="kw">insert into</span> grades_org(g)
+<span class="kw">select</span> floor(random() * 100)
+<span class="kw">from</span> generate_series(0, 10000000);
+<span class="comment">-- INSERT 0 10000001</span></pre>
+
+    <div class="step" style="margin-top:14px;">
+      <span class="stepnum">4</span>
+      <div class="steptext">Create an index on <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">g</code> <b>after</b> inserting — faster than maintaining the index during 10M inserts.</div>
+    </div>
+    <pre><span class="kw">create index</span> grades_org_index <span class="kw">on</span> grades_org(g);</pre>
+
+    <div class="note">Table check via <code>\dt</code> confirms one table: <b>grades_org</b>.</div>
+  </div>
+
+  <!-- QUERY 1 -->
+  <div class="card">
+    <h2><span class="tag yellow">Baseline Query 1</span> Exact match <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">g = 30</code></h2>
+    <pre><span class="kw">select count</span>(*) <span class="kw">from</span> grades_org <span class="kw">where</span> g = 30;
+<span class="comment">-- count: 100271</span></pre>
+    <pre><span class="kw">explain analyze select count</span>(*) <span class="kw">from</span> grades_org <span class="kw">where</span> g = 30;</pre>
+
+    <div class="result-card">
+      <h4>📊 Plan result</h4>
+      <p style="font-size:0.85rem; color:#cfd6e4; margin:0;">Used an <b>Index Only Scan</b> on <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">grades_org_index</code> — condition <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">g = 30</code>, ~100,271 rows matched.</p>
+      <span class="metric plan">Planning: 0.261 ms</span>
+      <span class="metric slow">Execution: 75.97 ms</span>
+    </div>
+  </div>
+
+  <!-- QUERY 2 -->
+  <div class="card">
+    <h2><span class="tag yellow">Baseline Query 2</span> Range match <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">g between 30 and 35</code></h2>
+    <pre><span class="kw">explain analyze select count</span>(*) <span class="kw">from</span> grades_org
+<span class="kw">where</span> g <span class="kw">between</span> 30 <span class="kw">and</span> 35;</pre>
+
+    <div class="result-card">
+      <h4>📊 Plan result</h4>
+      <p style="font-size:0.85rem; color:#cfd6e4; margin:0;">Range condition is heavier — Postgres used a <b>Parallel Index Only Scan</b> (2 parallel workers) to cover the wider match (~268,194 rows per worker estimate).</p>
+      <span class="metric plan">Planning: 0.140 ms</span>
+      <span class="metric slow">Execution: 107.37 ms</span>
+    </div>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:8px;">A range query touches more of the index/table than a single exact match, so it costs more — even with parallelism and an index in place.</p>
+  </div>
+
+  <!-- WHY THIS MATTERS -->
+  <div class="card">
+    <h2><span class="tag green">Why this baseline matters</span></h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">This is the <b>before</b> picture: one giant 10M-row table, indexed, queried directly. Both queries still have to work through a large index over the full table. The next step in the demo is to create <b>partitions</b> for this data and attach them to a master table — then re-run similar queries to compare performance.</p>
+    <div class="example">
+      🧭 <b>What to watch for next:</b> once <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">grades_org</code> is split into partitions (e.g. by grade range), the same <code style="background:#0c0e13;color:#9fd4ff;padding:2px 6px;border-radius:5px;">EXPLAIN ANALYZE</code> should show the planner doing <b>partition pruning</b> — skipping irrelevant partitions entirely instead of scanning one big index across all 10M rows.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
