@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multi-class Classification Lab — TensorFlow</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1060px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.85rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.22rem;}
+  .badge{display:inline-block;background:var(--blue);color:#fff;border-radius:999px;padding:3px 12px;font-size:0.78rem;font-weight:700;margin-bottom:10px;}
+  pre{background:#1e1e2e;color:#e6e6e6;padding:14px;border-radius:10px;overflow-x:auto;font-size:0.85rem;line-height:1.55;font-family:'Cascadia Code','Consolas',monospace;}
+  .kw{color:#ff7edb;} .fn{color:#7dd3fc;} .str{color:#a3e635;} .num{color:#fbbf24;} .cmt{color:#8a8a9c;}
+  svg{background:#fff;border-radius:8px;display:block;margin:0 auto;}
+  .net{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:10px 0;}
+  .layer{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #444;border-radius:12px;padding:12px 10px;}
+  .unit{width:30px;height:30px;border-radius:50%;border:2.5px solid var(--blue);background:#eaf2ff;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--blue);}
+  .unit.out{border-color:var(--pink);background:#ffeaf3;}
+  .layer-label{font-weight:600;color:var(--purple);font-size:0.78rem;}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:14px;}
+  .step-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;position:relative;}
+  .step-num{position:absolute;top:-14px;left:14px;background:var(--teal);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:0.85rem;}
+  .step-card h3{margin:6px 0 8px;color:var(--teal);font-size:1rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.9rem;}
+  th,td{border:1px solid #ddd;padding:7px 9px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧪 Multi-class Classification Lab (TensorFlow)</h1>
+
+  <div class="section">
+    <span class="badge">WHAT WE'RE DOING</span>
+    <h2>🎯 The Task</h2>
+    <p>Build and train a small neural network that classifies 2D points into <strong>4 categories</strong>, then peek inside the trained network to see <strong>how</strong> each layer actually separates the classes — not just treat it as a black box.</p>
+    <pre>classes = <span class="num">4</span>
+m = <span class="num">100</span>
+centers = [[<span class="num">-5</span>,<span class="num">2</span>], [<span class="num">-2</span>,<span class="num">-2</span>], [<span class="num">1</span>,<span class="num">2</span>], [<span class="num">5</span>,<span class="num">-2</span>]]
+X_train, y_train = make_blobs(n_samples=m, centers=centers, cluster_std=<span class="num">1.0</span>)</pre>
+    <p>100 points scattered around 4 cluster centers → each point has features <code>(x0, x1)</code> and belongs to one of classes <code>0, 1, 2, 3</code>.</p>
+  </div>
+
+  <div class="section">
+    <span class="badge">WHY</span>
+    <h2>🤔 Why This Lab</h2>
+    <ul>
+      <li>Real-world multi-class problems look exactly like this shape: <strong>several input features → one of several output categories</strong> (e.g. photo → {dog, cat, horse, other}, or word → {noun, verb, adjective}).</li>
+      <li>Previous labs used <strong>2 classes</strong> (0 vs 1). This lab bumps it to <strong>4 classes</strong> to show how the architecture and loss generalize.</li>
+      <li>Rather than just training and accepting the result, this lab intentionally opens up the trained weights to build real intuition for <strong>what each hidden unit is actually doing</strong> — connecting back to the ReLU-stitching intuition from earlier.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <span class="badge">HOW</span>
+    <h2>🏗️ The Network</h2>
+    <div class="net">
+      <div class="layer">
+        <div class="unit">relu</div><div class="unit">relu</div>
+        <div class="layer-label">L1: 2 units<br>(ReLU)</div>
+      </div>
+      <div>→ a<sup>[1]</sup> →</div>
+      <div class="layer">
+        <div class="unit out"></div><div class="unit out"></div><div class="unit out"></div><div class="unit out"></div>
+        <div class="layer-label">L2: 4 units<br>(Linear)</div>
+      </div>
+      <div>→ logits (z₁...z₄)</div>
+    </div>
+    <pre>model = Sequential([
+    Dense(<span class="num">2</span>, activation=<span class="str">'relu'</span>,   name=<span class="str">"L1"</span>),
+    Dense(<span class="num">4</span>, activation=<span class="str">'linear'</span>, name=<span class="str">"L2"</span>)   <span class="cmt"># linear, not softmax!</span>
+])
+
+model.compile(
+    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="kw">True</span>),
+    optimizer=tf.keras.optimizers.Adam(<span class="num">0.01</span>),
+)
+
+model.fit(X_train, y_train, epochs=<span class="num">200</span>)</pre>
+    <p class="callout">📌 This uses the <strong>"preferred" numerically stable pattern</strong> you already learned: <code>linear</code> output + <code>from_logits=True</code> — exactly the trick from the earlier lesson, now applied in a real training run.</p>
+  </div>
+
+  <div class="section">
+    <span class="badge">HOW — INSPECTING THE TRAINED MODEL</span>
+    <h2>🔬 Opening the Black Box</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Pull Layer 1 weights</h3>
+        <p style="font-size:0.9rem;"><code>W1, b1 = model.get_layer("L1").get_weights()</code></p>
+        <p style="font-size:0.85rem;">Plot what each of the 2 hidden ReLU units computes across the (x0, x1) input space.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Transform data through L1</h3>
+        <p style="font-size:0.9rem;"><code>Xl2 = max(0, X_train·W1 + b1)</code></p>
+        <p style="font-size:0.85rem;">This creates 2 new "features" — the ReLU outputs — that Layer 2 will use.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Pull Layer 2 weights</h3>
+        <p style="font-size:0.9rem;"><code>W2, b2 = model.get_layer("L2").get_weights()</code></p>
+        <p style="font-size:0.85rem;">Plot how the output layer separates classes using these 2 new ReLU-derived features.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <span class="badge">OUTCOMES</span>
+    <h2>📊 What the Trained Network Actually Learned</h2>
+
+    <h3 style="color:var(--teal);">Layer 1 (2 ReLU units)</h3>
+    <ul>
+      <li><strong>Unit 0</strong> — separates classes {0,1} from {2,3}: outputs 0 for points on the left, positive for points on the right.</li>
+      <li><strong>Unit 1</strong> — separates classes {0,2} from {1,3}: outputs 0 for points above a line, positive below it.</li>
+    </ul>
+    <p style="font-size:0.9rem;">Together, these 2 ReLU "cuts" act like two intersecting decision lines, carving the input space into <strong>4 quadrant-like regions</strong> — one per class.</p>
+
+    <h3 style="color:var(--teal);">Layer 2 (4 linear/output units)</h3>
+    <table>
+      <tr><th>Output unit</th><th>Peaks near</th><th>Selects class</th></tr>
+      <tr><td>Unit 0</td><td>(a₁⁽¹⁾, a₂⁽¹⁾) ≈ (0, 0)</td><td>Class 0</td></tr>
+      <tr><td>Unit 1</td><td>upper-left</td><td>Class 1</td></tr>
+      <tr><td>Unit 2</td><td>lower-right</td><td>Class 2</td></tr>
+      <tr><td>Unit 3</td><td>upper-right</td><td>Class 3</td></tr>
+    </table>
+    <p class="callout">🔑 Key subtlety: each output unit isn't just maximized for its class in isolation — it has to be the <strong>largest among all 4 outputs</strong> for that region. This cross-unit coordination is enforced by softmax being baked into <code>SparseCategoricalCrossentropy</code> during training — softmax uniquely looks at all outputs together, unlike ReLU/sigmoid.</p>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Think of Layer 1's two ReLU units as <strong>two independent yes/no gatekeepers</strong> asking "are you left or right?" and "are you above or below?" Combining their two binary answers creates exactly 4 possible combinations — one per quadrant, one per class. Layer 2 then acts like <strong>4 specialized judges</strong>, each one trained to raise their hand highest only when the gatekeepers' combined answer matches their assigned quadrant — and softmax makes sure only one judge "wins" per point.</p>
+  </div>
+
+  <div class="section">
+    <span class="badge">WHAT WE LEARNED</span>
+    <h2>🧠 Concepts Reinforced</h2>
+    <ul>
+      <li><strong>Multi-class architecture</strong>: output layer needs one unit per class (here, 4).</li>
+      <li><strong>Numerically stable pattern</strong>: <code>linear</code> output activation + <code>SparseCategoricalCrossentropy(from_logits=True)</code>, same trick from the lecture, now used in a real trained model.</li>
+      <li><strong>Softmax is layer-wide</strong>: unlike ReLU/sigmoid, softmax coordinates across all outputs simultaneously — necessary for the "winner takes all" class selection to work.</li>
+      <li><strong>Hidden layers build reusable features</strong>: Layer 1's ReLU outputs become new "coordinates" that Layer 2 uses — directly connects to the ReLU piecewise-stitching intuition from the earlier tax-bracket example, just now in 2D and combined with a linear output layer.</li>
+      <li><strong>You don't need to inspect internals to use a model</strong> — but doing so once builds real intuition for what's happening "under the hood."</li>
+    </ul>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Optional Lab — "Multi-class Classification" <span class="tag">4-Class ReLU + Softmax Network</span></div>
+
+</div>
+</body>
+</html>

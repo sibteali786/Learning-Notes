@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multi-label Classification</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00; --orange:#e08e00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1060px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.85rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.22rem;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1rem;text-align:center;}
+  .net{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:10px 0;font-size:0.85rem;}
+  .layer{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #444;border-radius:12px;padding:10px 8px;}
+  .unit{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--blue);background:#eaf2ff;}
+  .unit.out{border-color:var(--pink);background:#ffeaf3;}
+  .netgroup{border:2px dashed #ccc;border-radius:14px;padding:10px;margin:8px 0;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.9rem;}
+  th,td{border:1px solid #ddd;padding:7px 9px;text-align:center;}
+  th{background:#eef4ff;color:var(--blue);}
+  .examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:14px;}
+  .ex-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;}
+  .ex-card h3{margin:0 0 8px;color:var(--teal);font-size:1rem;}
+  .ex-card .q{font-size:0.85rem;color:#444;}
+  .ex-card .ans{font-family:'Cascadia Code',monospace;background:#fff;border:1px solid #cde;border-radius:6px;padding:6px 8px;margin-top:6px;font-size:0.85rem;}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;}
+  @media(max-width:700px){.compare{grid-template-columns:1fr;}}
+  .col{border-radius:12px;padding:14px 16px;}
+  .col.mc{background:#fdf1f1;border:2px solid var(--red);}
+  .col.ml{background:#eef4ff;border:2px solid var(--blue);}
+  .col h3{margin-top:0;font-size:1.05rem;}
+  .col.mc h3{color:var(--red);}
+  .col.ml h3{color:var(--blue);}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🏷️ Multi-label Classification</h1>
+
+  <div class="section">
+    <h2>📌 What It Is</h2>
+    <p>A <strong>multi-label</strong> problem: one input image gets <strong>several independent yes/no labels at once</strong> — e.g. for a self-driving car, given one photo: "Is there a car? Is there a bus? Is there a pedestrian?"</p>
+
+    <div class="examples">
+      <div class="ex-card">
+        <h3>Image 1</h3>
+        <div class="q">Car? Yes &nbsp;|&nbsp; Bus? No &nbsp;|&nbsp; Pedestrian? Yes</div>
+        <div class="ans">y = [1, 0, 1]</div>
+      </div>
+      <div class="ex-card">
+        <h3>Image 2</h3>
+        <div class="q">Car? No &nbsp;|&nbsp; Bus? No &nbsp;|&nbsp; Pedestrian? Yes</div>
+        <div class="ans">y = [0, 0, 1]</div>
+      </div>
+      <div class="ex-card">
+        <h3>Image 3</h3>
+        <div class="q">Car? Yes &nbsp;|&nbsp; Bus? Yes &nbsp;|&nbsp; Pedestrian? No</div>
+        <div class="ans">y = [1, 1, 0]</div>
+      </div>
+    </div>
+    <p class="callout">📌 The target <strong>y is now a vector</strong> (multiple numbers), not a single number — that's the key structural difference from everything covered so far.</p>
+  </div>
+
+  <div class="section" style="border-left-color:var(--teal);">
+    <h2>⚖️ Multi-class vs Multi-label — Don't Confuse Them!</h2>
+    <div class="compare">
+      <div class="col mc">
+        <h3>Multi-class Classification</h3>
+        <p><strong>One label, many possible values.</strong></p>
+        <p style="font-size:0.9rem;">Example: handwritten digit → y is a <em>single number</em>, but it can be 0, 1, 2, ..., or 9.</p>
+        <div class="formula" style="font-size:0.9rem;">y = 7 &nbsp;(one value, from a set of 10)</div>
+        <p style="font-size:0.85rem;">Output layer: <strong>softmax</strong> — probabilities across classes sum to 1 (mutually exclusive; it's exactly one class).</p>
+      </div>
+      <div class="col ml">
+        <h3>Multi-label Classification</h3>
+        <p><strong>Many labels, each independently yes/no.</strong></p>
+        <p style="font-size:0.9rem;">Example: driving scene → y is a <em>vector</em> of independent binary answers (car? bus? pedestrian?).</p>
+        <div class="formula" style="font-size:0.9rem;">y = [1, 0, 1] &nbsp;(multiple values, each 0 or 1)</div>
+        <p style="font-size:0.85rem;">Output layer: <strong>sigmoid per unit</strong> — each output is its own independent probability, they don't need to sum to 1 (car and bus can both be present).</p>
+      </div>
+    </div>
+    <table>
+      <tr><th></th><th>Multi-class</th><th>Multi-label</th></tr>
+      <tr><td>Target y</td><td>Single number (1 of N categories)</td><td>Vector of 0/1 values</td></tr>
+      <tr><td>Question shape</td><td>"Which one of these is it?"</td><td>"Which of these are present?" (can be several)</td></tr>
+      <tr><td>Output activation</td><td>Softmax (probabilities sum to 1)</td><td>Sigmoid per output (independent probabilities)</td></tr>
+      <tr><td>Classes mutually exclusive?</td><td>Yes — exactly one</td><td>No — any combination possible</td></tr>
+      <tr><td>Example</td><td>Digit is either 0, 1, 2, ... or 9</td><td>Photo can contain a car <em>and</em> a bus <em>and</em> pedestrians, any combo</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🏗️ How to Build the Neural Network</h2>
+    <p><strong>Option 1 — Three separate networks</strong> (one per question):</p>
+    <div class="net">
+      <div class="netgroup">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="layer"><div class="unit"></div><div>⋮</div><div class="unit"></div></div>
+          →
+          <div class="layer"><div class="unit"></div><div>⋮</div><div class="unit"></div></div>
+          →
+          <div class="layer"><div class="unit out"></div></div>
+          → <strong>car</strong>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.85rem;">...repeated separately for "bus" and "pedestrian" — 3 independent networks. Valid, but redundant.</p>
+
+    <p><strong>Option 2 (Recommended) — One network, 3 output units:</strong></p>
+    <div class="net">
+      <div class="layer"><div class="unit"></div><div>⋮</div><div class="unit"></div></div>
+      <div>→ a<sup>[1]</sup> →</div>
+      <div class="layer"><div class="unit"></div><div>⋮</div><div class="unit"></div></div>
+      <div>→ a<sup>[2]</sup> →</div>
+      <div class="layer"><div class="unit out"></div><div class="unit out"></div><div class="unit out"></div></div>
+      <div>→ a<sup>[3]</sup></div>
+    </div>
+    <div class="formula" style="font-size:0.9rem;">
+      a⃗<sup>[3]</sup> = [a₁<sup>[3]</sup>, a₂<sup>[3]</sup>, a₃<sup>[3]</sup>] = [P(car), P(bus), P(pedestrian)]
+    </div>
+    <p>Shared hidden layers learn common features once; output layer has <strong>3 units, each with its own sigmoid</strong> — since each question is its own independent binary classification, not competing options.</p>
+    <p class="callout">💡 More efficient than 3 separate networks — shared hidden layers = shared learned features across all three detection tasks.</p>
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Think of <strong>multi-class</strong> like a <strong>single-choice exam question</strong> — "Which one of these is the capital of France?" Only one answer can be correct.</p>
+    <p>Think of <strong>multi-label</strong> like a <strong>checklist survey</strong> — "Check all that apply: Do you own a car? A bike? A bus pass?" You can check none, one, or all of them — they're independent yes/no questions, not competing options.</p>
+  </div>
+
+  <div class="section">
+    <h2>➡️ Coming Up Next</h2>
+    <p>Multiclass and multi-label classification wrap up this section. Next: an <strong>optimization algorithm better than plain gradient descent</strong> — to help your networks train faster.</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 10 — "Multi-label Classification" <span class="tag">vs Multi-class</span></div>
+
+</div>
+</body>
+</html>

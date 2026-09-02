@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neural Network with Softmax Output</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1060px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.85rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.22rem;}
+  .net{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 0;}
+  .layer{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid #444;border-radius:12px;padding:12px 10px;}
+  .unit{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--blue);background:#eaf2ff;}
+  .unit.out{border-color:var(--pink);background:#ffeaf3;}
+  .layer-label{font-weight:600;color:var(--purple);font-size:0.78rem;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1rem;text-align:center;}
+  pre{background:#1e1e2e;color:#e6e6e6;padding:14px;border-radius:10px;overflow-x:auto;font-size:0.85rem;line-height:1.55;font-family:'Cascadia Code','Consolas',monospace;}
+  .kw{color:#ff7edb;} .fn{color:#7dd3fc;} .str{color:#a3e635;} .num{color:#fbbf24;} .cmt{color:#8a8a9c;}
+  .compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:14px;}
+  .compare-card{border:2px solid var(--teal);border-radius:12px;padding:16px;background:#f2fbfa;}
+  .compare-card h3{margin:0 0 8px;color:var(--teal);font-size:1rem;}
+  .analogy{background:#fff8e1;border:2px dashed var(--gold);border-radius:12px;padding:14px 18px;margin-top:14px;}
+  .analogy h3{margin-top:0;color:#8a6100;font-size:1.05rem;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  .warn{background:#fdf1e0;border-left:5px solid var(--gold);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.9rem;}
+  th,td{border:1px solid #ddd;padding:7px 9px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🖧 Neural Network with a Softmax Output Layer</h1>
+
+  <div class="section">
+    <h2>🏗️ From 2-Class to 10-Class Architecture</h2>
+    <p>Previously (binary digit recognition: 0 vs 1), the output layer had 1 unit. For full MNIST (all 10 digits), swap the output layer to <strong>10 units</strong> with a <strong>softmax</strong> activation.</p>
+    <div class="net">
+      <div class="layer">
+        <div class="unit"></div><div class="unit"></div><div>⋮</div><div class="unit"></div>
+        <div class="layer-label">25 units<br>(ReLU)</div>
+      </div>
+      <div>→ a<sup>[1]</sup> →</div>
+      <div class="layer">
+        <div class="unit"></div><div class="unit"></div>
+        <div class="layer-label">15 units<br>(ReLU)</div>
+      </div>
+      <div>→ a<sup>[2]</sup> →</div>
+      <div class="layer">
+        <div class="unit out"></div><div class="unit out"></div><div>⋮</div><div class="unit out"></div>
+        <div class="layer-label">10 units<br>(Softmax)</div>
+      </div>
+      <div>→ a<sup>[3]</sup></div>
+    </div>
+    <p style="text-align:center;">Hidden layers unchanged (ReLU, computed exactly as before). Only the <strong>output layer</strong> changes.</p>
+  </div>
+
+  <div class="section">
+    <h2>🧮 Forward Propagation Through the Softmax Layer</h2>
+    <div class="formula">
+      z<sub>1</sub><sup>[3]</sup> = w⃗<sub>1</sub><sup>[3]</sup>·a⃗<sup>[2]</sup> + b<sub>1</sub><sup>[3]</sup> &nbsp;&nbsp; ⋯ &nbsp;&nbsp; z<sub>10</sub><sup>[3]</sup> = w⃗<sub>10</sub><sup>[3]</sup>·a⃗<sup>[2]</sup> + b<sub>10</sub><sup>[3]</sup>
+    </div>
+    <div class="formula" style="font-size:0.92rem;">
+      a<sub>1</sub><sup>[3]</sup> = e<sup>z₁⁽³⁾</sup> / (e<sup>z₁⁽³⁾</sup>+⋯+e<sup>z₁₀⁽³⁾</sup>) = P(y=1|x⃗)<br>
+      ⋮<br>
+      a<sub>10</sub><sup>[3]</sup> = e<sup>z₁₀⁽³⁾</sup> / (e<sup>z₁⁽³⁾</sup>+⋯+e<sup>z₁₀⁽³⁾</sup>) = P(y=10|x⃗)
+    </div>
+    <p>Same z-computation pattern you already know (weighted sum + bias), just now producing 10 z-values that feed into one softmax formula together.</p>
+  </div>
+
+  <div class="section">
+    <h2>⚡ Softmax's Unique Trait</h2>
+    <div class="compare">
+      <div class="compare-card">
+        <h3>Sigmoid / ReLU / Linear</h3>
+        <p style="font-size:0.9rem;">a₁ depends <strong>only</strong> on z₁. a₂ depends <strong>only</strong> on z₂. Applied <strong>element-wise</strong>.</p>
+        <div class="formula" style="font-size:0.85rem;">a<sub>1</sub> = g(z<sub>1</sub>), &nbsp; a<sub>2</sub> = g(z<sub>2</sub>)</div>
+      </div>
+      <div class="compare-card">
+        <h3>Softmax</h3>
+        <p style="font-size:0.9rem;">a₁ depends on <strong>all</strong> of z₁ through z₁₀ simultaneously (because of the shared denominator).</p>
+        <div class="formula" style="font-size:0.85rem;">a⃗<sup>[3]</sup> = (a₁,...,a₁₀) = g(z₁,...,z₁₀)</div>
+      </div>
+    </div>
+    <p class="callout">🔍 This is why softmax is often called a "layer-wide" activation rather than a per-neuron one — you can't compute any single aⱼ without knowing every zₖ.</p>
+  </div>
+
+  <div class="section">
+    <h2>💻 TensorFlow Implementation</h2>
+    <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">from</span> tensorflow.keras <span class="kw">import</span> <span class="fn">Sequential</span>
+<span class="kw">from</span> tensorflow.keras.layers <span class="kw">import</span> <span class="fn">Dense</span>
+
+<span class="cmt"># Step 1 — specify the model</span>
+model = <span class="fn">Sequential</span>([
+    <span class="fn">Dense</span>(units=<span class="num">25</span>, activation=<span class="str">'relu'</span>),
+    <span class="fn">Dense</span>(units=<span class="num">15</span>, activation=<span class="str">'relu'</span>),
+    <span class="fn">Dense</span>(units=<span class="num">10</span>, activation=<span class="str">'softmax'</span>)   <span class="cmt"># 10 classes</span>
+])
+
+<span class="kw">from</span> tensorflow.keras.losses <span class="kw">import</span> <span class="fn">SparseCategoricalCrossentropy</span>
+
+<span class="cmt"># Step 2 — specify loss and cost</span>
+model.<span class="fn">compile</span>(loss=<span class="fn">SparseCategoricalCrossentropy</span>())
+
+<span class="cmt"># Step 3 — train on data to minimize J(W,B)</span>
+model.<span class="fn">fit</span>(X, Y, epochs=<span class="num">100</span>)</pre>
+  </div>
+
+  <div class="section">
+    <h2>🏷️ Why "Sparse Categorical Crossentropy"?</h2>
+    <table>
+      <tr><th>Word</th><th>Meaning</th></tr>
+      <tr><td><strong>Categorical</strong></td><td>y falls into categories — here, values 1 through 10 (like the "cross-entropy" loss from softmax regression)</td></tr>
+      <tr><td><strong>Sparse</strong></td><td>Each example belongs to exactly <strong>one</strong> category at a time — a digit image is never simultaneously a "2" and a "7"</td></tr>
+    </table>
+    <p class="callout">↔️ Compare: logistic regression (binary) used <code>BinaryCrossentropy</code>. Softmax regression (multiclass, one label per example) uses <code>SparseCategoricalCrossentropy</code>.</p>
+  </div>
+
+  <div class="warn">
+    ⚠️ <strong>Important caveat from Andrew:</strong> the code above <em>works</em>, but it's <strong>not the recommended version</strong>. TensorFlow has a numerically better implementation that computes these probabilities more accurately — covered in the very next video. Don't use this exact code in practice; wait for the improved version.
+  </div>
+
+  <div class="analogy">
+    <h3>🌍 Real-World Analogy</h3>
+    <p>Think of the softmax output layer like a <strong>panel of 10 judges scoring one contestant in a singing competition</strong>, where the contestant can only truly belong to one "genre" (jazz, pop, rock, etc.). Each judge gives a raw compatibility score (z), but the judges must then <strong>collectively normalize their scores</strong> into a single 100%-sum probability distribution — no judge can score in isolation, because the final percentages depend on how every other judge scored too. That's exactly why softmax activations are computed jointly, unlike ReLU/sigmoid where each neuron minds its own business.</p>
+  </div>
+
+  <div class="section">
+    <h2>➡️ Coming Up Next</h2>
+    <p>The <strong>improved, numerically stable</strong> way to implement softmax + sparse categorical crossentropy in TensorFlow — the version Andrew actually recommends using.</p>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Lesson 8 — "Neural Network with Softmax Output" <span class="tag">10-Class MNIST</span></div>
+
+</div>
+</body>
+</html>

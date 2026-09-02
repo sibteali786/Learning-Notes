@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Softmax Function — Lab Summary</title>
+<style>
+  :root{
+    --red:#8b1e1e; --blue:#1a5fb4; --purple:#7b3fae; --pink:#c2185b;
+    --teal:#0d7377; --bg:#faf7f2; --card:#ffffff; --ink:#1b1b1b; --gold:#c78a00;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI', system-ui, sans-serif; background:var(--bg); color:var(--ink); margin:0; padding:24px;}
+  .wrap{max-width:1060px;margin:0 auto;}
+  h1{text-align:center;color:var(--red);font-size:1.85rem;border:3px solid var(--red);border-radius:12px;padding:14px;margin-bottom:22px;background:#fff;}
+  .section{background:var(--card);border-radius:14px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:6px solid var(--blue);}
+  .section h2{margin-top:0;color:var(--blue);font-size:1.22rem;}
+  .formula{background:#f6f0ff;border:2px solid var(--purple);border-radius:10px;padding:10px 16px;margin:10px 0;font-size:1rem;text-align:center;}
+  pre{background:#1e1e2e;color:#e6e6e6;padding:14px;border-radius:10px;overflow-x:auto;font-size:0.85rem;line-height:1.55;font-family:'Cascadia Code','Consolas',monospace;}
+  .kw{color:#ff7edb;} .fn{color:#7dd3fc;} .str{color:#a3e635;} .num{color:#fbbf24;} .cmt{color:#8a8a9c;}
+  .qa{background:#fff8e1;border:2px solid var(--gold);border-radius:12px;padding:14px 18px;margin-top:12px;}
+  .qa .q{font-weight:700;color:#8a6100;margin-bottom:4px;}
+  svg{background:#fff;border-radius:8px;display:block;margin:0 auto;}
+  .callout{background:#eef4ff;border-left:5px solid var(--blue);padding:10px 14px;border-radius:8px;margin-top:12px;font-size:0.95rem;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.9rem;}
+  th,td{border:1px solid #ddd;padding:7px 9px;text-align:left;}
+  th{background:#eef4ff;color:var(--blue);}
+  .tag{display:inline-block;background:var(--purple);color:#fff;padding:2px 10px;border-radius:999px;font-size:0.75rem;margin-left:8px;vertical-align:middle;}
+  .footer-note{text-align:center;color:#777;font-size:0.85rem;margin-top:24px;}
+  ul{padding-left:22px;} li{margin-bottom:6px;}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px;}
+  @media(max-width:700px){.compare{grid-template-columns:1fr;}}
+  .col{border-radius:12px;padding:14px 16px;}
+  .col.old{background:#fdf1f1;border:2px solid var(--red);}
+  .col.new{background:#eef4ff;border:2px solid var(--blue);}
+  .col h3{margin-top:0;font-size:1rem;}
+  .col.old h3{color:var(--red);}
+  .col.new h3{color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🧪 Softmax Function — Lab Walkthrough</h1>
+
+  <div class="section" style="border-left-color:var(--teal);">
+    <h2>❓ Q&amp;A — Cross-Entropy Loss</h2>
+    <div class="qa">
+      <div class="q">Q: For y=1, is only −log(a₁) non-zero?</div>
+      <p><strong>Yes, exactly.</strong> The loss formula is a "pick one branch" function — only the branch matching the true label contributes.</p>
+      <div class="formula" style="font-size:0.9rem;">L(a,y) = −log(a₁) if y=1, &nbsp;⋯,&nbsp; −log(a<sub>N</sub>) if y=N</div>
+      <p>In the cost formula, the <strong>indicator function</strong> <code>1{y==n}</code> makes this explicit: it equals 1 only when index n matches the true label, and 0 for every other class — so only one term per example ever gets added into the sum.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🎯 The Dataset — "What Are the Four Values?"</h2>
+    <pre><span class="cmt"># make dataset for example</span>
+centers = [[<span class="num">-5</span>, <span class="num">2</span>], [<span class="num">-2</span>, <span class="num">-2</span>], [<span class="num">1</span>, <span class="num">2</span>], [<span class="num">5</span>, <span class="num">-2</span>]]
+X_train, y_train = make_blobs(n_samples=<span class="num">2000</span>, centers=centers, cluster_std=<span class="num">1.0</span>, random_state=<span class="num">30</span>)</pre>
+    <p>The <strong>four values</strong> in <code>centers</code> are <strong>4 coordinate points</strong> — the centers of 4 clusters ("blobs") of synthetic 2D data. <code>make_blobs</code> then scatters 2000 random points around these 4 centers.</p>
+    <svg viewBox="0 0 320 220" width="100%" height="220">
+      <line x1="20" y1="200" x2="300" y2="200" stroke="#333"/>
+      <line x1="160" y1="10" x2="160" y2="200" stroke="#333"/>
+      <text x="290" y="215" font-size="10">x1</text>
+      <text x="165" y="18" font-size="10">x2</text>
+      <!-- cluster 0 center (-5,2) -->
+      <g fill="#c1440e"><circle cx="45" cy="85" r="3"/><circle cx="55" cy="90" r="3"/><circle cx="40" cy="75" r="3"/><circle cx="50" cy="95" r="3"/></g>
+      <text x="35" y="65" font-size="10" fill="#c1440e">class 0</text>
+      <!-- cluster 1 center (-2,-2) -->
+      <g fill="#1a5fb4"><circle cx="115" cy="150" r="3"/><circle cx="125" cy="145" r="3"/><circle cx="110" cy="160" r="3"/><circle cx="120" cy="155" r="3"/></g>
+      <text x="95" y="175" font-size="10" fill="#1a5fb4">class 1</text>
+      <!-- cluster 2 center (1,2) -->
+      <g fill="#7b3fae"><circle cx="180" cy="85" r="3"/><circle cx="190" cy="80" r="3"/><circle cx="175" cy="95" r="3"/><circle cx="185" cy="90" r="3"/></g>
+      <text x="185" y="65" font-size="10" fill="#7b3fae">class 2</text>
+      <!-- cluster 3 center (5,-2) -->
+      <g fill="#0d7377"><circle cx="260" cy="150" r="3"/><circle cx="270" cy="145" r="3"/><circle cx="255" cy="160" r="3"/><circle cx="265" cy="155" r="3"/></g>
+      <text x="250" y="175" font-size="10" fill="#0d7377">class 3</text>
+    </svg>
+    <div class="callout">📌 <strong>This is a 4-class classification problem</strong> — that's exactly why the model's final layer has <code>Dense(4, ...)</code>. Each of the 4 "blobs" is one class.</div>
+  </div>
+
+  <div class="section">
+    <h2>🔮 What Are We Predicting?</h2>
+    <p>Given a point's <strong>(x1, x2)</strong> coordinates, predict <strong>which of the 4 clusters it belongs to</strong> — i.e. classify each 2D point into class 0, 1, 2, or 3.</p>
+    <pre>model = Sequential([
+    Dense(<span class="num">25</span>, activation=<span class="str">'relu'</span>),
+    Dense(<span class="num">15</span>, activation=<span class="str">'relu'</span>),
+    Dense(<span class="num">4</span>, activation=<span class="str">'softmax'</span>)   <span class="cmt"># 4 classes → 4 output probabilities</span>
+])</pre>
+  </div>
+
+  <div class="section">
+    <h2>⚖️ Obvious vs Preferred Implementation</h2>
+    <div class="compare">
+      <div class="col old">
+        <h3>❌ "Obvious" (softmax in the layer)</h3>
+        <pre style="margin:0;font-size:0.78rem;">Dense(<span class="num">4</span>, activation=<span class="str">'softmax'</span>)
+...
+loss=SparseCategoricalCrossentropy()</pre>
+        <p style="font-size:0.85rem;">Output is already probabilities (0 to 1, summing to 1).</p>
+      </div>
+      <div class="col new">
+        <h3>✅ "Preferred" (linear + from_logits)</h3>
+        <pre style="margin:0;font-size:0.78rem;">Dense(<span class="num">4</span>, activation=<span class="str">'linear'</span>)
+...
+loss=SparseCategoricalCrossentropy(
+  from_logits=<span class="kw">True</span>)</pre>
+        <p style="font-size:0.85rem;">Output is raw logits (any real number) — more numerically accurate, but needs manual softmax to interpret as probabilities.</p>
+      </div>
+    </div>
+    <p class="callout">🔗 This mirrors exactly what we covered in the "Numerically Stable Softmax" lesson — same trade-off, same fix.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔁 Turning Raw Logits Back Into Probabilities</h2>
+    <pre>sm_preferred = tf.nn.softmax(p_preferred).numpy()</pre>
+    <p>Since the preferred model's raw output isn't probabilities, you manually run it through <code>tf.nn.softmax</code> afterward to get interpretable probabilities that sum to 1.</p>
+  </div>
+
+  <div class="section">
+    <h2>🔢 "What's the Last `for` Loop Doing?"</h2>
+    <pre><span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">5</span>):
+    print(f<span class="str">"{p_preferred[i]}, category: {np.argmax(p_preferred[i])}"</span>)</pre>
+    <div class="qa">
+      <div class="q">Q: Is it predicting on each example we provided, or something else?</div>
+      <p><strong>Yes — it's the first 5 training examples.</strong> Earlier, <code>p_preferred = preferred_model.predict(X_train)</code> already computed predictions for <em>all 2000</em> training points at once. This loop just <strong>prints the first 5</strong> of those results.</p>
+      <p>For each of those 5, <code>np.argmax(p_preferred[i])</code> finds which of the 4 output values is largest — that index (0, 1, 2, or 3) is the model's predicted class for that point. You don't need softmax just to pick the winning class — the largest raw logit is always also the largest probability after softmax, since softmax preserves ordering.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📋 Sparse vs Categorical Crossentropy</h2>
+    <table>
+      <tr><th>Loss</th><th>Expected target format</th><th>Example (10 classes, true label = 2)</th></tr>
+      <tr><td><code>SparseCategoricalCrossentropy</code></td><td>Single integer index</td><td><code>y = 2</code></td></tr>
+      <tr><td><code>CategoricalCrossentropy</code></td><td>One-hot encoded vector</td><td><code>y = [0,0,1,0,0,0,0,0,0,0]</code></td></tr>
+    </table>
+    <p class="callout">This lab uses <strong>Sparse</strong>Categorical since <code>y_train</code> from <code>make_blobs</code> is just plain integers (0,1,2,3), not one-hot vectors.</p>
+  </div>
+
+  <div class="section">
+    <h2>✅ Lab Takeaways</h2>
+    <ul>
+      <li>Softmax converts raw scores (z) into a probability distribution that sums to 1.</li>
+      <li>Unlike sigmoid/ReLU, softmax outputs are <strong>interdependent</strong> — changing one z changes every output probability.</li>
+      <li><strong>Preferred TF pattern:</strong> linear output layer + <code>SparseCategoricalCrossentropy(from_logits=True)</code> + manual <code>tf.nn.softmax()</code> when you need actual probabilities.</li>
+      <li><code>np.argmax()</code> is enough to pick the predicted class — no softmax needed just for classification.</li>
+    </ul>
+  </div>
+
+  <div class="footer-note">Course 2 · Week 2 · Optional Lab — "Softmax Function" <span class="tag">4-Class Blob Classification</span></div>
+
+</div>
+</body>
+</html>
