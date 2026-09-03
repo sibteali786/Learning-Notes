@@ -4,35 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "f10325be55d90560",
+        "id": "414283d43d5f6613",
         "type": "tabs",
         "children": [
           {
-            "id": "feab5df49c6008c5",
+            "id": "74fe191b1cb85426",
             "type": "leaf",
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/3-ionization-energy-three-factors.html"
+                "file": "Learning/Low Level Design/Intro/lld-intro-summary.html"
               },
               "icon": "code-glyph",
-              "title": "3-ionization-energy-three-factors"
-            }
-          },
-          {
-            "id": "e0567488867f6def",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "practice"
+              "title": "lld-intro-summary"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -91,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875
+    "width": 443.79296875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -197,22 +185,22 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "74fe191b1cb85426",
   "lastOpenFiles": [
+    "Learning/Low Level Design/Intro/lld-intro-summary.html",
+    "Learning/Low Level Design/Intro",
+    "Learning/Low Level Design",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/3-ionization-energy-three-factors.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/8-electronegativity-vs-electron-affinity.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/7-electron-affinity-vs-ionization-energy.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/6-successive-ionization-energies-element-id.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/5-ionization-energy-1st-vs-2nd.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/3-ionization-energy-three-factors.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/2-atomic-and-ionic-radii.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/4-ionization-energy-period-trend-exceptions.html",
     "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/6-demo-postgres-partition-pruning-summary.html",
     "conflict-files-obsidian-git.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel III.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/9-neural-network-softmax-output.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/8-softmax-regression.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/7-multiclass-classification.html",
     "Untitled.md",
     "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
     "Learning/Backend Engineering/Reources.md",

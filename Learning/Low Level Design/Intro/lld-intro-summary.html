@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LLD in a Hurry — Intro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#242938;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#b98cff;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 20px;line-height:1.55;}
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;margin:0 0 4px;}
+  .sub{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .bar{width:44px;height:4px;border-radius:2px;margin-bottom:10px;}
+  .section{margin-bottom:34px;}
+  .section h2{font-family:'Syne',sans-serif;font-size:19px;margin:0 0 14px;display:flex;align-items:center;gap:10px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:6px;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);}
+  .pill-green{background:rgba(92,255,168,.15);color:var(--green);}
+  .pill-purple{background:rgba(185,140,255,.15);color:var(--purple);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .diagram{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;}
+  .node{background:#1c2130;border:1px solid var(--border);border-radius:8px;padding:8px 14px;}
+  .arrow{color:var(--muted);}
+  .example{border-left:3px solid var(--purple);padding:10px 16px;background:rgba(185,140,255,.06);border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px;}
+  .example b{color:var(--purple);}
+  ul{margin:6px 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:13.5px;}
+  .tip{background:rgba(92,255,168,.06);border:1px solid rgba(92,255,168,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;}
+  .tip b{color:var(--green);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Low-Level Design in a Hurry</h1>
+  <div class="sub">Lecture 1 — Introduction · Hello Interview</div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>🎯 What is this interview?</h2>
+    <div class="card">
+      You're given a self-contained system — <span class="pill pill-blue">Parking Lot</span><span class="pill pill-blue">Elevator</span><span class="pill pill-blue">Connect Four</span> — and asked to design the <b>classes, interfaces, and relationships</b> that make it work. Also called <b>Object-Oriented Design (OOD)</b> — same interview, different name.
+      <div class="tip" style="margin-top:12px;">Focus = code organization: right objects, clean interactions, methods that make sense, extendable without rewrites.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>🗺️ LLD vs System Design</h2>
+    <div class="diagram">
+      <table>
+        <tr><th></th><th>System Design</th><th>Low-Level Design</th></tr>
+        <tr><td><b>Level</b></td><td>Architecture at scale</td><td>A single feature/service</td></tr>
+        <tr><td><b>Output</b></td><td>Boxes & arrows (services)</td><td>Classes, methods, state machines</td></tr>
+        <tr><td><b>Topics</b></td><td>Traffic, storage, caching, sharding</td><td>Objects, encapsulation, patterns</td></tr>
+        <tr><td><b>Coding</b></td><td>None</td><td>Pseudocode / real code</td></tr>
+      </table>
+      <div class="example"><b>Analogy:</b> System Design is the map of a city. Low-Level Design is the blueprint for one building on that map.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>🌍 Regional Variants</h2>
+    <div class="grid2">
+      <div class="card">
+        <span class="pill pill-green">US Big Tech</span>
+        <ul>
+          <li>Real code (Java/Python/C++), not just pseudocode</li>
+          <li>Patterns matter less by name — reasoning &gt; vocabulary</li>
+          <li>Requirements are more defined upfront</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="pill pill-purple">India / Asia</span>
+        <ul>
+          <li>Structured pseudocode is enough</li>
+          <li>Interviewers expect you to name the pattern (Factory, Strategy, etc.)</li>
+          <li>Requirements are vaguer — you must ask more to scope it</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tip" style="margin-top:12px;"><b>Tip:</b> Unsure what your interview expects? Just ask your recruiter — they'll tell you directly.</div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>🧩 What Interviewers Actually Score</h2>
+    <div class="diagram">
+      <div class="flow">
+        <div class="node">Problem Analysis</div><span class="arrow">→</span>
+        <div class="node">Class Design</div><span class="arrow">→</span>
+        <div class="node">Code Quality</div><span class="arrow">→</span>
+        <div class="node">Extensibility</div><span class="arrow">→</span>
+        <div class="node">Communication</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <table>
+        <tr><td style="width:180px;"><b>Problem Analysis</b></td><td>Extract entities/responsibilities, ask clarifying Qs, scope before coding</td></tr>
+        <tr><td><b>Class Design</b></td><td>Right responsibilities, clean method signatures, clear ownership</td></tr>
+        <tr><td><b>Code Quality</b></td><td>Encapsulation, sensible composition vs inheritance, naming, separation of concerns</td></tr>
+        <tr><td><b>Extensibility</b></td><td>Design absorbs a follow-up requirement without a rewrite</td></tr>
+        <tr><td><b>Communication</b></td><td>Narrate your thinking out loud, adapt when probed</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--purple)"></div>
+    <h2>💡 Example: Ride-Sharing, Two Ways</h2>
+    <div class="grid2">
+      <div class="card">
+        <b style="color:var(--blue)">System Design view</b>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0;">Ride Service, Matching Service, Location Service, DB, Queue — how they scale & talk over the network.</p>
+      </div>
+      <div class="card">
+        <b style="color:var(--purple)">LLD view</b>
+        <p style="font-size:13px;color:var(--muted);margin:8px 0 0;">A <code style="color:var(--green)">Trip</code> class, a <code style="color:var(--green)">TripState</code> enum, a <code style="color:var(--green)">PricingCalculator</code> interface — how they collaborate in-process.</p>
+      </div>
+    </div>
+    <div class="example"><b>Real scenario:</b> <code style="color:var(--orange)">trip.startTrip()</code> throws if state isn't <code style="color:var(--green)">DRIVER_ASSIGNED</code> — that guard-rail logic (not network calls) is the whole game in LLD.</div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>📚 What's Coming Next in the Guide</h2>
+    <ul>
+      <li><b>Delivery Framework</b> — structure to run the interview</li>
+      <li><b>Refresher</b> — Design Principles, OO Concepts, Design Patterns</li>
+      <li><b>Problem Breakdowns</b> — worked interviewer-perspective solutions</li>
+      <li><b>Guided Practice</b> — mock interview w/ personalized feedback</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
