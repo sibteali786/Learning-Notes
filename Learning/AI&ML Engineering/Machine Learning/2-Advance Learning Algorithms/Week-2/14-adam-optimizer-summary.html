@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Adam Optimizer — Summary</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 {
+    font-size: 26px;
+    background: linear-gradient(90deg,#7c3aed,#2563eb);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 4px;
+  }
+  .subtitle { color: #9ca3af; margin-bottom: 24px; font-size: 14px; }
+  .card {
+    background: #171a23;
+    border: 1px solid #2a2e3a;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    display:inline-block; font-size:11px; font-weight:700;
+    padding: 3px 9px; border-radius: 20px; letter-spacing:.03em;
+  }
+  .b-purple { background:#2e1065; color:#c4b5fd; }
+  .b-blue { background:#0c2d5c; color:#93c5fd; }
+  .b-green { background:#052e1e; color:#86efac; }
+  .b-amber { background:#3a2408; color:#fcd34d; }
+  code, .code-block {
+    font-family: 'Fira Code', Consolas, monospace;
+    font-size: 13.5px;
+  }
+  .code-block {
+    background: #0b0d12;
+    border: 1px solid #2a2e3a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    color: #d1d5db;
+    margin: 10px 0;
+  }
+  .code-block .kw { color:#c792ea; }
+  .code-block .fn { color:#82aaff; }
+  .code-block .str { color:#c3e88d; }
+  .code-block .num { color:#f78c6c; }
+  .code-block .cm { color:#546178; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+  .diagram-box {
+    background:#0b0d12; border:1px solid #2a2e3a; border-radius: 10px;
+    padding: 14px; text-align:center;
+  }
+  .diagram-box svg { max-width: 100%; height: auto; }
+  .diagram-label { font-size: 12.5px; color:#9ca3af; margin-top: 6px; }
+
+  .formula {
+    background:#0b0d12; border-left: 3px solid #7c3aed; border-radius: 6px;
+    padding: 12px 16px; font-size: 16px; text-align:center; margin: 10px 0;
+    color:#e0e7ff;
+  }
+  .formula .hl { color:#f59e0b; font-weight:700; }
+
+  table { width:100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid #2a2e3a; }
+  th { color:#9ca3af; font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+
+  .scenario {
+    background: #10131c; border: 1px dashed #3f4557; border-radius: 10px;
+    padding: 12px 16px; margin-top: 10px; font-size: 13.5px; color:#c9cdd6;
+  }
+  .scenario b { color:#93c5fd; }
+
+  ul.tight { margin: 8px 0 0 18px; padding:0; }
+  ul.tight li { margin-bottom: 6px; }
+
+  .footer-note {
+    text-align:center; color:#6b7280; font-size:12px; margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Adam Optimizer — Adaptive Moment Estimation</h1>
+  <div class="subtitle">Course 2 · Improving Deep Neural Networks · Optimization Algorithms</div>
+
+  <!-- WHY -->
+  <div class="card">
+    <h2><span class="badge b-purple">WHY</span> Beyond Plain Gradient Descent</h2>
+    <p>Gradient descent uses <b>one fixed learning rate α</b> for every parameter. That's inefficient in two common situations, visualized on a contour plot of the cost function J(w,b):</p>
+    <div class="two-col">
+      <div class="diagram-box">
+        <svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="130" cy="110" rx="90" ry="100" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <ellipse cx="130" cy="110" rx="65" ry="72" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <ellipse cx="130" cy="110" rx="40" ry="45" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <ellipse cx="130" cy="110" rx="16" ry="18" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <circle cx="130" cy="110" r="2.5" fill="#f87171"/>
+          <text x="140" y="95" fill="#f87171" font-size="10">minimum</text>
+          <line x1="130" y1="205" x2="128" y2="180" stroke="#a78bfa" stroke-width="2"/>
+          <line x1="128" y1="180" x2="129" y2="158" stroke="#a78bfa" stroke-width="2"/>
+          <line x1="129" y1="158" x2="130" y2="138" stroke="#a78bfa" stroke-width="2"/>
+          <line x1="130" y1="138" x2="130" y2="120" stroke="#a78bfa" stroke-width="2"/>
+          <circle cx="130" cy="205" r="3" fill="#fbbf24"/>
+          <text x="135" y="210" fill="#fbbf24" font-size="9">start</text>
+        </svg>
+        <div class="diagram-label"><b style="color:#a78bfa">Same direction, tiny steps</b><br>→ increase α to go faster</div>
+      </div>
+      <div class="diagram-box">
+        <svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="130" cy="110" rx="90" ry="100" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <ellipse cx="130" cy="110" rx="65" ry="72" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <ellipse cx="130" cy="110" rx="40" ry="45" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <ellipse cx="130" cy="110" rx="16" ry="18" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+          <circle cx="130" cy="110" r="2.5" fill="#f87171"/>
+          <polyline points="60,150 195,140 70,120 180,112 100,104 130,100" fill="none" stroke="#a78bfa" stroke-width="2"/>
+          <circle cx="60" cy="150" r="3" fill="#fbbf24"/>
+        </svg>
+        <div class="diagram-label"><b style="color:#a78bfa">Oscillating back and forth</b><br>→ decrease α for a smoother path</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT -->
+  <div class="card">
+    <h2><span class="badge b-blue">WHAT</span> Adam = Adaptive Moment Estimation</h2>
+    <p>Instead of one global α, Adam gives <b>every single parameter its own learning rate</b> that adapts automatically during training.</p>
+    <div class="formula">
+      w<sub>j</sub> = w<sub>j</sub> − <span class="hl">α<sub>j</sub></span> · ∂J(w,b)/∂w<sub>j</sub> &nbsp;&nbsp;|&nbsp;&nbsp; b = b − <span class="hl">α<sub>11</sub></span> · ∂J(w,b)/∂b
+    </div>
+    <p style="font-size:13.5px; color:#9ca3af;">e.g. with w₁…w₁₀ and b, Adam tracks 11 independent learning rates (α₁ … α₁₁) — one per parameter, not one for the whole model.</p>
+    <div class="scenario">
+      <b>Intuition rule:</b> if a parameter keeps moving the <b>same direction</b> → raise its α (speed up). If it keeps <b>oscillating</b> → lower its α (calm down / smooth the path).
+    </div>
+  </div>
+
+  <!-- CODE -->
+  <div class="card">
+    <h2><span class="badge b-green">CODE</span> Using Adam in TensorFlow/Keras</h2>
+    <div class="code-block">
+<span class="cm"># model — architecture unchanged</span><br>
+model = Sequential([<br>
+&nbsp;&nbsp;tf.keras.layers.Dense(units=<span class="num">25</span>, activation=<span class="str">'sigmoid'</span>),<br>
+&nbsp;&nbsp;tf.keras.layers.Dense(units=<span class="num">15</span>, activation=<span class="str">'sigmoid'</span>),<br>
+&nbsp;&nbsp;tf.keras.layers.Dense(units=<span class="num">10</span>, activation=<span class="str">'linear'</span>)<br>
+])<br><br>
+<span class="cm"># compile — only the optimizer changes</span><br>
+model.compile(<br>
+&nbsp;&nbsp;optimizer=tf.keras.optimizers.<span class="fn">Adam</span>(learning_rate=<span class="num">1e-3</span>), <span class="cm"># α = 0.001 (default starting point)</span><br>
+&nbsp;&nbsp;loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=<span class="kw">True</span>)<br>
+)<br><br>
+<span class="cm"># fit — unchanged</span><br>
+model.fit(X, Y, epochs=<span class="num">100</span>)
+    </div>
+    <p style="font-size:13px; color:#9ca3af;">Only the <code>optimizer</code> argument in <code>.compile()</code> changes — everything else in your workflow stays the same. Adam still needs an initial α (default guess: 1e-3); it's worth trying a few values, but Adam is far more forgiving of a "wrong" choice than plain gradient descent.</p>
+  </div>
+
+  <!-- COMPARISON -->
+  <div class="card">
+    <h2><span class="badge b-amber">COMPARE</span> Gradient Descent vs Adam</h2>
+    <table>
+      <tr><th></th><th>Gradient Descent</th><th>Adam</th></tr>
+      <tr><td>Learning rate</td><td>One global α for all params</td><td>Separate α per parameter, auto-adjusted</td></tr>
+      <tr><td>Sensitivity to α choice</td><td>High — bad α badly hurts training</td><td>Low — more robust, self-corrects</td></tr>
+      <tr><td>Speed</td><td>Slower, especially near elongated minima</td><td>Typically much faster convergence</td></tr>
+      <tr><td>Usage today</td><td>Foundational / pedagogical</td><td>De facto default in practice</td></tr>
+    </table>
+  </div>
+
+  <div class="scenario">
+    <b>Real-world scenario:</b> Training on MNIST digit classification, you notice loss plateauing with tiny wiggling improvements for many epochs using vanilla gradient descent. Switching only the optimizer line to <code>tf.keras.optimizers.Adam(learning_rate=1e-3)</code> — same architecture, same data — often converges in a fraction of the epochs because Adam automatically speeds up along consistently-improving directions and dampens oscillation on noisy ones.
+  </div>
+
+  <div class="footer-note">Practical takeaway: when unsure which optimizer to pick — default to Adam.</div>
+
+</div>
+</body>
+</html>

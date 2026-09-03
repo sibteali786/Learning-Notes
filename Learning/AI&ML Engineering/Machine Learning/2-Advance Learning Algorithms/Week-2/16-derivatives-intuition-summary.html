@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Derivatives — Intuition Behind Backpropagation</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 {
+    font-size: 26px;
+    background: linear-gradient(90deg,#059669,#3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 4px;
+  }
+  .subtitle { color: #9ca3af; margin-bottom: 24px; font-size: 14px; }
+  .card {
+    background: #171a23;
+    border: 1px solid #2a2e3a;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    display:inline-block; font-size:11px; font-weight:700;
+    padding: 3px 9px; border-radius: 20px; letter-spacing:.03em;
+  }
+  .b-purple { background:#2e1065; color:#c4b5fd; }
+  .b-blue { background:#0c2d5c; color:#93c5fd; }
+  .b-green { background:#052e1e; color:#86efac; }
+  .b-amber { background:#3a2408; color:#fcd34d; }
+  .b-pink { background:#3a0b28; color:#f9a8d4; }
+
+  .formula {
+    background:#0b0d12; border-left: 3px solid #059669; border-radius: 6px;
+    padding: 12px 16px; font-size: 16px; text-align:center; margin: 10px 0;
+    color:#e0e7ff;
+  }
+  .formula .hl { color:#f59e0b; font-weight:700; }
+
+  table { width:100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid #2a2e3a; }
+  th { color:#9ca3af; font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+
+  .diagram-box {
+    background:#0b0d12; border:1px solid #2a2e3a; border-radius: 10px;
+    padding: 14px; text-align:center;
+  }
+  .diagram-box svg { max-width: 100%; height: auto; }
+  .diagram-label { font-size: 12.5px; color:#9ca3af; margin-top: 6px; }
+
+  .code-block {
+    font-family: 'Fira Code', Consolas, monospace;
+    font-size: 13.5px;
+    background: #0b0d12;
+    border: 1px solid #2a2e3a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    color: #d1d5db;
+    margin: 10px 0;
+  }
+  .code-block .kw { color:#c792ea; }
+  .code-block .fn { color:#82aaff; }
+  .code-block .num { color:#f78c6c; }
+  .code-block .cm { color:#546178; }
+  .code-block .out { color:#86efac; }
+
+  .scenario {
+    background: #10131c; border: 1px dashed #3f4557; border-radius: 10px;
+    padding: 12px 16px; margin-top: 10px; font-size: 13.5px; color:#c9cdd6;
+  }
+  .scenario b { color:#93c5fd; }
+  ul.tight { margin: 8px 0 0 18px; padding:0; }
+  ul.tight li { margin-bottom: 6px; }
+  .footer-note { text-align:center; color:#6b7280; font-size:12px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Derivatives — The Intuition Behind Backpropagation</h1>
+  <div class="subtitle">Course 2 · Improving Deep Neural Networks · Optional Calculus Deep-Dive</div>
+
+  <!-- CORE IDEA -->
+  <div class="card">
+    <h2><span class="badge b-purple">CORE IDEA</span> What a Derivative Actually Means</h2>
+    <p>Nudge w by a tiny amount ε. Watch how much J(w) moves in response. The ratio between "how much J moved" and "how much w moved" is the derivative.</p>
+    <div class="formula">
+      If <span class="hl">w ↑ ε</span> causes <span class="hl">J(w) ↑ k·ε</span>, then the derivative <code>∂J(w)/∂w = k</code>
+    </div>
+    <p style="font-size:13px;color:#9ca3af;">The smaller ε is, the more exact this ratio becomes — true derivatives use an infinitesimally small ε.</p>
+  </div>
+
+  <!-- WORKED EXAMPLE -->
+  <div class="card">
+    <h2><span class="badge b-blue">WORKED EXAMPLE</span> J(w) = w², nudging by ε</h2>
+    <div class="diagram-box">
+      <svg viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg">
+        <line x1="40" y1="230" x2="440" y2="230" stroke="#4b5563"/>
+        <line x1="240" y1="20" x2="240" y2="230" stroke="#4b5563"/>
+        <text x="445" y="234" font-size="11" fill="#9ca3af">w</text>
+        <text x="235" y="15" font-size="11" fill="#9ca3af">J(w)</text>
+        <path d="M 80 220 Q 240 20 400 220" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+        <!-- point at w=3 (J=9) approx x=340,y=70 -->
+        <circle cx="340" cy="70" r="4" fill="#f59e0b"/>
+        <line x1="270" y1="150" x2="410" y2="10" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="345" y="60" font-size="11" fill="#fbbf24">w=3, slope=6</text>
+        <!-- point at w=2 (J=4) approx x=300,y=150 -->
+        <circle cx="300" cy="150" r="4" fill="#a78bfa"/>
+        <text x="305" y="145" font-size="11" fill="#c4b5fd">w=2, slope=4</text>
+        <!-- point at w=-3 (J=9) approx x=140,y=70 -->
+        <circle cx="140" cy="70" r="4" fill="#f87171"/>
+        <line x1="70" y1="10" x2="210" y2="150" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="60" y="60" font-size="11" fill="#fca5a5">w=−3, slope=−6</text>
+      </svg>
+      <div class="diagram-label">Slope of the tangent line at each point = the derivative there. J(w)=w² → derivative = 2w</div>
+    </div>
+
+    <table>
+      <tr><th>w</th><th>J(w) = w²</th><th>w ↑ 0.001 →</th><th>ΔJ</th><th>∂J/∂w = 2w</th></tr>
+      <tr><td>3</td><td>9</td><td>3.001</td><td>9.006001 (≈ +6×ε)</td><td>6</td></tr>
+      <tr><td>2</td><td>4</td><td>2.001</td><td>4.004001 (≈ +4×ε)</td><td>4</td></tr>
+      <tr><td>−3</td><td>9</td><td>−2.999</td><td>8.994001 (≈ −6×ε)</td><td>−6</td></tr>
+    </table>
+    <p style="font-size:13px; color:#9ca3af; margin-top:8px;">Same function J(w)=w², but the derivative changes depending on the current value of w — that's why gradient descent's step size naturally adapts as w moves.</p>
+  </div>
+
+  <!-- WHY IT MATTERS FOR GD -->
+  <div class="card">
+    <h2><span class="badge b-green">WHY IT MATTERS</span> Connection to Gradient Descent</h2>
+    <div class="code-block">
+repeat {<br>
+&nbsp;&nbsp;w<sub>j</sub> = w<sub>j</sub> − <span class="kw">α</span> · ∂J(w,b)/∂w<sub>j</sub> &nbsp;<span class="cm">// α = learning rate</span><br>
+}
+    </div>
+    <ul class="tight">
+      <li><b>Small derivative</b> → changing w barely affects J → take a <b>small</b> step.</li>
+      <li><b>Large derivative</b> → changing w strongly affects J → take a <b>big</b> step, since it pays off in bringing J down faster.</li>
+    </ul>
+  </div>
+
+  <!-- MORE EXAMPLES TABLE -->
+  <div class="card">
+    <h2><span class="badge b-amber">MORE EXAMPLES</span> Common Derivative Rules (at w = 2)</h2>
+    <table>
+      <tr><th>J(w)</th><th>Value at w=2</th><th>∂J/∂w (formula)</th><th>Value at w=2</th></tr>
+      <tr><td>w²</td><td>4</td><td>2w</td><td>4</td></tr>
+      <tr><td>w³</td><td>8</td><td>3w²</td><td>12</td></tr>
+      <tr><td>w</td><td>2</td><td>1</td><td>1</td></tr>
+      <tr><td>1/w</td><td>0.5</td><td>−1/w²</td><td>−0.25</td></tr>
+    </table>
+    <p style="font-size:13px;color:#9ca3af; margin-top:8px;">Verified numerically: e.g. for J=w³ at w=2, nudging w by ε=0.001 → J goes from 8 to 8.012006, i.e. ≈ +12×ε — matching the calculus result 3w² = 12.</p>
+  </div>
+
+  <!-- SYMPY -->
+  <div class="card">
+    <h2><span class="badge b-pink">CODE</span> Computing Derivatives with SymPy</h2>
+    <div class="code-block">
+<span class="kw">import</span> sympy<br><br>
+J, w = sympy.symbols(<span class="fn">'J,w'</span>)<br><br>
+J = w**<span class="num">3</span> <span class="cm"># define the cost function</span><br>
+dJ_dw = sympy.diff(J, w) <span class="cm"># symbolic derivative</span><br>
+dJ_dw &nbsp;<span class="cm"># -&gt; 3*w**2</span><br><br>
+dJ_dw.subs([(w, <span class="num">2</span>)]) &nbsp;<span class="cm"># plug in w=2 -&gt; 12</span>
+    </div>
+    <table>
+      <tr><th>J</th><th>sympy.diff(J, w)</th></tr>
+      <tr><td>w**2</td><td>2*w</td></tr>
+      <tr><td>w**3</td><td>3*w**2</td></tr>
+      <tr><td>w</td><td>1</td></tr>
+      <tr><td>1/w</td><td>-1/w**2</td></tr>
+    </table>
+  </div>
+
+  <!-- NOTATION -->
+  <div class="card">
+    <h2><span class="badge b-purple">NOTATION</span> d vs ∂ — Which One This Course Uses</h2>
+    <table>
+      <tr><th>Case</th><th>Symbol</th><th>Written as</th></tr>
+      <tr><td>J is a function of <b>one</b> variable (w)</td><td>d</td><td>d/dw · J(w)</td></tr>
+      <tr><td>J is a function of <b>multiple</b> variables (w₁…wₙ)</td><td>∂ ("partial derivative")</td><td>∂J/∂w<sub>i</sub></td></tr>
+    </table>
+    <p style="font-size:13px;color:#9ca3af; margin-top:8px;">Andrew Ng's teaching choice: since J almost always depends on multiple parameters in practice, this course consistently uses the ∂ (partial derivative) notation everywhere — even in single-variable toy examples — to keep things uniform, even though strict calculus convention would use <code>d</code> for the single-variable case.</p>
+  </div>
+
+  <div class="scenario">
+    <b>Real-world scenario:</b> Training a neural network on house-price prediction, if the derivative of the cost function with respect to one weight (say, "number of bedrooms" weight) is huge, that means small tweaks to that weight swing predictions a lot — gradient descent should adjust it aggressively. If the derivative w.r.t. another weight (say, "house was painted last year") is tiny, that weight barely matters to the current loss, so gradient descent barely touches it. Backpropagation is exactly the algorithm that computes all these per-parameter derivatives efficiently across every layer.
+  </div>
+
+  <div class="footer-note">Optional/calculus-focused lesson — sets up intuition for the next video on computation graphs, which explains how backprop computes these derivatives layer by layer.</div>
+
+</div>
+</body>
+</html>

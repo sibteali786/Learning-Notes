@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "414283d43d5f6613",
+        "id": "0fc9330ce1307682",
         "type": "tabs",
         "children": [
           {
-            "id": "74fe191b1cb85426",
+            "id": "a732791eb087f9d7",
             "type": "leaf",
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Low Level Design/Intro/lld-intro-summary.html"
+                "file": "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html"
               },
               "icon": "code-glyph",
-              "title": "lld-intro-summary"
+              "title": "17-computation-graphs-backprop-summary"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875,
-    "collapsed": true
+    "width": 443.79296875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -185,20 +184,23 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "74fe191b1cb85426",
+  "active": "a732791eb087f9d7",
   "lastOpenFiles": [
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-derivatives-intuition-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-correct-lossfunction-graph.png",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
+    "Learning/Research/GRE/Resources.md",
+    "Learning/Research/GRE",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/15-convolutional-layer-summary.html~",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/15-convolutional-layer-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/14-adam-optimizer-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/13-multiclass-tf-lab.html",
     "Learning/Low Level Design/Intro/lld-intro-summary.html",
     "Learning/Low Level Design/Intro",
     "Learning/Low Level Design",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/3-ionization-energy-three-factors.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/8-electronegativity-vs-electron-affinity.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/7-electron-affinity-vs-ionization-energy.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/6-successive-ionization-energies-element-id.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/5-ionization-energy-1st-vs-2nd.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/2-atomic-and-ionic-radii.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/4-ionization-energy-period-trend-exceptions.html",
-    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/6-demo-postgres-partition-pruning-summary.html",
     "conflict-files-obsidian-git.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel III.excalidraw.md",
     "Untitled.md",
@@ -223,7 +225,6 @@
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Resources.md",
     "Learning/System Design/Case Studies.md",
     "Learning/Database/Interviews/Resources.md",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/Resources.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",
@@ -231,8 +232,6 @@
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Pasted image 20260714215710.png",
     "Pasted image 20260813204427.png",
-    "Pasted image 20260714215620.png",
-    "Pasted Image 20260621125127_166.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

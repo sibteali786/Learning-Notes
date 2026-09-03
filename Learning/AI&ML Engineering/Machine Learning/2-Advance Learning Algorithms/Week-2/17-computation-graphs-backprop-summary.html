@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Computation Graphs & Backpropagation — Summary</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 {
+    font-size: 26px;
+    background: linear-gradient(90deg,#3b82f6,#10b981);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 4px;
+  }
+  .subtitle { color: #9ca3af; margin-bottom: 24px; font-size: 14px; }
+  .card {
+    background: #171a23;
+    border: 1px solid #2a2e3a;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    display:inline-block; font-size:11px; font-weight:700;
+    padding: 3px 9px; border-radius: 20px; letter-spacing:.03em;
+  }
+  .b-purple { background:#2e1065; color:#c4b5fd; }
+  .b-blue { background:#0c2d5c; color:#93c5fd; }
+  .b-green { background:#052e1e; color:#86efac; }
+  .b-amber { background:#3a2408; color:#fcd34d; }
+  .b-pink { background:#3a0b28; color:#f9a8d4; }
+  .b-red { background:#3f0d0d; color:#fca5a5; }
+
+  .formula {
+    background:#0b0d12; border-left: 3px solid #3b82f6; border-radius: 6px;
+    padding: 12px 16px; font-size: 16px; text-align:center; margin: 10px 0;
+    color:#e0e7ff;
+  }
+  .formula .hl { color:#f59e0b; font-weight:700; }
+
+  table { width:100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid #2a2e3a; }
+  th { color:#9ca3af; font-weight:600; }
+  tr:last-child td { border-bottom:none; }
+
+  .diagram-box {
+    background:#0b0d12; border:1px solid #2a2e3a; border-radius: 10px;
+    padding: 14px; text-align:center; overflow-x:auto;
+  }
+  .diagram-box svg { max-width: 100%; height: auto; }
+  .diagram-label { font-size: 12.5px; color:#9ca3af; margin-top: 6px; }
+
+  .scenario {
+    background: #10131c; border: 1px dashed #3f4557; border-radius: 10px;
+    padding: 12px 16px; margin-top: 10px; font-size: 13.5px; color:#c9cdd6;
+  }
+  .scenario b { color:#93c5fd; }
+  .qbox {
+    background: #0d1420; border: 1px solid #1e3a5f; border-radius: 10px;
+    padding: 14px 16px; margin-top: 10px;
+  }
+  .qbox .qlabel { color:#60a5fa; font-weight:700; font-size:12.5px; margin-bottom:6px; }
+
+  ul.tight { margin: 8px 0 0 18px; padding:0; }
+  ul.tight li { margin-bottom: 6px; }
+  .footer-note { text-align:center; color:#6b7280; font-size:12px; margin-top: 20px; }
+  code { font-family: 'Fira Code', Consolas, monospace; font-size: 13px; color:#93c5fd;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Computation Graphs & Backpropagation</h1>
+  <div class="subtitle">Course 2 · Improving Deep Neural Networks · How Backprop Actually Computes Derivatives</div>
+
+  <!-- SETUP -->
+  <div class="card">
+    <h2><span class="badge b-purple">SETUP</span> A Tiny Neural Network (Linear Regression as 1 Neuron)</h2>
+    <div class="formula">
+      a = wx + b &nbsp;&nbsp;(linear activation) &nbsp;&nbsp;|&nbsp;&nbsp; J(w,b) = ½(a − y)²
+    </div>
+    <p>Example values: <b>w=2, b=8, x=−2, y=2</b></p>
+  </div>
+
+  <!-- FORWARD PROP -->
+  <div class="card">
+    <h2><span class="badge b-blue">FORWARD PROP</span> Left → Right: Breaking J into Steps</h2>
+    <div class="diagram-box">
+      <svg viewBox="0 0 780 160" xmlns="http://www.w3.org/2000/svg">
+        <text x="10" y="65" font-size="13" fill="#93c5fd">w=2</text>
+        <line x1="35" y1="70" x2="90" y2="70" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr)"/>
+        <text x="45" y="60" font-size="11" fill="#3b82f6">2</text>
+        <rect x="90" y="45" width="90" height="50" rx="6" fill="none" stroke="#a16207"/>
+        <text x="100" y="75" font-size="13" fill="#fcd34d">c = wx</text>
+        <line x1="180" y1="70" x2="245" y2="70" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="195" y="60" font-size="11" fill="#3b82f6">−4</text>
+        <rect x="245" y="45" width="90" height="50" rx="6" fill="none" stroke="#a16207"/>
+        <text x="255" y="75" font-size="13" fill="#fcd34d">a = c + b</text>
+        <text x="255" y="120" font-size="11" fill="#9ca3af">b=8 →</text>
+        <line x1="335" y1="70" x2="400" y2="70" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="350" y="60" font-size="11" fill="#3b82f6">4</text>
+        <rect x="400" y="45" width="90" height="50" rx="6" fill="none" stroke="#a16207"/>
+        <text x="410" y="75" font-size="13" fill="#fcd34d">d = a − y</text>
+        <line x1="490" y1="70" x2="555" y2="70" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="505" y="60" font-size="11" fill="#3b82f6">2</text>
+        <rect x="555" y="45" width="100" height="50" rx="6" fill="none" stroke="#a16207"/>
+        <text x="565" y="75" font-size="13" fill="#fcd34d">J = ½d²</text>
+        <line x1="655" y1="70" x2="720" y2="70" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="670" y="60" font-size="11" fill="#3b82f6">2</text>
+        <text x="725" y="75" font-size="14" fill="#93c5fd">J</text>
+      </svg>
+      <div class="diagram-label">c = wx = −4 → a = c+b = 4 → d = a−y = 2 → J = ½d² = <b style="color:#86efac">2</b></div>
+    </div>
+  </div>
+
+  <!-- BACKPROP -->
+  <div class="card">
+    <h2><span class="badge b-green">BACKPROP</span> Right → Left: Computing All Derivatives</h2>
+    <table>
+      <tr><th>Step (right→left)</th><th>Question asked</th><th>Result</th></tr>
+      <tr><td>∂J/∂d</td><td>If d ↑ε, how much does J move?</td><td>2 (J=½d² ⇒ slope 2d = 4... at d=2 → derivative of ½d² is d=2)</td></tr>
+      <tr><td>∂J/∂a</td><td>a ↑ε → d ↑ε (since d=a−y) → J ↑2ε</td><td>2</td></tr>
+      <tr><td>∂J/∂c</td><td>c ↑ε → a ↑ε (since a=c+b) → J ↑2ε</td><td>2</td></tr>
+      <tr><td>∂J/∂b</td><td>b ↑ε → a ↑ε → J ↑2ε</td><td>2</td></tr>
+      <tr><td>∂J/∂w</td><td>w ↑ε → c changes by x·ε = −2ε → J ↑2×(−2ε) = −4ε</td><td>−4</td></tr>
+    </table>
+    <p style="font-size:13px;color:#9ca3af; margin-top:8px;">Verified numerically: nudging w to 2.001 makes J drop from 2 to 1.996002 — a change of −4×ε, confirming ∂J/∂w = −4.</p>
+  </div>
+
+  <!-- Q1: CHAIN RULE -->
+  <div class="qbox">
+    <div class="qlabel">YOUR QUESTION 1 — Reminder: The Chain Rule</div>
+    <p>The chain rule tells you how to differentiate a function of a function. If J depends on a, and a depends on c, then:</p>
+    <div class="formula">
+      ∂J/∂c &nbsp;=&nbsp; <span class="hl">∂a/∂c</span> &nbsp;×&nbsp; <span class="hl">∂J/∂a</span>
+    </div>
+    <p>Intuition: "how much does nudging c ripple through to change J?" = (how much c moves a) × (how much a moves J).</p>
+
+    <p style="margin-top:14px;"><b>Worked example from this lesson</b> — computing ∂J/∂c:</p>
+    <table>
+      <tr><th>Piece</th><th>Relationship</th><th>Value</th></tr>
+      <tr><td>∂a/∂c</td><td>a = c + b → nudging c by ε moves a by exactly ε</td><td>1</td></tr>
+      <tr><td>∂J/∂a</td><td>already computed one step earlier in backprop</td><td>2</td></tr>
+      <tr><td><b>∂J/∂c</b></td><td>chain rule: 1 × 2</td><td><b>2</b></td></tr>
+    </table>
+
+    <p style="margin-top:10px;"><b>A second, cleaner worked example</b> (outside the lecture, to make the pattern concrete):</p>
+    <p>Let J = (3x + 1)². Think of it as J = u² where u = 3x + 1.</p>
+    <ul class="tight">
+      <li>∂J/∂u = 2u (power rule)</li>
+      <li>∂u/∂x = 3 (derivative of 3x+1)</li>
+      <li>Chain rule: ∂J/∂x = ∂u/∂x × ∂J/∂u = 3 × 2u = 6u = 6(3x+1) = 18x + 6</li>
+    </ul>
+    <p style="font-size:13px;color:#9ca3af;">Check at x=1: J=(3+1)²=16. Nudge x by ε=0.001 → J=(3.003+1)²=16.024009 → ΔJ ≈ 24×ε. Formula gives 18(1)+6=24. ✓ Matches.</p>
+  </div>
+
+  <!-- Q2: N+P DEDUCTION -->
+  <div class="qbox">
+    <div class="qlabel">YOUR QUESTION 2 — Why Reusing ∂J/∂a Leads to the N+P Insight</div>
+    <p>In this graph, both <code>w</code> and <code>b</code> feed into computing <code>a</code> (via <code>c=wx</code> then <code>a=c+b</code>). Backprop computes <b>∂J/∂a only once</b>, then reuses that single number to get both ∂J/∂w and ∂J/∂b via the chain rule — instead of recomputing "how does J respond to a change" from scratch for each parameter.</p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="90" height="45" rx="6" fill="none" stroke="#a16207"/>
+        <text x="30" y="47" font-size="12" fill="#fcd34d">c = wx</text>
+        <rect x="180" y="20" width="90" height="45" rx="6" fill="none" stroke="#a16207"/>
+        <text x="190" y="47" font-size="12" fill="#fcd34d">a = c+b</text>
+        <rect x="340" y="20" width="90" height="45" rx="6" fill="none" stroke="#a16207"/>
+        <text x="350" y="47" font-size="12" fill="#fcd34d">d = a−y</text>
+        <rect x="500" y="20" width="80" height="45" rx="6" fill="none" stroke="#a16207"/>
+        <text x="508" y="47" font-size="12" fill="#fcd34d">J = ½d²</text>
+        <line x1="110" y1="42" x2="178" y2="42" stroke="#4b5563"/>
+        <line x1="270" y1="42" x2="338" y2="42" stroke="#4b5563"/>
+        <line x1="430" y1="42" x2="498" y2="42" stroke="#4b5563"/>
+
+        <text x="10" y="120" font-size="12" fill="#93c5fd">∂J/∂a computed ONCE here ↓</text>
+        <line x1="225" y1="130" x2="225" y2="68" stroke="#22c55e" stroke-width="2" marker-end="url(#g)"/>
+        <text x="230" y="145" font-size="12" fill="#86efac">reused twice:</text>
+
+        <path d="M 220 150 C 150 170, 90 130, 65 68" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="30" y="175" font-size="11" fill="#86efac">→ ∂J/∂w (via c)</text>
+
+        <text x="200" y="190" font-size="11" fill="#86efac">→ ∂J/∂b (directly, since a=c+b)</text>
+      </svg>
+      <div class="diagram-label">∂J/∂a is the single "hub" value reused for both parameter derivatives</div>
+    </div>
+
+    <p style="margin-top:12px;"><b>Mapping the terms to N and P:</b></p>
+    <table>
+      <tr><th>Term</th><th>What it means here</th><th>In this small example</th></tr>
+      <tr><td><b>Nodes (N)</b></td><td>Every computed intermediate box in the graph: c, a, d, J (the operations chained together)</td><td>4 nodes (c, a, d, J)</td></tr>
+      <tr><td><b>Parameters (P)</b></td><td>The learnable values you actually update via gradient descent — here just w and b</td><td>2 parameters (w, b)</td></tr>
+      <tr><td><b>N + P steps</b></td><td>Backprop computes one derivative per node (right-to-left, once each) PLUS one final derivative per parameter, reusing the node derivatives</td><td>4 + 2 = 6 total derivative computations</td></tr>
+      <tr><td><b>N × P (naive)</b></td><td>If you recomputed "effect on J" separately from scratch for every single parameter, independently tracing all the way through every node</td><td>4 × 2 = 8 (small here, but explodes at scale)</td></tr>
+    </table>
+
+    <p style="margin-top:10px;">At real-world scale (from the lecture): <b>N = 10,000 nodes, P = 100,000 parameters</b></p>
+    <table>
+      <tr><th>Approach</th><th>Steps</th></tr>
+      <tr><td>Backprop: N + P</td><td>110,000 (~1.1×10⁵)</td></tr>
+      <tr><td>Naive: N × P</td><td>1,000,000,000 (10⁹)</td></tr>
+    </table>
+    <p style="font-size:13px;color:#9ca3af; margin-top:8px;">The deduction, precisely: because the graph is a chain/DAG, every node's derivative w.r.t. J only needs to be computed <b>once</b> (right to left, one pass). Once you have ∂J/∂a for a node, <i>any</i> parameter that feeds into that node (directly or through earlier nodes) can get its derivative by one extra chain-rule multiplication — no need to re-walk the whole graph per parameter. That's why total work scales additively (N+P) instead of multiplicatively (N×P).</p>
+  </div>
+
+  <div class="scenario">
+    <b>Real-world scenario:</b> A network with 3 hidden layers has thousands of shared intermediate activations feeding into millions of weights. Without backprop's node-reuse trick, computing each weight's gradient independently from scratch would mean re-deriving "how does the loss respond to this activation" millions of times over — computationally infeasible. Backprop's single right-to-left sweep computes each node's sensitivity exactly once, then every weight downstream just does one cheap multiplication (chain rule) to get its own gradient. This is precisely why training deep networks with millions of parameters is tractable at all.
+  </div>
+
+  <div class="footer-note">Optional calculus deep-dive — next video scales these same ideas up to a larger neural network.</div>
+
+</div>
+</body>
+</html>
