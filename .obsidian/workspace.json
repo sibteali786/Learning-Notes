@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "0fc9330ce1307682",
+        "id": "991737b496eb3703",
         "type": "tabs",
         "children": [
           {
-            "id": "a732791eb087f9d7",
+            "id": "c0ffd8fbf466236d",
             "type": "leaf",
             "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html"
-              },
-              "icon": "code-glyph",
-              "title": "17-computation-graphs-backprop-summary"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -53,7 +51,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "Isolation Levels",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -78,7 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -94,7 +92,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Book Reading/Writing/Writing Skills.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +102,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks"
             }
           },
           {
@@ -113,12 +111,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Book Reading/Writing/Writing Skills.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cargo Bussiness"
+              "title": "Outgoing links"
             }
           },
           {
@@ -142,17 +140,17 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-                "followCursor": false,
-                "showSearch": false,
+                "file": "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-1/4-more-complex-neural-network.html",
+                "followCursor": true,
+                "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Notes"
+              "title": "Outline"
             }
           },
           {
-            "id": "957dbb181bb46970",
+            "id": "88876276e2a2dd54",
             "type": "leaf",
             "state": {
               "type": "git-view",
@@ -166,11 +164,10 @@
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
-      "vault-lens:Vault Lens Dev: 打开当前文件": false,
       "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
@@ -181,57 +178,59 @@
       "obsidian-excalidraw-plugin:New drawing": false,
       "obsidian-git:Open Git source control": false,
       "publish:Publish changes...": false,
-      "audio-recorder:Start/stop recording": false
+      "audio-recorder:Start/stop recording": false,
+      "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "88876276e2a2dd54",
   "lastOpenFiles": [
+    "Learning/Research/GRE/Resources.md",
+    "Learning/Research/GRE",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/8-electronegativity-vs-electron-affinity.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/7-electron-affinity-vs-ionization-energy.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/6-successive-ionization-energies-element-id.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/5-ionization-energy-1st-vs-2nd.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/4-ionization-energy-period-trend-exceptions.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/3-ionization-energy-three-factors.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/2-atomic-and-ionic-radii.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/1-periodic-trends-coulombs-law.html",
+    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (4).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (3).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (2).png",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-derivatives-intuition-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-correct-lossfunction-graph.png",
-    "Learning/Research/GRE/Resources.md",
-    "Learning/Research/GRE",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/15-convolutional-layer-summary.html~",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/15-convolutional-layer-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/14-adam-optimizer-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/13-multiclass-tf-lab.html",
-    "Learning/Low Level Design/Intro/lld-intro-summary.html",
-    "Learning/Low Level Design/Intro",
-    "Learning/Low Level Design",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
-    "conflict-files-obsidian-git.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel III.excalidraw.md",
-    "Untitled.md",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
-    "Learning/Backend Engineering/Reources.md",
+    "Learning/Frontend Interview Preparation/Coding/Image Carousel/II.excalidraw.md",
+    "Learning/System Design/Core Concepts/9-Numbers-To-Know/numbers.md",
+    "Learning/System Design/Practice/TicketMaster/Pracice.excalidraw.md",
     "Learning/System Design/Practice/TicketMaster/Ticket Master .excalidraw.md",
-    "Learning/System Design/Practice/TicketMaster/Practice.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel II.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
+    "conflict-files-obsidian-git.md",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-article.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260805001316_159.png",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260730100726_423.png",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260730092132_463.png",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260730085940_939.png",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/1-calc-mass-subs-inmixture.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/3-Elemental-Composition-of-Elements/4-combustion-analysis.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/3-Elemental-Composition-of-Elements/3-Empirical-fromula-Hg-CL.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/3-Elemental-Composition-of-Elements/2-Calculating-mass-percent.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/2-Mass Spectrometry of elements/Isotopes.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/3-Moles_MolarMass_practice.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/2-Mole and Avogadro's Number.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/1-atomicmassunit.excalidraw.md",
     "Learning/DSA/Graphs/BFS/overview.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
-    "Learning/DSA/BFS/Drawing 2026-08-31 13.10.16.excalidraw.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Image Carousel/II.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
-    "Learning/System Design/Resources.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Resources.md",
     "Learning/System Design/Case Studies.md",
-    "Learning/Database/Interviews/Resources.md",
-    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Pasted image 20260813204431.png",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
-    "Screenshot 2026-06-12 at 10.29.20 AM.png",
+    "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
+    "Learning/Backend Engineering/Reources.md",
+    "Learning/System Design/Resources.md",
+    "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
