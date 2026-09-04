@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Automating Partitions with Node.js</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --yellow:#e5b53d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--accent); color:#fff;
+  }
+  .tag.green{background:var(--accent2); color:#04140a;}
+  .tag.purple{background:var(--purple); color:#fff;}
+  .tag.red{background:var(--red); color:#fff;}
+  code{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  .step{display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;}
+  .stepnum{
+    display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px;
+    border-radius:50%; background:var(--accent); color:#fff; font-size:0.78rem; font-weight:700;
+    flex-shrink:0; margin-top:2px;
+  }
+  .steptext{font-size:0.9rem; line-height:1.55;}
+  .steptext b{color:#fff;}
+  pre{
+    background:#0c0e13; border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-family:'Fira Code','Consolas',monospace; font-size:0.78rem;
+    overflow-x:auto; color:#c9d6ea; line-height:1.55; margin:8px 0 0;
+  }
+  .kw{color:#7fb3ff;}
+  .str{color:#9fd4ff;}
+  .fn{color:#e5b53d;}
+  .comment{color:#6b7484;}
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0; justify-content:center;}
+  .box{
+    background:#0f1319; border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; text-align:center; font-size:0.78rem;
+  }
+  .box.warn{border-color:var(--red); color:#f3c9c0;}
+  .box.good{border-color:var(--accent2); color:#bfeccf;}
+  .arrow{color:var(--muted); font-size:1.1rem;}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:12px; font-size:0.87rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .warning{
+    border-left:3px solid var(--red); background:#221417; padding:10px 16px; border-radius:0 8px 8px 0;
+    font-size:0.87rem; color:#f3c9c0; margin-top:10px;
+  }
+  table{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:12px;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid #2a2f3a;}
+  th{color:var(--muted); font-weight:600; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
+  td.num{font-family:'Fira Code',monospace; color:#9fd4ff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>⚙️ Automating Partitions with Node.js</h1>
+  <div class="sub">Community Q&A: dynamically generating 100 partitions instead of typing them by hand</div>
+
+  <!-- CONTEXT -->
+  <div class="card">
+    <h2><span class="tag">The question</span></h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">From the intro-to-database-engineering course: if you have a huge <b>customers</b> table and want to partition by ID, manually typing out dozens (or hundreds) of <code>CREATE TABLE</code> + <code>ATTACH PARTITION</code> statements gets tedious fast. This is a scripted solution — written in Node.js/JavaScript for readability, though the same logic works in any language, including PL/pgSQL.</p>
+  </div>
+
+  <!-- THE PLAN -->
+  <div class="card">
+    <h2><span class="tag green">The plan</span></h2>
+    <ul style="font-size:0.9rem; line-height:1.6; padding-left:20px;">
+      <li>Target scale: <b>1 billion customers</b> (simplified from Postgres integer's real max of ~4 billion, i.e. 2³²)</li>
+      <li>Each partition holds <b>10 million</b> rows</li>
+      <li>Result: <code>1,000,000,000 ÷ 10,000,000 = 100 partitions</code></li>
+    </ul>
+    <div class="flow">
+      <div class="box">1B customers</div>
+      <span class="arrow">÷ 10M each →</span>
+      <div class="box good">100 partitions</div>
+    </div>
+  </div>
+
+  <!-- DOCKER -->
+  <div class="card">
+    <h2><span class="tag">Setup</span> Spin up Postgres (port exposed this time)</h2>
+    <pre>docker run --name pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres</pre>
+    <p style="font-size:0.85rem; color:var(--muted);">Unlike the earlier demo, the port <b>is</b> exposed here (<code>-p 5432:5432</code>) since the Node.js script connects from outside the container.</p>
+  </div>
+
+  <!-- SCRIPT 1 -->
+  <div class="card">
+    <h2><span class="tag purple">Script 1: <code>create_partitions.mjs</code></span></h2>
+
+    <div class="step">
+      <span class="stepnum">1</span>
+      <div class="steptext">Connect to Postgres, create a fresh <code>customers</code> database (drop-and-recreate is commented out by default — a safety measure so you don't accidentally wipe a real database).</div>
+    </div>
+    <div class="warning">
+      ⚠️ The <code>drop database</code> line is intentionally commented out in the shared script. Only uncomment it if you're sure you want to wipe an existing database — running this against a real database with existing customer data is destructive.
+    </div>
+
+    <div class="step" style="margin-top:14px;">
+      <span class="stepnum">2</span>
+      <div class="steptext">Connect to the new <code>customers</code> database and create the partitioned table — same pattern as the manual demo, just parameterized.</div>
+    </div>
+    <pre><span class="kw">const</span> sql = <span class="str">`create table customers (id serial, name text)
+             partition by range (id)`</span>;
+<span class="kw">await</span> dbClientCustomers.query(sql);</pre>
+
+    <div class="step" style="margin-top:14px;">
+      <span class="stepnum">3</span>
+      <div class="steptext">Loop 100 times, computing each partition's ID range and generating the same two SQL statements used manually before — <code>CREATE TABLE ... (LIKE ... INCLUDING INDEXES)</code> and <code>ATTACH PARTITION</code>.</div>
+    </div>
+    <pre><span class="kw">for</span> (<span class="kw">let</span> i = 0; i < 100; i++) {
+    <span class="kw">const</span> idFrom = i * 10000000;
+    <span class="kw">const</span> idTo = (i + 1) * 10000000;
+    <span class="kw">const</span> partitionName = <span class="str">`customers_${idFrom}_${idTo}`</span>;
+
+    <span class="kw">const</span> psql1 = <span class="str">`create table ${partitionName}
+                     (like customers including indexes)`</span>;
+
+    <span class="kw">const</span> psql2 = <span class="str">`alter table customers
+        attach partition ${partitionName}
+        for values from (${idFrom}) to (${idTo})`</span>;
+
+    <span class="kw">await</span> dbClientCustomers.query(psql1);
+    <span class="kw">await</span> dbClientCustomers.query(psql2);
+}</pre>
+
+    <div class="warning">
+      🐛 <b>Gotcha learned the hard way:</b> the upper bound (<code>idTo</code>) in a Postgres range partition is <b>exclusive</b>. A range <code>FOR VALUES FROM (0) TO (10000000)</code> actually covers IDs <b>0 through 9,999,999</b> — not up to 10,000,000. Off-by-one errors here will bite you.
+    </div>
+
+    <div class="step" style="margin-top:14px;">
+      <span class="stepnum">4</span>
+      <div class="steptext">Close both connections when done.</div>
+    </div>
+
+    <pre><span class="comment">// run it:</span>
+npm install   <span class="comment">// installs the 'pg' library</span>
+node create_partitions.mjs</pre>
+  </div>
+
+  <!-- SCRIPT 2 -->
+  <div class="card">
+    <h2><span class="tag purple">Script 2: <code>populate_customers.mjs</code></span></h2>
+    <p style="font-size:0.9rem; color:#cfd6e4;">Run <b>after</b> partitions exist. Inserts 10 million random-named customers per loop iteration, 100 times — <b>1 billion rows total</b> (the demo only waits through a couple of iterations rather than the full run).</p>
+    <pre><span class="kw">for</span> (<span class="kw">let</span> i = 0; i < 100; i++) {
+    <span class="kw">const</span> psql = <span class="str">`insert into customers(name) (
+                    select random() from generate_series(1,10000000)
+                    )`</span>;
+    <span class="kw">await</span> dbClientCustomers.query(psql);
+}</pre>
+    <p style="font-size:0.9rem; color:#cfd6e4;">Notice the insert only ever targets the single logical <code>customers</code> table — <b>you never insert into a specific partition directly.</b> Postgres automatically routes each row to the correct partition based on its generated <code>id</code>.</p>
+  </div>
+
+  <!-- VERIFYING -->
+  <div class="card">
+    <h2><span class="tag green">Verifying the result</span></h2>
+    <pre>docker exec -it pg psql -U postgres -d customers</pre>
+    <pre><span class="kw">select max</span>(id) <span class="kw">from</span> customers;
+<span class="comment">-- shows highest inserted ID so far</span>
+
+\d customers            <span class="comment">-- shows table + "Number of partitions: 100"</span>
+\d+ customers            <span class="comment">-- lists all 100 partitions in detail</span>
+
+<span class="kw">select count</span>(*) <span class="kw">from</span> customers_0_10000000;
+<span class="comment">-- query any individual partition like a normal table</span></pre>
+    <div class="example">
+      💡 <b>Takeaway:</b> once partitions are attached, they behave like completely ordinary tables — you can query them directly by name, or just query the parent <code>customers</code> table and let Postgres route/prune automatically.
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="card">
+    <h2><span class="tag">Summary</span></h2>
+    <table>
+      <tr><th>Script</th><th>Purpose</th></tr>
+      <tr><td><code>create_partitions.mjs</code></td><td>Creates the <code>customers</code> database, the partitioned parent table, and loops to create + attach 100 range partitions (10M IDs each)</td></tr>
+      <tr><td><code>populate_customers.mjs</code></td><td>Inserts customers in batches of 10M straight into the parent table — Postgres auto-routes rows into the correct partition</td></tr>
+    </table>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:10px;">This automates exactly what was done manually in the earlier grades_parts demo — just scaled from 4 partitions to 100, and driven by a loop instead of hand-typed SQL.</p>
+  </div>
+
+</div>
+</body>
+</html>
