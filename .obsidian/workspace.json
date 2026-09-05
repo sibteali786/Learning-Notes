@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "f1abf27739705457",
+        "id": "86fde6146b7f05b8",
         "type": "tabs",
         "children": [
           {
-            "id": "ebeacb12c39e34da",
+            "id": "f3f699931c5deec9",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "html-view",
+              "state": {
+                "file": "Learning/Backend Engineering/Case Studies From Own Work/Chat App/asynclocalstorage-tenant-isolation.html"
+              },
+              "icon": "code-glyph",
+              "title": "asynclocalstorage-tenant-isolation"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 443.79296875
+    "width": 358.82421875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,25 +185,25 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "f3f699931c5deec9",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html",
-    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/9-automating-partitions-nodejs-summary.html",
-    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/8-cons-of-partitioning-summary.html",
-    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/7-pros-of-partitioning-summary.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/tenant-isolation-bypass.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/Tenant Isolation.md",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/asynclocalstorage-tenant-isolation.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/asynclocalstorage-tenant-isolation.html.tmp.17471.e63ffeedc9da",
+    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.abe763f8e051",
+    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.960f8c479a0d",
+    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.f5e619d76c63",
+    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.65403c77a0b0",
+    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.8748e0cca337",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (4).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (3).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (2).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-derivatives-intuition-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-correct-lossfunction-graph.png",
     "Learning/Research/GRE/Resources.md",
-    "Learning/Research/GRE",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/15-convolutional-layer-summary.html~",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/15-convolutional-layer-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/14-adam-optimizer-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/13-multiclass-tf-lab.html",
-    "Learning/Low Level Design/Intro/lld-intro-summary.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
     "conflict-files-obsidian-git.md",
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel III.excalidraw.md",
@@ -225,7 +228,6 @@
     "Learning/System Design/Resources.md",
     "Learning/System Design/Core Concepts/9-Numbers-To-Know/Resources.md",
     "Learning/System Design/Case Studies.md",
-    "Learning/Database/Interviews/Resources.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",

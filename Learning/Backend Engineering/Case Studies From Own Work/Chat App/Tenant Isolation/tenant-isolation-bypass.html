@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The findById That Slipped Past the Tenant Guard</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/rough.js/3.1.0/rough.js"></script>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --panel: #ffffff;
+    --ink: #1e1b16;
+    --muted: #635c50;
+    --accent: #a8471c;
+    --accent-soft: #f4e4da;
+    --line: #e6ded2;
+    --code-bg: #2b2620;
+    --code-ink: #f1ece2;
+    --danger: #b3261e;
+    --danger-soft: #fbe9e7;
+    --good: #2e6b3e;
+    --good-soft: #e7f3e9;
+    --warn: #8a6d1f;
+    --warn-soft: #fbf1d8;
+    --radius: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 6rem;
+  }
+  h1 {
+    font-size: 2rem;
+    line-height: 1.25;
+    margin: 0 0 0.4rem;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin-bottom: 2.2rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin-top: 3rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--line);
+  }
+  h3 {
+    font-size: 1.15rem;
+    margin-top: 2rem;
+    color: var(--accent);
+  }
+  p { margin: 0.9rem 0; }
+  a { color: var(--accent); }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: var(--accent-soft);
+    padding: 0.12em 0.4em;
+    border-radius: 5px;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 1rem 0;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 1em;
+  }
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .toc h2 { margin-top: 0; border: none; font-size: 1.1rem; }
+  .toc ol { margin: 0.5rem 0 0; padding-left: 1.3rem; }
+  .toc li { margin: 0.35rem 0; }
+  .toc a { text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .callout {
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin: 1.4rem 0;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+  }
+  .callout.danger { border-color: var(--danger); background: var(--danger-soft); }
+  .callout.good { border-color: var(--good); background: var(--good-soft); }
+  .callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .callout-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+    opacity: 0.85;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.6rem;
+    margin: 1.3rem 0;
+  }
+
+  /* diagram bits */
+  .diagram {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    margin: 1.5rem 0;
+  }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.6rem;
+    justify-content: center;
+  }
+  .flow-box {
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.85rem;
+    min-width: 130px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .flow-box.danger { background: var(--danger-soft); }
+  .flow-box.good { background: var(--good-soft); }
+  .flow-box .label { font-weight: 700; margin-bottom: 0.2rem; }
+  .flow-arrow {
+    align-self: center;
+    color: var(--muted);
+    font-size: 1.3rem;
+    padding: 0 0.2rem;
+  }
+  @media (max-width: 600px) {
+    .flow { flex-direction: column; align-items: stretch; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+
+  table.method-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2rem 0;
+    font-size: 0.9rem;
+  }
+  table.method-table th, table.method-table td {
+    border: 1px solid var(--line);
+    padding: 0.55rem 0.7rem;
+    text-align: left;
+  }
+  table.method-table th { background: #f2ede2; }
+  table.method-table td.yes { color: var(--good); font-weight: 600; }
+  table.method-table td.no { color: var(--danger); font-weight: 600; }
+
+  .diff-block {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    margin: 1rem 0;
+  }
+  .diff-block .diff-header {
+    background: #efe8db;
+    padding: 0.5rem 1rem;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  pre.diff {
+    margin: 0;
+    border-radius: 0;
+  }
+  .diffline-add { color: #a3e0ac; }
+  .diffline-del { color: #f0a3a3; }
+
+  /* quiz */
+  .quiz-q {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .quiz-q p.question { font-weight: 600; margin-top: 0; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; }
+  .quiz-option {
+    text-align: left;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fdfcfa;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .quiz-option:hover { background: var(--accent-soft); }
+  .quiz-option.correct { background: var(--good-soft); border-color: var(--good); }
+  .quiz-option.incorrect { background: var(--danger-soft); border-color: var(--danger); }
+  .quiz-feedback {
+    margin-top: 0.7rem;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: var(--good-soft); color: #1c4726; }
+  .quiz-feedback.incorrect-fb { background: var(--danger-soft); color: #7a1a15; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .muted { color: var(--muted); }
+  .commit-tag {
+    display: inline-block;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #efe8db;
+    border-radius: 5px;
+    padding: 0.05em 0.4em;
+    font-size: 0.85em;
+  }
+
+  /* hand-drawn architecture diagrams */
+  .sketch-wrap {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  .sketch-panel {
+    background: #fffdf8;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem;
+    flex: 1 1 320px;
+    max-width: 380px;
+  }
+  .sketch-panel h4 {
+    margin: 0 0 0.6rem;
+    font-family: 'Kalam', cursive;
+    font-size: 1.15rem;
+    text-align: center;
+  }
+  .sketch-panel.before h4 { color: var(--danger); }
+  .sketch-panel.after h4 { color: var(--good); }
+  .sketch-panel canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .sketch-legend {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 0.6rem;
+  }
+  .sketch-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>The <code>findById</code> That Slipped Past the Tenant Guard</h1>
+  <p class="subtitle">How a multi-tenant Mongoose backend silently leaked cross-tenant user records for three days, and what did — and didn't — get fixed afterward.</p>
+
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#background">Background: how the tenant plugin works</a></li>
+      <li><a href="#intuition">Intuition: an allow-list with one door left unlocked</a></li>
+      <li><a href="#bypass">The bypassing call: <code>UserService.getUserById</code></a></li>
+      <li><a href="#code">Code walkthrough of the fix</a></li>
+      <li><a href="#recurrence">Did this get fixed for good, or just fixed once?</a></li>
+      <li><a href="#improvements">Improvements: closing the class, not the instance</a></li>
+      <li><a href="#architecture">Architecture diagram: before vs. after</a></li>
+      <li><a href="#quiz">Quiz</a></li>
+    </ol>
+  </div>
+
+  <h2 id="background">Background: how the tenant plugin works</h2>
+
+  <p>
+    This backend is a Mongoose/MongoDB service supporting multiple tenants (separate customer
+    organizations) sharing the same database and the same collections. That's a common and
+    economical design — one <code>users</code> collection, one <code>channels</code> collection,
+    and so on, with every document carrying a <code>tenantId</code> field that says which
+    customer it belongs to. The danger, of course, is that a single missed filter can let one
+    tenant's code accidentally read or write another tenant's data. If you've never worked with
+    a shared-database multi-tenant system before, that's the entire risk in one sentence: <em>every
+    single query, everywhere in the codebase, forever, must remember to filter by tenant</em> — and
+    "must remember" is a fragile place to put a security boundary.
+  </p>
+
+  <p>
+    To make that less fragile, this codebase centralizes the enforcement in one place: a Mongoose
+    <strong>schema plugin</strong> called <code>tenantIsolationPlugin</code>, defined in
+    <code>src/plugins/tenantPlugin.ts</code>. A schema plugin in Mongoose is just a function that
+    gets applied to every model's schema and can attach hooks — code that runs automatically
+    before or after certain operations, without the call site needing to remember to invoke
+    anything. Think of it as an interceptor that sits between "a service calls <code>User.find(...)</code>"
+    and "MongoDB actually runs the query."
+  </p>
+
+  <p>
+    The second piece of background you need is <strong>AsyncLocalStorage</strong> — a Node.js
+    built-in that lets you stash a value (here, the current tenant ID) at the start of handling a
+    request, and have that value be transparently available anywhere later in that request's
+    call stack, without threading it through every function argument. This codebase calls that
+    stashed value the <em>tenant context</em>. An Express middleware, <code>setTenantContext</code>,
+    establishes it once per request (right after authenticating the user); a helper,
+    <code>runInTenantContext</code>, does the same thing for code paths that aren't a plain HTTP
+    request — WebSocket handlers, background jobs, and so on.
+  </p>
+
+  <p>
+    If you're already comfortable with Mongoose middleware and AsyncLocalStorage, skip ahead —
+    the part that matters for this story is narrower: <strong>which specific Mongoose operations
+    the plugin actually intercepts</strong>.
+  </p>
+
+  <h3>Reader vs. writer: <code>queryMiddleware</code> and <code>runInTenantContext</code> are not the same job</h3>
+
+  <p>
+    It's easy to conflate these two pieces because they both mention "tenant context," but they
+    sit on opposite sides of the same box. <code>queryMiddleware</code> — the function registered
+    via <code>schema.pre(...)</code> — is a <strong>reader</strong>. It never determines the
+    tenant itself; all it can do is ask <code>tenantContext.getStore()</code>, "is there anything
+    in the box right now?" If the box is empty, it throws. It has no mechanism for figuring out
+    the tenant from the query alone — a <code>User.findOne({...})</code> call carries no tenant
+    information on its own.
+  </p>
+
+  <p>
+    <code>runInTenantContext(tenantId, fn)</code> is the <strong>writer</strong>. It's a thin
+    wrapper around <code>AsyncLocalStorage.run({tenantId}, fn)</code>: for as long as
+    <code>fn</code> is executing — including every <code>await</code> inside it, and every
+    function it calls, transitively — <code>tenantContext.getStore()</code> will return
+    <code>{tenantId}</code>. The moment <code>fn</code> returns, the box empties again.
+    <code>setTenantContext</code> (the Express middleware) is just <code>runInTenantContext</code>
+    wearing an Express-shaped hat, wired up once in the middleware chain right after
+    authentication.
+  </p>
+
+  <p>
+    Put differently: the plugin hook is a smoke detector, and <code>runInTenantContext</code> is
+    the thing that has to actually be in the room for the detector to have anything to detect.
+    A smoke detector with nothing burning doesn't malfunction when it stays silent — it's working
+    correctly. The question is always upstream: did anyone strike a match (call
+    <code>runInTenantContext</code>) before this code path ran?
+  </p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="flow-box">
+        <div class="label">1. Auth middleware</div>
+        determines tenantId for this user
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="label">2. setTenantContext(tenantId)</div>
+        opens the AsyncLocalStorage box
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="label">3. service calls User.findOne(...)</div>
+        no tenant info in the call itself
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box good">
+        <div class="label">4. queryMiddleware fires</div>
+        reads the box → finds tenantId → injects filter
+      </div>
+    </div>
+  </div>
+
+  <p>
+    For anything outside a normal HTTP request — a WebSocket event handler, a background job, a
+    cron task — there is no Express middleware chain to auto-open the box in step 2. Whoever
+    kicks off that work has to call <code>runInTenantContext(tenantId, () =&gt; { ... })</code>
+    by hand before any query runs inside it. Skip that call, and step 4's reader finds an empty
+    box — which is precisely the shape of the bug this article is about: <code>getUserById</code>
+    called <code>userRepository.findById(id)</code> with no <code>runInTenantContext</code>
+    anywhere in its call chain, so even once <code>findById</code> was added to the hooked-methods
+    list, the fix required <em>also</em> adding the missing <code>runInTenantContext(tenantId, ...)</code>
+    wrapper around it. Neither change alone was sufficient — a reader with nothing to read is a
+    no-op, and a writer whose value nothing reads is unenforced.
+  </p>
+
+  <h3>The narrow background: the hooked-methods list</h3>
+
+  <p>
+    <code>tenantIsolationPlugin</code> attaches one hook, <code>queryMiddleware</code>, to a
+    hand-written list of Mongoose query methods via <code>schema.pre([...], queryMiddleware)</code>.
+    For every method in that list, before the query actually runs, the hook does two things:
+  </p>
+
+  <ol>
+    <li>Looks at the query's existing filter. If it already has a <code>tenantId</code>, nothing to do.</li>
+    <li>
+      Otherwise, it reads the tenant ID out of the AsyncLocalStorage context. If one is present,
+      it silently adds <code>{ tenantId }</code> to the filter. If <strong>no</strong> context is
+      present — meaning some code somewhere queried the database without ever entering a tenant
+      context — it throws: <code>"🚨 SECURITY: Query attempted without tenant context!"</code>
+    </li>
+  </ol>
+
+  <p>
+    There are sibling hooks too: one on <code>"validate"</code> that stamps a new document with
+    the current tenant ID before it's allowed to save, one on <code>"save"</code> that refuses to
+    let an existing document's <code>tenantId</code> be changed, and one on <code>"aggregate"</code>
+    that injects a <code>$match: { tenantId }</code> stage at the front of any aggregation
+    pipeline. All of them lean on the same idea: read the tenant out of context, and fail loudly
+    if there isn't one.
+  </p>
+
+  <p>That "fail loudly" design is exactly what makes this bug interesting — the safety net was designed to be noisy when triggered. So how did a cross-tenant leak happen <em>silently</em>?</p>
+
+  <div class="callout">
+    <div class="callout-title">The detail to hold onto</div>
+    The list of methods passed to <code>schema.pre([...])</code> — <code>find</code>,
+    <code>findOne</code>, <code>findOneAndUpdate</code>, <code>findOneAndDelete</code>,
+    <code>findOneAndReplace</code>, <code>count</code>, <code>create</code>, <code>insert</code>,
+    <code>insertMany</code>, <code>countDocuments</code>, <code>deleteOne</code>,
+    <code>deleteMany</code>, <code>updateOne</code>, <code>updateMany</code> — is a
+    <em>manually typed-out array</em>, not something Mongoose derives automatically from "all
+    query methods." Whatever isn't on that list gets no interception at all: no auto-filter,
+    and — this is the sting — no loud failure either. It's invisible to the plugin entirely.
+  </div>
+
+  <h2 id="intuition">Intuition: an allow-list with one door left unlocked</h2>
+
+  <p>
+    Picture the tenant plugin as a security guard standing at a set of named doors into the
+    database — one door labeled <code>find</code>, one labeled <code>findOne</code>, one labeled
+    <code>updateOne</code>, and so on. At each named door, the guard checks your badge (the
+    tenant context) before letting you through, and slams the door in your face with an alarm if
+    you don't have one.
+  </p>
+
+  <p>
+    But there was a door with no label on the guard's clipboard at all: <code>findById</code>.
+    Not because anyone decided it should be exempt — it just wasn't written down. Walk up to
+    that door, and there's no guard there. No badge check, no alarm. You just... walk into the
+    building.
+  </p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="flow-box good">
+        <div class="label">User.findOne(...)</div>
+        no tenant context
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box good">
+        <div class="label">Guard checks clipboard</div>
+        "findOne" is listed
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box good">
+        <div class="label">🚨 Thrown</div>
+        SECURITY error, loud &amp; safe
+      </div>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="flow-box danger">
+        <div class="label">User.findById(id)</div>
+        no tenant context
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box danger">
+        <div class="label">Guard checks clipboard</div>
+        "findById" not listed
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box danger">
+        <div class="label">Query runs unfiltered</div>
+        returns ANY tenant's user
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Concretely, with toy data: suppose tenant <code>acme</code> has a user with ID
+    <code>u_501</code>, and tenant <code>globex</code> has a user with ID <code>u_777</code>. A
+    request authenticated as someone in <code>globex</code> — whose tenant context correctly says
+    <code>tenantId: "globex"</code> — calls a function that does
+    <code>User.findById("u_501")</code>. If <code>findById</code> were on the guarded list, the
+    plugin would inject <code>tenantId: "globex"</code> into the filter, the ID wouldn't match
+    (because <code>u_501</code> belongs to <code>acme</code>), and Mongoose would correctly return
+    <code>null</code>. Instead, because <code>findById</code> had no guard at all, the query ran
+    as plain <code>{ _id: "u_501" }</code> with no tenant filter whatsoever — and returned
+    <code>acme</code>'s user record to code running in a <code>globex</code> request.
+  </p>
+
+  <h2 id="bypass">The bypassing call: <code>UserService.getUserById</code></h2>
+
+  <p>
+    The unlabeled door wouldn't have mattered if nothing ever walked through it. Something did:
+    <code>UserService.getUserById</code> in <code>src/services/user.service.ts</code>. Before the
+    fix, its entire body was this:
+  </p>
+
+  <div class="diff-block">
+    <div class="diff-header">src/services/user.service.ts — before commit <span class="commit-tag">37d7930</span></div>
+    <pre class="diff">public async getUserById(id: string): Promise&lt;User&gt; {
+  const user = await userRepository.findById(id);
+  if (!user) {
+    throw new NotFoundError("user");
+  }
+  return user;
+}</pre>
+  </div>
+
+  <p>
+    <code>userRepository.findById</code> traces down to the base repository's thinnest possible
+    wrapper — <code>src/repositories/base.repository.ts</code>'s
+    <code>findById(id) { return this.model.findById(id); }</code> — which is just Mongoose's raw
+    <code>Model.findById</code>. Two things are notably <em>absent</em> from this method, compared
+    to its siblings:
+  </p>
+
+  <ul>
+    <li>No <code>runInTenantContext(...)</code> wrapper — it doesn't even try to establish a tenant scope.</li>
+    <li>It routes through <code>findById</code>, the one query method the plugin doesn't watch.</li>
+  </ul>
+
+  <p>
+    Either flaw alone might have been caught. If it had gone through <code>findOne</code> instead
+    without a tenant context, the plugin's SECURITY check would have thrown immediately — annoying,
+    but safe, and it would have surfaced in testing or logs right away. Instead, the two gaps
+    stacked: no context, and no guard to notice the missing context. The failure mode wasn't a
+    crash — it was silence, plus a wrong answer.
+  </p>
+
+  <div class="callout danger">
+    <div class="callout-title">Why this one was quiet, not loud</div>
+    Every other query path in this codebase that skips its tenant context fails <em>noisily</em> —
+    that's the plugin doing its job. This one path failed <em>quietly</em>, because it used the
+    one method name the guard's clipboard didn't mention. A loud bug gets found in minutes. A
+    quiet one gets found whenever someone happens to compare notes across tenants.
+  </div>
+
+  <h2 id="code">Code walkthrough of the fix</h2>
+
+  <p>
+    The fix landed in a single commit, <span class="commit-tag">37d7930</span>
+    ("<em>feat(fix): tenant content was wrongly applied</em>", 2025-10-17), and it made two
+    changes that only work together.
+  </p>
+
+  <h3>1. Add the missing method to the guard's list</h3>
+
+  <div class="diff-block">
+    <div class="diff-header">src/plugins/tenantPlugin.ts</div>
+    <pre class="diff">   "findOneAndUpdate",
+   "findOneAndDelete",
+   "findOneAndReplace",
+<span class="diffline-add">+  "findById",</span>
+   "count",
+   "create",</pre>
+  </div>
+
+  <p>
+    One line. From this commit onward, <code>findById</code> calls are intercepted exactly like
+    <code>findOne</code> and the rest: filtered by tenant if a context exists, or thrown loudly if
+    it doesn't.
+  </p>
+
+  <h3>2. Give <code>getUserById</code> an actual tenant context to be checked against</h3>
+
+  <p>
+    Adding the method to the list alone would have just converted the silent bug into a loud
+    crash — <code>getUserById</code> still wasn't establishing any tenant context before calling
+    <code>findById</code>. So the method itself was rewritten to resolve the real tenant and wrap
+    the call:
+  </p>
+
+  <div class="diff-block">
+    <div class="diff-header">src/services/user.service.ts — after commit <span class="commit-tag">37d7930</span></div>
+    <pre class="diff">public async getUserById(id: string): Promise&lt;User&gt; {
+<span class="diffline-add">+  const tenantId = await this.getTenantIdForUser();
++  return runInTenantContext(tenantId, async () =&gt; {
++    const user = await userRepository.findById(id);
++    if (!user) {
++      throw new NotFoundError("user");
++    }
++    return user;
++  });</span>
+<span class="diffline-del">-  const user = await userRepository.findById(id);
+-  if (!user) {
+-    throw new NotFoundError("user");
+-  }
+-  return user;</span>
+}</pre>
+  </div>
+
+  <p>
+    Now the shape matches every other correctly-written query in the codebase: establish tenant
+    context, then query, with the plugin able to double-check the filter either way.
+  </p>
+
+  <div class="callout warn">
+    <div class="callout-title">A nuance worth flagging (not the main bug)</div>
+    The same commit touches sibling methods like <code>createUser</code>, and an intermediate
+    version of this fix wrapped some of them in <code>runInTenantContext("default", ...)</code> —
+    a <em>hardcoded</em> tenant string, rather than a tenant resolved from the actual request.
+    That's a different, smaller correctness smell: a hardcoded <code>"default"</code> tenant
+    technically satisfies the plugin's "is there a context?" check, but it defeats the entire
+    point of tenant isolation if it's used anywhere a real tenant should be threaded through
+    instead. It's adjacent to this story, not the headline bug — but if you're auditing this
+    pattern, it's the kind of thing worth grepping for.
+  </div>
+
+  <h2 id="recurrence">Did this get fixed for good, or just fixed once?</h2>
+
+  <p>
+    This is the part worth being honest about in an interview answer, because the interesting
+    engineering judgment isn't "did you fix the bug" — it's "did you fix the <em>class</em> of
+    bug." Here, the evidence says: <strong>no, this was a one-off fix.</strong> The two broken
+    call sites were repaired, and the missing method was added to the array — but the underlying
+    fragility that produced the bug in the first place is still sitting in the codebase today.
+  </p>
+
+  <h3>What would have counted as a structural fix — and wasn't done</h3>
+
+  <table class="method-table">
+    <tr><th>Prevention mechanism</th><th>Present?</th><th>Evidence</th></tr>
+    <tr>
+      <td>Custom lint rule banning raw <code>Model.findById</code>/etc. outside the plugin path</td>
+      <td class="no">No</td>
+      <td><code>eslint.config.mjs</code> only has generic <code>@typescript-eslint/no-explicit-any</code> and <code>explicit-function-return-type</code> warnings — nothing tenant-related.</td>
+    </tr>
+    <tr>
+      <td>Repository-layer wrapper that asserts tenant context before delegating to Mongoose</td>
+      <td class="no">No</td>
+      <td><code>base.repository.ts</code>'s <code>findById</code> is still a one-line passthrough: <code>return this.model.findById(id)</code>. Any enforcement still depends entirely on the plugin array further downstream.</td>
+    </tr>
+    <tr>
+      <td>Regression test asserting cross-tenant IDs are rejected</td>
+      <td class="no">No</td>
+      <td><code>base-repository.test.ts</code> has a <code>findById</code> test suite, but it predates the fix by about seven months (commit <span class="commit-tag">b699de0</span>, 2025-03-25) and has zero multi-tenant fixtures or assertions.</td>
+    </tr>
+    <tr>
+      <td>Documented checklist / process change for adding new Mongoose methods</td>
+      <td class="no">No</td>
+      <td>No commit message, comment, or doc references a checklist or convention going forward.</td>
+    </tr>
+  </table>
+
+  <div class="callout danger">
+    <div class="callout-title">Residual risk</div>
+    The enforcement mechanism for tenant isolation is still, today, a single hand-typed array of
+    method-name strings inside <code>tenantPlugin.ts</code>. If a future feature reaches for
+    <code>Model.distinct(...)</code>, <code>Model.estimatedDocumentCount(...)</code>,
+    <code>Model.bulkWrite(...)</code>, or any other Mongoose query method not currently on that
+    list, the exact same failure mode reproduces: no auto-filter, no thrown error, just a silent
+    cross-tenant read or write. Nothing in the codebase — no type, no test, no lint rule — would
+    catch it before it shipped. The <code>findById</code> incident wasn't really about
+    <code>findById</code> specifically; it was the first time this particular kind of gap in a
+    manually maintained allow-list got exercised. It's unlikely to be the last time that class of
+    gap exists, unless the enforcement moves from "remember to update this array" to something
+    the type system or CI can verify on its own.
+  </div>
+
+  <h2 id="improvements">Improvements: closing the class, not the instance</h2>
+
+  <p>
+    Everything so far explains what actually happened. This section is different — it's a
+    proposal for what would need to change to make this entire <em>category</em> of bug
+    structurally impossible, rather than merely patched wherever it's been noticed so far. The
+    guiding principle: an allow-list that a human has to remember to update is not a security
+    boundary, it's a to-do list. The fixes below are ordered by leverage — how much of the
+    underlying fragility each one actually removes, versus how much it just adds another layer of
+    hoping someone remembers.
+  </p>
+
+  <h3>1. Replace the method allow-list with a single choke point (highest leverage)</h3>
+
+  <p>
+    The core defect in the current design is that <code>tenantIsolationPlugin</code> hooks
+    <em>named methods</em> — <code>find</code>, <code>findOne</code>, <code>findById</code>, and so
+    on — one string at a time, in an array a human has to keep up to date. Mongoose actually gives
+    you two verified ways to stop enumerating and instead intercept by <em>shape</em>. Both are
+    documented, real Mongoose behavior — not invented for this article.
+  </p>
+
+  <h4 style="margin-top:1.4rem; color:var(--ink); font-size:1rem;">Option A — a regex hook, staying inside Mongoose's own middleware system</h4>
+
+  <p>
+    <code>schema.pre()</code> accepts a <code>RegExp</code> in place of a method name, matched
+    against the operation name. Mongoose's own docs give exactly this example:
+    <code>schema.pre(/^find/, fn)</code> to strip soft-deleted documents from every find-style
+    query. The important detail for this story: because <code>findById</code> is implemented
+    internally as a call to <code>findOne</code>, a regex hook on <code>/^find/</code> already
+    covers <code>findById</code> — nobody has to think to list it by name. That reframes the
+    original incident: it wasn't that someone forgot to type "findById" into an array; it's that
+    the array was the wrong data structure to encode "every find-shaped query" in the first place.
+  </p>
+
+  <div class="diff-block">
+    <div class="diff-header">src/plugins/tenantPlugin.ts — Option A: regex-based hooks</div>
+    <pre class="diff">export function tenantIsolationPlugin(schema: Schema&lt;any&gt;) {
+<span class="diffline-del">-  schema.pre(
+-    [
+-      "find", "findOne", "findOneAndUpdate", "findOneAndDelete",
+-      "findOneAndReplace", "findById", "count", "create", "insert",
+-      "insertMany", "countDocuments", "deleteOne", "deleteMany",
+-      "updateOne", "updateMany",
+-    ] as any,
+-    queryMiddleware,
+-  );</span>
+<span class="diffline-add">+  // Matches find, findOne, findById, findOneAndUpdate,
++  // findOneAndDelete, findOneAndReplace — findById is covered
++  // because Mongoose implements it as a call to findOne internally.
++  schema.pre(/^find/, queryMiddleware);
++
++  // Matches count, countDocuments, updateOne, updateMany,
++  // deleteOne, deleteMany — these don't start with "find", so
++  // they still need their own regex/name, but it's one line
++  // covering a whole family instead of one line per method.
++  schema.pre(/^(count|update|delete)/, queryMiddleware);</span>
+  ...
+}</pre>
+  </div>
+
+  <p>
+    This isn't a perfect wildcard — <code>create</code>, <code>insert</code>, and
+    <code>insertMany</code> are document-creation operations, not query operations, so they stay
+    on the existing <code>pre("validate")</code>/<code>pre("save")</code> hooks, which is correct
+    as-is. But two regexes now do the work of thirteen enumerated strings, and — critically — a
+    brand-new method matching an existing pattern (say, a future <code>findOneAndBulkUpdate</code>)
+    is covered automatically, with nothing to remember to add.
+  </p>
+
+  <h4 style="margin-top:1.4rem; color:var(--ink); font-size:1rem;">Option B — intercept at the actual choke point, <code>Query.prototype.exec()</code></h4>
+
+  <p>
+    Every query-based Mongoose method — regardless of name, present or future — ultimately calls
+    <code>Query.prototype.exec()</code> before it reaches MongoDB. This is a documented pattern:
+    caching libraries like <code>top-cache</code> monkey-patch exactly this method to add a cache
+    layer in front of every query, globally, with no per-method registration at all.
+  </p>
+
+  <div class="diff-block">
+    <div class="diff-header">src/plugins/tenantPlugin.ts — Option B: override the common terminus</div>
+    <pre class="diff"><span class="diffline-add">+import { Query } from "mongoose";
++
++const originalExec = Query.prototype.exec;
++
++Query.prototype.exec = function (this: Query&lt;any, any&gt;, ...args: any[]) {
++  const filter = this.getFilter();
++  if (!filter.tenantId) {
++    const ctx = tenantContext.getStore();
++    if (!ctx?.tenantId) {
++      throw new Error(
++        "🚨 SECURITY: Query attempted without tenant context!",
++      );
++    }
++    this.where({ tenantId: ctx.tenantId });
++  }
++  return originalExec.apply(this, args as any);
++};</span></pre>
+  </div>
+
+  <p>
+    This is the more complete of the two: literally every Query-based operation funnels through
+    <code>exec()</code> by construction, so there is no method name left to forget. It's also
+    blunter — it patches a shared prototype for the whole process rather than opting in per
+    schema, so it needs a guard (e.g. skip schemas that don't declare a <code>tenantId</code>
+    path) to avoid breaking models that are deliberately tenant-agnostic. <code>aggregate</code>
+    is a separate <code>Aggregate</code> class with its own <code>exec</code>, so the existing
+    <code>pre("aggregate")</code> hook still needs to stay for pipelines.
+  </p>
+
+  <div class="callout good">
+    <div class="callout-title">Why either option matters more than the original fix</div>
+    Both replace "did we remember to list this method" with "is it structurally possible to reach
+    the database without going through the check." The regex option (A) is the lower-risk,
+    more idiomatic change — it stays inside Mongoose's existing middleware system and is scoped
+    per schema, the same way the plugin already works today. The exec-override (B) is more
+    complete but more invasive, and would want careful rollout given it touches a shared
+    prototype. Either one — unlike the original array — would have caught the
+    <code>findById</code> gap without anyone needing to anticipate <code>findById</code>
+    specifically in advance.
+  </div>
+
+  <h3>2. Make tenant scoping a compile-time requirement</h3>
+
+  <p>
+    Right now, <code>base.repository.ts</code>'s <code>findById(id: string)</code> compiles
+    perfectly with no tenant awareness at all — TypeScript has no opinion on whether a tenant
+    context exists. A branded-type approach closes that gap by making it impossible to construct
+    the thing a query needs without having gone through tenant context first:
+  </p>
+
+  <div class="diff-block">
+    <div class="diff-header">src/repositories/base.repository.ts — proposed rewrite</div>
+    <pre class="diff"><span class="diffline-del">-export class BaseRepository&lt;T&gt; {
+-  async findById(id: string): Promise&lt;T | null&gt; {
+-    return this.model.findById(id);
+-  }
+-}</span>
+<span class="diffline-add">+// A TenantScope can only be minted from inside runInTenantContext,
++// so its mere existence as a parameter is proof a context was set up.
++export type TenantScope = { readonly tenantId: string; readonly __brand: "TenantScope" };
++
++export function currentTenantScope(): TenantScope {
++  const ctx = tenantContext.getStore();
++  if (!ctx?.tenantId) {
++    throw new Error("🚨 No tenant context — cannot mint TenantScope");
++  }
++  return { tenantId: ctx.tenantId, __brand: "TenantScope" };
++}
++
++export class BaseRepository&lt;T&gt; {
++  // `scope` is required — there is no overload that omits it.
++  async findById(id: string, scope: TenantScope): Promise&lt;T | null&gt; {
++    return this.model.findOne({ _id: id, tenantId: scope.tenantId });
++  }
++}</span></pre>
+  </div>
+
+  <p>
+    With this shape, <code>userRepository.findById(id)</code> — the exact call that caused the
+    incident — simply fails to compile. There is no runtime path where the mistake can ship,
+    because the mistake is now a type error, not a code review miss.
+  </p>
+
+  <h3>3. A CI guard as defense in depth, not as the primary fix</h3>
+
+  <p>
+    Even with #1 and #2 in place, a cheap belt-and-suspenders check is worth adding: a lint rule
+    (or a grep-based CI step, which is nearly as effective and far less work) that fails the build
+    if any file outside <code>src/repositories/</code> or <code>src/plugins/</code> calls
+    <code>Model.&lt;anything&gt;</code> directly on an imported Mongoose model. This wouldn't have
+    been enough on its own — the original bug went through the repository layer, which this rule
+    would have allowed — but it closes a different, related gap: someone bypassing the repository
+    layer entirely and calling <code>User.findById(...)</code> straight from a service.
+  </p>
+
+  <h3>4. Replace the single regression test with a coverage-parity check</h3>
+
+  <p>
+    The natural instinct after this incident is "add a test that asserts <code>getUserById</code>
+    rejects cross-tenant IDs." That's necessary but not sufficient — it only proves this one call
+    site stays fixed. The more useful test is one that asserts <em>parity</em> between reality and
+    the plugin's coverage: scan the codebase for every Mongoose query method actually invoked
+    (via a source grep or a runtime spy), and fail CI if any of them isn't provably intercepted by
+    the plugin. That test would have failed on day one of the original <code>findById</code> gap
+    — before a single line of service code ever called it.
+  </p>
+
+  <div class="panel">
+    <strong>Priority if only one of these ships:</strong> #1. It's the only change that removes
+    the actual mechanism of failure (an enumerable, forgettable list) rather than adding another
+    layer of checks around it. #2 is the next highest value — it moves the failure from
+    production to the editor. #3 and #4 are good hygiene, but neither would have stopped this
+    specific incident on its own.
+  </div>
+
+  <h2 id="architecture">Architecture diagram: before vs. after</h2>
+
+  <p>
+    Everything above has been prose and diffs. It's worth pausing to draw the actual request path
+    as a picture, because the bug is genuinely easier to see as a diagram than as text: it's a
+    single missing edge in a chain of boxes, not a complicated interaction. Two versions below —
+    the request path as it existed when <code>getUserById</code> was broken, and the request path
+    after the fix (plus the regex-based improvement proposed earlier).
+  </p>
+
+  <div class="sketch-wrap">
+    <div class="sketch-panel before">
+      <h4>Before — the unguarded door</h4>
+      <canvas id="diagram-before" width="380" height="900"></canvas>
+    </div>
+    <div class="sketch-panel after">
+      <h4>After — regex hook covers the family</h4>
+      <canvas id="diagram-after" width="380" height="900"></canvas>
+    </div>
+  </div>
+
+  <div class="sketch-legend">
+    <span><span class="swatch" style="background:#e8e3d8;border:2px solid #1e1b16;"></span> component / call</span>
+    <span><span class="swatch" style="background:#f7caba;border:2px solid #b3261e;"></span> the gap</span>
+    <span><span class="swatch" style="background:#cdeccf;border:2px solid #2e6b3e;"></span> tenant-safe path</span>
+  </div>
+
+  <p>
+    Reading the left diagram top to bottom: the request carries a valid tenant context all the
+    way down to the Mongoose query layer — that part was never broken. The break is a single box:
+    the plugin's hooked-methods array has no entry for <code>findById</code>, so the query
+    executes with the context sitting right there, unused, and MongoDB returns whichever
+    document matches the ID regardless of tenant. Everything upstream of that box did its job
+    correctly; the leak is entirely local to one missing string in one array.
+  </p>
+
+  <p>
+    The right diagram shows the same path after the fix discussed earlier: a regex hook
+    (<code>/^find/</code>) matches on the <em>shape</em> of the operation name rather than a
+    literal list, so <code>findById</code> is caught as a side effect of matching "anything that
+    starts with find" — the same fix that also covers whatever future method Mongoose adds that
+    happens to start with "find." The query never reaches MongoDB without the tenant filter
+    injected.
+  </p>
+
+  <script>
+  (function() {
+    const FONT = "16px 'Kalam', cursive";
+    const COLORS = {
+      box: "#e8e3d8", boxStroke: "#1e1b16",
+      gap: "#f7caba", gapStroke: "#b3261e",
+      good: "#cdeccf", goodStroke: "#2e6b3e",
+      arrow: "#4a453b", text: "#1e1b16"
+    };
+
+    function box(rc, ctx, x, y, w, h, label, variant) {
+      const fill = variant === "gap" ? COLORS.gap : variant === "good" ? COLORS.good : COLORS.box;
+      const stroke = variant === "gap" ? COLORS.gapStroke : variant === "good" ? COLORS.goodStroke : COLORS.boxStroke;
+      rc.rectangle(x, y, w, h, {
+        fill, fillStyle: "hachure", hachureGap: 4, fillWeight: 1.5,
+        stroke, strokeWidth: variant ? 2.5 : 1.8, roughness: 1.6
+      });
+      ctx.fillStyle = COLORS.text;
+      ctx.font = FONT;
+      ctx.textAlign = "center";
+      const lines = label.split("\n");
+      const lineHeight = 19;
+      const startY = y + h / 2 - ((lines.length - 1) * lineHeight) / 2 + 5;
+      lines.forEach((line, i) => ctx.fillText(line, x + w / 2, startY + i * lineHeight));
+    }
+
+    function arrow(rc, ctx, x1, y1, x2, y2, label, dashed) {
+      if (dashed) {
+        // rough.js has no native dashed-stroke option, so fake it with short segments
+        const dx = x2 - x1, dy = y2 - y1;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const segLen = 10, gapLen = 6;
+        let drawn = 0;
+        while (drawn < dist) {
+          const segEnd = Math.min(drawn + segLen, dist);
+          const sx = x1 + (dx * drawn) / dist, sy = y1 + (dy * drawn) / dist;
+          const ex = x1 + (dx * segEnd) / dist, ey = y1 + (dy * segEnd) / dist;
+          rc.line(sx, sy, ex, ey, { stroke: COLORS.arrow, strokeWidth: 2, roughness: 1.4 });
+          drawn += segLen + gapLen;
+        }
+      } else {
+        rc.line(x1, y1, x2, y2, { stroke: COLORS.arrow, strokeWidth: 2, roughness: 1.4 });
+      }
+      // arrowhead
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const hs = 8;
+      rc.line(x2, y2, x2 - hs * Math.cos(angle - Math.PI / 6), y2 - hs * Math.sin(angle - Math.PI / 6), { stroke: COLORS.arrow, strokeWidth: 2, roughness: 1.4 });
+      rc.line(x2, y2, x2 - hs * Math.cos(angle + Math.PI / 6), y2 - hs * Math.sin(angle + Math.PI / 6), { stroke: COLORS.arrow, strokeWidth: 2, roughness: 1.4 });
+      if (label) {
+        ctx.fillStyle = COLORS.text;
+        ctx.font = "13px 'Kalam', cursive";
+        ctx.textAlign = "left";
+        ctx.fillText(label, Math.max(x1, x2) + 8, (y1 + y2) / 2 + 4);
+      }
+    }
+
+    function drawBefore(canvas) {
+      const rc = rough.canvas(canvas);
+      const ctx = canvas.getContext("2d");
+      const cx = 100, w = 260, h = 55;
+      const steps = [
+        { y: 20,  label: "HTTP Request\n(any authenticated user)" },
+        { y: 110, label: "authMiddleware\ntenantContext.run({tenantId})" },
+        { y: 200, label: "UserService.getUserById(id)" },
+        { y: 290, label: "userRepository.findById(id)\n(no context wrapper)" },
+        { y: 380, label: "Mongoose Query\nop = \"findById\"" },
+      ];
+      steps.forEach(s => box(rc, ctx, cx, s.y, w, h, s.label));
+      for (let i = 0; i < steps.length - 1; i++) {
+        arrow(rc, ctx, cx + w / 2, steps[i].y + h, cx + w / 2, steps[i + 1].y);
+      }
+      // the gap box
+      box(rc, ctx, cx, 470, w, 70, "tenantIsolationPlugin\nchecks hooked-methods array —\n\"findById\" is NOT listed", "gap");
+      arrow(rc, ctx, cx + w / 2, 380 + h, cx + w / 2, 470);
+      // bypass arrow straight through
+      arrow(rc, ctx, cx + w / 2, 540, cx + w / 2, 630, "no filter injected", true);
+      box(rc, ctx, cx, 630, w, 70, "MongoDB\nreturns ANY tenant's\nmatching document", "gap");
+
+      ctx.fillStyle = COLORS.gapStroke;
+      ctx.font = "13px 'Kalam', cursive";
+      ctx.textAlign = "center";
+      ctx.fillText("↑ tenant context was available the whole time —", cx + w / 2, 730);
+      ctx.fillText("this box just never asked for it", cx + w / 2, 748);
+    }
+
+    function drawAfter(canvas) {
+      const rc = rough.canvas(canvas);
+      const ctx = canvas.getContext("2d");
+      const cx = 100, w = 260, h = 55;
+      const steps = [
+        { y: 20,  label: "HTTP Request\n(any authenticated user)" },
+        { y: 110, label: "authMiddleware\ntenantContext.run({tenantId})" },
+        { y: 200, label: "UserService.getUserById(id)\nresolves real tenantId" },
+        { y: 290, label: "runInTenantContext(tenantId,\n  userRepository.findById(id))" },
+        { y: 380, label: "Mongoose Query\nop = \"findById\"" },
+      ];
+      steps.forEach(s => box(rc, ctx, cx, s.y, w, h, s.label));
+      for (let i = 0; i < steps.length - 1; i++) {
+        arrow(rc, ctx, cx + w / 2, steps[i].y + h, cx + w / 2, steps[i + 1].y);
+      }
+      box(rc, ctx, cx, 470, w, 70, "tenantIsolationPlugin\nschema.pre(/^find/, ...)\nmatches \"findById\" by shape", "good");
+      arrow(rc, ctx, cx + w / 2, 380 + h, cx + w / 2, 470);
+      arrow(rc, ctx, cx + w / 2, 540, cx + w / 2, 630, "+ tenantId injected");
+      box(rc, ctx, cx, 630, w, 70, "MongoDB\nreturns only the\nrequesting tenant's document", "good");
+
+      ctx.fillStyle = COLORS.goodStroke;
+      ctx.font = "13px 'Kalam', cursive";
+      ctx.textAlign = "center";
+      ctx.fillText("↑ regex matches by shape, not by name —", cx + w / 2, 730);
+      ctx.fillText("no array entry needed for findById", cx + w / 2, 748);
+    }
+
+    function render() {
+      const beforeCanvas = document.getElementById("diagram-before");
+      const afterCanvas = document.getElementById("diagram-after");
+      if (!beforeCanvas || !afterCanvas || typeof rough === "undefined") return;
+      drawBefore(beforeCanvas);
+      drawAfter(afterCanvas);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", render);
+    } else {
+      render();
+    }
+  })();
+  </script>
+
+  <h2 id="quiz">Quiz</h2>
+  <p class="muted">Click an answer to check yourself — no penalty for guessing.</p>
+
+  <div id="quiz-container"></div>
+
+  <footer>
+    Compiled from <code>chat-app-backend</code> git history — commits
+    <span class="commit-tag">182e3c6</span>, <span class="commit-tag">37d7930</span>,
+    <span class="commit-tag">b699de0</span> — and the current state of
+    <code>src/plugins/tenantPlugin.ts</code>, <code>src/services/user.service.ts</code>, and
+    <code>src/repositories/base.repository.ts</code>.
+  </footer>
+
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What mechanism does the tenant plugin actually use to enforce isolation?",
+    options: [
+      "A Mongoose schema plugin using pre-hooks, combined with AsyncLocalStorage for context propagation",
+      "A global Express middleware that rewrites every outgoing MongoDB connection string",
+      "A database-level row-security policy configured in MongoDB itself",
+      "A decorator applied to each service method by hand"
+    ],
+    correct: 0,
+    feedback: [
+      "Right — schema.pre(...) hooks intercept specific Mongoose operations, and AsyncLocalStorage (tenantContext) carries the current tenant ID through the async call stack without it needing to be passed as an explicit argument.",
+      "Not quite — there's no connection-string rewriting involved; the interception happens at the Mongoose query level via schema hooks.",
+      "MongoDB doesn't have a native per-document row-security feature being used here — this is entirely enforced in application code via the plugin.",
+      "Not decorators — it's schema-level pre-hooks applied once via the plugin, not per-method annotations."
+    ]
+  },
+  {
+    q: "Why did the missing findById hook cause a *silent* bug instead of a crash?",
+    options: [
+      "Because findById wasn't in the plugin's hooked-methods list, so no code ran to check for a tenant context at all — there was nothing to fail loudly",
+      "Because MongoDB automatically retries findById queries with a default tenant",
+      "Because the SECURITY error was caught and swallowed somewhere in error-handling middleware",
+      "Because findById always returns null instead of throwing when misconfigured"
+    ],
+    correct: 0,
+    feedback: [
+      "Exactly. Other methods on the list would throw the loud '🚨 SECURITY' error if context were missing. findById wasn't on the list, so the interception logic never even ran — it wasn't a failed check, it was the total absence of a check.",
+      "No such retry mechanism exists here — this is plain application-level Mongoose usage.",
+      "There's no evidence of the error being swallowed; the issue is upstream of that — the check never fired in the first place.",
+      "findById can return null for a genuinely missing ID, but that's unrelated to the tenant-isolation gap; here it happily returned a real document from the wrong tenant."
+    ]
+  },
+  {
+    q: "Which specific file and method contained the call that actually leaked data across tenants?",
+    options: [
+      "UserService.getUserById in src/services/user.service.ts, calling userRepository.findById with no tenant context wrapper",
+      "AttachmentController.completeUpload in the attachment controller",
+      "PresenceManager.processHeartbeat in the presence module",
+      "AuthMiddleware.authenticate in the Express auth middleware"
+    ],
+    correct: 0,
+    feedback: [
+      "Correct — getUserById called the repository's raw findById directly, with no runInTenantContext wrapper at all, and via the one query method the plugin didn't intercept.",
+      "The attachment controller has its own separate history (around async processing), unrelated to this particular tenant-isolation gap.",
+      "PresenceManager had a different, separate tenant-related story (a constructor design reversal), not this bypass.",
+      "The auth middleware is what *establishes* tenant context for a request — it wasn't where the missing-context bug lived."
+    ]
+  },
+  {
+    q: "What two changes did the fix commit make, and why did it need both?",
+    options: [
+      "It added \"findById\" to the plugin's hooked-methods array AND rewrote getUserById to resolve a real tenant and wrap the call in runInTenantContext — either change alone was insufficient",
+      "It only added findById to the array; the rest of the fix was unrelated cleanup",
+      "It only rewrote getUserById; the plugin array was left unchanged because Mongoose hooks findById automatically",
+      "It removed findById from the codebase entirely and replaced it with a raw MongoDB driver call"
+    ],
+    correct: 0,
+    feedback: [
+      "Right. Adding findById to the array alone would have just turned the silent bug into a loud crash, since getUserById still had no tenant context to check against. Wrapping getUserById alone, without adding findById to the array, would have left the plugin blind to that call. Both were needed together.",
+      "The array change alone would have converted the bug from silent-and-wrong to loud-and-crashing — not the same as actually fixing it.",
+      "Mongoose does not auto-hook methods for a plugin; the array is manually maintained, which is exactly the root fragility this incident exposed.",
+      "findById wasn't removed — it's still used throughout the codebase, now correctly intercepted by the plugin."
+    ]
+  },
+  {
+    q: "Based on the evidence in the repo (eslint config, base repository code, and test files), was a systemic recurrence-prevention mechanism put in place afterward?",
+    options: [
+      "No — it was a one-off fix; the enforcement still depends entirely on a manually maintained array of method names, with no lint rule, repository-layer guard, or dedicated regression test added",
+      "Yes — a custom ESLint rule now bans any raw Mongoose Model call outside the repository layer",
+      "Yes — the base repository now throws at compile time if a query method isn't registered with the tenant plugin",
+      "Yes — a dedicated integration test suite was added asserting cross-tenant IDs are always rejected"
+    ],
+    correct: 0,
+    feedback: [
+      "Correct. eslint.config.mjs has no tenant-related custom rules, base.repository.ts's findById is still an unguarded one-line passthrough to Mongoose, and the existing findById test suite predates this fix by about seven months with zero tenant assertions. The next method someone forgets to add to the array would reproduce the exact same bug.",
+      "No such rule exists in eslint.config.mjs — only generic TypeScript warnings are configured.",
+      "There's no compile-time check here; the array is a runtime list checked only when a query actually executes.",
+      "No tenant-specific regression tests were added around this fix; the pre-existing findById tests don't cover multi-tenancy at all."
+    ]
+  }
+];
+
+const container = document.getElementById('quiz-container');
+questions.forEach((item, qIdx) => {
+  const qDiv = document.createElement('div');
+  qDiv.className = 'quiz-q';
+
+  const qText = document.createElement('p');
+  qText.className = 'question';
+  qText.textContent = (qIdx + 1) + ". " + item.q;
+  qDiv.appendChild(qText);
+
+  const optsDiv = document.createElement('div');
+  optsDiv.className = 'quiz-options';
+
+  const feedbackDiv = document.createElement('div');
+  feedbackDiv.className = 'quiz-feedback';
+
+  item.options.forEach((optText, optIdx) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = optText;
+    btn.addEventListener('click', () => {
+      const buttons = optsDiv.querySelectorAll('.quiz-option');
+      buttons.forEach(b => { b.disabled = true; });
+
+      if (optIdx === item.correct) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('incorrect');
+        buttons[item.correct].classList.add('correct');
+      }
+
+      feedbackDiv.textContent = item.feedback[optIdx];
+      feedbackDiv.className = 'quiz-feedback show ' + (optIdx === item.correct ? 'correct-fb' : 'incorrect-fb');
+    });
+    optsDiv.appendChild(btn);
+  });
+
+  qDiv.appendChild(optsDiv);
+  qDiv.appendChild(feedbackDiv);
+  container.appendChild(qDiv);
+});
+</script>
+
+</body>
+</html>

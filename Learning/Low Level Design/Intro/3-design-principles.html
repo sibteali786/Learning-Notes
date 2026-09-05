@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LLD — Design Principles</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#242938;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#b98cff; --red:#ff6b6b;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 20px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin:0 0 4px;}
+  .sub{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .bar{width:44px;height:4px;border-radius:2px;margin-bottom:10px;}
+  .section{margin-bottom:30px;}
+  .section h2{font-family:'Syne',sans-serif;font-size:19px;margin:0 0 4px;}
+  .section .desc{color:var(--muted);font-size:12.5px;margin-bottom:12px;display:block;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:6px;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);}
+  .pill-green{background:rgba(92,255,168,.15);color:var(--green);}
+  .pill-purple{background:rgba(185,140,255,.15);color:var(--purple);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);}
+  code.blk{display:block;background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;white-space:pre;overflow-x:auto;color:#c7d0e0;margin-top:8px;}
+  .badrow,.goodrow{display:flex;align-items:flex-start;gap:8px;font-size:12px;margin-top:6px;color:var(--muted);}
+  .example{border-left:3px solid var(--purple);padding:10px 16px;background:rgba(185,140,255,.06);border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px;}
+  .example b{color:var(--purple);}
+  .tip{background:rgba(92,255,168,.06);border:1px solid rgba(92,255,168,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .tip b{color:var(--green);}
+  .warn{background:rgba(255,157,92,.06);border:1px solid rgba(255,157,92,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .warn b{color:var(--orange);}
+  ul{margin:6px 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:13.5px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{text-align:left;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .cheat{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
+  .cheatcol h3{font-family:'Syne',sans-serif;font-size:13px;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;}
+  .cheatitem{font-size:12.5px;padding:8px 0;border-bottom:1px solid var(--border);}
+  .cheatitem b{color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Design Principles</h1>
+  <div class="sub">The decision-making framework behind "should this be its own class?" — General principles + SOLID</div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>🧭 Why these matter</h2>
+    <div class="card">
+      These guide decisions like: should this be a separate class? Should I use inheritance? Is this abstraction worth it?
+      <div class="tip"><b>Key mindset:</b> interviewers care that you <i>apply</i> the lessons, not that you can recite SOLID like the alphabet. Two categories exist — <span class="pill pill-blue">General principles</span> and <span class="pill pill-purple">OOD principles (SOLID)</span>. SOLID gets more attention since most LLD problems expect class hierarchies.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>⚙️ General Software Design Principles</h2>
+    <span class="desc">If you remember only 3 from this whole guide: KISS, DRY, YAGNI.</span>
+
+    <div class="card">
+      <span class="pill pill-orange">KISS</span> <b>Keep It Simple, Stupid</b>
+      <p style="font-size:13px;margin:8px 0;">The simplest solution that works is usually right. Solve with a conditional instead of a Strategy pattern if that's enough. <b style="color:var(--red)">Most commonly violated principle in LLD interviews</b> — candidates over-engineer with factories/builders/decorators to show off knowledge.</p>
+      <div class="tip"><b>When to add complexity:</b> when simplicity stops working — e.g. a 500-line class with 10 responsibilities, or a new payment method requiring edits in 5 places → that's when Strategy pattern earns its place.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-green">DRY</span> <b>Don't Repeat Yourself</b>
+      <p style="font-size:13px;margin:8px 0;">Same logic in multiple places → pull into one. Benefit = fix/update once instead of hunting across the codebase.</p>
+      <div class="warn"><b>Don't overdo it:</b> if two pieces of code look similar but serve <i>different purposes</i>, duplication can be fine — forcing shared code creates artificial coupling. Key test: is the logic <i>conceptually</i> the same, not just textually similar.</div>
+      <div class="example"><b>DRY vs KISS tension (senior-level signal):</b> "I expect this validation logic to appear in multiple places, but I'll start by keeping it in the User class to avoid premature complexity. If we see it duplicated 3-4 times, we pull it into a shared validator." — shows you can balance competing principles instead of blindly following rules.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-purple">YAGNI</span> <b>You Aren't Gonna Need It</b>
+      <p style="font-size:13px;margin:8px 0;">Build what's needed now — not speculative future features. Don't add valet parking / EV charging to a parking lot design unless requirements mention it.</p>
+      <div class="warn"><b>Why it fails when ignored:</b> you usually guess future requirements wrong — you add complexity for scenarios that never happen, and the real new requirement ends up different from what you prepared for.</div>
+      <div class="tip"><b>Nuance:</b> doesn't mean "never think ahead" — means don't <i>build</i> ahead. Design with extension in mind, implement only what's needed now. This is exactly what "how would you extend this?" follow-ups are testing.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-blue">Separation of Concerns</span>
+      <p style="font-size:13px;margin:8px 0;">Different parts of code handle different responsibilities and don't know each other's internals. UI shouldn't hold business logic; business logic shouldn't know storage details.</p>
+      <div class="grid2">
+        <div>
+          <div class="badrow">❌ <b style="color:var(--red)">Bad</b></div>
+          <code class="blk">class TicTacToe {
+  board: string[][]
+  play() {
+    // display logic
+    console.log(board)
+    // input handling
+    board[row][col] = "X"
+    // win checking
+    if (board[0][0]===board[1][1]
+        && board[1][1]===board[2][2])
+      console.log("Winner!")
+  }
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ <b style="color:var(--green)">Good</b></div>
+          <code class="blk">class TicTacToe {
+  constructor(
+    private board: Board,
+    private display: Display,
+    private input: InputHandler
+  ) {}
+
+  play() {
+    while (!board.hasWinner()) {
+      display.render(board)
+      const move = input.getNextMove()
+      board.makeMove(move)
+    }
+    display.showWinner(board.getWinner())
+  }
+}</code>
+        </div>
+      </div>
+      <div class="tip">Switch console→GUI: only touch <code style="color:var(--green)">InputHandler</code>. Change display: only <code style="color:var(--green)">Display</code>. New win conditions: only <code style="color:var(--green)">Board</code>. Each change isolated → each part independently testable.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-orange">Law of Demeter</span> <i>("Principle of Least Knowledge")</i>
+      <p style="font-size:13px;margin:8px 0;">A method should only talk to its immediate friends, not reach through objects to access distant parts.</p>
+      <div class="example"><b>Violation:</b> <code style="color:var(--red)">order.getCustomer().getAddress().getZipCode()</code> — your code now knows the internal structure of 3 different objects; if any reorganizes its data, you break.<br><b>Fix:</b> put <code style="color:var(--green)">getCustomerZipCode()</code> on <code style="color:var(--green)">Order</code>, handle navigation internally.</div>
+      <div class="tip"><b>Not the same as method chaining:</b> fluent interfaces like <code style="color:var(--green)">builder.setName("John").setAge(30).build()</code> are fine — they return the <i>same</i> object type. The issue is specifically chaining that leaks internal structure across <i>different</i> object types.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--purple)"></div>
+    <h2>🏛️ Object-Oriented Design Principles — SOLID</h2>
+    <span class="desc">Apply when the problem calls for them — don't force SOLID where a simpler solution works (that breaks KISS).</span>
+
+    <div class="warn"><b>Context:</b> SOLID comes from Java's deep-inheritance era. Outside Java/C#, heavy SOLID application is falling out of fashion — modern languages favor composition over hierarchies, functions over interfaces.</div>
+
+    <div class="card">
+      <span class="pill pill-blue">S</span> <b>Single Responsibility Principle</b> — a class should have one reason to change.
+      <div class="grid2" style="margin-top:8px;">
+        <div>
+          <div class="badrow">❌ Mixes content gen + PDF + storage</div>
+          <code class="blk">class Report {
+  generateContent(): string
+  printToPDF(): void
+  saveToFile(): void
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ Split by responsibility</div>
+          <code class="blk">class Report { generateContent() }
+class PDFPrinter { print(report) }
+class FileStorage { save(content) }</code>
+        </div>
+      </div>
+      <div class="tip">PDF library changes → touch only <code style="color:var(--green)">PDFPrinter</code>. Switch file→DB → only <code style="color:var(--green)">FileStorage</code>. Each change isolated.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-green">O</span> <b>Open/Closed Principle</b> — open for extension, closed for modification. Add new behavior without touching existing code (usually via interfaces).
+      <div class="grid2" style="margin-top:8px;">
+        <div>
+          <div class="badrow">❌ Modify method for every new type</div>
+          <code class="blk">class PaymentProcessor {
+  process(type: string, amount: number) {
+    if (type === "credit") {...}
+    else if (type === "paypal") {...}
+    // adding crypto = editing this method
+  }
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ New class per type, old code untouched</div>
+          <code class="blk">interface PaymentMethod {
+  process(amount): void
+}
+class CreditCardPayment implements PaymentMethod {...}
+class CryptoPayment implements PaymentMethod {...}
+
+class PaymentProcessor {
+  process(method: PaymentMethod, amount) {
+    method.process(amount)
+  }
+}</code>
+        </div>
+      </div>
+      <div class="tip">Adding crypto = just create <code style="color:var(--green)">CryptoPayment</code>. <code style="color:var(--green)">PaymentProcessor</code> never changes → can't break what already works.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-orange">L</span> <b>Liskov Substitution Principle</b> — subclasses must work wherever the base class works, without breaking caller expectations.
+      <div class="example"><b>Red flags:</b> subclass throws for a method the parent provides; caller needs <code style="color:var(--red)">if (bird instanceof Penguin)</code> special-casing.</div>
+      <div class="grid2" style="margin-top:8px;">
+        <div>
+          <div class="badrow">❌ Penguin breaks "all birds fly"</div>
+          <code class="blk">class Bird { fly(): void {...} }
+class Penguin extends Bird {
+  fly(): void {
+    throw new Error("Penguins can't fly")
+  }
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ Split flying into its own interface</div>
+          <code class="blk">interface Bird { eat(): void }
+interface FlyingBird extends Bird { fly(): void }
+
+class Sparrow implements FlyingBird {
+  eat() {...}; fly() {...}
+}
+class Penguin implements Bird {
+  eat() {...}
+}</code>
+        </div>
+      </div>
+      <div class="tip">Comes up when designing class hierarchies — think carefully about what belongs in the base class vs. subclasses.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-purple">I</span> <b>Interface Segregation Principle</b> — prefer small, focused interfaces over large general-purpose ones.
+      <div class="grid2" style="margin-top:8px;">
+        <div>
+          <div class="badrow">❌ Robot forced to implement eat()/sleep()</div>
+          <code class="blk">interface Worker {
+  work(): void
+  eat(): void
+  sleep(): void
+}
+class Robot implements Worker {
+  work() {...}
+  eat() { /* robots don't eat */ }
+  sleep() { /* robots don't sleep */ }
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ Split into focused interfaces</div>
+          <code class="blk">interface Workable { work(): void }
+interface Feedable { eat(): void }
+interface Restable { sleep(): void }
+
+class Human implements Workable, Feedable, Restable {...}
+class Robot implements Workable { work() {...} }</code>
+        </div>
+      </div>
+      <div class="warn">Fat interfaces force empty implementations or exception-throwing stubs — that's a code smell.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-red">D</span> <b>Dependency Inversion Principle</b> — depend on abstractions, not concrete implementations.
+      <p style="font-size:13px;margin:8px 0;"><b>"Inversion" = who defines the contract.</b> Normally business logic conforms to whatever the implementation provides. With DIP: define an interface based on what business logic <i>needs</i>, then implementations conform to that interface — implementation adapts to business logic, not the reverse.</p>
+      <div class="grid2" style="margin-top:8px;">
+        <div>
+          <div class="badrow">❌ Tightly coupled to EmailSender</div>
+          <code class="blk">class EmailSender {
+  send(message): void {...}
+}
+class NotificationService {
+  private emailSender = new EmailSender()
+  notify(message) {
+    emailSender.send(message)
+  }
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ Depends on MessageSender interface</div>
+          <code class="blk">interface MessageSender {
+  send(message: string): void
+}
+class EmailSender implements MessageSender {
+  send(message) {...}
+}
+class NotificationService {
+  constructor(private sender: MessageSender) {}
+  notify(message) {
+    sender.send(message)
+  }
+}</code>
+        </div>
+      </div>
+      <div class="tip">Neither high-level nor low-level module knows about the other directly. Swap email→SMS by injecting a different implementation. Unit test with a mock <code style="color:var(--green)">MessageSender</code> — no real emails sent.</div>
+      <div class="warn"><b>Important distinction:</b> DIP is a design <i>principle</i>. Dependency Injection (passing deps through constructor) is a <i>technique</i> for achieving it. Related, but not the same thing.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>📋 Cheat Sheet</h2>
+    <div class="card">
+      <div class="cheat">
+        <div class="cheatcol">
+          <h3>General Principles</h3>
+          <div class="cheatitem"><b>KISS</b> → Start simple, add complexity only when needed</div>
+          <div class="cheatitem"><b>DRY</b> → Reduce duplication, simplify maintenance</div>
+          <div class="cheatitem"><b>YAGNI</b> → Build for today, not hypothetical futures</div>
+          <div class="cheatitem"><b>Separation of Concerns</b> → Enable independent testing and changes</div>
+          <div class="cheatitem"><b>Law of Demeter</b> → Reduce coupling, hide internal structure</div>
+        </div>
+        <div class="cheatcol">
+          <h3>SOLID Principles</h3>
+          <div class="cheatitem"><b>SRP</b> → Keep classes focused on one responsibility</div>
+          <div class="cheatitem"><b>OCP</b> → Support future requirements without modifying existing code</div>
+          <div class="cheatitem"><b>LSP</b> → Prevent brittle hierarchies that break at runtime</div>
+          <div class="cheatitem"><b>ISP</b> → Keep interfaces clean and focused</div>
+          <div class="cheatitem"><b>DIP</b> → Decouple business logic from implementation details</div>
+        </div>
+      </div>
+      <div class="tip" style="margin-top:14px;"><b>Final takeaway:</b> don't recite these constantly — use them to guide decisions, reference briefly when explaining tradeoffs. They're tools for thinking, not a checklist.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>💬 Real Talk from the Comments (worth knowing)</h2>
+    <div class="card">
+      <ul>
+        <li><b>Regional mismatch:</b> some candidates report Indian-market interviewers expecting you to <i>name</i> patterns explicitly and tick off each SOLID letter — despite the "don't recite it" advice above. If your recruiter/interviewer signals this style, prep the vocabulary too, don't rely solely on "just reason well."</li>
+        <li><b>Functional-programming background friction:</b> engineers from OCaml/Haskell/Rust backgrounds report LLD rounds feeling arbitrary/bookish — worth knowing this is a common pain point, not a personal gap, if OOP-heavy interviews feel unnatural to you.</li>
+        <li><b>DIP nuance raised in comments:</b> testability really comes from <i>how</i> a dependency is provided (injected vs. hardcoded with <code style="color:var(--orange)">new EmailSender()</code>), not strictly from whether it's an interface — you could inject a concrete class and still mock it in some languages. Interface + injection together give you the full swap-implementation + mock-for-testing benefit described in the DIP example.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LLD — Design Patterns</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#242938;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#b98cff; --red:#ff6b6b;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 20px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin:0 0 4px;}
+  .sub{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .bar{width:44px;height:4px;border-radius:2px;margin-bottom:10px;}
+  .section{margin-bottom:30px;}
+  .section h2{font-family:'Syne',sans-serif;font-size:19px;margin:0 0 4px;}
+  .section .desc{color:var(--muted);font-size:12.5px;margin-bottom:12px;display:block;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:6px;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);}
+  .pill-green{background:rgba(92,255,168,.15);color:var(--green);}
+  .pill-purple{background:rgba(185,140,255,.15);color:var(--purple);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);}
+  .tier{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.4px;}
+  .tier-top{background:rgba(92,255,168,.18);color:var(--green);}
+  .tier-mid{background:rgba(91,157,255,.18);color:var(--blue);}
+  .tier-low{background:rgba(255,157,92,.18);color:var(--orange);}
+  code.blk{display:block;background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;white-space:pre;overflow-x:auto;color:#c7d0e0;margin-top:8px;}
+  .example{border-left:3px solid var(--purple);padding:10px 16px;background:rgba(185,140,255,.06);border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px;}
+  .example b{color:var(--purple);}
+  .tip{background:rgba(92,255,168,.06);border:1px solid rgba(92,255,168,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .tip b{color:var(--green);}
+  .warn{background:rgba(255,157,92,.06);border:1px solid rgba(255,157,92,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .warn b{color:var(--orange);}
+  .trigger{background:rgba(91,157,255,.06);border:1px solid rgba(91,157,255,.25);border-radius:10px;padding:12px 16px;font-size:13px;margin-top:10px;}
+  .trigger b{color:var(--blue);}
+  ul{margin:6px 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:13.5px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{text-align:left;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .cheatitem{font-size:13px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .cheatitem b{color:var(--blue);}
+  .cheatgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px;}
+  .cheatcol h3{font-family:'Syne',sans-serif;font-size:12px;color:var(--muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Design Patterns</h1>
+  <div class="sub">Reusable structures for recurring design problems — the ~7 that actually show up in LLD interviews (not all 23 GoF)</div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>🧩 Why so few patterns matter</h2>
+    <div class="card">
+      Gang of Four (1994) catalogued 23 patterns for C++/Smalltalk. Most don't matter anymore — modern languages absorbed half as primitives (iterators), and composition/functional style made others obsolete. <b>You'll get asked about ~5 in interviews, not 23.</b>
+      <div class="warn"><b>The #1 mistake:</b> forcing a pattern where it doesn't belong. Patterns should <i>arise from</i> good design decisions, not <i>drive</i> them. Only use one when the problem naturally calls for it.</div>
+      <div class="tip"><b>Regional note:</b> US interviews usually don't test whether you can <i>name</i> patterns — they evaluate design quality. India-region interviews more often ask about patterns directly. Be ready for either.</div>
+    </div>
+    <table>
+      <tr><th>Category</th><th>Controls</th><th>Patterns in this guide</th></tr>
+      <tr><td><span class="pill pill-orange">Creational</span></td><td>How objects get created</td><td>Factory Method, Builder, Singleton</td></tr>
+      <tr><td><span class="pill pill-green">Structural</span></td><td>How objects connect</td><td>Decorator, Facade</td></tr>
+      <tr><td><span class="pill pill-purple">Behavioral</span></td><td>How objects interact</td><td>Strategy, Observer, State Machine</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>🏗️ Creational Patterns</h2>
+    <span class="desc">Control how objects get created — hide construction, swap implementations, avoid tight coupling</span>
+
+    <div class="card">
+      <span class="pill pill-orange">Factory Method</span> <span class="tier tier-mid">POLARIZING</span>
+      <p style="font-size:13px;margin:8px 0;">A helper that creates the right object so you don't decide which one. Hides creation logic, keeps code flexible when the needed type varies.</p>
+      <div class="trigger"><b>Trigger phrases:</b> "support different notification types," "handle multiple payment methods"</div>
+      <code class="blk">interface Notification { send(message: string): void }
+class EmailNotification implements Notification { send(m) {...} }
+class SMSNotification implements Notification { send(m) {...} }
+
+class NotificationFactory {
+  static create(type: string): Notification {
+    if (type === "email") return new EmailNotification()
+    if (type === "sms") return new SMSNotification()
+    throw new Error("Unknown type")
+  }
+}
+// Usage
+const notif = NotificationFactory.create("email")
+notif.send("Hello")</code>
+      <div class="tip">Add push notifications → update the factory only. Rest of the code never changes.</div>
+      <div class="warn"><b>Note:</b> this is technically "Simple Factory," not GoF's Factory Method (which uses abstract factory classes + subclasses overriding a factory method — more complex, rarely shows up in real code/interviews). What's shown here is what people actually build and what "use a factory" means in practice.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-orange">Builder</span> <span class="tier tier-low">RARE FIT</span>
+      <p style="font-size:13px;margin:8px 0;">Create a complex object step-by-step without worrying about order/messy construction. Use for objects with many optional parts.</p>
+      <code class="blk">class HttpRequest {
+  private url?: string
+  private method?: string
+  private headers = new Map()
+  private body?: string
+  private constructor() {}
+
+  static Builder = class {
+    private request = new HttpRequest()
+    url(url) { this.request.url = url; return this }
+    method(method) { this.request.method = method; return this }
+    header(key, value) { this.request.headers.set(key, value); return this }
+    body(body) { this.request.body = body; return this }
+    build() {
+      if (!this.request.url) throw new Error("URL is required")
+      return this.request
+    }
+  }
+}
+// Usage
+const request = new HttpRequest.Builder()
+  .url("https://api.example.com")
+  .method("POST")
+  .header("Content-Type", "application/json")
+  .body('{"key": "value"}')
+  .build()</code>
+      <div class="warn"><b>Reality check:</b> most interview problems involve simple domain objects with 2-4 required fields — a normal constructor works fine. If the interviewer didn't describe a complex object with lots of optional details, Builder probably isn't needed. In TypeScript specifically, a config object with <code style="color:var(--orange)">Partial&lt;T&gt;</code> is often simpler than implementing this pattern.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-orange">Singleton</span> <span class="tier tier-low">USUALLY UNNEEDED</span>
+      <p style="font-size:13px;margin:8px 0;">Ensures only one instance of a class exists — shared config manager, connection pool, logger.</p>
+      <code class="blk">class DatabaseConnection {
+  private static instance: DatabaseConnection
+  private constructor() {}
+
+  static getInstance(): DatabaseConnection {
+    if (!DatabaseConnection.instance) {
+      DatabaseConnection.instance = new DatabaseConnection()
+    }
+    return DatabaseConnection.instance
+  }
+  query(sql: string): void {...}
+}
+// Usage
+const db = DatabaseConnection.getInstance()</code>
+      <div class="warn"><b>Most of the time you don't need this.</b> Passing shared objects through constructors is clearer and easier to test — Singletons hide dependencies and make testing harder. If asked "should this be a Singleton?", the answer is <b>usually no</b> unless they explicitly want one shared instance across the whole system.</div>
+      <div class="tip">Thread-safe Singleton implementations exist, but interviewers don't expect you to implement them in LLD rounds. In modern TS/JS, ES modules are singletons by default — prefer <code style="color:var(--green)">export const db = new DatabaseConnection()</code> over this pattern.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>🔗 Structural Patterns</h2>
+    <span class="desc">How objects connect — flexible relationships without tight coupling</span>
+
+    <div class="card">
+      <span class="pill pill-green">Decorator</span> <span class="tier tier-mid">LESS COMMON</span>
+      <p style="font-size:13px;margin:8px 0;">Adds behavior to an object without changing its class — layers extra functionality at runtime.</p>
+      <div class="trigger"><b>Trigger phrases:</b> "add logging to specific operations," "encrypt certain messages," "optional features," "stack behaviors," "combine multiple enhancements"</div>
+      <code class="blk">interface DataSource {
+  writeData(data: string): void
+  readData(): string
+}
+class FileDataSource implements DataSource {...}
+
+class EncryptionDecorator implements DataSource {
+  constructor(private wrapped: DataSource) {}
+  writeData(data) { this.wrapped.writeData(this.encrypt(data)) }
+  readData() { return this.decrypt(this.wrapped.readData()) }
+}
+class CompressionDecorator implements DataSource {
+  constructor(private wrapped: DataSource) {}
+  writeData(data) { this.wrapped.writeData(this.compress(data)) }
+  readData() { return this.decompress(this.wrapped.readData()) }
+}
+// Usage
+let source: DataSource = new FileDataSource("data.txt")
+source = new EncryptionDecorator(source)
+source = new CompressionDecorator(source)
+source.writeData("sensitive info")
+// compressed, then encrypted, then written</code>
+      <div class="tip"><b>Why not just subclass?</b> Avoids combinatorial explosion — <code style="color:var(--red)">LoggedEmailNotification</code>, <code style="color:var(--red)">EncryptedEmailNotification</code>, <code style="color:var(--red)">LoggedEncryptedEmailNotification</code>... Instead you wrap and stack.</div>
+      <div class="example"><b>Decorator vs. Subclass — the decision rule:</b> if behavior depends on <i>runtime conditions</i> (debug-mode logging, per-request caching) → Decorator. If it's a <i>predefined, fixed type difference</i> → Subclass.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-green">Facade</span> <span class="tier tier-top">YOU ALREADY DO THIS</span>
+      <p style="font-size:13px;margin:8px 0;">A coordinator class that hides complexity. You're probably already building these without naming them — <b>your orchestrator IS a facade.</b></p>
+      <div class="example"><b>Example:</b> Tic Tac Toe's <code style="color:var(--green)">Game</code> class coordinates <code>Board</code>, <code>Player</code>, and state — caller just does <code style="color:var(--green)">game.makeMove(row, col)</code> and never touches internals.</div>
+      <code class="blk">class Game {
+  private board: Board
+  private playerX: Player
+  private playerO: Player
+  private currentPlayer: Player
+  private state: GameState
+
+  makeMove(row, col): boolean {
+    // Coordinates board, player, and state logic
+    // Caller doesn't need to understand internal details
+    if (this.state !== GameState.IN_PROGRESS) return false
+    if (!this.board.placeMark(row, col, this.currentPlayer.getMark())) return false
+    if (this.board.checkWin(row, col)) this.state = GameState.WON
+    else if (this.board.isFull()) this.state = GameState.DRAW
+    else this.currentPlayer = (this.currentPlayer === this.playerX) ? this.playerO : this.playerX
+    return true
+  }
+}</code>
+      <div class="tip">The pattern name mostly matters when wrapping <i>existing messy code</i> with awkward APIs. In LLD interviews you're designing clean orchestrators from scratch — same structure, you just don't need to announce the name.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--purple)"></div>
+    <h2>🎬 Behavioral Patterns</h2>
+    <span class="desc">Control how objects interact — flow of control and communication</span>
+
+    <div class="card">
+      <span class="pill pill-purple">Strategy</span> <span class="tier tier-top">#1 MOST COMMON — LEARN THIS ONE</span>
+      <p style="font-size:13px;margin:8px 0;">Replaces conditional logic with polymorphism. Different ways of doing the same thing, swappable at <b>runtime</b> (vs. compile-time, where behavior is fixed in the class definition).</p>
+      <div class="trigger"><b>Trigger:</b> a pile of <code style="color:var(--blue)">if/else</code> or <code style="color:var(--blue)">switch</code> statements based on type — that's Strategy waiting to happen. (Same idea as the vehicle-type example from OOP Concepts.)</div>
+      <code class="blk">interface PaymentStrategy { pay(amount: number): boolean }
+class CreditCardPayment implements PaymentStrategy { pay(amount) {...} }
+class PayPalPayment implements PaymentStrategy { pay(amount) {...} }
+
+class ShoppingCart {
+  private paymentStrategy?: PaymentStrategy
+  setPaymentStrategy(strategy) { this.paymentStrategy = strategy }
+  checkout(amount) { this.paymentStrategy!.pay(amount) }
+}
+// Usage
+cart.setPaymentStrategy(new CreditCardPayment("1234-5678"))
+cart.checkout(100.00)
+cart.setPaymentStrategy(new PayPalPayment("user@example.com"))
+cart.checkout(50.00)</code>
+      <div class="tip"><b>Strategy vs Factory:</b> Factory decides <i>which type to instantiate</i>. Strategy decides <i>which behavior to use</i> after the object already exists. Strategy = polymorphism with a pattern name.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-purple">Observer</span> <span class="tier tier-top">TOP-TIER INTERVIEW PATTERN</span>
+      <p style="font-size:13px;margin:8px 0;">Objects subscribe to events, get notified when something happens. Changes in one object trigger updates in others.</p>
+      <div class="trigger"><b>Trigger phrases:</b> "notify," "update multiple components" — e.g. stock price changes → multiple displays update; order placed → inventory, notifications, analytics all react.</div>
+      <code class="blk">interface Observer { update(symbol: string, price: number): void }
+interface Subject {
+  attach(observer: Observer): void
+  detach(observer: Observer): void
+  notifyObservers(): void
+}
+
+class Stock implements Subject {
+  private observers: Observer[] = []
+  setPrice(price) {
+    this.price = price
+    this.notifyObservers()   // Price changed, tell everyone
+  }
+  notifyObservers() {
+    for (const observer of this.observers) observer.update(this.symbol, this.price)
+  }
+}
+class PriceDisplay implements Observer {
+  update(symbol, price) { console.log(`Display updated: ${symbol} = $${price}`) }
+}
+class PriceAlert implements Observer {
+  constructor(private threshold: number) {}
+  update(symbol, price) { if (price > this.threshold) console.log(`Alert! ${symbol} exceeded $${this.threshold}`) }
+}
+// Usage
+stock.attach(display); stock.attach(alert)
+stock.setPrice(145.00)   // both observers notified</code>
+      <div class="tip">The stock doesn't need to know what observers do with the info — full decoupling between the event source and the reactors.</div>
+    </div>
+
+    <div class="card">
+      <span class="pill pill-purple">State Machine</span> <span class="tier tier-mid">LESS COMMON, BUT BECOMES THE CENTERPIECE</span>
+      <p style="font-size:13px;margin:8px 0;">Handles state transitions cleanly. Use when an object's behavior changes based on internal state with complex transition rules. (Also called "State pattern.")</p>
+      <div class="trigger"><b>Trigger:</b> the word "state" appears multiple times in requirements — vending machines, document workflows, game states.</div>
+      <code class="blk">interface VendingMachineState {
+  insertCoin(machine): void
+  selectProduct(machine): void
+  dispense(machine): void
+}
+class NoCoinState implements VendingMachineState {
+  insertCoin(machine) { machine.setState(new HasCoinState()) }
+  selectProduct(machine) { /* "Insert coin first" */ }
+  dispense(machine) { /* "Insert coin first" */ }
+}
+class HasCoinState implements VendingMachineState {
+  insertCoin(machine) { /* "Coin already inserted" */ }
+  selectProduct(machine) { machine.setState(new DispenseState()) }
+  dispense(machine) { /* "Select product first" */ }
+}
+class DispenseState implements VendingMachineState {
+  dispense(machine) {
+    // "Dispensing product"
+    machine.setState(new NoCoinState())
+  }
+}
+class VendingMachine {
+  private currentState: VendingMachineState = new NoCoinState()
+  insertCoin() { this.currentState.insertCoin(this) }
+  selectProduct() { this.currentState.selectProduct(this) }
+  dispense() { this.currentState.dispense(this) }
+  setState(state) { this.currentState = state }
+}</code>
+      <div class="tip"><b>Interview tip:</b> draw a state diagram — circles for states, labeled arrows for transitions. Interviewers appreciate the visual; it shows clear thinking about the problem.</div>
+      <div class="warn"><b>If a state machine is in your design, it's probably the centerpiece</b> — the interview will likely be organized around walking through it.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>📋 Wrapping Up — Cheat Sheet</h2>
+    <div class="card">
+      <div class="warn"><b>Most interview-ready designs use no patterns, or at most one or two.</b> Reaching for 3+ patterns = you're probably over-engineering.</div>
+      <div class="cheatgrid">
+        <div class="cheatcol">
+          <h3>Creational</h3>
+          <div class="cheatitem"><b>Factory</b> → callers shouldn't care which concrete class gets created</div>
+          <div class="cheatitem"><b>Builder</b> → lots of optional fields / messy construction</div>
+          <div class="cheatitem"><b>Singleton</b> → need one global instance (rare)</div>
+        </div>
+        <div class="cheatcol">
+          <h3>Structural</h3>
+          <div class="cheatitem"><b>Decorator</b> → layer optional behaviors at runtime, avoid subclass explosion</div>
+          <div class="cheatitem"><b>Facade</b> → hide internal complexity behind a simple entry point</div>
+        </div>
+        <div class="cheatcol">
+          <h3>Behavioral</h3>
+          <div class="cheatitem"><b>Strategy</b> → replace if/else with interchangeable behaviors</div>
+          <div class="cheatitem"><b>Observer</b> → multiple components react to one event</div>
+          <div class="cheatitem"><b>State Machine</b> → behavior depends on current state, transitions get messy</div>
+        </div>
+      </div>
+      <div class="tip" style="margin-top:14px;"><b>Final takeaway:</b> focus on solving the problem cleanly — name the pattern afterward, only if it helps communicate.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

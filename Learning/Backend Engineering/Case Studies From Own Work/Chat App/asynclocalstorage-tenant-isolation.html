@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AsyncLocalStorage Tenant Isolation: Who Opens the Box, and When</title>
+<style>
+  :root {
+    --bg: #fbfaf8;
+    --panel: #ffffff;
+    --ink: #1e1b16;
+    --muted: #635c50;
+    --accent: #a8471c;
+    --accent-soft: #f4e4da;
+    --line: #e6ded2;
+    --code-bg: #2b2620;
+    --code-ink: #f1ece2;
+    --danger: #b3261e;
+    --danger-soft: #fbe9e7;
+    --good: #2e6b3e;
+    --good-soft: #e7f3e9;
+    --warn: #8a6d1f;
+    --warn-soft: #fbf1d8;
+    --radius: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 6rem;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.28;
+    margin: 0 0 0.4rem;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin-bottom: 2.2rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin-top: 3rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--line);
+  }
+  h3 {
+    font-size: 1.15rem;
+    margin-top: 2rem;
+    color: var(--accent);
+  }
+  h4 {
+    font-size: 1rem;
+    margin-top: 1.4rem;
+    color: var(--ink);
+  }
+  p { margin: 0.9rem 0; }
+  a { color: var(--accent); }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: var(--accent-soft);
+    padding: 0.12em 0.4em;
+    border-radius: 5px;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    margin: 1rem 0;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 1em;
+  }
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .toc h2 { margin-top: 0; border: none; font-size: 1.1rem; }
+  .toc ol { margin: 0.5rem 0 0; padding-left: 1.3rem; }
+  .toc li { margin: 0.35rem 0; }
+  .toc a { text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .callout {
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    margin: 1.4rem 0;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+  }
+  .callout.danger { border-color: var(--danger); background: var(--danger-soft); }
+  .callout.good { border-color: var(--good); background: var(--good-soft); }
+  .callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .callout-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+    opacity: 0.85;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.6rem;
+    margin: 1.3rem 0;
+  }
+
+  .companion-note {
+    background: #efe8db;
+    border-radius: var(--radius);
+    padding: 0.9rem 1.2rem;
+    font-size: 0.92rem;
+    margin-bottom: 2rem;
+  }
+
+  /* lifetime diagrams */
+  .lifetime-wrap {
+    display: flex;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+  }
+  .lifetime-col {
+    flex: 1 1 320px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+  }
+  .lifetime-col h4 { margin-top: 0; text-align: center; }
+  .lifetime-track {
+    position: relative;
+    padding-left: 1.6rem;
+  }
+  .lifetime-track::before {
+    content: "";
+    position: absolute;
+    left: 0.6rem;
+    top: 0.3rem;
+    bottom: 0.3rem;
+    width: 3px;
+    border-radius: 2px;
+  }
+  .lifetime-track.open::before { background: var(--good); }
+  .lifetime-step {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 0.9rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.88rem;
+  }
+  .lifetime-step::before {
+    content: "";
+    position: absolute;
+    left: -1.6rem;
+    top: 0.85rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 2px solid var(--muted);
+  }
+  .lifetime-step.in-context::before { border-color: var(--good); background: var(--good); }
+  .lifetime-step.gap::before { border-color: var(--danger); background: var(--danger-soft); }
+  .lifetime-step .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.1em 0.5em;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+  }
+  .lifetime-step.in-context .tag { background: var(--good-soft); color: var(--good); }
+  .lifetime-step.gap .tag { background: var(--danger-soft); color: var(--danger); }
+
+  /* diagram bits (flow) */
+  .diagram {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    margin: 1.5rem 0;
+  }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.6rem;
+    justify-content: center;
+  }
+  .flow-box {
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.85rem;
+    min-width: 130px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .flow-box.danger { background: var(--danger-soft); }
+  .flow-box.good { background: var(--good-soft); }
+  .flow-box .label { font-weight: 700; margin-bottom: 0.2rem; }
+  .flow-arrow {
+    align-self: center;
+    color: var(--muted);
+    font-size: 1.3rem;
+    padding: 0 0.2rem;
+  }
+  @media (max-width: 600px) {
+    .flow { flex-direction: column; align-items: stretch; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+
+  table.model-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2rem 0;
+    font-size: 0.88rem;
+  }
+  table.model-table th, table.model-table td {
+    border: 1px solid var(--line);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+  }
+  table.model-table th { background: #f2ede2; }
+  table.model-table td.yes { color: var(--good); font-weight: 600; }
+  table.model-table td.no { color: var(--danger); font-weight: 600; }
+
+  .diff-block {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    margin: 1rem 0;
+  }
+  .diff-block .diff-header {
+    background: #efe8db;
+    padding: 0.5rem 1rem;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  pre.diff { margin: 0; border-radius: 0; }
+
+  .quiz-q {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .quiz-q p.question { font-weight: 600; margin-top: 0; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; }
+  .quiz-option {
+    text-align: left;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fdfcfa;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .quiz-option:hover { background: var(--accent-soft); }
+  .quiz-option.correct { background: var(--good-soft); border-color: var(--good); }
+  .quiz-option.incorrect { background: var(--danger-soft); border-color: var(--danger); }
+  .quiz-feedback {
+    margin-top: 0.7rem;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: var(--good-soft); color: #1c4726; }
+  .quiz-feedback.incorrect-fb { background: var(--danger-soft); color: #7a1a15; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .muted { color: var(--muted); }
+  .commit-tag {
+    display: inline-block;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #efe8db;
+    border-radius: 5px;
+    padding: 0.05em 0.4em;
+    font-size: 0.85em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>AsyncLocalStorage Tenant Isolation: Who Opens the Box, and When</h1>
+  <p class="subtitle">Three places open the tenant context, one plugin reads it, and the gap between "opened" and "still open" is where a socket-based chat app quietly earns its keep.</p>
+
+  <div class="companion-note">
+    This is a companion piece to <strong>"The findById That Slipped Past the Tenant Guard"</strong>
+    in this same folder, which walks through a specific incident where a missing entry in a
+    method-name array let one tenant's user data leak to another. That article is about the
+    <em>enforcement</em> side — the plugin that reads the tenant context. This one is about the
+    <em>plumbing</em> side — where that context actually comes from, how long it stays alive, and
+    what happens the moment it isn't there. You can read either one first.
+  </div>
+
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#background">Background: three kinds of "top of a request"</a></li>
+      <li><a href="#intuition">Intuition: a box that closes the moment you stop asking</a></li>
+      <li><a href="#code">Code walkthrough: where the box opens, and who reads it</a></li>
+      <li><a href="#failmode">Fail closed or fail open? Both — depending which gap you hit</a></li>
+      <li><a href="#improvements">Improvements: turning "remembered" into "structural"</a></li>
+      <li><a href="#quiz">Quiz</a></li>
+    </ol>
+  </div>
+
+  <h2 id="background">Background: three kinds of "top of a request"</h2>
+
+  <p>
+    If you've never worked with Node's <code>AsyncLocalStorage</code> before, here's the one-paragraph
+    version: it's a way to make a value — here, a tenant ID — implicitly available to every function
+    called during some span of asynchronous work, without threading it through every function
+    signature as an explicit parameter. You open it once, at the top, with
+    <code>asyncLocalStorage.run(value, callback)</code>, and for as long as <code>callback</code> is
+    executing — including every <code>await</code> inside it, and every function it calls, no matter
+    how many layers deep — any code that calls <code>asyncLocalStorage.getStore()</code> gets that
+    same value back. Once <code>callback</code> returns, the value is gone; a later, unrelated piece
+    of code calling <code>getStore()</code> gets nothing.
+  </p>
+
+  <p>
+    If you're already comfortable with that, skip ahead — the part specific to this codebase, and the
+    part actually worth understanding carefully, is <strong>where "the top" actually is</strong>. In a
+    typical request/response web framework, there's exactly one obvious "top": the request comes in,
+    a middleware chain runs, a handler runs, a response goes out, done. This chat app isn't that
+    simple, because it has three genuinely different shapes of "a unit of work that needs a tenant,"
+    and each one has to open the box for itself.
+  </p>
+
+  <h3>The narrow background: the three entry points</h3>
+
+  <ol>
+    <li><strong>A normal HTTP request</strong> — has one clear beginning and end, matching the AsyncLocalStorage model closely.</li>
+    <li><strong>A WebSocket connection</strong> — has one beginning (the handshake), but then stays alive indefinitely, receiving many separate events over time. Each event is its own "unit of work," but they don't share a single call stack the way a request's middleware chain does.</li>
+    <li><strong>Everything else</strong> — background jobs, scheduled tasks — has no framework-provided "top" at all; something has to manually decide where a unit of work begins.</li>
+  </ol>
+
+  <p>
+    All three eventually rely on the same underlying primitive, and the same helper function,
+    <code>runInTenantContext</code>. But only one of them (HTTP) gets that helper "for free," wired
+    into a middleware chain that runs on every request automatically. The other two have to call it
+    by hand, and — as you'll see — the socket case has to call it by hand <em>repeatedly</em>, once
+    per event, which is the detail most worth internalizing from this whole article.
+  </p>
+
+  <h2 id="intuition">Intuition: a box that closes the moment you stop asking</h2>
+
+  <p>
+    Picture <code>tenantContext</code> as a single labeled box that lives for the duration of some
+    span of work. Something places a sticky note with the tenant ID written on it inside the box at
+    the start of that span. Any code running "inside" that span — however deeply nested, however many
+    functions removed — can open the box and read the sticky note. The moment the span ends, the box
+    empties. There is no way to reach back in time and read a note left by a span that has already
+    finished.
+  </p>
+
+  <p>
+    For an HTTP request, this maps cleanly onto real life: the request starts, the note goes in, every
+    downstream function call is "part of" that request, and when the response is sent, the request is
+    over — box empties, and that's fine, because nothing needs to read the note after the response
+    ships.
+  </p>
+
+  <p>
+    A WebSocket connection breaks that clean mapping. The connection itself is a single long-lived
+    "thing" — a user connects once and might stay connected for hours — but the actual <em>work</em>
+    happens in bursts: an event arrives, gets handled, and then nothing happens until the next event.
+    If you naively wrote <code>tenantContext.run({tenantId}, () =&gt; { registerAllMyEventHandlers(); })</code>
+    at connection time, thinking that would cover every future event, you'd be wrong: registering an
+    event handler is not the same as running it. The actual handler function gets invoked later, by
+    Socket.IO's internal event loop, as a brand new call — not nested inside your original
+    <code>.run()</code> callback at all. By the time a message-send event fires, the box from
+    connection time has long since closed.
+  </p>
+
+  <div class="lifetime-wrap">
+    <div class="lifetime-col">
+      <h4>HTTP request — one span, one box</h4>
+      <div class="lifetime-track open">
+        <div class="lifetime-step in-context">Request arrives <span class="tag">context opens</span></div>
+        <div class="lifetime-step in-context">authMiddleware verifies user, calls tenantContext.run()</div>
+        <div class="lifetime-step in-context">next() called <em>inside</em> that callback</div>
+        <div class="lifetime-step in-context">Controller runs</div>
+        <div class="lifetime-step in-context">Service runs, queries fire</div>
+        <div class="lifetime-step in-context">Response sent <span class="tag">context closes</span></div>
+      </div>
+    </div>
+    <div class="lifetime-col">
+      <h4>Socket connection — one handshake, many disconnected spans</h4>
+      <div class="lifetime-track">
+        <div class="lifetime-step in-context">Handshake <span class="tag">context opens</span></div>
+        <div class="lifetime-step in-context">next() called inside that callback</div>
+        <div class="lifetime-step gap">Connection idles... <span class="tag">context closed</span></div>
+        <div class="lifetime-step gap">"send_message" event fires later <span class="tag">no context</span></div>
+        <div class="lifetime-step in-context">Handler re-opens its own context manually</div>
+        <div class="lifetime-step gap">Handler finishes <span class="tag">context closes again</span></div>
+        <div class="lifetime-step gap">...idle until next event, repeat</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">The core intuition to take away</div>
+    AsyncLocalStorage context tracks <em>call-stack nesting</em>, not <em>wall-clock connection
+    lifetime</em>. A WebSocket connection lasting three hours has zero continuous tenant context for
+    almost all of that time — context only exists in the narrow slices where a handler is actively
+    executing, and each of those slices has to open its own box from scratch.
+  </div>
+
+  <p>
+    That's why, if you go looking at the socket-handling code, you find the tenant ID stashed
+    somewhere durable — <code>socket.data.tenantId</code>, set once at handshake time — and then
+    every single event handler re-reads that stashed value and re-opens a fresh
+    <code>runInTenantContext</code> box around its own work. The handshake-time context isn't wasted —
+    it protects anything that happens synchronously as part of the handshake continuation — but for
+    the actual chat functionality (sending messages, joining channels, reacting to messages), the
+    handshake's box is already long closed by the time any of that runs.
+  </p>
+
+  <h2 id="code">Code walkthrough: where the box opens, and who reads it</h2>
+
+  <h3>1. HTTP requests — opened once, in <code>authMiddleware</code></h3>
+
+  <div class="diff-block">
+    <div class="diff-header">src/common/middlewares/auth.middleware.ts</div>
+    <pre><span></span>// CRITICAL: Set tenant context for database isolation
+// This ensures all subsequent database queries are automatically
+// filtered by the user's tenantId via the tenantIsolationPlugin
+return tenantContext.run({ tenantId: user.tenantId }, () =&gt; {
+  (req as TenantAuthenticatedRequest).tenantId = user.tenantId;
+  next();
+});</pre>
+  </div>
+
+  <p>
+    The detail that makes this correct is not obvious on first read: <code>next()</code> — the call
+    that hands control to the rest of the middleware chain, the controller, and everything the
+    controller calls — is invoked <em>from inside</em> the <code>.run()</code> callback. That's what
+    keeps the box open for the entire rest of the request. (This wasn't always true here — an earlier
+    version of this exact file awaited a `Promise` that resolved and returned before calling
+    `next()`, which silently closed the box before any real work ran. That's covered in the companion
+    article's fix commit, <span class="commit-tag">37d7930</span>.)
+  </p>
+
+  <h3>2. Socket connections — opened at handshake, re-opened per event</h3>
+
+  <div class="diff-block">
+    <div class="diff-header">src/socket/middleware/auth.middleware.ts</div>
+    <pre>// Attach user to socket data
+socket.data.user = userFromDatabase;
+socket.data.tenantId = userFromDatabase.tenantId;
+
+// Run next() INSIDE tenant context
+tenantContext.run({ tenantId: userFromDatabase.tenantId }, () =&gt; {
+  next();
+});</pre>
+  </div>
+
+  <p>
+    Same shape as the HTTP version — <code>next()</code> inside <code>.run()</code> — but this only
+    covers the handshake continuation. The real work happens later:
+  </p>
+
+  <div class="diff-block">
+    <div class="diff-header">src/socket/channel.handler.ts (representative of ~5 handler files)</div>
+    <pre>socket.on("send_message", async (data) =&gt; {
+  const tenantId = socket.data.tenantId;
+  const result = await runInTenantContext(tenantId, async () =&gt; {
+    // ...service calls and queries happen here, inside a fresh context...
+  });
+});</pre>
+  </div>
+
+  <p>
+    <code>direct-message.handler.ts</code>, <code>message-reaction.handler.ts</code>,
+    <code>attachment.handler.ts</code>, and <code>socket/index.ts</code> all repeat this same pattern —
+    read <code>socket.data.tenantId</code>, wrap the actual work in a fresh
+    <code>runInTenantContext</code> call. It's the correct thing to do, but notice that it's a
+    <em>convention</em>, not something the framework enforces: nothing stops a future event handler
+    from being added that forgets to wrap its body this way — a bug shaped exactly like the
+    <code>findById</code> incident in the companion article, just one layer up the stack.
+  </p>
+
+  <h3>3. Everything else — <code>runInTenantContext</code> directly</h3>
+
+  <div class="diff-block">
+    <div class="diff-header">src/plugins/tenantPlugin.ts</div>
+    <pre>export const tenantContext = new AsyncLocalStorage&lt;{ tenantId: string }&gt;();
+
+export async function runInTenantContext&lt;T&gt;(
+  tenantId: string,
+  fn: () =&gt; Promise&lt;T&gt;,
+): Promise&lt;T&gt; {
+  return tenantContext.run({ tenantId }, fn);
+}</pre>
+  </div>
+
+  <p>
+    This is the one primitive everything else is built from. <code>setTenantContext</code> (used by
+    the HTTP middleware) and the raw <code>tenantContext.run()</code> calls in the socket middleware
+    are really the same operation wearing different clothes — a request-shaped wrapper versus a
+    direct call — but underneath, it's always the same <code>AsyncLocalStorage.run()</code>.
+  </p>
+
+  <h3>4. How the eight models actually read from it</h3>
+
+  <p>
+    This part is refreshingly uncomplicated: the reading logic exists in exactly one file,
+    <code>src/plugins/tenantPlugin.ts</code>, and every tenant-scoped model opts in with a single line:
+  </p>
+
+  <pre>channelSchema.plugin(tenantIsolationPlugin);</pre>
+
+  <table class="model-table">
+    <tr><th>Model</th><th>Plugin applied?</th></tr>
+    <tr><td>attachment</td><td class="yes">Yes</td></tr>
+    <tr><td>channel</td><td class="yes">Yes</td></tr>
+    <tr><td>channel-member</td><td class="yes">Yes</td></tr>
+    <tr><td>direct-message</td><td class="yes">Yes</td></tr>
+    <tr><td>message</td><td class="yes">Yes</td></tr>
+    <tr><td>refresh-token</td><td class="yes">Yes</td></tr>
+    <tr><td>thread</td><td class="yes">Yes</td></tr>
+    <tr><td>user</td><td class="yes">Yes</td></tr>
+    <tr><td>tenant <span class="muted">(the registry itself)</span></td><td class="no">No — deliberately</td></tr>
+  </table>
+
+  <p>
+    <code>tenant.model.ts</code> is correctly excluded: a <code>Tenant</code> document doesn't have a
+    <code>tenantId</code> of its own to be scoped by — it <em>is</em> the thing everything else is
+    scoped around. So this is eight tenant-scoped models sharing one plugin function, not nine models
+    each reimplementing the same logic. Mongoose calls the plugin function once per schema it's
+    applied to, and each call independently attaches the same set of <code>pre(...)</code> hooks —
+    shared code, applied repeatedly, rather than one global hook watching every model at once. Here's
+    the plugin in full, for reference:
+  </p>
+
+  <pre>export function tenantIsolationPlugin(schema: Schema&lt;any&gt;) {
+  const queryMiddleware = function (
+    this: Query&lt;any, any&gt;,
+    next: (err?: any) =&gt; void,
+  ) {
+    const context = tenantContext.getStore();
+    const filter = this.getFilter();
+
+    if (!filter.tenantId) {
+      if (!context?.tenantId) {
+        throw new Error(
+          "🚨 SECURITY: Query attempted without tenant context! " +
+          "All queries must have tenantId.",
+        );
+      }
+      this.where({ tenantId: context.tenantId });
+    }
+    next();
+  };
+
+  schema.pre(
+    [
+      "find", "findOne", "findOneAndUpdate", "findOneAndDelete",
+      "findOneAndReplace", "findById", "count", "create", "insert",
+      "insertMany", "countDocuments", "deleteOne", "deleteMany",
+      "updateOne", "updateMany",
+    ] as any,
+    queryMiddleware,
+  );
+
+  schema.pre("validate", function (next) {
+    const context = tenantContext.getStore();
+    if (this.isNew) {
+      if (!context?.tenantId) {
+        return next(new Error("🚨 SECURITY: Cannot create document without tenant context!"));
+      }
+      this.tenantId = context.tenantId;
+    }
+    next();
+  });
+
+  schema.pre("save", function (next) {
+    if (!this.isNew && this.isModified("tenantId")) {
+      return next(new Error("🚨 SECURITY: Cannot modify tenantId! This is immutable."));
+    }
+    next();
+  });
+
+  schema.pre("aggregate", function (next) {
+    const context = tenantContext.getStore();
+    if (!context?.tenantId) {
+      throw new Error("🚨 SECURITY: Aggregate query attempted without tenant context!");
+    }
+    this.pipeline().unshift({ $match: { tenantId: context.tenantId } });
+    next();
+  });
+}</pre>
+
+  <p>
+    Four separate hooks, four separate concerns: <code>queryMiddleware</code> for reads and writes
+    routed through named query methods, <code>"validate"</code> for stamping new documents,
+    <code>"save"</code> for preventing tenant reassignment, and <code>"aggregate"</code> for pipelines.
+    All four ask the same question of the same box — <code>tenantContext.getStore()</code> — they just
+    ask it at different points in a document or query's lifecycle.
+  </p>
+
+  <h2 id="failmode">Fail closed or fail open? Both — depending which gap you hit</h2>
+
+  <p>
+    Read the query hook again with this specific question in mind: what happens if
+    <code>tenantContext.getStore()</code> returns nothing?
+  </p>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="flow-box good">
+        <div class="label">Method IS hooked</div>
+        e.g. findOne, no context
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box good">
+        <div class="label">Check runs</div>
+        context?.tenantId is undefined
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box good">
+        <div class="label">🚨 Thrown</div>
+        loud, safe — fails closed
+      </div>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="flow">
+      <div class="flow-box danger">
+        <div class="label">Method NOT hooked</div>
+        (historically: findById)
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box danger">
+        <div class="label">Check never runs</div>
+        there's no code to ask the question
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box danger">
+        <div class="label">Query executes unfiltered</div>
+        silent, wrong answer — fails open
+      </div>
+    </div>
+  </div>
+
+  <p>
+    The mechanism is <strong>designed</strong> to fail closed — when it fires, it either finds a
+    tenant to filter by or it throws, loudly, before touching the database. But its coverage is an
+    enumerated list of method names, not a structural guarantee that covers every possible query
+    shape. Anything outside that list doesn't fail at all, in either direction — it just runs, as if
+    the plugin didn't exist. There's no deliberate fallback, no <code>catch</code> swallowing the
+    security error, no feature flag disabling the check. The fail-open behavior is a side effect of
+    omission, not a designed escape hatch — which is exactly why it went unnoticed for as long as it
+    did: nothing about the code at the call site looks unusual when it silently skips the check.
+  </p>
+
+  <div class="callout warn">
+    <div class="callout-title">Worth auditing, not yet confirmed</div>
+    While tracing this, one more call site with the same shape as the original incident turned up:
+    <code>src/services/message.service.ts</code>, <code>getMessageByIdOrThrowError</code> (around line
+    51):
+    <pre>async getMessageByIdOrThrowError(messageId: string): Promise&lt;MessageInterface&gt; {
+  const message = await messageRepository.findById(messageId);
+  if (!message) {
+    throw new NotFoundError("message");
+  }
+  return message;
+}</pre>
+    No <code>runInTenantContext</code> wrapper around a raw <code>findById</code> call — the same
+    pattern that caused the original leak. Whether this is actually exploitable depends on whether
+    <code>tenantContext</code> is already open higher up the call stack every time this runs (likely
+    for HTTP paths that went through <code>authMiddleware</code>; less certain for any socket-originated
+    call path that reaches this method without its own <code>runInTenantContext</code> wrapper). This
+    wasn't traced end-to-end in this session, so treat it as an audit item, not a confirmed second
+    incident.
+  </div>
+
+  <h2 id="improvements">Improvements: turning "remembered" into "structural"</h2>
+
+  <p>
+    The companion article's Improvements section covers the enforcement side in depth — replacing the
+    plugin's method-name array with a regex hook or an <code>exec()</code>-level interception, and
+    making tenant scoping a compile-time requirement via a branded <code>TenantScope</code> type. Both
+    apply here too, since the <code>getMessageByIdOrThrowError</code> case above is the same class of
+    bug. What's specific to <em>this</em> article is the socket-layer plumbing, which has its own
+    version of the same underlying problem: correctness depends on every handler author remembering to
+    do the right thing, rather than the framework making the wrong thing impossible to write.
+  </p>
+
+  <h3>1. Make socket handlers open context by construction, not by convention</h3>
+
+  <p>
+    Right now, every socket event handler independently writes
+    <code>runInTenantContext(socket.data.tenantId, ...)</code> around its own body. That's five-plus
+    files repeating the same pattern by hand — which is precisely the "remembered convention" shape
+    that caused the original array bug, just at a different layer. A small wrapper applied at
+    registration time removes the possibility of forgetting:
+  </p>
+
+  <pre>function withSocketTenant&lt;A extends any[]&gt;(
+  socket: Socket,
+  handler: (...args: A) =&gt; Promise&lt;void&gt;,
+) {
+  return (...args: A) =&gt;
+    runInTenantContext(socket.data.tenantId, () =&gt; handler(...args));
+}
+
+// usage — the context-wrapping is now guaranteed by the registration
+// helper, not by whether the handler author remembered to add it:
+socket.on("send_message", withSocketTenant(socket, sendMessageHandler));
+socket.on("join_channel", withSocketTenant(socket, joinChannelHandler));</pre>
+
+  <p>
+    This doesn't change behavior for handlers that already wrap themselves correctly — it just moves
+    the guarantee from "every author remembers" to "every handler registered through this helper is
+    covered, full stop," which is the same shift in kind as replacing an enumerated method-name array
+    with a regex match.
+  </p>
+
+  <h3>2. Apply the same regex-hook fix from the companion article</h3>
+
+  <p>
+    Briefly, for continuity: replacing the enumerated method list with a regex-based hook removes the
+    need to remember every method name individually, and would have caught <code>findById</code>
+    (and would catch <code>getMessageByIdOrThrowError</code>'s call today) without anyone needing to
+    anticipate it specifically:
+  </p>
+
+  <pre>schema.pre(/^find/, queryMiddleware);              // find, findOne, findById, findOneAnd*
+schema.pre(/^(count|update|delete)/, queryMiddleware); // count*, updateOne/Many, deleteOne/Many</pre>
+
+  <h3>3. Close the <code>getMessageByIdOrThrowError</code> gap with a required scope parameter</h3>
+
+  <p>
+    The structural fix proposed in the companion article — a branded <code>TenantScope</code> type
+    that can only be constructed from inside an active tenant context — applies directly here too.
+    Adapted to this call site:
+  </p>
+
+  <pre>async findById(id: string, scope: TenantScope): Promise&lt;T | null&gt; {
+  return this.model.findOne({ _id: id, tenantId: scope.tenantId });
+}
+
+// getMessageByIdOrThrowError now cannot compile without a scope:
+async getMessageByIdOrThrowError(
+  messageId: string,
+  scope: TenantScope,
+): Promise&lt;MessageInterface&gt; {
+  const message = await messageRepository.findById(messageId, scope);
+  if (!message) throw new NotFoundError("message");
+  return message;
+}</pre>
+
+  <div class="callout good">
+    <div class="callout-title">The throughline connecting both articles</div>
+    Every version of this bug — the original <code>findById</code> array gap, the socket handlers'
+    repeated manual wrapping, and the newly-spotted <code>getMessageByIdOrThrowError</code> pattern —
+    is the same failure mode wearing different clothes: a safety property that depends on a human
+    remembering to invoke it correctly, at every call site, forever. The fixes that actually hold up
+    are the ones that make the unsafe version <em>impossible to write</em> — a regex that matches by
+    shape instead of name, a wrapper that opens context by construction instead of convention, a type
+    that can't compile without proof a scope exists — rather than the ones that just add one more
+    place to remember to check.
+  </div>
+
+  <h2 id="quiz">Quiz</h2>
+  <p class="muted">Click an answer to check yourself.</p>
+
+  <div id="quiz-container"></div>
+
+  <footer>
+    Compiled from <code>chat-app-backend</code> — <code>src/common/middlewares/auth.middleware.ts</code>,
+    <code>src/socket/middleware/auth.middleware.ts</code>, <code>src/socket/channel.handler.ts</code>,
+    <code>src/socket/direct-message.handler.ts</code>, <code>src/socket/message-reaction.handler.ts</code>,
+    <code>src/socket/attachment.handler.ts</code>, <code>src/socket/index.ts</code>,
+    <code>src/plugins/tenantPlugin.ts</code>, <code>src/services/message.service.ts</code>, and
+    <code>src/models/*.ts</code>. Companion piece: <em>The findById That Slipped Past the Tenant
+    Guard</em>, same folder.
+  </footer>
+
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Why does a WebSocket connection need runInTenantContext called separately in every event handler, instead of once at connection time?",
+    options: [
+      "AsyncLocalStorage context only lasts for the duration of the callback passed to .run() — an event handler invoked later by Socket.IO's event loop is a new, unrelated call, not nested inside that original callback",
+      "Socket.IO does not support AsyncLocalStorage at all",
+      "Because each event uses a different tenantId than the one established at handshake",
+      "Because the socket.data object cannot store a tenantId value"
+    ],
+    correct: 0,
+    feedback: [
+      "Right. The handshake's tenantContext.run() only keeps context open for whatever runs synchronously inside its callback (i.e., the rest of the handshake continuation). A later event handler is invoked independently by Socket.IO, outside that call stack, so the context from handshake time is already gone by then — hence stashing tenantId on socket.data and re-opening context per event.",
+      "AsyncLocalStorage works fine with Socket.IO — the issue is about call-stack nesting and timing, not compatibility.",
+      "The tenantId is the same for the whole connection (a user doesn't change tenants mid-session) — the issue is that the context box closes, not that the value changes.",
+      "socket.data.tenantId is exactly where the tenantId IS stored for later use — this storage works fine; it's AsyncLocalStorage context that doesn't persist automatically."
+    ]
+  },
+  {
+    q: "What determines whether a query fails loudly (throws) versus fails silently (leaks) when no tenant context exists?",
+    options: [
+      "Whether the specific Mongoose method being called is in the plugin's hooked-methods list — if it is, the check runs and throws; if not, no check ever runs at all",
+      "Whether the database connection is using a replica set or a single node",
+      "Whether the query uses async/await versus .then() chains",
+      "Whether the request came from an authenticated or unauthenticated user"
+    ],
+    correct: 0,
+    feedback: [
+      "Correct. The plugin's fail-closed throw only happens inside code that runs — and that code only runs for methods explicitly listed in schema.pre([...]). A method outside that list has no check to fail at all, so it executes unfiltered rather than throwing.",
+      "Replica sets are unrelated to this — the enforcement is entirely at the Mongoose/application layer, not the database topology layer.",
+      "The async mechanics don't affect whether the hook is registered for a given method name.",
+      "Authentication determines whether a tenantId exists to check against, but the fail-open bug specifically concerns methods where the check code never executes at all, regardless of auth status."
+    ]
+  },
+  {
+    q: "Why is the tenantIsolationPlugin NOT applied to the Tenant model itself?",
+    options: [
+      "Because a Tenant document doesn't have a tenantId of its own to be scoped by — it is the entity that tenancy is scoped around, not a piece of tenant-owned data",
+      "Because the Tenant model was created before the plugin existed and was never updated",
+      "Because Tenant documents don't support Mongoose schema plugins",
+      "Because tenant records are stored in a separate database, not MongoDB"
+    ],
+    correct: 0,
+    feedback: [
+      "Right — applying tenant-scoping to the tenant registry itself would be circular: which tenantId would you even filter a Tenant document by? It's deliberately excluded, not an oversight.",
+      "This isn't a case of technical debt or an outdated model — it's a correct, deliberate design choice given what the Tenant model represents.",
+      "Mongoose plugins work on any schema; there's no technical restriction here.",
+      "Tenant records live in the same MongoDB instance as everything else in this codebase — no separate database is involved."
+    ]
+  },
+  {
+    q: "In authMiddleware's HTTP flow, why does calling next() from inside the tenantContext.run() callback matter, rather than calling it after?",
+    options: [
+      "Because AsyncLocalStorage context is only active for code executing inside the .run() callback — calling next() from outside it would mean the rest of the request (controllers, services, queries) runs with no context available at all",
+      "Because Express requires next() to be called synchronously within the same tick",
+      "Because calling next() outside .run() would cause a memory leak",
+      "It doesn't actually matter — both orderings behave identically"
+    ],
+    correct: 0,
+    feedback: [
+      "Exactly, and this was a real historical bug in this codebase (fixed in commit 37d7930 discussed in the companion article): an earlier version awaited a Promise that resolved before calling next(), which meant next() — and everything downstream of it — ran after the context had already closed, silently disabling tenant enforcement for the entire rest of the request.",
+      "Express doesn't have a same-tick requirement for next() — the issue here is specifically about AsyncLocalStorage's context boundary, not Express's own execution model.",
+      "No memory leak is involved; the consequence is a correctness bug (missing tenant context), not a resource leak.",
+      "The ordering matters a great deal — this is the exact bug class covered in the companion article's fix commit."
+    ]
+  },
+  {
+    q: "What is the common thread connecting the original findById array bug, the socket handlers' repeated manual runInTenantContext calls, and the getMessageByIdOrThrowError audit item?",
+    options: [
+      "All three depend on a human remembering to do the right thing correctly at every call site, rather than the code being structured so the wrong thing is impossible to write",
+      "All three are caused by using MongoDB instead of a SQL database",
+      "All three only occur when the application is under heavy load",
+      "All three were introduced in the same single commit"
+    ],
+    correct: 0,
+    feedback: [
+      "Correct — this is the throughline of both articles. An enumerated array, a manually-repeated wrapping convention, and an unwrapped repository call are all instances of a safety property that depends on remembered discipline instead of structural guarantees (a regex matching by shape, a registration-time wrapper, or a type that can't compile without proof of context).",
+      "MongoDB isn't the root cause — the same class of bug (a convention-dependent safety check) could occur with any database if the equivalent enforcement layer were similarly structured as an enumerated list or manual convention.",
+      "None of these are load-dependent — they're structural/correctness issues that manifest deterministically based on which code path runs, not how much traffic the system is under.",
+      "These were introduced across different commits, at different times, in different files — they share a design pattern, not a commit."
+    ]
+  }
+];
+
+const container = document.getElementById('quiz-container');
+questions.forEach((item, qIdx) => {
+  const qDiv = document.createElement('div');
+  qDiv.className = 'quiz-q';
+
+  const qText = document.createElement('p');
+  qText.className = 'question';
+  qText.textContent = (qIdx + 1) + ". " + item.q;
+  qDiv.appendChild(qText);
+
+  const optsDiv = document.createElement('div');
+  optsDiv.className = 'quiz-options';
+
+  const feedbackDiv = document.createElement('div');
+  feedbackDiv.className = 'quiz-feedback';
+
+  item.options.forEach((optText, optIdx) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = optText;
+    btn.addEventListener('click', () => {
+      const buttons = optsDiv.querySelectorAll('.quiz-option');
+      buttons.forEach(b => { b.disabled = true; });
+
+      if (optIdx === item.correct) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('incorrect');
+        buttons[item.correct].classList.add('correct');
+      }
+
+      feedbackDiv.textContent = item.feedback[optIdx];
+      feedbackDiv.className = 'quiz-feedback show ' + (optIdx === item.correct ? 'correct-fb' : 'incorrect-fb');
+    });
+    optsDiv.appendChild(btn);
+  });
+
+  qDiv.appendChild(optsDiv);
+  qDiv.appendChild(feedbackDiv);
+  container.appendChild(qDiv);
+});
+</script>
+
+</body>
+</html>
