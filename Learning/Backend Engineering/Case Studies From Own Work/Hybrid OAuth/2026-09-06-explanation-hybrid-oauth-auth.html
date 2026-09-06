@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hybrid OAuth: How Keycloak/Cognito Coexists with Legacy JWT</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f4f6f5;
+    --bg-alt: #e7ebe9;
+    --text: #10171a;
+    --text-dim: #4d5c60;
+    --accent: #1f6f5c;
+    --accent-ink: #123f34;
+    --accent-2: #b5401f;
+    --accent-3: #9c2f3a;
+    --accent-purple: #7a5cc4;
+    --line: #ccd6d3;
+    --code-bg: #0d1416;
+    --code-text: #d9e6e2;
+    --card-bg: #ffffff;
+    --callout-bg: #e7f1ed;
+    --callout-border: #1f6f5c;
+    --danger-bg: #fbeae7;
+    --danger-border: #9c2f3a;
+    --quiz-correct: #1f6f5c;
+    --quiz-wrong: #9c2f3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+  h1, h2, h3, .hero-kicker {
+    font-family: "Fraunces", Georgia, "Iowan Old Style", serif;
+  }
+  header.hero {
+    padding: 3.4rem 1.25rem 2.2rem;
+    background: var(--accent-ink, #123f34);
+    background: linear-gradient(175deg, #0e2b24 0%, #123f34 55%, #16493d 100%);
+    color: #ecf5f1;
+    border-bottom: 1px solid #0a201b;
+  }
+  header.hero .wrap { padding-top: 0; padding-bottom: 0; }
+  .hero-kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #7fd6ba;
+    margin-bottom: 0.9rem;
+  }
+  header.hero h1 {
+    font-size: 2.4rem;
+    margin: 0 0 0.8rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  header.hero p.subtitle {
+    color: #c3d9d0;
+    font-size: 1.08rem;
+    max-width: 620px;
+    margin: 0;
+    font-family: "Source Sans 3", sans-serif;
+  }
+  header.hero .meta {
+    margin-top: 1.6rem;
+    font-size: 0.8rem;
+    font-family: "IBM Plex Mono", monospace;
+    color: #85a89c;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  h2 {
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin-top: 3.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--line);
+    scroll-margin-top: 1rem;
+    text-wrap: balance;
+  }
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 2.2rem;
+    color: var(--accent-ink, var(--accent));
+    text-wrap: balance;
+  }
+  h4 { font-size: 1rem; margin-top: 1.5rem; font-family: "Source Sans 3", sans-serif; font-weight: 700; }
+  p { margin: 0.9rem 0; max-width: 68ch; }
+  a { color: var(--accent); text-decoration-thickness: 1px; }
+  code {
+    font-family: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+    background: var(--bg-alt);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 1rem 1.1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    white-space: pre;
+    margin: 1rem 0;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+  .filepath {
+    font-family: "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: -0.6rem;
+    margin-top: 1rem;
+  }
+  nav.toc {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+  }
+  nav.toc h2 { border: none; margin-top: 0; font-size: 1.1rem; padding-bottom: 0; }
+  nav.toc ol { margin: 0.5rem 0 0; padding-left: 1.3rem; }
+  nav.toc li { margin: 0.35rem 0; }
+  nav.toc a { text-decoration: none; font-weight: 600; }
+  nav.toc a:hover { text-decoration: underline; }
+
+  .callout {
+    background: var(--callout-bg);
+    border-left: 4px solid var(--callout-border);
+    border-radius: 6px;
+    padding: 0.9rem 1.2rem;
+    margin: 1.3rem 0;
+    font-size: 0.95rem;
+  }
+  .callout strong.label {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+  .callout.danger { background: var(--danger-bg); border-left-color: var(--danger-border); }
+  .callout.danger strong.label { color: var(--danger-border); }
+  .callout.info { background: var(--callout-bg); border-left-color: var(--accent); }
+  .callout.info strong.label { color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.3rem 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--bg-alt); font-weight: 700; }
+  td code, th code { white-space: nowrap; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 1.2rem 0;
+  }
+
+  /* timeline */
+  .timeline { position: relative; margin: 1.5rem 0; padding-left: 1.6rem; border-left: 3px solid var(--line); }
+  .tl-item { position: relative; margin-bottom: 1.6rem; }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -1.98rem;
+    top: 0.28rem;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-item.wnp::before { background: var(--accent-2); }
+  .tl-item.idp::before { background: var(--accent); }
+  .tl-date { font-size: 0.78rem; color: var(--text-dim); font-weight: 700; letter-spacing: 0.02em; }
+  .tl-hash { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; background: var(--bg-alt); padding: 0.05rem 0.4rem; border-radius: 4px; }
+  .tl-title { font-weight: 600; margin: 0.15rem 0 0.15rem; }
+  .tl-desc { color: var(--text-dim); font-size: 0.92rem; margin: 0; }
+  .legend { display: flex; gap: 1.4rem; font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.wnp { background: var(--accent-2); }
+  .dot.idp { background: var(--accent); }
+
+  /* diagram */
+  .diagram {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .flow-row { display: flex; align-items: stretch; gap: 0.6rem; flex-wrap: wrap; margin: 0.8rem 0; }
+  .box {
+    flex: 1;
+    min-width: 150px;
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.85rem;
+  }
+  .box.accent { border-color: var(--accent-purple); background: color-mix(in srgb, var(--accent-purple) 14%, var(--bg-alt)); }
+  .box.accent2 { border-color: var(--accent); background: var(--callout-bg); }
+  .box.accent3 { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 14%, var(--bg-alt)); }
+  .box strong { display: block; margin-bottom: 0.2rem; font-size: 0.85rem; }
+  .arrow { display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 1.3rem; min-width: 28px; }
+  .arrow.down { transform: rotate(90deg); }
+  .stack { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .decision-tree { font-size: 0.9rem; }
+  .decision-tree .node { margin-left: 1.2rem; padding-left: 1rem; border-left: 2px dashed var(--line); margin-top: 0.6rem; padding-bottom: 0.2rem; }
+  .decision-tree .q { font-weight: 700; color: var(--accent); }
+  .decision-tree .yes { color: var(--accent); font-weight: 600; }
+  .decision-tree .no { color: var(--accent-2); font-weight: 600; }
+
+  /* quiz */
+  .quiz-q {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.3rem 1.4rem;
+    margin: 1.5rem 0;
+  }
+  .quiz-q h4 { margin-top: 0; font-size: 1.02rem; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; }
+  .quiz-opt {
+    text-align: left;
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-family: inherit;
+    color: var(--text);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .quiz-opt:hover { background: #eee7d6; }
+  .quiz-opt.correct { background: var(--callout-bg); border-color: var(--quiz-correct); }
+  .quiz-opt.wrong { background: var(--danger-bg); border-color: var(--quiz-wrong); }
+  .quiz-opt[disabled] { cursor: default; }
+  .quiz-feedback { margin-top: 0.7rem; font-size: 0.88rem; padding: 0.6rem 0.8rem; border-radius: 6px; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: var(--callout-bg); color: var(--quiz-correct); }
+  .quiz-feedback.wrong-fb { background: var(--danger-bg); color: var(--quiz-wrong); }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    background: var(--bg-alt);
+    color: var(--text-dim);
+    border: 1px solid var(--line);
+  }
+
+  footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--text-dim); font-size: 0.82rem; }
+
+  @media (max-width: 600px) {
+    header.hero h1 { font-size: 1.6rem; }
+    .flow-row { flex-direction: column; }
+    .arrow { transform: rotate(90deg); }
+    .arrow.down { transform: rotate(90deg); }
+    pre { font-size: 0.74rem; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1615;
+      --bg-alt: #17201e;
+      --text: #e6ede9;
+      --text-dim: #9bb0a9;
+      --accent: #5fbfa2;
+      --accent-ink: #b6ecd9;
+      --accent-2: #e07850;
+      --accent-3: #e58a92;
+      --accent-purple: #a996e8;
+      --line: #2b3835;
+      --code-bg: #070b0a;
+      --code-text: #d9e6e2;
+      --card-bg: #142120;
+      --callout-bg: #16302a;
+      --callout-border: #5fbfa2;
+      --danger-bg: #34201d;
+      --danger-border: #e07850;
+      --quiz-correct: #5fbfa2;
+      --quiz-wrong: #e07850;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1615;
+    --bg-alt: #17201e;
+    --text: #e6ede9;
+    --text-dim: #9bb0a9;
+    --accent: #5fbfa2;
+    --accent-ink: #b6ecd9;
+    --accent-2: #e07850;
+    --accent-3: #e58a92;
+    --accent-purple: #a996e8;
+    --line: #2b3835;
+    --code-bg: #070b0a;
+    --code-text: #d9e6e2;
+    --card-bg: #142120;
+    --callout-bg: #16302a;
+    --callout-border: #5fbfa2;
+    --danger-bg: #34201d;
+    --danger-border: #e07850;
+    --quiz-correct: #5fbfa2;
+    --quiz-wrong: #e07850;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="hero-kicker">Architecture reading — two repos, one auth boundary</p>
+    <h1>Hybrid OAuth: how Keycloak and Cognito coexist with legacy JWT</h1>
+    <p class="subtitle">A tour through <code>Identity-provider-shared-infra</code> and <code>whatsnextplease-monolith</code>, and a year of git history, explaining how a home-grown JWT system learned to live alongside a proper identity provider without anyone flipping a big-bang switch.</p>
+    <div class="meta">
+      <span>repo: HCC/Identity-provider-shared-infra</span>
+      <span>repo: whatsnextplease-monolith</span>
+      <span>span: Jan 2025 – Apr 2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#background">Background</a></li>
+    <li><a href="#timeline">The evolution: two repos, one merge</a></li>
+    <li><a href="#intuition">Intuition: what "hybrid" actually means here</a></li>
+    <li><a href="#code">Code walkthrough</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ol>
+</nav>
+
+<h2 id="background">Background</h2>
+
+<h3>For readers new to JWTs and OAuth/OIDC identity providers</h3>
+<p>
+If you already know the difference between a symmetric JWT and an OIDC provider's JWKS endpoint, feel free to skip to <a href="#timeline">the timeline</a>. For everyone else, here's the ten-minute version.
+</p>
+<p>
+A <strong>JWT (JSON Web Token)</strong> is just a signed bag of claims — a JSON object like <code>{ id, username, role }</code> — base64-encoded and signed so that a server can trust it hasn't been tampered with. The simplest possible setup, and the one most homegrown systems start with, is <strong>HMAC signing</strong> (algorithm <code>HS256</code>): one secret string is used to both sign the token at login time and verify it on every subsequent request. Whoever holds that secret can mint tokens, so it lives only on your own servers.
+</p>
+<p>
+The problem with rolling your own auth this way is that everything — password hashing, session/token lifetime, account recovery, MFA, brute-force protection, group/role management — is now your team's responsibility, forever. An <strong>identity provider (IdP)</strong> like <strong>Keycloak</strong> (open-source, self-hosted) or <strong>AWS Cognito</strong> (managed) exists to take that off your plate: it owns the user directory, issues tokens on your behalf, and — critically — signs tokens with a private key that <em>never leaves the IdP</em>. Your application only ever sees the public half of that key pair, published at a well-known URL as a <strong>JWKS (JSON Web Key Set)</strong>. Verification becomes: fetch the public key matching the token's <code>kid</code> (key ID), and check the signature with asymmetric <code>RS256</code> instead of a shared secret.
+</p>
+<div class="callout info">
+  <strong class="label">Key definition</strong>
+  <strong>OIDC (OpenID Connect)</strong> is just OAuth2 plus a standard identity layer — it defines the token shapes (access, ID, refresh), the <code>/token</code> and <code>/certs</code> (JWKS) endpoints, and standard claims like <code>sub</code> (subject — the IdP's permanent user ID), <code>groups</code>, and <code>email</code>. Both Keycloak and Cognito are OIDC-compliant, which is precisely what lets one small library treat them almost interchangeably.
+</div>
+
+<h3>The situation these two repos are in</h3>
+<p>
+<code>whatsnextplease-monolith</code> ("WNP") is a task-management platform that has had its own JWT auth system, hand-rolled with the <code>jsonwebtoken</code> npm package and a bcrypt-hashed password column in Postgres, since day one. <code>Identity-provider-shared-infra</code> is a newer, separate repository whose job is to stand up a <em>shared</em> identity provider — a single AWS Cognito User Pool (defined as CDK infrastructure-as-code) usable by both WNP and a sibling product, HCC — plus a local Keycloak instance (via Docker Compose) that mirrors that Cognito setup for development, and a small TypeScript package, <code>@HillCountryCoder/auth-client</code>, published to GitHub Packages, that both apps can import to validate tokens from either provider through one common interface.
+</p>
+<p>
+The problem this created: WNP already had real users, with real passwords, sitting in its own database, and none of them existed in Cognito or Keycloak. You can't migrate a live product's entire user base to a new identity system overnight without locking everyone out. That constraint — <em>keep old users working with zero downtime while new users (and eventually everyone) move to the shared IdP</em> — is the entire reason "hybrid" auth exists, and it shapes almost every code path described below.
+</p>
+
+<h2 id="timeline">The evolution: two repos, one merge</h2>
+<p>
+Reading the two repositories' git histories side by side tells the real story better than any architecture doc. For roughly a year, they evolved on entirely separate tracks; then, in a two-week window in January 2026, WNP wired itself into the IdP and the word "hybrid" entered the codebase.
+</p>
+
+<div class="legend">
+  <span><span class="dot wnp"></span> whatsnextplease-monolith</span>
+  <span><span class="dot idp"></span> Identity-provider-shared-infra</span>
+</div>
+
+<div class="timeline">
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2025-01-21 <span class="tl-hash">6ebde88</span></div>
+    <p class="tl-title">Legacy JWT auth is born</p>
+    <p class="tl-desc"><em>"feat: implement authentication middleware with token verification and role-based access control."</em> Introduces <code>auth.middleware.ts</code> with a simple <code>verifyToken</code>: <code>jwt.verify(token, SECRET)</code>, HS256, plus a <code>requireRole</code> guard. This single shared secret becomes the foundation the whole legacy system rests on for the next year.</p>
+  </div>
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2025 (throughout)</div>
+    <p class="tl-title">The legacy flow is fleshed out</p>
+    <p class="tl-desc">Commits like <code>450a41e</code> (auth docs), <code>dcd164b</code> (cookie settings), <code>b29c5d3</code> (API proxy), and <code>b719a15</code> (user retrieval endpoint) build the cookie-based sign-in UI and API surface WNP users interact with all year.</p>
+  </div>
+
+  <div class="tl-item idp">
+    <div class="tl-date">early <span class="tl-hash">bca216b → eb2b65b</span></div>
+    <p class="tl-title">The shared IdP project starts, independently</p>
+    <p class="tl-desc">CDK project initialized, then a first Cognito stack ("implement shared authentication infrastructure with environment config"). At this point WNP doesn't know this repo exists.</p>
+  </div>
+
+  <div class="tl-item idp">
+    <div class="tl-date"><span class="tl-hash">1dae8a7, fa87897</span></div>
+    <p class="tl-title">One User Pool, two apps</p>
+    <p class="tl-desc">The Cognito stack grows into <code>shared-auth-stack.ts</code>: a single User Pool with distinct app clients (<code>WnpAppClient</code>, <code>HccAppClient</code>) and three groups — <code>WnpInternalUsers</code>, <code>WnpExternalClients</code>, <code>HccUsers</code> — establishing that group membership, not a separate pool per app, is how the shared IdP will distinguish user populations.</p>
+  </div>
+
+  <div class="tl-item idp">
+    <div class="tl-date"><span class="tl-hash">35a9e2d, 64f3ca2, a9394e3</span></div>
+    <p class="tl-title">Local Keycloak shows up</p>
+    <p class="tl-desc">Docker Compose config plus a realm export JSON that auto-imports on container start — giving every developer a local IdP that mirrors the shape of the eventual Cognito deployment, without needing AWS credentials.</p>
+  </div>
+
+  <div class="tl-item idp">
+    <div class="tl-date"><span class="tl-hash">04d98f7</span></div>
+    <p class="tl-title">One interface, two providers</p>
+    <p class="tl-desc"><em>"feat(auth-client): implement Cognito and Keycloak authentication services with token validation."</em> <code>CognitoAuthService</code> and <code>KeycloakAuthService</code> are both written against a shared <code>IAuthService</code> interface (<code>validateToken</code>, <code>getAuthorizationUrl</code>, <code>getLogoutUrl</code>) — the abstraction that later lets WNP swap providers with one environment variable.</p>
+  </div>
+
+  <div class="tl-item idp">
+    <div class="tl-date"><span class="tl-hash">00de42e, 349a004, 7a668fd</span></div>
+    <p class="tl-title">Hardening and packaging</p>
+    <p class="tl-desc">Audience validation becomes configurable (needed because Keycloak's direct-grant tokens don't always carry the audience claim client libraries expect). The whole thing is packaged as <code>@HillCountryCoder/auth-client</code> with semantic-release, publishing to GitHub Packages as a real versioned dependency.</p>
+  </div>
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2026-01-06 <span class="tl-hash">b0c4bfe</span></div>
+    <p class="tl-title">The pivotal migration: WNP's schema learns about Cognito</p>
+    <p class="tl-desc"><em>"feat: add cognitoSub field and make passwordHash optional for User and Client models."</em> This is the single commit that turns "we have two separate auth systems" into "we have one hybrid system." It adds a nullable, unique <code>cognitoSub</code> column to both <code>User</code> and <code>Client</code>, and makes <code>passwordHash</code> optional with the comment <code>// make optional since we are moving into cognito sub</code>. The same commit lands the first version of <code>hybrid-auth.middleware.ts</code>.</p>
+  </div>
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2026-01-08 <span class="tl-hash">85179d2</span></div>
+    <p class="tl-title">Auto-migration logic lands</p>
+    <p class="tl-desc"><em>"feat: implemented user migration and linking for IDP (Keycloak/Cognito)."</em> The logic that creates an existing user in the IdP transparently on their next successful sign-in.</p>
+  </div>
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2026-01-08 <span class="tl-hash">24b9057</span></div>
+    <p class="tl-title">The switch is flipped, broadly</p>
+    <p class="tl-desc"><em>"feat: replaced verifyToken with verifyTokenHybrid, improved authentication handling."</em> Roughly 18 route files — <code>user.routes.ts</code>, <code>task.routes.ts</code>, <code>client.routes.ts</code>, <code>chat.routes.ts</code>, <code>file.routes.ts</code>, and more — swap their middleware from the legacy-only <code>verifyToken</code> to the new dual-strategy <code>verifyTokenHybrid</code> in a single sweep.</p>
+  </div>
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2026-01-12/13 <span class="tl-hash">764146b, ba902e7</span></div>
+    <p class="tl-title">Signin/signup get rebuilt around the IdP</p>
+    <p class="tl-desc"><code>apps/backend/api/services/idp/</code> is created (<code>IdpAdminFactory</code>, <code>CognitoAdminService</code>, <code>KeycloakAdminService</code>, <code>TokenExchangeService</code>), and <code>AuthService.signin()</code>/<code>signup()</code> are rewritten to the migration-aware logic described in the sections below.</p>
+  </div>
+
+  <div class="tl-item wnp">
+    <div class="tl-date">2026-01-15 → 01-22 <span class="tl-hash">9c9e9c7, c0152d1, 1126c98</span></div>
+    <p class="tl-title">Stabilization and staging rollout</p>
+    <p class="tl-desc">Error-logging improvements for migration/token-exchange failures, then <code>1126c98</code> wires staging's allowed origins and Cognito configuration — the point at which a real, non-local environment starts using Cognito instead of local Keycloak.</p>
+  </div>
+
+  <div class="tl-item idp">
+    <div class="tl-date">2026-04-10 <span class="tl-hash">a3258e7</span></div>
+    <p class="tl-title">The schema catches up to the frontend's needs</p>
+    <p class="tl-desc"><em>"feat: add custom attribute 'wnp_role' to Cognito User Pool."</em> The most recent commit in the IdP repo — adding a <code>wnp_role</code> custom attribute so that WNP's Next.js middleware (below) can read a user's role directly off the Cognito token instead of inferring it from group names.</p>
+  </div>
+
+</div>
+
+<div class="callout">
+  <strong class="label">The big picture</strong>
+  Legacy JWT auth ran alone for about a year. In parallel, a completely separate repository built a shared, dual-provider identity service designed to serve <em>two</em> products (WNP and HCC) from one Cognito User Pool. In January 2026 the two were stitched together — not by ripping legacy auth out, but by layering the new system <em>on top of</em> it. WNP's own documentation (<code>apps/docs/authentication/01-OVERVIEW.md</code>) names this explicitly as "Phase 1: Coexistence" of a planned three-phase migration, ending eventually in "Phase 3: IDP Only," with legacy JWT removed.
+</div>
+
+<h2 id="intuition">Intuition: what "hybrid" actually means here</h2>
+
+<p>
+It's worth being precise about what "hybrid" does <em>not</em> mean in this system, because the term is overloaded. It is <strong>not</strong> "session cookies plus JWT," and it is <strong>not</strong> a browser-redirect SSO flow where WNP forwards the user to a Cognito or Keycloak login page. Users still type their username and password directly into WNP's own sign-in form. What's hybrid is <em>which system verifies and issues the token behind the scenes</em>, decided per-user and re-decided on every request.
+</p>
+
+<p>Think of it as a system with three simple states, and a login/verification pipeline that walks through them in order every time:</p>
+
+<div class="diagram">
+  <div class="flow-row">
+    <div class="box accent3">
+      <strong>State 1 — Unmigrated</strong>
+      <code>cognitoSub</code> is <code>NULL</code>.<br>User only exists in WNP's own Postgres table, authenticated by <code>passwordHash</code> + local HS256 JWT.
+    </div>
+    <div class="arrow">→</div>
+    <div class="box accent">
+      <strong>State 2 — Migrating</strong>
+      Happens transparently on this user's next successful sign-in: WNP creates them in Keycloak/Cognito, then stamps <code>cognitoSub</code> onto their row.
+    </div>
+    <div class="arrow">→</div>
+    <div class="box accent2">
+      <strong>State 3 — Migrated</strong>
+      <code>cognitoSub</code> is set. All future sign-ins get real IdP tokens (RS256, JWKS-verified), with legacy JWT kept only as an emergency fallback if the IdP is briefly unreachable.
+    </div>
+  </div>
+</div>
+
+<p>
+Now picture two employees, Priya and Sam. Priya signed up for WNP back in March 2025 — long before any of this existed — so her row has <code>passwordHash = "$2b$10$..."</code> and <code>cognitoSub = NULL</code>. Sam signs up today, after the hybrid system shipped, so his row gets <code>cognitoSub = "8f2a...-91cd"</code> the moment his account is created, and his <code>passwordHash</code> is really only kept as a legacy safety net.
+</p>
+<p>
+When Priya logs in, WNP checks her password the old way (bcrypt against <code>passwordHash</code>) — the same check as before — but instead of just handing her a JWT, it quietly creates her as a Cognito/Keycloak user in the background using the same password, records the resulting <code>cognitoSub</code> back onto her row, and hands her <em>Cognito's</em> access token as if nothing changed on her end. From that moment forward, Priya's account is indistinguishable from Sam's. The next time she logs in, the "already migrated" branch fires directly — no more one-time migration step.
+</p>
+
+<div class="diagram">
+  <p style="margin-top:0; font-weight:600; color:var(--text-dim); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">Sign-in decision tree — <code>AuthService.signin()</code></p>
+  <div class="decision-tree">
+    <div class="q">Does username + password match a row (User or Client)?</div>
+    <div class="node">
+      <span class="no">No</span> → 401 "Invalid username or password"
+    </div>
+    <div class="node">
+      <span class="yes">Yes</span> →
+      <div class="q" style="margin-top:0.6rem;">Is <code>cognitoSub</code> set on that row?</div>
+      <div class="node">
+        <span class="no">No (unmigrated)</span> → create user in IdP → stamp <code>cognitoSub</code> → exchange credentials for an IdP token
+        <div class="node">If any of that fails → fall back to a locally-signed 12h JWT ("legacy mode")</div>
+      </div>
+      <div class="node">
+        <span class="yes">Yes (migrated)</span> → exchange credentials for a fresh IdP token directly
+        <div class="node">If the IdP call fails (outage, network) → fall back to a locally-signed 12h JWT anyway</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="callout danger">
+  <strong class="label">A subtlety worth noticing</strong>
+  The password check against <code>passwordHash</code> still runs even for <em>migrated</em> users — that's why <code>passwordHash</code> could only be made <em>optional</em>, not removed, on the Prisma schema. This is what lets legacy-JWT fallback keep working indefinitely, but it also means a migrated user's password is now, in effect, stored (as a hash) in two places that can silently drift apart if one system's password is changed without updating the other.
+</div>
+
+<p>
+On the <em>verification</em> side — every subsequent API call the user makes — the logic is symmetric: try the IdP first, and only fall back to legacy JWT if that fails. This ordering matters: it means as more users migrate, the legacy path is exercised less and less often, and it degrades gracefully rather than needing a cutover date.
+</p>
+
+<div class="diagram">
+  <p style="margin-top:0; font-weight:600; color:var(--text-dim); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">Request verification — <code>verifyTokenHybrid</code> middleware, on every protected route</p>
+  <div class="flow-row">
+    <div class="box"><strong>Incoming request</strong><br><code>Authorization: Bearer &lt;token&gt;</code></div>
+    <div class="arrow">→</div>
+    <div class="box accent2">
+      <strong>Strategy 1: IdP validation</strong>
+      <code>authService.validateToken(token)</code> — RS256/JWKS check against Keycloak or Cognito (whichever <code>AUTH_PROVIDER</code> selects)
+    </div>
+    <div class="arrow">→</div>
+    <div class="stack" style="flex:1; min-width:150px;">
+      <div class="box accent2" style="font-size:0.8rem;">✅ valid → read <code>groups</code> claim → look up row by <code>cognitoSub</code> → attach <code>req.user</code></div>
+      <div class="box accent3" style="font-size:0.8rem;">❌ invalid/throws → fall through ↓</div>
+    </div>
+  </div>
+  <div class="flow-row">
+    <div class="box accent3">
+      <strong>Strategy 2: legacy JWT</strong>
+      <code>jwt.verify(token, SECRET)</code> — HS256 check against the shared secret
+    </div>
+    <div class="arrow">→</div>
+    <div class="box"><strong>✅ valid</strong><br>look up row by primary key <code>id</code> → attach <code>req.user</code></div>
+    <div class="arrow">→</div>
+    <div class="box accent3"><strong>Both failed</strong><br>401 "Invalid or expired token"</div>
+  </div>
+</div>
+
+<p>
+Notice that the two strategies key off <em>different</em> identifiers: an IdP token's owner is found by <code>cognitoSub</code> (a UUID-like string from the IdP), while a legacy token's owner is found by the local database's own primary-key <code>id</code>. This is exactly why the <code>cognitoSub</code> column had to be introduced — it's the bridge that lets a token minted by an external system be traced back to WNP's own user row.
+</p>
+
+<h2 id="code">Code walkthrough</h2>
+
+<h3>1. The shared library: one interface, two providers</h3>
+<p>
+Everything downstream depends on <code>@HillCountryCoder/auth-client</code> exposing one shape (<code>IAuthService.validateToken()</code>) regardless of which provider is behind it. The factory function is refreshingly small:
+</p>
+<div class="filepath">Identity-provider-shared-infra/packages/auth-client/src/factory.ts</div>
+<pre><code>export function getAuthService(
+  provider?: AuthProvider,
+  config?: AuthServiceConfig
+): IAuthService {
+  const authProvider =
+    provider || (process.env.AUTH_PROVIDER as AuthProvider) || "cognito";
+
+  switch (authProvider) {
+    case "keycloak":
+      return new KeycloakAuthService({
+        validateAudience: false,
+        ...config,
+      });
+    case "cognito":
+      return new CognitoAuthService(config);
+    default:
+      throw new Error(`Unknown auth provider: ${authProvider}`);
+  }
+}</code></pre>
+<p>
+One detail worth calling out: Keycloak is instantiated with <code>validateAudience: false</code> by default. Standard OIDC audience validation checks that a token's <code>aud</code> claim matches the expecting client; Keycloak's direct-grant (username/password) tokens don't reliably populate that claim the way authorization-code-flow tokens do, so this codebase validates the <code>azp</code> ("authorized party") claim instead when audience validation is off — you can see that fallback inside <code>KeycloakAuthService.validateToken()</code> below.
+</p>
+
+<div class="filepath">Identity-provider-shared-infra/packages/auth-client/src/services/KeycloakAuthService.ts (lines 32–38, 67–113)</div>
+<pre><code>// Setup JWKS client for public key retrieval
+this.jwksClient = jwksClient({
+  jwksUri: `${this.keycloakUrl}/realms/${this.realm}/protocol/openid-connect/certs`,
+  cache: true,
+  cacheMaxAge: 86400000, // 24 hours
+});
+
+// ... inside validateToken():
+const key = await this.jwksClient.getSigningKey(decoded.header.kid);
+const publicKey = key.getPublicKey();
+
+const verifyOptions: jwt.VerifyOptions = { algorithms: ["RS256"] };
+if (this.validateAudience) {
+  verifyOptions.audience = this.clientId;
+}
+const payload = jwt.verify(token, publicKey, verifyOptions) as any;
+
+// If audience validation is disabled, validate azp (authorized party) instead
+if (!this.validateAudience && payload.azp !== this.clientId) {
+  return { isValid: false, error: "..." };
+}</code></pre>
+
+<div class="callout">
+  <strong class="label">Worth knowing before you touch this file</strong>
+  The current <code>validateToken()</code> implementation is dense with <code>console.log</code> debug tracing (step 1 through step 8, printing raw payload contents including <code>sub</code> and <code>email</code>). This is a direct fossil of commits <code>713614e</code>/<code>f343037</code> ("add debug logging"), landed while diagnosing the audience/azp validation bug fixed in <code>cfbb372</code>. It's functional but noisy in production logs — a good candidate to gate behind a debug flag.
+</div>
+
+<p>Cognito's equivalent is comparatively simple because the <code>aws-jwt-verify</code> SDK handles JWKS fetching, caching, and claim validation internally — the interesting part is that it tries the access token first and silently falls back to the ID token:</p>
+
+<div class="filepath">Identity-provider-shared-infra/packages/auth-client/src/services/CognitoAuthService.ts (lines 29–57)</div>
+<pre><code>// Verifier for access tokens (API authorization)
+this.accessTokenVerifier = CognitoJwtVerifier.create({
+  userPoolId: this.userPoolId,
+  tokenUse: "access",
+  clientId: this.clientId,
+});
+
+// Verifier for ID tokens (user profile info)
+this.idTokenVerifier = CognitoJwtVerifier.create({
+  userPoolId: this.userPoolId,
+  tokenUse: "id",
+  clientId: this.clientId,
+});
+
+async validateToken(token: string): Promise&lt;TokenValidationResult&gt; {
+  try {
+    let payload: any;
+    let tokenType: "access" | "id";
+    try {
+      payload = await this.accessTokenVerifier.verify(token);
+      tokenType = "access";
+    } catch (error) {
+      // If access token verification fails, try as ID token
+      payload = await this.idTokenVerifier.verify(token);
+      tokenType = "id";
+    }
+    ...</code></pre>
+
+<h3>2. The infrastructure: one Cognito User Pool, two products, three groups</h3>
+<p>
+The CDK stack that provisions Cognito is the physical evidence for why group membership is central to the whole design — WNP and HCC share a user pool, so the pool needs a way to say "this token belongs to a WNP internal staff member" versus "this token belongs to an HCC user," and that's exactly what <code>CfnUserPoolGroup</code> does:
+</p>
+<div class="filepath">Identity-provider-shared-infra/cdk/lib/shared-auth-stack.ts</div>
+<pre><code>// Create User Pool Groups
+new cognito.CfnUserPoolGroup(this, "WnpInternalUserGroup", {
+  userPoolId: this.userPool.userPoolId,
+  groupName: "WnpInternalUsers",
+  description: "Internal users for WhatsNextPlease application",
+});
+
+new cognito.CfnUserPoolGroup(this, "WnpExternalClientsGroup", {
+  userPoolId: this.userPool.userPoolId,
+  groupName: "WnpExternalClients",
+  description: "External clients for WhatsNextPlease application",
+});
+
+new cognito.CfnUserPoolGroup(this, "HccUserGroup", {
+  userPoolId: this.userPool.userPoolId,
+  groupName: "HccUsers",
+  description: "Users for HCC Admin application",
+});
+
+customAttributes: {
+  wnp_role: new cognito.StringAttribute({ mutable: true }),
+},</code></pre>
+<p>
+The <code>wnp_role</code> custom attribute (visible in the schema above) is the more recent, more direct alternative to inferring a role from group names — it was added in commit <code>a3258e7</code> specifically because inferring role purely from group membership was becoming fragile as roles diversified beyond the original internal/external/HCC split.
+</p>
+
+<h3>3. Making the schema hybrid-aware</h3>
+<p>
+The single commit that unlocks everything else is the Prisma migration adding <code>cognitoSub</code>:
+</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/prisma/schema.prisma (lines 39–47, 95–101)</div>
+<pre><code>model User {
+    id                   String                   @id @default(uuid())
+    ...
+    username             String                   @unique
+    email                String                   @unique
+    passwordHash         String? // make optional since we are moving into cognito sub
+    cognitoSub           String?                  @unique
+    ...
+}
+
+model Client {
+    id                   String                   @id @default(uuid())
+    ...
+    passwordHash         String? // Make optional for Cognito users
+    cognitoSub           String?                  @unique
+    ...
+}</code></pre>
+<p>
+Both fields are nullable, and both are unique. Nullable <code>cognitoSub</code> is what makes the "unmigrated" state representable at all; unique <code>cognitoSub</code> is what allows a fast, unambiguous <code>findUnique({ where: { cognitoSub } })</code> lookup — exactly the query the hybrid middleware runs on every request that authenticates via the IdP path.
+</p>
+
+<h3>4. Signin: auto-migration with a legacy safety net</h3>
+<p>The heart of the migration logic lives in <code>AuthService.signin()</code>. The comments in the source describe its own algorithm better than a paraphrase would:</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/services/auth.service.ts (lines 61–169, abridged)</div>
+<pre><code>/**
+ * Signin with auto-migration
+ * 1. Validate credentials
+ * 2. Check if user needs migration
+ * 3. If YES: Migrate to IDP, get IDP token
+ * 4. If NO: Get IDP token directly
+ * 5. Fallback to legacy JWT if IDP fails
+ */
+async signin(request: SigninRequest): Promise&lt;SigninResponse&gt; {
+  ...
+  // 2. Verify password (even if migrated, we keep passwordHash for fallback)
+  const isValidPassword = await comparePwd(password, entity.passwordHash);
+  if (!isValidPassword) {
+    return { success: false, error: 'Invalid username or password' };
+  }
+
+  // 3. Check if user needs migration
+  if (!entity.cognitoSub) {
+    const migrationResult = await this.migrateUserToIdp(entity, entityType!, password);
+    if (!migrationResult.success) {
+      logger.warn(`Migration failed for ${username}, using legacy JWT`);
+      return this.createLegacyJwtResponse(entity, entityType!);
+    }
+    return {
+      success: true,
+      token: migrationResult.token!,
+      ...
+      migrated: true,
+      message: 'Logged in successfully (account upgraded)',
+    };
+  }
+
+  // 4. User already migrated, get IDP token
+  const tokenResult = await tokenExchangeService.getTokenWithPassword(username, password);
+  if (!tokenResult.success) {
+    logger.warn(`IDP token failed for ${username}, using legacy JWT`);
+    return this.createLegacyJwtResponse(entity, entityType!);
+  }
+  return { success: true, token: tokenResult.tokens!.access_token, ... };
+}</code></pre>
+<p>The one-time migration step itself is a small saga: create the user in the IdP, then commit <code>cognitoSub</code> to Postgres inside a transaction, then immediately exchange the same credentials for a real IdP token so the user's very first "upgraded" login already returns a Cognito/Keycloak token rather than the legacy one:</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/services/auth.service.ts (lines 174–255, abridged)</div>
+<pre><code>private async migrateUserToIdp(entity: any, entityType: 'user' | 'client', password: string) {
+  // 1. Determine IDP group
+  const role = entityType === 'client' ? Roles.CLIENT : (entity.role?.name ?? Roles.TASK_AGENT);
+  const idpGroups = [idpAdmin.mapRoleToGroup(role)];
+
+  // 2. Create user in IDP
+  const createResult = await idpAdmin.createUser({
+    username: entity.username, email: entity.email, password,
+    groups: idpGroups, role, ...
+  });
+  if (!createResult.success) {
+    return { success: false, error: createResult.error };
+  }
+
+  // 3. Update database with cognitoSub (within transaction)
+  await prisma.$transaction(async tx => {
+    if (entityType === 'user') {
+      await tx.user.update({ where: { id: entity.id }, data: { cognitoSub: createResult.sub } });
+    } else {
+      await tx.client.update({ where: { id: entity.id }, data: { cognitoSub: createResult.sub } });
+    }
+  });
+
+  // 4. Get IDP token
+  const tokenResult = await tokenExchangeService.getTokenWithPassword(entity.username, password);
+  ...
+}</code></pre>
+<p>And the fallback is deliberately minimal — a plain HS256 sign, same as day one, just with an explicit <code>usedLegacy: true</code> flag so downstream code (and monitoring) can tell the two token flavors apart:</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/services/auth.service.ts (lines 259–281)</div>
+<pre><code>private createLegacyJwtResponse(entity: any, entityType: 'user' | 'client'): SigninResponse {
+  const SECRET = process.env.SECRET!;
+  const role = entityType === 'client' ? Roles.CLIENT : entity.role?.name || Roles.TASK_AGENT;
+
+  const token = jwt.sign({ id: entity.id, username: entity.username, role }, SECRET, {
+    expiresIn: '12h',
+  });
+
+  return {
+    success: true,
+    token,
+    [entityType === 'user' ? 'user' : 'client']: this.sanitizeEntity(entity),
+    usedLegacy: true,
+    message: 'Logged in successfully (legacy mode)',
+  };
+}</code></pre>
+
+<h3>5. Signup: IdP-first, with rollback on the way back</h3>
+<p>
+New accounts never enter the world "legacy-only" — they're created in the IdP <em>first</em>, and only committed to Postgres once the IdP confirms success. If the local database write then fails, the code compensates by deleting the just-created IdP user, so you don't end up with an orphaned Cognito/Keycloak account with no corresponding WNP row:
+</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/services/auth.service.ts (lines 326–431, abridged)</div>
+<pre><code>// 4. Create user in IDP FIRST (atomic operation #1)
+const idpResult = await idpAdmin.createUser({ username, email, password, groups: idpGroups, role });
+if (!idpResult.success) {
+  return { success: false, error: `Failed to create account: ${idpResult.error}` };
+}
+const cognitoSub = idpResult.sub!;
+
+// 5. Create user in database WITH cognitoSub (atomic operation #2)
+try {
+  entity = await prisma.user.create({
+    data: { username, email, passwordHash: hashedPassword, cognitoSub, ... },
+  });
+  ...
+} catch (dbError) {
+  // Database creation failed, rollback IDP user
+  logger.error('Database user creation failed, rolling back IDP user:', dbError);
+  await idpAdmin.deleteUser(cognitoSub).catch(deleteError => {
+    logger.error('Failed to rollback IDP user:', deleteError);
+  });
+  return { success: false, error: 'Failed to create account (database error)' };
+}</code></pre>
+<div class="callout danger">
+  <strong class="label">This isn't a true distributed transaction</strong>
+  Between "create in IDP" and "create in DB," there's a window where the process could crash and leave an orphaned IdP user with no compensating rollback ever run. The <code>try/catch</code> handles the common failure mode (DB write throws synchronously) but not a hard process crash mid-flight. WNP's own <code>04-MIGRATION-GUIDE.md</code> acknowledges this as a known risk and proposes a future reconciliation job.
+</div>
+
+<h3>6. Request-time verification: two middlewares, same pattern</h3>
+<p>
+<code>verifyTokenHybrid</code> is the workhorse — used on the <code>Authorization</code> header for nearly every protected route — and follows exactly the "try IdP, fall back to legacy" order described in the diagram above:
+</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/middleware/auth/hybrid-auth.middleware.ts (lines 36–133, abridged)</div>
+<pre><code>// STRATEGY 1: Try Cognito/Keycloak authentication first
+try {
+  const cognitoResult = await authService.validateToken(token);
+  if (cognitoResult.isValid && cognitoResult.user) {
+    const { user: cognitoUser } = cognitoResult;
+    const isInternalUser = cognitoUser.groups?.some(g => g.includes('WnpInternalUsers'));
+    const isExternalClient = cognitoUser.groups?.some(g => g.includes('WnpExternalClients'));
+
+    let dbEntity: any = null;
+    if (isInternalUser) {
+      dbEntity = await prisma.user.findUnique({ where: { cognitoSub: cognitoUser.sub }, include: { role: true } });
+    } else if (isExternalClient) {
+      dbEntity = await prisma.client.findUnique({ where: { cognitoSub: cognitoUser.sub }, include: { role: true } });
+    }
+
+    if (dbEntity) {
+      req.user = { id: dbEntity.id, username: dbEntity.username, role: userRole!, cognitoSub: cognitoUser.sub, ... };
+      return next();
+    }
+    // User found in IDP but not in DB - this is an error state
+    return res.status(404).json({ message: 'User not found in database' });
+  }
+} catch (cognitoError) {
+  // Continue to legacy JWT fallback
+}
+
+// STRATEGY 2: Fallback to legacy JWT authentication
+try {
+  const decodedUser = jwt.verify(token, SECRET) as UserJwtPayload;
+  let dbEntity = decodedUser.role !== Roles.CLIENT
+    ? await prisma.user.findUnique({ where: { id: decodedUser.id }, include: { role: true } })
+    : await prisma.client.findUnique({ where: { id: decodedUser.id }, include: { role: true } });
+
+  if (dbEntity) {
+    req.user = { id: dbEntity.id, username: dbEntity.username, role: dbEntity.role?.name || decodedUser.role };
+    return next();
+  }
+} catch (jwtError) { /* falls through */ }
+
+// Both authentication methods failed
+return res.status(401).json({ message: 'Invalid or expired token' });</code></pre>
+<p>
+A near-identical structure — same two strategies, same ordering — exists in <code>verifyTokenFromQuery</code> for the handful of endpoints (file downloads, SSE streams) that need the token in a query string instead of a header, since those requests are often triggered by a plain <code>&lt;a href&gt;</code> or <code>EventSource</code> where you can't set custom headers.
+</p>
+<p>The original, legacy-only <code>verifyToken</code> is still present, unchanged since 2025, and is deliberately kept around as a minimal fallback used where hybrid behavior isn't needed:</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/middleware/auth/auth.middleware.ts (lines 12–32)</div>
+<pre><code>export const verifyToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      res.status(401).json({ message: 'No token provided' });
+      return;
+    }
+    const decodedUser = jwt.verify(token, SECRET) as UserJwtPayload;
+    req.user = decodedUser;
+    next();
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({ message: 'Invalid token' });
+      return;
+    }
+    next(error);
+  }
+};</code></pre>
+
+<h3>7. The frontend has to reconcile token shapes too</h3>
+<p>
+Next.js's edge middleware doesn't (and shouldn't) verify signatures — that's the backend's job — but it still needs to read a role out of the token to decide which routes to allow. Because a token might be a legacy JWT, a Keycloak token, or a Cognito token, <code>extractRole()</code> tries each known shape in a deliberate priority order:
+</p>
+<div class="filepath">whatsnextplease-monolith/apps/web/middleware.ts (lines 20–49)</div>
+<pre><code>/**
+ * Extract role from token payload
+ * Handles both legacy JWT and IDP tokens (Keycloak/Cognito)
+ */
+const extractRole = (payload: any): Roles | null => {
+  // Legacy JWT format
+  if (payload.role && typeof payload.role === 'string') {
+    return payload.role as Roles;
+  }
+
+  // IDP token: wnp_role custom attribute (set for all WNP users)
+  if (payload.wnp_role && typeof payload.wnp_role === 'string') {
+    return payload.wnp_role as Roles;
+  }
+
+  // Cognito: custom:wnp_role attribute (set for all WNP users)
+  if (payload['custom:wnp_role'] && typeof payload['custom:wnp_role'] === 'string') {
+    return payload['custom:wnp_role'] as Roles;
+  }
+
+  // Safety net fallback: infer from groups if wnp_role missing
+  const groups: string[] =
+    payload.realm_access?.roles || payload['cognito:groups'] || payload.groups || [];
+
+  if (groups.includes('WnpExternalClients')) return Roles.CLIENT;
+  if (groups.includes('HccUsers')) return Roles.CLIENT; // HCC default
+  if (groups.includes('WnpInternalUsers')) return Roles.TASK_AGENT; // safest default
+
+  return null;
+};</code></pre>
+<p>
+This function is a compact fossil record of the whole project's evolution: legacy <code>role</code> first (oldest), then the newer <code>wnp_role</code>/<code>custom:wnp_role</code> custom attribute (added April 2026, commit <code>a3258e7</code>), and finally a group-name-based fallback (the original January 2026 approach), kept as a safety net in case the custom attribute is ever missing on a token.
+</p>
+
+<h3>8. Provider selection and refresh: one switch, mirrored in two places</h3>
+<p>Everything above is gated by a single environment variable, validated with zod:</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/config/environment.ts (lines 44–52)</div>
+<pre><code>// Add Authentication Configuration
+AUTH_PROVIDER: z.enum(['cognito', 'keycloak']).default('keycloak'),
+
+// Cognito (optional for local, required for staging/prod)
+COGNITO_USER_POOL_ID: z.string().optional(),
+COGNITO_CLIENT_ID: z.string().optional(),
+AWS_REGION: z.string().default('us-east-1'),
+COGNITO_DOMAIN: z.string().optional(),
+
+// Keycloak (optional for staging/prod, required for local)</code></pre>
+<p>Token refresh mirrors the same branch, since Keycloak and Cognito have entirely different refresh-token endpoints/SDKs (a raw HTTP POST versus an AWS SDK command) and there's no refresh path at all for legacy tokens — they simply expire after 12 hours and force a re-login:</p>
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/services/auth.service.ts (lines 516–523)</div>
+<pre><code>async refreshToken(refreshToken: string) {
+  const provider = env.AUTH_PROVIDER;
+  if (provider === 'keycloak') {
+    return await this.refreshKeycloakToken(refreshToken);
+  } else if (provider === 'cognito') {
+    return await this.refreshCognitoToken(refreshToken);
+  }
+  return { success: false, error: `Unknown AUTH_PROVIDER: ${provider}` };
+}</code></pre>
+
+<table>
+  <tr><th>Concern</th><th>Legacy JWT</th><th>Keycloak</th><th>Cognito</th></tr>
+  <tr><td>Signing algorithm</td><td><code>HS256</code> (symmetric)</td><td><code>RS256</code> (asymmetric)</td><td><code>RS256</code> (asymmetric)</td></tr>
+  <tr><td>Key source</td><td><code>process.env.SECRET</code></td><td>JWKS endpoint (<code>/protocol/openid-connect/certs</code>)</td><td>AWS-managed, fetched by <code>aws-jwt-verify</code></td></tr>
+  <tr><td>User lookup key</td><td>Postgres primary key <code>id</code></td><td><code>cognitoSub</code> (== <code>sub</code> claim)</td><td><code>cognitoSub</code> (== <code>sub</code> claim)</td></tr>
+  <tr><td>Refresh</td><td>none — re-login after 12h</td><td>raw fetch, <code>grant_type=refresh_token</code></td><td>AWS SDK <code>InitiateAuthCommand</code></td></tr>
+  <tr><td>Typical environment</td><td>any (fallback everywhere)</td><td>local development (Docker Compose)</td><td>staging / production</td></tr>
+</table>
+
+<h2 id="quiz">Quiz</h2>
+<p>Five questions to check whether the mental model above actually stuck. Click an answer to see feedback.</p>
+
+<div class="quiz-q" data-answer="1">
+  <h4>1. When a never-migrated user ("Priya," with <code>cognitoSub = NULL</code>) signs in successfully for the first time after hybrid auth shipped, what token does she receive?</h4>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-idx="0">A locally-signed legacy JWT, since she hasn't migrated yet</button>
+    <button class="quiz-opt" data-idx="1">An IdP-issued token (Keycloak or Cognito), because <code>signin()</code> migrates her to the IdP first and then exchanges her credentials for a real IdP token</button>
+    <button class="quiz-opt" data-idx="2">No token — she's asked to re-register from scratch</button>
+    <button class="quiz-opt" data-idx="3">Both a legacy JWT and an IdP token, and the client picks one</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q" data-answer="2">
+  <h4>2. In <code>verifyTokenHybrid</code>, what happens if a request carries a token that Keycloak/Cognito can't validate (e.g. it's expired) <em>and</em> that same string also fails <code>jwt.verify(token, SECRET)</code>?</h4>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-idx="0">The middleware retries the IdP call once more before giving up</button>
+    <button class="quiz-opt" data-idx="1">It falls back to checking <code>req.query.token</code> instead</button>
+    <button class="quiz-opt" data-idx="2">It responds 401 "Invalid or expired token" — both strategies are exhausted, in that order</button>
+    <button class="quiz-opt" data-idx="3">It treats the user as unauthenticated but still calls <code>next()</code></button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q" data-answer="2">
+  <h4>3. Why does the Prisma schema keep <code>passwordHash</code> as optional rather than deleting it once a user has a <code>cognitoSub</code>?</h4>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-idx="0">Prisma doesn't support dropping columns on models with unique constraints</button>
+    <button class="quiz-opt" data-idx="1">It's dead code left over from before the migration and safe to remove</button>
+    <button class="quiz-opt" data-idx="2"><code>signin()</code> still checks the password against <code>passwordHash</code> even for migrated users, so it needs to keep existing — it's what lets legacy-JWT fallback keep functioning if the IdP call fails</button>
+    <button class="quiz-opt" data-idx="3">Cognito requires the original password hash to be re-uploaded on every login</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q" data-answer="1">
+  <h4>4. What's the practical difference between how signin and signup handle the "unmigrated" case?</h4>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-idx="0">There is none — both use <code>migrateUserToIdp()</code></button>
+    <button class="quiz-opt" data-idx="1">Signup never creates a legacy-only user — it always creates the IdP account first, then the DB row with <code>cognitoSub</code> already set, rolling back the IdP user if the DB write fails. Signin, by contrast, deals with users who were already legacy before hybrid auth existed, migrating them lazily on demand.</button>
+    <button class="quiz-opt" data-idx="2">Signup skips password hashing entirely since Cognito handles it</button>
+    <button class="quiz-opt" data-idx="3">Signin always creates a new IdP user even if one already exists</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q" data-answer="3">
+  <h4>5. Why is Keycloak's <code>KeycloakAuthService</code> constructed with <code>validateAudience: false</code> by default, and what does it check instead?</h4>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-idx="0">Audience validation is deprecated in OIDC and no longer recommended</button>
+    <button class="quiz-opt" data-idx="1">Keycloak tokens are never signed, so there's no audience to check</button>
+    <button class="quiz-opt" data-idx="2">It's a performance optimization to skip an extra claim check</button>
+    <button class="quiz-opt" data-idx="3">Keycloak's direct-grant (password) tokens don't reliably carry a usable <code>aud</code> claim, so audience validation is disabled and the <code>azp</code> (authorized party) claim is checked against the client ID instead</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+</div><!-- /.wrap for quiz section still inside main wrap -->
+
+<footer>
+  <div class="wrap" style="padding:0;">
+    Sources: <code>Identity-provider-shared-infra</code> (CDK stack, Docker/Keycloak config, <code>packages/auth-client</code>) and <code>whatsnextplease-monolith</code> (<code>apps/backend</code>, <code>apps/web</code>, <code>apps/docs/authentication</code>), git history read via <code>git log</code> across both repos. All code snippets were read directly from the current working tree.
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.quiz-q').forEach(function(q) {
+  var correctIdx = parseInt(q.getAttribute('data-answer'), 10);
+  var feedback = q.querySelector('.quiz-feedback');
+  var opts = q.querySelectorAll('.quiz-opt');
+  opts.forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      if (q.dataset.answered) return;
+      q.dataset.answered = 'true';
+      var idx = parseInt(opt.getAttribute('data-idx'), 10);
+      opts.forEach(function(o) { o.disabled = true; });
+      if (idx === correctIdx) {
+        opt.classList.add('correct');
+        feedback.textContent = '✅ Correct.';
+        feedback.className = 'quiz-feedback show correct-fb';
+      } else {
+        opt.classList.add('wrong');
+        opts[correctIdx].classList.add('correct');
+        feedback.textContent = '❌ Not quite — the highlighted option above is correct.';
+        feedback.className = 'quiz-feedback show wrong-fb';
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>
