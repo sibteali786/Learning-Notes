@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "86fde6146b7f05b8",
+        "id": "92d3b2e6930769dc",
         "type": "tabs",
         "children": [
           {
-            "id": "f3f699931c5deec9",
+            "id": "cc8d5b6318e7f41d",
             "type": "leaf",
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Backend Engineering/Case Studies From Own Work/Chat App/asynclocalstorage-tenant-isolation.html"
+                "file": "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/tenant-isolation-bypass.html"
               },
               "icon": "code-glyph",
-              "title": "asynclocalstorage-tenant-isolation"
+              "title": "tenant-isolation-bypass"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 358.82421875,
-    "collapsed": true
+    "width": 358.82421875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -185,19 +184,25 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "f3f699931c5deec9",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/tenant-isolation-bypass.html",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/Tenant Isolation.md",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/asynclocalstorage-tenant-isolation.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/asynclocalstorage-tenant-isolation.html.tmp.17471.e63ffeedc9da",
-    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.abe763f8e051",
-    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.960f8c479a0d",
-    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.f5e619d76c63",
-    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.65403c77a0b0",
-    "Learning/Backend Engineering/Case Studies From Own Work/tenant-isolation-bypass.html.tmp.17471.8748e0cca337",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage/asynclocalstorage-tenant-isolation.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage/asynclocalstorage-context-lifetime-diagram.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/cross-tenant-leak-diagram.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage",
+    "Learning/Backend Engineering/Case Studies From Own Work/SSO-wnp-chat/architecture-sso-evolution.md",
+    "Learning/Backend Engineering/Case Studies From Own Work/SSO-wnp-chat/architecture-sso-evolution.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/SSO/sso-race-condition.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/2026-09-06-architecture-sso-evolution.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/SSO-wnp-chat",
+    "Learning/Backend Engineering/Case Studies From Own Work/architecture-sso-evolution.md",
+    "Learning/Backend Engineering/Case Studies From Own Work/architecture-sso-evolution.html",
+    "Learning/Backend Engineering/Case Studies From Own Work/2026-09-06-architecture-sso-evolution.md",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/SSO",
+    "Personal/Me/Journal.md",
+    "Personal/Maryam's Things.md",
+    "Personal/Maryam/Maryam's Things.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (4).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (3).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (2).png",
@@ -222,12 +227,6 @@
     "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
     "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
     "Learning/DSA/BFS/Drawing 2026-08-31 13.10.16.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Image Carousel/II.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/Redis-As-In-Memory.excalidraw.md",
-    "Learning/System Design/Resources.md",
-    "Learning/System Design/Core Concepts/9-Numbers-To-Know/Resources.md",
-    "Learning/System Design/Case Studies.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",
