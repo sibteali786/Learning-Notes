@@ -8,27 +8,27 @@
         "type": "tabs",
         "children": [
           {
-            "id": "cc8d5b6318e7f41d",
+            "id": "d7cf7b6a680acef7",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/DSA/Graphs/BFS/1-Minimum Knight Moves.excalidraw.md"
+                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "1-Minimum Knight Moves.excalidraw"
-            }
-          },
-          {
-            "id": "dad33b54dc1e4640",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Learning/DSA/Graphs/BFS/overview.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "overview.excalidraw"
+              "icon": "lucide-file",
+              "title": "Notes"
             }
           }
         ]
@@ -90,8 +90,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 358.82421875,
-    "collapsed": true
+    "width": 358.82421875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -197,50 +196,50 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "cc8d5b6318e7f41d",
+  "active": "d7cf7b6a680acef7",
   "lastOpenFiles": [
-    "Learning/DSA/Graphs/BFS/overview.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/1-Minimum Knight Moves.excalidraw.md",
+    "Learning/DSA/Two Pointers/ValidTriangleNumber.excalidraw.md",
+    "Learning/DSA/Two Pointers/TwoSum.excalidraw.md",
+    "Learning/DSA/Two Pointers/TrappingRainWater.excalidraw.md",
+    "Learning/DSA/Two Pointers/SortColors.excalidraw.md",
+    "Learning/DSA/Two Pointers/Moving Zeros.excalidraw.md",
+    "Learning/DSA/Two Pointers/ContainerWithMostWater.excalidraw.md",
+    "Learning/DSA/Two Pointers/3Sum.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
+    "Learning/DSA/Stack/Monotonic-Stack/2-Daily Temperatures.excalidraw.md",
+    "Learning/DSA/Stack/3-Longest Valid Parentheses.excalidraw.md",
+    "Learning/DSA/Stack/2-DecodeString.excalidraw.md",
+    "Learning/DSA/Stack/1-ValidParenthesis.excalidraw.md",
+    "Learning/DSA/Stack/1-Intuition.excalidraw.md",
+    "Learning/DSA/LinkedList/5-Swap Nodes in Pairs.excalidraw.md",
+    "Learning/DSA/LinkedList/4-Remove Nth Node From End of List.excalidraw.md",
+    "Learning/DSA/LinkedList/3-Reorder_List.excalidraw.md",
+    "Learning/DSA/LinkedList/2-Palindrome_linkedlist.excalidraw.md",
+    "Learning/DSA/LinkedList/1-Linked-List-Cycle.excalidraw.md",
+    "Learning/DSA/LinkedList/Drawing 2026-02-17 12.47.54.excalidraw.md",
+    "Learning/DSA/LinkedList/Drawing 2026-06-12 10.29.06.excalidraw.md",
+    "Learning/DSA/LinkedList/OverView_Intuition.excalidraw.md",
+    "Learning/DSA/Fixed Length Sliding Window/MaxSumofDistinctSubarraysLengthk.excalidraw.md",
+    "Learning/DSA/Fixed Length Sliding Window/MaxPointsYouCanObtainFromCards.excalidraw.md",
+    "Learning/DSA/Fixed Length Sliding Window/MaximumSumOfSubarrayWithSizeK.excalidraw.md",
+    "Learning/DSA/Binary Search/3-Searching in rotated sorted array.excalidraw.md",
     "Learning/DSA/Graphs/BFS/bfs_graphs_cheatsheet.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html",
     "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth/hybrid-oauth-architecture.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth/hybrid-oauth-architecture.md",
     "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth/2026-09-06-explanation-hybrid-oauth-auth.html",
     "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/tenant-isolation-bypass.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/Tenant Isolation.md",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage/asynclocalstorage-tenant-isolation.html",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage/asynclocalstorage-context-lifetime-diagram.html",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/cross-tenant-leak-diagram.html",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage",
-    "Learning/Backend Engineering/Case Studies From Own Work/SSO-wnp-chat/architecture-sso-evolution.md",
-    "Learning/Backend Engineering/Case Studies From Own Work/architecture-sso-evolution.md",
-    "Learning/Backend Engineering/Case Studies From Own Work/2026-09-06-architecture-sso-evolution.md",
-    "Personal/Me/Journal.md",
-    "Personal/Maryam's Things.md",
-    "Personal/Maryam/Maryam's Things.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (4).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (3).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (2).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-correct-lossfunction-graph.png",
-    "Learning/Research/GRE/Resources.md",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
-    "conflict-files-obsidian-git.md",
-    "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel III.excalidraw.md",
-    "Untitled.md",
-    "Learning/Database/Fundamentals of Database Engineering/3-B-tree-B+tree/B-tree-vs-B+tree.excalidraw.md",
-    "Learning/Backend Engineering/Reources.md",
-    "Learning/System Design/Practice/TicketMaster/Ticket Master .excalidraw.md",
-    "Learning/System Design/Practice/TicketMaster/Practice.excalidraw.md",
-    "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image Carousel II.excalidraw.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/Rough Work.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
-    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-article.md",
-    "Learning/DSA/Graphs/DFS/Matrices/3-Number of Islands.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/2-FloodFill.excalidraw.md",
-    "Learning/DSA/Graphs/DFS/Matrices/1-Traversal.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted image 20260813204431.png",
