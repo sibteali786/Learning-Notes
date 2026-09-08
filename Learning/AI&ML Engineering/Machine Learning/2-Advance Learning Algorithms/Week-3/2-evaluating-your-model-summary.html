@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2 - Evaluating Your Model (Train/Test)</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:18px; text-align:center; font-size:1.05rem; margin:14px 0; color:#fff; overflow-x:auto;}
+  .formula-box .reg{color:var(--accent2); text-decoration:line-through; text-decoration-color:var(--bad); opacity:0.55;}
+  .formula-box small{display:block; color:var(--muted); font-size:0.7rem; margin-top:6px;}
+
+  /* wiggly curve figure */
+  .fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px; text-align:center;}
+  .fig svg{max-width:100%; height:auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px;}
+
+  .split-visual{display:flex; align-items:center; gap:14px; margin-top:16px; flex-wrap:wrap;}
+  .split-bar{flex:1; min-width:260px; height:34px; border-radius:8px; overflow:hidden; display:flex; border:1px solid var(--border);}
+  .split-bar .train{background:linear-gradient(90deg,var(--accent),#5c78d6); flex:7; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:#0f1117;}
+  .split-bar .test{background:linear-gradient(90deg,var(--accent2),#e0674c); flex:3; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.8rem; color:#0f1117;}
+  .split-legend{display:flex; gap:16px; font-size:0.82rem; color:var(--muted); margin-top:8px;}
+  .split-legend span{display:flex; align-items:center; gap:6px;}
+  .dot{width:10px; height:10px; border-radius:50%; display:inline-block;}
+  .dot.train{background:var(--accent);}
+  .dot.test{background:var(--accent2);}
+
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:0.88rem;}
+  th,td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--border);}
+  th{color:var(--accent); font-weight:600;}
+  tr.test-row td{color:var(--accent2);}
+  .notation-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  @media(max-width:700px){.notation-grid{grid-template-columns:1fr;}}
+  .notation-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:14px 16px;}
+  .notation-card .h{font-weight:700; color:#fff; margin-bottom:6px;}
+
+  .steps{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .step{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .step .n{font-weight:700; color:var(--accent); min-width:20px;}
+
+  .result-cards{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.result-cards{grid-template-columns:1fr;}}
+  .result-card{border-radius:10px; padding:16px; border:1px solid var(--border);}
+  .result-card.low{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .result-card.high{background:rgba(255,107,129,0.08); border-color:rgba(255,107,129,0.4);}
+  .result-card .val{font-size:1.4rem; font-weight:700;}
+  .result-card.low .val{color:var(--good);}
+  .result-card.high .val{color:var(--bad);}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .classif-note{background:rgba(124,155,255,0.1); border:1px solid var(--accent); border-radius:10px; padding:14px 18px; margin-top:14px;}
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 2 — Evaluating Your Model (Train/Test)</h1>
+  <p class="subtitle">A systematic, numeric way to tell whether your model actually generalizes — instead of eyeballing a plot.</p>
+
+  <section>
+    <h2><span class="num">1</span> Why "Just Plot It" Doesn't Scale</h2>
+    <p>With a single feature (house size), you can plot <code>f(x)</code> and visually spot a problem — like an overly wiggly 4th-order polynomial fit to 5 points that clearly won't generalize.</p>
+    <div class="fig">
+      <svg viewBox="0 0 420 180" width="420">
+        <line x1="30" y1="150" x2="400" y2="150" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="150" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="200" y="172" fill="#9aa0b4" font-size="11">size (x)</text>
+        <text x="8" y="90" fill="#9aa0b4" font-size="11" transform="rotate(-90 8 90)">price</text>
+        <path d="M40,140 C70,40 90,150 130,60 C160,10 190,120 230,50 C260,15 290,90 340,45"
+              fill="none" stroke="#ff6b81" stroke-width="2.5"/>
+        <circle cx="45" cy="138" r="3" fill="#7c9bff"/>
+        <circle cx="95" cy="145" r="3" fill="#7c9bff"/>
+        <circle cx="150" cy="70" r="3" fill="#7c9bff"/>
+        <circle cx="230" cy="52" r="3" fill="#7c9bff"/>
+        <circle cx="335" cy="48" r="3" fill="#7c9bff"/>
+      </svg>
+      <div class="fig-caption">4th-order fit — wiggly, overfits the 5 training points, unlikely to generalize.</div>
+    </div>
+    <p>But real models rarely have one feature. With <code>x₁</code>=size, <code>x₂</code>=bedrooms, <code>x₃</code>=floors, <code>x₄</code>=age, <code>f(x)</code> is a function of 4+ dimensions — <strong>you can't plot that</strong>. You need a number, not a picture, to judge performance.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The Fix: Split Your Data into Train + Test</h2>
+    <p>Instead of using 100% of your data to fit parameters, hold some out. A common split is <strong>70/30</strong> (or 80/20), with the larger share for training:</p>
+    <div class="split-visual">
+      <div class="split-bar">
+        <div class="train">70% — Training Set</div>
+        <div class="test">30% — Test Set</div>
+      </div>
+    </div>
+    <div class="split-legend">
+      <span><span class="dot train"></span>Used to fit w, b</span>
+      <span><span class="dot test"></span>Held out — used only to evaluate</span>
+    </div>
+
+    <table>
+      <thead><tr><th>size</th><th>price</th><th>split</th></tr></thead>
+      <tbody>
+        <tr><td>2104</td><td>400</td><td>train</td></tr>
+        <tr><td>1600</td><td>330</td><td>train</td></tr>
+        <tr><td>2400</td><td>369</td><td>train</td></tr>
+        <tr><td>1416</td><td>232</td><td>train</td></tr>
+        <tr><td>3000</td><td>540</td><td>train</td></tr>
+        <tr><td>1985</td><td>300</td><td>train</td></tr>
+        <tr><td>1534</td><td>315</td><td>train</td></tr>
+        <tr class="test-row"><td>1427</td><td>199</td><td>test</td></tr>
+        <tr class="test-row"><td>1380</td><td>212</td><td>test</td></tr>
+        <tr class="test-row"><td>1494</td><td>243</td><td>test</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.85rem; color:var(--muted); margin-top:8px;">10-example dataset → 7 training examples, 3 test examples.</p>
+
+    <div class="notation-grid">
+      <div class="notation-card">
+        <div class="h">Training set notation</div>
+        <p style="margin:0;">(x⁽¹⁾, y⁽¹⁾) ... (x⁽<sup>m_train</sup>⁾, y⁽<sup>m_train</sup>⁾)<br><strong>m_train</strong> = number of training examples = 7</p>
+      </div>
+      <div class="notation-card">
+        <div class="h">Test set notation</div>
+        <p style="margin:0;">(x_test⁽¹⁾, y_test⁽¹⁾) ... (x_test⁽<sup>m_test</sup>⁾, y_test⁽<sup>m_test</sup>⁾)<br><strong>m_test</strong> = number of test examples = 3</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Train/Test Procedure — Linear Regression (Squared Error)</h2>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div>Fit parameters by minimizing the <strong>full cost function</strong> J(w,b) — squared error <em>plus</em> regularization — on the training set only.</div></div>
+      <div class="step"><span class="n">2</span><div>Compute <strong>J_test(w,b)</strong> = average squared error on the held-out test set.</div></div>
+      <div class="step"><span class="n">3</span><div>Compute <strong>J_train(w,b)</strong> = average squared error on the training set.</div></div>
+    </div>
+    <div class="formula-box">
+      J(w,b) = 1/(2m_train)·Σ(f(x⁽ⁱ⁾)−y⁽ⁱ⁾)² + λ/(2m_train)·Σw<sub>j</sub>²
+      <small>used to FIT the parameters — includes regularization</small>
+    </div>
+    <div class="formula-box">
+      J_test(w,b) = 1/(2m_test)·Σ(f(x_test⁽ⁱ⁾)−y_test⁽ⁱ⁾)²  <span class="reg">no λ term</span>
+      <small>evaluates generalization — regularization term dropped</small>
+    </div>
+    <div class="formula-box">
+      J_train(w,b) = 1/(2m_train)·Σ(f(x⁽ⁱ⁾)−y⁽ⁱ⁾)²  <span class="reg">no λ term</span>
+      <small>evaluates fit on training data — regularization term dropped</small>
+    </div>
+    <p><strong>Key detail:</strong> the regularization penalty is part of what you <em>minimize</em> to find w,b — but it's excluded from both J_train and J_test when you're just <em>measuring</em> error. Those are meant to reflect actual prediction error, not the optimization objective.</p>
+
+    <div class="result-cards">
+      <div class="result-card low">
+        <div>J_train(w,b)</div>
+        <div class="val">LOW</div>
+        <p style="margin:6px 0 0; font-size:0.85rem;">The wiggly 4th-order model fits training points almost exactly → training error ≈ 0.</p>
+      </div>
+      <div class="result-card high">
+        <div>J_test(w,b)</div>
+        <div class="val">HIGH</div>
+        <p style="margin:6px 0 0; font-size:0.85rem;">On unseen test points, predictions are far from actual prices → large gap.</p>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">Real-World Signal</div>
+      <p style="margin:0;">Low J_train + high J_test is the numeric fingerprint of a model that <strong>memorized</strong> the training data instead of learning the underlying pattern — exactly what the wiggly curve looked like visually, but now you can detect it in a system with 50 features where you can't plot anything.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Train/Test Procedure — Classification</h2>
+    <p>Same idea, different loss. For logistic regression (e.g. classifying handwritten digits 0 vs 1):</p>
+    <div class="formula-box" style="font-size:0.92rem;">
+      J(w,b) = −1/m_train · Σ[y⁽ⁱ⁾log(f(x⁽ⁱ⁾)) + (1−y⁽ⁱ⁾)log(1−f(x⁽ⁱ⁾))] + λ/(2m_train)·Σw<sub>j</sub>²
+      <small>logistic loss + regularization, used to fit w, b</small>
+    </div>
+    <p>J_test and J_train use the same logistic loss formula, applied to the test set / training set respectively — again <strong>without</strong> the regularization term.</p>
+
+    <div class="classif-note">
+      <strong>A more common alternative for classification:</strong> instead of reporting the logistic-loss value, report the <em>misclassification fraction</em>.
+      <ul style="margin:10px 0 0;">
+        <li>Predict ŷ = 1 if f(x) ≥ 0.5, else ŷ = 0</li>
+        <li>Count how often ŷ ≠ y</li>
+        <li><strong>J_test</strong> = fraction of the test set misclassified</li>
+        <li><strong>J_train</strong> = fraction of the training set misclassified</li>
+      </ul>
+      <p style="margin:10px 0 0; font-size:0.85rem; color:var(--muted);">This is more interpretable than a raw loss number — "12% of test digits misclassified" is easier to reason about than a log-loss value.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Key Takeaway</h2>
+    <p>Splitting data into train/test gives you two numbers — <strong>J_train</strong> and <strong>J_test</strong> — that replace "look at the plot" as your evaluation method, and they work in any number of dimensions. This is the foundation for the next step: using these numbers to <em>automatically</em> choose between candidate models (straight line vs. 2nd order vs. 3rd order polynomial, etc.) rather than picking one by eye.</p>
+  </section>
+
+  <footer>Lesson 2 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>
