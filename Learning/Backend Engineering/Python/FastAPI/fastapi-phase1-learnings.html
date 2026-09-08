@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>FastAPI — Phase 1 Learnings</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #1c1c1e;
+    --sub: #6b6b70;
+    --border: #e6e5e2;
+    --accent: #2f6f4f;
+    --accent-soft: #e8f3ec;
+    --warn: #b5541a;
+    --warn-soft: #fbeee3;
+    --code-bg: #f2f1ee;
+    --blue: #2f5f9e;
+    --blue-soft: #e9f0fa;
+    --red: #b13a3a;
+    --red-soft: #fbe9e9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a;
+      --card: #202124;
+      --ink: #e9e9ea;
+      --sub: #9a9a9e;
+      --border: #34353a;
+      --accent: #5fbf8f;
+      --accent-soft: #1c2e26;
+      --warn: #e0935a;
+      --warn-soft: #2e2319;
+      --code-bg: #2a2b2f;
+      --blue: #7aa8e0;
+      --blue-soft: #1c2733;
+      --red: #e07a7a;
+      --red-soft: #2e1c1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 26px;
+    margin: 6px 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .date {
+    color: var(--sub);
+    font-size: 14px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 16px;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    background: var(--accent-soft);
+    font-size: 13px;
+    flex: none;
+  }
+
+  p { line-height: 1.55; font-size: 14.5px; color: var(--ink); margin: 6px 0; }
+  .sub { color: var(--sub); font-size: 13.5px; }
+
+  code, .code-inline {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-size: 12.8px;
+    line-height: 1.5;
+    margin: 10px 0 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: auto;
+  }
+  .pill.concept { background: var(--blue-soft); color: var(--blue); }
+  .pill.gotcha { background: var(--warn-soft); color: var(--warn); }
+  .pill.result { background: var(--red-soft); color: var(--red); }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .flow .step {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .flow .arrow { color: var(--sub); font-size: 13px; }
+
+  .gotcha-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .gotcha-item {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+  }
+  .gotcha-item .title { font-weight: 600; font-size: 13.5px; margin-bottom: 3px; }
+  .gotcha-item .desc { font-size: 13px; color: var(--ink); opacity: 0.85; }
+
+  .checklist { list-style: none; margin: 0; padding: 0; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check { color: var(--accent); font-weight: 700; flex: none; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .stat {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .stat .label { font-size: 11.5px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat .value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .stat .value.hot { color: var(--red); }
+  .stat .value.ok { color: var(--accent); }
+
+  footer {
+    text-align: center;
+    color: var(--sub);
+    font-size: 12.5px;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Live Feed Engine · Phase 1</div>
+    <h1>Containerizing the API + feeling Postgres degrade</h1>
+    <div class="date">2026-09-07 — Docker Compose wiring, 1M-row seed, k6 load test</div>
+  </header>
+
+  <div class="card">
+    <h2><span class="badge">🐳</span>Dockerfile basics <span class="pill concept">concept</span></h2>
+    <p>Standard layered build: copy <code>requirements.txt</code> first and install deps before copying app code, so Docker's layer cache skips the (slow) <code>pip install</code> step on every code change.</p>
+    <pre><code>COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY main.py .</code></pre>
+    <p class="sub">Uvicorn in the container must bind <code>--host 0.0.0.0</code>, not the default <code>127.0.0.1</code> — otherwise nothing outside the container can reach it. Also drop <code>--reload</code>; it's dev-only.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🔗</span>Container-to-container networking <span class="pill concept">concept</span></h2>
+    <p>Inside a Compose network, services address each other by <em>service name</em>, not <code>localhost</code>. The API's <code>DATABASE_URL</code> changes from the host's <code>localhost:5432</code> to <code>postgres:5432</code> — Compose's built-in DNS resolves <code>postgres</code> to the right container.</p>
+    <div class="flow">
+      <span class="step">depends_on: postgres</span><span class="arrow">→</span>
+      <span class="step">condition: service_healthy</span>
+    </div>
+    <p class="sub">Plain <code>depends_on</code> only waits for the container to start, not for Postgres to actually accept connections. Gating on the existing <code>pg_isready</code> healthcheck avoids a race on first boot.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🔤</span>Filename case matters on Linux <span class="pill gotcha">gotcha</span></h2>
+    <p>Created <code>dockerfile</code> (lowercase). Builds fine with an explicit <code>-f</code>, but Compose's <code>build: .</code> shorthand looks for <code>Dockerfile</code> by default on case-sensitive filesystems. Renamed to match convention rather than special-casing the compose file.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🌱</span>Seeding 1M rows: COPY, not INSERT <span class="pill concept">concept</span></h2>
+    <p>Row-by-row <code>INSERT</code> for a million rows is painfully slow — each one is a separate round trip. <code>COPY ... FROM STDIN</code> streams a whole CSV buffer in one shot.</p>
+    <pre><code>cur.copy_expert(
+    "COPY article (title, url, publisher_id, category, region, published_at) "
+    "FROM STDIN WITH (FORMAT csv)",
+    buf,
+)</code></pre>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">📈</span>k6: what it actually is <span class="pill concept">concept</span></h2>
+    <p>Not a Python/Node dependency — a standalone Go binary, installed once via the OS package manager, run from the CLI against a live server. Scripts happen to be written in JS purely as k6's config language; no JS runtime is added to the project. <code>wrk</code> (Lua-scripted) is the equivalent alternative.</p>
+    <div class="flow">
+      <span class="step">ramping-vus</span><span class="arrow">→</span>
+      <span class="step">0 → 1000 VUs over 5 stages</span><span class="arrow">→</span>
+      <span class="step">thresholds: p(99)&lt;200ms</span>
+    </div>
+    <p class="sub">Ramping (not an instant spike) is what makes it possible to locate <em>where</em> latency starts climbing, not just confirm it eventually breaks.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🔥</span>First load test result, 1M rows <span class="pill result">result</span></h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="label">Threshold p99 target</div><div class="value">200ms</div></div>
+      <div class="stat"><div class="label">Actual p99</div><div class="value hot">10.93s</div></div>
+      <div class="stat"><div class="label">Median latency</div><div class="value">914ms</div></div>
+      <div class="stat"><div class="label">Max latency</div><div class="value hot">32.65s</div></div>
+      <div class="stat"><div class="label">Requests failed</div><div class="value ok">0.00%</div></div>
+      <div class="stat"><div class="label">Throughput ceiling</div><div class="value">~205 req/s</div></div>
+    </div>
+    <p class="sub">The signature here is <strong>queuing, not crashing</strong> — every request still returned 200, but they piled up waiting rather than being rejected. Throughput plateaued near 205 req/s even as VUs ramped to 1000, meaning something upstream (connection pool size, or query cost at 1M rows) is capping how fast requests actually drain.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">🧭</span>Next: find the actual bottleneck</h2>
+    <ul class="checklist">
+      <li><span class="check">→</span> Check <code>asyncpg</code> pool <code>min_size</code>/<code>max_size</code> in <code>main.py</code> — default pools are small, likely first suspect at 1000 concurrent VUs</li>
+      <li><span class="check">→</span> Run <code>EXPLAIN ANALYZE</code> on the actual <code>/feed</code> query at 1M rows to see if it's a real query-cost problem or purely a queuing problem</li>
+      <li><span class="check">→</span> This pairing (pool-size fix vs. query-cost fix) decides whether Phase 2 (Redis) is even the right next move, or if a bigger pool alone buys back most of the latency</li>
+    </ul>
+  </div>
+
+  <footer>Live Feed Engine — Phase 1 · Docker Compose + k6 load test done · next up: diagnose the 200ms→10.9s gap</footer>
+
+</div>
+</body>
+</html>

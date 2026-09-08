@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "92d3b2e6930769dc",
+        "id": "45a8c2c39800641e",
         "type": "tabs",
         "children": [
           {
-            "id": "d7cf7b6a680acef7",
+            "id": "f7f9614d2634bde7",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "html-view",
               "state": {
-                "file": "Learning/JavaScript/Coding/Array Methods/Array.prototype.map.excalidraw.md"
+                "file": "Learning/Backend Engineering/Python/FastAPI/2026-09-08-live-feed-engine-phase0-phase1.html"
               },
-              "icon": "excalidraw-icon",
-              "title": "Array.prototype.map.excalidraw"
+              "icon": "code-glyph",
+              "title": "2026-09-08-live-feed-engine-phase0-phase1"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 358.82421875
+    "width": 358.82421875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,8 +185,35 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "d7cf7b6a680acef7",
+  "active": "f7f9614d2634bde7",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/Python/FastAPI/Server Analysis/First.md",
+    "Learning/Backend Engineering/Python/FastAPI/2026-09-08-live-feed-engine-phase0-phase1.html",
+    "Learning/Backend Engineering/Python/FastAPI/2026-09-08-live-feed-engine-phase0-phase1.html.tmp.98919.fe598f9a7788",
+    "Pasted image 20260908125311.png",
+    "Pasted image 20260908125301.png",
+    "Pasted image 20260908122717.png",
+    "Pasted image 20260908122705.png",
+    "Pasted image 20260908122650.png",
+    "Learning/Backend Engineering/Python/FastAPI/Analysis Database/Analysis 1.md",
+    "Learning/Backend Engineering/Python/FastAPI/Server Analysis",
+    "Learning/Backend Engineering/Python/FastAPI/Analysis Database/Untitled",
+    "Learning/Backend Engineering/Python/FastAPI/fastapi-phase1-learnings.html",
+    "Learning/Backend Engineering/Python/FastAPI/Analysis Database",
+    "Learning/Backend Engineering/Python/FastAPI/fastapi-phase0-learnings.html",
+    "Learning/Backend Engineering/Python/FastAPI/fastapi-phase1-learnings.html.tmp.385074.4e6965c75a8d",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Derivatives/16-derivatives-intuition-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Derivatives/17-computation-graphs-backprop-summary.html",
+    "Personal/Me/Journal.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/2-TypesOfIndexes.excalidraw.md",
+    "Learning/System Design/Core Concepts/4-Database Indexing/1-Intuition.excalidraw.md",
+    "Learning/System Design/Core Concepts/3-Data Modelling/SchemaDesign.excalidraw.md",
+    "Learning/JavaScript/Javascript.md",
+    "Learning/Frontend Interview Preparation/Interview.excalidraw.md",
+    "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
+    "Learning/JavaScript/Coding/Array Methods/Array.prototype.map.excalidraw.md",
     "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
     "Learning/JavaScript/Coding/2-Throttle.excalidraw.md",
     "Learning/JavaScript/Coding/2-Debounce.excalidraw.md",
@@ -199,39 +227,11 @@
     "Learning/DSA/Two Pointers/ContainerWithMostWater.excalidraw.md",
     "Learning/DSA/Two Pointers/3Sum.excalidraw.md",
     "Learning/DSA/Stack/Monotonic-Stack/1-Next Greater Element.excalidraw.md",
-    "Learning/DSA/Stack/Monotonic-Stack/3-Largest Rectangle in histogram.excalidraw.md",
-    "Learning/DSA/Stack/Monotonic-Stack/2-Daily Temperatures.excalidraw.md",
-    "Learning/DSA/Stack/3-Longest Valid Parentheses.excalidraw.md",
-    "Learning/DSA/Stack/2-DecodeString.excalidraw.md",
-    "Learning/DSA/Stack/1-ValidParenthesis.excalidraw.md",
-    "Learning/DSA/Stack/1-Intuition.excalidraw.md",
-    "Learning/DSA/LinkedList/5-Swap Nodes in Pairs.excalidraw.md",
-    "Learning/DSA/LinkedList/4-Remove Nth Node From End of List.excalidraw.md",
-    "Learning/DSA/LinkedList/3-Reorder_List.excalidraw.md",
-    "Learning/DSA/LinkedList/2-Palindrome_linkedlist.excalidraw.md",
-    "Learning/DSA/LinkedList/1-Linked-List-Cycle.excalidraw.md",
-    "Learning/DSA/LinkedList/Drawing 2026-02-17 12.47.54.excalidraw.md",
-    "Learning/DSA/LinkedList/Drawing 2026-06-12 10.29.06.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/bfs_graphs_cheatsheet.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/17-computation-graphs-backprop-summary.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth/hybrid-oauth-architecture.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth/2026-09-06-explanation-hybrid-oauth-auth.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Hybrid OAuth",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/tenant-isolation-bypass.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage/asynclocalstorage-tenant-isolation.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage/asynclocalstorage-context-lifetime-diagram.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Tenant Isolation/cross-tenant-leak-diagram.html",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/AsyncLocalStorage",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (4).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (3).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (2).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/16-correct-lossfunction-graph.png",
-    "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
-    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/attachments/Pasted Image 20260826220236_220.png",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Pasted image 20260813204431.png",
-    "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
