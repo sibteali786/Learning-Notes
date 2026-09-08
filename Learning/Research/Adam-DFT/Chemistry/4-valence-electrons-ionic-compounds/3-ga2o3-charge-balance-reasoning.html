@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Why We Cross Charges — Ga₂O₃</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5da8ff; --orange:#ff9f5a; --green:#5ce0a0; --purple:#c792ea;
+    --red:#ff6b81; --text:#e6e8ef; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono',monospace; line-height:1.6;}
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 12px;}
+  .wrap{max-width:900px; margin:0 auto;}
+  header{margin-bottom:36px;}
+  header h1{font-size:1.7rem; font-weight:800;}
+  header p{color:var(--muted); margin:0;}
+  .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; margin-right:6px; margin-bottom:6px;}
+  .pill-blue{background:rgba(93,168,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill-green{background:rgba(92,224,160,.15); color:var(--green); border:1px solid var(--green);}
+  section{margin-bottom:36px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:16px;}
+  .card h3{color:var(--orange); font-size:1.05rem;}
+  .formula{background:#1a1d2b; border-left:3px solid var(--purple); border-radius:6px; padding:14px 18px; margin:14px 0; font-size:1.15rem; color:var(--purple); font-weight:700; text-align:center;}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.88rem;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left;}
+  th{background:#1b1f2d; color:var(--orange); font-family:'Syne',sans-serif;}
+  tr:nth-child(even){background:#141724;}
+  .callout{border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.88rem;}
+  .tip{background:rgba(92,224,160,.08); border:1px solid var(--green);}
+  .tip::before{content:"💡 TIP  "; color:var(--green); font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Why "Cross the Charges" Actually Works</h1>
+  <p>AP Chemistry · Unit 1 · Ionic formula derivation — Ga₂O₃ walkthrough</p>
+  <div style="margin-top:12px;">
+    <span class="pill pill-blue">CHARGE NEUTRALITY</span>
+    <span class="pill pill-orange">LEAST COMMON MULTIPLE</span>
+    <span class="pill pill-green">Ga₂O₃</span>
+  </div>
+</header>
+
+<section>
+  <div class="card">
+    <h3>The Ions</h3>
+    <table>
+      <tr><th>Element</th><th>Group</th><th>Valence e⁻</th><th>Ion</th></tr>
+      <tr><td>Gallium (Ga)</td><td>13</td><td>3</td><td style="color:var(--orange);font-weight:700;">Ga³⁺ (loses 3)</td></tr>
+      <tr><td>Oxygen (O)</td><td>16</td><td>6</td><td style="color:var(--blue);font-weight:700;">O²⁻ (gains 2)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>The Real Rule: Net Charge = 0</h3>
+    <p>Total positive charge must exactly cancel total negative charge. So find the <b>smallest common multiple</b> of 3 and 2 → that's <b>6</b>.</p>
+    <ul style="margin:8px 0 0; padding-left:20px;">
+      <li>Reach +6 using Ga³⁺ → need <b>2 Ga</b> (2 × 3 = 6)</li>
+      <li>Reach −6 using O²⁻ → need <b>3 O</b> (3 × 2 = 6)</li>
+    </ul>
+    <div class="formula">2 Ga³⁺ + 3 O²⁻ → (+6) + (−6) = 0 → Ga₂O₃</div>
+  </div>
+
+  <div class="card">
+    <h3>Why the "Cross" Shortcut Works</h3>
+    <p>Crossing charges as subscripts (charge of one ion → subscript of the other) is just a fast way of forcing both sides to hit that same common-multiple number. It works cleanly whenever the two charge magnitudes <b>don't share a common factor</b> — like 3 and 2.</p>
+    <div class="callout tip">
+      If the charges <i>do</i> share a factor (e.g. Ca²⁺ and O²⁻), crossing gives Ca₂O₂ — but that simplifies down to CaO. Always reduce to the smallest whole-number ratio.
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

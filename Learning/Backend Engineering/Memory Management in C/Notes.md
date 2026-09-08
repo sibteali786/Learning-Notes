@@ -6491,3 +6491,193 @@ void frame_free(frame_t *frame) {
 }
 
 ```
+
+# Frame References
+
+Consider this example of Sneklang scopes and stack frames:
+
+```python
+msg1 = "This is in scope 1"
+
+
+def outer_func():
+    msg2 = "This is in scope 2"
+
+    def inner_func():
+        msg2 = "This is in scope 3"
+        return
+
+    return
+```
+
+In scope 2, we add `msg2` to its referenced objects. Once again, this is a bit simplified from what you would do in a real, production-grade language, but the idea is the same.
+
+Each stack frame needs to know about all of the objects that it references.
+
+## Assignment
+
+Complete the `frame_reference_object` function in `vm.c`. It should push the object onto the stack of references for the current frame.
+
+```c
+#include "vm.h"
+#include "snekobject.h"
+#include "stack.h"
+
+void frame_reference_object(frame_t *frame, snek_object_t *obj) {
+  stack_push(frame->references, obj);
+}
+
+// don't touch below this line
+
+vm_t *vm_new(void) {
+  vm_t *vm = malloc(sizeof(vm_t));
+  if (vm == NULL) {
+    return NULL;
+  }
+
+  vm->frames = stack_new(8);
+  vm->objects = stack_new(8);
+  return vm;
+}
+
+void vm_free(vm_t *vm) {
+  for (size_t i = 0; i < vm->frames->count; i++) {
+    frame_free(vm->frames->data[i]);
+  }
+  stack_free(vm->frames);
+  for (size_t i = 0; i < vm->objects->count; i++) {
+    snek_object_free(vm->objects->data[i]);
+  }
+  stack_free(vm->objects);
+
+  free(vm);
+}
+
+void vm_frame_push(vm_t *vm, frame_t *frame) { stack_push(vm->frames, frame); }
+
+frame_t *vm_new_frame(vm_t *vm) {
+  frame_t *frame = malloc(sizeof(frame_t));
+  frame->references = stack_new(8);
+
+  vm_frame_push(vm, frame);
+  return frame;
+}
+
+void frame_free(frame_t *frame) {
+  stack_free(frame->references);
+  free(frame);
+}
+
+void vm_track_object(vm_t *vm, snek_object_t *obj) {
+  stack_push(vm->objects, obj);
+}
+
+```
+
+# Mark and Sweep
+
+We finally have enough machinery in place to start thinking about the "Mark and Sweep" part of our garbage collector.
+
+## The Algorithm
+
+Mark and Sweep garbage collection was first described by John McCarthy in 1960, primarily for managing memory in `((lisp))`. It's a two-phase algorithm:
+
+1. **Mark Phase:** Traverses the object graph, marking all reachable objects.
+2. **Sweep Phase:** Scan memory, collecting all unmarked objects, which are considered garbage.
+
+Note! We don't keep track of how many times a particular object is referenced, like we did with reference counting! Instead, we keep track of which objects are referenced in each `stack frame` and then traverse our container objects looking for any other referenced objects. That's what "traverse the object graph" means – a fancy way of saying "look for objects".
+
+## Assignment
+
+1. [ ] In `snekobject.h` add an `is_marked` boolean to our `snek_object_t` struct.
+2. [ ] In `sneknew.c` ensure the `is_marked` field is set to `false` when we create a `_new_snek_object`.
+```c
+#pragma once
+
+#include "stack.h"
+#include <stdbool.h>
+#include <stddef.h>
+
+typedef struct SnekObject snek_object_t;
+
+typedef struct {
+  size_t size;
+  snek_object_t **elements;
+} snek_array_t;
+
+typedef struct {
+  snek_object_t *x;
+  snek_object_t *y;
+  snek_object_t *z;
+} snek_vector_t;
+
+typedef enum SnekObjectKind {
+  INTEGER,
+  FLOAT,
+  STRING,
+  VECTOR3,
+  ARRAY,
+} snek_object_kind_t;
+
+typedef union SnekObjectData {
+  int v_int;
+  float v_float;
+  char *v_string;
+  snek_vector_t v_vector3;
+  snek_array_t v_array;
+} snek_object_data_t;
+
+typedef struct SnekObject {
+  bool is_marked;
+  snek_object_kind_t kind;
+  snek_object_data_t data;
+} snek_object_t;
+
+void snek_object_free(snek_object_t *obj);
+
+```
+
+```c
+snek_object_t *_new_snek_object(vm_t *vm) {
+  snek_object_t *obj = calloc(1, sizeof(snek_object_t));
+  if (obj == NULL) {
+    return NULL;
+  }
+  obj->is_marked = false;
+  vm_track_object(vm, obj);
+  return obj;
+}
+```
+
+
+# Mark
+
+TODO: Would it be funny to just have a video clip of me going "MAAARRKKKK" and that's it?
+
+I'd advise against it.
+
+In some mark and sweep implementations you'll see different ways to mark "root objects" – the objects directly referenced by stack frames. However, in our simplistic VM it's a bit easier to find and mark all of the directly referenced objects. You'll see why when you write it in a moment.
+
+## Assignment
+
+Complete the `mark` function in `vm.c`. It should set every object that's directly referenced by a stack frame to `is_marked = true`.
+
+1. [ ] Iterate over each frame in the VM
+2. [ ] Iterate over each `references` object in each frame
+3. [ ] Mark the objects as `is_marked = true`
+
+```c
+#include "vm.h"
+#include "snekobject.h"
+#include "stack.h"
+
+void mark(vm_t *vm) {
+  for (size_t i = 0; i < vm->frames->count; ++i){
+    frame_t *frame = (frame_t *)vm->frames->data[i];
+    for (size_t j = 0; j < frame->references->count; ++j){
+      snek_object_t *obj = (snek_object_t *)frame->references->data[j];
+      obj->is_marked = true;
+    }
+  }
+}
+```
