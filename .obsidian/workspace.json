@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "ea7e81cd7485a84f",
+        "id": "8ec0185e489b2bc0",
         "type": "tabs",
         "children": [
           {
-            "id": "cee0941ea538bd3a",
+            "id": "5e98ba8991fc59a4",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "html-view",
+              "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/5-Sharding/3-sharding-docker-setup.html"
+              },
+              "icon": "code-glyph",
+              "title": "3-sharding-docker-setup"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 358.82421875
+    "width": 358.82421875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,20 +185,29 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "5e98ba8991fc59a4",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/1-sharding.html",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/3-sharding-docker-setup.html",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/2-hp-vs-sharding.html",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/Sharding.pdf",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/commands.txt",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/links-code-commands.txt",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding",
+    "Learning/DSA/Graphs/BFS/5-Rotting Oranges.excalidraw.md",
+    "Learning/DSA/Graphs/BFS/1-Minimum Knight Moves.excalidraw.md",
+    "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
+    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
+    "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
+    "Learning/DSA/BFS/Pasted Image 20260909114033_425.png",
+    "Learning/Work Stuff/Freelance/Builders's Website/Creds.md",
+    "Learning/Work Stuff/Freelance/Builders's Website/Builders Website.md",
     "Learning/Research/Adam-DFT/Chemistry/4-valence-electrons-ionic-compounds/Drawing 2026-09-08 21.48.32.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/1-debugging-learning-algorithm-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/2-evaluating-your-model-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/3-model-selection-train-cv-test-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3",
-    "Learning/Research/Adam-DFT/Chemistry/5-photo-eletctronscopy",
-    "Learning/Research/Adam-DFT/Chemistry/4-valence-electrons-ionic-compounds/3-ga2o3-charge-balance-reasoning.html",
-    "Learning/Research/Adam-DFT/Chemistry/4-valence-electrons-ionic-compounds/1-groups-valence-ionic-compounds.html",
-    "Learning/Research/Adam-DFT/Chemistry/4-valence-electrons-ionic-compounds/1-ionic-formula-calcium-bromide.html",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Research/Adam-DFT/Chemistry/4-valence-electrons-ionic-compounds",
-    "Learning/Backend Engineering/Python/FastAPI/live-feed-engine-command-cheatsheet.html",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/Final Run.md",
     "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
     "Learning/Backend Engineering/Python/FastAPI/2-Server Analysis/First.md",
@@ -209,7 +221,6 @@
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Screenshot 2026-05-25 at 10.26.44 AM.png",
-    "Screenshot 2026-04-19 at 10.51.38 PM.png",
     "Personal/Me/Journal.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/Indexing.excalidraw.md",
     "Learning/System Design/Core Concepts/4-Database Indexing/3-IndexOptimizationPatterns.excalidraw.md",
@@ -222,13 +233,6 @@
     "Learning/JavaScript/Coding/Array Methods/Array.prototype.map.excalidraw.md",
     "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
     "Learning/JavaScript/Coding/2-Throttle.excalidraw.md",
-    "Learning/JavaScript/Coding/2-Debounce.excalidraw.md",
-    "Learning/JavaScript/Coding/1-Flatten.excalidraw.md",
-    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-    "Learning/DSA/Two Pointers/ValidTriangleNumber.excalidraw.md",
-    "Learning/DSA/Two Pointers/TwoSum.excalidraw.md",
-    "Learning/DSA/Two Pointers/TrappingRainWater.excalidraw.md",
-    "Learning/DSA/Two Pointers/SortColors.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
