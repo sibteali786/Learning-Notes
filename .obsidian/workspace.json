@@ -4,17 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "991737b496eb3703",
+        "id": "47176245aa09920a",
         "type": "tabs",
         "children": [
           {
-            "id": "c0ffd8fbf466236d",
+            "id": "39a56896603780fe",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Failed Interview Learings.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Failed Interview Learings"
             }
           }
         ]
@@ -76,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 376.6920585632324,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,20 +185,25 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "88876276e2a2dd54",
+  "active": "39a56896603780fe",
   "lastOpenFiles": [
+    "Learning/Failed Interview Learings.md",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/Drawing 2026-09-04 17.23.15.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/5-demo-postgres-creating-partitions-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/4-demo-postgres-setup-baseline-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/3-partitioning-vs-sharding-summary.html",
+    "Pasted Image 20260904172659_828.png",
+    "Pasted Image 20260904172615_090.png",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/9-automating-partitions-nodejs-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/what_is_partitioning_diagram.svg",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/7-pros-of-partitioning-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/6-demo-postgres-partition-pruning-summary.html",
+    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/8-cons-of-partitioning-summary.html",
     "Learning/Research/GRE/Resources.md",
     "Learning/Research/GRE",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/practice.md",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/8-electronegativity-vs-electron-affinity.html",
     "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/7-electron-affinity-vs-ionization-energy.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/6-successive-ionization-energies-element-id.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/5-ionization-energy-1st-vs-2nd.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/4-ionization-energy-period-trend-exceptions.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/3-ionization-energy-three-factors.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/2-atomic-and-ionic-radii.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend/1-periodic-trends-coulombs-law.html",
-    "Learning/Research/Adam-DFT/Chemistry/3-Periodic-Trend",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image.png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (4).png",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-2/Pasted image (3).png",
@@ -211,9 +219,6 @@
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/4-The_Aufbau_Principle_Guide.png",
     "Learning/Research/Adam-DFT/Chemistry/2-Atomic-structure-Electron-configuration/1-article.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260805001316_159.png",
-    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260730100726_423.png",
-    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260730092132_463.png",
-    "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/attachments/Pasted Image 20260730085940_939.png",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/Practice.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/4-Composition-of-mixtures/1-calc-mass-subs-inmixture.md",
     "Learning/Research/Adam-DFT/Chemistry/1-Atomic Structure/3-Elemental-Composition-of-Elements/Practice.excalidraw.md",
@@ -228,8 +233,6 @@
     "Learning/Frontend Interview Preparation/Coding/Image Carousel/Image-Carousel.excalidraw.md",
     "Learning/System Design/Case Studies.md",
     "Learning/System Design/Practice/Local Delivery Service/Reading_Attempt.excalidraw.md",
-    "Learning/Backend Engineering/Reources.md",
-    "Learning/System Design/Resources.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"

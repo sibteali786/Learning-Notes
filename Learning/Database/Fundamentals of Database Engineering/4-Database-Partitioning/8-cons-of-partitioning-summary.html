@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cons of Partitioning</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --accent:#4f8dff; --accent2:#4caf7d;
+    --purple:#a878ff; --red:#e5533d; --yellow:#e5b53d; --text:#e8eaf0; --muted:#9aa3b2; --border:#262b36;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(circle at top left,#1a1e27,#0f1115 60%);
+    color:var(--text); padding:32px 24px 60px;
+  }
+  .wrap{max-width:1000px; margin:0 auto;}
+  h1{font-size:2rem; margin-bottom:4px;}
+  .sub{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:20px; box-shadow:0 4px 18px rgba(0,0,0,0.25);
+  }
+  .card h2{margin:0 0 12px; font-size:1.15rem; display:flex; align-items:center; gap:8px;}
+  .tag{
+    display:inline-block; font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+    padding:2px 8px; border-radius:20px; background:var(--red); color:#fff;
+  }
+  .tag.blue{background:var(--accent); color:#fff;}
+  code{
+    font-family:'Fira Code','Consolas',monospace; background:#0c0e13; color:#9fd4ff;
+    padding:2px 6px; border-radius:5px; font-size:0.9em;
+  }
+  .con-num{
+    display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px;
+    border-radius:50%; background:var(--red); color:#fff; font-size:0.82rem; font-weight:700;
+    margin-right:8px; flex-shrink:0;
+  }
+  .con-title{display:flex; align-items:center; gap:2px; font-size:1.02rem; margin-bottom:8px;}
+  p{font-size:0.9rem; line-height:1.6; color:#cfd6e4; margin:0 0 8px;}
+  p b{color:#fff;}
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:12px 0; justify-content:center;}
+  .box{
+    background:#0f1319; border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; text-align:center; font-size:0.78rem;
+  }
+  .box.good{border-color:var(--accent2); color:#bfeccf;}
+  .box.bad{border-color:var(--red); color:#f3c9c0;}
+  .arrow{color:var(--muted); font-size:1.1rem;}
+  .example{
+    background:#141922; border:1px dashed #3a4152; border-radius:10px; padding:14px 16px;
+    margin-top:10px; font-size:0.87rem; color:#cfd6e4;
+  }
+  .example b{color:#fff;}
+  .quote{
+    font-style:italic; color:#cfd6e4; border-left:3px solid var(--red);
+    padding:10px 16px; margin:10px 0; background:#151a22; border-radius:0 8px 8px 0; font-size:0.87rem;
+  }
+  pre{
+    background:#0c0e13; border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; font-family:'Fira Code','Consolas',monospace; font-size:0.8rem;
+    overflow-x:auto; color:#c9d6ea; line-height:1.5; margin:8px 0 0;
+  }
+  .kw{color:#7fb3ff;}
+  hr.sep{border:none; border-top:1px solid var(--border); margin:20px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>⚠️ Cons of Partitioning</h1>
+  <div class="sub">The trade-offs behind the performance gains</div>
+
+  <!-- CON 1 -->
+  <div class="card">
+    <div class="con-title"><span class="con-num">1</span> Updates that move a row across partitions are slow</div>
+    <p>In a normal single table, updating a row is straightforward: find it, update it, done. But if a partitioned table's row is updated in a way that changes <b>which partition it belongs to</b> (e.g. changing a grade from 30 to 60, moving it from the 0–35 partition into the 35–60 partition), the database can't just update the row in place.</p>
+    <p>Instead, it effectively has to <b>delete the row from the old partition and insert it into the new one</b> — which is slower than a plain in-place update.</p>
+    <div class="flow">
+      <div class="box bad">g0035 partition<br><span style="font-size:0.7rem;">grade: 30</span></div>
+      <span class="arrow">✂️ delete + insert →</span>
+      <div class="box bad">g3560 partition<br><span style="font-size:0.7rem;">grade: 60</span></div>
+    </div>
+    <div class="quote">"If you're doing this so many times, that could hurt your SSD — jumping pages from one partition to another repeatedly."</div>
+    <p style="font-size:0.85rem; color:var(--muted);">Practical implication: choose a partition key that rows rarely "cross" over time (e.g. don't partition by a value that frequently changes into another range).</p>
+  </div>
+
+  <!-- CON 2 -->
+  <div class="card">
+    <div class="con-title"><span class="con-num">2</span> Inefficient queries can accidentally scan every partition</div>
+    <p>If your query's <code>WHERE</code> clause lets the database know exactly which partition to hit, everything works as intended — fast and targeted. But if the query doesn't filter on the partition key, the database has to check <b>all</b> partitions.</p>
+    <pre><span class="kw">select</span> * <span class="kw">from</span> grades_parts <span class="kw">where</span> id > 1;
+<span class="comment" style="color:#6b7484;">-- no filter on the partition key (g) → hits every partition</span></pre>
+    <p>Instead of querying one table, the database now has to jump between <b>5, 7, or however many partitions exist</b> — this can end up <b>slower</b> than just having a single unpartitioned table in the first place.</p>
+    <div class="flow">
+      <div class="box bad">Partition 1</div>
+      <div class="box bad">Partition 2</div>
+      <div class="box bad">Partition 3</div>
+      <div class="box bad">Partition 4</div>
+      <div class="box bad">...</div>
+    </div>
+    <p style="font-size:0.85rem; color:var(--muted);">This is the flip side of partition pruning — pruning only helps if the query gives the planner something to prune with.</p>
+  </div>
+
+  <!-- CON 3 -->
+  <div class="card">
+    <div class="con-title"><span class="con-num">3</span> Schema changes can be challenging</div>
+    <p>DBMSs usually handle this well — e.g. creating an index on the master/parent partition table typically cascades that index to all child partitions automatically (as seen in the demo).</p>
+    <p><b>But this doesn't always work seamlessly</b> — the underlying database engine has to explicitly support this feature, and behavior can vary between databases or versions. Schema changes across many partitions are inherently more complex to reason about than a single table.</p>
+  </div>
+
+  <hr class="sep">
+
+  <div class="card">
+    <h2><span class="tag blue">Quick Recap</span></h2>
+    <ul style="font-size:0.9rem; line-height:1.6; padding-left:20px;">
+      <li><b>Cross-partition updates</b> — slow, effectively a delete + insert; repeated often, can wear on SSDs</li>
+      <li><b>Non-selective queries</b> — scanning all partitions can be slower than a single unpartitioned table</li>
+      <li><b>Schema changes</b> — usually handled by the DBMS, but support and reliability vary by engine</li>
+    </ul>
+    <p style="margin-top:10px;">Partitioning is a trade-off: it can dramatically speed up well-targeted queries at scale, but it adds real complexity around updates, query design, and schema management.</p>
+  </div>
+
+</div>
+</body>
+</html>
