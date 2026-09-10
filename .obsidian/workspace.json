@@ -4,19 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "8ec0185e489b2bc0",
+        "id": "43863fbc8d8b776c",
         "type": "tabs",
         "children": [
           {
-            "id": "5e98ba8991fc59a4",
+            "id": "97ba3c0558f73d76",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/5-Sharding/3-sharding-docker-setup.html"
+                "file": "Learning/Backend Engineering/Memory Management in C/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "code-glyph",
-              "title": "3-sharding-docker-setup"
+              "icon": "lucide-file",
+              "title": "Notes"
             }
           }
         ]
@@ -185,10 +197,12 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "5e98ba8991fc59a4",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/1-sharding.html",
+    "Learning/Backend Engineering/Memory Management in C/GC/trace-mark-and-sweep.html",
+    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/5-Sharding/3-sharding-docker-setup.html",
+    "Learning/Database/Fundamentals of Database Engineering/5-Sharding/1-sharding.html",
     "Learning/Database/Fundamentals of Database Engineering/5-Sharding/2-hp-vs-sharding.html",
     "Learning/Database/Fundamentals of Database Engineering/5-Sharding/Sharding.pdf",
     "Learning/Database/Fundamentals of Database Engineering/5-Sharding/commands.txt",
@@ -206,7 +220,6 @@
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/1-debugging-learning-algorithm-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/2-evaluating-your-model-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/3-model-selection-train-cv-test-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3",
     "Learning/Backend Engineering/Memory Management in C/Notes.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/Final Run.md",
     "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
@@ -232,7 +245,6 @@
     "Learning/Frontend Interview Preparation/Coding/Tabs.excalidraw.md",
     "Learning/JavaScript/Coding/Array Methods/Array.prototype.map.excalidraw.md",
     "Learning/JavaScript/Coding/Caching/Caching_Function_calls.excalidraw.md",
-    "Learning/JavaScript/Coding/2-Throttle.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

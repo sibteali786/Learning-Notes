@@ -6681,3 +6681,489 @@ void mark(vm_t *vm) {
   }
 }
 ```
+
+# Trace
+
+Click to hide video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: tracing in mark and sweep
+
+Now that we've done the first (and simplest) part: **marking**, we can trace through all of our objects and determine which ones are connected to the roots. For example:
+
+```python
+def get_list():
+    a = 5
+    return [a]
+
+
+print(get_list())
+```
+
+If we run this code it will return a list with the integer `a` inside of it. Our current `mark` function will mark the list, but it won't mark the integer `a`. Which means that when we go to sweep the memory, we will mark the list, but not the integer `a`. We'd then `free` `a` while it's still being used, and the operating system could then fill that memory with something else... which would be very bad! So we need to prevent this!
+
+But we also have another problem:
+
+```python
+def get_list():
+    a = []
+    a.append(a)
+    return [5]
+
+
+print(get_list())
+```
+
+In the above (very dumb) example, we create a list that references itself and then return a completely unrelated list.
+
+If our `trace` function looks for any object that is referenced by _any other object_ it will consider `a` alive because it has a reference (albeit, to itself in this case). In fact, `a` is unreachable because when `get_list` returns, `a` is no longer used anywhere.
+
+_Tracing solves these problems._ To be clear, tracing is _part_ of the "mark" phase of mark and sweep. It's where we mark all the objects referenced by our root objects.
+
+## Assignment
+
+This is one of the larger assignments, take your time. You're almost done with the course!
+
+1. [ ] Complete the `trace_mark_object` function in `vm.c`.
+    1. [ ] If the object is `NULL` or already marked, return immediately without doing anything.
+    2. [ ] Otherwise, mark the object and push it onto the `gray_objects` stack.
+2. [ ] Complete the `trace_blacken_object` function in `vm.c`.
+    1. [ ] If the object is an `INTEGER`, `FLOAT` or `STRING` do nothing. These don't contain references to other objects.
+    2. [ ] If it's a `VECTOR3`, call `trace_mark_object` on the `x`, `y`, and `z` fields.
+    3. [ ] If it's an `ARRAY`, call `trace_mark_object` on each element.
+3. [ ] Complete the `trace` function in `vm.c`.
+    1. [ ] Create a new stack (`stack_new`) with a capacity of `8` called `gray_objects`. If the allocation fails, `return`.
+    2. [ ] Iterate over each of the objects in the VM: if the object is marked, push it onto the `gray_objects` stack.
+    3. [ ] While the `gray_objects` stack is not empty:
+        1. [ ] Pop an object off the `gray_objects` stack.
+        2. [ ] Call `trace_blacken_object` on the object.
+    4. [ ] Free the `gray_objects` stack (`stack_free`)
+```c
+#include "vm.h"
+#include "stack.h"
+
+void trace(vm_t *vm) {
+  stack_t *gray_objects = stack_new(8);
+  if (gray_objects == NULL){
+    return;
+  }
+  for (size_t i = 0; i < vm->objects->count; ++i){
+    snek_object_t *obj = (snek_object_t*)vm->objects->data[i];
+    if (obj->is_marked == true){
+      stack_push(gray_objects, obj);
+    }
+  }
+
+  while(gray_objects->count > 0){
+    snek_object_t *obj = (snek_object_t*)stack_pop(gray_objects);
+    trace_blacken_object(gray_objects, obj);
+  }
+
+  stack_free(gray_objects);
+}
+
+void trace_blacken_object(stack_t *gray_objects, snek_object_t *obj) {
+  if (obj->kind == INTEGER || obj->kind == FLOAT || obj->kind == STRING){
+    return;
+  }
+  if (obj->kind == VECTOR3){
+    snek_vector_t vector3 = obj->data.v_vector3;
+    trace_mark_object(gray_objects, vector3.x);
+    trace_mark_object(gray_objects, vector3.y);
+    trace_mark_object(gray_objects, vector3.z);
+  }
+
+  if (obj->kind == ARRAY){
+    for (size_t i = 0; i < obj->data.v_array.size; i++){
+      trace_mark_object(gray_objects, obj->data.v_array.elements[i]);
+    }
+  }
+}
+
+void trace_mark_object(stack_t *gray_objects, snek_object_t *obj) {
+  if (obj == NULL || obj->is_marked == true){
+    return;
+  }
+
+  obj->is_marked = true;
+  stack_push(gray_objects, obj);
+}
+
+// don't touch below this line
+
+void mark(vm_t *vm) {
+  for (size_t i = 0; i < vm->frames->count; i++) {
+    frame_t *frame = vm->frames->data[i];
+    for (size_t j = 0; j < frame->references->count; j++) {
+      snek_object_t *obj = frame->references->data[j];
+      obj->is_marked = true;
+    }
+  }
+}
+
+void frame_reference_object(frame_t *frame, snek_object_t *obj) {
+  stack_push(frame->references, obj);
+}
+
+vm_t *vm_new(void) {
+  vm_t *vm = malloc(sizeof(vm_t));
+  if (vm == NULL) {
+    return NULL;
+  }
+
+  vm->frames = stack_new(8);
+  vm->objects = stack_new(8);
+  return vm;
+}
+
+void vm_free(vm_t *vm) {
+  // Free the stack frames, and then their container
+  for (size_t i = 0; i < vm->frames->count; i++) {
+    frame_free(vm->frames->data[i]);
+  }
+  stack_free(vm->frames);
+
+  // Free the objects, and then their container
+  for (size_t i = 0; i < vm->objects->count; i++) {
+    snek_object_free(vm->objects->data[i]);
+  }
+  stack_free(vm->objects);
+
+  free(vm);
+}
+
+void vm_frame_push(vm_t *vm, frame_t *frame) { stack_push(vm->frames, frame); }
+
+frame_t *vm_new_frame(vm_t *vm) {
+  frame_t *frame = malloc(sizeof(frame_t));
+  frame->references = stack_new(8);
+
+  vm_frame_push(vm, frame);
+  return frame;
+}
+
+void frame_free(frame_t *frame) {
+  stack_free(frame->references);
+  free(frame);
+}
+
+void vm_track_object(vm_t *vm, snek_object_t *obj) {
+  stack_push(vm->objects, obj);
+}
+
+```
+
+
+
+```c
+#include "snekobject.h"
+#include "sneknew.h"
+#include <string.h>
+
+void snek_object_free(snek_object_t *obj) {
+  switch (obj->kind) {
+  case INTEGER:
+  case FLOAT:
+    break;
+  case STRING:
+    free(obj->data.v_string);
+    break;
+  case VECTOR3: {
+    break;
+  }
+  case ARRAY: {
+    snek_array_t *array = &obj->data.v_array;
+    free(array->elements);
+
+    break;
+  }
+  }
+
+  free(obj);
+}
+
+bool snek_array_set(snek_object_t *array, size_t index, snek_object_t *value) {
+  if (array == NULL || value == NULL) {
+    return false;
+  }
+
+  if (array->kind != ARRAY) {
+    return false;
+  }
+
+  if (index >= array->data.v_array.size) {
+    return false;
+  }
+
+  array->data.v_array.elements[index] = value;
+  return true;
+}
+
+snek_object_t *snek_array_get(snek_object_t *array, size_t index) {
+  if (array == NULL) {
+    return NULL;
+  }
+
+  if (array->kind != ARRAY) {
+    return NULL;
+  }
+
+  if (index >= array->data.v_array.size) {
+    return NULL;
+  }
+
+  // Get the value directly now (already checked size constraint)
+  return array->data.v_array.elements[index];
+}
+
+snek_object_t *snek_add(vm_t *vm, snek_object_t *a, snek_object_t *b) {
+  if (a == NULL || b == NULL) {
+    return NULL;
+  }
+
+  switch (a->kind) {
+  case INTEGER:
+    switch (b->kind) {
+    case INTEGER:
+      return new_snek_integer(vm, a->data.v_int + b->data.v_int);
+    case FLOAT:
+      return new_snek_float(vm, (float)a->data.v_int + b->data.v_float);
+    default:
+      return NULL;
+    }
+  case FLOAT:
+    switch (b->kind) {
+    case FLOAT:
+      return new_snek_float(vm, a->data.v_float + b->data.v_float);
+    default:
+      return snek_add(vm, b, a);
+    }
+  case STRING:
+    switch (b->kind) {
+    case STRING: {
+      int a_len = strlen(a->data.v_string);
+      int b_len = strlen(b->data.v_string);
+      int len = a_len + b_len + 1;
+      char *dst = malloc(len * sizeof(char));
+      dst[0] = '\0';
+
+      strcat(dst, a->data.v_string);
+      strcat(dst, b->data.v_string);
+
+      snek_object_t *obj = new_snek_string(vm, dst);
+      free(dst);
+
+      return obj;
+    }
+    default:
+      return NULL;
+    }
+  case VECTOR3:
+    switch (b->kind) {
+    case VECTOR3:
+      return new_snek_vector3(
+          vm, snek_add(vm, a->data.v_vector3.x, b->data.v_vector3.x),
+          snek_add(vm, a->data.v_vector3.y, b->data.v_vector3.y),
+          snek_add(vm, a->data.v_vector3.z, b->data.v_vector3.z));
+    default:
+      return NULL;
+    }
+  case ARRAY:
+    switch (b->kind) {
+    case ARRAY: {
+      size_t a_len = a->data.v_array.size;
+      size_t b_len = b->data.v_array.size;
+      size_t length = a_len + b_len;
+
+      snek_object_t *array = new_snek_array(vm, length);
+
+      for (size_t i = 0; i < a_len; i++) {
+        snek_array_set(array, i, snek_array_get(a, i));
+      }
+
+      for (size_t i = 0; i < b_len; i++) {
+        snek_array_set(array, i + a_len, snek_array_get(b, i));
+      }
+
+      return array;
+    }
+    default:
+      return NULL;
+    }
+  default:
+    return NULL;
+  }
+}
+
+```
+
+# Sweep
+
+Sweep is easy! Trace was probably the hardest part of the garbage collector.
+
+Every object now has an `is_marked` field that we can use to determine if an object is reachable or not. All we need to do is iterate over all the objects in the VM and free any object that is not marked. Once it's freed, we can also remove it from our VM.
+
+One more thing that's not obvious about `sweep()`: Any object that is marked (we don't want to free it right now) needs to be reset to `is_marked = false`. That way the next time the mark phase runs, if it's _not marked again_ it will be freed in the next cycle.
+
+## Assignment
+
+1. [ ] Complete the `sweep` function.
+    1. [ ] Iterate over all of the VM's objects:
+        1. [ ] If the object is marked, reset `is_marked = false` and continue.
+        2. [ ] Otherwise, free the object and set the data at that position in the stack to `NULL`.
+    2. [ ] Call `stack_remove_nulls` to remove any `NULL` objects from the VM's objects stack.
+2. [ ] Complete the `vm_collect_garbage` function. This is it! This is the function that runs the GC.
+    1. [ ] Call `mark`.
+    2. [ ] Call `trace`.
+    3. [ ] Call `sweep`.
+
+Hope you liked the course! Great work.
+
+## Hint
+
+You can use the `snek_object_free` function to free the objects
+
+```c
+#include "vm.h"
+#include "snekobject.h"
+#include "stack.h"
+
+void vm_collect_garbage(vm_t *vm) {
+  mark(vm);
+  trace(vm);
+  sweep(vm);
+}
+
+void sweep(vm_t *vm) {
+  for (size_t i = 0; i < vm->objects->count; ++i){
+    snek_object_t *obj = (snek_object_t*)vm->objects->data[i];
+    if (obj->is_marked == true){
+      obj->is_marked = false;
+    }else{
+      snek_object_free(obj);
+      vm->objects->data[i] = NULL;
+    }
+  }
+  stack_remove_nulls(vm->objects);
+}
+
+// don't touch below this line
+
+void mark(vm_t *vm) {
+  for (size_t i = 0; i < vm->frames->count; i++) {
+    frame_t *frame = vm->frames->data[i];
+    for (size_t j = 0; j < frame->references->count; j++) {
+      snek_object_t *obj = frame->references->data[j];
+      obj->is_marked = true;
+    }
+  }
+}
+
+void trace(vm_t *vm) {
+  stack_t *gray_objects = stack_new(8);
+  if (gray_objects == NULL) {
+    return;
+  }
+
+  // Get previously marked objects (which are the roots)
+  for (size_t i = 0; i < vm->objects->count; i++) {
+    snek_object_t *obj = vm->objects->data[i];
+    if (obj->is_marked) {
+      stack_push(gray_objects, obj);
+    }
+  }
+
+  // Trace through the objects
+  while (gray_objects->count > 0) {
+    trace_blacken_object(gray_objects, stack_pop(gray_objects));
+  }
+
+  // Clean up after ourselves :)
+  stack_free(gray_objects);
+}
+
+void trace_blacken_object(stack_t *gray_objects, snek_object_t *ref) {
+  snek_object_t *obj = ref;
+
+  switch (obj->kind) {
+  case INTEGER:
+  case FLOAT:
+  case STRING:
+    break;
+  case VECTOR3: {
+    snek_vector_t vec = obj->data.v_vector3;
+    trace_mark_object(gray_objects, vec.x);
+    trace_mark_object(gray_objects, vec.y);
+    trace_mark_object(gray_objects, vec.z);
+    break;
+  }
+  case ARRAY: {
+    for (size_t i = 0; i < obj->data.v_array.size; i++) {
+      trace_mark_object(gray_objects, obj->data.v_array.elements[i]);
+    }
+    break;
+  }
+  }
+}
+
+void trace_mark_object(stack_t *gray_objects, snek_object_t *obj) {
+  if (obj == NULL || obj->is_marked) {
+    return;
+  }
+
+  stack_push(gray_objects, obj);
+  obj->is_marked = true;
+}
+
+void frame_reference_object(frame_t *frame, snek_object_t *obj) {
+  stack_push(frame->references, obj);
+}
+
+vm_t *vm_new(void) {
+  vm_t *vm = malloc(sizeof(vm_t));
+  if (vm == NULL) {
+    return NULL;
+  }
+
+  vm->frames = stack_new(8);
+  vm->objects = stack_new(8);
+  return vm;
+}
+
+void vm_free(vm_t *vm) {
+  // Free the stack frames, and then their container
+  for (size_t i = 0; i < vm->frames->count; i++) {
+    frame_free(vm->frames->data[i]);
+  }
+  stack_free(vm->frames);
+
+  // Free the objects, and then their container
+  for (size_t i = 0; i < vm->objects->count; i++) {
+    snek_object_free(vm->objects->data[i]);
+  }
+  stack_free(vm->objects);
+
+  free(vm);
+}
+
+void vm_frame_push(vm_t *vm, frame_t *frame) { stack_push(vm->frames, frame); }
+
+frame_t *vm_frame_pop(vm_t *vm) { return stack_pop(vm->frames); }
+
+frame_t *vm_new_frame(vm_t *vm) {
+  frame_t *frame = malloc(sizeof(frame_t));
+  frame->references = stack_new(8);
+
+  vm_frame_push(vm, frame);
+  return frame;
+}
+
+void frame_free(frame_t *frame) {
+  stack_free(frame->references);
+  free(frame);
+}
+
+void vm_track_object(vm_t *vm, snek_object_t *obj) {
+  stack_push(vm->objects, obj);
+}
+
+```
