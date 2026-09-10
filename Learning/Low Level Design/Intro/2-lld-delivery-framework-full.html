@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LLD — Delivery Framework</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#242938;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#b98cff;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 20px;line-height:1.55;}
+  .wrap{max-width:940px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin:0 0 4px;}
+  .sub{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .bar{width:44px;height:4px;border-radius:2px;margin-bottom:10px;}
+  .section{margin-bottom:32px;}
+  .section h2{font-family:'Syne',sans-serif;font-size:18px;margin:0 0 4px;}
+  .section .time{color:var(--muted);font-size:12px;margin-bottom:12px;display:block;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:6px;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);}
+  .pill-green{background:rgba(92,255,168,.15);color:var(--green);}
+  .pill-purple{background:rgba(185,140,255,.15);color:var(--purple);}
+  code.blk{display:block;background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12.5px;white-space:pre;overflow-x:auto;color:#c7d0e0;margin-top:8px;}
+  .example{border-left:3px solid var(--purple);padding:10px 16px;background:rgba(185,140,255,.06);border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px;}
+  .example b{color:var(--purple);}
+  .tip{background:rgba(92,255,168,.06);border:1px solid rgba(92,255,168,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .tip b{color:var(--green);}
+  .warn{background:rgba(255,157,92,.06);border:1px solid rgba(255,157,92,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .warn b{color:var(--orange);}
+  ul{margin:6px 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:13.5px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{text-align:left;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;margin-top:10px;}
+  .node{background:#1c2130;border:1px solid var(--border);border-radius:8px;padding:7px 12px;white-space:nowrap;}
+  .arrow{color:var(--muted);}
+  .qbank{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:0 12px 12px 0;padding:16px 20px;margin-bottom:10px;}
+  .qbank .q{color:var(--blue);font-weight:700;font-size:13.5px;margin-bottom:4px;}
+  .qbank .a{font-size:13px;color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Low-Level Design Delivery Framework</h1>
+  <div class="sub">Full lecture + your Q&A, folded together — the 5-step structure for a ~35 min LLD interview</div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>⏱️ Why you need a framework at all</h2>
+    <div class="card">
+      35 minutes to clarify requirements, define your object model, design class APIs, and walk through core logic. Most candidates lose points on <b>pacing</b>, not knowledge.
+      <div class="grid2" style="margin-top:10px;">
+        <div class="warn"><b>Failure mode 1:</b> Dive straight into code, get bogged down in edge cases before the interviewer even understands your structure.</div>
+        <div class="warn"><b>Failure mode 2:</b> Move too slow through setup, define every tiny detail, run out of time before showing real design.</div>
+      </div>
+      <div class="tip"><b>Golden rule:</b> if your interviewer pulls you off-framework to probe something, follow their lead — don't fight it. Just gently steer back after.</div>
+    </div>
+    <div class="flow">
+      <div class="node">1. Requirements ~5m</div><span class="arrow">→</span>
+      <div class="node">2. Entities & Relationships ~3m</div><span class="arrow">→</span>
+      <div class="node">3. Class Design ~10-15m</div><span class="arrow">→</span>
+      <div class="node">4. Implementation ~10m</div><span class="arrow">→</span>
+      <div class="node">5. Extensibility ~5m</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>1️⃣ Requirements</h2>
+    <span class="time">~5 minutes</span>
+    <div class="card">
+      Prompt is intentionally minimal ("Design Tic Tac Toe"). Turn it into a spec by asking questions across 4 themes:
+      <table>
+        <tr><th>Theme</th><th>Ask</th></tr>
+        <tr><td><b>Primary capabilities</b></td><td>What operations must this system support?</td></tr>
+        <tr><td><b>Rules & completion</b></td><td>What conditions define success, failure, or state transitions?</td></tr>
+        <tr><td><b>Error handling</b></td><td>How should invalid inputs/actions be handled?</td></tr>
+        <tr><td><b>Scope boundaries</b></td><td>What's in scope (core logic, rules) vs out (UI, storage, networking, concurrency, extensibility)?</td></tr>
+      </table>
+      <div class="example"><b>Tic Tac Toe example output:</b><br>
+      <b>Requirements:</b> alternating X/O on 3×3 grid · win via row/col/diagonal · draw if board full & no winner · reject invalid moves (occupied cell, move after game over) · query state + reset.<br>
+      <b>Out of scope:</b> UI, AI opponent, networked multiplayer, NxN grids, undo/redo.</div>
+      <div class="tip"><b>Tip:</b> Write down what's explicitly <i>not</i> being built too — prevents scope creep later.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>2️⃣ Entities & Relationships</h2>
+    <span class="time">~3 minutes</span>
+    <div class="card">
+      <b>Step A — Identify entities.</b> Scan requirements, pull out meaningful nouns. Apply the filter:
+      <ul>
+        <li><span class="pill pill-green">Entity</span> — maintains changing state or enforces rules</li>
+        <li><span class="pill pill-orange">Field</span> — just information attached to something else</li>
+      </ul>
+      <div class="example"><b>Parking Lot:</b> <code style="color:var(--green)">ParkingSpot</code> is its own entity — state flips available→occupied, enforces "can this vehicle fit?". A car's <code style="color:var(--orange)">licensePlate</code> is just data → a field on <code style="color:var(--green)">Vehicle</code>.
+      <code class="blk">ParkingLot
+  - spots: List&lt;ParkingSpot&gt;
+
+ParkingSpot
+  - spotId, size, parkedVehicle
+  + canFit(vehicle)
+  + park(vehicle)
+  + unpark()
+
+Vehicle
+  - licensePlate, vehicleType</code></div>
+
+      <b style="display:block;margin-top:14px;">Step B — Define relationships.</b> Ask 4 questions:
+      <ul>
+        <li>Which entity is the <b>orchestrator</b> — drives the main workflow?</li>
+        <li>Which entities <b>own durable state</b>?</li>
+        <li>How do they depend on each other? (<span class="pill pill-purple">has-a</span><span class="pill pill-blue">uses</span><span class="pill pill-green">contains</span>)</li>
+        <li>Where should specific <b>rules</b> logically live?</li>
+      </ul>
+      <div class="example"><b>Parking Lot:</b>
+      <code class="blk">ParkingLot
+  has-a List&lt;ParkingSpot&gt;
+  uses ParkingSpot.findAvailableFor(vehicle)
+  uses TicketService.createTicket(vehicle, spot)</code>
+      "Can this vehicle fit?" → lives in <code style="color:var(--green)">ParkingSpot</code> (owns size/occupancy). "Assign spot + create ticket" → lives in <code style="color:var(--green)">ParkingLot</code> (coordinates multiple objects).</div>
+
+      <div class="tip"><b>Whiteboard tip:</b> just a list of entities + a few arrows for ownership/usage is enough. No formal UML needed — don't fixate on notation, just communicate structure clearly.</div>
+      <code class="blk">Entities: Game, Board, Player
+Relationships: Game → Board, Game → Player (2x)</code>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--purple)"></div>
+    <h2>🎯 Deep Dive: What is an Orchestrator?</h2>
+    <div class="card">
+      An entity that <b>coordinates other entities</b> to complete a workflow — manages the sequence, while each supporting entity keeps its own data & rules.
+      <table>
+        <tr><th>System</th><th>Orchestrator</th><th>Why</th></tr>
+        <tr><td>Tic Tac Toe</td><td><code style="color:var(--green)">Game</code></td><td>Checks turn, asks <code>Board</code> to place a mark, decides win/draw, switches players</td></tr>
+        <tr><td>Ticketmaster</td><td><code style="color:var(--green)">BookingService</code></td><td>Checks user, asks <code>SeatInventory</code> for seat status, creates reservation, starts payment</td></tr>
+        <tr><td>Parking Lot</td><td><code style="color:var(--green)">ParkingLot</code></td><td>Finds a spot, parks the vehicle, creates a ticket</td></tr>
+      </table>
+      <code class="blk">BookingService
+  has-a SeatInventory
+  uses ReservationService
+  uses PaymentService
+
+SeatInventory
+  - seats
+  + isAvailable(seatId)
+  + markReserved(seatId)
+
+ReservationService
+  - reservations
+  + createHold(userId, seatId, expiresAt)</code>
+      <div class="example"><b>Why isn't SeatInventory the orchestrator?</b> It owns <i>seat state</i> (is A12 available? can it be reserved?) — not the full booking workflow. <code style="color:var(--green)">BookingService</code> coordinates across objects: check user → reserve seat → create hold → start payment. <b>Cross-object coordination = orchestrator.</b></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>3️⃣ Class Design</h2>
+    <span class="time">~10–15 minutes</span>
+    <div class="card">
+      Go entity by entity, <b>top-down</b> — start with the orchestrator, then supporting entities. For each: derive <b>State</b> and <b>Behavior</b> from requirements.
+      <b style="display:block;margin-top:10px;">Deriving State</b> — for each entity: which requirements does it own? What must it remember?
+      <table>
+        <tr><th>Requirement</th><th>Game must track</th></tr>
+        <tr><td>"Two players alternate placing X/O on 3×3 grid"</td><td>The two players, whose turn, the Board</td></tr>
+        <tr><td>"Game ends when a player wins or board is full"</td><td>Game state (in progress/won/draw), winner</td></tr>
+      </table>
+      <code class="blk">Game – State:
+  - board: Board
+  - playerX: Player
+  - playerO: Player
+  - currentPlayer: Player
+  - state: GameState (IN_PROGRESS, WON, DRAW)
+  - winner: Player? (null if no winner)</code>
+      <b style="display:block;margin-top:10px;">Deriving Behavior</b> — what does the outside world need to call?
+      <table>
+        <tr><th>Need</th><th>Method</th></tr>
+        <tr><td>Players make moves</td><td><code style="color:var(--green)">makeMove(player, row, col) → bool</code></td></tr>
+        <tr><td>Whose turn?</td><td><code style="color:var(--green)">getCurrentPlayer() → Player</code></td></tr>
+        <tr><td>Check state</td><td><code style="color:var(--green)">getGameState() → GameState</code></td></tr>
+        <tr><td>Who won?</td><td><code style="color:var(--green)">getWinner() → Player?</code></td></tr>
+        <tr><td>Inspect board</td><td><code style="color:var(--green)">getBoard() → Board</code></td></tr>
+      </table>
+
+      <div class="tip"><b>Core principle — "Tell, Don't Ask" (Encapsulation):</b> keep rules with the entity that owns the relevant state.
+        <div class="grid2" style="margin-top:8px;">
+          <div><b style="color:var(--blue)">Workflow/lifecycle rules</b><br>("can this run right now?") → orchestrator</div>
+          <div><b style="color:var(--green)">Data-specific rules</b><br>("is this cell occupied?") → entity that owns the data</div>
+        </div>
+      </div>
+      <code class="blk">ParkingLot.park(vehicle)
+  spot = findAvailableSpot(vehicle)
+  spot.park(vehicle)          // tell, don't ask
+  createTicket(vehicle, spot)
+
+ParkingSpot.park(vehicle)
+  if occupied → reject
+  if vehicle doesn't fit → reject
+  parkedVehicle = vehicle</code>
+      <div class="example"><b>Why it matters:</b> keeps APIs small & predictable — when something breaks, you know exactly which class to check.</div>
+
+      <div class="warn" style="margin-top:12px;"><b>On UML:</b> not used in these breakdowns — it's outdated, rarely used in production (MS dropped UML tooling from Visual Studio in 2016). Simple class notation (state + methods) is enough. If an interviewer explicitly wants UML, ask if simplified notation is okay — usually is.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>4️⃣ Implementation</h2>
+    <span class="time">~10 minutes</span>
+    <div class="card">
+      Ask the interviewer their preferred depth first — pseudocode, near-complete code, or just talk-through. Default: <b>pseudocode</b> for the most interesting methods.
+      <ul>
+        <li><b>Happy path first</b> — inputs, sequence of steps, calls to other classes, return/state change.</li>
+        <li><b>Then edge cases</b> — invalid inputs, illegal operations, out-of-range values, state violations.</li>
+      </ul>
+      <code class="blk">makeMove(player, row, col)
+  if state != IN_PROGRESS → return false
+  if player != currentPlayer → return false
+  if !board.canPlace(row, col) → return false
+
+  board.placeMark(row, col, player.mark)
+  if board.checkWin(row, col, player.mark)
+    state = WON; winner = player
+  else if board.isFull()
+    state = DRAW
+  else
+    currentPlayer = (player == playerX) ? playerO : playerX
+
+  return true</code>
+      <div class="warn"><b>Patterns caution:</b> Singleton/Factory/Builder can help — but candidates more often <i>overengineer</i> by forcing patterns than by skipping needed ones. Only add if it earns its place.</div>
+      <div class="tip"><b>Verification step (1-2 min):</b> trace a concrete scenario tick-by-tick — initial state → each operation → state changes → edge transitions. Catches bugs like forgetting to switch turns or win-detection not triggering. Fix on the spot if found — that's a positive signal, not a negative one.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>5️⃣ Extensibility</h2>
+    <span class="time">~5 minutes, if time/level allow</span>
+    <div class="card">
+      Interviewer-led — they propose a twist to test if your design evolves cleanly (not hacks bolted on).
+      <table>
+        <tr><th>Level</th><th>What to expect</th></tr>
+        <tr><td>Junior</td><td>Little or no extensibility discussion</td></tr>
+        <tr><td>Mid-level</td><td>One or two small follow-ups</td></tr>
+        <tr><td>Senior</td><td>Several "what if we…" questions in a row</td></tr>
+      </table>
+      <div class="example"><b>Example — "How would you add undo?":</b><br>"All state transitions flow through a single action method — <code style="color:var(--green)">makeMove</code>. To add undo, introduce a command history stack: each successful action records prior state before mutating. <code style="color:var(--green)">undo()</code> pops the stack and reverts — rest of the system doesn't change."</div>
+      <div class="tip">Stay high-level here — point to <i>why</i> your design's boundaries make the change clean, don't rewrite code.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--purple)"></div>
+    <h2>🗣️ Questions You Asked — Answered</h2>
+
+    <div class="qbank">
+      <div class="q">Q: Give real-life examples of entity vs. field?</div>
+      <div class="a">Parking lot: <code style="color:var(--green)">ParkingSpot</code> is an entity (changing state: available↔occupied, enforces fit rules). <code style="color:var(--orange)">licensePlate</code> is just a field on <code style="color:var(--green)">Vehicle</code> — no behavior of its own, just data.</div>
+    </div>
+
+    <div class="qbank">
+      <div class="q">Q: Explain entity relationships with an example?</div>
+      <div class="a">Parking lot: <code style="color:var(--green)">ParkingLot</code> is the orchestrator — <b>has-a</b> list of spots, <b>uses</b> <code>ParkingSpot.findAvailableFor()</code> and <code>TicketService.createTicket()</code>. Rule placement follows ownership: fit-check rule → <code>ParkingSpot</code>; assign+ticket workflow → <code>ParkingLot</code>.</div>
+    </div>
+
+    <div class="qbank">
+      <div class="q">Q: What is an orchestrator entity — what does it mean?</div>
+      <div class="a">The entity coordinating the main workflow between other objects. Tic Tac Toe: <code style="color:var(--green)">Game</code> checks turn, asks <code>Board</code> to place a mark, decides win/draw, switches players — <code>Board</code> just owns grid-specific rules.</div>
+    </div>
+
+    <div class="qbank">
+      <div class="q">Q: Any other orchestrator example, like Ticketmaster?</div>
+      <div class="a"><code style="color:var(--green)">BookingService</code> is the orchestrator — checks user eligibility, asks <code>SeatInventory</code> if A12 is available, creates a temporary reservation, starts payment. It has-a <code>SeatInventory</code>, uses <code>ReservationService</code> and <code>PaymentService</code>.</div>
+    </div>
+
+    <div class="qbank">
+      <div class="q">Q: Why isn't SeatInventory the orchestrator?</div>
+      <div class="a">It owns seat-specific state/rules (is A12 available? can it be marked reserved?), not the full booking sequence. <code style="color:var(--green)">BookingService</code> coordinates across multiple entities — that cross-object coordination is what makes something the orchestrator.</div>
+    </div>
+
+    <div class="qbank">
+      <div class="q">Q: So orchestrator is basically an entity that manages other entities?</div>
+      <div class="a">Yes — it coordinates other entities to complete a workflow, managing the sequence, while each supporting entity keeps its own data and rules.</div>
+    </div>
+
+    <div class="qbank">
+      <div class="q">Q: Explain "Tell, Don't Ask" with the Parking example?</div>
+      <div class="a"><code style="color:var(--green)">ParkingLot</code> owns the workflow; each <code>ParkingSpot</code> owns its own occupancy/size. So <code>ParkingLot</code> tells a spot to park a vehicle rather than fetching its fields and deciding the rules itself:
+      <code class="blk">ParkingLot.park(vehicle)
+  spot = findAvailableSpot(vehicle)
+  spot.park(vehicle)
+  createTicket(vehicle, spot)
+
+ParkingSpot.park(vehicle)
+  if occupied → reject
+  if vehicle doesn't fit → reject
+  parkedVehicle = vehicle</code>
+      This is encapsulation — each object protects and manages the data it owns.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

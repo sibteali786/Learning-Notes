@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSO Handshake & The Tenant Registration Race</title>
+<style>
+  :root{
+    --bg:#fbfaf8; --panel:#ffffff; --ink:#1e2124; --muted:#5b6168; --line:#e4e1da;
+    --accent:#2f6f5e; --accent-soft:#e6f2ee; --warn:#a3491d; --warn-soft:#fbeee5;
+    --code-bg:#1e2430; --code-ink:#e8ecf1; --good:#1f7a4a; --bad:#b23b2e;
+    --chip:#eef0ea;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+    line-height:1.65; font-size:17px;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:2.5rem 1.5rem 6rem;}
+  h1,h2,h3{font-family: Georgia, serif; line-height:1.25;}
+  h1{font-size:2.1rem; margin-bottom:.3rem;}
+  .subtitle{color:var(--muted); font-size:1.05rem; margin-top:0;}
+  h2{font-size:1.5rem; margin-top:3rem; border-bottom:2px solid var(--line); padding-bottom:.4rem;}
+  h3{font-size:1.15rem; margin-top:2rem; color:var(--accent);}
+  p{margin:1rem 0;}
+  code{
+    font-family: 'SF Mono', Menlo, Consolas, monospace; font-size:.85em;
+    background:var(--chip); padding:.1em .35em; border-radius:4px;
+  }
+  pre{
+    background:var(--code-bg); color:var(--code-ink);
+    padding:1rem 1.1rem; border-radius:10px; overflow-x:auto;
+    font-family:'SF Mono', Menlo, Consolas, monospace; font-size:.83rem;
+    white-space:pre; line-height:1.55; margin:1rem 0;
+  }
+  pre code{background:none; padding:0; font-size:1em;}
+  .filepath{
+    font-family:'SF Mono', Menlo, Consolas, monospace; font-size:.78rem; color:var(--muted);
+    margin:1.4rem 0 -.6rem; letter-spacing:.02em;
+  }
+  a{color:var(--accent);}
+  nav.toc{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:1.2rem 1.5rem; margin:2rem 0 3rem;
+  }
+  nav.toc h2{margin-top:0; border:none; font-size:1.1rem;}
+  nav.toc ol{margin:0; padding-left:1.3rem;}
+  nav.toc li{margin:.3rem 0;}
+  nav.toc a{text-decoration:none;}
+  nav.toc a:hover{text-decoration:underline;}
+  .callout{
+    border-left:4px solid var(--accent); background:var(--accent-soft);
+    padding:1rem 1.3rem; border-radius:0 10px 10px 0; margin:1.5rem 0;
+  }
+  .callout.warn{border-left-color:var(--warn); background:var(--warn-soft);}
+  .callout .label{font-weight:bold; color:var(--accent); font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; margin-bottom:.3rem;}
+  .callout.warn .label{color:var(--warn);}
+  .flow{
+    display:flex; flex-direction:column; gap:0; margin:1.8rem 0; border:1px solid var(--line);
+    border-radius:12px; overflow:hidden; background:var(--panel);
+  }
+  .flow-step{
+    display:grid; grid-template-columns:2.4rem 1fr; gap:.9rem;
+    padding:1rem 1.2rem; border-bottom:1px solid var(--line); align-items:start;
+  }
+  .flow-step:last-child{border-bottom:none;}
+  .flow-num{
+    width:2.4rem; height:2.4rem; border-radius:50%; background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:bold; font-family:sans-serif;
+  }
+  .flow-title{font-weight:bold; margin:0 0 .2rem;}
+  .flow-detail{color:var(--muted); font-size:.92rem; margin:0;}
+  .flow-detail code{font-size:.85em;}
+  .badge{
+    display:inline-block; font-family:sans-serif; font-size:.7rem; text-transform:uppercase;
+    letter-spacing:.05em; padding:.15em .55em; border-radius:99px; font-weight:bold; margin-left:.4rem;
+  }
+  .badge.frontend{background:#dbe7f5; color:#1c4c7c;}
+  .badge.backend{background:#e8dff2; color:#5b2d84;}
+  .badge.wnp{background:#fde3d0; color:#8a4416;}
+  .badge.chat{background:#d7f0e6; color:#1a6b4c;}
+  table{width:100%; border-collapse:collapse; margin:1.2rem 0; font-size:.92rem;}
+  th,td{text-align:left; padding:.6rem .8rem; border:1px solid var(--line);}
+  th{background:var(--chip); font-family:sans-serif; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em;}
+  .diagram{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:1.5rem; margin:1.8rem 0;
+  }
+  .lane-row{display:flex; gap:.8rem; align-items:stretch; margin:.6rem 0;}
+  .lane-box{
+    flex:1; border:1.5px solid var(--line); border-radius:8px; padding:.7rem .9rem;
+    background:#fdfcfa; font-size:.85rem;
+  }
+  .lane-box.actor{background:var(--chip); font-family:sans-serif; font-weight:bold; font-size:.75rem;
+    text-align:center; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); flex:0 0 130px;}
+  .arrow-row{display:flex; align-items:center; gap:.5rem; margin:.4rem 0 .4rem 140px; color:var(--muted); font-size:.82rem; font-family:sans-serif;}
+  .arrow-row .arrow{flex:1; height:1px; background:var(--muted); position:relative;}
+  .arrow-row .arrow::after{content:'▶'; position:absolute; right:-2px; top:-8px; font-size:.7rem;}
+  .timeline{position:relative; margin:2rem 0; padding-left:2rem;}
+  .timeline::before{content:''; position:absolute; left:.55rem; top:0; bottom:0; width:2px; background:var(--line);}
+  .tl-item{position:relative; margin-bottom:1.6rem;}
+  .tl-item::before{
+    content:''; position:absolute; left:-2rem; top:.3rem; width:.9rem; height:.9rem; border-radius:50%;
+    background:var(--accent); border:3px solid var(--bg);
+  }
+  .tl-item.bug::before{background:var(--bad);}
+  .tl-item.fix::before{background:var(--good);}
+  .tl-date{font-family:sans-serif; font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:.2rem;}
+  .tl-title{font-weight:bold; margin:.1rem 0;}
+  .quiz-q{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:1.3rem 1.4rem; margin:1.5rem 0;
+  }
+  .quiz-q p.question{font-weight:bold; margin-top:0;}
+  .quiz-opts{display:flex; flex-direction:column; gap:.5rem;}
+  .quiz-opt{
+    text-align:left; padding:.7rem .9rem; border:1.5px solid var(--line); border-radius:8px;
+    background:#fdfcfa; cursor:pointer; font-family:Georgia,serif; font-size:.95rem; color:var(--ink);
+    transition:background .15s;
+  }
+  .quiz-opt:hover{background:var(--chip);}
+  .quiz-opt.correct{background:#e2f5e9; border-color:var(--good);}
+  .quiz-opt.incorrect{background:#fbe6e2; border-color:var(--bad);}
+  .quiz-feedback{
+    margin-top:.8rem; padding:.7rem .9rem; border-radius:8px; font-size:.9rem; display:none;
+  }
+  .quiz-feedback.show{display:block;}
+  .quiz-feedback.correct-fb{background:#e2f5e9; color:#1f5c37;}
+  .quiz-feedback.incorrect-fb{background:#fbe6e2; color:#8a2e22;}
+  .skip-note{font-style:italic; color:var(--muted); font-size:.9rem;}
+  hr.section-break{border:none; border-top:1px dashed var(--line); margin:3rem 0;}
+  .key-list{padding-left:1.2rem;}
+  .key-list li{margin:.4rem 0;}
+  footer{margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line); color:var(--muted); font-size:.85rem; text-align:center; font-family:sans-serif;}
+  @media (max-width:600px){
+    body{font-size:15.5px;}
+    h1{font-size:1.6rem;}
+    .flow-step{grid-template-columns:2rem 1fr; padding:.8rem;}
+    .flow-num{width:2rem;height:2rem;font-size:.85rem;}
+    .arrow-row{margin-left:0;}
+    .lane-box.actor{flex-basis:80px; font-size:.65rem;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SSO Handshake &amp; the Tenant Registration Race</h1>
+<p class="subtitle">How an embedded chat widget authenticates a logged-in user across two applications, and how a timing gap between provisioning and verification once broke it.</p>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#background">Background: two apps, one identity</a></li>
+    <li><a href="#architecture">Architecture Overview — how SSO works today</a>
+      <ol>
+        <li><a href="#embed">The iframe embed</a></li>
+        <li><a href="#mint">Minting the SSO token (HMAC signing)</a></li>
+        <li><a href="#delivery">Getting the token to the iframe</a></li>
+        <li><a href="#handshake">The Socket.IO handshake</a></li>
+        <li><a href="#verify">Verifying the token (HMAC checking)</a></li>
+        <li><a href="#tenancy">Tenant isolation, end to end</a></li>
+        <li><a href="#session">After authentication: rooms and events</a></li>
+      </ol>
+    </li>
+    <li><a href="#intuition">Intuition: why any of this is tricky</a></li>
+    <li><a href="#bug">The Bug &amp; the Fix</a>
+      <ol>
+        <li><a href="#postmessage-era">Act I — the postMessage handshake</a></li>
+        <li><a href="#registration">Act II — the three-step tenant registration</a></li>
+        <li><a href="#race">Act III — the race condition</a></li>
+        <li><a href="#socketio-fix">Act IV — moving auth into the Socket.IO handshake</a></li>
+        <li><a href="#hardening">Act V — hardening the registration window</a></li>
+      </ol>
+    </li>
+    <li><a href="#code-walkthrough">Code Walkthrough Summary</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ol>
+</nav>
+
+<h2 id="background">Background: two apps, one identity</h2>
+
+<p>There are two separate applications here, each with its own codebase, its own database, and — critically — its own idea of who is logged in.</p>
+
+<p><strong>whatsnextplease-monolith</strong> (I'll call it <strong>WNP</strong>) is the main product: a Next.js frontend (<code>apps/web</code>) talking to an Express-style backend (<code>apps/backend</code>), backed by Postgres via Prisma. Users log in here the normal way — session cookie, JWT, whatever WNP's own auth stack does — and that's the identity we start from.</p>
+
+<p><strong>chat app</strong> is a separate product: a Socket.IO-based real-time chat system, with its own Next.js frontend (<code>Chat-App-Frontend</code>) and its own Express + MongoDB backend (<code>chat-app-backend</code>). It has its own users, its own tenants, its own sessions. WNP embeds it as an iframe so that a WNP user can chat without leaving the page.</p>
+
+<p>The problem this whole system solves is: <em>a user is already authenticated in WNP — how do we get them authenticated in chat-app, inside an iframe, without asking them to log in a second time?</em> That's Single Sign-On (SSO), and because the chat app is multi-tenant (many different customer organizations use the same chat-app deployment), it also has to answer <em>which tenant does this user belong to, and is that tenant even fully set up yet?</em></p>
+
+<div class="callout">
+  <div class="label">If you already know SSO patterns</div>
+  Skip ahead to <a href="#architecture">Architecture Overview</a> — the interesting part of this story is less "how SSO works" in general and more the specific handshake mechanism used here (Socket.IO's handshake-time <code>auth</code> field) and the multi-tenant provisioning race it replaced.
+</div>
+
+<h2 id="architecture">Architecture Overview — how SSO works today</h2>
+
+<p>Let's walk through exactly what happens, in order, when a logged-in WNP user opens the chat panel. I'll number each step so we can refer back to them later.</p>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-num">1</div>
+    <div>
+      <p class="flow-title">WNP renders an iframe <span class="badge wnp">WNP</span> <span class="badge frontend">frontend</span></p>
+      <p class="flow-detail"><code>FullPageChat.tsx</code> / <code>ChatModal.tsx</code> point an <code>&lt;iframe&gt;</code> at the chat app's <code>/embed</code> route, with the SSO token attached as query params.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">2</div>
+    <div>
+      <p class="flow-title">WNP backend mints a signed token <span class="badge wnp">WNP</span> <span class="badge backend">backend</span></p>
+      <p class="flow-detail"><code>ChatController.generateInitToken</code> builds a JSON payload describing the user and tenant, then HMAC-SHA256 signs it with a shared secret.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">3</div>
+    <div>
+      <p class="flow-title">Token travels to the iframe as URL params <span class="badge wnp">WNP</span> <span class="badge frontend">frontend</span></p>
+      <p class="flow-detail"><code>use-chat-auth.ts</code> fetches the token via a same-origin proxy and builds the iframe's <code>src</code> URL.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">4</div>
+    <div>
+      <p class="flow-title">Chat app reads the token and opens a socket <span class="badge chat">chat-app</span> <span class="badge frontend">frontend</span></p>
+      <p class="flow-detail"><code>app/embed/page.tsx</code> pulls <code>ssoToken</code>/<code>ssoSignature</code> from the URL and connects Socket.IO with them in the handshake <code>auth</code> payload.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">5</div>
+    <div>
+      <p class="flow-title">chat-app-backend validates the handshake <span class="badge chat">chat-app</span> <span class="badge backend">backend</span></p>
+      <p class="flow-detail"><code>socketAuthMiddleware</code> → <code>SSOTokenService.validateToken</code> checks expiry and recomputes the HMAC using the <em>tenant's own</em> stored secret.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">6</div>
+    <div>
+      <p class="flow-title">Session established, tenant context set <span class="badge chat">chat-app</span> <span class="badge backend">backend</span></p>
+      <p class="flow-detail">A chat-app <code>User</code> is found or created, JWTs are issued, and everything downstream runs inside an <code>AsyncLocalStorage</code> tenant context.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">7</div>
+    <div>
+      <p class="flow-title">Client renders the chat UI <span class="badge chat">chat-app</span> <span class="badge frontend">frontend</span></p>
+      <p class="flow-detail">The socket joins tenant-scoped rooms, loads conversations, and starts listening for real-time message events.</p>
+    </div>
+  </div>
+</div>
+
+<h3 id="embed">1. The iframe embed</h3>
+
+<p>Two WNP components render the chat iframe — one for a full-page chat view, one for a modal dialog. Both build the embed URL the same way, delegating the actual token-fetching to a shared hook.</p>
+
+<div class="filepath">whatsnextplease-monolith/apps/web/components/chat/FullPageChat.tsx</div>
+<pre>const CHAT_BASE_URL = (process.env.NEXT_PUBLIC_CHAT_APP_URL || 'http://localhost:3000')
+  .replace(/\/embed\/?$/, '');
+const CHAT_EMBED_URL = `${CHAT_BASE_URL}/embed`;
+...
+&lt;iframe
+  ref={iframeRef}
+  src={iframeUrl}   // built by useChatAuth(): `${CHAT_EMBED_URL}?ssoToken=...&amp;ssoSignature=...&amp;t=...`
+  title="Messages"
+  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation-by-user-activation ..."
+  ...
+/&gt;</pre>
+
+<p>Notice the token and signature travel as plain query-string parameters on the iframe's <code>src</code>. That's a deliberate choice worth flagging now, because it becomes important later: whatever is in that URL is what the chat app's frontend has to work with the instant the iframe starts loading — there's no separate back-channel at load time.</p>
+
+<h3 id="mint">2. Minting the SSO token (HMAC signing)</h3>
+
+<p>The actual token is produced by a WNP backend route, gated behind WNP's own authentication middleware (so only an already-logged-in WNP user can request one).</p>
+
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/routes/chat.routes.ts</div>
+<pre>router.get('/init-token', verifyTokenHybrid, ChatController.generateInitToken);</pre>
+
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/controller/chat.controller.ts</div>
+<pre>const CHAT_SHARED_SECRET = env.CHAT_SHARED_SECRET!;
+const TENANT_ID = env.TENANT_ID || 'whatsnextplease';
+
+static async generateInitToken(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+
+  let user = req.user.role === 'CLIENT'
+    ? await prisma.client.findUnique({ where: { id: req.user.id }, select: {...} })
+    : await prisma.user.findUnique({ where: { id: req.user.id }, select: {...} });
+
+  const payload = {
+    tenantUserId: user.id,
+    email: user.email,
+    name: /* contactName or firstName+lastName */,
+    avatarUrl: user.avatarUrl || undefined,
+    tenantId: TENANT_ID,
+    externalSystem: 'wnp',
+    timestamp: Date.now(),
+    nonce: crypto.randomBytes(16).toString('hex'),
+    iss: 'whatnextplease',
+    aud: 'chat-app',
+    exp: Math.floor(Date.now() / 1000) + 300, // 5-minute expiry
+  };
+
+  const token = Buffer.from(JSON.stringify(payload)).toString('base64');
+  const signature = crypto.createHmac('sha256', CHAT_SHARED_SECRET).update(token).digest('hex');
+
+  res.json({ success: true, token, signature, chatUrl: CHAT_APP_URL });
+}</pre>
+
+<div class="callout">
+  <div class="label">What's actually being signed</div>
+  It's important to be precise here: the HMAC signs the <em>base64 string</em>, not the raw JSON object. So <code>signature = HMAC-SHA256(CHAT_SHARED_SECRET, token)</code> where <code>token</code> is already <code>base64(JSON.stringify(payload))</code>. The payload itself bundles: who the user is (<code>tenantUserId</code>, <code>email</code>, <code>name</code>), which tenant they belong to (<code>tenantId</code>), a 5-minute expiry (<code>exp</code>) to bound the token's useful lifetime, a random <code>nonce</code> to make each token unique even for the same user issued twice, and issuer/audience fields (<code>iss</code>, <code>aud</code>) that pin the token to this specific integration.
+</div>
+
+<p><code>CHAT_SHARED_SECRET</code> and <code>TENANT_ID</code> come from zod-validated environment config, backed in production by AWS Secrets Manager:</p>
+
+<div class="filepath">whatsnextplease-monolith/apps/backend/api/config/environment.ts</div>
+<pre>CHAT_APP_API_URL: z.string().url().default('http://localhost:5002'),
+CHAT_SHARED_SECRET: z.string().min(64),
+CHAT_APP_REGISTRATION_TOKEN: z.string().min(64),
+TENANT_ID: z.string().min(1).default('whatsnextplease'),</pre>
+
+<h3 id="delivery">3. Getting the token to the iframe</h3>
+
+<p>The frontend never calls the WNP backend's chat route directly from client code — it goes through a same-origin proxy so the request carries the user's session cookies (which the browser wouldn't attach to a cross-origin fetch to the backend's own host).</p>
+
+<div class="filepath">whatsnextplease-monolith/apps/web/hooks/use-chat-auth.ts</div>
+<pre>async function silentRefresh(): Promise&lt;boolean&gt; {
+  const response = await fetch('/api/proxy/chat/init-token', { credentials: 'include' });
+  const data = await response.json();
+  sharedAuthState = { ...sharedAuthState, token: data.token, signature: data.signature };
+  return true;
+}
+
+async function fetchChatToken(): Promise&lt;void&gt; {
+  await silentRefresh();
+  const { token, signature } = sharedAuthState;
+  const url = new URL(CHAT_EMBED_URL);
+  url.searchParams.set('ssoToken', token!);
+  url.searchParams.set('ssoSignature', signature!);
+  url.searchParams.set('t', Date.now().toString());
+  sharedAuthState = { token, signature, iframeUrl: url.toString(), ... };
+}</pre>
+
+<p>This hook is a module-level singleton — all the components that want to show chat share one fetch and one iframe URL, rather than each independently hitting the token endpoint.</p>
+
+<p>There's a second delivery path worth mentioning, used only <em>after</em> the iframe is already loaded: if the chat app reports an auth error mid-session (say the token expired), WNP silently re-fetches a token and pushes it into the already-mounted iframe via <code>postMessage</code>, rather than reloading the iframe entirely:</p>
+
+<pre>iframe?.contentWindow?.postMessage(
+  { source: 'wnp', type: 'CHAT_REAUTH', payload: { ssoToken: token, ssoSignature: signature } },
+  CHAT_BASE_URL
+);</pre>
+
+<p>So today's system actually uses <em>both</em> mechanisms — query params for the very first load, <code>postMessage</code> for silent re-auth without a remount. Keep that in mind; it matters for the history section below.</p>
+
+<h3 id="handshake">4. The Socket.IO handshake</h3>
+
+<p>On the chat app's side, the embedded page reads the token straight out of the URL on mount:</p>
+
+<div class="filepath">chat app/Chat-App-Frontend/app/embed/page.tsx</div>
+<pre>useEffect(() =&gt; {
+  const searchParams = new URLSearchParams(window.location.search);
+  const ssoToken = searchParams.get("ssoToken");
+  const ssoSignature = searchParams.get("ssoSignature");
+
+  if (ssoToken &amp;&amp; ssoSignature) {
+    authenticateViaSocket(ssoToken, ssoSignature);   // WebSocket-first auth
+    return;
+  }
+  // else fall back to isAuthenticated (existing session) or show error
+}, []);</pre>
+
+<p>The key architectural decision is in <code>lib/socket.ts</code>: rather than making a REST call to trade the token for a session and <em>then</em> opening a socket, the token and signature are handed straight to Socket.IO's connection options as the <code>auth</code> field.</p>
+
+<div class="filepath">chat app/Chat-App-Frontend/lib/socket.ts</div>
+<pre>export const initializeSocket = (options?: ConnectOptions): Socket =&gt; {
+  if (options?.ssoToken &amp;&amp; options?.ssoSignature) {
+    if (socket) { socket.removeAllListeners(); socket.disconnect(); socket = null; }
+  }
+  const authConfig: any = {};
+  if (options?.ssoToken &amp;&amp; options?.ssoSignature) {
+    authConfig.ssoToken = options.ssoToken;
+    authConfig.ssoSignature = options.ssoSignature;
+  } else {
+    // fallback: existing JWT/tenantId from auth store
+  }
+  socket = io(SOCKET_URL, { autoConnect: false, withCredentials: true, auth: authConfig });
+  return socket;
+};</pre>
+
+<div class="callout">
+  <div class="label">Why this matters</div>
+  Socket.IO ships an <code>auth</code> option specifically so that credentials can be validated <em>before</em> a connection is fully established, via server-side middleware registered with <code>io.use(...)</code>. That means the SSO token doesn't get its own bespoke REST endpoint on the chat-app side at all — the socket connection attempt <em>is</em> the login request. If validation fails, the connection simply never completes (a <code>connect_error</code> event fires instead).
+</div>
+
+<p>The page then waits for one of two outcomes:</p>
+
+<pre>newSocket.once("authenticated", (data: any) =&gt; {
+  if (data.success &amp;&amp; data.user) {
+    actions.login(..., data.accessToken, data.refreshToken, "15m", false, tenant);
+  }
+});
+newSocket.once("connect_error", (err: Error) =&gt; { ... });</pre>
+
+<h3 id="verify">5. Verifying the token (HMAC checking)</h3>
+
+<p>On the server, a single middleware function is attached to every incoming socket connection before any handler runs:</p>
+
+<div class="filepath">chat app/chat-app-backend/src/socket/index.ts</div>
+<pre>io.use(socketAuthMiddleware);
+io.on("connection", (socket) =&gt; {
+  const userId = socket.data.user._id.toString();
+  const tenantId = socket.data.tenantId;
+  socket.join(`tenant:${tenantId}:user:${userId}`);
+  socket.to(`tenant:${tenantId}`).emit("user_status_changed", { userId, status: "online" });
+  registerDirectMessageHandlers(io, socket, userId, tenantId);
+  registerChannelHandlers(io, socket, userId, tenantId);
+  // ...more handler registrations
+});</pre>
+
+<div class="filepath">chat app/chat-app-backend/src/socket/middleware/auth.middleware.ts</div>
+<pre>export const socketAuthMiddleware = async (socket, next) =&gt; {
+  const ssoToken = socket.handshake.auth.ssoToken || socket.handshake.query.ssoToken;
+  const ssoSignature = socket.handshake.auth.ssoSignature || socket.handshake.query.ssoSignature;
+
+  if (ssoToken &amp;&amp; ssoSignature) {
+    const payload = await SSOTokenService.validateToken(ssoToken, ssoSignature);
+    const user = await SSOTokenService.findOrCreateUser(payload);
+    const { accessToken, refreshToken } = await authService.generateTokenPair(user, false, ...);
+
+    socket.data.user = user;
+    socket.data.tenantId = user.tenantId;
+    await user.save();
+
+    socket.emit("authenticated", { success: true, accessToken, refreshToken, user: {...} });
+    return tenantContext.run({ tenantId: user.tenantId }, () =&gt; next());
+  }
+
+  // Fallback: plain JWT auth for a returning (non-SSO) session
+  const token = socket.handshake.auth.token || ...;
+  const decodedUser = authService.verifyToken(token);
+  const userFromDatabase = await userService.getUserByIdWithTenantId(decodedUser._id, decodedUser.tenantId);
+  socket.data.user = userFromDatabase;
+  socket.data.tenantId = userFromDatabase.tenantId;
+  tenantContext.run({ tenantId: userFromDatabase.tenantId }, () =&gt; next());
+};</pre>
+
+<p>And here's where the HMAC actually gets checked, in the token-validation service:</p>
+
+<div class="filepath">chat app/chat-app-backend/src/services/sso-token.service.ts</div>
+<pre>static async validateToken(token, signature) {
+  const payload = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
+  // require tenantId / tenantUserId / email / externalSystem present
+
+  if (payload.exp &lt; Math.floor(Date.now() / 1000))
+    throw new UnauthorizedError("Token has expired");
+
+  const tenant = await TenantService.getTenantWithSecret(payload.tenantId);
+  if (!tenant || !tenant.isActive || tenant.status !== "verified")
+    throw new ForbiddenError("Tenant is not active or verified");
+
+  const expectedSignature = crypto
+    .createHmac("sha256", tenant.sharedSecret)
+    .update(token)
+    .digest("hex");
+
+  if (signature !== expectedSignature)
+    throw new UnauthorizedError("Invalid token signature");
+
+  return payload;
+}</pre>
+
+<div class="callout warn">
+  <div class="label">Hold this thought</div>
+  Look closely at that middle check: <code>if (!tenant || !tenant.isActive || tenant.status !== "verified")</code>. This single line is the crux of the whole race-condition story below. The secret used to verify the signature isn't a global constant baked into the chat-app deployment — it's fetched <em>per tenant</em> from the database, and the tenant record has to already be in the <code>"verified"</code> state, or validation is refused outright, no matter how correct the signature is.
+</div>
+
+<h3 id="tenancy">6. Tenant isolation, end to end</h3>
+
+<p><code>tenantId</code> isn't just a field in the payload — it's threaded through literally every layer of the system, so that no code path can accidentally serve one tenant's data to another:</p>
+
+<table>
+  <tr><th>Layer</th><th>How tenantId is carried</th></tr>
+  <tr><td>SSO token</td><td>Embedded inside the HMAC-signed payload — tampering with it invalidates the signature</td></tr>
+  <tr><td>Token validation</td><td><code>TenantService.getTenantWithSecret(payload.tenantId)</code> looks up that tenant's own secret</td></tr>
+  <tr><td>User lookup</td><td><code>findOrCreateUser</code> scopes users by <code>{tenantId, externalSystem, externalId}</code></td></tr>
+  <tr><td>Socket handshake</td><td><code>socket.data.tenantId</code>, wrapped in <code>tenantContext.run({tenantId}, next)</code></td></tr>
+  <tr><td>Socket.IO rooms</td><td>Room names are namespaced: <code>tenant:{id}:user:{userId}</code>, <code>tenant:{id}</code></td></tr>
+  <tr><td>Database queries</td><td>A Mongoose plugin auto-injects <code>{tenantId}</code> into every query</td></tr>
+</table>
+
+<p>That last row is enforced quite aggressively — the plugin doesn't just default to some tenant if one isn't set, it throws:</p>
+
+<div class="filepath">chat app/chat-app-backend/src/plugins/tenantPlugin.ts</div>
+<pre>const tenantContext = new AsyncLocalStorage&lt;{ tenantId: string }&gt;();
+
+schema.pre(['find', 'findOne', 'findOneAndUpdate', 'updateMany'], function () {
+  const context = tenantContext.getStore();
+  if (!context) throw new Error("🚨 SECURITY: Query attempted without tenant context!");
+  this.where({ tenantId: context.tenantId });
+});</pre>
+
+<p>This is a defense-in-depth choice: even if some future code path forgot to scope a query by tenant, the plugin refuses to run it rather than silently leaking data across tenants.</p>
+
+<h3 id="session">7. After authentication: rooms and events</h3>
+
+<p>Once the <code>authenticated</code> event fires, the client stores its tokens and renders the chat UI. From there it's a fairly standard real-time chat pattern: joining rooms as the user navigates, and listening for matching events.</p>
+
+<div class="diagram">
+  <div class="lane-row">
+    <div class="lane-box actor">Client</div>
+    <div class="lane-box">Opens a channel → emits <code>join_channel</code></div>
+  </div>
+  <div class="arrow-row"><div class="arrow"></div></div>
+  <div class="lane-row">
+    <div class="lane-box actor">Server</div>
+    <div class="lane-box"><code>channel.handler.ts</code> adds the socket to that channel's room, scoped by tenant</div>
+  </div>
+  <div class="arrow-row"><div class="arrow"></div></div>
+  <div class="lane-row">
+    <div class="lane-box actor">Server</div>
+    <div class="lane-box">Broadcasts <code>new_channel_message</code>, <code>message_updated</code>, <code>message_reaction_updated</code> to that room</div>
+  </div>
+  <div class="arrow-row"><div class="arrow"></div></div>
+  <div class="lane-row">
+    <div class="lane-box actor">Client</div>
+    <div class="lane-box"><code>ChannelWindow.tsx</code> is subscribed and renders new messages as they arrive</div>
+  </div>
+</div>
+
+<p>Presence works the same way — <code>user_status_changed</code> is broadcast to the tenant room whenever someone connects or disconnects, and the frontend's <code>use-presence.ts</code> listens for it to show who's online.</p>
+
+<hr class="section-break">
+
+<h2 id="intuition">Intuition: why any of this is tricky</h2>
+
+<p>Strip away the code and the core idea is simple: WNP writes a note that says "this is Alice, from tenant Acme, and this note expires in 5 minutes," seals it with a wax stamp only WNP and chat-app know how to make (the HMAC secret), and hands it to Alice's browser to carry over to chat-app. Chat-app checks the stamp, and if it matches, trusts the note.</p>
+
+<p>The subtlety is in <em>who holds the stamp</em>. It would be simple — but wrong — for every tenant to share one global stamp. Instead, each tenant gets its <strong>own</strong> secret, generated when that tenant is first provisioned into the chat system, and stored in chat-app's own database. That's what lets tenant Acme's stamp be different from tenant Globex's stamp, so that a leaked secret only compromises one tenant.</p>
+
+<p>But this design implies a strict ordering requirement: a tenant's secret has to exist and be marked "ready" in chat-app's database <em>before</em> anyone can present a token signed with it. If WNP tries to mint a token for a tenant that chat-app doesn't yet consider fully set up, the sealed note is technically correct but chat-app will refuse to even check the stamp — as we saw in the <code>validateToken</code> snippet above: <code>if (!tenant.isActive || tenant.status !== "verified") throw ...</code>.</p>
+
+<p>That ordering requirement is exactly where the race condition lived, and it's the story the rest of this document tells.</p>
+
+<hr class="section-break">
+
+<h2 id="bug">The Bug &amp; the Fix</h2>
+
+<p>The architecture described above is the <em>current</em> state. It didn't arrive fully formed — it evolved through several commits across both repositories, in direct response to a real, reproducible failure mode. Here's the chronological story.</p>
+
+<div class="timeline">
+  <div class="tl-item">
+    <div class="tl-date">Early — original design</div>
+    <div class="tl-title">postMessage-based handshake</div>
+    <p>The very first SSO integration used <code>window.postMessage</code> to hand the token to the iframe, followed by a REST call to trade it for a session.</p>
+  </div>
+  <div class="tl-item">
+    <div class="tl-date">Mid — provisioning added</div>
+    <div class="tl-title">Three-step tenant registration introduced</div>
+    <p>To support multiple customer tenants (not just WNP itself), a generate → register → verify provisioning flow was built.</p>
+  </div>
+  <div class="tl-item bug">
+    <div class="tl-date">Observed failure</div>
+    <div class="tl-title">Race condition: auth attempted before verification completed</div>
+    <p>SSO/socket-auth requests landing between "register" and "verify" were rejected with <code>ForbiddenError</code>, and some failure paths threw raw exceptions instead of clean errors.</p>
+  </div>
+  <div class="tl-item fix">
+    <div class="tl-date">Fix, part 1</div>
+    <div class="tl-title">Socket.IO handshake-time auth replaces postMessage + REST</div>
+    <p>Collapsing the token hand-off and session creation into a single, atomic handshake step removed one whole class of ordering ambiguity on the client side.</p>
+  </div>
+  <div class="tl-item fix">
+    <div class="tl-date">Fix, part 2</div>
+    <div class="tl-title">Registration flow hardened</div>
+    <p>Error handling around the pending-verification window was made explicit and non-throwing, with debug logging added to catch the remaining edge cases.</p>
+  </div>
+</div>
+
+<h3 id="postmessage-era">Act I — the postMessage handshake</h3>
+
+<p>The original SSO integration worked like this: the iframe would announce itself as ready, the parent WNP page would respond with a token over <code>postMessage</code>, and the iframe would then make a separate REST call to actually log in.</p>
+
+<div class="filepath">Chat-App-Frontend/app/embed/page.tsx (original design)</div>
+<pre>const handleMessage = async (event: MessageEvent) =&gt; {
+  if (event.data?.type === "INIT_CHAT" &amp;&amp; event.data?.source !== "chat-app") {
+    const { token, signature } = event.data.payload || {};
+    await ssoAuth.mutateAsync({ token, signature }); // POST /tenants/sso/init
+  }
+};
+window.addEventListener("message", handleMessage);
+window.parent.postMessage({ source: "chat-app", type: "EMBED_READY" }, "*");</pre>
+
+<p>Meanwhile, the Socket.IO connection was established <em>separately</em>, using a JWT that only existed once the REST call above had already succeeded:</p>
+
+<pre>// hooks/use-sso-auth.ts (original) — plain REST call
+apiClient.post("/tenants/sso/init", { token, signature });
+// only after this resolves does lib/socket.ts have a JWT to put in socket.auth</pre>
+
+<div class="callout warn">
+  <div class="label">Where the fragility came from</div>
+  This is a three-step relay — <code>postMessage</code> → REST call → separately-initiated socket connection — with two asynchronous hops between "the iframe knows it needs to authenticate" and "the socket is actually connected as that user." Any one of those hops arriving late, out of order, or failing silently left the UI in an ambiguous state.
+</div>
+
+<h3 id="registration">Act II — the three-step tenant registration</h3>
+
+<p>In parallel, chat-app needed a way to onboard a brand-new tenant (a new customer organization) — generating that tenant's own <code>sharedSecret</code>, handing it to WNP, and only trusting SSO tokens once both sides agreed the tenant was properly set up. The chat-app backend documents its own three-step process directly in its response payload:</p>
+
+<div class="filepath">chat-app-backend — AdminController.generateTenantCredentials response</div>
+<pre>instructions: {
+  step1: "Send sharedSecret and registrationToken to client via secure channel",
+  step2: "Client stores sharedSecret in their .env file",
+  step3: "Client calls POST /api/tenants/register with all credentials",
+  step4: "You verify domain and activate tenant",
+}</pre>
+
+<p>Concretely, wired end-to-end across both repos, the three steps that matter are:</p>
+
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-num">1</div>
+    <div>
+      <p class="flow-title">Generate <span class="badge chat">chat-app</span></p>
+      <p class="flow-detail"><code>POST /api/admin/tenants/generate-credentials</code> creates a <code>Tenant</code> document with <code>status: "pending_registration"</code>, <code>isActive: false</code>, a random <code>sharedSecret</code>, and a single-use <code>registrationToken</code> (24h expiry).</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">2</div>
+    <div>
+      <p class="flow-title">Register <span class="badge wnp">WNP</span> → <span class="badge chat">chat-app</span></p>
+      <p class="flow-detail">WNP calls <code>POST /api/tenants/register</code> with the <code>registrationToken</code> and <code>sharedSecret</code> it was given. On match, the tenant flips to <code>status: "pending_verification"</code>, <code>isActive: true</code>, and the one-time registration token is cleared.</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-num">3</div>
+    <div>
+      <p class="flow-title">Verify <span class="badge chat">chat-app</span></p>
+      <p class="flow-detail"><code>POST /api/tenants/verify</code> checks the domain and flips the tenant to <code>status: "verified"</code>, calling <code>provisionTenant(tenantId)</code>.</p>
+    </div>
+  </div>
+</div>
+
+<h3 id="race">Act III — the race condition</h3>
+
+<p>Here's the crucial detail: <strong>step 2 (register) already marks the tenant <code>isActive: true</code></strong> — before step 3 (verify) has run. Anyone who kicked off SSO login (or a WNP user just trying the chat feature) in that in-between window would hit exactly the guard clause we flagged earlier:</p>
+
+<pre>if (!tenant || !tenant.isActive || tenant.status !== "verified")
+  throw new ForbiddenError("Tenant is not active or verified");</pre>
+
+<div class="diagram">
+  <p style="margin-top:0; font-family:sans-serif; font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;">Timeline of the race window</p>
+  <div class="lane-row">
+    <div class="lane-box actor">t=0</div>
+    <div class="lane-box">Step 2 completes: <code>isActive: true</code>, <code>status: "pending_verification"</code></div>
+  </div>
+  <div class="lane-row">
+    <div class="lane-box actor">t=0 to N</div>
+    <div class="lane-box" style="border-color:var(--bad); background:#fdf1ef;">⚠️ <strong>Race window</strong> — any SSO handshake attempted now is rejected, even with a perfectly valid signature, because <code>status !== "verified"</code></div>
+  </div>
+  <div class="lane-row">
+    <div class="lane-box actor">t=N</div>
+    <div class="lane-box">Step 3 completes: <code>status: "verified"</code> — handshakes now succeed</div>
+  </div>
+</div>
+
+<p>Worse, some of the surrounding code didn't fail cleanly during this window. A tenant lookup for a not-yet-fully-registered tenant could <em>throw</em> rather than return <code>null</code>, turning what should have been a clean 403/404 into an unhandled 500.</p>
+
+<h3 id="socketio-fix">Act IV — moving auth into the Socket.IO handshake</h3>
+
+<p>The fix that mattered most for the client-side ambiguity was collapsing the postMessage → REST → separate-socket-connect relay into a single step: hand the token straight to Socket.IO's handshake, as shown in the architecture section above. Compare the before and after directly:</p>
+
+<table>
+  <tr><th>Before (postMessage + REST)</th><th>After (Socket.IO handshake)</th></tr>
+  <tr>
+    <td>Iframe waits for <code>postMessage</code> from parent</td>
+    <td>Iframe reads token from its own URL on mount — no waiting on the parent's timing</td>
+  </tr>
+  <tr>
+    <td>Separate REST call: <code>POST /tenants/sso/init</code></td>
+    <td>No separate call — the socket connection attempt <em>is</em> the auth request</td>
+  </tr>
+  <tr>
+    <td>Socket connects afterwards using a JWT from the REST response</td>
+    <td>Socket connects immediately with <code>ssoToken</code>/<code>ssoSignature</code> in <code>auth</code>; JWTs come back on the same handshake via the <code>authenticated</code> event</td>
+  </tr>
+  <tr>
+    <td>Three independent async steps, each a place to get out of sync</td>
+    <td>One atomic handshake — success or <code>connect_error</code>, nothing in between</td>
+  </tr>
+</table>
+
+<div class="callout">
+  <div class="label">A shipped bug along the way</div>
+  Interestingly, right after this migration landed, the server-side <code>authenticated</code> event was emitting a typo'd field — <code>sucess: true</code> instead of <code>success: true</code> — which silently broke the frontend's <code>if (data.success &amp;&amp; data.user)</code> check and made the new, supposedly-more-reliable handshake look like it was hanging. A one-line fix corrected the field name. It's a good reminder that collapsing async steps reduces race conditions, but doesn't eliminate ordinary bugs.
+</div>
+
+<p>postMessage wasn't deleted from the system entirely — it was <em>demoted</em> to a narrower job it's actually well-suited for: pushing a refreshed token into an already-open iframe without tearing it down, for the case where a long-lived session's token needs silent renewal:</p>
+
+<pre>// used only for re-auth of an already-connected session, not first load
+iframe.contentWindow?.postMessage(
+  { source: 'wnp', type: 'CHAT_REAUTH', payload: { ssoToken, ssoSignature } },
+  CHAT_BASE_URL
+);</pre>
+
+<h3 id="hardening">Act V — hardening the registration window</h3>
+
+<p>The second half of the fix addressed the tenant-registration race directly, by making the pending-verification window fail predictably instead of unpredictably:</p>
+
+<ul class="key-list">
+  <li><strong>Tenant lookups return <code>null</code>, not exceptions.</strong> A fix changed <code>getTenant</code> so that an unregistered or mid-flight tenant lookup returns <code>null</code> instead of throwing, letting callers produce clean 403/404 responses rather than unhandled 500s.</li>
+  <li><strong>Custom error classes.</strong> Error handling in tenant authentication was refactored to use dedicated error types (like the <code>ForbiddenError</code>/<code>UnauthorizedError</code> seen in <code>validateToken</code> above) rather than generic thrown errors, so the failure mode during this window is explicit and catchable.</li>
+  <li><strong>Debug logging around the exact failure points.</strong> Logging was added around origin verification and around the token/shared-secret comparison in the registration handler specifically to diagnose failures occurring during this window — i.e., instrumentation aimed squarely at making the race visible when it happened.</li>
+</ul>
+
+<p>Notice what this fix does <em>not</em> do: it doesn't eliminate the ordering requirement between "register" and "verify" — a tenant genuinely can't accept SSO tokens signed with a secret it hasn't finished verifying. What it does is make the in-between window <em>observable and safe to fail</em>, rather than an unhandled crash — the correct response to "not ready yet" is a clean, expected rejection, not a 500.</p>
+
+<hr class="section-break">
+
+<h2 id="code-walkthrough">Code Walkthrough Summary</h2>
+
+<p>Pulling the threads together, here's the shape of the final system, organized by which file is responsible for which piece of trust:</p>
+
+<table>
+  <tr><th>Concern</th><th>File</th><th>Responsibility</th></tr>
+  <tr><td>Iframe embed</td><td><code>apps/web/components/chat/FullPageChat.tsx</code></td><td>Renders the iframe pointed at the chat app's <code>/embed</code> route</td></tr>
+  <tr><td>Token minting</td><td><code>apps/backend/api/controller/chat.controller.ts</code></td><td>Builds the payload, HMAC-signs it with the shared secret</td></tr>
+  <tr><td>Token delivery</td><td><code>apps/web/hooks/use-chat-auth.ts</code></td><td>Fetches the token via proxy, builds the iframe URL, handles re-auth</td></tr>
+  <tr><td>Handshake initiation</td><td><code>Chat-App-Frontend/app/embed/page.tsx</code> + <code>lib/socket.ts</code></td><td>Reads token from URL, opens socket with it in <code>auth</code></td></tr>
+  <tr><td>Handshake validation</td><td><code>chat-app-backend/src/socket/middleware/auth.middleware.ts</code></td><td>Runs before every connection via <code>io.use(...)</code></td></tr>
+  <tr><td>Signature verification</td><td><code>chat-app-backend/src/services/sso-token.service.ts</code></td><td>Decodes payload, checks expiry, recomputes and compares HMAC</td></tr>
+  <tr><td>Tenant provisioning</td><td><code>chat-app-backend</code> Admin/Tenant controllers</td><td>Generate → register → verify lifecycle</td></tr>
+  <tr><td>Tenant isolation</td><td><code>chat-app-backend/src/plugins/tenantPlugin.ts</code></td><td>Enforces <code>tenantId</code> on every DB query via <code>AsyncLocalStorage</code></td></tr>
+</table>
+
+<hr class="section-break">
+
+<h2 id="quiz">Quiz</h2>
+<p class="skip-note">Click an answer to see if you're right.</p>
+
+<div class="quiz-q" data-answer="2">
+  <p class="question">1. What exactly does the HMAC signature in the SSO token cover?</p>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-correct="false">Only the <code>tenantId</code> field, so it can be checked quickly</button>
+    <button class="quiz-opt" data-correct="false">The raw JSON object before it's encoded</button>
+    <button class="quiz-opt" data-correct="true">The base64-encoded string produced from <code>JSON.stringify(payload)</code></button>
+    <button class="quiz-opt" data-correct="false">The user's email address concatenated with the shared secret</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q">
+  <p class="question">2. Why does <code>SSOTokenService.validateToken</code> look up a per-tenant <code>sharedSecret</code> instead of using one global secret for the whole chat-app deployment?</p>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-correct="false">It's a performance optimization — per-tenant secrets are faster to hash</button>
+    <button class="quiz-opt" data-correct="true">So that a leaked secret only compromises one tenant, not every tenant using the chat system</button>
+    <button class="quiz-opt" data-correct="false">Because MongoDB requires per-document encryption keys</button>
+    <button class="quiz-opt" data-correct="false">To support multiple <code>externalSystem</code> values per tenant</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q">
+  <p class="question">3. In the three-step tenant registration flow, at which step does the tenant record first become <code>isActive: true</code>?</p>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-correct="false">Step 1 (Generate)</button>
+    <button class="quiz-opt" data-correct="true">Step 2 (Register)</button>
+    <button class="quiz-opt" data-correct="false">Step 3 (Verify)</button>
+    <button class="quiz-opt" data-correct="false">It never becomes active automatically — an admin must flip it manually</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q">
+  <p class="question">4. What was the actual root cause of the race condition failures?</p>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-correct="false">The HMAC algorithm was non-deterministic under concurrent load</button>
+    <button class="quiz-opt" data-correct="false">Socket.IO handshakes could arrive out of order at the transport layer</button>
+    <button class="quiz-opt" data-correct="true">A tenant could be <code>isActive: true</code> (post-Register) but not yet <code>status: "verified"</code> (pre-Verify), and <code>validateToken</code> rejects anything short of "verified"</button>
+    <button class="quiz-opt" data-correct="false">The <code>nonce</code> field collided between concurrent requests from the same user</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+<div class="quiz-q">
+  <p class="question">5. What specifically changed in the client-side handshake to remove the postMessage-era race, and what did postMessage get repurposed for afterwards?</p>
+  <div class="quiz-opts">
+    <button class="quiz-opt" data-correct="false">postMessage was removed entirely and replaced by polling a REST endpoint every second</button>
+    <button class="quiz-opt" data-correct="true">The token moved into the Socket.IO handshake's <code>auth</code> field for first load (collapsing three async steps into one); postMessage was kept only for silently refreshing tokens on an already-connected iframe (<code>CHAT_REAUTH</code>)</button>
+    <button class="quiz-opt" data-correct="false">postMessage was replaced by localStorage sharing between the two origins</button>
+    <button class="quiz-opt" data-correct="false">The iframe was removed and chat was rendered as a same-origin route instead</button>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+
+</div>
+
+<script>
+document.querySelectorAll('.quiz-q').forEach(q => {
+  const opts = q.querySelectorAll('.quiz-opt');
+  const fb = q.querySelector('.quiz-feedback');
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (opt.classList.contains('answered-locked')) return;
+      const correct = opt.getAttribute('data-correct') === 'true';
+      opts.forEach(o => o.classList.add('answered-locked'));
+      opt.classList.add(correct ? 'correct' : 'incorrect');
+      if (!correct) {
+        opts.forEach(o => {
+          if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+        });
+      }
+      fb.textContent = correct
+        ? '✓ Correct.'
+        : '✗ Not quite — the correct answer is highlighted above.';
+      fb.className = 'quiz-feedback show ' + (correct ? 'correct-fb' : 'incorrect-fb');
+    });
+  });
+});
+</script>
+
+<footer>Generated explainer &middot; SSO handshake architecture &amp; the tenant-registration race condition</footer>
+
+</body>
+</html>

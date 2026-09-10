@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>1 - Debugging a Learning Algorithm</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.55; padding:32px 18px 60px;
+  }
+  .wrap{max-width:940px;margin:0 auto;}
+  h1{
+    font-size:1.9rem; margin:0 0 6px; color:#fff;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .subtitle{color:var(--muted); margin-bottom:28px; font-size:0.95rem;}
+  .badge{
+    display:inline-block; background:var(--panel2); border:1px solid var(--border);
+    color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px;
+    margin-right:8px; margin-bottom:14px;
+  }
+  section{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin-bottom:22px;
+  }
+  h2{
+    font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;
+  }
+  h2 .num{
+    background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem;
+    width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+  p{color:#cfd2e0;}
+  code, .code{
+    font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14;
+    border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;
+  }
+  .formula-box{
+    background:#0c0e14; border:1px solid var(--border); border-radius:10px;
+    padding:20px; text-align:center; font-size:1.15rem; margin:14px 0; color:#fff;
+    overflow-x:auto;
+  }
+  .formula-box .term{color:var(--accent);}
+  .formula-box .reg{color:var(--accent2);}
+  .flow{
+    display:flex; flex-direction:column; gap:10px; margin-top:14px;
+  }
+  .flow-item{
+    display:flex; align-items:center; gap:12px; background:var(--panel2);
+    border:1px solid var(--border); border-left:4px solid var(--accent);
+    border-radius:8px; padding:12px 16px;
+  }
+  .flow-item .arrow{color:var(--accent); font-size:1.2rem;}
+  .flow-item .label{font-weight:600; color:#fff;}
+  .flow-item .desc{color:var(--muted); font-size:0.85rem;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .fix-card{
+    background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px;
+  }
+  .fix-card .tag{
+    font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+    padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:8px;
+  }
+  .tag.variance{background:rgba(94,214,164,0.15); color:var(--good);}
+  .tag.bias{background:rgba(255,107,129,0.15); color:var(--bad);}
+  .diagnostic-callout{
+    background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(255,138,107,0.08));
+    border:1px solid var(--accent); border-radius:12px; padding:20px; margin-top:10px;
+  }
+  .diagnostic-callout .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .scenario{
+    background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px;
+    padding:14px 18px; margin-top:14px;
+  }
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+  ul{color:#cfd2e0; padding-left:20px;}
+  li{margin-bottom:6px;}
+  .timeline{display:flex; gap:0; margin-top:16px; border-radius:10px; overflow:hidden; border:1px solid var(--border);}
+  .timeline div{flex:1; padding:14px 10px; text-align:center; font-size:0.82rem;}
+  .t-bad{background:rgba(255,107,129,0.15); color:var(--bad); font-weight:600;}
+  .t-good{background:rgba(94,214,164,0.15); color:var(--good); font-weight:600;}
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 1 — Debugging a Learning Algorithm</h1>
+  <p class="subtitle">What to try when your model makes unacceptably large errors — and how to stop guessing.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Setup: Regularized Linear Regression on Housing Prices</h2>
+    <p>You've trained a model to predict housing prices using regularized linear regression. The cost function combines the usual squared-error term with a regularization penalty:</p>
+    <div class="formula-box">
+      J(<span class="term">w</span>,b) = <span class="term">1/2m · Σ(f<sub>w,b</sub>(x⁽ⁱ⁾) − y⁽ⁱ⁾)²</span> + <span class="reg">λ/2m · Σw<sub>j</sub>²</span>
+    </div>
+    <p>But when you test it, it makes <strong>unacceptably large errors</strong> in its predictions. The question every ML engineer eventually faces: <em>what do you actually try next?</em></p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The Six Usual Suspects</h2>
+    <p>There's a standard menu of things people reach for when a model underperforms. Each <em>can</em> help — but on any given problem, some will be fruitful and some will be a waste of months.</p>
+    <div class="flow">
+      <div class="flow-item"><span class="arrow">→</span><div><div class="label">Get more training examples</div><div class="desc">Assumes the model needs more data to generalize</div></div></div>
+      <div class="flow-item"><span class="arrow">→</span><div><div class="label">Try smaller sets of features</div><div class="desc">Assumes the model is overfitting on irrelevant/noisy features</div></div></div>
+      <div class="flow-item"><span class="arrow">→</span><div><div class="label">Try getting additional features</div><div class="desc">Assumes the model is underfitting — missing signal</div></div></div>
+      <div class="flow-item"><span class="arrow">→</span><div><div class="label">Try adding polynomial features (x₁², x₂², x₁x₂, ...)</div><div class="desc">Assumes the relationship isn't linear enough</div></div></div>
+      <div class="flow-item"><span class="arrow">→</span><div><div class="label">Try decreasing λ</div><div class="desc">Assumes regularization is too strong, causing underfitting</div></div></div>
+      <div class="flow-item"><span class="arrow">→</span><div><div class="label">Try increasing λ</div><div class="desc">Assumes regularization is too weak, causing overfitting</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Why This List Is Dangerous Without a Plan</h2>
+    <div class="scenario">
+      <div class="stitle">Real-World Scenario</div>
+      <p style="margin:0;">A team spends <strong>months collecting more training data</strong>, assuming that's the bottleneck. Performance barely moves. It turns out the real problem was that the model was <em>too simple</em> (high bias) — no amount of extra data would've fixed that. A quick diagnostic run beforehand would have revealed this in an afternoon, not a quarter.</p>
+    </div>
+    <p style="margin-top:14px;">This is the core lesson: <strong>each fix targets a different root cause</strong> (mostly: bias vs. variance, covered in later lessons), and picking the wrong one wastes real time.</p>
+    <div class="grid2">
+      <div class="fix-card">
+        <span class="tag variance">Fixes for High Variance (overfitting)</span>
+        <ul>
+          <li>Get more training examples</li>
+          <li>Try smaller sets of features</li>
+          <li>Try increasing λ</li>
+        </ul>
+      </div>
+      <div class="fix-card">
+        <span class="tag bias">Fixes for High Bias (underfitting)</span>
+        <ul>
+          <li>Try getting additional features</li>
+          <li>Try adding polynomial features</li>
+          <li>Try decreasing λ</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Fix: Run a Diagnostic First</h2>
+    <div class="diagnostic-callout">
+      <div class="title">Definition — Diagnostic</div>
+      <p style="margin:0;">A <strong>test</strong> you run to gain insight into what is/isn't working with a learning algorithm, in order to guide what to improve.</p>
+    </div>
+    <p style="margin-top:16px;">Diagnostics take upfront time to implement — but that time is almost always worth it, because they tell you <em>which</em> of the six fixes above is actually likely to help, before you commit weeks or months to it.</p>
+    <div class="timeline">
+      <div class="t-bad">No diagnostic → guess a fix → months of work → maybe no improvement</div>
+      <div class="t-good">Diagnostic first → identify root cause → targeted fix → time well spent</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Key Takeaway</h2>
+    <p>Efficiency in ML engineering isn't about knowing more algorithms — it's about <strong>repeatedly making good decisions about what to try next</strong>. The teams that ship fast aren't smarter about the math; they're better at diagnosing before they act. This week's material builds the diagnostic toolkit (starting with evaluating model performance properly) to make that decision-making systematic instead of guesswork.</p>
+  </section>
+
+  <footer>Lesson 1 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>

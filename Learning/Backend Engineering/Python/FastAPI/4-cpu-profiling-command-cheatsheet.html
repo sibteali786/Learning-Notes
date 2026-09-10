@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>CPU Profiling Diagnosis — Command Cheatsheet</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #1c1c1e;
+    --sub: #6b6b70;
+    --border: #e6e5e2;
+    --accent: #2f6f4f;
+    --accent-soft: #e8f3ec;
+    --warn: #b5541a;
+    --warn-soft: #fbeee3;
+    --code-bg: #f2f1ee;
+    --blue: #2f5f9e;
+    --blue-soft: #e9f0fa;
+    --purple: #6b4fa0;
+    --purple-soft: #eee8f5;
+    --red: #a5312c;
+    --red-soft: #fbeceb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a;
+      --card: #202124;
+      --ink: #e9e9ea;
+      --sub: #9a9a9e;
+      --border: #34353a;
+      --accent: #5fbf8f;
+      --accent-soft: #1c2e26;
+      --warn: #e0935a;
+      --warn-soft: #2e2319;
+      --code-bg: #2a2b2f;
+      --blue: #7aa8e0;
+      --blue-soft: #1c2733;
+      --purple: #b09ee0;
+      --purple-soft: #241f30;
+      --red: #e08a86;
+      --red-soft: #2e1f1e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 { font-size: 26px; margin: 6px 0 4px; letter-spacing: -0.01em; }
+  .date { color: var(--sub); font-size: 14px; }
+  .intro { font-size: 14px; color: var(--sub); line-height: 1.6; margin-top: 12px; max-width: 640px; }
+
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0 30px;
+  }
+  .toc a {
+    font-size: 12.5px;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  .toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* diagnosis flow strip */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 30px;
+    font-size: 12.5px;
+  }
+  .flow .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow .arrow { color: var(--sub); }
+
+  section { margin-bottom: 34px; }
+  section h2 {
+    font-size: 17px;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    scroll-margin-top: 16px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    font-size: 14px;
+    flex: none;
+  }
+  section > .lede { color: var(--sub); font-size: 13.5px; margin: 4px 0 14px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .card .title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card .title .when {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex: none;
+  }
+  .card p { font-size: 13.5px; line-height: 1.5; color: var(--ink); margin: 6px 0; }
+  .card p.note { color: var(--sub); font-size: 12.5px; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+  pre {
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    margin: 8px 0;
+    line-height: 1.55;
+  }
+  pre .comment { color: var(--sub); }
+
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-right: 6px;
+  }
+  .tag.host { background: var(--blue-soft); color: var(--blue); }
+  .tag.container { background: var(--purple-soft); color: var(--purple); }
+  .tag.psql { background: var(--accent-soft); color: var(--accent); }
+  .tag.gotcha { background: var(--warn-soft); color: var(--warn); }
+  .tag.result { background: var(--red-soft); color: var(--red); }
+
+  .callout {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 10px 0;
+  }
+  .callout.finding {
+    border-left-color: var(--red);
+    background: var(--red-soft);
+  }
+  .callout .lbl {
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 10px 0;
+  }
+  th, td {
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--sub); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+  td code { background: transparent; padding: 0; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 22px; }
+    .card { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Live Feed Engine · Phase 1</div>
+    <h1>CPU Profiling Diagnosis — Command Cheatsheet</h1>
+    <div class="date">2026-09-10</div>
+    <p class="intro">
+      Every command run today to chase the p99 latency plateau past the pool/worker fix —
+      from confirming CPU (not I/O) is the bottleneck, to catching a profiling artifact,
+      to isolating the real hot path down to a specific FastAPI function.
+    </p>
+  </header>
+
+  <div class="toc">
+    <a href="#resource">1 · Resource check</a>
+    <a href="#pyspy-live">2 · py-spy (live view)</a>
+    <a href="#pyspy-record">3 · py-spy (flamegraph)</a>
+    <a href="#gunicorn">4 · Gunicorn process map</a>
+    <a href="#findings">5 · What the numbers meant</a>
+  </div>
+
+  <div class="flow">
+    <span class="step">k6 load</span><span class="arrow">→</span>
+    <span class="step">docker stats</span><span class="arrow">→</span>
+    <span class="step">top (in container)</span><span class="arrow">→</span>
+    <span class="step">py-spy top</span><span class="arrow">→</span>
+    <span class="step">py-spy record (flamegraph)</span><span class="arrow">→</span>
+    <span class="step">zoom to hot branch</span>
+  </div>
+
+  <section id="resource">
+    <h2><span class="badge">🧭</span> Resource check — is it CPU at all?</h2>
+    <p class="lede">Before reaching for a profiler, confirm which resource is actually saturated.</p>
+
+    <div class="card">
+      <div class="title"><span><span class="tag host">host</span>core count</span></div>
+      <pre>docker exec -it feed_api nproc</pre>
+      <p class="note">Confirms how many CPUs the container actually has to work with — the number
+      you compare <code>load average</code> against.</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span><span class="tag container">container</span>live per-process CPU</span></div>
+      <pre>docker exec -it feed_api top</pre>
+      <p>Run this <em>while</em> k6 is hammering the API. Key columns:</p>
+      <table>
+        <tr><th>Field</th><th>What to read</th></tr>
+        <tr><td><code>%Cpu(s) id</code></td><td>Idle CPU. <code>0.0</code> across the whole run ⇒ CPU-bound, not I/O-bound.</td></tr>
+        <tr><td><code>%Cpu(s) wa</code></td><td>I/O wait. Near-zero here ruled out disk/network blocking.</td></tr>
+        <tr><td><code>load average</code></td><td>Compare to <code>nproc</code>. Went 3.32 → 8.41 against 4 cores — real queuing, not just busy.</td></tr>
+        <tr><td>per-PID <code>%CPU</code></td><td>Confirmed all 4 Gunicorn workers evenly loaded — earlier <code>docker stats</code> snapshot showing "only 2 workers" was a stale single-sample misread.</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="pyspy-live">
+    <h2><span class="badge">🔬</span> py-spy — live sampling profiler</h2>
+    <p class="lede">Attaches to a running process and shows which Python functions are actually
+    on-CPU, without needing to modify or restart anything.</p>
+
+    <div class="card">
+      <div class="title"><span><span class="tag host">host</span>find the PIDs first</span></div>
+      <pre>docker top feed_api</pre>
+      <p>Lists every process inside the container with its <code>PID</code>/<code>PPID</code> — this
+      is how the Gunicorn <strong>master</strong> was told apart from its 4 <strong>worker</strong>
+      children. The master's children (matching <code>PPID</code>) are the ones handling requests;
+      the master itself never touches an HTTP request.</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span><span class="tag host">host</span>live top-style view, all subprocesses</span></div>
+      <pre>sudo /home/sibteali-baqar/.local/bin/py-spy top --pid 307782 --subprocesses</pre>
+      <p><code>--subprocesses</code> follows the master PID and samples all its child workers at once
+      instead of picking a single worker to guess at.</p>
+      <div class="callout">
+        <span class="lbl">Needs SYS_PTRACE</span>
+        py-spy reads another process's memory directly, so it needs elevated privilege
+        (<code>sudo</code>, or the container needs <code>--cap-add SYS_PTRACE</code>) to attach.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title"><span><span class="tag host">host</span>live view, one worker only</span></div>
+      <pre>sudo /home/sibteali-baqar/.local/bin/py-spy top --pid 307847</pre>
+      <p class="note">No <code>--subprocesses</code> here — sampling a single worker PID keeps
+      Gunicorn's own internal (non-request) threads out of the picture.</p>
+    </div>
+  </section>
+
+  <section id="pyspy-record">
+    <h2><span class="badge">🔥</span> py-spy record — flamegraph</h2>
+    <p class="lede">Same sampling, but written out as an SVG flamegraph instead of a live scrolling
+    table — much easier to eyeball the widest (= most cumulative time) branch across a whole run.</p>
+
+    <div class="card">
+      <div class="title"><span><span class="tag host">host</span>record a flamegraph</span></div>
+      <pre>sudo /home/sibteali-baqar/.local/bin/py-spy record --pid 370147</pre>
+      <p>Produces a timestamped <code>.svg</code> next to wherever the command was run. Open it in a
+      browser — width of a bar = proportion of total sampled time, click to zoom into a branch.</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span><span class="tag host">host</span>single worker, no subprocess noise</span></div>
+      <pre>sudo /home/sibteali-baqar/.local/bin/py-spy record --pid 337266</pre>
+      <p class="note">The one that actually produced a usable request-path flamegraph — recording
+      against a single worker PID (skip <code>--subprocesses</code>) avoided mixing in the master's
+      own bookkeeping threads.</p>
+    </div>
+  </section>
+
+  <section id="gunicorn">
+    <h2><span class="badge">🧵</span> Gunicorn process map — master vs. worker</h2>
+    <p class="lede">The one distinction that made the whole diagnosis click.</p>
+    <table>
+      <tr><th>PID</th><th>PPID</th><th>Role</th><th>Handles requests?</th></tr>
+      <tr><td><code>307782</code></td><td>—</td><td>Gunicorn <strong>master</strong> (arbiter)</td><td>No — spawns/monitors workers only</td></tr>
+      <tr><td><code>307847–307850</code></td><td><code>307782</code></td><td>4× <code>UvicornWorker</code></td><td>Yes — these run your FastAPI code</td></tr>
+    </table>
+    <p class="note" style="margin-top:8px;">Rule of thumb going forward: always profile a
+    <strong>worker</strong> PID for request-path questions, and only reach for
+    <code>--subprocesses</code> on the master when you deliberately want the aggregate picture.</p>
+  </section>
+
+  <section id="findings">
+    <h2><span class="badge">🧩</span> What the numbers actually meant</h2>
+
+    <div class="callout finding">
+      <span class="lbl">False lead: <code>_worker (concurrent/futures/thread.py)</code></span>
+      Dominated every <code>--subprocesses</code> snapshot (~1200% own time, growing linearly with
+      wall time). Looked alarming, but the flamegraph showed it branching off as a
+      <strong>sibling</strong> of Gunicorn's own arbiter loop — straight from
+      <code>_bootstrap_inner</code>, not nested under any request-handling code. Confirmed as an
+      artifact of profiling <em>all</em> subprocesses together (including the master's own internal
+      threads) rather than a real cost of serving requests.
+    </div>
+
+    <div class="callout finding">
+      <span class="lbl">Real finding: <code>solve_dependencies</code></span>
+      Re-profiling a single worker in isolation showed <code>solve_dependencies</code> →
+      <code>request_params_to_args</code> → three <code>_get_multidict_value</code> calls (one per
+      query param: <code>region</code>, <code>limit</code>, <code>cursor</code>) as a branch
+      comparable in width to the actual Postgres <code>fetch</code>/<code>execute</code> branch.
+      FastAPI's own per-request parameter-resolution machinery was costing roughly as much CPU as
+      the database round-trip itself — despite <code>EXPLAIN ANALYZE</code> showing the query at
+      ~2ms.
+    </div>
+
+    <div class="callout">
+      <span class="lbl">Falsification test</span>
+      Removed <code>response_model</code>/Pydantic response validation, returned a raw
+      <code>JSONResponse</code> instead → <strong>no change</strong> in p99 (~1.5s, same as before).
+      Correctly predicted by the profiling data: the response-side cost
+      (<code>dump_json</code>/<code>validate_python</code>) was small; the untouched
+      <code>solve_dependencies</code> branch was the large one. A clean confirm-or-falsify test, not
+      a guess.
+    </div>
+  </section>
+
+  <footer>
+    Live Feed Engine — Phase 1 diagnosis session. Continues from
+    <code>3-live-feed-engine-command-cheatsheet.html</code> (pool/worker/EXPLAIN ANALYZE fixes).
+    Next: rewrite <code>get_feed</code> to read <code>request.query_params</code> directly and
+    re-profile to see whether <code>solve_dependencies</code> shrinks.
+  </footer>
+
+</div>
+</body>
+</html>

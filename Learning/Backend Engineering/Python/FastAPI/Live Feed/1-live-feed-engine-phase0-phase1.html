@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Live Feed Engine: From First Query to a 5x Faster API</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #1c1c1e;
+    --sub: #6b6b70;
+    --border: #e6e5e2;
+    --accent: #2f6f4f;
+    --accent-soft: #e8f3ec;
+    --warn: #b5541a;
+    --warn-soft: #fbeee3;
+    --code-bg: #f2f1ee;
+    --blue: #2f5f9e;
+    --blue-soft: #e9f0fa;
+    --red: #b13a3a;
+    --red-soft: #fbe9e9;
+    --purple: #6b4fa0;
+    --purple-soft: #eee8f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a;
+      --card: #202124;
+      --ink: #e9e9ea;
+      --sub: #9a9a9e;
+      --border: #34353a;
+      --accent: #5fbf8f;
+      --accent-soft: #1c2e26;
+      --warn: #e0935a;
+      --warn-soft: #2e2319;
+      --code-bg: #2a2b2f;
+      --blue: #7aa8e0;
+      --blue-soft: #1c2733;
+      --red: #e07a7a;
+      --red-soft: #2e1c1c;
+      --purple: #b09ee0;
+      --purple-soft: #241f30;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .layout {
+    display: flex;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .toc {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    width: 240px;
+    flex: none;
+    padding: 32px 16px;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+  }
+  .toc h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--sub); margin: 0 0 12px; }
+  .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  .toc li { counter-increment: toc; margin-bottom: 4px; }
+  .toc a {
+    display: block;
+    padding: 6px 8px;
+    border-radius: 7px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13.5px;
+  }
+  .toc a:before { content: counter(toc) ". "; color: var(--sub); }
+  .toc a:hover { background: var(--code-bg); }
+  main { flex: 1; min-width: 0; padding: 32px 36px 100px; }
+
+  header.hero { margin-bottom: 40px; }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  h1 { font-size: 30px; margin: 8px 0 8px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--sub); font-size: 15.5px; max-width: 640px; }
+
+  section { margin-bottom: 52px; }
+  section > h2 {
+    font-size: 22px;
+    margin: 0 0 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  section > h2 .num { color: var(--accent); margin-right: 8px; }
+  section > .lede { color: var(--sub); font-size: 14.5px; margin-bottom: 20px; }
+
+  h3 { font-size: 17px; margin: 28px 0 10px; }
+
+  p { font-size: 15px; margin: 10px 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 12.8px;
+    line-height: 1.55;
+    white-space: pre;
+    margin: 12px 0;
+  }
+  pre code { background: none; padding: 0; }
+
+  .callout {
+    border-left: 3px solid var(--blue);
+    background: var(--blue-soft);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .callout.win { border-color: var(--accent); background: var(--accent-soft); }
+  .callout .label { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .callout.warn .label { color: var(--warn); }
+  .callout.win .label { color: var(--accent); }
+  .callout.blue-label .label { color: var(--blue); }
+
+  /* system diagram */
+  .diagram {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 18px 0;
+    padding: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .node {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    background: var(--bg);
+    text-align: center;
+    min-width: 90px;
+  }
+  .node .title { font-weight: 700; margin-bottom: 2px; }
+  .node .sub { color: var(--sub); font-size: 11px; }
+  .node.accent { border-color: var(--accent); background: var(--accent-soft); }
+  .node.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .node.blue { border-color: var(--blue); background: var(--blue-soft); }
+  .arrow { color: var(--sub); font-size: 18px; flex: none; }
+  .diagram.vertical { flex-direction: column; align-items: stretch; }
+  .diagram.vertical .arrow { text-align: center; align-self: center; }
+
+  .workers-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  table.stats { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  table.stats th, table.stats td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  table.stats th { color: var(--sub); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+  table.stats td.hot { color: var(--red); font-weight: 700; }
+  table.stats td.ok { color: var(--accent); font-weight: 700; }
+  table.stats tr:last-child td { border-bottom: none; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .stat { background: var(--code-bg); border-radius: 10px; padding: 10px 12px; }
+  .stat .label { font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.03em; }
+  .stat .value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .stat .value.hot { color: var(--red); }
+  .stat .value.ok { color: var(--accent); }
+
+  .diff-block { border-radius: 10px; overflow: hidden; margin: 12px 0; border: 1px solid var(--border); }
+  .diff-block .file-label {
+    background: var(--code-bg);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--sub);
+    border-bottom: 1px solid var(--border);
+  }
+  .diff-block pre { margin: 0; border-radius: 0; }
+  .diff-block .del { background: var(--red-soft); color: var(--red); display: block; }
+  .diff-block .add { background: var(--accent-soft); color: var(--accent); display: block; }
+
+  ul.plain, ol.plain { padding-left: 22px; font-size: 15px; }
+  ul.plain li, ol.plain li { margin-bottom: 6px; }
+
+  .quiz-q {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .quiz-q .qtext { font-weight: 600; margin-bottom: 12px; font-size: 15px; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    text-align: left;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .quiz-opt:hover { border-color: var(--blue); }
+  .quiz-opt.correct { border-color: var(--accent); background: var(--accent-soft); }
+  .quiz-opt.incorrect { border-color: var(--red); background: var(--red-soft); }
+  .quiz-opt.disabled { cursor: default; pointer-events: none; }
+  .quiz-feedback { margin-top: 10px; font-size: 13.5px; padding: 10px 12px; border-radius: 8px; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: var(--accent-soft); color: var(--accent); }
+  .quiz-feedback.incorrect-fb { background: var(--red-soft); color: var(--red); }
+
+  footer { text-align: center; color: var(--sub); font-size: 12.5px; padding: 30px 0 60px; }
+
+  @media (max-width: 860px) {
+    .layout { flex-direction: column; }
+    .toc { position: static; width: auto; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    main { padding: 24px 18px 80px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#background">Background</a></li>
+      <li><a href="#intuition">Intuition</a></li>
+      <li><a href="#code">Code Walkthrough</a></li>
+      <li><a href="#quiz">Quiz</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">Live Feed Engine · Learning Report</div>
+      <h1>From First Query to a 5x Faster API</h1>
+      <p class="subtitle">
+        How a simple <code>GET /feed</code> endpoint over Postgres went from serving ~205
+        requests/second with a 10.9-second worst-case wait, to ~1,114 requests/second with a
+        1.42-second worst case — and what each step of that journey actually taught us about
+        where web applications get slow.
+      </p>
+    </header>
+
+    <section id="background">
+      <h2><span class="num">1.</span>Background</h2>
+      <p class="lede">Skip ahead to Intuition if you're already comfortable with connection pools, WSGI/ASGI workers, and Postgres query plans.</p>
+
+      <h3>What this project is</h3>
+      <p>
+        The Live Feed Engine is a small news aggregator: a background poller pulls articles from
+        real RSS feeds (BBC, TechCrunch, Hacker News) into a Postgres database, and a FastAPI
+        service exposes a single endpoint, <code>GET /feed</code>, that returns a page of articles
+        for a given region. It's deliberately simple — the interesting part isn't the feature, it's
+        what happens when you point real load at it.
+      </p>
+
+      <h3>For beginners: the pieces in play</h3>
+      <p>
+        A web API like this one has several layers, and slowness can hide in any of them. It's
+        worth having names for each before we go further:
+      </p>
+      <ul class="plain">
+        <li>
+          <strong>The web server process.</strong> Something has to accept incoming HTTP
+          connections and hand them to your application code. Here that's
+          <a href="#" onclick="return false;"><code>uvicorn</code></a>, an ASGI server — the
+          modern, asynchronous counterpart to older WSGI servers like Gunicorn's classic sync
+          workers. "ASGI" just means it can juggle many in-flight requests on one thread using
+          <code>async</code>/<code>await</code>, rather than blocking one thread per request.
+        </li>
+        <li>
+          <strong>The application framework.</strong> FastAPI sits on top of the ASGI server. It
+          turns a Python function into an HTTP route, validates query parameters against type
+          hints, and serializes return values into JSON via Pydantic models.
+        </li>
+        <li>
+          <strong>The database driver and connection pool.</strong> Every query to Postgres needs
+          an open TCP connection to it. Opening a new one per request is slow, so applications keep
+          a <em>pool</em> of already-open connections and borrow one for the duration of a query.
+          <code>asyncpg</code> is the async Postgres driver used here; its <code>create_pool()</code>
+          takes a <code>min_size</code>/<code>max_size</code> that bounds how many real Postgres
+          connections ever exist at once.
+        </li>
+        <li>
+          <strong>The database itself.</strong> Postgres has its own hard limit on total concurrent
+          connections (<code>max_connections</code>, default 100) — regardless of what your
+          application-level pool allows, Postgres will refuse connections beyond this.
+        </li>
+        <li>
+          <strong>The operating system.</strong> Every open socket or file — including every open
+          database connection and every open HTTP connection — consumes a file descriptor, and the
+          OS (or, inside a container, Docker) caps how many a process may hold open at once (the
+          <code>ulimit</code>).
+        </li>
+      </ul>
+
+      <div class="diagram">
+        <div class="node blue"><div class="title">k6 (load generator)</div><div class="sub">simulates many users</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="title">uvicorn / Gunicorn</div><div class="sub">accepts HTTP, runs event loop(s)</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="title">FastAPI route</div><div class="sub">validates params, builds query</div></div>
+        <div class="arrow">→</div>
+        <div class="node accent"><div class="title">asyncpg pool</div><div class="sub">borrows a connection</div></div>
+        <div class="arrow">→</div>
+        <div class="node warn"><div class="title">Postgres</div><div class="sub">max_connections = 100</div></div>
+      </div>
+
+      <h3>Directly relevant to this change: how the project started</h3>
+      <p>
+        Phase 0 of the project built exactly the chain above, by hand, so its concepts could be
+        learned rather than taken for granted:
+      </p>
+      <ul class="plain">
+        <li>Postgres running via <code>docker-compose.yml</code>, schema with <code>article</code> and <code>publisher</code> tables.</li>
+        <li>A tiny RSS poller (<code>rss_poller.py</code>) inserting real articles.</li>
+        <li>
+          A FastAPI app (<code>main.py</code>) with one route, <code>GET /feed?region=&amp;limit=&amp;cursor=</code>,
+          using <strong>cursor-based pagination</strong> — paging by the strictly-increasing
+          <code>article.id</code> rather than a numeric offset, so that pages never drift or
+          overlap even as new rows are inserted concurrently.
+        </li>
+        <li>
+          A connection pool created once at startup via FastAPI's <code>lifespan</code> context
+          manager, and reused for every request — the standard pattern, since opening a fresh
+          Postgres connection per request would be far too slow to survive real traffic.
+        </li>
+        <li>A <code>Dockerfile</code> and a matching <code>api</code> service in <code>docker-compose.yml</code>, so the whole thing runs as two containers talking over Docker's internal network.</li>
+      </ul>
+      <p>
+        That's the system as it stood at the end of Phase 0: correct, and confirmed working against
+        real RSS data. What it had never done was face concurrent load. That's where Phase 1 — and
+        this report — begins.
+      </p>
+    </section>
+
+    <section id="intuition">
+      <h2><span class="num">2.</span>Intuition</h2>
+      <p class="lede">The core idea: a system with zero errors can still be "broken" — and the fix isn't always where you first suspect.</p>
+
+      <h3>The setup: proving you need to worry, before you worry</h3>
+      <p>
+        A tempting habit when building something like this is to add caching (Redis), message
+        queues (Kafka), and other heavyweight infrastructure speculatively, because "that's what
+        real systems have." The more disciplined — and more instructive — approach is to <em>prove
+        you need it first</em>. So Phase 1 seeded the <code>article</code> table with one million
+        synthetic rows, using Postgres's <code>COPY ... FROM STDIN</code> rather than a million
+        individual <code>INSERT</code> statements (which would have taken drastically longer — each
+        <code>INSERT</code> is its own network round trip, while <code>COPY</code> streams the whole
+        batch in one go), and then hit the running <code>/feed</code> endpoint with
+        <a href="#" onclick="return false;"><code>k6</code></a>, a load-testing tool that simulates
+        many concurrent users ("virtual users," or VUs) hitting an endpoint at once, ramping from 0
+        up to 1,000 VUs over five 30-second stages.
+      </p>
+
+      <div class="callout blue-label">
+        <div class="label">What is k6, really?</div>
+        It's a standalone command-line tool (not a Python or JS library your project depends on) —
+        you install it once via your OS package manager, and it runs test scripts written in
+        JavaScript purely as its own configuration language. It sits <em>outside</em> your stack
+        entirely, generating real HTTP requests against your already-running server, the same way a
+        browser or <code>curl</code> would.
+      </div>
+
+      <h3>Act 1 — the first surprise: it's not crashing, it's queuing</h3>
+      <p>
+        The first run's result looked, at first glance, like total collapse: a 99th-percentile
+        (p99) latency of <strong>10.93 seconds</strong> against a target of 200ms, with some
+        requests taking over 32 seconds. But the crucial detail was that <strong>0% of requests
+        failed</strong> — every single one eventually returned a correct <code>200 OK</code>. That
+        distinction matters enormously: a system returning errors under load is rejecting work it
+        can't do; a system where every request eventually succeeds, just slowly, is <em>queuing</em>
+        — work is piling up faster than it can be drained, like a single toll booth trying to
+        process a thousand cars arriving at once. Nobody gets turned away, but the line grows
+        without bound.
+      </p>
+
+      <div class="diagram">
+        <div class="node blue"><div class="title">1000 requests arrive</div></div>
+        <div class="arrow">→</div>
+        <div class="node warn"><div class="title">pool max_size = 10</div><div class="sub">only 10 can be "in service"</div></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="title">~990 requests wait in line</div><div class="sub">this queue *is* the 10.9s p99</div></div>
+      </div>
+
+      <p>
+        Sure enough, the pool was configured with <code>max_size=10</code> — meaning only 10 requests
+        could ever be actively talking to Postgres at once, no matter how many thousands were
+        waiting. Raising it to <code>max_size=50</code> cut the median latency roughly 5x (914ms →
+        ~180ms) and nearly doubled throughput. Progress — but the tail (p99, max) barely moved, and
+        a new symptom appeared: hundreds of requests were now getting cut off by k6's own
+        graceful-shutdown timer because they still hadn't finished. Fixing one bottleneck had simply
+        exposed the next one underneath it.
+      </p>
+
+      <h3>Act 2 — ruling out the "obvious" suspect</h3>
+      <p>
+        The project's own plan document predicted that at large row counts, pagination would start
+        doing expensive full-table scans, especially for offset-style pagination reading deep
+        pages. This is a very real and common failure mode — but it's worth learning to <em>check</em>
+        rather than assume, using Postgres's <code>EXPLAIN ANALYZE</code>, which runs a query for
+        real and reports exactly what plan it used and how long each step took.
+      </p>
+      <p>
+        Running it against the actual <code>/feed</code> query — at the full 1 million rows — showed
+        an <strong>Index Scan Backward</strong> on the primary key, executing in under 2
+        milliseconds. Because this project used cursor-based pagination (<code>WHERE id &lt;
+        $cursor ORDER BY id DESC LIMIT 20</code>) rather than an offset (<code>OFFSET 500000 LIMIT
+        20</code>), Postgres could jump directly to the right position using the primary key
+        index, rather than scanning and discarding 500,000 rows to get there. The predicted
+        bottleneck simply wasn't present — a valuable negative result, and a good illustration of
+        why cursor pagination is the standard recommendation for large, growing tables.
+      </p>
+
+      <div class="callout win">
+        <div class="label">Lesson</div>
+        A slow system under load doesn't mean the database query is slow. Measure before you
+        assume — <code>EXPLAIN ANALYZE</code> turned a suspicion into a two-millisecond fact, and
+        pointed the search elsewhere.
+      </div>
+
+      <h3>Act 3 — watching the container itself</h3>
+      <p>
+        With the query cleared, the next question was: if it's not the database, what <em>is</em>
+        eating the time? Running <code>docker stats</code> alongside a k6 test — which shows live
+        CPU%, memory, and network I/O per container — revealed the API container's CPU pinned at
+        ~92-95% <em>for the entire run</em>. That number needs a bit of interpretation:
+        <code>docker stats</code> reports CPU usage as a percentage of a <em>single core</em>, so
+        95% means "fully saturating one core," not "using most of the machine." And that's exactly
+        the problem: the container was running plain <code>uvicorn</code> with no
+        <code>--workers</code> flag, meaning one Python process, one event loop, one core — no
+        matter how many CPU cores the host machine actually had sitting idle.
+      </p>
+      <p>
+        At the same time, the container logs showed a second, previously-invisible failure:
+        <code>OSError: [Errno 24] Too many open files</code>. Every open connection — HTTP or
+        Postgres — consumes a file descriptor, and the container's default limit was too low for
+        the connection volume 1,000 concurrent VUs was generating.
+      </p>
+
+      <h3>Act 4 — parallelism, not just bigger numbers</h3>
+      <p>
+        The fix here wasn't "make the pool even bigger" — it was to let the application actually use
+        more than one CPU core. <a href="#" onclick="return false;">Gunicorn</a> is a process
+        manager that can run several independent worker processes behind one bound port; pairing it
+        with Uvicorn's own worker class (<code>UvicornWorker</code>) gives you several full ASGI
+        event loops, each pinned to its own core, all accepting connections on the same port.
+      </p>
+
+      <div class="diagram">
+        <div class="node"><div class="title">Gunicorn master</div><div class="sub">binds :8000</div></div>
+        <div class="arrow">↓</div>
+        <div class="workers-row">
+          <div class="node accent"><div class="title">Worker 1</div><div class="sub">own event loop<br/>own pool (max 20)</div></div>
+          <div class="node accent"><div class="title">Worker 2</div><div class="sub">own event loop<br/>own pool (max 20)</div></div>
+          <div class="node accent"><div class="title">Worker 3</div><div class="sub">own event loop<br/>own pool (max 20)</div></div>
+          <div class="node accent"><div class="title">Worker 4</div><div class="sub">own event loop<br/>own pool (max 20)</div></div>
+        </div>
+        <div class="arrow">↓</div>
+        <div class="node warn"><div class="title">Postgres, max_connections = 100</div><div class="sub">4 × 20 = 80, safely under the cap</div></div>
+      </div>
+
+      <p>
+        This is the subtlety worth sitting with: each Gunicorn worker is a <em>separate process</em>,
+        so each one independently runs the app's <code>lifespan</code> startup code and creates its
+        <em>own</em> connection pool. Four workers each allowed up to 20 connections means up to 80
+        real Postgres connections in total — which is why the pool size had to come <em>down</em>
+        (from 50 to 20) at the same time the worker count went <em>up</em> (from 1 to 4): the two
+        numbers multiply together, and the product has to stay under Postgres's
+        <code>max_connections=100</code>. Alongside this, raising the container's file-descriptor
+        <code>ulimit</code> to 65,536 addressed the "too many open files" crash directly.
+      </p>
+
+      <h3>The payoff</h3>
+      <table class="stats">
+        <tr><th>Stage</th><th>p99 latency</th><th>Median</th><th>Throughput</th><th>Interrupted / failed</th></tr>
+        <tr><td>Baseline (pool max_size=10, 1 worker)</td><td class="hot">10.93s</td><td>914ms</td><td>~205 req/s</td><td>0 / 0%</td></tr>
+        <tr><td>Bigger pool (max_size=50, 1 worker)</td><td class="hot">4.72–5.19s</td><td>~180ms</td><td>~365–375 req/s</td><td>~965 / 0%</td></tr>
+        <tr><td>4 Gunicorn workers + tuned pool (20 each) + ulimit</td><td class="ok">1.42s</td><td class="ok">133ms</td><td class="ok">~1,114 req/s</td><td>0 / 0%</td></tr>
+      </table>
+      <p>
+        Throughput roughly quintupled, p99 dropped nearly 8x, and the "requests never finishing"
+        symptom disappeared entirely — all while the request-level success rate stayed at 100%
+        throughout every single run. Note that the target threshold (p99 under 200ms) still wasn't
+        met — this is a genuinely CPU-bound, single-machine ceiling now, which is precisely the
+        kind of measured, honest breaking point that motivates adding a cache like Redis in the
+        project's next phase, rather than reaching for one on faith.
+      </p>
+    </section>
+
+    <section id="code">
+      <h2><span class="num">3.</span>Code Walkthrough</h2>
+      <p class="lede">The changes, grouped by what problem each one solves rather than by file.</p>
+
+      <h3>1. Fix: the connection pool was too small</h3>
+      <p><code>main.py</code> — first pass, widening the pool:</p>
+      <div class="diff-block">
+        <div class="file-label">main.py</div>
+        <pre><span class="del">-    app.state.pool = await asyncpg.create_pool(DB_DSN, min_size=10, max_size=50)</span></pre>
+      </div>
+      <p>
+        (This was the very first fix tried, going from an original <code>max_size=10</code> up to
+        <code>50</code> in a single-worker setup — it's the value shown as "before" in step 2
+        below, once the worker count changed.)
+      </p>
+
+      <h3>2. Fix: only one CPU core was ever in use</h3>
+      <p><code>Dockerfile</code> — replacing bare Uvicorn with Gunicorn managing four Uvicorn workers:</p>
+      <div class="diff-block">
+        <div class="file-label">Dockerfile</div>
+        <pre><span class="del">-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]</span>
+<span class="add">+CMD ["gunicorn", "main:app", "-k", "uvicorn.workers.UvicornWorker", "--workers", "4", "--bind", "0.0.0.0:8000"]</span></pre>
+      </div>
+      <p><code>requirements.txt</code> — Gunicorn added as a dependency:</p>
+      <div class="diff-block">
+        <div class="file-label">requirements.txt</div>
+        <pre><span class="add">+gunicorn==23.0.0</span></pre>
+      </div>
+
+      <h3>3. Fix: rebalancing the pool now that there are 4 processes, not 1</h3>
+      <p>
+        Because each of the four Gunicorn workers creates its own independent pool, the per-worker
+        <code>max_size</code> had to shrink so the total (<code>workers × max_size</code>) stayed
+        under Postgres's <code>max_connections=100</code>:
+      </p>
+      <div class="diff-block">
+        <div class="file-label">main.py</div>
+        <pre><span class="del">-    app.state.pool = await asyncpg.create_pool(DB_DSN, min_size=10, max_size=50)</span>
+<span class="add">+    app.state.pool = await asyncpg.create_pool(DB_DSN, min_size=5, max_size=20)</span></pre>
+      </div>
+      <p>
+        4 workers × 20 connections = 80 total, leaving roughly 20 connections of headroom under the
+        100 limit for Postgres's own internal use (autovacuum, direct <code>psql</code> sessions,
+        etc.) — the kind of safety margin worth deliberately reserving rather than maxing out.
+      </p>
+
+      <h3>4. Fix: the container was running out of file descriptors</h3>
+      <p><code>docker-compose.yml</code> — raising the open-files limit for the API container:</p>
+      <div class="diff-block">
+        <div class="file-label">docker-compose.yml</div>
+        <pre>  api:
+    build: .
+<span class="add">+    ulimits:
++      nofile:
++        soft: 65536
++        hard: 65536</span>
+    container_name: feed_api
+    restart: unless-stopped</pre>
+      </div>
+
+      <h3>Diagnostic tools used along the way (not code changes, but essential steps)</h3>
+      <ul class="plain">
+        <li>
+          <code>k6 run --env BASE_URL=http://localhost:8000 k6/load_test.js</code> — a
+          <code>ramping-vus</code> scenario stepping 0 → 1,000 virtual users across five 30-second
+          stages, with a threshold asserting <code>p(99)&lt;200ms</code>, run after every change to
+          get an apples-to-apples before/after comparison.
+        </li>
+        <li>
+          <code>EXPLAIN ANALYZE</code>, run directly in <code>psql</code> against both the
+          cursor and non-cursor forms of the <code>/feed</code> query — the tool that ruled out
+          query cost as the bottleneck, by actually executing the query and reporting its real plan
+          and timing rather than guessing.
+        </li>
+        <li>
+          <code>docker stats feed_api</code>, watched live during a k6 run — the tool that revealed
+          single-core CPU saturation, by making visible what percentage of a core the container was
+          actually consuming.
+        </li>
+      </ul>
+      <p>
+        Together, these three tools tell a small story about debugging performance in general:
+        reach for the load generator to <em>reproduce</em> the problem, the query planner to
+        <em>rule out</em> the database as the cause, and the container/process monitor to
+        <em>locate</em> which resource is actually saturated — rather than guessing and applying
+        fixes at random.
+      </p>
+    </section>
+
+    <section id="quiz">
+      <h2><span class="num">4.</span>Quiz</h2>
+      <p class="lede">Five questions to check your understanding. Click an answer to see if you're right.</p>
+
+      <div class="quiz-q" data-answer="1">
+        <div class="qtext">1. In the very first load test, 0% of requests failed, but p99 latency was 10.93 seconds. What does that combination best indicate?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" data-idx="0">The database was returning corrupted data slowly.</button>
+          <button class="quiz-opt" data-idx="1">Requests were queuing for a scarce resource (the connection pool), not failing outright.</button>
+          <button class="quiz-opt" data-idx="2">The Postgres query itself was doing a full table scan.</button>
+          <button class="quiz-opt" data-idx="3">k6 was misconfigured and not actually sending requests.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="2">
+        <div class="qtext">2. Why did cursor-based pagination (<code>WHERE id &lt; $cursor</code>) avoid the "expensive deep-page scan" problem that offset-based pagination (<code>OFFSET n LIMIT 20</code>) commonly has?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" data-idx="0">Cursor pagination doesn't use an index at all, so it's always fast regardless of table size.</button>
+          <button class="quiz-opt" data-idx="1">Cursor pagination caches previous pages in application memory.</button>
+          <button class="quiz-opt" data-idx="2">Cursor pagination can use the primary key index to jump directly to the right position, instead of scanning and discarding rows to reach a deep offset.</button>
+          <button class="quiz-opt" data-idx="3">Cursor pagination only works correctly on tables smaller than 100,000 rows.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="2">
+        <div class="qtext">3. <code>docker stats</code> showed the API container's CPU at ~92-95%. Given that number is a percentage of a single core, what did that most directly tell the team?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" data-idx="0">The host machine was completely out of CPU capacity across all cores.</button>
+          <button class="quiz-opt" data-idx="1">Memory, not CPU, was the real bottleneck.</button>
+          <button class="quiz-opt" data-idx="2">The single Uvicorn worker was maxing out the one core it could use, regardless of how many cores the machine had free.</button>
+          <button class="quiz-opt" data-idx="3">Postgres itself was CPU-bound.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="1">
+        <div class="qtext">4. When moving from 1 Uvicorn process to 4 Gunicorn-managed Uvicorn workers, why did the per-worker connection pool's <code>max_size</code> need to shrink from 50 to 20, rather than staying the same?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" data-idx="0">Smaller pools are always faster than larger ones.</button>
+          <button class="quiz-opt" data-idx="1">Each worker process creates its own independent pool, so the effective total is workers × max_size, and that total needed to stay safely under Postgres's max_connections=100.</button>
+          <button class="quiz-opt" data-idx="2">Gunicorn shares a single pool across all workers, and 20 was the shared limit.</button>
+          <button class="quiz-opt" data-idx="3">asyncpg does not support pools larger than 20 connections.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="3">
+        <div class="qtext">5. After all the Phase 1 fixes, throughput reached ~1,114 req/s but the p99 &lt; 200ms threshold still failed (actual p99 was 1.42s). What's the most reasonable next step suggested by this result?</div>
+        <div class="quiz-opts">
+          <button class="quiz-opt" data-idx="0">The fixes didn't work and should be reverted.</button>
+          <button class="quiz-opt" data-idx="1">Increase the pool size again — connections are still the bottleneck.</button>
+          <button class="quiz-opt" data-idx="2">Re-run EXPLAIN ANALYZE — the query must have gotten slower.</button>
+          <button class="quiz-opt" data-idx="3">Treat this as the honestly-measured ceiling of Postgres + the API alone, and consider adding a cache (like Redis) as the next architectural step.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </section>
+
+    <footer>Live Feed Engine — Phase 0 → Phase 1 learning report · generated 2026-09-08</footer>
+  </main>
+</div>
+
+<script>
+  document.querySelectorAll('.quiz-q').forEach(function (q) {
+    var correctIdx = parseInt(q.getAttribute('data-answer'), 10);
+    var feedback = q.querySelector('.quiz-feedback');
+    var opts = q.querySelectorAll('.quiz-opt');
+    opts.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (q.classList.contains('answered')) return;
+        q.classList.add('answered');
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        opts.forEach(function (b) { b.classList.add('disabled'); });
+        if (idx === correctIdx) {
+          btn.classList.add('correct');
+          feedback.textContent = 'Correct.';
+          feedback.className = 'quiz-feedback show correct-fb';
+        } else {
+          btn.classList.add('incorrect');
+          opts[correctIdx].classList.add('correct');
+          feedback.textContent = 'Not quite — the highlighted answer is correct.';
+          feedback.className = 'quiz-feedback show incorrect-fb';
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

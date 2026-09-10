@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LLD — OOP Concepts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#242938;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#b98cff; --red:#ff6b6b;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 20px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin:0 0 4px;}
+  .sub{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .bar{width:44px;height:4px;border-radius:2px;margin-bottom:10px;}
+  .section{margin-bottom:30px;}
+  .section h2{font-family:'Syne',sans-serif;font-size:19px;margin:0 0 4px;}
+  .section .desc{color:var(--muted);font-size:12.5px;margin-bottom:12px;display:block;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:6px;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);}
+  .pill-green{background:rgba(92,255,168,.15);color:var(--green);}
+  .pill-purple{background:rgba(185,140,255,.15);color:var(--purple);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);}
+  code.blk{display:block;background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;white-space:pre;overflow-x:auto;color:#c7d0e0;margin-top:8px;}
+  .badrow,.goodrow{font-size:12px;margin-top:6px;color:var(--muted);}
+  .example{border-left:3px solid var(--purple);padding:10px 16px;background:rgba(185,140,255,.06);border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px;}
+  .example b{color:var(--purple);}
+  .tip{background:rgba(92,255,168,.06);border:1px solid rgba(92,255,168,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .tip b{color:var(--green);}
+  .warn{background:rgba(255,157,92,.06);border:1px solid rgba(255,157,92,.25);border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:10px;}
+  .warn b{color:var(--orange);}
+  ul{margin:6px 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:13.5px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{text-align:left;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .cheatitem{font-size:13px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .cheatitem b{color:var(--blue);}
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;margin-top:10px;}
+  .node{background:#1c2130;border:1px solid var(--border);border-radius:8px;padding:7px 12px;white-space:nowrap;}
+  .arrow{color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>OOP Concepts</h1>
+  <div class="sub">The language mechanisms that implement the design principles — Encapsulation, Abstraction, Polymorphism, Inheritance</div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>🔧 Why this page exists</h2>
+    <div class="card">
+      Design Principles taught you <i>how to think</i> about clean code. OOP concepts are the <b>mechanisms your language gives you</b> to actually implement those ideas. Four core concepts, each covered as: what it is → why interviewers care → how it shows up in real LLD problems.
+    </div>
+    <div class="flow">
+      <div class="node">Encapsulation</div><span class="arrow">→</span>
+      <div class="node">Abstraction</div><span class="arrow">→</span>
+      <div class="node">Polymorphism</div><span class="arrow">→</span>
+      <div class="node">Inheritance</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--orange)"></div>
+    <h2>🔒 Encapsulation</h2>
+    <span class="desc">Keep an object's data private; let the object control how that data is used</span>
+    <div class="card">
+      Interact through simple methods, not by reaching in and changing internals directly.
+      <div class="tip"><b>Benefit — predictability:</b> when <code style="color:var(--green)">Account</code> owns <code>balance</code> and only lets you change it via <code>deposit()</code>/<code>withdraw()</code>, you can enforce rules there — prevent negative balances, log transactions, update related state. Public field = no guarantee those rules run.</div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <div class="badrow">❌ <b style="color:var(--red)">Bad — public spots</b></div>
+          <code class="blk">class ParkingLot {
+  public spots: ParkingSpot[] = []
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ <b style="color:var(--green)">Good — private + controlled access</b></div>
+          <code class="blk">class ParkingLot {
+  private spots: ParkingSpot[] = []
+
+  parkVehicle(vehicle): boolean {
+    const spot = this.findAvailableSpot(vehicle)
+    if (!spot) return false
+    spot.occupy(vehicle)
+    return true
+  }
+
+  getSpots(): ParkingSpot[] {
+    return [...this.spots]   // return a copy
+  }
+}</code>
+        </div>
+      </div>
+      <div class="tip"><b>Interview hygiene check:</b> do your classes expose fields directly, or provide methods? Are you returning references to mutable internal collections, or copies? <b>Rule of thumb: when in doubt, write the getter — and if returning a collection, return an unmodifiable view or copy.</b></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>🎭 Abstraction</h2>
+    <span class="desc">Expose only what's essential; hide implementation details behind clear interfaces</span>
+    <div class="card">
+      Define <i>what</i> something can do without revealing <i>how</i>. Benefit = simplification — swap implementations (Stripe API vs. stored tokens) without touching the caller.
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <div class="badrow">❌ <b style="color:var(--red)">Bad — tightly coupled to StripeAPI</b></div>
+          <code class="blk">class OrderService {
+  private apiKey = ""
+  checkout(order: Order): void {
+    const stripe = new StripeAPI()
+    stripe.setApiKey(this.apiKey)
+    stripe.createCharge(order.total, order.creditCard)
+  }
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ <b style="color:var(--green)">Good — depends on PaymentMethod interface</b></div>
+          <code class="blk">interface PaymentMethod {
+  process(amount: number): boolean
+}
+class CreditCardPayment implements PaymentMethod {...}
+class PayPalPayment implements PaymentMethod {...}
+
+class OrderService {
+  constructor(private paymentMethod: PaymentMethod) {}
+  checkout(order: Order): void {
+    this.paymentMethod.process(order.total)
+  }
+}</code>
+        </div>
+      </div>
+      <div class="tip"><b>When to reach for it:</b> where there's real complexity — lots of variations, rules, or messy details. In interviews: logic feels tangled, or requirements suggest multiple approaches → good signal to introduce an abstraction.</div>
+      <div class="warn"><b>The hard part — right level of abstraction:</b> too abstract → meaningless interface names (<code style="color:var(--red)">doWork()</code>, <code style="color:var(--red)">handleRequest()</code>). Too specific → you haven't actually abstracted anything. Think about what operations the <i>caller needs</i>, not how they happen internally.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--purple)"></div>
+    <h2>🔀 Polymorphism</h2>
+    <span class="desc">What replaces if/switch statements on type — same method call, each object handles itself</span>
+    <div class="card">
+      Naturally follows from abstraction. Define an interface (<code style="color:var(--green)">Vehicle</code>) → each implementation provides its own behavior. No type checking required.
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <div class="badrow">❌ <b style="color:var(--red)">Bad — type checks</b></div>
+          <code class="blk">parkVehicle(v: Vehicle): boolean {
+  if (v.type === "car") {
+    const spot = this.findSpotBySize("regular")
+    return spot !== null
+  } else if (v.type === "motorcycle") {
+    ...
+  } else if (v.type === "truck") {
+    ...
+  }
+  return false
+}</code>
+        </div>
+        <div>
+          <div class="goodrow">✅ <b style="color:var(--green)">Good — polymorphic dispatch</b></div>
+          <code class="blk">interface Vehicle {
+  getRequiredSpotSize(): SpotSize
+}
+class Car implements Vehicle {
+  getRequiredSpotSize() { return "regular" }
+}
+class Motorcycle implements Vehicle {
+  getRequiredSpotSize() { return "motorcycle" }
+}
+
+parkVehicle(v: Vehicle): boolean {
+  const required = v.getRequiredSpotSize()
+  const spot = this.findSpotBySize(required)
+  return spot !== null
+}</code>
+        </div>
+      </div>
+      <div class="tip"><b>Payoff:</b> add a new vehicle type → just create a new class implementing <code style="color:var(--green)">Vehicle</code>. <code>ParkingLot</code> code never changes.</div>
+      <div class="warn"><b>Tradeoff to voice in interviews:</b> highly polymorphic code can be hard to trace/debug as implementations grow. Companies vary in tolerance — some prefer explicit branches per type, others embrace the extensibility. <b>Signal:</b> if you're writing type checks or switch statements on an enum, that's your cue to use polymorphism instead.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--blue)"></div>
+    <h2>🧬 Inheritance</h2>
+    <span class="desc">One class as a more specific version of another — powerful, but comes with tight coupling</span>
+    <div class="card">
+      A tool for <i>sharing implementation</i>. Big cost: the <b>"fragile base class" problem</b> — any parent change can break every child.
+      <div class="warn"><b>Safer default:</b> composition + interfaces. You still get abstraction and polymorphism, without forcing a parent-child relationship or shared state.</div>
+
+      <b style="display:block;margin-top:14px;color:var(--green);">✅ When inheritance works — stable, shared implementation</b>
+      <code class="blk">abstract class BankAccount {
+  protected balance = 0
+  deposit(amount): void { this.balance += amount }
+  withdraw(amount): boolean {
+    if (this.balance < amount) return false
+    this.balance -= amount
+    return true
+  }
+  getBalance(): number { return this.balance }
+}
+class SavingsAccount extends BankAccount {
+  private interestRate: number
+  constructor(rate) { super(); this.interestRate = rate }
+}
+class CheckingAccount extends BankAccount {
+  private overdraftLimit: number
+  constructor(limit) { super(); this.overdraftLimit = limit }
+}</code>
+      <div class="example"><b>Why it fits here:</b> both subclasses are genuinely forms of <code style="color:var(--green)">BankAccount</code> — deposit/withdraw/balance logic is identical, and neither needs to override inherited behavior in ways that break the parent's contract.</div>
+
+      <b style="display:block;margin-top:14px;color:var(--red);">❌ When it breaks down — modeling behavior differences</b>
+      <code class="blk">class Car {
+  startEngine(): void { /* gasoline logic */ }
+}
+class ElectricCar extends Car {
+  startEngine(): void { /* completely different — electric motor */ }
+}</code>
+      <div class="warn">Electric cars don't have engines — no shared logic. You're forcing a behavior difference into a hierarchy. Add a hybrid? Doesn't extend cleanly from either <code style="color:var(--red)">Car</code> or <code style="color:var(--red)">ElectricCar</code>.</div>
+
+      <b style="display:block;margin-top:14px;color:var(--green);">✅ Fix — composition for behavior variation</b>
+      <code class="blk">interface Drivetrain {
+  start(): void
+}
+class GasEngine implements Drivetrain { start() {...} }
+class ElectricMotor implements Drivetrain { start() {...} }
+
+class Car {
+  constructor(private drivetrain: Drivetrain) {}
+  start(): void { this.drivetrain.start() }
+}</code>
+      <div class="tip">Want a hybrid? Give it two drivetrains. Want hydrogen? Add a new <code style="color:var(--green)">Drivetrain</code> implementation. <code>Car</code> class never changes.</div>
+
+      <div class="warn" style="margin-top:12px;"><b>Interview default:</b> reach for interfaces + composition first. Only use inheritance when sharing <i>stable</i> implementation across classes. In most LLD interviews, you don't need inheritance at all.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="bar" style="background:var(--green)"></div>
+    <h2>📋 Putting It Together</h2>
+    <div class="card">
+      Don't recite the terms — the concepts should show through in <i>how you design</i>, not what you name.
+      <div class="cheatitem"><b>Encapsulation</b> → Hide state, expose behavior. Private fields, methods for access.</div>
+      <div class="cheatitem"><b>Abstraction</b> → Define interfaces for variations. Multiple payment methods? Different vehicle types? → interface.</div>
+      <div class="cheatitem"><b>Polymorphism</b> → Let objects handle themselves. No type checking, no switch on types.</div>
+      <div class="cheatitem"><b>Inheritance</b> → Compose behavior, don't inherit it. Interfaces first; inheritance only for sharing stable implementation.</div>
+      <div class="tip" style="margin-top:12px;"><b>The trigger to remember:</b> "support multiple X" in requirements → you know to define an interface. Writing type checks → switch to polymorphism instead.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

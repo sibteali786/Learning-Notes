@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3 - Model Selection: Train/CV/Test</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; font-size:1.0rem; margin:12px 0; color:#fff; overflow-x:auto;}
+  .formula-box small{display:block; color:var(--muted); font-size:0.7rem; margin-top:6px;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .flawed{background:rgba(255,107,129,0.08); border:1px solid rgba(255,107,129,0.4); border-radius:10px; padding:16px 18px; margin-top:14px;}
+  .flawed .tag{color:var(--bad); font-weight:700; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.4px;}
+
+  .model-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .model-row{display:grid; grid-template-columns:60px 1fr auto; gap:10px; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:0.85rem;}
+  .model-row .d{color:var(--accent); font-weight:700;}
+  .model-row .f{color:#cfd2e0; font-family:'Cascadia Code',monospace; font-size:0.82rem;}
+  .model-row .j{color:var(--muted);}
+  .model-row.picked{border-color:var(--good); background:rgba(94,214,164,0.08);}
+  .model-row.picked .j{color:var(--good); font-weight:700;}
+
+  .split-visual{display:flex; align-items:center; gap:14px; margin-top:16px; flex-wrap:wrap;}
+  .split-bar{flex:1; min-width:280px; height:34px; border-radius:8px; overflow:hidden; display:flex; border:1px solid var(--border);}
+  .split-bar .train{background:linear-gradient(90deg,var(--accent),#5c78d6); flex:6; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.78rem; color:#0f1117;}
+  .split-bar .cv{background:linear-gradient(90deg,var(--cv),#a06fd0); flex:2; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem; color:#0f1117;}
+  .split-bar .test{background:linear-gradient(90deg,var(--accent2),#e0674c); flex:2; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem; color:#0f1117;}
+
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:0.86rem;}
+  th,td{padding:7px 10px; text-align:left; border-bottom:1px solid var(--border);}
+  th{color:var(--accent); font-weight:600;}
+  tr.cv-row td{color:var(--cv);}
+  tr.test-row td{color:var(--accent2);}
+
+  .notation-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:14px;}
+  @media(max-width:750px){.notation-grid{grid-template-columns:1fr;}}
+  .notation-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:0.85rem;}
+  .notation-card .h{font-weight:700; color:#fff; margin-bottom:6px;}
+  .notation-card.train{border-left:3px solid var(--accent);}
+  .notation-card.cv{border-left:3px solid var(--cv);}
+  .notation-card.test{border-left:3px solid var(--accent2);}
+
+  .qa{background:rgba(124,155,255,0.08); border:1px solid var(--accent); border-radius:10px; padding:16px 18px; margin-top:14px;}
+  .qa .q{color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .qa .a{margin:0;}
+
+  .nn-list{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .nn-row{display:flex; justify-content:space-between; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:0.85rem;}
+  .nn-row.picked{border-color:var(--good); background:rgba(94,214,164,0.08);}
+
+  .steps{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .step{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .step .n{font-weight:700; color:var(--accent); min-width:20px;}
+  .step.final{border-left-color:var(--accent2);}
+  .step.final .n{color:var(--accent2);}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 3 — Model Selection: Train / Cross-Validation / Test</h1>
+  <p class="subtitle">Why one test set isn't enough to both pick a model AND report how good it is.</p>
+
+  <section>
+    <h2><span class="num">1</span> Recap: Training Error Lies to You</h2>
+    <p>Once w,b are fit to the training set, <strong>J_train is likely lower than the true generalization error</strong> — the model has literally seen and optimized against those exact points. <strong>J_test is a much better estimate</strong> of real-world performance, because the model never touched that data during fitting.</p>
+    <div class="fig" style="text-align:center;">
+      <svg viewBox="0 0 420 170" width="380">
+        <line x1="30" y1="140" x2="400" y2="140" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="140" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="200" y="160" fill="#9aa0b4" font-size="11">size</text>
+        <path d="M40,130 C70,40 90,140 130,55 C160,10 190,110 230,45 C260,15 290,85 340,40" fill="none" stroke="#ff6b81" stroke-width="2.5"/>
+        <circle cx="45" cy="128" r="3" fill="#7c9bff"/><circle cx="95" cy="135" r="3" fill="#7c9bff"/>
+        <circle cx="150" cy="65" r="3" fill="#7c9bff"/><circle cx="230" cy="48" r="3" fill="#7c9bff"/>
+        <circle cx="335" cy="42" r="3" fill="#7c9bff"/>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Using J_test to Pick a Polynomial Degree — Looks Reasonable...</h2>
+    <p>Suppose you're not sure what degree polynomial fits best. Try d = 1 through d = 10, fit each on the training set, and compute J_test for each:</p>
+    <div class="model-list">
+      <div class="model-row"><span class="d">d=1</span><span class="f">f = w₁x + b</span><span class="j">J_test(w⁽¹⁾,b⁽¹⁾)</span></div>
+      <div class="model-row"><span class="d">d=2</span><span class="f">f = w₁x + w₂x² + b</span><span class="j">J_test(w⁽²⁾,b⁽²⁾)</span></div>
+      <div class="model-row"><span class="d">d=3</span><span class="f">f = w₁x + w₂x² + w₃x³ + b</span><span class="j">J_test(w⁽³⁾,b⁽³⁾)</span></div>
+      <div class="model-row"><span class="d">⋮</span><span class="f">⋮</span><span class="j">⋮</span></div>
+      <div class="model-row picked"><span class="d">d=5</span><span class="f">f = w₁x + ... + w₅x⁵ + b</span><span class="j">J_test lowest ✓</span></div>
+      <div class="model-row"><span class="d">⋮</span><span class="f">⋮</span><span class="j">⋮</span></div>
+      <div class="model-row"><span class="d">d=10</span><span class="f">f = w₁x + ... + w₁₀x¹⁰ + b</span><span class="j">J_test(w⁽¹⁰⁾,b⁽¹⁰⁾)</span></div>
+    </div>
+    <p style="margin-top:12px;">Pick d=5 (lowest J_test), then report <code>J_test(w⁵,b⁵)</code> as "how well this model generalizes."</p>
+    <div class="flawed">
+      <span class="tag">⚠ This procedure is flawed</span>
+      <p style="margin:8px 0 0;">You just used the <strong>test set</strong> to choose <code>d</code> — an extra parameter, selected by whichever value made J_test smallest. That's the same mistake as fitting w,b to training data and then reporting J_train: <strong>J_test(w⁵,b⁵) is now an optimistic (too-low) estimate</strong> of true generalization error, because the test set influenced a decision instead of staying purely an unbiased final check.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The Fix: Add a Third Split — Cross-Validation Set</h2>
+    <p>Split data into <strong>three</strong> subsets instead of two. A common split is 60% train / 20% cross-validation (CV) / 20% test:</p>
+    <div class="split-visual">
+      <div class="split-bar">
+        <div class="train">60% Train</div>
+        <div class="cv">20% CV</div>
+        <div class="test">20% Test</div>
+      </div>
+    </div>
+    <p style="margin-top:10px;">"Cross-validation" is also called the <strong>validation set</strong>, <strong>development set</strong>, or <strong>dev set</strong> — all the same thing, just different names practitioners use.</p>
+
+    <table>
+      <thead><tr><th>size</th><th>price</th><th>split</th></tr></thead>
+      <tbody>
+        <tr><td>2104</td><td>400</td><td>train</td></tr>
+        <tr><td>1600</td><td>330</td><td>train</td></tr>
+        <tr><td>2400</td><td>369</td><td>train</td></tr>
+        <tr><td>1416</td><td>232</td><td>train</td></tr>
+        <tr><td>3000</td><td>540</td><td>train</td></tr>
+        <tr><td>1985</td><td>300</td><td>train</td></tr>
+        <tr class="cv-row"><td>1534</td><td>315</td><td>cross-validation</td></tr>
+        <tr class="cv-row"><td>1427</td><td>199</td><td>cross-validation</td></tr>
+        <tr class="test-row"><td>1380</td><td>212</td><td>test</td></tr>
+        <tr class="test-row"><td>1494</td><td>243</td><td>test</td></tr>
+      </tbody>
+    </table>
+
+    <div class="notation-grid">
+      <div class="notation-card train"><div class="h">Training set</div>(x⁽¹⁾,y⁽¹⁾)...(x⁽ᵐᵗʳᵃⁱⁿ⁾,y⁽ᵐᵗʳᵃⁱⁿ⁾)<br>m_train = 6</div>
+      <div class="notation-card cv"><div class="h">CV set</div>(x_cv⁽¹⁾,y_cv⁽¹⁾)...(x_cv⁽ᵐᶜᵛ⁾,y_cv⁽ᵐᶜᵛ⁾)<br>m_cv = 2</div>
+      <div class="notation-card test"><div class="h">Test set</div>(x_test⁽¹⁾,y_test⁽¹⁾)...(x_test⁽ᵐᵗᵉˢᵗ⁾,y_test⁽ᵐᵗᵉˢᵗ⁾)<br>m_test = 2</div>
+    </div>
+
+    <div class="formula-box">
+      J_train(w,b) = 1/(2m_train)·Σ(f(x⁽ⁱ⁾)−y⁽ⁱ⁾)²
+    </div>
+    <div class="formula-box">
+      J_cv(w,b) = 1/(2m_cv)·Σ(f(x_cv⁽ⁱ⁾)−y_cv⁽ⁱ⁾)²  <span style="color:var(--cv)">← "validation error" / "dev error"</span>
+    </div>
+    <div class="formula-box">
+      J_test(w,b) = 1/(2m_test)·Σ(f(x_test⁽ⁱ⁾)−y_test⁽ⁱ⁾)²
+      <small>None of these three include the regularization term — that's only in the training objective used to fit w,b.</small>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Correct Model Selection Procedure</h2>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div>Fit w,b for each candidate model (d=1 through d=10) using the <strong>training set</strong>.</div></div>
+      <div class="step"><span class="n">2</span><div>Evaluate each fitted model on the <strong>cross-validation set</strong>, computing J_cv(w⁽¹⁾,b⁽¹⁾) through J_cv(w⁽¹⁰⁾,b⁽¹⁰⁾).</div></div>
+      <div class="step"><span class="n">3</span><div>Pick the model with the <strong>lowest J_cv</strong> — e.g. d=4 if J_cv(w⁽⁴⁾,b⁽⁴⁾) is smallest.</div></div>
+      <div class="step final"><span class="n">4</span><div><strong>Only now</strong> touch the test set: report <code>J_test(w⁴,b⁴)</code> as the generalization estimate.</div></div>
+    </div>
+    <div class="model-list" style="margin-top:14px;">
+      <div class="model-row"><span class="d">d=1</span><span class="f">f = w₁x + b</span><span class="j">J_cv(w⁽¹⁾,b⁽¹⁾)</span></div>
+      <div class="model-row"><span class="d">d=2</span><span class="f">f = w₁x + w₂x² + b</span><span class="j">J_cv(w⁽²⁾,b⁽²⁾)</span></div>
+      <div class="model-row"><span class="d">d=3</span><span class="f">f = w₁x + w₂x² + w₃x³ + b</span><span class="j">J_cv(w⁽³⁾,b⁽³⁾)</span></div>
+      <div class="model-row picked"><span class="d">d=4</span><span class="f">f = w₁x + ... + w₄x⁴ + b</span><span class="j">J_cv lowest ✓ → pick this</span></div>
+      <div class="model-row"><span class="d">⋮</span><span class="f">⋮</span><span class="j">⋮</span></div>
+      <div class="model-row"><span class="d">d=10</span><span class="f">f = w₁x + ... + w₁₀x¹⁰ + b</span><span class="j">J_cv(w⁽¹⁰⁾,b⁽¹⁰⁾)</span></div>
+    </div>
+    <div class="rule-box">
+      <div class="title">Why this works</div>
+      <p style="margin:0;">w,b were fit using the training set. The degree <code>d</code> was chosen using the CV set. The test set was <strong>never touched</strong> during any decision — so J_test(w⁴,b⁴) is a fair, unbiased estimate of true generalization error.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Same Procedure Works for Neural Network Architecture Selection</h2>
+    <p>Model selection isn't limited to polynomial degree — it generalizes to choosing between entire architectures (e.g. handwritten digit classification):</p>
+    <div class="nn-list">
+      <div class="nn-row"><span>1. Small NN (25 → 15 → 1 units)</span><span>J_cv(w⁽¹⁾,b⁽¹⁾)</span></div>
+      <div class="nn-row picked"><span>2. Medium NN (20 → 12 → 12 → 20 units) ✓ lowest J_cv</span><span>J_cv(w⁽²⁾,b⁽²⁾)</span></div>
+      <div class="nn-row"><span>3. Large NN (32 → 16 → 8 → 4 → 12 units)</span><span>J_cv(w⁽³⁾,b⁽³⁾)</span></div>
+    </div>
+    <p style="margin-top:12px;">Train all three on the training set → evaluate each on CV set (for classification, J_cv is typically the <strong>fraction of CV examples misclassified</strong>) → pick the architecture with lowest J_cv → report J_test on that chosen network as the final generalization estimate.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> The Golden Rule</h2>
+    <div class="rule-box">
+      <div class="title">Best Practice</div>
+      <p style="margin:0;">Make <strong>every</strong> decision about your model — fitting parameters, choosing polynomial degree, choosing architecture, choosing hyperparameters — using only the <strong>training</strong> and <strong>cross-validation</strong> sets. Never look at the test set until you've locked in your final model. Only then evaluate on test, exactly once, to report generalization performance.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Clarifying Q&A</h2>
+
+    <div class="qa">
+      <div class="q">Q: Why not just use J_test(w⁵,b⁵) for model selection — why go to the trouble of a cross-validation set?</div>
+      <p class="a">Because using the test set to make a decision (which degree <code>d</code> to pick) makes the test set complicit in fitting — no different in principle from fitting w,b to training data. J_test would then be measuring "how well did this model do on the data I used to choose it," not "how well does it do on truly unseen data." Result: J_test(w⁵,b⁵) ends up optimistically low, understating the real generalization error. The cross-validation set exists specifically to absorb this decision-making role, so the test set can remain completely untouched and give one final, honest number at the end.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: What's the ideal train/CV/test split fraction for a classification problem?</div>
+      <p class="a">No different rule for classification vs regression — the split is about data volume, not task type. <strong>60/20/20</strong> (train/CV/test) is the classic default, sometimes seen as 70/15/15. With very large datasets, the CV and test percentages often shrink (e.g. 98/1/1) because even 1% of a huge dataset is still enough examples to validate/test on reliably.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: How do we know we chose the "right" J_test metric for classification vs. regression?</div>
+      <p class="a">There isn't one universally "correct" metric — it's a design choice, but two things must hold: (1) the metric must match the problem type — squared error for regression; logistic loss <em>or</em> (more common and interpretable) fraction misclassified for classification — and (2) the <strong>same</strong> metric must be used consistently across J_train, J_cv, and J_test, otherwise your model-selection comparisons and final generalization estimate aren't measuring the same thing.</p>
+    </div>
+  </section>
+
+  <footer>Lesson 3 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>

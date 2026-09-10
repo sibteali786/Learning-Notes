@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sharding Setup — Docker + Postgres + pgAdmin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161923;--panel2:#1c202c;--border:#2a2f3d;
+    --text:#e6e8ef;--muted:#9aa1b4;
+    --blue:#5b9dff;--orange:#ff9d5b;--green:#5bd6a0;--purple:#b78bff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:40px 20px 80px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0;}
+  h1{font-size:2.1rem;font-weight:800;letter-spacing:-0.5px;}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:1rem;}
+  .hero{margin-bottom:36px;}
+  .pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;border:1px solid;}
+  .pill-blue{color:var(--blue);border-color:var(--blue);background:rgba(91,157,255,0.08);}
+  .pill-purple{color:var(--purple);border-color:var(--purple);background:rgba(183,139,255,0.08);}
+  .pill-red{color:var(--red);border-color:var(--red);background:rgba(255,107,107,0.08);}
+  .pill-green{color:var(--green);border-color:var(--green);background:rgba(91,214,160,0.08);}
+
+  .section{margin-bottom:40px;}
+  .section-label{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .bar-blue{background:var(--blue);} .bar-orange{background:var(--orange);}
+  .bar-green{background:var(--green);} .bar-purple{background:var(--purple);} .bar-red{background:var(--red);}
+  .section-label h2{font-size:1.15rem;color:var(--text);}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .card + .card{margin-top:14px;}
+  p{line-height:1.6;color:var(--text);margin:0 0 10px;}
+  .muted{color:var(--muted);}
+  code{background:#0b0d13;border:1px solid var(--border);color:var(--green);padding:2px 6px;border-radius:5px;font-size:0.85rem;}
+  pre{background:#0b0d13;border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto;font-size:0.83rem;line-height:1.55;}
+  pre code{background:none;border:none;padding:0;color:#d7dae4;}
+  .kw{color:var(--purple);} .str{color:var(--green);} .fn{color:var(--blue);} .cm{color:var(--muted);font-style:italic;} .flag{color:var(--orange);}
+
+  .diagram-wrap{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:14px;}
+  svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+
+  .bug{
+    border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;
+  }
+  .bug-head{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--panel2);padding:10px 16px;border-bottom:1px solid var(--border);
+  }
+  .bug-num{color:var(--red);font-weight:600;font-size:0.85rem;}
+  .bug-body{padding:14px 16px;}
+  .bug-row{margin-bottom:8px;font-size:0.88rem;line-height:1.55;}
+  .bug-label{color:var(--muted);text-transform:uppercase;font-size:0.68rem;letter-spacing:0.5px;display:block;margin-bottom:2px;}
+  .fixlabel{color:var(--green);}
+  .mistakelabel{color:var(--red);}
+
+  .tip{border-left:3px solid var(--blue);background:rgba(91,157,255,0.06);padding:14px 18px;border-radius:0 10px 10px 0;margin-top:10px;}
+  .tip .tag{color:var(--blue);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+  .toc a{color:var(--muted);text-decoration:none;font-size:0.8rem;border:1px solid var(--border);padding:5px 10px;border-radius:8px;}
+  .toc a:hover{color:var(--text);border-color:var(--muted);}
+
+  .footer{margin-top:60px;text-align:center;color:var(--muted);font-size:0.75rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill pill-blue">System Design</span>
+    <span class="pill pill-purple" style="margin-left:6px;">Docker</span>
+    <span class="pill pill-orange" style="margin-left:6px;">Postgres</span>
+    <h1 style="margin-top:14px;">Sharding Setup — Docker + Postgres + pgAdmin</h1>
+    <div class="subtitle">Spinning up 3 identical Postgres shards, wiring pgAdmin to manage them, and every real error hit along the way.</div>
+  </div>
+
+  <div class="toc">
+    <a href="#plan">The Plan</a>
+    <a href="#schema">Schema & Dockerfile</a>
+    <a href="#build">Build & Run</a>
+    <a href="#bugs">Debugging Log</a>
+    <a href="#network">Networking Fix</a>
+  </div>
+
+  <!-- PLAN -->
+  <div class="section" id="plan">
+    <div class="section-label"><div class="bar bar-blue"></div><h2>The Plan</h2></div>
+    <div class="card">
+      <p>Spin up <strong>3 identical Postgres instances</strong> for the URL-shortener example — one for each shard — then build a NodeJS/Express REST API on top that decides which shard to hit.</p>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg">
+          <g font-family="JetBrains Mono" font-size="11" fill="#e6e8ef" text-anchor="middle">
+            <g>
+              <ellipse cx="120" cy="40" rx="30" ry="9" fill="#1f3a5f"/>
+              <rect x="90" y="40" width="60" height="34" fill="#193049"/>
+              <ellipse cx="120" cy="74" rx="30" ry="9" fill="#142639"/>
+              <text x="120" y="98">shard1 : 5432</text>
+            </g>
+            <g>
+              <ellipse cx="350" cy="40" rx="30" ry="9" fill="#1f3a5f"/>
+              <rect x="320" y="40" width="60" height="34" fill="#193049"/>
+              <ellipse cx="350" cy="74" rx="30" ry="9" fill="#142639"/>
+              <text x="350" y="98">shard2 : 5433</text>
+            </g>
+            <g>
+              <ellipse cx="580" cy="40" rx="30" ry="9" fill="#1f3a5f"/>
+              <rect x="550" y="40" width="60" height="34" fill="#193049"/>
+              <ellipse cx="580" cy="74" rx="30" ry="9" fill="#142639"/>
+              <text x="580" y="98">shard3 : 5434</text>
+            </g>
+            <text x="350" y="140" fill="#9aa1b4" font-size="10">managed via pgAdmin :5555</text>
+          </g>
+        </svg>
+      </div>
+      <p class="muted">Matches the slide: <em>"Spin up 3 postgres instances with identical schema — 5432, 5433, 5434 — write to the sharded databases, read from the sharded databases."</em></p>
+    </div>
+  </div>
+
+  <!-- SCHEMA -->
+  <div class="section" id="schema">
+    <div class="section-label"><div class="bar bar-green"></div><h2>Schema & Dockerfile</h2></div>
+    <div class="card">
+      <p>Every shard needs the <strong>same table</strong> created automatically on first boot, so the init SQL is copied into Postgres's special init folder.</p>
+      <p><strong><code>init.sql</code></strong></p>
+      <pre><code><span class="kw">create table</span> url_table (
+  id <span class="kw">serial not null primary key</span>,
+  URL <span class="kw">text</span>,
+  URL_ID <span class="kw">character</span>(<span class="fn">5</span>)
+)</code></pre>
+      <p><strong><code>Dockerfile</code></strong></p>
+      <pre><code><span class="kw">FROM</span> postgres
+<span class="kw">COPY</span> init.sql /docker-entrypoint-initdb.d</code></pre>
+      <p class="muted">Anything placed in <code>/docker-entrypoint-initdb.d</code> runs automatically the first time the container initializes its database — the filename doesn't have to be <code>init.sql</code>.</p>
+    </div>
+  </div>
+
+  <!-- BUILD -->
+  <div class="section" id="build">
+    <div class="section-label"><div class="bar bar-orange"></div><h2>Build & Run</h2></div>
+    <div class="card">
+      <p><strong>Build one custom image, then spin up 3 containers from it — one per shard port:</strong></p>
+      <pre><code><span class="cm">// build the custom image (init.sql baked in)</span>
+docker build <span class="flag">-t</span> pgshard .
+
+<span class="cm">// spin up the 3 shards — modern Postgres images require a password</span>
+docker run <span class="flag">--name</span> shard1 <span class="flag">-p</span> 5432:5432 <span class="flag">-e</span> POSTGRES_PASSWORD=postgres <span class="flag">-d</span> pgshard
+docker run <span class="flag">--name</span> shard2 <span class="flag">-p</span> 5433:5432 <span class="flag">-e</span> POSTGRES_PASSWORD=postgres <span class="flag">-d</span> pgshard
+docker run <span class="flag">--name</span> shard3 <span class="flag">-p</span> 5434:5432 <span class="flag">-e</span> POSTGRES_PASSWORD=postgres <span class="flag">-d</span> pgshard
+
+<span class="cm">// spin up pgAdmin to browse all 3 shards</span>
+docker run <span class="flag">-e</span> PGADMIN_DEFAULT_EMAIL=<span class="str">"sibteali786@gmail.com"</span> \
+           <span class="flag">-e</span> PGADMIN_DEFAULT_PASSWORD=<span class="str">"password"</span> \
+           <span class="flag">-p</span> 5555:80 <span class="flag">--name</span> pgadmin <span class="flag">-d</span> dpage/pgadmin4</code></pre>
+      <div class="tip">
+        <span class="tag">Updated from the original video</span>
+        <p style="margin-top:6px;margin-bottom:0;">The original commands (<code>docker run --name shard1 -p 5432:5432 pgshard</code>, with a random pgAdmin email) no longer work as-is on current Postgres/pgAdmin images: <strong>a real <code>POSTGRES_PASSWORD</code> is required</strong> at container start, and <strong>pgAdmin now validates the email format</strong> — it must be a real-looking address, not a placeholder string.</p>
+      </div>
+      <p class="muted" style="margin-top:10px;">Once all 4 containers are up, add 3 servers in pgAdmin (host = machine IP or container name, ports 5432/5433/5434, user/db default to <code>postgres</code>) — each should show the same <code>url_table</code> schema, empty.</p>
+    </div>
+  </div>
+
+  <!-- DEBUGGING LOG -->
+  <div class="section" id="bugs">
+    <div class="section-label"><div class="bar bar-red"></div><h2>Debugging Log — What Actually Broke</h2></div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">01</span><span class="muted">docker build failed</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Mistake</span>File was named <code>DockerFile</code> (capital F) instead of <code>Dockerfile</code> — Docker's default build only looks for the exact lowercase name.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Fix</span><code>mv DockerFile Dockerfile</code>, then <code>docker build -t pgshard .</code> succeeded.</div>
+      </div>
+    </div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">02</span><span class="muted">"address already in use" on port 5433</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Mistake</span>Assumed the port was free — a local (non-Docker) Postgres was already listening on <code>127.0.0.1:5433</code>.</div>
+        <div class="bug-row"><span class="bug-label">Diagnosis</span><code>ss -ltnp | grep 5433</code> → <code>sudo lsof -i :5433 -sTCP:LISTEN -P -n</code> → found local postgres PID 1839.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Fix</span>That local service only bound to <code>127.0.0.1</code>, so <code>0.0.0.0:5433</code> was still free for Docker — confirmed and reused the port, no real change needed.</div>
+      </div>
+    </div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">03</span><span class="muted">"Conflict, name already in use"</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Mistake</span>Reused a container name (<code>pgshard2</code>) that already existed in Created/Exited state instead of removing it first.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Fix</span><code>docker rm pgshard2</code> before re-running.</div>
+      </div>
+    </div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">04</span><span class="muted">Containers exiting immediately — "superuser password is not specified"</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Root cause</span>The base <code>postgres</code> image requires <code>POSTGRES_PASSWORD</code> (or <code>POSTGRES_HOST_AUTH_METHOD=trust</code>) on every fresh container start. This check runs at <strong>container-start time</strong>, not build time — hit repeatedly across shard1, shard2, and shard3.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Fix</span><code>docker rm &lt;name&gt;</code>, then <code>docker run --name &lt;name&gt; -p &lt;hostport&gt;:5432 -e POSTGRES_PASSWORD=postgres -d pgshard</code>.</div>
+      </div>
+    </div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">05</span><span class="muted">init.sql failing during container init</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Mistake</span>Trailing comma in <code>CREATE TABLE</code> (<code>URL_ID character(5),</code>) — invalid SQL syntax.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Fix</span>Removed the trailing comma, then <strong>rebuilt the image</strong> (<code>docker build -t pgshard .</code>) since <code>init.sql</code> is copied in at build time, and recreated the container.</div>
+      </div>
+    </div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">06</span><span class="muted">pgAdmin: curly quotes in -e values</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Mistake</span><code>"hussein"</code> used smart/curly quotes (from copy-paste or terminal autocorrect) instead of straight <code>"</code>, breaking both shell quoting and email validation.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Fix</span>Retyped with straight double quotes: <code>-e PGADMIN_DEFAULT_EMAIL="sibteali786@gmail.com"</code>.</div>
+      </div>
+    </div>
+
+    <div class="bug">
+      <div class="bug-head"><span class="bug-num">07</span><span class="muted">pgAdmin couldn't connect to localhost:5432</span></div>
+      <div class="bug-body">
+        <div class="bug-row"><span class="bug-label mistakelabel">Mistake</span>Assumed <code>localhost</code> inside the pgAdmin container refers to the host machine — it doesn't. Each container has its own network namespace, so <code>localhost</code> there is pgAdmin itself.</div>
+        <div class="bug-row"><span class="bug-label mistakelabel">Also failed</span><code>host.docker.internal</code> — that hostname is a Docker Desktop convenience, not available on plain Docker Engine on Linux.</div>
+        <div class="bug-row"><span class="bug-label fixlabel">Real fix</span>Put pgAdmin and all 3 Postgres containers on a shared user-defined network, then connect using <strong>container names</strong> (see below).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NETWORKING -->
+  <div class="section" id="network">
+    <div class="section-label"><div class="bar bar-purple"></div><h2>The Networking Fix</h2></div>
+    <div class="card">
+      <pre><code>docker network <span class="fn">create</span> pgnet
+docker network <span class="fn">connect</span> pgnet pgadmin
+docker network <span class="fn">connect</span> pgnet pgshard1
+docker network <span class="fn">connect</span> pgnet pgshard2
+docker network <span class="fn">connect</span> pgnet pgshard3</code></pre>
+      <p>Then in pgAdmin, set <strong>host = <code>pgshard1</code></strong> (etc.) and <strong>port = <code>5432</code></strong> — the container's internal port, not the host-mapped one.</p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+          <rect x="30" y="20" width="640" height="180" rx="12" fill="#1c202c" stroke="#2a2f3d"/>
+          <text x="350" y="42" fill="#9aa1b4" font-size="11" font-family="JetBrains Mono" text-anchor="middle">docker network: pgnet</text>
+          <g font-family="JetBrains Mono" font-size="11" fill="#e6e8ef" text-anchor="middle">
+            <ellipse cx="130" cy="100" rx="26" ry="8" fill="#3d2f5c"/>
+            <rect x="104" y="100" width="52" height="30" fill="#2e2347"/>
+            <ellipse cx="130" cy="130" rx="26" ry="8" fill="#251c38"/>
+            <text x="130" y="152">pgadmin</text>
+
+            <ellipse cx="300" cy="100" rx="26" ry="8" fill="#1f3a5f"/>
+            <rect x="274" y="100" width="52" height="30" fill="#193049"/>
+            <ellipse cx="300" cy="130" rx="26" ry="8" fill="#142639"/>
+            <text x="300" y="152">pgshard1:5432</text>
+
+            <ellipse cx="470" cy="100" rx="26" ry="8" fill="#1f3a5f"/>
+            <rect x="444" y="100" width="52" height="30" fill="#193049"/>
+            <ellipse cx="470" cy="130" rx="26" ry="8" fill="#142639"/>
+            <text x="470" y="152">pgshard2:5432</text>
+
+            <ellipse cx="600" cy="100" rx="26" ry="8" fill="#1f3a5f"/>
+            <rect x="574" y="100" width="52" height="30" fill="#193049"/>
+            <ellipse cx="600" cy="130" rx="26" ry="8" fill="#142639"/>
+            <text x="600" y="152">pgshard3:5432</text>
+          </g>
+          <text x="350" y="185" fill="#9aa1b4" font-size="10" font-family="JetBrains Mono" text-anchor="middle">containers reach each other by name, always on port 5432</text>
+        </svg>
+      </div>
+
+      <div class="tip">
+        <span class="tag">Key concept</span>
+        <p style="margin-top:6px;margin-bottom:0;"><strong>Host-mapped ports</strong> (5432 / 5433 / 5434) are for reaching containers <em>from the host machine</em>. <strong>Container-to-container</strong> traffic on a shared Docker network uses <strong>container names + the container's internal port</strong> (always 5432 for Postgres) — a separate, non-conflicting namespace from the host ports.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Source: Hussein Nasser — "Sharding & Consistent Hashing" (hands-on setup segment) · husseinnasser.com — commands updated to reflect current Postgres/pgAdmin image requirements</div>
+</div>
+</body>
+</html>

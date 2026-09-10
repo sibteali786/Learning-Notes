@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>P50 vs P99 — Latency Percentiles</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #171a23;
+    --card-border: #262b3a;
+    --blue: #5b8ff9;
+    --orange: #ff9f5b;
+    --green: #4ade80;
+    --purple: #b18cff;
+    --red: #ff6b6b;
+    --text: #e6e8ef;
+    --dim: #8b92a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { color: var(--dim); margin-bottom: 32px; font-size: 0.95rem; }
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 40px 0 16px;
+  }
+  .bar { width: 5px; height: 22px; border-radius: 3px; }
+  .bar.blue { background: var(--blue); }
+  .bar.orange { background: var(--orange); }
+  .bar.green { background: var(--green); }
+  .bar.purple { background: var(--purple); }
+  .bar.red { background: var(--red); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-right: 6px;
+  }
+  .pill.good { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.4); }
+  .pill.bad { background: rgba(255,107,107,0.15); color: var(--red); border: 1px solid rgba(255,107,107,0.4); }
+  .pill.warn { background: rgba(255,159,91,0.15); color: var(--orange); border: 1px solid rgba(255,159,91,0.4); }
+
+  code, .code-inline {
+    background: #1e2230;
+    color: var(--green);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  pre {
+    background: #0b0d13;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    color: #c9d1e0;
+  }
+  pre .kw { color: var(--blue); }
+  pre .comment { color: var(--dim); }
+  pre .val { color: var(--orange); }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.87rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--card-border); }
+  th { color: var(--dim); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .compare-grid { grid-template-columns: 1fr; } }
+  .metric-box {
+    background: #12141c;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .metric-box.win { border-color: rgba(74,222,128,0.4); }
+  .metric-box.lose { border-color: rgba(255,107,107,0.4); }
+  .metric-title { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 8px; }
+  .metric-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.85rem; }
+  .metric-val { color: var(--text); font-weight: 700; }
+
+  .distribution {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 90px;
+    margin: 16px 0 6px;
+  }
+  .bar-item { flex: 1; background: var(--blue); border-radius: 3px 3px 0 0; opacity: 0.35; }
+  .bar-item.tail { background: var(--red); opacity: 0.9; }
+  .dist-labels { display: flex; justify-content: space-between; color: var(--dim); font-size: 0.7rem; }
+
+  .example {
+    border-left: 3px solid var(--purple);
+    padding: 10px 16px;
+    background: rgba(177,140,255,0.06);
+    border-radius: 0 8px 8px 0;
+    margin-top: 12px;
+    font-size: 0.88rem;
+  }
+  .example b { color: var(--purple); }
+
+  .heuristic {
+    background: linear-gradient(135deg, rgba(91,143,249,0.1), rgba(177,140,255,0.1));
+    border: 1px solid rgba(91,143,249,0.3);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 1rem;
+    text-align: center;
+    font-weight: 500;
+  }
+  .heuristic b { color: var(--blue); }
+  .heuristic b.tail { color: var(--red); }
+
+  .tip {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 0;
+    font-size: 0.88rem;
+  }
+  .tip::before { content: "→"; color: var(--green); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>P50 vs P99</h1>
+  <div class="subtitle">Latency percentiles — what they mean, why they diverge, and how it was proven live against Postgres</div>
+
+  <!-- 1. Problem statement -->
+  <div class="section-label"><span class="bar blue"></span>The Problem</div>
+  <div class="card">
+    Saying <span class="code-inline">"check the database"</span> when asked to find a bottleneck is a <b>component guess</b>.
+    P50/P99 is a <b>diagnostic lens</b> — it tells you <i>which kind</i> of problem you're looking for before you go looking.
+    <div class="pill bad" style="margin-top:10px;">Averages hide the tail</div>
+  </div>
+
+  <!-- 2. How it works -->
+  <div class="section-label"><span class="bar orange"></span>How It Works</div>
+  <div class="card">
+    <b>Definition:</b> out of 100 requests, P99 is the latency below which 99 of them fall — the slowest 1% is worse than this.
+    <table>
+      <tr><th>Metric</th><th>Meaning</th></tr>
+      <tr><td>P50 (median)</td><td>Typical experience</td></tr>
+      <tr><td>P95</td><td>Most users, including some friction</td></tr>
+      <tr><td>P99</td><td>The tail — GC pauses, lock contention, cold cache, slow disk I/O, retries, noisy neighbor</td></tr>
+      <tr><td>P999</td><td>Worst case — often one flaky node/shard</td></tr>
+    </table>
+
+    <div class="distribution" title="9900 fast requests, 100 very slow requests">
+      <!-- 40 bars representing distribution, last 2 are tail -->
+      <div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:23%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:24%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:23%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:24%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:23%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:24%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:23%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:24%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:23%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:24%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:23%"></div><div class="bar-item" style="height:20%"></div><div class="bar-item" style="height:22%"></div><div class="bar-item" style="height:21%"></div><div class="bar-item" style="height:24%"></div><div class="bar-item tail" style="height:100%"></div><div class="bar-item tail" style="height:90%"></div><div class="bar-item tail" style="height:70%"></div>
+    </div>
+    <div class="dist-labels"><span>fast requests (P0–P97)</span><span style="color:var(--red)">tail (P99+)</span></div>
+
+    <div class="example">
+      <b>Example:</b> 9,900 requests at 20ms, 100 requests at 5000ms.<br>
+      Average ≈ 68ms (looks fine!) — <b>P99 = 5000ms</b> (users are furious). At millions of requests, that 1% is thousands of real angry users.
+    </div>
+  </div>
+
+  <!-- 3. Key distinctions -->
+  <div class="section-label"><span class="bar purple"></span>Key Distinctions — Reading the Shape</div>
+
+  <div class="compare-grid">
+    <div class="metric-box">
+      <div class="metric-title" style="color:var(--blue)">Uniform badness → P50 bad too</div>
+      <div class="metric-row"><span>Cause type</span><span class="metric-val">Structural / code path</span></div>
+      <div class="metric-row"><span>Examples</span><span class="metric-val">missing index, bad query plan, N+1</span></div>
+      <div class="metric-row"><span>Signature</span><span class="metric-val">P99 − P50 spread stays small</span></div>
+      <div class="metric-row"><span>Fix</span><span class="metric-val">EXPLAIN ANALYZE, add index</span></div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-title" style="color:var(--red)">Tail-only badness → P99 bad, P50 fine</div>
+      <div class="metric-row"><span>Cause type</span><span class="metric-val">Occasional / contention</span></div>
+      <div class="metric-row"><span>Examples</span><span class="metric-val">GC pause, pool exhaustion, cold cache, slow shard, retry</span></div>
+      <div class="metric-row"><span>Signature</span><span class="metric-val">tail % ≈ % of unlucky requests</span></div>
+      <div class="metric-row"><span>Fix</span><span class="metric-val">tracing, per-node metrics</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <table>
+      <tr><th>Cause</th><th>Why it hits P99 only</th></tr>
+      <tr><td>GC pause</td><td>Runs occasionally — only requests coinciding with it suffer</td></tr>
+      <tr><td>Connection pool exhaustion</td><td>Pool has N connections; under a burst, requests wait — only burst traffic suffers</td></tr>
+      <tr><td>Cold cache miss</td><td>99% hit rate → the 1% miss rate ≈ your tail, almost mathematically</td></tr>
+      <tr><td>Slow shard / noisy neighbor</td><td>Only requests routed to that one bad replica are slow</td></tr>
+      <tr><td>Network retry</td><td>Only the small % hitting a transient blip pay the extra RTT</td></tr>
+    </table>
+  </div>
+
+  <div class="heuristic">
+    Uniform badness across the whole distribution → look at <b>the code path itself</b> (query plan, index, algorithm).<br>
+    Badness only in the tail → look at what happens <b class="tail">occasionally</b> (contention, cache miss, GC, retries, one bad node).
+  </div>
+
+  <!-- 4. Real-world example: the Postgres experiment -->
+  <div class="section-label"><span class="bar green"></span>Real-World Proof — Postgres Experiment</div>
+  <div class="card">
+    <b>Setup:</b> <span class="code-inline">feed_engine</span> DB, <span class="code-inline">article</span> table (millions of rows), only indexes present were the primary keys.
+    <pre><span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> a.id, a.title, a.url, p.name <span class="kw">AS</span> "publisherName",
+       a.category, a.region, a.published_at <span class="kw">AS</span> "publishedAt"
+<span class="kw">FROM</span> article a
+<span class="kw">JOIN</span> publisher p <span class="kw">ON</span> p.id = a.publisher_id
+<span class="kw">WHERE</span> a.region = <span class="val">'US'</span> <span class="kw">AND</span> a.id &lt; <span class="val">500000</span>
+<span class="kw">ORDER BY</span> a.id <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="val">20</span>;</pre>
+    <span class="pill warn">Inconclusive — first attempt</span>
+    <p>Composite index <span class="code-inline">(region, id DESC)</span> was created, but the planner <b>ignored it</b> — kept using <span class="code-inline">article_pkey</span> both times. Why: <span class="code-inline">ORDER BY id DESC LIMIT 20</span> lets Postgres walk the pkey backward and stop after only 20 matches (skipped just 39 non-US rows) — cheaper than switching indexes. The 1.14ms → 0.09ms drop between runs was <b>buffer-pool caching</b> (cold vs warm), not the index — a live demonstration of the "cold cache" P99 mechanism, just at the DB buffer level.</p>
+  </div>
+
+  <div class="card">
+    <b>Corrected test:</b> removed <span class="code-inline">LIMIT</span> and <span class="code-inline">ORDER BY id</span> so the index actually has to compete on its own merit.
+    <pre><span class="kw">EXPLAIN (ANALYZE, BUFFERS)</span>
+<span class="kw">SELECT</span> count(*) <span class="kw">FROM</span> article <span class="kw">WHERE</span> region = <span class="val">'US'</span>;</pre>
+
+    <div class="compare-grid" style="margin-top:14px;">
+      <div class="metric-box win">
+        <div class="metric-title" style="color:var(--green)">With composite index</div>
+        <div class="pill good">Index Only Scan</div>
+        <div class="metric-row"><span>Execution Time</span><span class="metric-val">213.76 ms</span></div>
+        <div class="metric-row"><span>Buffers read</span><span class="metric-val">9,578 pages</span></div>
+        <div class="metric-row"><span>Heap Fetches</span><span class="metric-val">0</span></div>
+        <div class="metric-row"><span>Rows filtered</span><span class="metric-val">0</span></div>
+      </div>
+      <div class="metric-box lose">
+        <div class="metric-title" style="color:var(--red)">Index dropped (seq scan)</div>
+        <div class="pill bad">Parallel Seq Scan</div>
+        <div class="metric-row"><span>Execution Time</span><span class="metric-val">1,912.80 ms</span></div>
+        <div class="metric-row"><span>Buffers read</span><span class="metric-val">166,104 pages</span></div>
+        <div class="metric-row"><span>Heap Fetches</span><span class="metric-val">n/a (full scan)</span></div>
+        <div class="metric-row"><span>Rows filtered out</span><span class="metric-val">2,500,371</span></div>
+      </div>
+    </div>
+
+    <div class="example" style="margin-top:16px;">
+      <b>Result:</b> ~9x slowdown, ~17x more disk pages touched, after dropping one index. This badness is <b>uniform and structural</b> — every request pays it — exactly the P50 signature discussed above, now proven with real <span class="code-inline">EXPLAIN ANALYZE</span> numbers instead of theory.
+    </div>
+  </div>
+
+  <!-- 5. Interview / practical tips -->
+  <div class="section-label"><span class="bar red"></span>Interview & Practical Tips</div>
+  <div class="card">
+    <div class="tip">Never say "check the database" alone — name whether it's a P50 (structural) or P99 (tail) problem first.</div>
+    <div class="tip">P50 bad → pull <span class="code-inline">EXPLAIN ANALYZE</span>, look for <span class="code-inline">Seq Scan</span> vs <span class="code-inline">Index Scan</span>, missing composite indexes, N+1 queries.</div>
+    <div class="tip">P99 bad, P50 fine → pull distributed tracing on slow requests specifically, correlate spike timestamps with GC logs / connection pool metrics / per-replica dashboards.</div>
+    <div class="tip">Tail % should roughly match the % of requests on the "unlucky path" — a 99% cache hit rate almost mathematically predicts a P99 bump.</div>
+    <div class="tip">An index existing ≠ an index being used — the planner picks based on cost, and <span class="code-inline">LIMIT</span> + a sorted PK can beat a "smarter" index for small result sets.</div>
+    <div class="tip">Ties back to the News Aggregator design: this is why the accepted answer for category feeds was in-memory filtering on Redis, not <span class="code-inline">WHERE category=...</span> on Postgres — measured seq-scan cost (1.9s) makes the DB non-viable at 50M req scale.</div>
+  </div>
+
+</div>
+</body>
+</html>
