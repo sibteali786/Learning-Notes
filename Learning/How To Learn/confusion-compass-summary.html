@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Confusion Compass</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #171a22;
+    --border: #262b38;
+    --blue: #5b8cff;
+    --orange: #ff9f5b;
+    --green: #4ade80;
+    --purple: #c084fc;
+    --text: #e5e7eb;
+    --muted: #8b93a7;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+
+  .container { max-width: 920px; margin: 0 auto; }
+
+  h1, h2, h3 {
+    font-family: 'Syne', sans-serif;
+    margin: 0;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 36px 0 14px;
+  }
+  .bar { width: 5px; height: 20px; border-radius: 3px; }
+  .section-label h2 { font-size: 1.15rem; }
+  .bar.blue { background: var(--blue); }
+  .bar.orange { background: var(--orange); }
+  .bar.green { background: var(--green); }
+  .bar.purple { background: var(--purple); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .pill.blue { background: rgba(91,140,255,0.15); color: var(--blue); }
+  .pill.orange { background: rgba(255,159,91,0.15); color: var(--orange); }
+  .pill.green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .pill.purple { background: rgba(192,132,252,0.15); color: var(--purple); }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+
+  .compare-card {
+    border-radius: 12px;
+    padding: 18px;
+    border: 1px solid var(--border);
+  }
+  .compare-card.bad { background: rgba(255,80,80,0.06); border-color: rgba(255,80,80,0.3); }
+  .compare-card.good { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.3); }
+  .compare-card h3 { font-size: 0.95rem; margin-bottom: 8px; }
+  .compare-card.bad h3 { color: #ff8080; }
+  .compare-card.good h3 { color: var(--green); }
+  .compare-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.85rem; }
+  .compare-card li { margin-bottom: 4px; }
+
+  code, .code-block {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0b0d13;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: block;
+    font-size: 0.82rem;
+    color: var(--green);
+    white-space: pre-wrap;
+    margin-top: 8px;
+  }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 110px;
+    text-align: center;
+    background: #0b0d13;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    font-size: 0.8rem;
+  }
+  .flow-arrow { color: var(--muted); font-size: 1.2rem; }
+
+  .example {
+    border-left: 3px solid var(--orange);
+    padding-left: 14px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  .example b { color: var(--text); }
+
+  .tip {
+    background: rgba(91,140,255,0.08);
+    border: 1px dashed var(--blue);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    margin-top: 10px;
+  }
+
+  svg text { font-family: 'JetBrains Mono', monospace; }
+
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 50px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1>🧭 The Confusion Compass</h1>
+    <p>The one strategy separating efficient learners from everyone else</p>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="section-label"><div class="bar blue"></div><h2>Problem Statement</h2></div>
+  <div class="card">
+    Most people treat <span class="pill orange">confusion</span> as a sign something is wrong — so when it shows up, they either push through by re-reading the same material for hours, or they quietly disengage (eyes glazing over, "getting it" on the surface without really connecting anything). Both paths waste huge amounts of time because the confusion never gets converted into anything actionable.
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section-label"><div class="bar green"></div><h2>How It Works</h2></div>
+
+  <div class="card">
+    <b>Core reframe:</b> Confusion isn't a bug — it's your brain actively trying to file new information ("what is this, where does it go, how does it connect?"). No confusion = no real learning happening.
+    <div class="flow">
+      <div class="flow-step">😵 Feel confusion</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">❓ Write down the specific questions that would resolve it</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🔍 Go answer them</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🔁 New confusion → repeat</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>Diagram — the loop:</b>
+    <svg viewBox="0 0 700 220" width="100%" height="220">
+      <circle cx="350" cy="110" r="95" fill="none" stroke="#262b38" stroke-width="2"/>
+      <circle cx="350" cy="20" r="34" fill="#171a22" stroke="#ff9f5b" stroke-width="2"/>
+      <text x="350" y="16" fill="#ff9f5b" font-size="11" text-anchor="middle">Confusion</text>
+      <text x="350" y="30" fill="#8b93a7" font-size="9" text-anchor="middle">(emotion)</text>
+
+      <circle cx="460" cy="110" r="34" fill="#171a22" stroke="#5b8cff" stroke-width="2"/>
+      <text x="460" y="106" fill="#5b8cff" font-size="11" text-anchor="middle">Questions</text>
+      <text x="460" y="120" fill="#8b93a7" font-size="9" text-anchor="middle">(written down)</text>
+
+      <circle cx="350" cy="200" r="34" fill="#171a22" stroke="#4ade80" stroke-width="2"/>
+      <text x="350" y="196" fill="#4ade80" font-size="11" text-anchor="middle">Answers</text>
+      <text x="350" y="210" fill="#8b93a7" font-size="9" text-anchor="middle">(targeted search)</text>
+
+      <circle cx="240" cy="110" r="34" fill="#171a22" stroke="#c084fc" stroke-width="2"/>
+      <text x="240" y="106" fill="#c084fc" font-size="11" text-anchor="middle">New</text>
+      <text x="240" y="120" fill="#c084fc" font-size="9" text-anchor="middle">confusion</text>
+
+      <path d="M375,40 Q430,60 450,80" stroke="#8b93a7" fill="none" marker-end="url(#arrow)"/>
+      <path d="M450,140 Q410,175 375,190" stroke="#8b93a7" fill="none" marker-end="url(#arrow)"/>
+      <path d="M320,195 Q270,175 250,145" stroke="#8b93a7" fill="none" marker-end="url(#arrow)"/>
+      <path d="M245,80 Q290,45 320,35" stroke="#8b93a7" fill="none" marker-end="url(#arrow)"/>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#8b93a7"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section-label"><div class="bar orange"></div><h2>Key Distinctions</h2></div>
+  <div class="compare-grid">
+    <div class="compare-card bad">
+      <h3>❌ Passive confusion (wasted)</h3>
+      <ul>
+        <li>Feel overwhelmed, keep re-reading hoping it "clicks"</li>
+        <li>No conversion of the feeling into anything usable</li>
+        <li>More reading = more disconnected data points</li>
+        <li>Confusion → overwhelm</li>
+      </ul>
+    </div>
+    <div class="compare-card good">
+      <h3>✅ Confusion Compass (effective)</h3>
+      <ul>
+        <li>Feel confusion → immediately ask "what would reduce this?"</li>
+        <li>Write a concrete list of questions</li>
+        <li>Go find targeted answers</li>
+        <li>Confusion → clarity → new (smaller) confusion</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="pill purple">Detail</span> The other symptom to watch: if you feel <b>zero</b> confusion (bored, skimming, eyes glazing over), that's a red flag too — it means your brain isn't connecting dots at all. In that case, deliberately trigger confusion by asking how the material applies to your actual goal.
+  </div>
+
+  <!-- REAL WORLD EXAMPLE -->
+  <div class="section-label"><div class="bar blue"></div><h2>Real-World Example</h2></div>
+  <div class="card">
+    <b>Scenario:</b> A developer opens the docs for a new library they need at work and starts zoning out.
+    <div class="example">
+      <b>Trigger step:</b> Ask "how does this affect the work I'm doing?" → confusion kicks in because it resembles a library they already use.
+    </div>
+    <div class="example">
+      <b>Questions generated:</b>
+      <div class="code-block">- How does this compare to [library we already use]?
+- What are its actual benefits over the alternative?
+- How would I implement it in our current workflow?
+- What's the migration cost / time?
+- What are real examples of it being used in production?</div>
+    </div>
+    <div class="example">
+      <b>Result:</b> Answering these targeted questions resolves the original confusion — but often raises new, narrower ones (e.g. "ok but how does its caching work?"). That's the cycle repeating, and it's exactly what efficient learning looks like.
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section-label"><div class="bar green"></div><h2>Interview / Practical Tips</h2></div>
+  <div class="card">
+    <div class="tip">💡 <b>Practical rule:</b> Whenever you catch yourself "just re-reading" something for the 3rd time, stop — write down 3 specific questions instead of a 4th read-through.</div>
+    <div class="tip">💡 <b>Self-check:</b> No confusion after 10 minutes of new material? You're probably skimming, not learning. Force a "how does this apply to X" question.</div>
+    <div class="tip">💡 <b>Universal:</b> Works for any domain — code, business, medicine, exam prep — because it targets how the brain files new information, not the subject matter itself.</div>
+  </div>
+
+  <div class="footer">Summary generated from video transcript · Confusion Compass learning technique</div>
+
+</div>
+</body>
+</html>
