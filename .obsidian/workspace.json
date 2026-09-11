@@ -11,10 +11,24 @@
             "id": "5667da2d6399115d",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "3-01-Matrix.excalidraw"
+            }
+          },
+          {
+            "id": "e2eac8bb5edd10f3",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "2-Rotting Oranges.excalidraw"
             }
           }
         ]
@@ -76,7 +90,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 376.6920585632324,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,8 +197,10 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "88876276e2a2dd54",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
+    "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/8-learning-curves-summary.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/Untitled.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/7-baseline-performance-summary.html",
@@ -224,7 +241,6 @@
     "Learning/JavaScript/Coding/2-Throttle.excalidraw.md",
     "Learning/JavaScript/Coding/2-Debounce.excalidraw.md",
     "Learning/JavaScript/Coding/1-Flatten.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
     "Learning/DSA/Graphs/BFS/1-Minimum Knight Moves.excalidraw.md",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/2026-09-08-live-feed-engine-architecture-evolution.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/Final Run.md",
