@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>4 - Lab: Model Evaluation and Selection</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.87em;}
+  pre{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:0.82rem; margin:12px 0;}
+  pre code{background:none; border:none; padding:0; color:#d4d8e8;}
+  .kw{color:#c792ea;} .fn{color:#82aaff;} .cm{color:#546079; font-style:italic;} .str{color:#c3e88d;}
+
+  .qa{background:rgba(124,155,255,0.08); border:1px solid var(--accent); border-radius:10px; padding:16px 18px; margin-top:14px;}
+  .qa .q{color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .qa .a{margin:0;}
+
+  .flow{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .flow-item{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .flow-item.cv{border-left-color:var(--cv);}
+  .flow-item.test{border-left-color:var(--accent2);}
+  .flow-item .n{font-weight:700; color:var(--accent); min-width:20px;}
+  .flow-item.cv .n{color:var(--cv);}
+  .flow-item.test .n{color:var(--accent2);}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .compare-card .tag{font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:2px 8px; border-radius:6px; display:inline-block; margin-bottom:8px;}
+  .tag.right{background:rgba(94,214,164,0.15); color:var(--good);}
+  .tag.wrong{background:rgba(255,107,129,0.15); color:var(--bad);}
+
+  .idx-visual{display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; font-family:'Cascadia Code',monospace; font-size:0.85rem;}
+  .idx-pair{display:flex; flex-direction:column; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:8px 14px;}
+  .idx-pair .top{color:var(--accent); font-weight:700;}
+  .idx-pair .bot{color:var(--muted); font-size:0.75rem;}
+
+  .pill{display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; margin-right:6px;}
+  .pill.blue{background:rgba(124,155,255,0.15); color:var(--accent);}
+  .pill.orange{background:rgba(255,138,107,0.15); color:var(--accent2);}
+  .pill.green{background:rgba(94,214,164,0.15); color:var(--good);}
+  .pill.purple{background:rgba(199,146,234,0.15); color:var(--cv);}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Lab Notebook</span><span class="badge">C2W3 Lab 1</span>
+  <h1>Lesson 4 — Lab: Model Evaluation and Selection (Code Walkthrough)</h1>
+  <p class="subtitle">The practical, code-level version of Lessons 2 & 3 — feature scaling pitfalls, polynomial degree selection, and classification error metrics.</p>
+
+  <section>
+    <h2><span class="num">1</span> Feature Scaling: fit_transform vs transform</h2>
+    <p><span class="pill blue">Train</span> gets <code>StandardScaler().fit_transform()</code>. <span class="pill purple">CV</span> and <span class="pill orange">Test</span> only get <code>.transform()</code>. This trips people up every time — here's the actual reason.</p>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <span class="tag right">fit_transform (train only)</span>
+        <p style="margin:0; font-size:0.88rem;">Computes the mean &amp; std <strong>from this data</strong>, then applies them. This is the one time you're allowed to "learn" the scaling parameters.</p>
+      </div>
+      <div class="compare-card">
+        <span class="tag wrong">transform (cv / test)</span>
+        <p style="margin:0; font-size:0.88rem;">Reuses the mean &amp; std <strong>already learned from train</strong>. Never recomputes new statistics from CV/test data.</p>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">Why this matters</div>
+      <p style="margin:0;">Your model's weights were learned on features scaled using train's mean/std. If CV/test computed their <em>own</em> mean/std, the number "1.0" would mean something different in each dataset — the model's learned weights wouldn't map correctly anymore. It also leaks information: CV/test are supposed to simulate genuinely unseen future data, and computing statistics from them defeats that purpose, making your evaluation optimistically biased.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Evaluating the Final Chosen Model on the Test Set</h2>
+    <pre><code><span class="cm"># Add polynomial features to the test set</span>
+X_test_mapped = polys[degree-1].<span class="fn">transform</span>(x_test)
+
+<span class="cm"># Scale the test set</span>
+X_test_mapped_scaled = scalers[degree-1].<span class="fn">transform</span>(X_test_mapped)
+
+<span class="cm"># Compute the test MSE</span>
+yhat = models[degree-1].<span class="fn">predict</span>(X_test_mapped_scaled)
+test_mse = <span class="fn">mean_squared_error</span>(y_test, yhat) / 2
+
+<span class="fn">print</span>(f<span class="str">"Training MSE: {train_mses[degree-1]:.2f}"</span>)
+<span class="fn">print</span>(f<span class="str">"Cross Validation MSE: {cv_mses[degree-1]:.2f}"</span>)
+<span class="fn">print</span>(f<span class="str">"Test MSE: {test_mse:.2f}"</span>)</code></pre>
+    <p>This is Lesson 3's procedure in code: <code>degree</code> was already chosen by picking the lowest CV MSE earlier. Now — and only now — the winning degree's polynomial transformer, scaler, and model are applied to the test set, exactly once, to get the final unbiased generalization estimate.</p>
+
+    <div class="idx-visual">
+      <div class="idx-pair"><div class="top">degree = 3</div><div class="bot">what you think in</div></div>
+      <span style="color:var(--muted);">→</span>
+      <div class="idx-pair"><div class="top">polys[2]</div><div class="bot">degree-1 = list index</div></div>
+    </div>
+    <p style="margin-top:10px;"><strong>Why <code>degree-1</code>?</strong> It's a Python indexing offset, not a different degree. Your loop names models degree = 1, 2, 3... but Python lists are 0-indexed, so the degree-3 transformer actually sits at <code>polys[2]</code>. <code>polys[degree-1]</code> just corrects for that — it's still pulling the <strong>same degree</strong> that had the lowest CV error, not a different one.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Classification Version: Fraction Misclassified</h2>
+    <pre><code><span class="cm"># Set the threshold for classification</span>
+threshold = 0.5
+
+<span class="cm"># Record the fraction of misclassified examples for the training set</span>
+yhat = model.<span class="fn">predict</span>(x_bc_train_scaled)
+yhat = tf.math.<span class="fn">sigmoid</span>(yhat)
+yhat = np.<span class="fn">where</span>(yhat >= threshold, 1, 0)
+train_error = np.<span class="fn">mean</span>(yhat != y_bc_train)
+nn_train_error.<span class="fn">append</span>(train_error)
+
+<span class="cm"># Record the fraction of misclassified examples for the cross validation set</span>
+yhat = model.<span class="fn">predict</span>(x_bc_cv_scaled)
+yhat = tf.math.<span class="fn">sigmoid</span>(yhat)
+yhat = np.<span class="fn">where</span>(yhat >= threshold, 1, 0)
+cv_error = np.<span class="fn">mean</span>(yhat != y_bc_cv)
+nn_cv_error.<span class="fn">append</span>(cv_error)</code></pre>
+    <p>The loop trains several candidate NN architectures, records train/CV error for each, then (same as the neural-network model-selection from Lesson 3) you'd pick the architecture with lowest <code>nn_cv_error</code> and finally check it once on test.</p>
+    <div class="flow">
+      <div class="flow-item"><span class="n">1</span><div>Raw logits → <code>tf.math.sigmoid()</code> converts to a probability between 0 and 1.</div></div>
+      <div class="flow-item"><span class="n">2</span><div>Threshold at 0.5 → <code>np.where(yhat >= 0.5, 1, 0)</code> converts probability to a hard 0/1 label.</div></div>
+      <div class="flow-item cv"><span class="n">3</span><div><code>np.mean(yhat != y)</code> → fraction of examples where predicted label ≠ true label = the misclassification rate.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Clarifying Q&A</h2>
+
+    <div class="qa">
+      <div class="q">Q: Why fit_transform on train but only transform on CV — I still don't fully get it.</div>
+      <p class="a"><code>fit_transform</code> = "learn the scaling rule from this data, then apply it." You only ever learn that rule once, from train. CV and test then get <code>transform</code> = "apply the rule you already learned" — they don't get to define their own rule. If they did, a raw feature value like 2000 sq ft could get scaled differently in train vs. CV depending on each set's own mean/std, so the model (which learned weights relative to train's scale) would misinterpret CV's scaled numbers. It also prevents information about "future" CV/test data from leaking into your preprocessing pipeline.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: Why <code>degree-1</code> in <code>polys[degree-1]</code> — shouldn't it match the CV degree?</div>
+      <p class="a">It does match the same degree — <code>degree-1</code> is purely converting a 1-indexed degree number into a 0-indexed Python list position. If your winning degree (chosen via lowest CV MSE) is 3, its transformer object lives at list index 2, because index 0 held degree 1's transformer. No different polynomial is being used here than the one already selected.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: Why fraction of error here vs. MSE for regression?</div>
+      <p class="a">Yes — same regression-vs-classification split from Lessons 2 &amp; 3. Regression predicts continuous numbers, so squared error captures "how far off" you were. Classification predicts discrete labels, so distance doesn't apply — you either got the label right or wrong. <code>np.mean(yhat != y)</code> is literally the average of a 0/1 "was this wrong" indicator across all examples, i.e. the misclassification fraction.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: Why do we scale only X (features), not y (target)?</div>
+      <p class="a">Scaling exists to fix mismatched <em>relative</em> scales between different features (e.g. square footage in thousands vs. bedroom count in single digits), which otherwise distorts gradient descent and regularization. <code>y</code> is a single target value — there's no other feature it needs to be scaled relative to. Scaling y would also force you to convert every error metric back into original units to make sense of it, adding a step with no real benefit.</p>
+    </div>
+  </section>
+
+  <footer>Lesson 4 · Lab Walkthrough · C2W3 Lab 1: Model Evaluation and Selection</footer>
+</div>
+</body>
+</html>

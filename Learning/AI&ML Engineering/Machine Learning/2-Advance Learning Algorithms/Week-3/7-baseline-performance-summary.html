@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>7 - Baseline Level of Performance</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .metric-stack{display:flex; flex-direction:column; gap:0; margin-top:16px; max-width:420px;}
+  .metric-row{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border:1px solid var(--border); background:var(--panel2);}
+  .metric-row:first-child{border-radius:8px 8px 0 0;}
+  .metric-row:last-child{border-radius:0 0 8px 8px;}
+  .metric-row .val{font-weight:700; color:#fff;}
+  .gap-label{text-align:center; font-size:0.78rem; color:var(--muted); padding:4px 0;}
+  .gap-label.bias-gap{color:var(--bad);}
+  .gap-label.var-gap{color:var(--accent2);}
+
+  .verdict{margin-top:14px; padding:14px 18px; border-radius:10px; font-weight:700; text-align:center; font-size:1.0rem;}
+  .verdict.variance{background:rgba(255,138,107,0.12); border:1px solid var(--accent2); color:var(--accent2);}
+  .verdict.bias{background:rgba(255,107,129,0.12); border:1px solid var(--bad); color:var(--bad);}
+  .verdict.both{background:rgba(255,209,102,0.12); border:1px solid var(--warn); color:var(--warn);}
+
+  .three-examples{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:16px;}
+  @media(max-width:750px){.three-examples{grid-template-columns:1fr;}}
+  .ex-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:14px; font-size:0.85rem;}
+  .ex-card .row{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border);}
+  .ex-card .row:last-of-type{border-bottom:none;}
+  .ex-card .diag{margin-top:10px; text-align:center; font-weight:700; padding:6px; border-radius:6px;}
+  .diag.hv{background:rgba(255,138,107,0.15); color:var(--accent2);}
+  .diag.hb{background:rgba(255,107,129,0.15); color:var(--bad);}
+  .diag.hbv{background:rgba(255,209,102,0.15); color:var(--warn);}
+
+  .baseline-sources{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .source-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 7 — Establishing a Baseline Level of Performance</h1>
+  <p class="subtitle">What "high" or "low" actually means for J_train and J_cv — you can't judge them in a vacuum.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Speech Recognition Puzzle</h2>
+    <p>Training a speech recognition system on web-search audio clips gives:</p>
+    <div class="metric-stack">
+      <div class="metric-row"><span>Human level performance</span><span class="val">10.6%</span></div>
+      <div class="gap-label bias-gap">↕ 0.2% gap</div>
+      <div class="metric-row"><span>Training error (J_train)</span><span class="val">10.8%</span></div>
+      <div class="gap-label var-gap">↕ 4.0% gap</div>
+      <div class="metric-row"><span>Cross-validation error (J_cv)</span><span class="val">14.8%</span></div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">The trap</div>
+      <p style="margin:0;">At first glance, 10.8% training error looks bad on its own — "10% wrong" sounds high. You might conclude high bias. But <strong>even human transcribers get 10.6% wrong</strong> on this data — a lot of web-search audio is genuinely noisy ("I'm going to navigate to [inaudible]"), so no algorithm, however good, can realistically beat that. 10.8% is actually excellent — just 0.2% off human performance.</p>
+    </div>
+    <p>The real story is in the second gap: <strong>J_cv (14.8%) is 4% higher than J_train (10.8%)</strong>. That gap is what signals the actual problem.</p>
+    <div class="verdict variance">Diagnosis: High Variance — not high bias</div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Why You Need a Baseline</h2>
+    <p>Raw error numbers are meaningless without something to compare them to. A <strong>baseline level of performance</strong> is the answer to: "what error rate can I realistically hope to reach?" For inherently noisy or ambiguous data (audio, images, handwriting), that number is rarely 0%.</p>
+    <div class="baseline-sources">
+      <div class="source-row"><div><strong>Human-level performance</strong> — best benchmark for unstructured data (audio, images, text), since humans are naturally excellent at these tasks.</div></div>
+      <div class="source-row"><div><strong>Competing algorithm's performance</strong> — a prior implementation, an existing product, or a competitor's system.</div></div>
+      <div class="source-row"><div><strong>Guess based on prior experience</strong> — informed estimate when neither of the above is available.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The Two Gaps That Actually Matter</h2>
+    <div class="rule-box">
+      <div class="title">Gap 1 — Baseline vs. J_train</div>
+      <p style="margin:0;">Large gap → <strong>high bias</strong>. Your model isn't even reaching what's realistically achievable on this data.</p>
+    </div>
+    <div class="rule-box" style="margin-top:12px;">
+      <div class="title">Gap 2 — J_train vs. J_cv</div>
+      <p style="margin:0;">Large gap → <strong>high variance</strong>. Your model does much better on data it has seen than data it hasn't.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Four Patterns You'll See in Practice</h2>
+    <div class="three-examples">
+      <div class="ex-card">
+        <div class="row"><span>Baseline</span><span>10.6%</span></div>
+        <div class="row"><span>J_train</span><span>10.8%</span></div>
+        <div class="row"><span>J_cv</span><span>14.8%</span></div>
+        <div style="text-align:center; font-size:0.78rem; color:var(--muted); margin-top:6px;">gap1 = 0.2% · gap2 = 4.0%</div>
+        <div class="diag hv">High Variance</div>
+      </div>
+      <div class="ex-card">
+        <div class="row"><span>Baseline</span><span>10.6%</span></div>
+        <div class="row"><span>J_train</span><span>15.0%</span></div>
+        <div class="row"><span>J_cv</span><span>15.5%</span></div>
+        <div style="text-align:center; font-size:0.78rem; color:var(--muted); margin-top:6px;">gap1 = 4.4% · gap2 = 0.5%</div>
+        <div class="diag hb">High Bias</div>
+      </div>
+      <div class="ex-card">
+        <div class="row"><span>Baseline</span><span>10.6%</span></div>
+        <div class="row"><span>J_train</span><span>15.0%</span></div>
+        <div class="row"><span>J_cv</span><span>19.7%</span></div>
+        <div style="text-align:center; font-size:0.78rem; color:var(--muted); margin-top:6px;">gap1 = 4.4% · gap2 = 4.7%</div>
+        <div class="diag hbv">High Bias + High Variance</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;">Same underlying numbers, three completely different diagnoses — purely based on <em>where the gaps sit</em>, not the raw error values.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Key Takeaway</h2>
+    <p>Don't ask "is my training error large?" in isolation — ask <strong>"is my training error large relative to what I can reasonably hope to achieve?"</strong> Sometimes that achievable floor is 0% (clean, unambiguous data); often, especially for messy real-world audio/image/text data, it isn't. Establishing this baseline turns two raw percentages into an actual diagnosis of bias vs. variance vs. both.</p>
+  </section>
+
+  <footer>Lesson 7 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>
