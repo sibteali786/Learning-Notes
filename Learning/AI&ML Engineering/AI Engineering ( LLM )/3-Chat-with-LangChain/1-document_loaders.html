@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LangChain Document Loaders — Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161925; --panel2:#1c2030;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#c48bff;
+    --text:#e6e8ef; --muted:#9098ab; --border:#272c3e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); margin:0; padding:40px 20px;
+    font-family:'JetBrains Mono', monospace; line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0;}
+  .wrap{max-width:980px; margin:0 auto;}
+  header{margin-bottom:36px;}
+  header h1{font-size:32px; font-weight:800; color:var(--text);}
+  header p{color:var(--muted); margin-top:8px; font-size:14px;}
+  .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; margin-right:6px; letter-spacing:.3px;}
+  .pill-blue{background:rgba(91,157,255,.15); color:var(--blue); border:1px solid rgba(91,157,255,.35);}
+  .pill-orange{background:rgba(255,157,92,.15); color:var(--orange); border:1px solid rgba(255,157,92,.35);}
+  .pill-green{background:rgba(92,255,168,.15); color:var(--green); border:1px solid rgba(92,255,168,.35);}
+  .pill-purple{background:rgba(196,139,255,.15); color:var(--purple); border:1px solid rgba(196,139,255,.35);}
+
+  .section{margin-bottom:40px;}
+  .section-label{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  }
+  .bar{width:5px; height:22px; border-radius:3px;}
+  .bar-blue{background:var(--blue);} .bar-orange{background:var(--orange);}
+  .bar-green{background:var(--green);} .bar-purple{background:var(--purple);}
+  .section-label h2{font-size:20px; color:var(--text);}
+
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:20px 22px; margin-bottom:14px;
+  }
+  .card h3{font-size:16px; color:var(--text); margin-bottom:8px; font-weight:700;}
+  .card p{color:#c3c8d6; font-size:13.5px; margin:6px 0;}
+  .card .muted{color:var(--muted); font-size:12.5px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  code, .code-inline{
+    background:#20243333; padding:2px 6px; border-radius:4px; color:var(--green);
+    font-size:12.5px;
+  }
+  pre{
+    background:#0c0e15; border:1px solid var(--border); border-radius:10px;
+    padding:16px 18px; overflow-x:auto; font-size:12.8px; color:#d7dbe8;
+    margin:10px 0;
+  }
+  pre .kw{color:var(--purple);}
+  pre .fn{color:var(--blue);}
+  pre .str{color:var(--green);}
+  pre .cm{color:var(--muted); font-style:italic;}
+
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:16px 0;}
+  .flow-box{
+    background:var(--panel2); border:1px solid var(--border); border-radius:8px;
+    padding:10px 16px; font-size:12.5px; color:var(--text); font-weight:600;
+  }
+  .flow-arrow{color:var(--muted); font-size:16px;}
+
+  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:12.8px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--blue); font-weight:600;}
+  td{color:#c3c8d6;}
+
+  .example{
+    border-left:3px solid var(--orange); background:rgba(255,157,92,.06);
+    padding:10px 14px; border-radius:0 8px 8px 0; margin-top:10px; font-size:12.8px; color:#d7dbe8;
+  }
+  .example b{color:var(--orange);}
+
+  .tip{
+    border-left:3px solid var(--green); background:rgba(92,255,168,.06);
+    padding:10px 14px; border-radius:0 8px 8px 0; margin-top:10px; font-size:12.8px; color:#d7dbe8;
+  }
+  .tip b{color:var(--green);}
+
+  svg{display:block; margin:16px auto;}
+  .diagram-label{fill:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px;}
+  .diagram-sub{fill:var(--muted); font-family:'JetBrains Mono',monospace; font-size:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="pill pill-blue">LANGCHAIN</span>
+  <span class="pill pill-orange">RAG PIPELINE — STEP 1</span>
+  <span class="pill pill-purple">DOCUMENT LOADERS</span>
+  <h1 style="margin-top:14px;">Document Loading in LangChain</h1>
+  <p>How to pull data from 80+ sources into a standardized "Document" object before it can be chunked, embedded, and retrieved.</p>
+</header>
+
+<!-- PROBLEM -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-blue"></div><h2>Problem Statement</h2></div>
+  <div class="card">
+    <p>To build a "chat with your data" application, raw data first needs to be loaded into a workable, standardized format. Data lives in wildly different places (websites, YouTube, databases, Notion) and in different formats (PDF, HTML, JSON). <b style="color:var(--text)">Document Loaders</b> are LangChain's abstraction that handles the specifics of accessing + converting any of these sources into one consistent interface.</p>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-orange"></div><h2>How It Works</h2></div>
+
+  <div class="flow">
+    <div class="flow-box">Any Source (PDF, YouTube, URL, Notion...)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Loader.load()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">List[Document]</div>
+  </div>
+
+  <svg viewBox="0 0 900 220" width="100%" height="220">
+    <rect x="0" y="0" width="900" height="220" fill="transparent"/>
+    <!-- Document box -->
+    <rect x="360" y="20" width="180" height="80" rx="10" fill="#1c2030" stroke="#5b9dff" stroke-width="1.5"/>
+    <text x="450" y="50" text-anchor="middle" class="diagram-label" font-weight="600">Document</text>
+    <text x="450" y="70" text-anchor="middle" class="diagram-sub">page_content: str</text>
+    <text x="450" y="86" text-anchor="middle" class="diagram-sub">metadata: dict</text>
+
+    <!-- left sources -->
+    <rect x="40" y="140" width="140" height="50" rx="8" fill="#161925" stroke="#ff9d5c"/>
+    <text x="110" y="170" text-anchor="middle" class="diagram-label">PyPDFLoader</text>
+
+    <rect x="200" y="140" width="140" height="50" rx="8" fill="#161925" stroke="#ff9d5c"/>
+    <text x="270" y="170" text-anchor="middle" class="diagram-label">YouTube Loader</text>
+
+    <rect x="360" y="140" width="140" height="50" rx="8" fill="#161925" stroke="#ff9d5c"/>
+    <text x="430" y="170" text-anchor="middle" class="diagram-label">WebBaseLoader</text>
+
+    <rect x="520" y="140" width="140" height="50" rx="8" fill="#161925" stroke="#ff9d5c"/>
+    <text x="590" y="170" text-anchor="middle" class="diagram-label">NotionDirLoader</text>
+
+    <rect x="680" y="140" width="180" height="50" rx="8" fill="#161925" stroke="#c48bff"/>
+    <text x="770" y="170" text-anchor="middle" class="diagram-label">+ 80 more...</text>
+
+    <!-- connecting lines -->
+    <line x1="110" y1="140" x2="420" y2="100" stroke="#3a4055" stroke-width="1.5"/>
+    <line x1="270" y1="140" x2="440" y2="100" stroke="#3a4055" stroke-width="1.5"/>
+    <line x1="430" y1="140" x2="460" y2="100" stroke="#3a4055" stroke-width="1.5"/>
+    <line x1="590" y1="140" x2="480" y2="100" stroke="#3a4055" stroke-width="1.5"/>
+    <line x1="770" y1="140" x2="500" y2="100" stroke="#3a4055" stroke-width="1.5"/>
+  </svg>
+
+  <div class="card">
+    <p>Every loader, regardless of source, ultimately returns a <code>Document</code> object with two parts:</p>
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td><code>page_content</code></td><td>The actual text content of that chunk/page</td></tr>
+      <tr><td><code>metadata</code></td><td>Extra info — e.g. <code>source</code> (file/URL) and <code>page</code> number</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- LOADER CATEGORIES -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-purple"></div><h2>80+ Loaders — Rough Categorization</h2></div>
+  <div class="grid3">
+    <div class="card">
+      <h3><span class="pill pill-blue">Unstructured</span></h3>
+      <p class="muted">Public sources</p>
+      <p>YouTube, Twitter, Hacker News, text files</p>
+    </div>
+    <div class="card">
+      <h3><span class="pill pill-orange">Unstructured</span></h3>
+      <p class="muted">Proprietary sources</p>
+      <p>Figma, Notion, and other company/personal tools</p>
+    </div>
+    <div class="card">
+      <h3><span class="pill pill-green">Structured</span></h3>
+      <p class="muted">Tabular data w/ text cells</p>
+      <p>Airbyte, Stripe, Airtable — for QA/semantic search over table data</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4 LOADERS WALKTHROUGH -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-blue"></div><h2>Four Loaders Covered in Detail</h2></div>
+
+  <!-- PDF -->
+  <div class="card">
+    <h3>1. <span class="pill pill-blue">PDF</span> — PyPDFLoader</h3>
+    <p>Loads a PDF and returns <b style="color:var(--text)">one Document per page</b>.</p>
+    <pre><span class="kw">from</span> langchain.document_loaders <span class="kw">import</span> <span class="fn">PyPDFLoader</span>
+
+loader = <span class="fn">PyPDFLoader</span>(<span class="str">"docs/cs229_lectures/MachineLearning-Lecture01.pdf"</span>)
+pages = loader.load()
+
+<span class="cm"># pages is a list — e.g. 22 pages = 22 Document objects</span>
+page = pages[0]
+print(page.page_content[:500])   <span class="cm"># first 500 chars</span>
+print(page.metadata)             <span class="cm"># {'source': '...pdf', 'page': 0}</span></pre>
+    <div class="example"><b>Real-world scenario:</b> Loading a 22-page lecture PDF gives you 22 Document objects — each one's metadata tags which page it came from, so later when your chatbot answers a question, it can cite "page 4" as the source.</div>
+  </div>
+
+  <!-- YouTube -->
+  <div class="card">
+    <h3>2. <span class="pill pill-orange">YouTube</span> — Audio → Whisper transcript</h3>
+    <p>Downloads the audio from a YouTube video, then transcribes it into text using OpenAI's <b style="color:var(--text)">Whisper</b> speech-to-text model.</p>
+    <pre><span class="kw">from</span> langchain.document_loaders.generic <span class="kw">import</span> <span class="fn">GenericLoader</span>
+<span class="kw">from</span> langchain.document_loaders.parsers <span class="kw">import</span> <span class="fn">OpenAIWhisperParser</span>
+<span class="kw">from</span> langchain.document_loaders.blob_loaders.youtube_audio <span class="kw">import</span> <span class="fn">YoutubeAudioLoader</span>
+
+url = <span class="str">"https://www.youtube.com/watch?v=..."</span>
+save_dir = <span class="str">"docs/youtube/"</span>
+
+loader = <span class="fn">GenericLoader</span>(
+    <span class="fn">YoutubeAudioLoader</span>([url], save_dir),
+    <span class="fn">OpenAIWhisperParser</span>()
+)
+docs = loader.load()
+print(docs[0].page_content[:500])</pre>
+    <div class="example"><b>Real-world scenario:</b> Want to "chat with" a favorite lecture or podcast episode on YouTube? This loader pipeline turns the raw audio into searchable transcript text — no manual transcription needed.</div>
+  </div>
+
+  <!-- Web -->
+  <div class="card">
+    <h3>3. <span class="pill pill-green">URLs / Web pages</span> — WebBaseLoader</h3>
+    <p>Loads content directly from any URL on the internet.</p>
+    <pre><span class="kw">from</span> langchain.document_loaders <span class="kw">import</span> <span class="fn">WebBaseLoader</span>
+
+loader = <span class="fn">WebBaseLoader</span>(<span class="str">"https://github.com/some-repo/README.md"</span>)
+docs = loader.load()
+print(docs[0].page_content)</pre>
+    <div class="tip"><b>Gotcha:</b> Raw web content often comes with a lot of whitespace and boilerplate mixed with the real text — this is a good example of why <b>post-processing / cleaning</b> is usually required before using the content downstream.</div>
+  </div>
+
+  <!-- Notion -->
+  <div class="card">
+    <h3>4. <span class="pill pill-purple">Notion</span> — NotionDirectoryLoader</h3>
+    <p>Notion is a common store of personal/company knowledge. You first export your Notion database (to markdown), then load that export directory.</p>
+    <pre><span class="kw">from</span> langchain.document_loaders <span class="kw">import</span> <span class="fn">NotionDirectoryLoader</span>
+
+loader = <span class="fn">NotionDirectoryLoader</span>(<span class="str">"docs/Notion_DB"</span>)
+docs = loader.load()
+print(docs[0].page_content[:200])  <span class="cm"># markdown-formatted text</span></pre>
+    <div class="example"><b>Real-world scenario:</b> The lesson uses "Blendle's Employee Handbook" exported from Notion as a live example — teams often build internal chatbots over their own Notion wiki this way.</div>
+  </div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-orange"></div><h2>Key Distinctions</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Structured vs. Unstructured sources</h3>
+      <p><b style="color:var(--blue)">Unstructured</b> = raw text-like content (PDFs, web pages, videos).<br><b style="color:var(--green)">Structured</b> = tabular data (Airtable, Stripe) where only some cells contain text worth semantic search.</p>
+    </div>
+    <div class="card">
+      <h3>Loading ≠ Chunking</h3>
+      <p>Loaders only standardize the format. Documents are often still too large — the <b style="color:var(--text)">next step (splitting)</b> breaks them into smaller chunks so retrieval pulls only the most relevant snippet, not the whole document.</p>
+    </div>
+  </div>
+</div>
+
+<!-- INTERVIEW / PRACTICAL TIPS -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-green"></div><h2>Practical Tips</h2></div>
+  <div class="card">
+    <p>✅ Every loader exposes the same interface: <code>loader.load()</code> → <code>List[Document]</code>. Learn this pattern once, and any of the 80+ loaders becomes usable.</p>
+    <p>✅ Always inspect <code>.metadata</code> — it's what lets your RAG app cite sources later (filename, page number, URL).</p>
+    <p>✅ Raw loaded content is rarely "clean" (whitespace, boilerplate) — expect a post-processing step.</p>
+    <p>✅ Why this matters for RAG: retrieval quality depends on retrieving small, relevant chunks — not entire documents — which is why loading is immediately followed by <b style="color:var(--text)">splitting</b> in the pipeline.</p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
