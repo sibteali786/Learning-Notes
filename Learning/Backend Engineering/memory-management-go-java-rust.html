@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Memory Management: Go vs Java vs Rust</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{
+    --bg:#0f1117; --panel:#161923; --panel2:#1c2030; --border:#2a2f42;
+    --blue:#5aa9ff; --orange:#ff9f5a; --green:#5affa0; --purple:#b18aff; --pink:#ff5a8c;
+    --text:#e6e8f0; --muted:#8b90a8;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'JetBrains Mono', monospace; margin:0; padding:32px 16px 80px; line-height:1.55;}
+  h1,h2,h3{font-family:'Syne', sans-serif; margin:0;}
+  .wrap{max-width:980px; margin:0 auto;}
+  .hero{text-align:center; margin-bottom:36px;}
+  .hero h1{font-size:2rem; font-weight:800; background:linear-gradient(90deg,var(--green),var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero p{color:var(--muted); margin-top:8px; font-size:.95rem;}
+  .section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px; position:relative;}
+  .section::before{content:''; position:absolute; left:0; top:16px; bottom:16px; width:4px; border-radius:4px;}
+  .sec-blue::before{background:var(--blue);} .sec-orange::before{background:var(--orange);}
+  .sec-green::before{background:var(--green);} .sec-purple::before{background:var(--purple);} .sec-pink::before{background:var(--pink);}
+  .label{font-family:'Syne', sans-serif; font-size:.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:6px; display:block;}
+  h2.title{font-size:1.3rem; margin-bottom:10px;}
+  .pill{display:inline-block; padding:3px 11px; border-radius:999px; font-size:.72rem; font-weight:700; margin-right:6px; margin-bottom:4px;}
+  .pill-blue{background:rgba(90,169,255,.15); color:var(--blue); border:1px solid rgba(90,169,255,.4);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid rgba(255,159,90,.4);}
+  .pill-green{background:rgba(90,255,160,.15); color:var(--green); border:1px solid rgba(90,255,160,.4);}
+  .pill-purple{background:rgba(177,138,255,.15); color:var(--purple); border:1px solid rgba(177,138,255,.4);}
+  .pill-pink{background:rgba(255,90,140,.15); color:var(--pink); border:1px solid rgba(255,90,140,.4);}
+  code{background:#0b0d13; padding:2px 7px; border-radius:5px; color:var(--orange); font-size:.88rem; border:1px solid var(--border);}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media(max-width:750px){.grid3{grid-template-columns:1fr;}}
+  .card{background:var(--panel2); border:1px solid var(--border); border-radius:12px; padding:16px 18px;}
+  .card h3{font-size:1rem; margin-bottom:8px;}
+  .card ul{margin:0; padding-left:18px; font-size:.87rem;}
+  .card li{margin-bottom:6px;}
+  svg{display:block; margin:18px auto;}
+  .svg-label{font-family:'JetBrains Mono', monospace; font-size:13px;}
+  table{width:100%; border-collapse:collapse; font-size:.87rem; margin-top:10px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--muted); font-family:'Syne',sans-serif; font-size:.75rem; text-transform:uppercase; letter-spacing:.5px;}
+  tr:nth-child(even) td{background:#12141d;}
+  .tip{background:rgba(177,138,255,.08); border:1px dashed var(--purple); border-radius:10px; padding:12px 16px; font-size:.85rem; color:#d8cfff;}
+  .example{background:rgba(90,255,160,.06); border-left:3px solid var(--green); border-radius:0 10px 10px 0; padding:10px 16px; font-size:.87rem; margin-top:10px;}
+  .example b{color:var(--green);}
+  .bar-chart{display:flex; align-items:flex-end; gap:28px; justify-content:center; height:180px; margin:20px 0 6px;}
+  .bar-item{display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .bar{width:56px; border-radius:6px 6px 0 0;}
+  .bar-label{margin-top:8px; font-size:.8rem; color:var(--muted);}
+  .bar-val{font-size:.78rem; margin-bottom:4px; font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Memory Management: Go vs Java vs Rust</h1>
+    <p>Why some programs sip memory and others gulp it — stack vs heap, garbage collection, and where each language draws the line between automatic and manual control.</p>
+  </div>
+
+  <!-- PROBLEM -->
+  <div class="section sec-pink">
+    <span class="label">Problem Statement</span>
+    <h2 class="title">🧩 Who's responsible for freeing memory?</h2>
+    <p>Every program needs memory to store its variables and data while it computes. Two things matter: <b>speed</b> (CPU cycles to finish the job) and <b>memory usage</b> (RAM needed along the way). The big design question every language answers differently: <i>who decides when memory gets freed — the developer, or the runtime?</i></p>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section sec-blue">
+    <span class="label">How It Works</span>
+    <h2 class="title">⚙️ Three memory management philosophies</h2>
+
+    <div class="grid3">
+      <div class="card">
+        <h3 style="color:var(--orange);">Manual <span class="pill pill-orange">C / Rust / Zig</span></h3>
+        <ul>
+          <li>Developer explicitly allocates memory</li>
+          <li>Developer explicitly signals when it's done</li>
+          <li>No automated cleanup step at runtime</li>
+          <li>Max control → smallest footprint</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--purple);">VM + GC <span class="pill pill-purple">Java / C#</span></h3>
+        <ul>
+          <li>Runs on a Virtual Machine (JVM / CLR)</li>
+          <li>JVM executes compiled bytecode</li>
+          <li>JVM allocates/frees memory automatically</li>
+          <li>Tends to allocate more on the <b>heap</b></li>
+          <li>Automation overhead → more memory used</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green);">Runtime + GC <span class="pill pill-green">Go</span></h3>
+        <ul>
+          <li>No virtual machine — natively compiled binary</li>
+          <li>But binary embeds a <b>Go runtime</b></li>
+          <li>Runtime handles GC + goroutine scheduling</li>
+          <li>Favors <b>stack</b> allocation when possible</li>
+          <li>Middle ground: automated, but leaner than a VM</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip">💡 <b>Core insight:</b> Go is garbage collected like Java (automated), but it's natively compiled like Rust/C (no VM). That combination is why it lands in the middle on memory usage — automated cleanup, without the cost of a full virtual machine.</div>
+  </div>
+
+  <!-- VISUAL: stack vs heap + runtime diagram -->
+  <div class="section sec-purple">
+    <span class="label">Visual — What ships in the binary</span>
+    <h2 class="title">📦 Where the Go runtime lives</h2>
+    <svg viewBox="0 0 720 220" width="100%" style="max-width:680px;">
+      <rect x="20" y="30" width="220" height="160" rx="12" fill="none" stroke="var(--blue)" stroke-width="2"/>
+      <text x="130" y="20" text-anchor="middle" class="svg-label" fill="var(--blue)">your go binary</text>
+      <rect x="40" y="50" width="180" height="55" rx="8" fill="none" stroke="#fff" stroke-width="1.5"/>
+      <text x="130" y="82" text-anchor="middle" class="svg-label" fill="#fff">your compiled code</text>
+      <rect x="40" y="120" width="180" height="55" rx="8" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <text x="130" y="145" text-anchor="middle" class="svg-label" fill="var(--green)">go runtime</text>
+      <text x="130" y="162" text-anchor="middle" class="svg-label" fill="var(--green)" font-size="11">GC + scheduler</text>
+
+      <text x="290" y="110" class="svg-label" fill="var(--muted)">vs.</text>
+
+      <rect x="360" y="30" width="150" height="160" rx="12" fill="none" stroke="#fff" stroke-width="1.5"/>
+      <text x="435" y="20" text-anchor="middle" class="svg-label" fill="#fff">rust / c binary</text>
+      <rect x="380" y="50" width="110" height="130" rx="8" fill="none" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="435" y="118" text-anchor="middle" class="svg-label" fill="var(--orange)">your code only</text>
+      <text x="435" y="135" text-anchor="middle" class="svg-label" fill="var(--orange)" font-size="10">(you manage memory)</text>
+
+      <text x="580" y="110" class="svg-label" fill="var(--muted)">vs.</text>
+
+      <rect x="620" y="10" width="90" height="200" rx="12" fill="none" stroke="var(--purple)" stroke-width="1.5"/>
+      <text x="665" y="0" text-anchor="middle" class="svg-label" fill="var(--purple)" font-size="11">JVM</text>
+      <rect x="632" y="30" width="66" height="40" rx="6" fill="none" stroke="#fff" stroke-width="1"/>
+      <text x="665" y="53" text-anchor="middle" class="svg-label" fill="#fff" font-size="10">bytecode</text>
+      <rect x="632" y="80" width="66" height="110" rx="6" fill="none" stroke="var(--purple)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="665" y="120" text-anchor="middle" class="svg-label" fill="var(--purple)" font-size="10">JVM engine</text>
+      <text x="665" y="138" text-anchor="middle" class="svg-label" fill="var(--purple)" font-size="9">(interprets +</text>
+      <text x="665" y="152" text-anchor="middle" class="svg-label" fill="var(--purple)" font-size="9">GC + heap</text>
+      <text x="665" y="166" text-anchor="middle" class="svg-label" fill="var(--purple)" font-size="9">mgmt)</text>
+    </svg>
+    <p style="font-size:.82rem; color:var(--muted); text-align:center;">Go bundles a small runtime into the binary itself. Java needs a whole separate virtual machine process to run at all — that's extra memory before your code even does anything.</p>
+  </div>
+
+  <!-- IDLE MEMORY CHART -->
+  <div class="section sec-green">
+    <span class="label">Comparison</span>
+    <h2 class="title">📊 Idle memory usage (simple equivalent programs)</h2>
+    <div class="bar-chart">
+      <div class="bar-item">
+        <div class="bar-val" style="color:var(--purple);">highest</div>
+        <div class="bar" style="height:160px; background:linear-gradient(180deg,var(--purple),rgba(177,138,255,.2));"></div>
+        <div class="bar-label">Java</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-val" style="color:var(--green);">low</div>
+        <div class="bar" style="height:60px; background:linear-gradient(180deg,var(--green),rgba(90,255,160,.2));"></div>
+        <div class="bar-label">Go</div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-val" style="color:var(--orange);">lowest</div>
+        <div class="bar" style="height:42px; background:linear-gradient(180deg,var(--orange),rgba(255,159,90,.2));"></div>
+        <div class="bar-label">Rust</div>
+      </div>
+    </div>
+    <p style="font-size:.82rem; color:var(--muted); text-align:center;">Illustrative, based on Dexter Darwich's benchmark comparing idle memory of equivalent simple programs — not exact figures.</p>
+
+    <table>
+      <tr><th>Language</th><th>Mechanism</th><th>Allocation tendency</th><th>Relative memory use</th></tr>
+      <tr><td>Rust / C</td><td>Manual (developer controlled)</td><td>Stack-favored, precise</td><td>Lowest</td></tr>
+      <tr><td>Go</td><td>Automated (GC in runtime, no VM)</td><td>Stack when possible, else heap</td><td>Low–Medium</td></tr>
+      <tr><td>Java / C#</td><td>Automated (GC inside JVM/CLR)</td><td>Heap-favored</td><td>Highest</td></tr>
+    </table>
+  </div>
+
+  <!-- STACK VS HEAP -->
+  <div class="section sec-orange">
+    <span class="label">Key Distinction</span>
+    <h2 class="title">📚 Stack vs Heap allocation</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3 style="color:var(--blue);">Stack</h3>
+        <ul>
+          <li>Fast to allocate/deallocate</li>
+          <li>Memory freed automatically when function returns</li>
+          <li>Go prefers this whenever it can prove a value doesn't "escape"</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--pink);">Heap</h3>
+        <ul>
+          <li>Slower to allocate, needs explicit or GC-driven cleanup</li>
+          <li>Used when data must outlive the function / is shared</li>
+          <li>Java tends to allocate more here → more GC work → more memory</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green);">Why it matters</h3>
+        <ul>
+          <li>Stack allocations are cheaper &amp; more performant than heap ones</li>
+          <li>Go's compiler does "escape analysis" to keep more data on the stack</li>
+          <li>This is part of why Go beats Java on memory despite both being GC'd</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <div class="section sec-purple">
+    <span class="label">Real-World Example</span>
+    <h2 class="title">🏗️ Why this matters in production</h2>
+    <div class="example">
+      <b>Containerized microservices:</b> A Go service and an equivalent Java service doing the same job — the Go container can typically run with a much smaller memory limit (e.g. 64–128MB) than the Java one (which often needs several hundred MB just to give the JVM headroom), directly lowering hosting cost at scale.
+    </div>
+    <div class="example">
+      <b>Embedded / resource-constrained environments:</b> Rust or C are chosen over Go or Java specifically because there's no GC pause and no runtime overhead — critical when every KB of RAM is accounted for (e.g. IoT devices, firmware).
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section sec-pink">
+    <span class="label">Interview / Practical Tips</span>
+    <h2 class="title">🎯 What to remember</h2>
+    <ul style="font-size:.9rem; padding-left:20px;">
+      <li><span class="pill pill-purple">Java</span> Uses more memory mainly because of the JVM overhead + heap-heavy allocation.</li>
+      <li><span class="pill pill-green">Go</span> Garbage collected (automated) but no VM — middle ground on both speed and memory.</li>
+      <li><span class="pill pill-orange">Rust/C</span> Manual memory management gives the developer full control → smallest footprint, but more responsibility (and risk of bugs like leaks/use-after-free in C).</li>
+      <li><span class="pill pill-blue">Stack vs Heap</span> Stack allocation is cheaper — Go's escape analysis pushing more data to the stack is a real reason it beats Java on memory.</li>
+      <li><span class="pill pill-pink">Common interview trap</span> "Compiled = low memory" is wrong — Go and Java are both often compiled/JIT'd, but their memory profile differs because of GC design and whether a VM is involved, not because of compilation itself.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
