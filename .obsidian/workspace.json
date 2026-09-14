@@ -11,12 +11,24 @@
             "id": "601bec223ce4b9b4",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "Learning/IELTS/Cambridge 17_text.pdf"
+                "file": "Learning/IELTS/Resources.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "lucide-file-text",
-              "title": "Cambridge 17_text"
+              "icon": "lucide-file",
+              "title": "Resources"
             }
           }
         ]
@@ -78,8 +90,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324,
-    "collapsed": true
+    "width": 376.6920585632324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -187,8 +198,9 @@
   },
   "active": "601bec223ce4b9b4",
   "lastOpenFiles": [
-    "Learning/IELTS/Cambridge-IELTS-18-Academic.pdf",
     "Learning/IELTS/Cambridge 17_text.pdf",
+    "Learning/IELTS/Resources.md",
+    "Learning/IELTS/Cambridge-IELTS-18-Academic.pdf",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/1-document_loaders.html",
     "Learning/IELTS",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/2-document_splitting_summary.html",
@@ -198,7 +210,6 @@
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/Notebooks/C2W3_Lab_01_Model_Evaluation_and_Selection.ipynb",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/Notebooks",
     "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/untitled folder",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/C2W3_Lab_01_Model_Evaluation_and_Selection.ipynb",
     "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/Untitled.md",
     "Learning/AI&ML Engineering/Resources.md",
@@ -232,7 +243,6 @@
     "Learning/JavaScript/Coding/1-Flatten.excalidraw.md",
     "Learning/DSA/Graphs/BFS/1-Minimum Knight Moves.excalidraw.md",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/2026-09-08-live-feed-engine-architecture-evolution.md",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/Final Run.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
