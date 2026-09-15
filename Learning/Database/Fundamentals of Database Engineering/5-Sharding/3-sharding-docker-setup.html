@@ -158,7 +158,7 @@ docker run <span class="flag">-e</span> PGADMIN_DEFAULT_EMAIL=<span class="str">
         <span class="tag">Updated from the original video</span>
         <p style="margin-top:6px;margin-bottom:0;">The original commands (<code>docker run --name shard1 -p 5432:5432 pgshard</code>, with a random pgAdmin email) no longer work as-is on current Postgres/pgAdmin images: <strong>a real <code>POSTGRES_PASSWORD</code> is required</strong> at container start, and <strong>pgAdmin now validates the email format</strong> — it must be a real-looking address, not a placeholder string.</p>
       </div>
-      <p class="muted" style="margin-top:10px;">Once all 4 containers are up, add 3 servers in pgAdmin (host = machine IP or container name, ports 5432/5433/5434, user/db default to <code>postgres</code>) — each should show the same <code>url_table</code> schema, empty.</p>
+      <p class="muted" style="margin-top:10px;">Once all 4 containers are up, add 3 servers in pgAdmin (host = machine IP or container name, ports 5432/5433/5434). <strong>Note:</strong> <code>pgshard</code> is only the image/container name — the actual maintenance database and username are both <code>postgres</code> (the base image's default superuser/db), not <code>pgshard</code>. Each server should show the same <code>url_table</code> schema, empty.</p>
     </div>
   </div>
 

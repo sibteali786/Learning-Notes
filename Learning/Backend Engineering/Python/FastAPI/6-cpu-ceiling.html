@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Session Summary — Chasing the CPU Ceiling</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --card: #ffffff;
+    --ink: #1c1c1e;
+    --sub: #6b6b70;
+    --border: #e6e5e2;
+    --accent: #2f6f4f;
+    --accent-soft: #e8f3ec;
+    --warn: #b5541a;
+    --warn-soft: #fbeee3;
+    --code-bg: #f2f1ee;
+    --blue: #2f5f9e;
+    --blue-soft: #e9f0fa;
+    --purple: #6b4fa0;
+    --purple-soft: #eee8f5;
+    --red: #a5312c;
+    --red-soft: #fbeceb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a;
+      --card: #202124;
+      --ink: #e9e9ea;
+      --sub: #9a9a9e;
+      --border: #34353a;
+      --accent: #5fbf8f;
+      --accent-soft: #1c2e26;
+      --warn: #e0935a;
+      --warn-soft: #2e2319;
+      --code-bg: #2a2b2f;
+      --blue: #7aa8e0;
+      --blue-soft: #1c2733;
+      --purple: #b09ee0;
+      --purple-soft: #241f30;
+      --red: #e08a86;
+      --red-soft: #2e1f1e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header { margin-bottom: 24px; }
+  .eyebrow {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 { font-size: 27px; margin: 6px 0 4px; letter-spacing: -0.01em; }
+  .date { color: var(--sub); font-size: 14px; }
+  .intro { font-size: 14px; color: var(--sub); line-height: 1.6; margin-top: 12px; max-width: 680px; }
+
+  /* p99 through-line */
+  .through-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 22px 0 30px;
+  }
+  .through-line .p {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 4px 6px;
+    position: relative;
+  }
+  .through-line .p .val { font-size: 18px; font-weight: 700; font-family: ui-monospace, monospace; }
+  .through-line .p .lbl { font-size: 10.5px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.03em; margin-top: 2px; }
+  .through-line .p:not(:last-child)::after {
+    content: "→";
+    position: absolute; right: -4px; top: 6px;
+    color: var(--sub); font-size: 14px;
+  }
+  .through-line .p.start .val { color: var(--red); }
+  .through-line .p.end .val { color: var(--accent); }
+
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 30px;
+  }
+  .toc a {
+    font-size: 12.5px;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  .toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+  section { margin-bottom: 36px; }
+  section h2 {
+    font-size: 17px;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    scroll-margin-top: 16px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    font-size: 14px;
+    flex: none;
+  }
+  section > .lede { color: var(--sub); font-size: 13.5px; margin: 4px 0 14px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+  .card .title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card .title .metric {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: ui-monospace, monospace;
+    color: var(--sub);
+    flex: none;
+    white-space: nowrap;
+  }
+  .card p { font-size: 13.5px; line-height: 1.55; color: var(--ink); margin: 6px 0; }
+  .card p.note { color: var(--sub); font-size: 12.5px; }
+  .card ul { margin: 6px 0; padding-left: 18px; font-size: 13px; line-height: 1.6; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+  pre {
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    margin: 8px 0;
+    line-height: 1.55;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-right: 6px;
+  }
+  .tag.tool { background: var(--blue-soft); color: var(--blue); }
+  .tag.result { background: var(--accent-soft); color: var(--accent); }
+  .tag.falsified { background: var(--red-soft); color: var(--red); }
+  .tag.lesson { background: var(--purple-soft); color: var(--purple); }
+
+  .callout {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 10px 0;
+  }
+  .callout.finding { border-left-color: var(--red); background: var(--red-soft); }
+  .callout.verdict { border-left-color: var(--accent); background: var(--accent-soft); }
+  .callout .lbl {
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 10px 0;
+  }
+  th, td {
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--sub); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; }
+  td code { background: transparent; padding: 0; }
+
+  .commands-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 620px) { .commands-grid { grid-template-columns: 1fr; } }
+  .cmd-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .cmd-card .what { font-size: 11.5px; color: var(--sub); margin-bottom: 4px; }
+  .cmd-card code { display: block; white-space: pre-wrap; word-break: break-all; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 22px; }
+    .card { padding: 14px; }
+    .through-line { flex-direction: column; }
+    .through-line .p:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -14px; transform: translateX(50%); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Live Feed Engine · Phase 1</div>
+    <h1>Session Summary — Chasing the CPU Ceiling</h1>
+    <div class="date">2026-09-10 → 2026-09-12</div>
+    <p class="intro">
+      A two-day arc: from a 10.93s p99 caused by a single event loop, through a profiling
+      artifact that could have wasted hours, to a genuine framework-level finding (FastAPI's
+      own dependency resolution costing as much CPU as the database), and finally to a hard
+      wall — 4 physical CPU cores, fully saturated, with nothing left to shave off.
+    </p>
+  </header>
+
+  <div class="through-line">
+    <div class="p start"><div class="val">10.93s</div><div class="lbl">baseline p99</div></div>
+    <div class="p"><div class="val">1.42s</div><div class="lbl">worker + pool fix</div></div>
+    <div class="p"><div class="val">1.53s</div><div class="lbl">falsified attempt</div></div>
+    <div class="p end"><div class="val">~1.34s</div><div class="lbl">raw request_params</div></div>
+  </div>
+
+  <div class="toc">
+    <a href="#reasoning">1 · Reasoning first</a>
+    <a href="#diagnosis">2 · CPU diagnosis</a>
+    <a href="#finding">3 · The real finding</a>
+    <a href="#experiments">4 · Experiments</a>
+    <a href="#verdict">5 · Verdict</a>
+    <a href="#commands">6 · All commands</a>
+    <a href="#lessons">7 · Lessons</a>
+  </div>
+
+  <section id="reasoning">
+    <h2><span class="badge">🧭</span> Reasoning before touching anything</h2>
+    <p class="lede">Before profiling, worked through why PgBouncer and Redis solve different
+    problems than the one actually observed.</p>
+    <div class="card">
+      <div class="title">PgBouncer vs. Redis vs. "what's actually saturated right now"</div>
+      <p>PgBouncer addresses <em>connection exhaustion</em> between app and Postgres; Redis
+      addresses <em>expensive-to-fetch</em> data. Since the worker/ulimit fix already ruled out
+      connection queuing (p99 1.42s, not connection-starved), and <code>EXPLAIN ANALYZE</code>
+      already showed the query at ~2ms, neither tool's usual justification applied yet. The real
+      open question was: <strong>what's consuming CPU right now, if not the query?</strong></p>
+      <p class="note">This reframing — "which resource is actually saturated" instead of "which
+      tool is popular for this kind of problem" — is what shaped every step that followed.</p>
+    </div>
+  </section>
+
+  <section id="diagnosis">
+    <h2><span class="badge">🔬</span> CPU diagnosis: top → py-spy → flamegraph</h2>
+    <p class="lede">Confirmed CPU-bound, then caught a profiling artifact before it wasted the
+    rest of the session.</p>
+
+    <div class="card">
+      <div class="title"><span>top inside the container</span><span class="metric">idle 0.0%</span></div>
+      <p><code>docker exec -it feed_api top</code> during a k6 run: all 4 Gunicorn workers evenly
+      loaded (35–80% CPU each — ruling out an earlier stale <code>docker stats</code> misread of
+      "only 2 workers used"). <code>%Cpu(s) id = 0.0</code> and <code>wa = 0.0</code> across every
+      snapshot, load average climbing 3.32 → 8.41 against <code>nproc</code>=4 — genuinely
+      CPU-bound, with real queuing by the end of the run.</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span>py-spy — the false lead</span><span class="metric">~1200% OwnTime</span></div>
+      <p><span class="tag falsified">Caught, not fixed</span>
+      <code>py-spy top --pid &lt;master&gt; --subprocesses</code> showed
+      <code>_worker (concurrent/futures/thread.py)</code> dominating every snapshot. Diagnosed via
+      the flamegraph that this branches off as a <strong>sibling</strong> of Gunicorn's own
+      arbiter loop, straight from <code>_bootstrap_inner</code> — and critically, it showed up
+      even on the <strong>master</strong> process (PID 307782), which never touches an HTTP
+      request. An artifact of profiling all subprocesses together, not real request cost.</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span>Clean re-profile</span><span class="metric">single worker only</span></div>
+      <p><code>py-spy record --pid &lt;single-worker&gt;</code> (no <code>--subprocesses</code>) —
+      a clean flamegraph of just request handling, with the master's bookkeeping threads excluded.
+      This is the run that surfaced the real finding below.</p>
+    </div>
+  </section>
+
+  <section id="finding">
+    <h2><span class="badge">🧩</span> The real finding: solve_dependencies</h2>
+    <div class="callout finding">
+      <span class="lbl">FastAPI's own overhead ≈ the database round-trip</span>
+      Zooming progressively into the flamegraph: <code>routing.py</code> →
+      <code>solve_dependencies</code> (comparable in width to the DB
+      <code>fetch</code>/<code>execute</code>/<code>write</code> branch) →
+      <code>request_params_to_args</code> → three roughly-equal
+      <code>_get_multidict_value</code> calls, one per query parameter
+      (<code>region</code>, <code>limit</code>, <code>cursor</code>). A comparable share of
+      per-request CPU time was spent just <em>extracting three query parameters</em> as was spent
+      on the actual Postgres round-trip — despite the query itself costing ~2ms per
+      <code>EXPLAIN ANALYZE</code>.
+    </div>
+    <div class="card">
+      <div class="title">Why this ruled out Redis before testing it</div>
+      <p>Postgres's <code>shared_buffers</code>/OS page cache already serves hot rows from memory,
+      consistent with the ~2ms result — so for this access pattern, Redis and Postgres both
+      resolve to an in-memory lookup. Redis's usual win (avoiding disk I/O) wasn't available to
+      claim here. Correctly reasoned this <em>before</em> spending time building a cache layer.</p>
+    </div>
+  </section>
+
+  <section id="experiments">
+    <h2><span class="badge">🧪</span> Experiments — one falsified, one real</h2>
+
+    <div class="card">
+      <div class="title"><span>Attempt 1: drop response_model</span><span class="metric">p99 1.53s — <span style="color:var(--red)">no change</span></span></div>
+      <p><span class="tag falsified">Falsified</span> Removed <code>response_model=list[FeedItem]</code>,
+      returned a raw <code>JSONResponse([dict(r) for r in rows])</code>. p99 stayed ~1.53s. Correct
+      prediction from the profiling data: the route's parameters
+      (<code>region: str</code>, <code>limit: int = Query(...)</code>, <code>cursor</code>) were
+      untouched, so <code>solve_dependencies</code> — the actual largest branch — kept running
+      unchanged. Only the smaller response-side cost was removed.</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span>Attempt 2: raw Request.query_params</span><span class="metric">p99 ~1.34-1.38s — <span style="color:var(--accent)">real, modest win</span></span></div>
+      <p><span class="tag result">Confirmed</span> Rewrote <code>get_feed</code> to accept the raw
+      Starlette <code>Request</code> and read <code>region</code>/<code>limit</code>/<code>cursor</code>
+      from <code>request.query_params</code> directly, bypassing FastAPI's <code>Query()</code>
+      dependency injection entirely. Re-profiling confirmed the
+      <code>fastapi/dependencies/utils.py</code> branch shrank/disappeared for this path. Cost:
+      manual type coercion/bounds-checking that <code>Query(ge=1, le=100)</code> gave for free —
+      judged not worth keeping once it stopped moving the needle further (see next).</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span>New discovery: access-log writes</span><span class="metric">comparably sized</span></div>
+      <p>A branch previously unnoticed: <code>app (routing.py:145)</code> →
+      <code>sender</code> → <code>send</code> → Python's <code>logging</code> module
+      (<code>info</code> → <code>_log</code> → <code>makeRecord</code> → <code>emit</code>) —
+      Gunicorn's <code>--access-logfile</code> writing a line per request, comparably sized to the
+      other three costs (dependency resolution, DB round-trip, response validation).</p>
+    </div>
+
+    <div class="card">
+      <div class="title"><span>Pool max_size: 20 → 22 per worker</span><span class="metric">88/97 conns — small, noisy effect</span></div>
+      <p>Checked <code>SHOW max_connections</code> (100) and
+      <code>SHOW superuser_reserved_connections</code> (3) → 97 available to non-superuser roles →
+      chose 22 × 4 workers = 88, leaving real headroom (not the naive 25 × 4 = 100, which would
+      have left zero room for an admin <code>psql</code> session). Effect present but small and
+      within run-to-run noise (throughput varied ~860–1120 req/s across otherwise-similar runs) —
+      correctly reasoned that any real gain here is capped by CPU saturation, not connection
+      availability.</p>
+    </div>
+  </section>
+
+  <section id="verdict">
+    <h2><span class="badge">🏁</span> Verdict</h2>
+    <div class="callout verdict">
+      <span class="lbl">4 physical cores, fully saturated, no dominant cost left</span>
+      By this point, the remaining per-request costs (dependency resolution, DB round-trip,
+      response serialization, access logging) are all roughly comparable in size — no single
+      fix left with outsized leverage. Since the host has only 4 physical cores (confirmed via
+      <code>nproc</code>), adding replicas or Gunicorn workers <em>on the same machine</em> would
+      just divide the same saturated cores further, not add real capacity. Real horizontal
+      scaling — more replicas behind a load balancer — only pays off with additional hardware,
+      which wasn't available to test locally. Correctly identified this as the honest stopping
+      point for code-level tuning, rather than continuing to chase diminishing returns.
+    </div>
+  </section>
+
+  <section id="commands">
+    <h2><span class="badge">⌨️</span> Every command run this session</h2>
+    <div class="commands-grid">
+      <div class="cmd-card"><div class="what">Load test</div><code>k6 run --env BASE_URL=http://localhost:8000 k6/load_test.js</code></div>
+      <div class="cmd-card"><div class="what">Live container CPU snapshot</div><code>docker stats feed_api</code></div>
+      <div class="cmd-card"><div class="what">Host cores available to container</div><code>docker exec -it feed_api nproc</code></div>
+      <div class="cmd-card"><div class="what">Per-process CPU/load, live</div><code>docker exec -it feed_api top</code></div>
+      <div class="cmd-card"><div class="what">List processes + PIDs/PPIDs</div><code>docker top feed_api</code></div>
+      <div class="cmd-card"><div class="what">Live profiler, all subprocesses</div><code>sudo py-spy top --pid &lt;master&gt; --subprocesses</code></div>
+      <div class="cmd-card"><div class="what">Live profiler, one worker</div><code>sudo py-spy top --pid &lt;worker&gt;</code></div>
+      <div class="cmd-card"><div class="what">Flamegraph, all subprocesses</div><code>sudo py-spy record --pid &lt;master&gt; --subprocesses</code></div>
+      <div class="cmd-card"><div class="what">Flamegraph, one worker (clean)</div><code>sudo py-spy record --pid &lt;worker&gt;</code></div>
+      <div class="cmd-card"><div class="what">Query plan / cost check</div><code>docker exec -it feed_postgres psql -U feed_admin -d feed_engine -c "EXPLAIN ANALYZE ..."</code></div>
+      <div class="cmd-card"><div class="what">Postgres connection ceiling</div><code>SHOW max_connections;</code></div>
+      <div class="cmd-card"><div class="what">Reserved admin connections</div><code>SHOW superuser_reserved_connections;</code></div>
+    </div>
+  </section>
+
+  <section id="lessons">
+    <h2><span class="badge">💡</span> Lessons worth keeping</h2>
+    <div class="card">
+      <ul>
+        <li><span class="tag lesson">Process model</span> Gunicorn's <strong>master/arbiter</strong>
+        spawns and monitors workers but never handles a request. Always profile a <strong>worker</strong>
+        PID for request-path questions; <code>--subprocesses</code> is for the aggregate picture only,
+        and can quietly mix in the master's own internal threads as if they were request cost.</li>
+        <li><span class="tag lesson">Falsification &gt; guessing</span> The response-model removal
+        test cost nothing and definitively ruled out one hypothesis (response serialization) rather
+        than leaving it as an untested assumption.</li>
+        <li><span class="tag lesson">Reasoning before reaching for tools</span> Redis was ruled out
+        by reasoning about Postgres's own buffer cache <em>before</em> writing any caching code —
+        cheaper than building and then discovering it wouldn't help.</li>
+        <li><span class="tag lesson">Watch for noise</span> Throughput swung ~20% (860–1120 req/s)
+        between runs meant to test the same variable — a reminder to be skeptical of small deltas
+        without repeated runs.</li>
+        <li><span class="tag lesson">Know the hardware ceiling</span> "Add more replicas" only helps
+        if there's spare CPU somewhere to give them — on a 4-core host already at 0% idle, more
+        processes on the same machine just divides the same saturated cores further.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Live Feed Engine — Phase 1. See also
+    <code>4-cpu-profiling-command-cheatsheet.html</code> (command reference) and
+    <code>5-live-feed-engine-cpu-diagnosis-architecture.html</code> (interactive click-through
+    diagram of this same diagnosis chain). Progress log in <code>PROGRESS.md</code> at the repo root.
+  </footer>
+
+</div>
+</body>
+</html>

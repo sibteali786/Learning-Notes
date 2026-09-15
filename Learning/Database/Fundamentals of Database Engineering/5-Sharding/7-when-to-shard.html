@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>When Should You Shard?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161923;--panel2:#1c202c;--border:#2a2f3d;
+    --text:#e6e8ef;--muted:#9aa1b4;
+    --blue:#5b9dff;--orange:#ff9d5b;--green:#5bd6a0;--purple:#b78bff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:40px 20px 80px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0;}
+  h1{font-size:2.15rem;font-weight:800;letter-spacing:-0.5px;}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:1rem;}
+  .hero{margin-bottom:36px;}
+  .pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;border:1px solid;}
+  .pill-blue{color:var(--blue);border-color:var(--blue);background:rgba(91,157,255,0.08);}
+  .pill-orange{color:var(--orange);border-color:var(--orange);background:rgba(255,157,91,0.08);}
+  .pill-green{color:var(--green);border-color:var(--green);background:rgba(91,214,160,0.08);}
+  .pill-red{color:var(--red);border-color:var(--red);background:rgba(255,107,107,0.08);}
+  .pill-purple{color:var(--purple);border-color:var(--purple);background:rgba(183,139,255,0.08);}
+
+  .section{margin-bottom:40px;}
+  .section-label{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .bar-blue{background:var(--blue);} .bar-orange{background:var(--orange);}
+  .bar-green{background:var(--green);} .bar-purple{background:var(--purple);} .bar-red{background:var(--red);}
+  .section-label h2{font-size:1.15rem;color:var(--text);}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .card + .card{margin-top:14px;}
+  p{line-height:1.6;color:var(--text);margin:0 0 10px;}
+  .muted{color:var(--muted);}
+  code{background:#0b0d13;border:1px solid var(--border);color:var(--green);padding:2px 6px;border-radius:5px;font-size:0.85rem;}
+
+  .scenario{border-left:3px solid var(--orange);background:rgba(255,157,91,0.06);padding:14px 18px;border-radius:0 10px 10px 0;margin-top:10px;}
+  .scenario .tag{color:var(--orange);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;}
+  .tip{border-left:3px solid var(--blue);background:rgba(91,157,255,0.06);padding:14px 18px;border-radius:0 10px 10px 0;margin-top:10px;}
+  .tip .tag{color:var(--blue);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;}
+
+  .ladder{position:relative;padding-left:36px;}
+  .ladder::before{
+    content:"";position:absolute;left:13px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(to bottom, var(--green), var(--blue), var(--purple), var(--orange), var(--red));
+  }
+  .rung{position:relative;margin-bottom:22px;}
+  .rung-num{
+    position:absolute;left:-36px;top:0;width:28px;height:28px;border-radius:50%;
+    background:var(--panel2);border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--text);
+  }
+  .rung-body{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;}
+  .rung-body h3{font-size:0.98rem;margin-bottom:6px;}
+  .rung-body p{margin:0;color:var(--muted);font-size:0.9rem;}
+
+  .diagram-wrap{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:14px;}
+  svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+  .toc a{color:var(--muted);text-decoration:none;font-size:0.8rem;border:1px solid var(--border);padding:5px 10px;border-radius:8px;}
+  .toc a:hover{color:var(--text);border-color:var(--muted);}
+
+  .footer{margin-top:60px;text-align:center;color:var(--muted);font-size:0.75rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill pill-blue">System Design</span>
+    <span class="pill pill-purple" style="margin-left:6px;">Databases</span>
+    <h1 style="margin-top:14px;">When Should You Shard?</h1>
+    <div class="subtitle">Short answer: sharding is the last thing you want to do. There's a whole ladder of simpler options to exhaust first.</div>
+  </div>
+
+  <div class="toc">
+    <a href="#problem">The Real Problem</a>
+    <a href="#ladder">The Decision Ladder</a>
+    <a href="#youtube">Case Study: YouTube & Vitess</a>
+    <a href="#takeaway">Takeaway</a>
+  </div>
+
+  <!-- PROBLEM -->
+  <div class="section" id="problem">
+    <div class="section-label"><div class="bar bar-blue"></div><h2>Identify the Actual Problem First</h2></div>
+    <div class="card">
+      <p>Sharding <em>sounds</em> sophisticated, but it's a genuinely complex architecture to build and operate — it shouldn't be reached for just because it sounds impressive.</p>
+      <p class="muted">The typical starting point: a single relational database instance behind a web/API server. As a table grows into the millions of rows, an index only helps so much — past a certain size, even indexed queries start approaching a full index scan, and <strong>reads</strong> slow down (writes usually stay fine, since they're mostly append-only).</p>
+      <div class="tip">
+        <span class="tag">Key principle</span>
+        <p style="margin-top:6px;margin-bottom:0;">You can't fix a problem you haven't named. Before reaching for any solution, pin down exactly what's slow — is it reads? Writes? Connection count? Each has a different, much simpler fix than sharding.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LADDER -->
+  <div class="section" id="ladder">
+    <div class="section-label"><div class="bar bar-green"></div><h2>The Decision Ladder — Try These Before Sharding</h2></div>
+    <div class="card">
+      <div class="ladder">
+
+        <div class="rung">
+          <div class="rung-num" style="border-color:var(--green);color:var(--green);">1</div>
+          <div class="rung-body">
+            <h3 style="color:var(--green);">Horizontal partitioning (same server)</h3>
+            <p>Slice a huge table into smaller partitions by a partition key (often the primary key) — e.g. rows 1–100K in partition 1, 100K–200K in partition 2, etc. Still <strong>one database instance</strong>, so transactions, joins, and rollbacks keep working. Modern Postgres does this transparently — the client doesn't even need to know which partition it hit.</p>
+          </div>
+        </div>
+
+        <div class="rung">
+          <div class="rung-num" style="border-color:var(--blue);color:var(--blue);">2</div>
+          <div class="rung-body">
+            <h3 style="color:var(--blue);">Caching (optional)</h3>
+            <p>A Redis layer in front of the database can absorb read load — at the cost of cache-invalidation and consistency complexity.</p>
+          </div>
+        </div>
+
+        <div class="rung">
+          <div class="rung-num" style="border-color:var(--purple);color:var(--purple);">3</div>
+          <div class="rung-body">
+            <h3 style="color:var(--purple);">Read replication (master + backups)</h3>
+            <p>One master handles writes; the master periodically pushes writes to one or more read replicas. A reverse proxy (nginx, HAProxy, etc.) routes reads to replicas and writes to the master. Reads scale out easily because reads rarely conflict — writes still hit a single server.</p>
+          </div>
+        </div>
+
+        <div class="rung">
+          <div class="rung-num" style="border-color:var(--orange);color:var(--orange);">4</div>
+          <div class="rung-body">
+            <h3 style="color:var(--orange);">Multi-master, geo-partitioned writes</h3>
+            <p>Two masters in different regions (e.g. US-East / US-West), each handling writes for its own region's customers. Since traffic rarely overlaps between regions, cross-region sync stays simple and conflicts stay rare.</p>
+          </div>
+        </div>
+
+        <div class="rung">
+          <div class="rung-num" style="border-color:var(--red);color:var(--red);">5</div>
+          <div class="rung-body">
+            <h3 style="color:var(--red);">Sharding — last resort</h3>
+            <p>Only after every option above is exhausted. Sharding is horizontal partitioning taken one step further: instead of separate tables on the <strong>same</strong> server, each partition lives on a completely <strong>separate server</strong>. That's the one change that breaks everything else.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="scenario" style="margin-top:20px;">
+        <span class="tag">What sharding costs you</span>
+        <p style="margin-top:6px;margin-bottom:0;">With partitioning (same server), transactions still work. With sharding, <strong>ACID transactions, atomicity, and rollbacks across shards are effectively gone</strong> — you can't atomically write to two separate database servers. The client also needs shard-routing logic baked in (e.g. "customer 100 → range 1–10,000 → server 1"), which means connection pooling per shard and real coupling between the application and the data layout.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- YOUTUBE CASE STUDY -->
+  <div class="section" id="youtube">
+    <div class="section-label"><div class="bar bar-purple"></div><h2>Case Study: YouTube & Vitess</h2></div>
+    <div class="card">
+      <p>YouTube ran on a single MySQL server for a long time and scaled it using the same ladder above — until write volume became unmanageable and they had no choice but to shard.</p>
+      <p class="muted">Their sharding was <strong>application-level</strong>: the app itself knew which shard (partition range) to hit. That created tight coupling between application logic and data layout — exactly the kind of coupling you want to avoid in software. When they later wanted to reshard (e.g. change a range from 10,000 to 100,000 rows per shard), it would have broken every client that had that range logic baked in.</p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg">
+          <g font-family="JetBrains Mono" font-size="11" fill="#e6e8ef" text-anchor="middle">
+            <rect x="20" y="55" width="150" height="50" rx="8" fill="#1c202c" stroke="#2a2f3d"/>
+            <text x="95" y="85" text-anchor="middle">Client query</text>
+
+            <rect x="230" y="30" width="180" height="100" rx="10" fill="#2e2347" stroke="#2a2f3d"/>
+            <text x="320" y="55" fill="#b78bff" font-weight="600">Vitess</text>
+            <text x="320" y="75" fill="#9aa1b4" font-size="9.5">middleware layer</text>
+            <text x="320" y="92" fill="#9aa1b4" font-size="9.5">parses SQL,</text>
+            <text x="320" y="106" fill="#9aa1b4" font-size="9.5">routes to shard</text>
+
+            <line x1="170" y1="80" x2="230" y2="80" stroke="#5b9dff" stroke-width="2"/>
+
+            <ellipse cx="500" cy="55" rx="24" ry="7" fill="#1f3a5f"/>
+            <rect x="478" y="55" width="44" height="26" fill="#193049"/>
+            <ellipse cx="500" cy="81" rx="24" ry="7" fill="#142639"/>
+            <text x="500" y="100">MySQL shard 1</text>
+
+            <ellipse cx="620" cy="55" rx="24" ry="7" fill="#1f3a5f"/>
+            <rect x="598" y="55" width="44" height="26" fill="#193049"/>
+            <ellipse cx="620" cy="81" rx="24" ry="7" fill="#142639"/>
+            <text x="620" y="100">MySQL shard 2</text>
+
+            <line x1="410" y1="80" x2="478" y2="65" stroke="#b78bff" stroke-width="2"/>
+            <line x1="410" y1="80" x2="598" y2="65" stroke="#b78bff" stroke-width="2"/>
+          </g>
+        </svg>
+      </div>
+
+      <p class="muted" style="margin-top:10px;"><strong>Vitess</strong> was built to solve exactly this coupling problem: it's an open-source middleware (built on Kubernetes, Redis, and related tech) that sits in front of MySQL. The client sends a normal SQL query; Vitess parses it and transparently routes it to the correct shard — the application no longer needs to know shards exist at all.</p>
+    </div>
+  </div>
+
+  <!-- TAKEAWAY -->
+  <div class="section" id="takeaway">
+    <div class="section-label"><div class="bar bar-orange"></div><h2>Takeaway</h2></div>
+    <div class="card">
+      <div class="tip">
+        <span class="tag">Before you shard, ask</span>
+        <p style="margin-top:6px;margin-bottom:0;">Have you tried partitioning? Caching? Read replicas? Regional multi-master writes? Every one of these is simpler to build, operate, and reason about than sharding — and every technology choice has a maintenance cost. Shard only when every simpler option is genuinely exhausted, not because it sounds like the sophisticated thing to do.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Source: Hussein Nasser — "When Should You Shard Your Database?" · husseinnasser.com</div>
+</div>
+</body>
+</html>
