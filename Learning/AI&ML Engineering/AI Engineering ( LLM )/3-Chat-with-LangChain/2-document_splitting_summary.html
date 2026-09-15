@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LangChain Document Splitting — Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161925; --panel2:#1c2030;
+    --blue:#5b9dff; --orange:#ff9d5c; --green:#5cffa8; --purple:#c48bff;
+    --text:#e6e8ef; --muted:#9098ab; --border:#272c3e;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono', monospace; line-height:1.6;}
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0;}
+  .wrap{max-width:980px; margin:0 auto;}
+  header{margin-bottom:36px;}
+  header h1{font-size:32px; font-weight:800;}
+  header p{color:var(--muted); margin-top:8px; font-size:14px;}
+  .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; margin-right:6px;}
+  .pill-blue{background:rgba(91,157,255,.15); color:var(--blue); border:1px solid rgba(91,157,255,.35);}
+  .pill-orange{background:rgba(255,157,92,.15); color:var(--orange); border:1px solid rgba(255,157,92,.35);}
+  .pill-green{background:rgba(92,255,168,.15); color:var(--green); border:1px solid rgba(92,255,168,.35);}
+  .pill-purple{background:rgba(196,139,255,.15); color:var(--purple); border:1px solid rgba(196,139,255,.35);}
+  .pill-red{background:rgba(255,92,92,.15); color:#ff7d7d; border:1px solid rgba(255,92,92,.35);}
+  .section{margin-bottom:40px;}
+  .section-label{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .bar{width:5px; height:22px; border-radius:3px;}
+  .bar-blue{background:var(--blue);} .bar-orange{background:var(--orange);}
+  .bar-green{background:var(--green);} .bar-purple{background:var(--purple);}
+  .section-label h2{font-size:20px;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:14px;}
+  .card h3{font-size:16px; margin-bottom:8px; font-weight:700;}
+  .card p{color:#c3c8d6; font-size:13.5px; margin:6px 0;}
+  .muted{color:var(--muted); font-size:12.5px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr;}}
+  code{background:#20243333; padding:2px 6px; border-radius:4px; color:var(--green); font-size:12.5px;}
+  pre{background:#0c0e15; border:1px solid var(--border); border-radius:10px; padding:16px 18px; overflow-x:auto; font-size:12.6px; color:#d7dbe8; margin:10px 0;}
+  pre .kw{color:var(--purple);} pre .fn{color:var(--blue);} pre .str{color:var(--green);} pre .cm{color:var(--muted); font-style:italic;}
+  table{width:100%; border-collapse:collapse; margin-top:10px; font-size:12.8px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--blue); font-weight:600;}
+  td{color:#c3c8d6;}
+  .example{border-left:3px solid var(--orange); background:rgba(255,157,92,.06); padding:10px 14px; border-radius:0 8px 8px 0; margin-top:10px; font-size:12.8px;}
+  .example b{color:var(--orange);}
+  .tip{border-left:3px solid var(--green); background:rgba(92,255,168,.06); padding:10px 14px; border-radius:0 8px 8px 0; margin-top:10px; font-size:12.8px;}
+  .tip b{color:var(--green);}
+  .warn{border-left:3px solid #ff7d7d; background:rgba(255,92,92,.06); padding:10px 14px; border-radius:0 8px 8px 0; margin-top:10px; font-size:12.8px;}
+  .warn b{color:#ff7d7d;}
+  svg{display:block; margin:16px auto;}
+  .lbl{fill:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px;}
+  .sub{fill:var(--muted); font-family:'JetBrains Mono',monospace; font-size:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="pill pill-blue">LANGCHAIN</span>
+  <span class="pill pill-orange">RAG PIPELINE — STEP 2</span>
+  <span class="pill pill-purple">DOCUMENT SPLITTING</span>
+  <h1 style="margin-top:14px;">Document Splitting in LangChain</h1>
+  <p>Turning loaded Documents into smaller, semantically coherent chunks that retrieval can pull individually.</p>
+</header>
+
+<!-- PROBLEM -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-blue"></div><h2>Problem Statement</h2></div>
+  <div class="card">
+    <p>Splitting sounds trivial ("just cut by character count") but sloppy splitting breaks meaning apart. Example from the lesson: a sentence describing <b style="color:var(--text)">Toyota Camry specifications</b> gets cut mid-sentence — half the spec lands in chunk A, half in chunk B. Later, when a user asks "what are the Camry's specs?", <b style="color:var(--text)">neither chunk alone has the full answer</b>, so retrieval fails even though the information technically exists in the document.</p>
+    <div class="warn"><b>Why it matters:</b> Splitting quality directly determines whether your RAG system can even find the right answer — this happens after loading, before the vector store.</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-orange"></div><h2>How It Works — Chunk Size &amp; Overlap</h2></div>
+
+  <svg viewBox="0 0 860 160" width="100%" height="160">
+    <rect x="0" y="0" width="860" height="160" fill="transparent"/>
+    <!-- full text bar -->
+    <rect x="40" y="20" width="780" height="26" rx="4" fill="#1c2030" stroke="#3a4055"/>
+    <text x="430" y="38" text-anchor="middle" class="sub">original text (continuous)</text>
+
+    <!-- chunk 1 -->
+    <rect x="40" y="70" width="300" height="30" rx="6" fill="rgba(91,157,255,.18)" stroke="#5b9dff"/>
+    <text x="190" y="90" text-anchor="middle" class="lbl">chunk 1</text>
+
+    <!-- overlap zone -->
+    <rect x="280" y="70" width="60" height="30" rx="6" fill="rgba(255,157,92,.35)" stroke="#ff9d5c"/>
+
+    <!-- chunk 2 -->
+    <rect x="280" y="115" width="300" height="30" rx="6" fill="rgba(92,255,168,.18)" stroke="#5cffa8"/>
+    <text x="430" y="135" text-anchor="middle" class="lbl">chunk 2</text>
+
+    <text x="310" y="65" text-anchor="middle" class="sub" fill="#ff9d5c">overlap</text>
+    <text x="670" y="90" text-anchor="middle" class="sub">chunk_size = length of each block</text>
+    <text x="670" y="135" text-anchor="middle" class="sub">chunk_overlap = shared "sliding window"</text>
+  </svg>
+
+  <div class="card">
+    <p><b style="color:var(--text)">chunk_size</b> — size of each chunk, measured via a <code>length_function</code> (usually <code>len()</code> for characters, or a token counter).</p>
+    <p><b style="color:var(--text)">chunk_overlap</b> — a small repeated region between consecutive chunks (like a sliding window) so context at a boundary isn't fully lost.</p>
+    <p>All LangChain text splitters expose two equivalent methods:</p>
+    <table>
+      <tr><th>Method</th><th>Input</th><th>Use case</th></tr>
+      <tr><td><code>create_documents()</code></td><td>list of raw strings</td><td>splitting plain text</td></tr>
+      <tr><td><code>split_documents()</code></td><td>list of <code>Document</code> objects</td><td>splitting already-loaded docs (keeps metadata)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- SPLITTER TYPES -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-purple"></div><h2>Splitters Vary Across 3 Dimensions</h2></div>
+  <div class="grid3">
+    <div class="card"><h3><span class="pill pill-blue">How</span></h3><p>Which characters/rules it splits on (newlines, spaces, regex, language syntax)</p></div>
+    <div class="card"><h3><span class="pill pill-orange">Length measure</span></h3><p>Characters vs. tokens vs. even smaller ML models detecting sentence boundaries</p></div>
+    <div class="card"><h3><span class="pill pill-green">Metadata handling</span></h3><p>Whether/how it preserves or adds new metadata (e.g. section headers) to each chunk</p></div>
+  </div>
+</div>
+
+<!-- WALKTHROUGH -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-blue"></div><h2>Splitters Covered in Detail</h2></div>
+
+  <!-- Recursive vs Character -->
+  <div class="card">
+    <h3>1. <span class="pill pill-blue">RecursiveCharacterTextSplitter</span> vs <span class="pill pill-orange">CharacterTextSplitter</span></h3>
+    <p><b style="color:var(--text)">RecursiveCharacterTextSplitter</b> is the recommended default — it tries a list of separators in priority order: double-newline → newline → space → empty string (char-by-char), falling back only when a bigger unit is still too large. This keeps paragraphs/sentences intact whenever possible.</p>
+    <p><b style="color:var(--text)">CharacterTextSplitter</b> splits on a single separator only (default <code>\n</code>) — if that separator isn't present in the text, it won't split at all unless you set one explicitly (e.g. a space).</p>
+    <pre><span class="kw">from</span> langchain_text_splitters <span class="kw">import</span> <span class="fn">RecursiveCharacterTextSplitter</span>, <span class="fn">CharacterTextSplitter</span>
+
+chunk_size = 26
+chunk_overlap = 4
+
+r_splitter = <span class="fn">RecursiveCharacterTextSplitter</span>(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+c_splitter = <span class="fn">CharacterTextSplitter</span>(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+text1 = <span class="str">"abcdefghijklmnopqrstuvwxyz"</span>   <span class="cm"># exactly 26 chars — no split needed</span>
+r_splitter.split_text(text1)  <span class="cm"># ['abcdefghijklmnopqrstuvwxyz']</span>
+
+text2 = text1 + <span class="str">"abcdefg"</span>              <span class="cm"># longer than 26</span>
+r_splitter.split_text(text2)
+<span class="cm"># ['abcdefghijklmnopqrstuvwxyz', 'wxyzabcdefg']  → 'wxyz' is the 4-char overlap</span>
+
+<span class="cm"># CharacterTextSplitter needs an explicit separator if there's no \n:</span>
+c_splitter = <span class="fn">CharacterTextSplitter</span>(chunk_size=chunk_size, chunk_overlap=chunk_overlap, separator=<span class="str">' '</span>)</pre>
+    <div class="example"><b>Toy example insight:</b> On a string full of spaces, overlap of "4" can look like just 2 letters (L, M) because surrounding spaces count toward the character length too.</div>
+  </div>
+
+  <!-- Real world paragraph example -->
+  <div class="card">
+    <h3>2. Real-World Paragraph Example — Why Recursive Wins</h3>
+    <pre>some_text = <span class="str">"""...paragraph 1 text...\n\n...paragraph 2 text..."""</span>
+
+c_splitter = <span class="fn">CharacterTextSplitter</span>(chunk_size=450, chunk_overlap=0, separator=<span class="str">' '</span>)
+r_splitter = <span class="fn">RecursiveCharacterTextSplitter</span>(
+    chunk_size=450, chunk_overlap=0,
+    separators=[<span class="str">"\n\n"</span>, <span class="str">"\n"</span>, <span class="str">" "</span>, <span class="str">""</span>]
+)
+
+c_splitter.split_text(some_text)   <span class="cm"># cuts mid-sentence (splits on spaces)</span>
+r_splitter.split_text(some_text)   <span class="cm"># splits cleanly at the \n\n paragraph break</span></pre>
+    <p>Adding a period <code>"."</code> to the separators list splits by sentence — but a naive regex leaves periods at the start of the next chunk. Fix with a regex lookbehind so the period stays attached to its sentence:</p>
+    <pre>r_splitter = <span class="fn">RecursiveCharacterTextSplitter</span>(
+    chunk_size=150, chunk_overlap=0,
+    separators=[<span class="str">"\n\n"</span>, <span class="str">"\n"</span>, <span class="str">"\(?&lt;=\. \)"</span>, <span class="str">" "</span>, <span class="str">""</span>]  <span class="cm"># lookbehind keeps '.' in place</span>
+)</pre>
+    <div class="tip"><b>Tip:</b> Default separators <code>["\n\n", "\n", " ", ""]</code> mirror natural text hierarchy: paragraph → line → word → character.</div>
+  </div>
+
+  <!-- Real PDFs / Notion -->
+  <div class="card">
+    <h3>3. Applying to Real Documents (PDF &amp; Notion)</h3>
+    <pre>text_splitter = <span class="fn">RecursiveCharacterTextSplitter</span>(chunk_size=1500, chunk_overlap=150, length_function=len)
+
+docs = text_splitter.split_documents(pages)        <span class="cm"># from the PDF loader</span>
+notion_docs = text_splitter.split_documents(notion_db)  <span class="cm"># from the Notion loader</span>
+
+<span class="cm"># len(docs) > len(pages)  → splitting produced more, smaller documents</span></pre>
+    <div class="example"><b>Real-world scenario:</b> A 22-page PDF loaded as 22 Documents might explode into 70+ smaller chunks after splitting — each small enough to embed and retrieve precisely.</div>
+  </div>
+
+  <!-- Token splitter -->
+  <div class="card">
+    <h3>4. <span class="pill pill-purple">TokenTextSplitter</span> — Splitting by Tokens, Not Characters</h3>
+    <p>LLM context windows are measured in <b style="color:var(--text)">tokens</b>, not characters — so splitting by token count better reflects how the model actually "sees" the text.</p>
+    <pre><span class="kw">from</span> langchain_text_splitters <span class="kw">import</span> <span class="fn">TokenTextSplitter</span>
+
+text_splitter = <span class="fn">TokenTextSplitter</span>(chunk_size=1, chunk_overlap=0)
+text_splitter.split_text(<span class="str">"foo bar bazzyfoo"</span>)
+<span class="cm"># ['foo', ' bar', ' b', 'az', 'zy', 'foo']  → tokens ≠ characters ≠ words</span>
+
+text_splitter = <span class="fn">TokenTextSplitter</span>(chunk_size=10, chunk_overlap=0)
+docs = text_splitter.split_documents(pages)
+docs[0].metadata  <span class="cm"># {'source': '...pdf', 'page': 0} — metadata still carries through</span></pre>
+    <div class="tip"><b>Tip:</b> Metadata (like <code>source</code> and <code>page</code>) is automatically propagated from the parent Document to every chunk split from it.</div>
+  </div>
+
+  <!-- Markdown header splitter -->
+  <div class="card">
+    <h3>5. <span class="pill pill-green">MarkdownHeaderTextSplitter</span> — Context-Aware Metadata</h3>
+    <p>Splits on markdown headers/subheaders, and — uniquely — <b style="color:var(--text)">injects the header hierarchy into each chunk's metadata</b>, so downstream retrieval knows which section a chunk came from.</p>
+    <pre><span class="kw">from</span> langchain_text_splitters <span class="kw">import</span> <span class="fn">MarkdownHeaderTextSplitter</span>
+
+headers_to_split_on = [
+    (<span class="str">"#"</span>,   <span class="str">"Header 1"</span>),
+    (<span class="str">"##"</span>,  <span class="str">"Header 2"</span>),
+    (<span class="str">"###"</span>, <span class="str">"Header 3"</span>),
+]
+
+markdown_splitter = <span class="fn">MarkdownHeaderTextSplitter</span>(headers_to_split_on=headers_to_split_on)
+md_header_splits = markdown_splitter.split_text(markdown_document)
+
+<span class="cm"># md_header_splits[0].page_content → "Hi this is Jim.\nHi this is Joe."</span>
+<span class="cm"># md_header_splits[0].metadata → {'Header 1': 'Title', 'Header 2': 'Chapter 1'}</span></pre>
+    <div class="example"><b>Real-world scenario:</b> Applied to the Notion export of "Blendle's Employee Handbook," each chunk's metadata records which section/subsection it came from (e.g. <code>Header 1: "Blendle's Employee Handbook"</code>) — letting a chatbot answer "which section discusses X?" accurately.</div>
+  </div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-orange"></div><h2>Key Distinctions</h2></div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Character-based vs Token-based splitting</h3>
+      <p><b style="color:var(--blue)">Character-based</b> = simple, consistent across text types.<br><b style="color:var(--purple)">Token-based</b> = matches how the LLM actually consumes input; important when respecting context-window limits.</p>
+    </div>
+    <div class="card">
+      <h3>Generic splitters vs Structure-aware splitters</h3>
+      <p><b style="color:var(--green)">Recursive/Character/Token</b> splitters are format-agnostic.<br><b style="color:var(--orange)">MarkdownHeaderTextSplitter</b> and the <b>language-aware splitter</b> (Python/Ruby/C, etc. via <code>from_language()</code>) split according to the document's actual structure and enrich metadata.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRACTICAL TIPS -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-green"></div><h2>Practical Tips</h2></div>
+  <div class="card">
+    <p>✅ Default to <code>RecursiveCharacterTextSplitter</code> — it degrades gracefully from paragraph → sentence → word → character splits.</p>
+    <p>✅ Keep a small <code>chunk_overlap</code> so context isn't lost right at a chunk boundary — this is what prevented the Toyota Camry spec problem.</p>
+    <p>✅ Match your <code>length_function</code> to how your embedding/LLM will actually consume the text — tokens for LLM context budgeting, characters for simplicity.</p>
+    <p>✅ For structured content (Markdown, code), prefer a structure-aware splitter — you get both better chunk boundaries AND free metadata (headers, language constructs).</p>
+    <p>✅ Splitting → next step is embedding these chunks into a <b style="color:var(--text)">vector store</b> for retrieval.</p>
+  </div>
+</div>
+
+<!-- SDK VERIFICATION NOTE -->
+<div class="section">
+  <div class="section-label"><div class="bar bar-purple"></div><h2>⚠ Notebook vs. Current LangChain SDK</h2></div>
+  <div class="card">
+    <p>Verified against current LangChain docs (as of this response):</p>
+    <table>
+      <tr><th>Notebook (older)</th><th>Current (verified)</th></tr>
+      <tr><td><code>from langchain.text_splitter import RecursiveCharacterTextSplitter</code></td><td><code>from langchain_text_splitters import RecursiveCharacterTextSplitter</code></td></tr>
+      <tr><td><code>from langchain.text_splitter import CharacterTextSplitter</code></td><td><code>from langchain_text_splitters import CharacterTextSplitter</code></td></tr>
+      <tr><td><code>from langchain.text_splitter import TokenTextSplitter</code></td><td><code>from langchain_text_splitters import TokenTextSplitter</code></td></tr>
+      <tr><td><code>from langchain.text_splitter import MarkdownHeaderTextSplitter</code></td><td><code>from langchain_text_splitters import MarkdownHeaderTextSplitter</code></td></tr>
+    </table>
+    <p class="muted">Splitters now live in the standalone <code>langchain_text_splitters</code> package (paired with <code>langchain_community</code> for loaders, as noted in the previous summary). All method names (<code>split_text</code>, <code>split_documents</code>, <code>create_documents</code>) and constructor args (<code>chunk_size</code>, <code>chunk_overlap</code>, <code>separators</code>, <code>length_function</code>) are unchanged.</p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>6 - Regularization and Bias/Variance</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; font-size:1.0rem; margin:12px 0; color:#fff; overflow-x:auto;}
+  .formula-box .reg{color:var(--accent2);}
+
+  .three-col{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px;}
+  @media(max-width:750px){.three-col{grid-template-columns:1fr;}}
+  .fit-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center;}
+  .fit-card svg{width:100%; height:auto;}
+  .fit-card .name{font-weight:700; margin-top:8px;}
+  .fit-card.bias .name{color:var(--bad);}
+  .fit-card.right .name{color:var(--good);}
+  .fit-card.variance .name{color:var(--accent2);}
+  .fit-card .lam{font-size:0.78rem; color:var(--muted); margin-top:4px; font-family:'Cascadia Code',monospace;}
+  .fit-card .jvals{margin-top:10px; font-size:0.82rem; text-align:left; background:#0c0e14; border-radius:6px; padding:8px 10px;}
+  .fit-card .jvals div{display:flex; justify-content:space-between;}
+
+  .pill{display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;}
+  .pill.high{background:rgba(255,107,129,0.15); color:var(--bad);}
+  .pill.low{background:rgba(94,214,164,0.15); color:var(--good);}
+
+  .steps{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .step{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .step .n{font-weight:700; color:var(--accent); min-width:20px;}
+  .step.final{border-left-color:var(--accent2);}
+  .step.final .n{color:var(--accent2);}
+
+  .lambda-list{display:flex; flex-direction:column; gap:6px; margin-top:14px; font-family:'Cascadia Code',monospace; font-size:0.85rem;}
+  .lambda-row{display:grid; grid-template-columns:100px 1fr auto; gap:10px; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:8px 14px;}
+  .lambda-row.picked{border-color:var(--good); background:rgba(94,214,164,0.08);}
+  .lambda-row .j{color:var(--muted);}
+  .lambda-row.picked .j{color:var(--good); font-weight:700;}
+
+  .fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px; text-align:center;}
+  .fig svg{max-width:100%; height:auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px;}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .compare-card .h{font-weight:700; color:#fff; margin-bottom:8px;}
+
+  .mirror-visual{display:flex; align-items:center; justify-content:center; gap:24px; margin-top:14px; flex-wrap:wrap;}
+  .mirror-visual .axis-label{font-size:0.8rem; color:var(--muted); text-align:center;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 6 — Regularization and Bias/Variance</h1>
+  <p class="subtitle">How the choice of λ moves a model along the exact same bias↔variance spectrum as polynomial degree did — and how to pick a good λ with cross-validation.</p>
+
+  <section>
+    <h2><span class="num">1</span> Same Model, Different λ — Three Outcomes</h2>
+    <p>Fix the model shape (4th-order polynomial) and vary only the regularization strength λ:</p>
+    <div class="formula-box">
+      J(w,b) = 1/2m·Σ(f(x⁽ⁱ⁾)−y⁽ⁱ⁾)² + <span class="reg">λ/2m·Σw<sub>j</sub>²</span>
+    </div>
+    <div class="three-col">
+      <div class="fit-card bias">
+        <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="190" y2="120" stroke="#4a4f66"/><line x1="20" y1="120" x2="20" y2="10" stroke="#4a4f66"/>
+          <line x1="25" y1="75" x2="180" y2="72" stroke="#7c9bff" stroke-width="2.5"/>
+          <circle cx="35" cy="95" r="3" fill="#ff6b81"/><circle cx="70" cy="55" r="3" fill="#ff6b81"/><circle cx="100" cy="65" r="3" fill="#ff6b81"/>
+          <circle cx="140" cy="45" r="3" fill="#ff6b81"/><circle cx="170" cy="30" r="3" fill="#ff6b81"/>
+        </svg>
+        <div class="name">High Bias (underfit)</div>
+        <div class="lam">λ = 10,000</div>
+        <p style="font-size:0.8rem; margin:6px 0 0;">w₁≈0, w₂≈0... → f(x) ≈ b (nearly flat)</p>
+        <div class="jvals"><div>J_train <span class="pill high">LARGE</span></div></div>
+      </div>
+      <div class="fit-card right">
+        <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="190" y2="120" stroke="#4a4f66"/><line x1="20" y1="120" x2="20" y2="10" stroke="#4a4f66"/>
+          <path d="M25,115 Q60,20 180,25" fill="none" stroke="#5ed6a4" stroke-width="2.5"/>
+          <circle cx="30" cy="105" r="3" fill="#ff6b81"/><circle cx="55" cy="60" r="3" fill="#ff6b81"/><circle cx="80" cy="45" r="3" fill="#ff6b81"/>
+          <circle cx="120" cy="30" r="3" fill="#ff6b81"/><circle cx="160" cy="28" r="3" fill="#ff6b81"/>
+        </svg>
+        <div class="name">Intermediate λ</div>
+        <div class="lam">λ = "just right"</div>
+        <p style="font-size:0.8rem; margin:6px 0 0;">Balances fit vs. small weights</p>
+        <div class="jvals"><div>J_train <span class="pill low">small</span></div><div>J_cv <span class="pill low">small</span></div></div>
+      </div>
+      <div class="fit-card variance">
+        <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="190" y2="120" stroke="#4a4f66"/><line x1="20" y1="120" x2="20" y2="10" stroke="#4a4f66"/>
+          <path d="M25,110 C50,30 70,110 100,45 C120,15 140,90 180,35" fill="none" stroke="#ff8a6b" stroke-width="2.5"/>
+          <circle cx="27" cy="108" r="3" fill="#ff6b81"/><circle cx="60" cy="35" r="3" fill="#7c9bff"/><circle cx="95" cy="50" r="3" fill="#ff6b81"/>
+          <circle cx="130" cy="20" r="3" fill="#7c9bff"/><circle cx="170" cy="38" r="3" fill="#ff6b81"/>
+        </svg>
+        <div class="name">High Variance (overfit)</div>
+        <div class="lam">λ = 0</div>
+        <p style="font-size:0.8rem; margin:6px 0 0;">No regularization → free wiggly fit</p>
+        <div class="jvals"><div>J_train <span class="pill low">small</span></div><div>J_cv <span class="pill high">large</span></div></div>
+      </div>
+    </div>
+    <p style="margin-top:14px;"><strong>Very large λ</strong> forces nearly all weights toward zero — the algorithm is so heavily penalized for having non-zero weights that <code>f(x) ≈ b</code>, a near-constant line. <strong>λ = 0</strong> removes the penalty entirely, letting the model overfit freely, same as the unregularized 4th-order curve from Lesson 5.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Choosing λ with Cross-Validation</h2>
+    <p>Same recipe as choosing polynomial degree — just swap out the thing being varied:</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div>Try a range of λ values, doubling each time: 0, 0.01, 0.02, 0.04, 0.08, ... up to ≈10.</div></div>
+      <div class="step"><span class="n">2</span><div>For each λ, minimize J(w,b) on the <strong>training set</strong> to get parameters.</div></div>
+      <div class="step"><span class="n">3</span><div>Evaluate each set of parameters on the <strong>cross-validation set</strong>, computing J_cv for each λ.</div></div>
+      <div class="step final"><span class="n">4</span><div>Pick the λ with the lowest J_cv, then report generalization error using the <strong>test set</strong> on that final model — same as before, never touch test until the very end.</div></div>
+    </div>
+    <div class="lambda-list">
+      <div class="lambda-row"><span>λ = 0</span><span>w⁽¹⁾,b⁽¹⁾</span><span class="j">J_cv(w⁽¹⁾,b⁽¹⁾)</span></div>
+      <div class="lambda-row"><span>λ = 0.01</span><span>w⁽²⁾,b⁽²⁾</span><span class="j">J_cv(w⁽²⁾,b⁽²⁾)</span></div>
+      <div class="lambda-row"><span>λ = 0.02</span><span>w⁽³⁾,b⁽³⁾</span><span class="j">J_cv(w⁽³⁾,b⁽³⁾)</span></div>
+      <div class="lambda-row"><span>λ = 0.04</span><span>w⁽⁴⁾,b⁽⁴⁾</span><span class="j">J_cv(w⁽⁴⁾,b⁽⁴⁾)</span></div>
+      <div class="lambda-row picked"><span>λ = 0.08</span><span>w⁽⁵⁾,b⁽⁵⁾</span><span class="j">J_cv lowest ✓ → pick this</span></div>
+      <div class="lambda-row"><span>⋮</span><span>⋮</span><span class="j">⋮</span></div>
+      <div class="lambda-row"><span>λ ≈ 10</span><span>w⁽¹²⁾,b⁽¹²⁾</span><span class="j">J_cv(w⁽¹²⁾,b⁽¹²⁾)</span></div>
+    </div>
+    <p style="margin-top:10px;">Final answer: report <code>J_test(w⁵,b⁵)</code> as the generalization estimate for the chosen λ = 0.08 model.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> J_train and J_cv as Functions of λ</h2>
+    <div class="fig">
+      <svg viewBox="0 0 420 220" width="420">
+        <line x1="30" y1="190" x2="400" y2="190" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="190" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="200" y="212" fill="#9aa0b4" font-size="11">λ (regularization strength)</text>
+        <path d="M40,180 C120,175 250,140 380,50" fill="none" stroke="#7c9bff" stroke-width="2.5"/>
+        <path d="M40,60 C130,175 260,170 380,55" fill="none" stroke="#c792ea" stroke-width="2.5"/>
+        <text x="330" y="45" fill="#7c9bff" font-size="11">J_train</text>
+        <text x="330" y="80" fill="#c792ea" font-size="11">J_cv</text>
+        <circle cx="200" cy="172" r="4" fill="#c792ea"/>
+      </svg>
+      <div class="fig-caption">J_train rises steadily as λ grows — more penalty on weights means less freedom to fit training data well. J_cv dips then rises — same U-shape as before, minimum marks the best λ.</div>
+    </div>
+    <p><strong>Why J_train increases with λ:</strong> the more weight the cost function gives to keeping w small, the less attention it pays to minimizing actual prediction error — so training fit gets steadily worse as λ grows, unlike the polynomial-degree case where more flexibility always helped J_train.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Mirror Image of the Polynomial-Degree Curve</h2>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="h">vs. Polynomial Degree (Lesson 5)</div>
+        <p style="margin:0; font-size:0.88rem;"><strong>Left</strong> (low d) = underfit = high bias.<br><strong>Right</strong> (high d) = overfit = high variance.</p>
+      </div>
+      <div class="compare-card">
+        <div class="h">vs. Regularization λ (this lesson)</div>
+        <p style="margin:0; font-size:0.88rem;"><strong>Left</strong> (low λ) = overfit = high variance.<br><strong>Right</strong> (high λ) = underfit = high bias.</p>
+      </div>
+    </div>
+    <p style="margin-top:12px;">The two curves are effectively mirror images — not mathematically identical, but conceptually: whichever axis you're varying, the same underlying U-shaped J_cv curve appears, with high bias on one end and high variance on the other. Cross-validation is the tool that finds the sweet spot on <em>either</em> axis.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">The Pattern Generalizes</div>
+      <p style="margin:0;">Whether you're choosing polynomial degree, regularization strength, or (as seen earlier) neural network architecture — the procedure is identical: sweep candidate values, fit on train, evaluate on CV, pick the lowest J_cv, and report the honest generalization estimate using J_test only once, at the very end.</p>
+    </div>
+    <p style="margin-top:14px;">Next up: what actually counts as "high" or "low" for J_train and J_cv — establishing a baseline level of performance to judge these numbers against, rather than eyeballing them in isolation.</p>
+  </section>
+
+  <footer>Lesson 6 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>

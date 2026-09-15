@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>8 - Learning Curves</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px; text-align:center;}
+  .fig svg{max-width:100%; height:auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px;}
+
+  .mini-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
+  .mini-fit{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center;}
+  .mini-fit svg{width:100%; height:auto;}
+  .mini-fit .lbl{font-size:0.75rem; color:var(--muted); margin-top:4px;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .verdict{margin-top:14px; padding:14px 18px; border-radius:10px; font-weight:700; text-align:center; font-size:1.0rem;}
+  .verdict.bias{background:rgba(255,107,129,0.12); border:1px solid var(--bad); color:var(--bad);}
+  .verdict.variance{background:rgba(255,138,107,0.12); border:1px solid var(--accent2); color:var(--accent2);}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .compare-card .h{font-weight:700; color:#fff; margin-bottom:8px;}
+  .compare-card.bias{border-left:4px solid var(--bad);}
+  .compare-card.variance{border-left:4px solid var(--accent2);}
+
+  .caveat{background:rgba(255,209,102,0.08); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin-top:14px;}
+  .caveat .h{color:var(--warn); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 8 — Learning Curves</h1>
+  <p class="subtitle">Watching J_train and J_cv as training set size grows — and why more data doesn't always help.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Baseline Shape: Quadratic Model</h2>
+    <p>Plot J_train and J_cv against <code>m_train</code> (training set size) for a plain quadratic fit:</p>
+    <div class="fig">
+      <svg viewBox="0 0 420 220" width="420">
+        <line x1="30" y1="190" x2="400" y2="190" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="190" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="180" y="212" fill="#9aa0b4" font-size="11">m_train (training set size)</text>
+        <polyline points="40,174.5 77.8,162.2 115.6,149.8 153.3,140.5 191.1,134.4 228.9,129.7 266.7,126.7 304.4,125.1 342.2,124.2 380,123.6" fill="none" stroke="#7c9bff" stroke-width="2.5"/>
+        <polyline points="40,35.5 77.8,60.2 115.6,78.7 153.3,94.2 191.1,103.5 228.9,109.6 266.7,114.3 304.4,117.4 342.2,119.5 380,121.4" fill="none" stroke="#c792ea" stroke-width="2.5"/>
+        <text x="330" y="140" fill="#7c9bff" font-size="11">J_train</text>
+        <text x="330" y="100" fill="#c792ea" font-size="11">J_cv</text>
+      </svg>
+      <div class="fig-caption">J_cv goes down as training set grows (more data → better generalization). Counterintuitively, J_train goes UP as training set grows.</div>
+    </div>
+    <div class="mini-grid">
+      <div class="mini-fit"><svg viewBox="0 0 100 70"><circle cx="50" cy="35" r="3" fill="#ff6b81"/><path d="M20,50 L80,20" stroke="#7c9bff" stroke-width="2" fill="none"/></svg><div class="lbl">1 example → perfect fit</div></div>
+      <div class="mini-fit"><svg viewBox="0 0 100 70"><circle cx="30" cy="45" r="3" fill="#ff6b81"/><circle cx="70" cy="25" r="3" fill="#ff6b81"/><path d="M15,55 L85,15" stroke="#7c9bff" stroke-width="2" fill="none"/></svg><div class="lbl">2-3 examples → still ~perfect</div></div>
+      <div class="mini-fit"><svg viewBox="0 0 100 70"><circle cx="20" cy="50" r="3" fill="#ff6b81"/><circle cx="40" cy="30" r="3" fill="#ff6b81"/><circle cx="60" cy="40" r="3" fill="#ff6b81"/><circle cx="85" cy="15" r="3" fill="#ff6b81"/><path d="M15,55 Q50,20 90,15" stroke="#7c9bff" stroke-width="2" fill="none"/></svg><div class="lbl">4 examples → slightly off in places</div></div>
+      <div class="mini-fit"><svg viewBox="0 0 100 70"><circle cx="15" cy="52" r="2.5" fill="#ff6b81"/><circle cx="30" cy="35" r="2.5" fill="#ff6b81"/><circle cx="45" cy="42" r="2.5" fill="#ff6b81"/><circle cx="60" cy="25" r="2.5" fill="#ff6b81"/><circle cx="80" cy="18" r="2.5" fill="#ff6b81"/><path d="M12,55 Q50,15 90,15" stroke="#7c9bff" stroke-width="2" fill="none"/></svg><div class="lbl">5+ examples → harder to fit all perfectly</div></div>
+    </div>
+    <p style="margin-top:14px;"><strong>Why J_train rises:</strong> with 1-3 points, a quadratic can pass through nearly all of them exactly — training error ≈ 0. As more points get added, it becomes geometrically harder for one smooth curve to hit every point — so training error creeps up. This is the opposite of what intuition ("more data = better") might suggest for J_train specifically.</p>
+    <p><strong>J_cv is typically higher than J_train</strong> throughout, since parameters are fit to the training set — the model has a natural advantage there that it doesn't have on held-out data.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> High Bias Learning Curve — Why More Data Won't Save It</h2>
+    <div class="fig">
+      <svg viewBox="0 0 420 220" width="420">
+        <line x1="30" y1="190" x2="400" y2="190" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="190" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="180" y="212" fill="#9aa0b4" font-size="11">m_train</text>
+        <polyline points="40.0,161.7 380.0,161.7" fill="none" stroke="#ff6b81" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="330" y="153" fill="#ff6b81" font-size="10">human level</text>
+        <polyline points="40.0,34.2 77.8,62.5 115.6,82.3 153.3,93.7 191.1,100.8 228.9,105.0 266.7,107.8 304.4,109.2 342.2,110.1 380.0,110.7" fill="none" stroke="#c792ea" stroke-width="2.5"/>
+        <polyline points="40.0,181.5 77.8,161.7 115.6,144.7 153.3,133.3 191.1,124.8 228.9,119.2 266.7,116.3 304.4,114.9 342.2,114.1 380.0,113.5" fill="none" stroke="#7c9bff" stroke-width="2.5"/>
+        <text x="330" y="102" fill="#c792ea" font-size="11">J_cv</text>
+        <text x="330" y="126" fill="#7c9bff" font-size="11">J_train</text>
+      </svg>
+      <div class="fig-caption">Both J_train and J_cv flatten out (plateau) as m_train grows — and neither ever reaches human-level performance, no matter how far the curve extends right.</div>
+    </div>
+    <p><strong>Why they plateau:</strong> fitting a simple straight line, more examples don't change the line much once it's roughly settled — there's just not enough model flexibility to keep improving. Both curves flatten, with a persistent large gap to the baseline (human-level) performance.</p>
+    <div class="verdict bias">Getting more training data will NOT by itself fix high bias.</div>
+    <div class="scenario">
+      <div class="stitle">The counterintuitive lesson</div>
+      <p style="margin:0;">"More data is good" is a common ML instinct — but if your model architecture itself is too simple (underfitting), throwing more examples at it just gives it more points to be equally bad on. The curve is already flat; extending it further right doesn't bend it downward. Fix the model's capacity first (more features, higher polynomial degree, less regularization) before investing months collecting more data.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> High Variance Learning Curve — Where More Data Actually Helps</h2>
+    <div class="fig">
+      <svg viewBox="0 0 420 220" width="420">
+        <line x1="30" y1="190" x2="400" y2="190" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="190" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="180" y="212" fill="#9aa0b4" font-size="11">m_train</text>
+        <polyline points="40.0,157.4 380.0,157.4" fill="none" stroke="#ff6b81" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="330" y="149" fill="#ff6b81" font-size="10">human level</text>
+        <polyline points="40.0,34.2 77.8,62.5 115.6,85.2 153.3,102.2 191.1,116.3 228.9,127.7 266.7,136.2 304.4,143.2 342.2,148.1 380.0,151.8" fill="none" stroke="#c792ea" stroke-width="2.5"/>
+        <polyline points="40.0,188.6 77.8,185.8 115.6,181.5 153.3,177.2 191.1,173.0 228.9,168.8 266.7,165.9 304.4,163.7 342.2,161.9 380.0,160.2" fill="none" stroke="#7c9bff" stroke-width="2.5"/>
+        <text x="330" y="140" fill="#c792ea" font-size="11">J_cv</text>
+        <text x="330" y="175" fill="#7c9bff" font-size="11">J_train</text>
+      </svg>
+      <div class="fig-caption">Large persistent gap between J_train (can even beat human level — overfit) and J_cv. But as m_train grows, J_cv trends downward toward J_train and toward human-level performance.</div>
+    </div>
+    <p>With a high-order polynomial and little/no regularization, J_train stays low (sometimes unrealistically low — even below human-level error, since it's memorizing training data rather than genuinely understanding the pattern). The huge J_cv−J_train gap is the high-variance signature. But extrapolating the curves to the right: <strong>J_cv keeps trending down</strong> as more examples are added, closing the gap with J_train.</p>
+    <div class="verdict variance">Getting more training data IS likely to help with high variance.</div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Side-by-Side: When Does More Data Help?</h2>
+    <div class="compare-grid">
+      <div class="compare-card bias">
+        <div class="h">High Bias</div>
+        <p style="margin:0; font-size:0.88rem;">Both curves plateau early and stay far from baseline. More data → curves stay flat. <strong>More data alone won't help.</strong> Need more model capacity instead.</p>
+      </div>
+      <div class="compare-card variance">
+        <div class="h">High Variance</div>
+        <p style="margin:0; font-size:0.88rem;">Large gap between J_train and J_cv, but J_cv is still trending downward. More data → gap keeps closing. <strong>More data will genuinely help.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Practical Note</h2>
+    <div class="caveat">
+      <div class="h">Rarely plotted in practice</div>
+      <p style="margin:0;">Generating a real learning curve means retraining the model repeatedly on growing subsets (100, 200, 300... examples) and recording J_train/J_cv each time — computationally expensive, so it's not commonly done as an actual plotted artifact. Still, having this <strong>mental picture</strong> of what a high-bias vs. high-variance learning curve looks like is valuable for quickly reasoning about whether more data is worth collecting, without needing to generate the plot.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Before you collect more data...</div>
+      <p style="margin:0;">Check whether your model has high bias or high variance. If it's high bias, more data is largely wasted effort — the model's ceiling is already visible in the flattened curves. If it's high variance, more data is one of the most reliable fixes available, since the J_cv curve is still actively trending toward J_train.</p>
+    </div>
+    <p style="margin-top:14px;">Next: returning to the original housing price example with all these bias/variance tools now in hand to decide concretely what to try next.</p>
+  </section>
+
+  <footer>Lesson 8 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>

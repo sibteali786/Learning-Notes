@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Compiled vs Interpreted Languages</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#0f1117;
+    --panel:#161923;
+    --panel2:#1c2030;
+    --border:#2a2f42;
+    --blue:#5aa9ff;
+    --orange:#ff9f5a;
+    --green:#5affa0;
+    --purple:#b18aff;
+    --pink:#ff5a8c;
+    --text:#e6e8f0;
+    --muted:#8b90a8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono', monospace;
+    margin:0;
+    padding:32px 16px 80px;
+    line-height:1.55;
+  }
+  h1,h2,h3{font-family:'Syne', sans-serif; margin:0;}
+  .wrap{max-width:980px; margin:0 auto;}
+
+  .hero{
+    text-align:center;
+    margin-bottom:36px;
+  }
+  .hero h1{
+    font-size:2.1rem;
+    font-weight:800;
+    background:linear-gradient(90deg,var(--blue),var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    letter-spacing:.5px;
+  }
+  .hero p{color:var(--muted); margin-top:8px; font-size:.95rem;}
+
+  .section{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px 24px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .section::before{
+    content:'';
+    position:absolute; left:0; top:16px; bottom:16px; width:4px;
+    border-radius:4px;
+  }
+  .sec-blue::before{background:var(--blue);}
+  .sec-orange::before{background:var(--orange);}
+  .sec-green::before{background:var(--green);}
+  .sec-purple::before{background:var(--purple);}
+  .sec-pink::before{background:var(--pink);}
+
+  .label{
+    font-family:'Syne', sans-serif;
+    font-size:.75rem;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--muted);
+    margin-bottom:6px;
+    display:block;
+  }
+  h2.title{font-size:1.35rem; margin-bottom:10px;}
+
+  .pill{
+    display:inline-block;
+    padding:3px 11px;
+    border-radius:999px;
+    font-size:.72rem;
+    font-weight:700;
+    margin-right:6px;
+    margin-bottom:4px;
+  }
+  .pill-blue{background:rgba(90,169,255,.15); color:var(--blue); border:1px solid rgba(90,169,255,.4);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid rgba(255,159,90,.4);}
+  .pill-green{background:rgba(90,255,160,.15); color:var(--green); border:1px solid rgba(90,255,160,.4);}
+  .pill-purple{background:rgba(177,138,255,.15); color:var(--purple); border:1px solid rgba(177,138,255,.4);}
+  .pill-pink{background:rgba(255,90,140,.15); color:var(--pink); border:1px solid rgba(255,90,140,.4);}
+
+  code, .code-inline{
+    background:#0b0d13;
+    padding:2px 7px;
+    border-radius:5px;
+    color:var(--orange);
+    font-size:.88rem;
+    border:1px solid var(--border);
+  }
+  pre{
+    background:#0b0d13;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    overflow-x:auto;
+    font-size:.85rem;
+    color:#c9d1e0;
+  }
+  pre .kw{color:var(--purple);}
+  pre .cmt{color:var(--muted); font-style:italic;}
+
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+
+  .compare-card{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+  }
+  .compare-card h3{font-size:1rem; margin-bottom:10px;}
+  .compare-card ul{margin:0; padding-left:18px; font-size:.88rem; color:var(--text);}
+  .compare-card li{margin-bottom:6px;}
+
+  svg{display:block; margin:18px auto;}
+  .svg-label{font-family:'JetBrains Mono', monospace; font-size:13px;}
+
+  table{width:100%; border-collapse:collapse; font-size:.87rem; margin-top:8px;}
+  th,td{border:1px solid var(--border); padding:8px 10px; text-align:left;}
+  th{background:var(--panel2); color:var(--muted); font-family:'Syne',sans-serif; font-size:.78rem; text-transform:uppercase; letter-spacing:.5px;}
+  tr:nth-child(even) td{background:#12141d;}
+
+  .tip{
+    background:rgba(177,138,255,.08);
+    border:1px dashed var(--purple);
+    border-radius:10px;
+    padding:12px 16px;
+    font-size:.85rem;
+    color:#d8cfff;
+  }
+  .example{
+    background:rgba(90,255,160,.06);
+    border-left:3px solid var(--green);
+    border-radius:0 10px 10px 0;
+    padding:10px 16px;
+    font-size:.87rem;
+    margin-top:10px;
+  }
+  .example b{color:var(--green);}
+
+  .flow{
+    display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
+    margin:14px 0;
+  }
+  .box{
+    border:2px solid var(--blue);
+    border-radius:10px;
+    padding:10px 16px;
+    font-size:.85rem;
+    color:var(--blue);
+    background:rgba(90,169,255,.08);
+  }
+  .box.green{border-color:var(--green); color:var(--green); background:rgba(90,255,160,.08);}
+  .box.orange{border-color:var(--orange); color:var(--orange); background:rgba(255,159,90,.08);}
+  .arrow{color:var(--muted); font-size:1.2rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>Compiled vs Interpreted Languages</h1>
+    <p>How human-readable code actually becomes something your CPU can run — and why it matters for speed, distribution, and deployment.</p>
+  </div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="section sec-pink">
+    <span class="label">Problem Statement</span>
+    <h2 class="title">🧩 Why does this distinction even matter?</h2>
+    <p>You've probably heard: <i>"compiled languages are faster, interpreted languages have better developer experience."</i> That's a surface-level take. The real question is: <b>how does human-readable source code get turned into something the CPU can execute?</b> The CPU only understands binary (1s and 0s / machine code) — it has no idea what <code>func main()</code> means. Compiled and interpreted languages solve this "translation problem" differently, and that difference cascades into speed, memory use, and how you ship software to users.</p>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section sec-blue">
+    <span class="label">How It Works</span>
+    <h2 class="title">⚙️ Two ways to bridge code → machine code</h2>
+
+    <p><span class="pill pill-blue">Compiled</span> All translation happens <b>up front</b>, before the program ever runs.</p>
+    <div class="flow">
+      <div class="box">main.go<br><span style="color:var(--muted);font-size:.7rem;">source code</span></div>
+      <span class="arrow">→</span>
+      <div class="box">go build<br><span style="color:var(--muted);font-size:.7rem;">compiler</span></div>
+      <span class="arrow">→</span>
+      <div class="box green">hello.exe<br><span style="color:var(--muted);font-size:.7rem;">binary executable</span></div>
+    </div>
+    <p style="font-size:.87rem;">Once <code>hello.exe</code> exists, the compiler is never needed again. The executable runs directly on the OS — no conversion happens at runtime.</p>
+
+    <p style="margin-top:16px;"><span class="pill pill-orange">Interpreted</span> Translation happens <b>on the fly, every time you run it</b>.</p>
+    <div class="flow">
+      <div class="box">main.py<br><span style="color:var(--muted);font-size:.7rem;">source code</span></div>
+      <span class="arrow">→</span>
+      <div class="box orange">python interpreter<br><span style="color:var(--muted);font-size:.7rem;">reads + converts live</span></div>
+      <span class="arrow">→</span>
+      <div class="box">CPU executes<br><span style="color:var(--muted);font-size:.7rem;">line by line, at runtime</span></div>
+    </div>
+    <p style="font-size:.87rem;">The interpreter must be installed on <i>every</i> machine that runs the code, and it re-does the translation work every single execution.</p>
+
+    <div class="tip">💡 <b>Core insight:</b> compiled = pay the translation cost once (at build time). Interpreted = pay it every time (at run time). That's the root of the speed difference.</div>
+  </div>
+
+  <!-- YOUR DIAGRAM RECREATED -->
+  <div class="section sec-purple">
+    <span class="label">Visual — Production Deployment</span>
+    <h2 class="title">🚀 What ships to the server</h2>
+    <svg viewBox="0 0 760 300" width="100%" style="max-width:720px;">
+      <!-- production box -->
+      <rect x="290" y="20" width="450" height="260" rx="14" fill="none" stroke="var(--pink)" stroke-width="2"/>
+      <text x="300" y="10" class="svg-label" fill="var(--pink)">production environment (e.g. a server)</text>
+
+      <!-- source code diamond -->
+      <polygon points="60,150 115,100 170,150 115,200" fill="none" stroke="#fff" stroke-width="2"/>
+      <text x="115" y="155" text-anchor="middle" class="svg-label" fill="#fff">code</text>
+
+      <!-- compiler path -->
+      <rect x="220" y="55" width="110" height="50" rx="10" fill="none" stroke="var(--blue)" stroke-width="2"/>
+      <text x="275" y="85" text-anchor="middle" class="svg-label" fill="var(--blue)">compiler</text>
+      <line x1="150" y1="115" x2="220" y2="80" stroke="#fff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <rect x="420" y="55" width="130" height="50" rx="10" fill="none" stroke="var(--blue)" stroke-width="2"/>
+      <text x="485" y="85" text-anchor="middle" class="svg-label" fill="var(--blue)">executable</text>
+      <line x1="330" y1="80" x2="420" y2="80" stroke="var(--blue)" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="590" y="70" class="svg-label" fill="var(--blue)" font-size="12">only the compiled</text>
+      <text x="590" y="88" class="svg-label" fill="var(--blue)" font-size="12">executable runs —</text>
+      <text x="590" y="106" class="svg-label" fill="var(--blue)" font-size="12">no compiler needed</text>
+
+      <!-- dashed divider -->
+      <line x1="290" y1="150" x2="740" y2="150" stroke="#fff" stroke-width="1.5" stroke-dasharray="6,6"/>
+
+      <!-- interpreted path -->
+      <line x1="150" y1="180" x2="440" y2="220" stroke="#fff" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="150" y="200" class="svg-label" fill="#fff" font-size="12">source code copied</text>
+      <text x="150" y="216" class="svg-label" fill="#fff" font-size="12">to production</text>
+
+      <polygon points="460,190 495,175 530,190 495,205" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="4,4"/>
+      <text x="495" y="195" text-anchor="middle" class="svg-label" fill="var(--green)" font-size="11">code</text>
+      <line x1="495" y1="208" x2="495" y2="228" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrowg)"/>
+
+      <rect x="415" y="230" width="160" height="42" rx="10" fill="none" stroke="var(--green)" stroke-width="2"/>
+      <text x="495" y="256" text-anchor="middle" class="svg-label" fill="var(--green)">interpreter</text>
+      <text x="600" y="245" class="svg-label" fill="var(--green)" font-size="12">code + interpreter</text>
+      <text x="600" y="262" class="svg-label" fill="var(--green)" font-size="12">both required live</text>
+
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#fff"/>
+        </marker>
+        <marker id="arrowg" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="var(--green)"/>
+        </marker>
+      </defs>
+    </svg>
+    <p style="font-size:.85rem; color:var(--muted);">Compiled: ship one binary, no toolchain needed. Interpreted: ship source + require the interpreter to be installed on the target machine.</p>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section sec-green">
+    <span class="label">Key Distinctions</span>
+    <h2 class="title">🔍 Compiled vs Interpreted vs "VM-based compiled"</h2>
+    <div class="grid2">
+      <div class="compare-card">
+        <h3 style="color:var(--blue);">Natively Compiled</h3>
+        <ul>
+          <li>Compiles directly to machine code for the CPU</li>
+          <li>No runtime translation needed</li>
+          <li>Fastest raw execution speed</li>
+          <li>Examples: <code>Rust</code>, <code>C</code>, <code>C++</code></li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h3 style="color:var(--purple);">Compiled to VM Bytecode</h3>
+        <ul>
+          <li>Compiles to bytecode, run inside a virtual machine (JVM / CLR)</li>
+          <li>VM adds overhead but enables portability</li>
+          <li>Examples: <code>Java</code>, <code>C#</code></li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h3 style="color:var(--orange);">Interpreted</h3>
+        <ul>
+          <li>Translated to machine code live, line by line, at runtime</li>
+          <li>Requires interpreter installed on every host</li>
+          <li>Examples: <code>Python</code>, <code>Ruby</code>, <code>JavaScript</code>*</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h3 style="color:var(--pink);">Go — the interesting middle case</h3>
+        <ul>
+          <li>Natively compiled (like Rust/C) — no interpreter needed</li>
+          <li>But includes a <b>Go runtime</b> baked into every binary (manages memory, garbage collection)</li>
+          <li>Runtime overhead → execution speed lands closer to Java/C# than to Rust/C</li>
+          <li>Still uses far less <i>memory</i> than Java/C#, since there's no full VM</li>
+        </ul>
+      </div>
+    </div>
+    <p style="font-size:.8rem; color:var(--muted); margin-top:10px;">*JavaScript is technically often JIT-compiled under the hood (V8 etc.), but conceptually behaves like an interpreted language from the developer's perspective.</p>
+
+    <table>
+      <tr><th>Language</th><th>Category</th><th>Needs installed at runtime?</th><th>Typical speed profile</th></tr>
+      <tr><td>C / C++ / Rust</td><td>Natively compiled</td><td>Nothing</td><td>Fastest</td></tr>
+      <tr><td>Go</td><td>Natively compiled + runtime</td><td>Nothing</td><td>Fast, but slowed by GC/runtime</td></tr>
+      <tr><td>Java / C#</td><td>Compiled to VM bytecode</td><td>JVM / CLR</td><td>Similar tier to Go</td></tr>
+      <tr><td>Python / Ruby</td><td>Interpreted</td><td>Interpreter</td><td>Slowest (translated live)</td></tr>
+    </table>
+  </div>
+
+  <!-- CODE / DISTRIBUTION EXAMPLE -->
+  <div class="section sec-orange">
+    <span class="label">Code Example</span>
+    <h2 class="title">🛠️ The Go build flow</h2>
+    <pre><span class="cmt">// 1. Write source</span>
+<span class="kw">package</span> main
+
+<span class="kw">import</span> "fmt"
+
+<span class="kw">func</span> main() {
+    fmt.Println(<span style="color:var(--green);">"Hello, World!"</span>)
+}</pre>
+    <pre><span class="cmt"># 2. Compile once, on your dev machine</span>
+$ go build -o hello main.go
+
+<span class="cmt"># 3. Ship only the binary to the server</span>
+$ scp hello user@server:/app/
+
+<span class="cmt"># 4. Run — no Go toolchain required on the server</span>
+$ ./hello
+Hello, World!</pre>
+    <div class="example">
+      <b>Real-world example — game distribution:</b> Players downloading a PC game never install a Go/Rust/C++ toolchain. They just download the pre-built executable and double-click it. The compiler already did its job on the developer's machine, once.
+    </div>
+    <div class="example">
+      <b>Real-world example — why Textio (Go server) benefits:</b> Deploying a Go backend means copying one pre-compiled binary to the server and running it — no Node.js, no Python interpreter, no dependency install step. Contrast with a Python/Node backend, where the production server must have the correct interpreter version installed, plus all source files.
+    </div>
+  </div>
+
+  <!-- INTERVIEW / PRACTICAL TIPS -->
+  <div class="section sec-purple">
+    <span class="label">Interview / Practical Tips</span>
+    <h2 class="title">🎯 What to remember</h2>
+    <ul style="font-size:.9rem; padding-left:20px;">
+      <li><span class="pill pill-blue">Speed</span> Compiled languages are generally faster because translation cost is paid once, at build time — not on every run.</li>
+      <li><span class="pill pill-orange">DX</span> Interpreted languages often have a faster edit-run feedback loop — no separate build step — which is why they're seen as having better developer experience.</li>
+      <li><span class="pill pill-green">Distribution</span> Compiled → ship one binary, no runtime dependency. Interpreted → ship source code + require the interpreter on the target machine.</li>
+      <li><span class="pill pill-pink">Gotcha</span> Go is natively compiled but still carries a runtime (for memory management / GC), so its raw execution speed sits closer to Java/C# than to Rust/C — don't assume "compiled" automatically means "fastest."</li>
+      <li><span class="pill pill-purple">Memory</span> Go still beats Java/C# on memory footprint, since it doesn't need a full virtual machine like the JVM or CLR.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

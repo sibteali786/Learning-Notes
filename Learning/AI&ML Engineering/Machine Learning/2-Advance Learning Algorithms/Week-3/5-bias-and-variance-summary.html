@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>5 - Bias and Variance</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .three-col{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-top:14px;}
+  @media(max-width:750px){.three-col{grid-template-columns:1fr;}}
+  .fit-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center;}
+  .fit-card svg{width:100%; height:auto;}
+  .fit-card .name{font-weight:700; margin-top:8px;}
+  .fit-card.bias .name{color:var(--bad);}
+  .fit-card.right .name{color:var(--good);}
+  .fit-card.variance .name{color:var(--accent2);}
+  .fit-card .formula{font-size:0.78rem; color:var(--muted); margin-top:4px; font-family:'Cascadia Code',monospace;}
+  .fit-card .jvals{margin-top:10px; font-size:0.82rem; text-align:left; background:#0c0e14; border-radius:6px; padding:8px 10px;}
+  .fit-card .jvals div{display:flex; justify-content:space-between;}
+
+  .pill{display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;}
+  .pill.high{background:rgba(255,107,129,0.15); color:var(--bad);}
+  .pill.low{background:rgba(94,214,164,0.15); color:var(--good);}
+
+  .signature-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:0.88rem;}
+  .signature-table th,.signature-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--border);}
+  .signature-table th{color:var(--accent);}
+  .signature-table td.diag{font-weight:700;}
+  .signature-table tr.bias td.diag{color:var(--bad);}
+  .signature-table tr.variance td.diag{color:var(--accent2);}
+  .signature-table tr.both td.diag{color:var(--warn);}
+  .signature-table tr.good td.diag{color:var(--good);}
+
+  .fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px; text-align:center;}
+  .fig svg{max-width:100%; height:auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 5 — Bias and Variance</h1>
+  <p class="subtitle">The single most useful diagnostic for deciding what to do next when a model isn't performing well.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Three Classic Fits</h2>
+    <p>Familiar from linear regression: fit a straight line, a quadratic, or a 4th-order polynomial to the same housing data.</p>
+    <div class="three-col">
+      <div class="fit-card bias">
+        <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="190" y2="120" stroke="#4a4f66"/><line x1="20" y1="120" x2="20" y2="10" stroke="#4a4f66"/>
+          <line x1="25" y1="105" x2="180" y2="25" stroke="#7c9bff" stroke-width="2.5"/>
+          <circle cx="35" cy="95" r="3" fill="#ff6b81"/><circle cx="60" cy="70" r="3" fill="#ff6b81"/><circle cx="90" cy="60" r="3" fill="#ff6b81"/>
+          <circle cx="120" cy="45" r="3" fill="#ff6b81"/><circle cx="160" cy="30" r="3" fill="#ff6b81"/><circle cx="45" cy="115" r="3" fill="#ff6b81"/>
+        </svg>
+        <div class="name">High Bias (Underfit)</div>
+        <div class="formula">f = w₁x + b</div>
+        <div class="jvals"><div>J_train <span class="pill high">HIGH</span></div><div>J_cv <span class="pill high">HIGH</span></div></div>
+      </div>
+      <div class="fit-card right">
+        <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="190" y2="120" stroke="#4a4f66"/><line x1="20" y1="120" x2="20" y2="10" stroke="#4a4f66"/>
+          <path d="M25,115 Q60,20 180,25" fill="none" stroke="#5ed6a4" stroke-width="2.5"/>
+          <circle cx="30" cy="105" r="3" fill="#ff6b81"/><circle cx="55" cy="60" r="3" fill="#ff6b81"/><circle cx="80" cy="45" r="3" fill="#ff6b81"/>
+          <circle cx="120" cy="30" r="3" fill="#ff6b81"/><circle cx="160" cy="28" r="3" fill="#ff6b81"/><circle cx="45" cy="80" r="3" fill="#ff6b81"/>
+        </svg>
+        <div class="name">"Just Right"</div>
+        <div class="formula">f = w₁x + w₂x² + b</div>
+        <div class="jvals"><div>J_train <span class="pill low">LOW</span></div><div>J_cv <span class="pill low">LOW</span></div></div>
+      </div>
+      <div class="fit-card variance">
+        <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="190" y2="120" stroke="#4a4f66"/><line x1="20" y1="120" x2="20" y2="10" stroke="#4a4f66"/>
+          <path d="M25,110 C50,30 70,110 100,45 C120,15 140,90 180,35" fill="none" stroke="#ff8a6b" stroke-width="2.5"/>
+          <circle cx="27" cy="108" r="3" fill="#ff6b81"/><circle cx="60" cy="35" r="3" fill="#7c9bff"/><circle cx="95" cy="50" r="3" fill="#ff6b81"/>
+          <circle cx="130" cy="20" r="3" fill="#7c9bff"/><circle cx="170" cy="38" r="3" fill="#ff6b81"/><circle cx="105" cy="100" r="3" fill="#7c9bff"/>
+        </svg>
+        <div class="name">High Variance (Overfit)</div>
+        <div class="formula">f = w₁x + w₂x² + w₃x³ + w₄x⁴ + b</div>
+        <div class="jvals"><div>J_train <span class="pill low">LOW</span></div><div>J_cv <span class="pill high">HIGH</span></div></div>
+      </div>
+    </div>
+    <p style="margin-top:14px;">With one feature, you can just <em>look</em> at the plot to see which is happening. With many features, plotting f(x) isn't possible — so instead you read the same story off two numbers: <strong>J_train</strong> and <strong>J_cv</strong>.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Reading J_train and J_cv Like a Diagnostic</h2>
+    <table class="signature-table">
+      <thead><tr><th>Signal</th><th>What it means</th><th>Diagnosis</th></tr></thead>
+      <tbody>
+        <tr class="bias"><td>J_train is high</td><td>Model doesn't even fit the data it was trained on</td><td class="diag">High Bias (underfitting)</td></tr>
+        <tr class="variance"><td>J_cv ≫ J_train (J_train may be low)</td><td>Does great on seen data, poorly on unseen data</td><td class="diag">High Variance (overfitting)</td></tr>
+        <tr class="good"><td>J_train low, J_cv low (close together)</td><td>Fits well AND generalizes well</td><td class="diag">Good fit</td></tr>
+        <tr class="both"><td>J_train is high AND J_cv ≫ J_train</td><td>Fits poorly overall, and generalizes even worse</td><td class="diag">High Bias + High Variance (rare, mostly in neural nets)</td></tr>
+      </tbody>
+    </table>
+    <div class="scenario">
+      <div class="stitle">Note on the rare combined case</div>
+      <p style="margin:0;">High bias + high variance together is unusual for simple linear models on 1D data, but can happen — e.g. in neural networks — when part of the input space is overfit while another part is underfit simultaneously. The tell is: J_train is high, and J_cv is even worse than that already-high J_train.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The Bias/Variance Curve vs. Polynomial Degree</h2>
+    <p>Plotting J_train and J_cv as a function of polynomial degree <code>d</code> (no regularization) reveals the full picture in one image:</p>
+    <div class="fig">
+      <svg viewBox="0 0 420 220" width="420">
+        <line x1="30" y1="190" x2="400" y2="190" stroke="#4a4f66" stroke-width="1.5"/>
+        <line x1="30" y1="190" x2="30" y2="20" stroke="#4a4f66" stroke-width="1.5"/>
+        <text x="180" y="212" fill="#9aa0b4" font-size="11">degree of polynomial (d)</text>
+        <path d="M40,40 C100,150 200,180 380,180" fill="none" stroke="#7c9bff" stroke-width="2.5"/>
+        <path d="M40,35 C120,150 200,170 380,60" fill="none" stroke="#c792ea" stroke-width="2.5"/>
+        <text x="330" y="175" fill="#7c9bff" font-size="11">J_train</text>
+        <text x="330" y="50" fill="#c792ea" font-size="11">J_cv</text>
+        <circle cx="200" cy="172" r="4" fill="#c792ea"/>
+      </svg>
+      <div class="fig-caption">J_train keeps dropping as degree increases (more flexibility → better training fit). J_cv dips then rises — a U-shape. The minimum of J_cv marks the "just right" degree.</div>
+    </div>
+    <div class="three-col" style="margin-top:14px;">
+      <div class="fit-card bias" style="text-align:left;">
+        <div class="name" style="text-align:center;">Left side (low d)</div>
+        <p style="margin:8px 0 0; font-size:0.85rem;">Underfits → J_train high, J_cv high. High bias region.</p>
+      </div>
+      <div class="fit-card right" style="text-align:left;">
+        <div class="name" style="text-align:center;">Middle (right d)</div>
+        <p style="margin:8px 0 0; font-size:0.85rem;">J_cv at its minimum — neither underfitting nor overfitting.</p>
+      </div>
+      <div class="fit-card variance" style="text-align:left;">
+        <div class="name" style="text-align:center;">Right side (high d)</div>
+        <p style="margin:8px 0 0; font-size:0.85rem;">Overfits → J_train low, but J_cv rises again. High variance region.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Quick Reference: How to Diagnose</h2>
+    <div class="rule-box">
+      <div class="title">High Bias (underfit)</div>
+      <p style="margin:0;">J_train will be high, and <strong>J_train ≈ J_cv</strong> (both bad, close together).</p>
+    </div>
+    <div class="rule-box" style="margin-top:12px;">
+      <div class="title">High Variance (overfit)</div>
+      <p style="margin:0;"><strong>J_cv ≫ J_train</strong> — the gap between them is the tell, even if J_train itself looks low.</p>
+    </div>
+    <div class="rule-box" style="margin-top:12px;">
+      <div class="title">High Bias AND High Variance (rare)</div>
+      <p style="margin:0;">J_train is high, <strong>and</strong> J_cv ≫ J_train on top of that. Worst of both worlds — mostly seen in neural network applications, not plain linear regression.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Key Takeaway</h2>
+    <p>Whenever a model underperforms, the first question to answer is: <strong>is this bias, or variance, or both?</strong> That answer determines which of the earlier "six usual suspects" (Lesson 1) is actually worth trying — more data and more regularization fix variance; more features, more polynomial terms, and less regularization fix bias. Next up: seeing how regularization itself shifts a model along this bias/variance curve.</p>
+  </section>
+
+  <footer>Lesson 5 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>
