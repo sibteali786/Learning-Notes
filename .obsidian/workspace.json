@@ -4,31 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "e89b31b261a8f4d4",
+        "id": "4eedc0fff4908dee",
         "type": "tabs",
         "children": [
           {
-            "id": "d16acc253d107ba3",
+            "id": "e6c10732aed38771",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Learning/Backend Engineering/Go/Basics/Lessons.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Lessons"
+              "title": "New tab"
             }
           }
         ]
@@ -90,7 +76,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 376.6920585632324
+    "width": 550.0709648132324
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -196,15 +182,24 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "d16acc253d107ba3",
+  "active": "88876276e2a2dd54",
   "lastOpenFiles": [
-    "Learning/Backend Engineering/memory-management-go-java-rust.html",
-    "Learning/Backend Engineering/Pasted Image 20260317121120_013.png",
-    "Learning/Backend Engineering/compiled-vs-interpreted.html",
-    "Learning/Backend Engineering/backend.excalidraw.excalidraw",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/utils.py",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/10-neural-networks-bias-variance-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/deeplearning.mplstyle",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/data_w3_ex2.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/data_w3_ex1.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data4.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data3.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data2.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data1.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/6-regularization-bias-variance-summary.html",
+    "Learning/Backend Engineering/Redis-POstgres/redis-bench-env/lib/python3.14/site-packages/pip-26.1.2.dist-info/licenses/src/pip/_vendor/idna/LICENSE.md",
+    "Learning/Backend Engineering/Redis-POstgres/redis-bench-env/lib/python3.14/site-packages/pip/_vendor/idna/LICENSE.md",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/Backend Engineering/Pasted Image 20260317121120_013.png",
     "Learning/Portfolio/Inspirations.md",
-    "Learning/Portfolio",
     "Screenshot 2026-06-12 at 10.29.31 AM.png",
     "Screenshot 2026-06-12 at 10.29.20 AM.png",
     "Screenshot 2026-05-20 at 9.56.44 PM.png",
@@ -215,13 +210,6 @@
     "redis_geosearch_grid_vs_radius.svg",
     "Pasted Image 20260904172659_828.png",
     "Learning/IELTS/Resources.md",
-    "Learning/Backend Engineering/Go/Basics",
-    "Learning/Backend Engineering/Go",
-    "Learning/IELTS/Cambridge 17_text.pdf",
-    "Learning/IELTS/Cambridge-IELTS-18-Academic.pdf",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/1-document_loaders.html",
-    "Learning/IELTS",
-    "Learning/AI&ML Engineering/AI Engineering ( LLM )/3-Chat-with-LangChain/2-document_splitting_summary.html",
     "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
     "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/Untitled.md",
@@ -242,8 +230,6 @@
     "Learning/Work Stuff/Freelance/Aesthetic Industry/Untitled.md",
     "Learning/Research/Adam-DFT/Chemistry/4-valence-electrons-ionic-compounds/Drawing 2026-09-08 21.48.32.excalidraw.md",
     "Learning/JavaScript/Coding/2-Throttle.excalidraw.md",
-    "Learning/JavaScript/Coding/2-Debounce.excalidraw.md",
-    "Learning/JavaScript/Coding/1-Flatten.excalidraw.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"

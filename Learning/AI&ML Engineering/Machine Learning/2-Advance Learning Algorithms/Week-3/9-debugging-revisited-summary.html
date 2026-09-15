@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>9 - Debugging a Learning Algorithm Revisited</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; font-size:1.0rem; margin:12px 0; color:#fff; overflow-x:auto;}
+
+  .fix-table{display:flex; flex-direction:column; gap:8px; margin-top:16px;}
+  .fix-row{display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px 16px;}
+  .fix-row .label{font-weight:600; color:#fff; font-size:0.92rem;}
+  .fix-row .tag{font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; padding:4px 12px; border-radius:20px; white-space:nowrap;}
+  .tag.variance{background:rgba(255,138,107,0.15); color:var(--accent2);}
+  .tag.bias{background:rgba(255,107,129,0.15); color:var(--bad);}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.two-col{grid-template-columns:1fr;}}
+  .col-card{border-radius:10px; padding:16px; border:1px solid var(--border);}
+  .col-card.variance{background:rgba(255,138,107,0.08); border-color:rgba(255,138,107,0.4);}
+  .col-card.bias{background:rgba(255,107,129,0.08); border-color:rgba(255,107,129,0.4);}
+  .col-card .h{font-weight:700; margin-bottom:10px; font-size:1.0rem;}
+  .col-card.variance .h{color:var(--accent2);}
+  .col-card.bias .h{color:var(--bad);}
+  .col-card ul{margin:0; padding-left:18px;}
+  .col-card li{margin-bottom:6px; font-size:0.88rem;}
+
+  .caveat{background:rgba(255,209,102,0.08); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin-top:14px;}
+  .caveat .h{color:var(--warn); font-weight:700; margin-bottom:6px;}
+
+  .quote-box{background:var(--panel2); border-left:4px solid var(--accent); border-radius:8px; padding:16px 20px; margin-top:14px; font-style:italic; color:#cfd2e0;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 9 — Debugging a Learning Algorithm, Revisited</h1>
+  <p class="subtitle">Closing the loop: the six fixes from Lesson 1, now mapped precisely to bias vs. variance.</p>
+
+  <section>
+    <h2><span class="num">1</span> Back to the Original Question</h2>
+    <p>Recall the opening scenario: regularized linear regression on housing prices, making unacceptably large errors.</p>
+    <div class="formula-box">
+      J(w,b) = 1/2m·Σ(f(x⁽ⁱ⁾)−y⁽ⁱ⁾)² + λ/2m·Σw<sub>j</sub>²
+    </div>
+    <p>Back in Lesson 1, six things were listed as possible fixes — but without a way to know <em>which one</em> actually applies. Now, armed with the bias/variance diagnostic, each one maps cleanly to a specific problem.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The Six Fixes, Finally Mapped</h2>
+    <div class="fix-table">
+      <div class="fix-row"><span class="label">Get more training examples</span><span class="tag variance">Fixes High Variance</span></div>
+      <div class="fix-row"><span class="label">Try smaller sets of features</span><span class="tag variance">Fixes High Variance</span></div>
+      <div class="fix-row"><span class="label">Try getting additional features</span><span class="tag bias">Fixes High Bias</span></div>
+      <div class="fix-row"><span class="label">Try adding polynomial features (x₁², x₂², x₁x₂, ...)</span><span class="tag bias">Fixes High Bias</span></div>
+      <div class="fix-row"><span class="label">Try decreasing λ</span><span class="tag bias">Fixes High Bias</span></div>
+      <div class="fix-row"><span class="label">Try increasing λ</span><span class="tag variance">Fixes High Variance</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Why Each One Works</h2>
+    <div class="two-col">
+      <div class="col-card variance">
+        <div class="h">High Variance fixes</div>
+        <ul>
+          <li><strong>More training examples</strong> — as shown in the learning curve lesson, more data directly shrinks the J_cv−J_train gap when the model is overfitting.</li>
+          <li><strong>Smaller feature set</strong> — fewer features (e.g. dropping x³, x⁴, x⁵) means less flexibility to fit noise, reducing overfitting.</li>
+          <li><strong>Increase λ</strong> — forces the algorithm to keep weights small, producing a smoother, less wiggly function — directly counteracts overfitting.</li>
+        </ul>
+      </div>
+      <div class="col-card bias">
+        <div class="h">High Bias fixes</div>
+        <ul>
+          <li><strong>Additional features</strong> — e.g. predicting price from size alone will never fit well if price also genuinely depends on bedrooms, floors, age. More relevant info lets the model actually reduce training error.</li>
+          <li><strong>Polynomial features</strong> — gives a straight-line model the flexibility to fit curved relationships, directly improving fit on the training set.</li>
+          <li><strong>Decrease λ</strong> — less penalty on weight size means more attention goes to actually minimizing prediction error on the training set.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Two-Sentence Summary</h2>
+    <div class="rule-box">
+      <div class="title">High Variance → Simplify</div>
+      <p style="margin:0;">Get more data, or reduce model flexibility (fewer features, higher λ). The goal is to stop the model from fitting noise.</p>
+    </div>
+    <div class="rule-box" style="margin-top:12px;">
+      <div class="title">High Bias → Add Power</div>
+      <p style="margin:0;">Give the model more capacity to fit the underlying pattern: more features, polynomial features, or lower λ.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> A Trap to Avoid: Don't Shrink the Training Set for Bias</h2>
+    <div class="caveat">
+      <div class="h">Reducing training set size does NOT fix high bias</div>
+      <p style="margin:0;">It's tempting to think a smaller training set is "easier" to fit well, and it is — J_train may look better. But this comes at the cost of a worse cross-validation error and worse real-world performance. Throwing away training examples to patch a high-bias number is treating the symptom, not the cause — never do this.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Closing Thought</h2>
+    <div class="quote-box">
+      "Bias and variance is one of those concepts that takes a short time to learn, but takes a lifetime to master."
+    </div>
+    <p style="margin-top:12px;">Recognizing high bias vs. high variance is a skill that sharpens with repeated practice on real projects — but the systematic habit itself (check J_train and J_cv before choosing a fix) is what separates fast, deliberate iteration from months of guessing. This same bias/variance lens applies directly to training neural networks too, which is the next topic.</p>
+  </section>
+
+  <footer>Lesson 9 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+</body>
+</html>

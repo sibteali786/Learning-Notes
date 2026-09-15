@@ -591,3 +591,76 @@ Click to hide video
 
 Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: go vs rust
 
+# Constants
+
+Constants are declared with the `const` keyword. They can't use the `:=` short declaration syntax.
+
+```go
+const pi = 3.14159
+```
+
+Constants can be primitive types like strings, integers, booleans and floats. They _cannot_ be more complex types like slices, maps and structs, which are types we will explain later.
+
+As the name implies, the value of a constant can't be changed after it has been declared.
+
+## Use Two Separate Constants
+
+Something weird is happening in this code.
+
+What _should_ be happening is that we create 2 separate constants: `premiumPlanName` and `basicPlanName`. Right now it looks like we're trying to overwrite one of them.
+
+## Assignment
+
+Complete the code to remove the bug and create the constant `basicPlanName`.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	const premiumPlanName = "Premium Plan"
+	basicPlanName := "Basic Plan"
+
+	// don't edit below this line
+
+	fmt.Println("plan:", premiumPlanName)
+	fmt.Println("plan:", basicPlanName)
+}
+
+```
+
+# Computed Constants
+
+Constants must be known at compile time. They are _usually_ declared with a static value:
+
+```go
+const myInt = 15
+```
+
+However, constants _can be computed_ as long as the computation can happen at _compile time_.
+
+For example, this is valid:
+
+```go
+const firstName = "Lane"
+const lastName = "Wagner"
+const fullName = firstName + " " + lastName
+```
+
+That said, you _cannot_ declare a constant that can only be computed at run-time like you can in JavaScript. This breaks:
+
+```go
+// the current time can only be known when the program is running
+const currentTime = time.Now()
+```
+
+## Assignment
+
+Keeping track of time in a message-sending application is _critical_. Imagine getting an appointment reminder an hour **after** your doctor's visit.
+
+Complete the code using a computed constant to print the number of seconds in an hour.
+
+```go
+
+```
