@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Photoelectron Spectroscopy (PES)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5da8ff; --orange:#ff9f5a; --green:#5ce0a0; --purple:#c792ea;
+    --red:#ff6b81; --text:#e6e8ef; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono',monospace; line-height:1.6;}
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 12px;}
+  .wrap{max-width:980px; margin:0 auto;}
+  header{margin-bottom:40px;}
+  header h1{font-size:2rem; font-weight:800;}
+  header p{color:var(--muted); margin:0;}
+  .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; margin-right:6px; margin-bottom:6px;}
+  .pill-blue{background:rgba(93,168,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill-green{background:rgba(92,224,160,.15); color:var(--green); border:1px solid var(--green);}
+  .pill-purple{background:rgba(199,146,234,.15); color:var(--purple); border:1px solid var(--purple);}
+  section{margin-bottom:44px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:16px;}
+  .card h3{color:var(--orange); font-size:1.05rem;}
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:16px 0;}
+  .flow .box{background:var(--card); border:1px solid var(--blue); color:var(--blue); padding:8px 14px; border-radius:8px; font-weight:700; font-size:.85rem;}
+  .flow .arrow{color:var(--muted); font-size:1.2rem;}
+  .formula{background:#1a1d2b; border-left:3px solid var(--purple); border-radius:6px; padding:14px 18px; margin:14px 0; font-size:1.1rem; color:var(--purple); font-weight:700; text-align:center;}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.88rem;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left;}
+  th{background:#1b1f2d; color:var(--orange); font-family:'Syne',sans-serif;}
+  tr:nth-child(even){background:#141724;}
+  .callout{border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.88rem;}
+  .tip{background:rgba(92,224,160,.08); border:1px solid var(--green);}
+  .tip::before{content:"💡 TIP  "; color:var(--green); font-weight:700;}
+  .example{background:rgba(93,168,255,.08); border:1px solid var(--blue);}
+  .example::before{content:"🧪 EXAMPLE  "; color:var(--blue); font-weight:700;}
+  .warning{background:rgba(255,107,129,.08); border:1px solid var(--red);}
+  .warning::before{content:"⚠️ WATCH OUT  "; color:var(--red); font-weight:700;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Photoelectron Spectroscopy (PES)</h1>
+  <p>AP Chemistry · Unit 1 · Reading electron configuration from a spectrum</p>
+  <div style="margin-top:12px;">
+    <span class="pill pill-blue">BINDING ENERGY</span>
+    <span class="pill pill-orange">PEAK HEIGHT = e⁻ COUNT</span>
+    <span class="pill pill-green">ELECTRON CONFIG</span>
+    <span class="pill pill-purple">Zeff / SHIELDING LINK</span>
+  </div>
+</header>
+
+<section>
+  <h2 style="color:var(--blue);">📌 Problem Statement</h2>
+  <div class="card">
+    <p>Given only a graph (a "photoelectron spectrum") with no element name attached, how do you figure out exactly which element it is — and its full electron configuration — just from the shape of some peaks?</p>
+    <p style="margin-bottom:0; color:var(--muted);">PES works because <b style="color:var(--text);">every subshell has a distinct binding energy</b>, and the height of each peak tells you exactly how many electrons live in that subshell.</p>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--orange);">⚙️ How It Works</h2>
+
+  <div class="card">
+    <h3>1. The Setup</h3>
+    <div class="flow">
+      <div class="box">Atom stream →</div><span class="arrow">←</span>
+      <div class="box">← High-energy X-ray photons</div>
+    </div>
+    <p>Photons collide with atoms and knock electrons out (like tiny fireworks 💥). Ejected electrons fly into a magnetic field that deflects them toward a detector.</p>
+    <ul style="margin:8px 0 0; padding-left:20px;">
+      <li><b style="color:var(--orange);">Core electrons</b> (close to nucleus) → high binding energy → most photon energy used just to knock them free → little leftover kinetic energy → don't travel far</li>
+      <li><b style="color:var(--blue);">Valence electrons</b> (far from nucleus) → low binding energy → most photon energy converts to kinetic energy → travel far, hit detector at greater distance</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>2. Reading the Axes</h3>
+    <table>
+      <tr><th>Axis</th><th>Represents</th><th>Direction</th></tr>
+      <tr><td>X — Binding energy (MJ/mol)</td><td>How tightly held the electron is</td><td>Plotted <b>right → left, decreasing</b> (1000 → 0)</td></tr>
+      <tr><td>Y — Relative # of electrons</td><td>Peak <b>height</b> = # electrons in that subshell</td><td>Taller peak = more electrons detected there</td></tr>
+    </table>
+    <div class="callout warning">
+      The x-axis runs backwards — leftmost peaks are the <b>highest</b> binding energy (innermost, 1s), not the lowest.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3. SVG: Matching Peaks to Subshells (Calcium)</h3>
+    <svg viewBox="0 0 700 240" width="100%" height="240">
+      <line x1="40" y1="200" x2="660" y2="200" stroke="#8b93a7" stroke-width="1.5"/>
+      <line x1="40" y1="200" x2="40" y2="20" stroke="#8b93a7" stroke-width="1.5"/>
+      <!-- 1s -->
+      <rect x="70" y="60" width="10" height="140" fill="#ff6b81"/>
+      <text x="75" y="50" fill="#ff6b81" font-size="13" text-anchor="middle">1s²</text>
+      <!-- 2s -->
+      <rect x="200" y="120" width="10" height="80" fill="#ff9f5a"/>
+      <text x="205" y="110" fill="#ff9f5a" font-size="13" text-anchor="middle">2s²</text>
+      <!-- 2p -->
+      <rect x="240" y="40" width="10" height="160" fill="#5da8ff"/>
+      <text x="245" y="30" fill="#5da8ff" font-size="13" text-anchor="middle">2p⁶</text>
+      <!-- 3s -->
+      <rect x="380" y="140" width="10" height="60" fill="#ff9f5a"/>
+      <text x="385" y="130" fill="#ff9f5a" font-size="13" text-anchor="middle">3s²</text>
+      <!-- 3p -->
+      <rect x="420" y="55" width="10" height="145" fill="#5da8ff"/>
+      <text x="425" y="45" fill="#5da8ff" font-size="13" text-anchor="middle">3p⁶</text>
+      <!-- 4s -->
+      <rect x="580" y="150" width="10" height="50" fill="#5ce0a0"/>
+      <text x="585" y="140" fill="#5ce0a0" font-size="13" text-anchor="middle">4s²</text>
+
+      <text x="60" y="220" fill="#8b93a7" font-size="12">high BE (1000)</text>
+      <text x="560" y="220" fill="#8b93a7" font-size="12">low BE (0)</text>
+      <text x="10" y="30" fill="#8b93a7" font-size="11" transform="rotate(-90 10,110)">e⁻ count</text>
+    </svg>
+    <p style="color:var(--muted); margin:0;">Peak heights follow the subshell capacities: s-peaks (2s, 3s, 4s) are always shorter than adjacent p-peaks (2p, 3p) which hold 3× as many electrons (6 vs 2).</p>
+  </div>
+
+  <div class="card">
+    <h3>4. Build the Configuration, Peak by Peak (left → right = decreasing binding energy = Aufbau order)</h3>
+    <div class="formula">1s² 2s² 2p⁶ 3s² 3p⁶ 4s²</div>
+    <p>Add up the electrons: 2+2+6+2+6+2 = <b>20 electrons</b> → neutral atom with 20 protons → <b style="color:var(--green);">Calcium (Ca)</b>.</p>
+    <div class="callout tip">
+      Valence electrons = the peak with the <b>lowest</b> binding energy (furthest right / smallest x-value) — for Ca that's the 4s² peak.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--green);">🔍 Key Distinctions</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="color:var(--orange);">Calcium (Z = 20)</h3>
+      <p>4s² peak is <b>full height</b> (2 electrons) → equal height to other filled s-peaks.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--blue);">Potassium (Z = 19)</h3>
+      <p>Identical pattern except 4s peak is only <b>half height</b> (1 electron, not 2) — and every peak shifts slightly right (lower BE) because K has one fewer proton pulling on the shells.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Why K's peaks shift right vs. Ca's</h3>
+    <p>Fewer protons in the nucleus (19 vs. 20) → weaker pull on every shell → <b>lower binding energy for every subshell</b>, not just the valence one. Same shape, whole spectrum nudges toward lower binding energy (right on the graph).</p>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--purple);">🌍 Real-World / Exam Connection</h2>
+  <div class="card">
+    <h3>PES ↔ First Ionization Energy</h3>
+    <p>The binding energy of the <b>outermost (valence) peak</b> is exactly your first ionization energy — the energy to remove the easiest electron.</p>
+    <div class="callout example">
+      You can only read <b>first</b> ionization energy this way. Once you remove one electron, all the remaining electron-electron interactions change, so the original spectrum no longer tells you the 2nd or 3rd ionization energies.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--red);">🎯 Practical / Exam Tips</h2>
+  <div class="card">
+    <ul style="margin:0; padding-left:20px;">
+      <li>Read the x-axis right-to-left in your head if it helps — leftmost peak = 1s, always the tallest binding energy.</li>
+      <li>Peak height ratios are your best sanity check: p-subshells should be ~3× the height of same-row s-subshells (6 vs 2 electrons).</li>
+      <li>Sum all peak electron counts → gives you Z (atomic number) for a neutral atom → identifies the element.</li>
+      <li>Furthest-right peak = valence electrons = first ionization energy.</li>
+      <li>Comparing two adjacent elements (like K vs Ca): same peak pattern, but fewer protons → whole spectrum shifts to lower binding energy, plus the outermost peak's height drops if that subshell isn't full.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

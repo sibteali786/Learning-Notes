@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>14 - Adding Data</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{border-radius:10px; padding:16px; border:1px solid var(--border);}
+  .compare-card.broad{background:rgba(255,209,102,0.06); border-color:rgba(255,209,102,0.35);}
+  .compare-card.targeted{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .compare-card .h{font-weight:700; margin-bottom:8px;}
+  .compare-card.broad .h{color:var(--warn);}
+  .compare-card.targeted .h{color:var(--good);}
+
+  .letter-grid{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;}
+  .letter-box{background:var(--panel2); border:2px solid var(--border); border-radius:8px; width:70px; height:70px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:700;}
+  .letter-box.original{border-color:var(--accent);}
+  .letter-box svg{width:50px; height:50px;}
+
+  .steps{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .step{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .step .n{font-weight:700; color:var(--accent); min-width:20px;}
+
+  .audio-chain{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .audio-row{display:flex; align-items:center; gap:12px; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:0.88rem;}
+  .audio-icon{width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0;}
+  .audio-icon.orig{background:rgba(124,155,255,0.2); color:var(--accent);}
+  .audio-icon.aug{background:rgba(94,214,164,0.2); color:var(--good);}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  .caveat{background:rgba(255,209,102,0.08); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin-top:14px;}
+  .caveat .h{color:var(--warn); font-weight:700; margin-bottom:6px;}
+
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center; font-size:1.15rem; margin:14px 0; color:#fff;}
+  .formula-box .highlight-code{color:var(--accent);}
+  .formula-box .highlight-data{color:var(--good);}
+  .arrow-note{text-align:center; font-size:0.8rem; color:var(--muted); margin-top:4px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">ML Development Process</span>
+  <h1>Lesson 14 — Adding Data</h1>
+  <p class="subtitle">Practical techniques for growing your dataset efficiently — targeted collection, data augmentation, and data synthesis.</p>
+
+  <section>
+    <h2><span class="num">1</span> Targeted Data Collection &gt; "More of Everything"</h2>
+    <div class="compare-grid">
+      <div class="compare-card broad">
+        <div class="h">Add more data of everything</div>
+        <p style="margin:0; font-size:0.88rem;">Works, but slow and expensive — e.g. a full honeypot project to collect all kinds of spam. Fine when feasible, but rarely the fastest path.</p>
+      </div>
+      <div class="compare-card targeted">
+        <div class="h">Add more data where error analysis points</div>
+        <p style="margin:0; font-size:0.88rem;">If error analysis (Lesson 13) showed pharma spam was 21% of errors, go find <em>more pharma spam specifically</em> — e.g. have labelers skim unlabeled emails just for that category. Much cheaper, much higher impact.</p>
+      </div>
+    </div>
+    <p style="margin-top:12px;">This connects error analysis directly to action: it doesn't just tell you <em>what's wrong</em>, it tells you <em>exactly what kind of data collection effort is worth funding</em>.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Data Augmentation: Modify Existing Examples</h2>
+    <p><strong>Data augmentation</strong> takes an existing training example (x, y) and applies a transformation to <code>x</code> that preserves the label <code>y</code> — creating a new, valid training example without collecting anything new.</p>
+    <div class="letter-grid">
+      <div class="letter-box original">A</div>
+      <div class="letter-box" style="transform:rotate(15deg); color:#7c9bff;">A</div>
+      <div class="letter-box" style="transform:scale(1.3); color:#5ed6a4;">A</div>
+      <div class="letter-box" style="transform:scale(0.7); color:#ffd166;">A</div>
+      <div class="letter-box" style="color:#ff8a6b; filter:contrast(0.5);">A</div>
+    </div>
+    <p style="margin-top:10px; text-align:center; font-size:0.85rem; color:var(--muted);">Original letter A → rotated, enlarged, shrunk, contrast-changed. All still unmistakably "A".</p>
+    <p style="margin-top:12px;">More advanced: overlay a grid on the letter and apply random <strong>warping</strong> to the grid — this can turn one image into dozens of distinct-looking but correctly-labeled training examples.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Data Augmentation for Audio</h2>
+    <p>Same principle applied to speech recognition: take a clean recording and layer realistic noise on top.</p>
+    <div class="audio-chain">
+      <div class="audio-row"><span class="audio-icon orig">🔊</span> Original: "What is today's weather?"</div>
+      <div class="audio-row"><span class="audio-icon aug">+</span> Original + crowd noise → sounds like it was said in a noisy room</div>
+      <div class="audio-row"><span class="audio-icon aug">+</span> Original + car noise → sounds like it was said while driving</div>
+      <div class="audio-row"><span class="audio-icon aug">+</span> Original + bad cellphone distortion → sounds like a poor connection</div>
+    </div>
+    <p style="margin-top:12px;">One clean clip became three additional realistic training examples. This was described as a genuinely critical technique for building more accurate speech recognizers in practice.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Rule: Augmented Noise Must Resemble Test-Set Noise</h2>
+    <div class="rule-box">
+      <div class="title">Representative distortions help. Random noise usually doesn't.</div>
+      <p style="margin:0;">Warping a letter's shape, or adding crowd/car/cellphone noise to audio, works because those distortions resemble what actually shows up in real-world test data. Adding meaningless per-pixel random noise to every pixel of an image, by contrast, creates examples that don't resemble anything in the test set — and tends <strong>not</strong> to help, since the model ends up learning to handle a type of corruption it will never actually see.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Data Synthesis: Creating Brand-New Examples</h2>
+    <p>Different from augmentation — instead of modifying a real example, you generate an entirely artificial one from scratch. Example: <strong>Photo OCR</strong> (reading text out of photographs).</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div>Open a text editor with many installed fonts.</div></div>
+      <div class="step"><span class="n">2</span><div>Type random text, vary the font, color, and contrast.</div></div>
+      <div class="step"><span class="n">3</span><div>Screenshot the result — this becomes synthetic training data that closely resembles real photographed text.</div></div>
+    </div>
+    <p style="margin-top:12px;">This can generate huge volumes of realistic-looking training examples cheaply — though writing the generation code well enough to look realistic can itself take real effort. Synthetic data generation has mostly proven useful for computer vision; less so for audio or other modalities.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Data-Centric vs. Model-Centric AI</h2>
+    <div class="formula-box">
+      AI = <span class="highlight-code">Code</span> (algorithm/model) + <span class="highlight-data">Data</span>
+    </div>
+    <p>For decades, most ML research took a <strong>model-centric</strong> approach: hold the dataset fixed, spend effort improving the algorithm. Today's algorithms (linear/logistic regression, neural networks, decision trees) are already quite good for many applications — which shifts the highest-leverage work toward a <strong>data-centric</strong> approach: keep the algorithm mostly fixed, and put engineering effort into the data itself — targeted collection, augmentation, or synthesis.</p>
+    <div class="caveat">
+      <div class="h">Why this matters practically</div>
+      <p style="margin:0;">All three techniques from this lesson — targeted collection, augmentation, synthesis — are examples of "engineering the data." They're often a more efficient use of time than continuing to tweak model architecture once you already have a reasonably good algorithm in hand.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Key Takeaway</h2>
+    <p>When error analysis or a bias/variance check points toward needing more data, don't default to broad, expensive collection. Consider, in order of effort: targeted collection of the specific error category, augmenting existing examples with realistic distortions, or synthesizing entirely new examples. Next up: for cases where none of this is feasible — genuinely limited data — <strong>transfer learning</strong> offers a way to borrow strength from an unrelated task.</p>
+  </section>
+
+  <footer>Lesson 14 · ML Development Process · ML Fundamentals</footer>
+</div>
+</body>
+</html>
