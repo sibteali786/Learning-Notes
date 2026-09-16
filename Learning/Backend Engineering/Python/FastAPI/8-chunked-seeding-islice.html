@@ -1,0 +1,130 @@
+<title>Chunked Seeding</title>
+<style>
+:root{
+  --bg:#faf9f7; --surface:#ffffff; --border:#e4e0d8;
+  --text:#211f1c; --text-dim:#6b6558; --accent:#3a5a40; --accent-soft:#e7efe6;
+  --mono-bg:#f1efe9; --warn:#9c5b1f; --warn-soft:#fbeee0;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17160f; --surface:#1f1d16; --border:#33301f;
+    --text:#ece8de; --text-dim:#a29c8a; --accent:#8fbf9a; --accent-soft:#233026;
+    --mono-bg:#22201a; --warn:#d99a5b; --warn-soft:#332417;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17160f; --surface:#1f1d16; --border:#33301f;
+  --text:#ece8de; --text-dim:#a29c8a; --accent:#8fbf9a; --accent-soft:#233026;
+  --mono-bg:#22201a; --warn:#d99a5b; --warn-soft:#332417;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--text); margin:0; padding-block:40px;
+  font-family:'Source Serif 4', Georgia, serif;
+}
+.wrap{max-width:760px; margin:0 auto; padding-inline:20px}
+h1{
+  font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:2rem;
+  margin:0 0 6px; letter-spacing:-0.01em;
+}
+.sub{color:var(--text-dim); font-size:0.95rem; margin:0 0 32px; font-family:'IBM Plex Mono',monospace}
+h2{
+  font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:1.2rem;
+  margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--border);
+}
+p{line-height:1.65; color:var(--text)}
+.pipeline{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:16px 0 24px;
+  font-family:'IBM Plex Mono',monospace; font-size:0.82rem;
+}
+.step{
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:10px 12px; flex:1 1 130px; text-align:center; color:var(--text);
+}
+.arrow{color:var(--text-dim); flex:0 0 auto}
+code, .mono{
+  font-family:'IBM Plex Mono',monospace; font-size:0.85em; background:var(--mono-bg);
+  padding:1px 5px; border-radius:4px;
+}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:16px 18px; margin:14px 0;
+}
+.card h3{margin:0 0 8px; font-size:0.95rem; font-family:'IBM Plex Mono',monospace; color:var(--accent)}
+ul{margin:8px 0; padding-left:20px; line-height:1.65}
+.tag{
+  display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:0.72rem;
+  background:var(--accent-soft); color:var(--accent); padding:2px 8px; border-radius:999px;
+  margin-right:6px;
+}
+.warn{
+  background:var(--warn-soft); border:1px solid var(--warn); border-radius:8px;
+  padding:12px 16px; margin:16px 0; color:var(--text); font-size:0.92rem;
+}
+.warn strong{color:var(--warn)}
+table{width:100%; border-collapse:collapse; margin:12px 0; font-size:0.88rem}
+th,td{text-align:left; padding:6px 8px; border-bottom:1px solid var(--border)}
+th{color:var(--text-dim); font-weight:600; font-family:'IBM Plex Mono',monospace; font-size:0.78rem}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Source+Serif+4&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+  <h1>Chunked Seeding — seed.py</h1>
+  <p class="sub">itertools.islice + generators, walked through by hand</p>
+
+  <h2>The pipeline you built</h2>
+  <div class="pipeline">
+    <div class="step">generate_rows()<br><span style="color:var(--text-dim)">lazy generator</span></div>
+    <div class="arrow">→</div>
+    <div class="step">islice(rows, N)<br><span style="color:var(--text-dim)">chunk of N tuples</span></div>
+    <div class="arrow">→</div>
+    <div class="step">writer.writerow<br><span style="color:var(--text-dim)">fill StringIO buf</span></div>
+    <div class="arrow">→</div>
+    <div class="step">copy_expert<br><span style="color:var(--text-dim)">bulk COPY</span></div>
+    <div class="arrow">→</div>
+    <div class="step">seek(0)+truncate(0)<br><span style="color:var(--text-dim)">reset buf</span></div>
+  </div>
+
+  <h2>Concepts covered</h2>
+
+  <div class="card">
+    <h3>generator functions</h3>
+    <p><code>generate_rows()</code> uses <code>yield</code>, so calling it doesn't run the body — it returns a generator object that's already an iterator. No <code>iter()</code> wrapping needed.</p>
+  </div>
+
+  <div class="card">
+    <h3>itertools.islice(iterator, n)</h3>
+    <p>Pulls the next <code>n</code> items off any iterator, lazily, then stops — even if the source is infinite (like <code>itertools.count()</code>). This is what turns one long row-stream into fixed-size batches.</p>
+  </div>
+
+  <div class="card">
+    <h3>the walrus while-loop</h3>
+    <p><code>while batch := list(islice(rows, batch_size)):</code> re-slices the next chunk each pass. When <code>rows</code> is exhausted, <code>islice</code> returns nothing, the list is empty, and the loop ends — no manual counter required.</p>
+  </div>
+
+  <div class="card">
+    <h3>StringIO as a scratch buffer</h3>
+    <table>
+      <tr><th>call</th><th>effect</th></tr>
+      <tr><td class="mono">writer.writerow(row)</td><td>appends CSV text, cursor moves to the end</td></tr>
+      <tr><td class="mono">buf.seek(0)</td><td>rewinds cursor to start — for reading, doesn't delete data</td></tr>
+      <tr><td class="mono">buf.truncate(0)</td><td>deletes from the cursor onward — only clears if cursor is already at 0</td></tr>
+    </table>
+    <p>Per chunk: write all rows → <span class="mono">seek(0)</span> → <span class="mono">copy_expert</span> reads it whole → <span class="mono">seek(0)</span> + <span class="mono">truncate(0)</span> to empty it for the next chunk.</p>
+  </div>
+
+  <h2>Bugs caught along the way</h2>
+  <ul>
+    <li><span class="tag">fixed</span> <code>iter(count)</code> on an int — ints aren't iterable; needed the generator object instead.</li>
+    <li><span class="tag">fixed</span> outer loop variable was a whole chunk, not a row — needed a nested loop before <code>writerow</code>.</li>
+    <li><span class="tag">fixed</span> buffer was reset every row instead of once per chunk — collapsed batching back to one <code>COPY</code> per row.</li>
+  </ul>
+
+  <div class="warn">
+    <strong>Still open:</strong> <code>uq_url</code> unique constraint collides with prior seed runs (URLs like <code>article/0</code> already exist from ~10M earlier rows). Options discussed: shift the id offset, stage + <code>ON CONFLICT DO NOTHING</code>, or truncate <code>article</code> before reseeding. Decision: truncate/delete first for a clean run.
+  </div>
+
+  <div class="warn" style="border-color:var(--border); background:var(--mono-bg)">
+    <strong>Also noted:</strong> <code>conn.commit()</code> only fires once, after all 50 chunks — so row count stays frozen in another <code>psql</code> session until the whole run finishes. Not a bug; just transaction visibility.
+  </div>
+</div>
