@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Electronegativity vs Electron Affinity</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161925; --border:#262b3d;
+    --blue:#5eb3f6; --orange:#ff9d5c; --green:#6fd98f; --purple:#c084fc; --pink:#ff6fae; --text:#e6e8ef; --muted:#9aa1b5;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:40px 20px;line-height:1.6;}
+  .wrap{max-width:940px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2em;margin-bottom:4px;
+     background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .subtitle{color:var(--muted);margin-bottom:30px;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.25em;margin-top:44px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68em;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;}
+  .pill-blue{background:rgba(94,179,246,.15);color:var(--blue);border:1px solid rgba(94,179,246,.4);}
+  .pill-orange{background:rgba(255,157,92,.15);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+  .pill-green{background:rgba(111,217,143,.15);color:var(--green);border:1px solid rgba(111,217,143,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin:14px 0;}
+  .callout{border-radius:10px;padding:14px 18px;margin:16px 0;border-left:4px solid;}
+  .tip{background:rgba(111,217,143,.08);border-color:var(--green);}
+  .example{background:rgba(94,179,246,.08);border-color:var(--blue);}
+  code, .code{font-family:'JetBrains Mono',monospace;background:#1c2030;padding:2px 7px;border-radius:5px;color:var(--orange);}
+  table{width:100%;border-collapse:collapse;margin:10px 0;}
+  th,td{padding:10px 12px;border:1px solid var(--border);text-align:left;font-size:.93em;}
+  th{background:#1c2030;color:var(--blue);}
+  svg{display:block;margin:16px auto;max-width:100%;}
+  ul{padding-left:22px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Electronegativity vs. Electron Affinity</h1>
+<div class="subtitle">Two closely related ideas — one general, one bond-specific</div>
+
+<h2><span class="pill pill-blue">Problem</span> Two similar-sounding terms</h2>
+<div class="card">
+Both describe how much an atom "wants" electrons, but at different scales:
+<ul>
+<li><b>Electron Affinity</b> — a general property: how much an isolated atom likes gaining an electron (energy released when adding one).</li>
+<li><b>Electronegativity</b> — a specific case: <i>within a covalent bond</i>, how badly an atom hogs the shared electrons, pulling them to spend more time near itself.</li>
+</ul>
+High EA ⇄ high electronegativity — they track together, but electronegativity only applies when atoms are actually bonded and sharing electrons.
+</div>
+
+<h2><span class="pill pill-orange">How it works</span> Water (H₂O) as the classic example</h2>
+<svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="350" cy="140" r="34" fill="none" stroke="var(--pink)" stroke-width="2"/>
+  <text x="350" y="146" fill="var(--pink)" font-size="16" text-anchor="middle" font-family="JetBrains Mono">O</text>
+  <circle cx="200" cy="80" r="24" fill="none" stroke="var(--blue)" stroke-width="2"/>
+  <text x="200" y="86" fill="var(--blue)" font-size="14" text-anchor="middle" font-family="JetBrains Mono">H</text>
+  <circle cx="500" cy="80" r="24" fill="none" stroke="var(--blue)" stroke-width="2"/>
+  <text x="500" y="86" fill="var(--blue)" font-size="14" text-anchor="middle" font-family="JetBrains Mono">H</text>
+  <line x1="222" y1="95" x2="325" y2="128" stroke="var(--muted)" stroke-width="2"/>
+  <line x1="478" y1="95" x2="375" y2="128" stroke="var(--muted)" stroke-width="2"/>
+  <text x="270" y="100" fill="var(--orange)" font-size="13">δ+</text>
+  <text x="430" y="100" fill="var(--orange)" font-size="13">δ+</text>
+  <text x="350" y="210" fill="var(--green)" font-size="13" text-anchor="middle">δ−  (electrons spend more time here)</text>
+  <text x="350" y="30" fill="var(--muted)" font-size="12" text-anchor="middle">O is more electronegative → pulls shared e⁻ closer</text>
+</svg>
+
+<div class="callout example">
+Both H atoms want to "borrow" an electron to feel like He (2 valence e⁻ = stable). O wants to borrow 2 electrons
+to feel like Ne (8 valence e⁻ = stable). They share — but O <b>hogs</b> the shared pairs more than H does, since O
+is more electronegative. Result: partial negative charge (δ−) on O, partial positive charge (δ+) on each H.
+This is why water is polar and behaves the way it does (hydrogen bonding, solvent properties, etc).
+</div>
+
+<h2><span class="pill pill-purple">Key Distinctions</span></h2>
+<table>
+<tr><th></th><th>Electron Affinity</th><th>Electronegativity</th></tr>
+<tr><td><b>Scope</b></td><td>Isolated atom, general property</td><td>Only meaningful within a covalent bond</td></tr>
+<tr><td><b>Measures</b></td><td>Energy released gaining 1 e⁻</td><td>Relative pull on shared bonding electrons</td></tr>
+<tr><td><b>Units / scale</b></td><td>kJ/mol</td><td>Unitless (relative scale, e.g. Pauling)</td></tr>
+<tr><td><b>Correlation</b></td><td colspan="2" style="text-align:center">High EA ⇄ High electronegativity — same underlying pull, different context</td></tr>
+</table>
+
+<h2><span class="pill pill-green">Periodic Trends</span></h2>
+<div class="grid2">
+<div class="card">
+<b>Across a period (left → right):</b> ↑ more electronegative<br>
+Na has 1 valence e⁻ → happy to give it away (low IE, low pull on electrons).<br>
+Cl is 1 electron short of a full shell → desperately wants to gain one → hogs electrons hard.
+</div>
+<div class="card">
+<b>Down a group (top → bottom):</b> ↓ less electronegative<br>
+Atom size increases → outer electron sits farther from nucleus, more shielding in between → weaker pull on any shared/incoming electron. Cs barely holds its own electron, let alone someone else's.
+</div>
+</div>
+
+<div class="callout tip">
+<b>Overall trend:</b> electronegativity increases toward the <b>top-right</b> of the periodic table (excluding noble
+gases, which rarely bond). Most electronegative real bonding atoms: <span class="code">F, O, N, Cl</span>.
+Least electronegative ("electropositive"): bottom-left, e.g. <span class="code">Cs, Fr</span>.
+</div>
+
+<h2><span class="pill pill-orange">Real-World Scenario</span></h2>
+<div class="card">
+Electronegativity differences predict <b>bond type and reactivity</b>: a large gap (like Na–Cl, ΔEN ≈ 2.1) gives
+an ionic bond — electrons transfer completely. A small/zero gap (like C–H or Cl–Cl) gives a covalent bond with
+even or near-even sharing. This is the backbone of predicting oxidation states and reaction mechanisms in
+organic chemistry — e.g. why carbonyl carbons (C=O) are electrophilic: oxygen hogs the electron density,
+leaving carbon partially positive and open to nucleophilic attack.
+</div>
+
+<h2><span class="pill pill-purple">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Same trend logic as ionization energy — think "how close is this atom to a stable noble-gas configuration?" Nearly-full shells (halogens) hog electrons; nearly-empty shells (alkali metals) give them up.</li>
+<li>Noble gases are usually excluded from electronegativity trend discussions since they don't typically form bonds.</li>
+<li>Don't confuse the two terms on exams: EA = single-atom energy value; electronegativity = relative, bond-context pulling power.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

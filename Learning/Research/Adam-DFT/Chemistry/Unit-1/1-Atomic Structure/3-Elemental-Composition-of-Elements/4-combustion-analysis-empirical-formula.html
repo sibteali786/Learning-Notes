@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Empirical Formula from Combustion Analysis — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8f0; --muted:#9aa0b4;
+    --blue:#5aa9ff; --orange:#ff9d5a; --green:#4fd995; --purple:#b48cff;
+  }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; margin:0; padding:40px 20px; line-height:1.6; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1,h2,h3 { font-family:'Syne',sans-serif; margin:0 0 12px; }
+  h1 { font-size:2em; font-weight:800; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  h2 { font-size:1.3em; margin-top:42px; padding-bottom:8px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .pill { display:inline-block; font-size:.72em; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .pill.blue{background:rgba(90,169,255,.15);color:var(--blue);border:1px solid rgba(90,169,255,.4);}
+  .pill.orange{background:rgba(255,157,90,.15);color:var(--orange);border:1px solid rgba(255,157,90,.4);}
+  .pill.green{background:rgba(79,217,149,.15);color:var(--green);border:1px solid rgba(79,217,149,.4);}
+  .pill.purple{background:rgba(180,140,255,.15);color:var(--purple);border:1px solid rgba(180,140,255,.4);}
+  code { background:#10131c; border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--green); font-size:.92em; }
+  .formula { background:#10131c; border-left:3px solid var(--blue); border-radius:6px; padding:12px 16px; margin:12px 0; color:var(--blue); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.92em; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:center; }
+  th { background:var(--card2); color:var(--orange); font-family:'Syne',sans-serif; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .example { border-left:3px solid var(--green); background:rgba(79,217,149,.06); border-radius:6px; padding:12px 16px; margin:12px 0; }
+  .example .tag{ color:var(--green); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .tip { border-left:3px solid var(--orange); background:rgba(255,157,90,.06); border-radius:6px; padding:12px 16px; margin:10px 0; }
+  .tip .tag{ color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  svg { display:block; margin:16px auto; max-width:100%; }
+  .caption { text-align:center; color:var(--muted); font-size:.85em; margin-top:-8px; }
+  ul{padding-left:20px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Empirical Formula from Combustion Analysis</h1>
+  <div class="subtitle">Worked example — C&#8339;H&#8348; combustion → CO₂ + H₂O</div>
+
+  <h2><span class="pill blue">Problem</span> What Are We Solving?</h2>
+  <div class="card">
+    A compound made only of <b>carbon and hydrogen</b> is completely combusted. We're told the mass of
+    <b>CO₂</b> and <b>H₂O</b> produced — <code>5.65 g CO₂</code> and <code>3.47 g H₂O</code> — and asked
+    to find the compound's <b>empirical formula</b>.
+    <div class="formula">C<sub>x</sub>H<sub>y</sub> + O₂ → CO₂ + H₂O</div>
+    <p>Key insight: <b>all the carbon</b> in the original compound ends up in the CO₂, and <b>all the
+    hydrogen</b> ends up in the H₂O — so we can trace atoms backward through the products.</p>
+  </div>
+
+  <h2><span class="pill orange">Core</span> Molar Masses Needed</h2>
+  <div class="card">
+    <table>
+      <tr><th>Atom</th><th>Molar mass (g/mol)</th></tr>
+      <tr><td>H</td><td>1.008</td></tr>
+      <tr><td>C</td><td>12.01</td></tr>
+      <tr><td>O</td><td>16.00</td></tr>
+    </table>
+    <table>
+      <tr><th>Molecule</th><th>Molar mass calc</th><th>Total</th></tr>
+      <tr><td>CO₂</td><td>12.01 + (2 × 16.00)</td><td>44.01 g/mol</td></tr>
+      <tr><td>H₂O</td><td>(2 × 1.008) + 16.00</td><td>18.016 g/mol</td></tr>
+    </table>
+  </div>
+
+  <h2><span class="pill purple">Diagram</span> Tracing Atoms Back to the Source</h2>
+  <svg viewBox="0 0 600 210" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="20" width="140" height="50" rx="8" fill="var(--card2)" stroke="var(--blue)"/>
+    <text x="35" y="50" fill="var(--blue)" font-family="JetBrains Mono" font-size="13">5.65 g CO₂</text>
+    <path d="M165 45 L260 45" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#a1)"/>
+    <text x="170" y="35" fill="var(--muted)" font-family="JetBrains Mono" font-size="10">÷44.01 g/mol</text>
+    <rect x="265" y="20" width="140" height="50" rx="8" fill="var(--card2)" stroke="var(--orange)"/>
+    <text x="280" y="50" fill="var(--orange)" font-family="JetBrains Mono" font-size="13">0.128 mol C</text>
+
+    <rect x="20" y="110" width="140" height="50" rx="8" fill="var(--card2)" stroke="var(--green)"/>
+    <text x="35" y="140" fill="var(--green)" font-family="JetBrains Mono" font-size="13">3.47 g H₂O</text>
+    <path d="M165 135 L260 135" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#a2)"/>
+    <text x="170" y="125" fill="var(--muted)" font-family="JetBrains Mono" font-size="9">÷18.016, ×2 mol H</text>
+    <rect x="265" y="110" width="140" height="50" rx="8" fill="var(--card2)" stroke="var(--purple)"/>
+    <text x="280" y="140" fill="var(--purple)" font-family="JetBrains Mono" font-size="13">0.385 mol H</text>
+
+    <defs>
+      <marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker>
+      <marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker>
+    </defs>
+    <text x="440" y="70" fill="var(--text)" font-family="JetBrains Mono" font-size="13">ratio H:C</text>
+    <text x="440" y="95" fill="var(--text)" font-family="JetBrains Mono" font-size="13">= 0.385/0.128</text>
+    <text x="440" y="120" fill="var(--green)" font-family="JetBrains Mono" font-size="15" font-weight="bold">≈ 3</text>
+  </svg>
+
+  <h2><span class="pill green">Formula</span> Step-by-Step Calculation</h2>
+  <div class="card">
+    <div class="example">
+      <span class="tag">Moles of C (from CO₂)</span>
+      <div class="formula">5.65 g CO₂ × (1 mol CO₂ / 44.01 g) × (1 mol C / 1 mol CO₂) ≈ <b>0.128 mol C</b></div>
+      <p style="color:var(--muted); font-size:.9em;">1:1 ratio — each CO₂ molecule has exactly 1 carbon.</p>
+    </div>
+    <div class="example">
+      <span class="tag">Moles of H (from H₂O)</span>
+      <div class="formula">3.47 g H₂O × (1 mol H₂O / 18.016 g) × (2 mol H / 1 mol H₂O) ≈ <b>0.385 mol H</b></div>
+      <p style="color:var(--muted); font-size:.9em;">2:1 ratio — each H₂O molecule has 2 hydrogens, so multiply by 2.</p>
+    </div>
+    <div class="example">
+      <span class="tag">Find the ratio</span>
+      <div class="formula">H : C = 0.385 / 0.128 ≈ <b>3</b></div>
+      <p>For every 1 carbon, there are 3 hydrogens.</p>
+    </div>
+  </div>
+
+  <div class="example">
+    <span class="tag">Result</span>
+    <p>The empirical formula is <code>CH₃</code>.</p>
+  </div>
+
+  <h2><span class="pill blue">Compare</span> Combustion Analysis vs. Direct % Composition</h2>
+  <table>
+    <tr><th></th><th>Direct % composition (e.g. HgCl₂ example)</th><th>Combustion analysis (this example)</th></tr>
+    <tr><td>What's given</td><td>Mass % of each element directly</td><td>Mass of combustion products (CO₂, H₂O)</td></tr>
+    <tr><td>Extra step</td><td>None — assume 100 g, convert straight to moles</td><td>Must first trace product mass back to moles of original element</td></tr>
+    <tr><td>Common use case</td><td>Known elemental analysis data</td><td>Organic compounds (C, H, sometimes O) via combustion</td></tr>
+  </table>
+
+  <h2><span class="pill orange">Tips</span> Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> In combustion analysis of CₓHᵧ compounds, all C ends up in CO₂ and all H ends up in H₂O — that's the whole trick that lets you work backward.</div>
+  <div class="tip"><span class="tag">Tip</span> Always multiply by the atom count per product molecule (1 C per CO₂, 2 H per H₂O) — forgetting this factor is the most common mistake.</div>
+  <div class="tip"><span class="tag">Tip</span> If oxygen is also present in the original compound, you can't measure it directly this way — instead find it by subtracting the mass of C and H (from moles × molar mass) from the original sample's total mass.</div>
+
+</div>
+</body>
+</html>

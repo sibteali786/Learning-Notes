@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Groups, Valence Electrons & Ionic Compounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5da8ff; --orange:#ff9f5a; --green:#5ce0a0; --purple:#c792ea;
+    --red:#ff6b81; --text:#e6e8ef; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); margin:0; padding:40px 20px;
+    font-family:'JetBrains Mono',monospace; line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 12px;}
+  .wrap{max-width:980px; margin:0 auto;}
+  header{margin-bottom:40px;}
+  header h1{font-size:2rem; font-weight:800;}
+  header p{color:var(--muted); margin:0;}
+  .pill{
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:.75rem; font-weight:700; margin-right:6px; margin-bottom:6px;
+  }
+  .pill-blue{background:rgba(93,168,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill-green{background:rgba(92,224,160,.15); color:var(--green); border:1px solid var(--green);}
+  .pill-purple{background:rgba(199,146,234,.15); color:var(--purple); border:1px solid var(--purple);}
+  .pill-red{background:rgba(255,107,129,.15); color:var(--red); border:1px solid var(--red);}
+
+  section{margin-bottom:44px;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:22px 24px; margin-bottom:16px;
+  }
+  .card h3{color:var(--orange); font-size:1.05rem;}
+
+  .flow{display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:16px 0;}
+  .flow .box{
+    background:var(--card); border:1px solid var(--blue); color:var(--blue);
+    padding:8px 14px; border-radius:8px; font-weight:700; font-size:.85rem;
+  }
+  .flow .arrow{color:var(--muted); font-size:1.2rem;}
+
+  code, .code{
+    background:#1c2030; border:1px solid var(--border); border-radius:6px;
+    padding:2px 8px; color:var(--green); font-size:.9rem;
+  }
+  .formula{
+    background:#1a1d2b; border-left:3px solid var(--purple); border-radius:6px;
+    padding:14px 18px; margin:14px 0; font-size:1.1rem; color:var(--purple); font-weight:700;
+  }
+
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.88rem;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left;}
+  th{background:#1b1f2d; color:var(--orange); font-family:'Syne',sans-serif;}
+  tr:nth-child(even){background:#141724;}
+
+  .callout{border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.88rem;}
+  .tip{background:rgba(92,224,160,.08); border:1px solid var(--green);}
+  .tip::before{content:"💡 TIP  "; color:var(--green); font-weight:700;}
+  .example{background:rgba(93,168,255,.08); border:1px solid var(--blue);}
+  .example::before{content:"🧪 EXAMPLE  "; color:var(--blue); font-weight:700;}
+  .warning{background:rgba(255,107,129,.08); border:1px solid var(--red);}
+  .warning::before{content:"⚠️ WATCH OUT  "; color:var(--red); font-weight:700;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+
+  .ion-tag{
+    display:inline-block; font-weight:700; padding:6px 10px; border-radius:6px;
+    margin:4px; font-size:.9rem;
+  }
+  .cation{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid var(--orange);}
+  .anion{background:rgba(93,168,255,.15); color:var(--blue); border:1px solid var(--blue);}
+
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Groups, Valence Electrons & Ionic Compounds</h1>
+  <p>AP Chemistry · Unit 1 · Periodic Trends</p>
+  <div style="margin-top:12px;">
+    <span class="pill pill-blue">GROUPS</span>
+    <span class="pill pill-orange">VALENCE ELECTRONS</span>
+    <span class="pill pill-green">OCTET RULE</span>
+    <span class="pill pill-purple">IONIC COMPOUNDS</span>
+  </div>
+</header>
+
+<section>
+  <h2 style="color:var(--blue);">📌 Problem Statement</h2>
+  <div class="card">
+    <p>Why do elements with wildly different atomic numbers (Li, Na, K) behave almost identically? Why does the periodic table's <em>column</em> matter more than its <em>row</em> for predicting reactivity?</p>
+    <p style="margin-bottom:0; color:var(--muted);">Because elements in the same <b style="color:var(--text);">group</b> share the same number of <b style="color:var(--text);">valence electrons</b> — and valence electrons are the reactive electrons that determine what ion an atom forms and what ionic compounds it builds.</p>
+  </div>
+  <div class="flow">
+    <div class="box">Same Group</div><span class="arrow">→</span>
+    <div class="box">Same # Valence e⁻</div><span class="arrow">→</span>
+    <div class="box">Similar Ions</div><span class="arrow">→</span>
+    <div class="box">Similar Roles in Ionic Compounds</div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--orange);">⚙️ How It Works</h2>
+
+  <div class="card">
+    <h3>1. The Octet Rule</h3>
+    <p>Atoms are most stable with a <b>full outer shell</b> — generally <span class="code">8 valence electrons</span>.</p>
+    <div class="callout warning">
+      Exception: the <b>1st shell</b> is full with just <b>2 electrons</b> — that's why He is stable with only 2.
+    </div>
+    <p>Proof: Group 18 (noble gases) already have full outer shells → extremely unreactive. He (shell 1, full), Ne (shell 2, full), Ar (shell 3, full)...</p>
+  </div>
+
+  <div class="card">
+    <h3>2. Two Paths to "Full": Lose or Gain</h3>
+    <p>An atom takes whichever path needs <b>fewer electrons moved</b> to reach a noble-gas configuration.</p>
+    <table>
+      <tr><th>Group</th><th>Valence e⁻</th><th>Easier Path</th><th>Result</th><th>Charge</th></tr>
+      <tr><td>1 — Alkali metals</td><td>1</td><td>Lose 1 (vs. gain 7)</td><td>Cation</td><td style="color:var(--orange);font-weight:700;">+1</td></tr>
+      <tr><td>2 — Alkaline earth metals</td><td>2</td><td>Lose 2 (vs. gain 6)</td><td>Cation</td><td style="color:var(--orange);font-weight:700;">+2</td></tr>
+      <tr><td>16 — Oxygen group</td><td>6</td><td>Gain 2 (vs. lose 6)</td><td>Anion</td><td style="color:var(--blue);font-weight:700;">−2</td></tr>
+      <tr><td>17 — Halogens</td><td>7</td><td>Gain 1 (vs. lose 7)</td><td>Anion</td><td style="color:var(--blue);font-weight:700;">−1</td></tr>
+      <tr><td>18 — Noble gases</td><td>8 (or 2)</td><td>Already full</td><td>Unreactive</td><td>0</td></tr>
+    </table>
+    <div class="callout tip">
+      Hydrogen is the odd one out: it needs only <b>1 more electron</b> to match He, so it can either lose 1 (→ H⁺) <i>or</i> gain 1 (→ H⁻).
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3. SVG: Electron Transfer in Ionic Bonding</h3>
+    <svg viewBox="0 0 700 220" width="100%" height="220">
+      <circle cx="150" cy="110" r="55" fill="none" stroke="#ff9f5a" stroke-width="2"/>
+      <text x="150" y="105" fill="#ff9f5a" font-size="20" font-weight="700" text-anchor="middle">Li</text>
+      <text x="150" y="128" fill="#8b93a7" font-size="12" text-anchor="middle">1 valence e⁻</text>
+
+      <circle cx="330" cy="60" r="6" fill="#ff9f5a"/>
+      <path d="M175 90 Q 260 30 320 58" stroke="#ff9f5a" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+      <circle cx="530" cy="110" r="55" fill="none" stroke="#5da8ff" stroke-width="2"/>
+      <text x="530" y="105" fill="#5da8ff" font-size="20" font-weight="700" text-anchor="middle">Cl</text>
+      <text x="530" y="128" fill="#8b93a7" font-size="12" text-anchor="middle">7 valence e⁻</text>
+
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L9,3 z" fill="#ff9f5a"/>
+        </marker>
+      </defs>
+
+      <text x="150" y="180" fill="#c792ea" font-size="16" font-weight="700" text-anchor="middle">Li⁺</text>
+      <text x="530" y="180" fill="#c792ea" font-size="16" font-weight="700" text-anchor="middle">Cl⁻</text>
+      <text x="340" y="200" fill="#5ce0a0" font-size="13" text-anchor="middle">→ LiCl (ionic compound)</text>
+    </svg>
+    <p style="color:var(--muted); margin:0;">Li gives its 1 valence electron to Cl, which needs only 1 more to complete its octet. Li becomes Li⁺, Cl becomes Cl⁻ — opposite charges attract → ionic bond.</p>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--green);">🔍 Key Distinctions</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="color:var(--orange);">Cations (lose e⁻)</h3>
+      <div class="ion-tag cation">Li¹⁺</div><div class="ion-tag cation">Na¹⁺</div><div class="ion-tag cation">K¹⁺</div>
+      <div class="ion-tag cation">Be²⁺</div><div class="ion-tag cation">Mg²⁺</div><div class="ion-tag cation">Ca²⁺</div>
+      <p style="color:var(--muted); margin-top:10px; margin-bottom:0;">Groups 1 & 2 → left side of periodic table → metals → "give away" electrons.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--blue);">Anions (gain e⁻)</h3>
+      <div class="ion-tag anion">F¹⁻</div><div class="ion-tag anion">Cl¹⁻</div><div class="ion-tag anion">I¹⁻</div>
+      <div class="ion-tag anion">O²⁻</div><div class="ion-tag anion">S²⁻</div>
+      <p style="color:var(--muted); margin-top:10px; margin-bottom:0;">Groups 16 & 17 → right side (excl. noble gases) → nonmetals → "steal" electrons.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Predicting the Formula: Balance the Charges</h3>
+    <p>Ionic compounds are always <b>neutral overall</b> — total positive charge = total negative charge.</p>
+    <div class="formula">Ca²⁺ + 2(I¹⁻) → CaI₂</div>
+    <div class="formula">Ca²⁺ + O²⁻ → CaO</div>
+    <div class="callout tip">
+      Quick method: cross the charge magnitudes as subscripts. Ca (charge 2) + I (charge 1) → subscript of I becomes 2 → CaI₂.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--purple);">🌍 Real-World Example Scenarios</h2>
+  <div class="card">
+    <h3>Table Salt Family</h3>
+    <p>Any Group 1 metal + any halogen makes a salt analogous to table salt:</p>
+    <table>
+      <tr><th>Combination</th><th>Compound</th><th>Everyday Note</th></tr>
+      <tr><td>Na⁺ + Cl⁻</td><td>NaCl</td><td>Table salt</td></tr>
+      <tr><td>K⁺ + Cl⁻</td><td>KCl</td><td>Salt substitute (low-sodium)</td></tr>
+      <tr><td>Na⁺ + I⁻</td><td>NaI</td><td>Iodized salt additive</td></tr>
+      <tr><td>K⁺ + I⁻</td><td>KI</td><td>Used in anti-radiation tablets</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Group 2 Compounds</h3>
+    <table>
+      <tr><th>Combination</th><th>Compound</th><th>Everyday Note</th></tr>
+      <tr><td>Ca²⁺ + 2I⁻</td><td>CaI₂</td><td>Calcium iodide</td></tr>
+      <tr><td>Ca²⁺ + O²⁻</td><td>CaO</td><td>Quicklime — used in cement</td></tr>
+      <tr><td>Mg²⁺ + O²⁻</td><td>MgO</td><td>Antacid ingredient</td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--red);">🎯 Practical / Exam Tips</h2>
+  <div class="card">
+    <ul style="margin:0; padding-left:20px;">
+      <li>Given a group number, instantly get valence electrons: Group 1 → 1, Group 2 → 2, Group 16 → 6, Group 17 → 7.</li>
+      <li>Charge an element forms = the "shorter path" to 8. Groups 1–2 lose; groups 16–17 gain.</li>
+      <li>To write any ionic formula fast: cross the charge numbers as subscripts, then simplify if they share a common factor.</li>
+      <li>Noble gases (Group 18) form ions essentially never — full shell already.</li>
+      <li>Hydrogen is the exception to memorize separately — can be H⁺ or H⁻.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

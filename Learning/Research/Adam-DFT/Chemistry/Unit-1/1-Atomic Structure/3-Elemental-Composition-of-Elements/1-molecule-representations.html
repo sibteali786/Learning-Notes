@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ways to Represent a Molecule — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8f0; --muted:#9aa0b4;
+    --blue:#5aa9ff; --orange:#ff9d5a; --green:#4fd995; --purple:#b48cff;
+  }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; margin:0; padding:40px 20px; line-height:1.6; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1,h2,h3 { font-family:'Syne',sans-serif; margin:0 0 12px; }
+  h1 { font-size:2em; font-weight:800; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  h2 { font-size:1.3em; margin-top:42px; padding-bottom:8px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .pill { display:inline-block; font-size:.72em; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .pill.blue{background:rgba(90,169,255,.15);color:var(--blue);border:1px solid rgba(90,169,255,.4);}
+  .pill.orange{background:rgba(255,157,90,.15);color:var(--orange);border:1px solid rgba(255,157,90,.4);}
+  .pill.green{background:rgba(79,217,149,.15);color:var(--green);border:1px solid rgba(79,217,149,.4);}
+  .pill.purple{background:rgba(180,140,255,.15);color:var(--purple);border:1px solid rgba(180,140,255,.4);}
+  code { background:#10131c; border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--green); font-size:.92em; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.92em; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:center; }
+  th { background:var(--card2); color:var(--orange); font-family:'Syne',sans-serif; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .grid3 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  @media (max-width:760px){ .grid3{grid-template-columns:1fr;} }
+  .compare-card { background:var(--card2); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .compare-card h3 { font-size:.98em; margin-bottom:6px; }
+  .compare-card ul { margin:0; padding-left:18px; color:var(--muted); font-size:.9em; }
+  .example { border-left:3px solid var(--green); background:rgba(79,217,149,.06); border-radius:6px; padding:12px 16px; margin:12px 0; }
+  .example .tag{ color:var(--green); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .tip { border-left:3px solid var(--orange); background:rgba(255,157,90,.06); border-radius:6px; padding:12px 16px; margin:10px 0; }
+  .tip .tag{ color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  svg { display:block; margin:16px auto; max-width:100%; }
+  .caption { text-align:center; color:var(--muted); font-size:.85em; margin-top:-8px; }
+  ul{padding-left:20px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Ways to Represent a Molecule</h1>
+  <div class="subtitle">Name → Empirical → Molecular → Structural formula</div>
+
+  <h2><span class="pill blue">Problem</span> Why Multiple Representations?</h2>
+  <div class="card">
+    A molecule's <b>name</b> alone (e.g. "benzene") tells you almost nothing about its composition.
+    Chemists needed increasingly detailed ways to describe what a molecule is actually made of and how
+    it's put together — each level of formula adds more information than the last, at the cost of
+    being more complex to write.
+  </div>
+
+  <h2><span class="pill orange">Core</span> The Four Levels of Detail</h2>
+  <div class="grid3">
+    <div class="compare-card">
+      <h3 style="color:var(--purple);">1. Name</h3>
+      <ul><li>e.g. "benzene"</li><li>No compositional info</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3 style="color:var(--blue);">2. Empirical Formula</h3>
+      <ul><li>Simplest whole-number <b>ratio</b> of elements</li><li>From "empirical" = based on observation</li><li>Benzene: <code>CH</code> (1 C : 1 H)</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3 style="color:var(--green);">3. Molecular Formula</h3>
+      <ul><li><b>Actual count</b> of each atom in one molecule</li><li>Benzene: <code>C₆H₆</code></li><li>Can reduce back to the empirical ratio</li></ul>
+    </div>
+    <div class="compare-card">
+      <h3 style="color:var(--orange);">4. Structural Formula</h3>
+      <ul><li>Shows how atoms are <b>bonded</b>/arranged</li><li>Can include 3D shape info</li><li>Reveals rings, double bonds, etc.</li></ul>
+    </div>
+  </div>
+
+  <h2><span class="pill purple">Diagram</span> Benzene Through Each Lens</h2>
+  <svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg">
+    <text x="40" y="30" fill="var(--purple)" font-family="JetBrains Mono" font-size="13">Name:</text>
+    <text x="130" y="30" fill="var(--text)" font-family="JetBrains Mono" font-size="13">benzene</text>
+
+    <text x="40" y="65" fill="var(--blue)" font-family="JetBrains Mono" font-size="13">Empirical:</text>
+    <text x="150" y="65" fill="var(--text)" font-family="JetBrains Mono" font-size="13">CH  (ratio 1:1)</text>
+
+    <text x="40" y="100" fill="var(--green)" font-family="JetBrains Mono" font-size="13">Molecular:</text>
+    <text x="150" y="100" fill="var(--text)" font-family="JetBrains Mono" font-size="13">C6H6  (6 C, 6 H — still 1:1)</text>
+
+    <text x="40" y="135" fill="var(--orange)" font-family="JetBrains Mono" font-size="13">Structural:</text>
+    <!-- hexagon ring -->
+    <g transform="translate(230,150)">
+      <polygon points="60,0 120,30 120,90 60,120 0,90 0,30" fill="none" stroke="var(--orange)" stroke-width="2.5"/>
+      <line x1="60" y1="0" x2="120" y2="30" stroke="var(--orange)" stroke-width="2.5"/>
+      <line x1="8" y1="34" x2="12" y2="36" stroke="var(--orange)" stroke-width="0"/>
+      <!-- alternating double bonds -->
+      <line x1="63" y1="6" x2="114" y2="33" stroke="var(--orange)" stroke-width="2"/>
+      <line x1="6" y1="86" x2="57" y2="113" stroke="var(--orange)" stroke-width="2"/>
+      <line x1="117" y1="86" x2="66" y2="113" stroke="var(--orange)" stroke-width="0"/>
+    </g>
+    <text x="420" y="200" fill="var(--muted)" font-family="JetBrains Mono" font-size="11">6-carbon ring, alternating double bonds, each C–H implicit at vertices</text>
+  </svg>
+  <p class="caption">Going left→right (name → structural) each step adds more information about the molecule</p>
+
+  <h2><span class="pill green">Key Distinction</span> When Empirical = Molecular</h2>
+  <div class="card">
+    <p>Empirical and molecular formulas aren't always different — they're only different when the
+    molecular counts can be reduced to a simpler ratio (like benzene's C₆H₆ → CH).</p>
+    <div class="example">
+      <span class="tag">Example — Water</span>
+      <p>Water has exactly 2 hydrogens and 1 oxygen per molecule. The ratio (2:1) already matches the
+      actual atom count, so its <b>empirical formula and molecular formula are the same</b>: <code>H₂O</code>.</p>
+    </div>
+  </div>
+
+  <h2><span class="pill blue">Compare</span> Formula Types at a Glance</h2>
+  <table>
+    <tr><th>Formula type</th><th>What it shows</th><th>Benzene example</th></tr>
+    <tr><td>Empirical</td><td>Simplest element ratio</td><td>CH</td></tr>
+    <tr><td>Molecular</td><td>Exact atom count per molecule</td><td>C₆H₆</td></tr>
+    <tr><td>Structural</td><td>Bonding/arrangement of atoms</td><td>Hexagon ring w/ alternating double bonds</td></tr>
+  </table>
+
+  <h2><span class="pill orange">Tips</span> Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> Going from molecular → empirical is always a one-way simplification: divide all subscripts by their greatest common factor.</div>
+  <div class="tip"><span class="tag">Tip</span> In organic chemistry skeletal structures, unlabeled vertices are carbons, and any "missing" bonds (carbon needs 4 total) are implicitly filled with hydrogens.</div>
+  <div class="tip"><span class="tag">Tip</span> Don't assume empirical ≠ molecular — always check if the molecular ratio is already in simplest form (like water) before reducing.</div>
+
+</div>
+</body>
+</html>

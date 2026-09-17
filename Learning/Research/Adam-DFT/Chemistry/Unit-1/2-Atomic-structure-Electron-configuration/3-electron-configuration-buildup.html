@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Electron Configurations & Noble Gas Notation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  .formula-block{background:var(--code-bg);border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;margin:8px 0;font-size:1.05rem;color:var(--green);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;}
+  th,td{border:1px solid var(--card-border);padding:9px 12px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Electron Configurations & Noble Gas Notation</h1>
+<p class="subtitle">AP Chemistry · Atomic Structure · Source: Khan Academy (video)</p>
+
+<h2><span class="pill pill-blue">Problem</span> Where exactly does each electron go?</h2>
+<div class="card">
+We know electrons fill orbitals from lowest to highest energy. This video walks the actual <strong>build-up process</strong> element by element (H → C) so you can write electron configurations confidently — plus a shortcut notation for larger atoms.
+</div>
+
+<h2><span class="pill pill-orange">Reference</span> Subshell Capacities</h2>
+<div class="card">
+Each individual orbital holds 2 electrons. Subshells contain different numbers of orbitals:
+
+<table>
+<tr><th>Subshell</th><th># orbitals</th><th>Max electrons (2 per orbital)</th></tr>
+<tr><td><code>s</code></td><td>1</td><td>2</td></tr>
+<tr><td><code>p</code></td><td>3</td><td>6</td></tr>
+<tr><td><code>d</code></td><td>5</td><td>10</td></tr>
+<tr><td><code>f</code></td><td>7</td><td>14</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-green">Walkthrough</span> Building Configurations, Element by Element</h2>
+<div class="card">
+<div class="formula-block">H&nbsp;&nbsp;(1 e⁻) → 1s¹</div>
+<div class="formula-block">He (2 e⁻) → 1s² &nbsp;<span class="muted" style="font-size:.8rem;">— 1s subshell now full</span></div>
+<div class="formula-block">Li (3 e⁻) → 1s² 2s¹ &nbsp;<span class="muted" style="font-size:.8rem;">— 3rd electron starts new shell</span></div>
+<div class="formula-block">Be (4 e⁻) → 1s² 2s² &nbsp;<span class="muted" style="font-size:.8rem;">— 2s subshell now full</span></div>
+<div class="formula-block">B&nbsp;&nbsp;(5 e⁻) → 1s² 2s² 2p¹ &nbsp;<span class="muted" style="font-size:.8rem;">— 2p subshell starts filling</span></div>
+<div class="formula-block">C&nbsp;&nbsp;(6 e⁻) → 1s² 2s² 2p² &nbsp;<span class="muted" style="font-size:.8rem;">— 2nd electron enters 2p</span></div>
+
+<div class="tip">
+<div class="tip-title">The pattern</div>
+Electrons always fill the <strong>lowest-energy available slot first</strong>: <code>1s</code> fills completely (2 e⁻) before <code>2s</code> starts; <code>2s</code> fills completely (2 e⁻) before <code>2p</code> starts. Superscripts must sum to the atom's total electron count — a quick way to self-check your work.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Shortcut</span> Noble Gas Notation</h2>
+<div class="card">
+As atoms get bigger, writing out the full configuration gets unwieldy. Instead, use the <strong>preceding noble gas</strong> (group 18) as shorthand for its "core" electrons, then list only the remaining ("valence") electrons explicitly.
+
+<div class="example">
+<div class="example-title">Worked example: Carbon</div>
+Full configuration: <code>1s² 2s² 2p²</code><br>
+Helium (the noble gas right before carbon) is <code>1s²</code> — exactly matching carbon's first shell.<br>
+So carbon can be written as: <code>[He] 2s² 2p²</code><br>
+<span class="muted" style="font-size:.85rem;">Same information, shorter notation — especially useful once you get to elements with dozens of electrons.</span>
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Visual</span> Orbital Shapes by Subshell</h2>
+<div class="card">
+<svg viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="80" cy="100" r="40" fill="#ff9d4d" opacity="0.5"/>
+  <text x="80" y="160" text-anchor="middle" font-size="12" fill="#ff9d4d">s (sphere)</text>
+
+  <ellipse cx="220" cy="60" rx="14" ry="35" fill="#5b9dff" opacity="0.6"/>
+  <ellipse cx="220" cy="140" rx="14" ry="35" fill="#5b9dff" opacity="0.6"/>
+  <ellipse cx="185" cy="100" rx="35" ry="14" fill="#4ade80" opacity="0.6"/>
+  <ellipse cx="255" cy="100" rx="35" ry="14" fill="#4ade80" opacity="0.6"/>
+  <text x="220" y="175" text-anchor="middle" font-size="12" fill="#5b9dff">p (dumbbells x3)</text>
+
+  <g transform="translate(380,100)">
+    <ellipse cx="-25" cy="-25" rx="22" ry="10" fill="#c084fc" opacity="0.6" transform="rotate(45 -25 -25)"/>
+    <ellipse cx="25" cy="-25" rx="22" ry="10" fill="#c084fc" opacity="0.6" transform="rotate(-45 25 -25)"/>
+    <ellipse cx="-25" cy="25" rx="22" ry="10" fill="#c084fc" opacity="0.6" transform="rotate(-45 -25 25)"/>
+    <ellipse cx="25" cy="25" rx="22" ry="10" fill="#c084fc" opacity="0.6" transform="rotate(45 25 25)"/>
+  </g>
+  <text x="380" y="175" text-anchor="middle" font-size="12" fill="#c084fc">d (cloverleaf, x5)</text>
+</svg>
+</div>
+
+<h2><span class="pill pill-green">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th>Notation</th><th>Example (Carbon)</th><th>When to use</th></tr>
+<tr><td>Full configuration</td><td><code>1s² 2s² 2p²</code></td><td>Small atoms, showing complete work</td></tr>
+<tr><td>Noble gas notation</td><td><code>[He] 2s² 2p²</code></td><td>Larger atoms, faster to write, highlights valence electrons</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-orange">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Check your work: superscripts should add up to the element's atomic number (= electron count for neutral atoms).</li>
+<li>Find the noble gas notation shortcut by locating the <strong>previous</strong> noble gas (group 18) on the periodic table, one row up.</li>
+<li>Noble gas notation instantly shows valence electrons — everything outside the brackets — which is exactly what determines reactivity.</li>
+<li>Filling order to memorize for early rows: <code>1s → 2s → 2p → 3s → 3p...</code></li>
+<li>Boron is the first element where <code>p</code> orbitals start filling — a common place mistakes happen.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

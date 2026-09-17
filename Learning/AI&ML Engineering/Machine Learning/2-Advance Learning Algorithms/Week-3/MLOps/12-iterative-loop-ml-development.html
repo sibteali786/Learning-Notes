@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>12 - Iterative Loop of ML Development</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .loop-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:20px; margin-top:14px; text-align:center;}
+  .loop-fig svg{max-width:100%; height:auto;}
+
+  .email-compare{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.email-compare{grid-template-columns:1fr;}}
+  .email-card{border-radius:10px; padding:16px; border:1px solid var(--border); font-size:0.85rem;}
+  .email-card.spam{background:rgba(255,107,129,0.08); border-color:rgba(255,107,129,0.4);}
+  .email-card.ham{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .email-card .tag{font-weight:700; font-size:0.72rem; text-transform:uppercase; margin-bottom:8px; display:block;}
+  .email-card.spam .tag{color:var(--bad);}
+  .email-card.ham .tag{color:var(--good);}
+  .email-card .body{font-style:italic; color:var(--muted);}
+
+  .feature-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:0.85rem;}
+  .feature-table th, .feature-table td{padding:8px 12px; text-align:center; border-bottom:1px solid var(--border);}
+  .feature-table th{color:var(--accent); font-weight:600;}
+  .feature-table td:first-child, .feature-table th:first-child{text-align:left;}
+
+  .idea-grid{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .idea-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">ML Development Process</span>
+  <h1>Lesson 12 — The Iterative Loop of ML Development</h1>
+  <p class="subtitle">Pulling bias/variance together into the actual day-to-day workflow of building a model — using a spam classifier as the running example.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Loop</h2>
+    <div class="loop-fig">
+      <svg viewBox="0 0 400 260" width="360">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7c9bff"/>
+          </marker>
+        </defs>
+        <path d="M 200 40 A 100 100 0 0 1 300 140" fill="none" stroke="#7c9bff" stroke-width="8" marker-end="url(#arrow)"/>
+        <path d="M 300 140 A 100 100 0 0 1 200 240" fill="none" stroke="#7c9bff" stroke-width="8" marker-end="url(#arrow)"/>
+        <path d="M 200 240 A 100 100 0 0 1 100 140" fill="none" stroke="#7c9bff" stroke-width="8" marker-end="url(#arrow)"/>
+        <path d="M 100 140 A 100 100 0 0 1 200 40" fill="none" stroke="#7c9bff" stroke-width="8" marker-end="url(#arrow)"/>
+        <text x="200" y="20" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Choose architecture</text>
+        <text x="200" y="34" text-anchor="middle" fill="#9aa0b4" font-size="11">(model, data, etc.)</text>
+        <text x="330" y="145" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Train</text>
+        <text x="330" y="160" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">model</text>
+        <text x="200" y="250" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Diagnostics</text>
+        <text x="200" y="264" text-anchor="middle" fill="#9aa0b4" font-size="10">(bias, variance,</text>
+        <text x="200" y="276" text-anchor="middle" fill="#9aa0b4" font-size="10">error analysis)</text>
+        <text x="65" y="145" text-anchor="middle" fill="#c792ea" font-size="10">↺</text>
+      </svg>
+    </div>
+    <div class="idea-grid">
+      <div class="idea-row"><div><strong>1. Choose architecture</strong> — pick the model type, what data to use, hyperparameters.</div></div>
+      <div class="idea-row"><div><strong>2. Train model</strong> — implement and train. It almost never works as well as hoped on the first pass.</div></div>
+      <div class="idea-row"><div><strong>3. Run diagnostics</strong> — bias/variance analysis, plus <strong>error analysis</strong> (next lesson) — to see what's actually going wrong.</div></div>
+      <div class="idea-row"><div><strong>4. Act on insights</strong> — bigger network? Change λ? More data? More/fewer features? Then loop back to step 1.</div></div>
+    </div>
+    <p style="margin-top:14px;">This loop typically runs multiple times before reaching the desired performance — it's the normal, expected shape of building a model, not a sign something's wrong.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Running Example: Building a Spam Classifier</h2>
+    <div class="email-compare">
+      <div class="email-card spam">
+        <span class="tag">Spam</span>
+        <div class="body">"Deal of the week! Buy now! Rolex w4tches, med1cine, m0rtgage..."</div>
+      </div>
+      <div class="email-card ham">
+        <span class="tag">Not Spam</span>
+        <div class="body">An actual email from a family member about getting together for the holidays.</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;">Note the spam email's deliberate misspellings — "w4tches", "med1cine", "m0rtgage" — a tactic spammers use specifically to trip up keyword-based spam filters.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Constructing Features: Bag-of-Words</h2>
+    <p>One classic approach: take the top 10,000 English words, and for each email, check whether each word appears.</p>
+    <table class="feature-table">
+      <thead><tr><th>Word</th><th>a</th><th>Andrew</th><th>buy</th><th>deal</th><th>discount</th></tr></thead>
+      <tbody>
+        <tr><td>Presence (0/1)</td><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px;">This gives a 10,000-dimensional feature vector <code>x₁...x₁₀₀₀₀</code> per email, fed into logistic regression or a neural network to predict <code>y</code> (spam / not spam). A variant: instead of 0/1 presence, count <em>how many times</em> each word appears — "if 'buy' appears twice, set that feature to 2" — which works decently well too.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> After the First Model: Which Idea to Chase?</h2>
+    <p>Once the first model underperforms, there's usually no shortage of ideas — the real skill is knowing which one is actually worth the time:</p>
+    <div class="idea-grid">
+      <div class="idea-row"><div><strong>Collect more data</strong> — e.g. a "honeypot" project: create fake email addresses, let spammers find them, and harvest confirmed-spam data at scale.</div></div>
+      <div class="idea-row"><div><strong>Sophisticated features from email routing</strong> — the header metadata tracking which servers/networks an email passed through en route can hint at spam origin.</div></div>
+      <div class="idea-row"><div><strong>Better features from the email body</strong> — e.g. treating "discount" and "discounting" as the same underlying word instead of separate features.</div></div>
+      <div class="idea-row"><div><strong>Misspelling detection</strong> — algorithms to catch deliberate obfuscations like "w4tches", "med1cine", "m0rtgage".</div></div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">Why diagnosis comes before action</div>
+      <p style="margin:0;">A honeypot project can take months to bear fruit. If the classifier's real problem is <strong>high bias</strong> (Lesson 5-9's diagnostic), pouring months into more data won't help much — the model's architecture is the bottleneck, not the data volume. If it's <strong>high variance</strong>, more data is exactly the right move. Picking the right direction from the start, using bias/variance as a guide, can speed up a project by an order of magnitude compared to guessing.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Diagnostics decide direction, not intuition</div>
+      <p style="margin:0;">The iterative loop only works efficiently when the "diagnostics" step is taken seriously. Bias/variance analysis is the first tool; <strong>error analysis</strong> — actually looking at which specific examples the model gets wrong — is the second, and is the subject of the next lesson.</p>
+    </div>
+  </section>
+
+  <footer>Lesson 12 · ML Development Process · ML Fundamentals</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Writing Ionic Formulas: Calcium Bromide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5da8ff; --orange:#ff9f5a; --green:#5ce0a0; --purple:#c792ea;
+    --red:#ff6b81; --text:#e6e8ef; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono',monospace; line-height:1.6;}
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 12px;}
+  .wrap{max-width:900px; margin:0 auto;}
+  header{margin-bottom:36px;}
+  header h1{font-size:1.8rem; font-weight:800;}
+  header p{color:var(--muted); margin:0;}
+  .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; margin-right:6px; margin-bottom:6px;}
+  .pill-blue{background:rgba(93,168,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill-green{background:rgba(92,224,160,.15); color:var(--green); border:1px solid var(--green);}
+  section{margin-bottom:40px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:16px;}
+  .card h3{color:var(--orange); font-size:1.05rem;}
+  .formula{background:#1a1d2b; border-left:3px solid var(--purple); border-radius:6px; padding:14px 18px; margin:14px 0; font-size:1.2rem; color:var(--purple); font-weight:700; text-align:center;}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.88rem;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left;}
+  th{background:#1b1f2d; color:var(--orange); font-family:'Syne',sans-serif;}
+  tr:nth-child(even){background:#141724;}
+  .callout{border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.88rem;}
+  .tip{background:rgba(92,224,160,.08); border:1px solid var(--green);}
+  .tip::before{content:"💡 TIP  "; color:var(--green); font-weight:700;}
+  .example{background:rgba(93,168,255,.08); border:1px solid var(--blue);}
+  .example::before{content:"🧪 EXAMPLE  "; color:var(--blue); font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Writing Ionic Formulas — Calcium Bromide</h1>
+  <p>AP Chemistry · Unit 1 · Naming & charge-balancing ionic compounds</p>
+  <div style="margin-top:12px;">
+    <span class="pill pill-blue">CATION FIRST</span>
+    <span class="pill pill-orange">CHARGE BALANCE</span>
+    <span class="pill pill-green">CROSS-DOWN METHOD</span>
+  </div>
+</header>
+
+<section>
+  <h2 style="color:var(--blue);">📌 Problem Statement</h2>
+  <div class="card">
+    <p>Given just a compound's name — "calcium bromide" — how do you figure out the actual chemical formula (CaBr₂) without memorizing it?</p>
+    <p style="margin-bottom:0; color:var(--muted);">Answer: identify each ion's charge from its <b style="color:var(--text);">group location</b>, then balance charges so the compound is neutral overall.</p>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--orange);">⚙️ How It Works — 3 Steps</h2>
+  <div class="card">
+    <h3>Step 1 — Naming order tells you the cation</h3>
+    <p>Convention: the <b>positive ion (cation) is always named/written first</b>. "Calcium bromide" → calcium is the cation, bromide is the anion.</p>
+  </div>
+  <div class="card">
+    <h3>Step 2 — Get each charge from group number</h3>
+    <table>
+      <tr><th>Element</th><th>Group</th><th>Tendency</th><th>Ion</th></tr>
+      <tr><td>Calcium (Ca)</td><td>2 (alkaline earth)</td><td>Loses 2 e⁻</td><td style="color:var(--orange);font-weight:700;">Ca²⁺</td></tr>
+      <tr><td>Bromine (Br)</td><td>17 (halogen)</td><td>Gains 1 e⁻</td><td style="color:var(--blue);font-weight:700;">Br¹⁻</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Step 3 — Cross the charges to balance</h3>
+    <p>Charges must cancel to zero net charge. Ca²⁺ needs <b>two</b> Br¹⁻ to balance out (2+ and 2×1− = 2−).</p>
+    <div class="formula">Ca²⁺ + 2 Br¹⁻ → CaBr₂</div>
+    <div class="callout tip">
+      Shortcut: the numeric value of one ion's charge becomes the subscript of the <i>other</i> ion. Ca is 2+ → Br gets subscript 2. Br is 1− → Ca gets subscript 1 (omitted).
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--green);">🧪 Example Scenario</h2>
+  <div class="card">
+    <p>Try aluminum oxide: Al is group 13 → Al³⁺. Oxygen is group 16 → O²⁻.</p>
+    <p>Cross the charges: Al gets subscript 2, O gets subscript 3.</p>
+    <div class="formula">Al₂O₃</div>
+    <div class="callout example">
+      This cross-down method works for <b>any</b> main-group cation/anion pair — same logic used for NaCl, MgO, CaI₂, AlCl₃, etc.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--red);">🎯 Exam Tips</h2>
+  <div class="card">
+    <ul style="margin:0; padding-left:20px;">
+      <li>Cation always written/named first — don't second-guess the order.</li>
+      <li>Get charge magnitude from group #, not memorization: Groups 1/2/13 → +1/+2/+3; Groups 15/16/17 → −3/−2/−1.</li>
+      <li>Cross-down trick: charge magnitude of one ion → subscript of the other. Simplify if both subscripts share a common factor (e.g. Ca²⁺O²⁻ → CaO, not Ca₂O₂).</li>
+      <li>Never write a subscript of 1 — it's implied.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

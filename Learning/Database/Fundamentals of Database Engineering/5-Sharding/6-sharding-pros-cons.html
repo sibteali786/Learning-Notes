@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pros & Cons of Sharding</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161923;--panel2:#1c202c;--border:#2a2f3d;
+    --text:#e6e8ef;--muted:#9aa1b4;
+    --blue:#5b9dff;--orange:#ff9d5b;--green:#5bd6a0;--purple:#b78bff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:40px 20px 80px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0;}
+  h1{font-size:2.1rem;font-weight:800;letter-spacing:-0.5px;}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:1rem;}
+  .hero{margin-bottom:36px;}
+  .pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;border:1px solid;}
+  .pill-blue{color:var(--blue);border-color:var(--blue);background:rgba(91,157,255,0.08);}
+  .pill-purple{color:var(--purple);border-color:var(--purple);background:rgba(183,139,255,0.08);}
+  .pill-green{color:var(--green);border-color:var(--green);background:rgba(91,214,160,0.08);}
+  .pill-red{color:var(--red);border-color:var(--red);background:rgba(255,107,107,0.08);}
+
+  .section{margin-bottom:40px;}
+  .section-label{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .bar-green{background:var(--green);} .bar-red{background:var(--red);}
+  .section-label h2{font-size:1.15rem;color:var(--text);}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  p{line-height:1.6;color:var(--text);margin:0 0 10px;}
+  .muted{color:var(--muted);}
+  code{background:#0b0d13;border:1px solid var(--border);color:var(--green);padding:2px 6px;border-radius:5px;font-size:0.85rem;}
+
+  .item{
+    background:var(--panel2);border:1px solid var(--border);border-radius:10px;
+    padding:16px 18px;margin-bottom:12px;
+  }
+  .item h3{font-size:0.98rem;margin-bottom:6px;}
+  .item.pro h3{color:var(--green);}
+  .item.con h3{color:var(--red);}
+  .item p{margin:0;color:var(--text);}
+
+  .diagram-wrap{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:14px;}
+  svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+
+  .scenario{border-left:3px solid var(--orange);background:rgba(255,157,91,0.06);padding:14px 18px;border-radius:0 10px 10px 0;margin-top:10px;}
+  .scenario .tag{color:var(--orange);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;}
+  .toc a{color:var(--muted);text-decoration:none;font-size:0.8rem;border:1px solid var(--border);padding:5px 10px;border-radius:8px;}
+  .toc a:hover{color:var(--text);border-color:var(--muted);}
+
+  .footer{margin-top:60px;text-align:center;color:var(--muted);font-size:0.75rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill pill-blue">System Design</span>
+    <span class="pill pill-purple" style="margin-left:6px;">Databases</span>
+    <h1 style="margin-top:14px;">Pros & Cons of Sharding</h1>
+    <div class="subtitle">Scalability and security for free — at the cost of client complexity, broken transactions, and joins.</div>
+  </div>
+
+  <div class="toc">
+    <a href="#pros">Pros</a>
+    <a href="#cons">Cons</a>
+  </div>
+
+  <!-- PROS -->
+  <div class="section" id="pros">
+    <div class="section-label"><div class="bar bar-green"></div><h2>Pros</h2></div>
+    <div class="card">
+
+      <div class="item pro">
+        <h3>Scalability</h3>
+        <p>Spreads data, memory, and CPU load across multiple machines instead of hogging one server's resources — horizontal scaling instead of vertical.</p>
+      </div>
+
+      <div class="item pro">
+        <h3>Security</h3>
+        <p>Shards can be access-controlled independently. Example: put VIP customers on one shard and everyone else on another, then restrict which clients can reach which shard — access control you don't get with one big table.</p>
+      </div>
+
+      <div class="item pro">
+        <h3>Optimal, smaller index size</h3>
+        <p>Each shard holds a fraction of the data, so its index stays small — smaller indexes mean quicker, more efficient queries.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CONS -->
+  <div class="section" id="cons">
+    <div class="section-label"><div class="bar bar-red"></div><h2>Cons</h2></div>
+    <div class="card">
+
+      <div class="item con">
+        <h3>Complex client</h3>
+        <p>The client has to know which shard an input lives in. Consistent hashing hides some of that complexity, but the awareness of sharding still leaks into the application and gets messy at scale.</p>
+        <div class="scenario">
+          <span class="tag">Emerging fix</span>
+          <p style="margin-top:6px;margin-bottom:0;">Backend-hidden sharding (mentioned: a tool called <em>Vitess</em> from YouTube) lets the client just issue normal queries while the sharding logic runs transparently behind the scenes.</p>
+        </div>
+      </div>
+
+      <div class="item con">
+        <h3>Transactions across shards</h3>
+        <p>An atomic operation that spans two shards means two separate database transactions — near-impossible to make truly atomic. Transactions work fine <em>within</em> a single shard, just not across shards.</p>
+      </div>
+
+      <div class="item con">
+        <h3>Rollbacks</h3>
+        <p>If an insert on shard A succeeds but the related insert on shard B fails, rolling back "the transaction" really means manually rolling back two independent transactions — despite it being one logical operation.</p>
+      </div>
+
+      <div class="item con">
+        <h3>Schema changes are hard</h3>
+        <p>Adding a field (e.g. a new <code>date</code> column) has to be applied to every shard individually. Rolling it out slowly is possible but risky — miss one shard and schemas drift out of sync.</p>
+      </div>
+
+      <div class="item con">
+        <h3>Joins</h3>
+        <p>Joining across separate database instances isn't really feasible. This is one reason to reach for horizontal partitioning instead — same database, multiple tables, so joins still work.</p>
+      </div>
+
+      <div class="item con">
+        <h3>Must know the shard key up front</h3>
+        <p>Queries are fast only when you're filtering by the sharding key (e.g. URL ID). Query on any other field and you lose that shortcut — you're forced to hit <strong>every</strong> shard to find the data.</p>
+        <div class="scenario">
+          <span class="tag">Real-world example</span>
+          <p style="margin-top:6px;margin-bottom:0;">A customer list sharded by customer ID, but you search by <strong>name</strong>: name has nothing to do with the shard key, so the query has to scan both shards — no shortcut.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg">
+      <g font-family="JetBrains Mono" font-size="11" fill="#e6e8ef" text-anchor="middle">
+        <rect x="20" y="20" width="300" height="100" rx="10" fill="#162a20" stroke="#2a2f3d"/>
+        <text x="170" y="42" fill="#5bd6a0" font-weight="600">Pros</text>
+        <text x="170" y="64">Scalability · Security</text>
+        <text x="170" y="82">Smaller indexes</text>
+
+        <rect x="380" y="20" width="300" height="100" rx="10" fill="#2a1616" stroke="#2a2f3d"/>
+        <text x="530" y="42" fill="#ff6b6b" font-weight="600">Cons</text>
+        <text x="530" y="60">Complex clients · No joins</text>
+        <text x="530" y="76">Hard transactions/rollbacks</text>
+        <text x="530" y="92">Hard schema changes</text>
+        <text x="530" y="108">Must know the shard key</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="footer">Source: Hussein Nasser — "Sharding & Consistent Hashing" (Pros & Cons segment) · husseinnasser.com</div>
+</div>
+</body>
+</html>

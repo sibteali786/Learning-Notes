@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Identifying a Contaminant via % Composition — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+  :root {
+    --bg:#0f1117; --card:#171a23; --card2:#1c2030; --border:#2a2f42;
+    --text:#e6e8f0; --muted:#9aa0b4;
+    --blue:#5aa9ff; --orange:#ff9d5a; --green:#4fd995; --purple:#b48cff;
+  }
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; margin:0; padding:40px 20px; line-height:1.6; }
+  .wrap { max-width:940px; margin:0 auto; }
+  h1,h2,h3 { font-family:'Syne',sans-serif; margin:0 0 12px; }
+  h1 { font-size:2em; font-weight:800; background:linear-gradient(90deg,var(--blue),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  h2 { font-size:1.3em; margin-top:42px; padding-bottom:8px; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .pill { display:inline-block; font-size:.72em; font-weight:700; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.03em; }
+  .pill.blue{background:rgba(90,169,255,.15);color:var(--blue);border:1px solid rgba(90,169,255,.4);}
+  .pill.orange{background:rgba(255,157,90,.15);color:var(--orange);border:1px solid rgba(255,157,90,.4);}
+  .pill.green{background:rgba(79,217,149,.15);color:var(--green);border:1px solid rgba(79,217,149,.4);}
+  .pill.purple{background:rgba(180,140,255,.15);color:var(--purple);border:1px solid rgba(180,140,255,.4);}
+  code { background:#10131c; border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--green); font-size:.92em; }
+  .formula { background:#10131c; border-left:3px solid var(--blue); border-radius:6px; padding:12px 16px; margin:12px 0; color:var(--blue); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:.92em; }
+  th,td { border:1px solid var(--border); padding:8px 10px; text-align:center; }
+  th { background:var(--card2); color:var(--orange); font-family:'Syne',sans-serif; }
+  tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+  .example { border-left:3px solid var(--green); background:rgba(79,217,149,.06); border-radius:6px; padding:12px 16px; margin:12px 0; }
+  .example .tag{ color:var(--green); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  .tip { border-left:3px solid var(--orange); background:rgba(255,157,90,.06); border-radius:6px; padding:12px 16px; margin:10px 0; }
+  .tip .tag{ color:var(--orange); font-weight:700; font-size:.8em; text-transform:uppercase; }
+  ul{padding-left:20px;} li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Identifying a Contaminant via % Composition</h1>
+  <div class="subtitle">Worked example — mystery salt sample, 73% Cl by mass</div>
+
+  <h2><span class="pill blue">Problem</span> What Are We Solving?</h2>
+  <div class="card">
+    A solid is known to be mostly <b>NaCl</b>, possibly contaminated with <b>NaI</b>, <b>KCl</b>, or
+    <b>LiCl</b>. Analysis shows the sample is <b>73% chlorine by mass</b> — well above pure NaCl. The
+    task: figure out which contaminant (if any) could explain that jump, using only % Cl by mass.
+  </div>
+
+  <h2><span class="pill orange">Core</span> Strategy: Compare % Cl of Each Candidate</h2>
+  <div class="card">
+    <div class="formula">% Cl by mass = molar mass of Cl / molar mass of whole compound</div>
+    <p>If pure NaCl's % Cl is <i>below</i> 73%, mixing in a compound with an even <i>lower</i> % Cl (or 0%)
+    can only pull the average down — never up. Only a contaminant with a <b>higher</b> % Cl than pure NaCl
+    could explain the jump to 73%.</p>
+  </div>
+
+  <h2><span class="pill green">Data</span> Molar Masses</h2>
+  <table>
+    <tr><th>Element</th><th>Na</th><th>Cl</th><th>I</th><th>K</th><th>Li</th></tr>
+    <tr><td>Molar mass (g/mol)</td><td>22.99</td><td>35.45</td><td>126.90</td><td>39.10</td><td>6.94</td></tr>
+  </table>
+
+  <h2><span class="pill purple">Compare</span> % Cl by Mass — All Candidates</h2>
+  <table>
+    <tr><th>Compound</th><th>Calculation</th><th>% Cl by mass</th><th>vs. NaCl (61%)</th><th>Could cause 73%?</th></tr>
+    <tr><td>NaCl (baseline)</td><td>35.45 / (22.99+35.45)</td><td>≈ 61%</td><td>—</td><td>—</td></tr>
+    <tr><td>NaI</td><td>0 / (whole)</td><td>0%</td><td>lower</td><td>❌ pulls average down</td></tr>
+    <tr><td>KCl</td><td>35.45 / (39.10+35.45)</td><td>&lt; 61%</td><td>lower</td><td>❌ pulls average down</td></tr>
+    <tr><td>LiCl</td><td>35.45 / (6.94+35.45)</td><td>≈ 84%</td><td>higher</td><td>✅ can raise average to 73%</td></tr>
+  </table>
+
+  <div class="example">
+    <span class="tag">Result</span>
+    <p>The sample is <b>not pure NaCl</b>. Since NaI and KCl both have lower (or zero) % Cl than NaCl,
+    they're ruled out. Only <b>LiCl</b> (≈84% Cl) has a high enough chlorine content to raise the mixture's
+    average from ~61% up to the observed 73%. The sample is likely a mix of <b>NaCl + LiCl</b>.</p>
+  </div>
+
+  <h2><span class="pill blue">Shortcut</span> No-Calculation Reasoning</h2>
+  <div class="card">
+    <ul>
+      <li>Same numerator (Cl's molar mass, 35.45) across every candidate compound.</li>
+      <li><b>Bigger denominator → lower % Cl</b> (K has a bigger molar mass than Na → KCl % Cl &lt; NaCl % Cl).</li>
+      <li><b>Smaller denominator → higher % Cl</b> (Li is much lighter than Na → LiCl % Cl &gt; NaCl % Cl).</li>
+      <li>This lets you rank candidates by comparing molar masses alone — no full division needed until you've narrowed it down.</li>
+    </ul>
+  </div>
+
+  <h2><span class="pill orange">Tips</span> Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> When comparing % composition of a series of similar compounds (same anion, different cation), a smaller cation molar mass always means a higher % of the shared anion by mass — no need to calculate all of them fully.</div>
+  <div class="tip"><span class="tag">Tip</span> A contaminant with 0% of the element in question (like NaI has 0% Cl) always pulls the mixture's average down, so it can be ruled out immediately if the observed % is higher than the pure compound's %.</div>
+  <div class="tip"><span class="tag">Tip</span> Once you know the two pure % values (e.g. 61% and 84%) and the mixture's actual % (73%), you can solve for the exact mixing ratio using a weighted-average (mixture) equation — same math as the isotope abundance problems.</div>
+
+</div>
+</body>
+</html>

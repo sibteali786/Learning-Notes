@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Electron Configuration of Ions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --card-border:#262b3a;
+    --text:#e6e8ef; --muted:#9aa1b4;
+    --blue:#5b9dff; --orange:#ff9d4d; --green:#4ade80; --purple:#c084fc;
+    --code-bg:#0b0d13;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin:0;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
+  .subtitle{color:var(--muted);margin-bottom:32px;font-size:.95rem;}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.35rem;margin:40px 0 16px;display:flex;align-items:center;gap:10px;}
+  .pill{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase;}
+  .pill-blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.4);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.4);}
+  .pill-purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.4);}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:20px 22px;margin-bottom:16px;}
+  code{background:var(--code-bg);border:1px solid var(--card-border);border-radius:5px;padding:1px 6px;color:var(--orange);font-size:.92em;}
+  .formula-block{background:var(--code-bg);border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:6px;padding:10px 16px;margin:8px 0;font-size:1.05rem;color:var(--green);}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;}
+  th,td{border:1px solid var(--card-border);padding:9px 12px;text-align:left;}
+  th{background:#1c2030;color:var(--blue);font-family:'Syne',sans-serif;}
+  tr:nth-child(even) td{background:#141722;}
+  .tip{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .tip-title{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  .example{background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:14px 18px;margin:14px 0;}
+  .example-title{color:var(--purple);font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+  svg{max-width:100%;height:auto;}
+  .muted{color:var(--muted);}
+  ul{padding-left:20px;}
+  li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Electron Configuration of Ions</h1>
+<p class="subtitle">AP Chemistry · Atomic Structure · Source: Khan Academy (video)</p>
+
+<h2><span class="pill pill-blue">Problem</span> What changes when an atom becomes an ion?</h2>
+<div class="card">
+Neutral atoms gain or lose electrons to become <strong>ions</strong> — charged atoms. Anions (negative) have gained electrons; cations (positive) have lost them. The electron configuration shifts accordingly, and the rule is simple: <strong>add electrons to the highest-energy available subshell, remove electrons from the highest-energy occupied subshell.</strong>
+</div>
+
+<h2><span class="pill pill-orange">Worked Example</span> Fluorine → Fluoride (anion)</h2>
+<div class="card">
+<div class="formula-block">F&nbsp;&nbsp;(neutral, 9 e⁻) → 1s² 2s² 2p⁵</div>
+<div class="formula-block">F⁻ (10 e⁻, gained 1) → 1s² 2s² 2p⁶</div>
+
+<div class="tip">
+<div class="tip-title">Where does the extra electron go?</div>
+The 2p subshell had room for one more (max capacity 6, fluorine only had 5). The gained electron simply completes it — fluoride ends up with a full outer shell, same configuration as neon. That's exactly why F⁻ is so stable.
+</div>
+</div>
+
+<h2><span class="pill pill-green">Worked Example</span> Calcium → Ca²⁺ (cation)</h2>
+<div class="card">
+<div class="formula-block">Ca&nbsp;&nbsp;(neutral, 20 e⁻) → [Ar] 4s²</div>
+<div class="formula-block">Ca²⁺ (18 e⁻, lost 2) → [Ar]</div>
+
+<div class="example">
+<div class="example-title">Which electrons leave first?</div>
+The 2 electrons removed come from the <strong>highest-energy occupied subshell</strong> — here, <code>4s</code>. After losing them, Ca²⁺ has exactly the same electron configuration as neutral argon. This is the same underlying idea as before: the ion settles into a full, stable shell.
+</div>
+</div>
+
+<h2><span class="pill pill-purple">Rule</span> General Method for Any Ion</h2>
+<div class="card">
+<table>
+<tr><th>Ion type</th><th>What happens</th><th>Where electrons go/come from</th></tr>
+<tr><td>Anion (X⁻, X²⁻...)</td><td>Gains electrons</td><td>Added to the next available spot in the outermost (valence) subshell</td></tr>
+<tr><td>Cation (X⁺, X²⁺...)</td><td>Loses electrons</td><td>Removed from the highest-energy occupied subshell</td></tr>
+</table>
+
+<div class="tip">
+<div class="tip-title">Quick method</div>
+Write the neutral atom's configuration first (noble gas notation is fastest), then simply add or remove electrons at the outer edge. You rarely need to rebuild the whole configuration from scratch.
+</div>
+</div>
+
+<h2><span class="pill pill-blue">Key Distinctions</span></h2>
+<div class="card">
+<table>
+<tr><th></th><th>F⁻</th><th>Ca²⁺</th></tr>
+<tr><td>Started with</td><td>9 electrons</td><td>20 electrons</td></tr>
+<tr><td>Change</td><td>+1 electron</td><td>−2 electrons</td></tr>
+<tr><td>Ends up matching</td><td>Neon's configuration</td><td>Argon's configuration</td></tr>
+<tr><td>Why stable</td><td>Full outer shell reached by gaining</td><td>Full outer shell reached by losing valence electrons, exposing full core</td></tr>
+</table>
+</div>
+
+<h2><span class="pill pill-green">Practical Tips</span></h2>
+<div class="card">
+<ul>
+<li>Anions add electrons to the valence subshell; cations remove them from the valence subshell — never touch core electrons unless specifically asked about highly charged/unusual ions.</li>
+<li>A useful sanity check: many common ions end up isoelectronic with (matching the configuration of) the nearest noble gas.</li>
+<li>Superscripts must still sum correctly: total electrons = atomic number ∓ ion charge.</li>
+<li>Use noble gas notation for cations especially — losing electrons often reduces the configuration to exactly <code>[NobleGas]</code>, as with Ca²⁺ → <code>[Ar]</code>.</li>
+<li>Practice tip from the video: pick any element, imagine gaining or losing an electron, and write out the resulting configuration — it's the fastest way to build intuition.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>

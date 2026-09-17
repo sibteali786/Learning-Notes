@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Isotopes, Atomic Mass & Mass Spectrometry</title>
+<style>
+  :root{
+    --proton:#e74c3c; --neutron:#3498db; --electron:#2ecc71;
+    --bg:#f7f9fc; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --accent:#6366f1;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);margin:0;padding:24px;}
+  h1{text-align:center;color:var(--accent);margin-bottom:4px;}
+  .subtitle{text-align:center;color:var(--muted);margin-top:0;margin-bottom:28px;}
+  .container{max-width:1000px;margin:0 auto;}
+  .card{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,0.07);padding:22px 26px;margin-bottom:20px;}
+  h2{margin-top:0;color:#111827;border-left:5px solid var(--accent);padding-left:10px;}
+  .particles{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin:16px 0;}
+  .particle{flex:1;min-width:150px;border-radius:10px;padding:14px;color:#fff;text-align:center;}
+  .proton{background:var(--proton);}
+  .neutron{background:var(--neutron);}
+  .electron{background:var(--electron);}
+  .particle .charge{font-size:1.4em;font-weight:bold;}
+  .particle small{display:block;opacity:0.9;margin-top:4px;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.95em;}
+  th,td{padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:center;}
+  th{background:#eef2ff;color:#374151;}
+  .formula-box{background:#111827;color:#f9fafb;border-radius:10px;padding:16px;text-align:center;font-size:1.15em;margin:14px 0;overflow-x:auto;}
+  .example{background:#fef9c3;border-left:5px solid #eab308;border-radius:8px;padding:14px 18px;margin-top:14px;}
+  .example b{color:#92400e;}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin:16px 0;}
+  .flow .step{background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px 14px;font-size:0.9em;text-align:center;min-width:120px;}
+  .flow .arrow{font-size:1.3em;color:var(--accent);}
+  .spectrum{display:flex;align-items:flex-end;gap:18px;height:180px;border-bottom:2px solid #374151;border-left:2px solid #374151;padding:10px 20px 0 20px;margin-top:10px;position:relative;}
+  .bar-wrap{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar{width:34px;background:linear-gradient(180deg,#818cf8,#4f46e5);border-radius:4px 4px 0 0;}
+  .bar-label{font-size:0.78em;margin-top:6px;color:var(--muted);text-align:center;}
+  .isotope-badge{display:inline-block;background:#e0e7ff;color:#3730a3;border-radius:6px;padding:3px 8px;font-weight:bold;margin-bottom:4px;}
+  .notation{display:flex;justify-content:center;gap:60px;flex-wrap:wrap;margin:16px 0;}
+  .notation-item{text-align:center;font-size:1.3em;}
+  .super{font-size:0.6em;vertical-align:super;}
+  .sub{font-size:0.6em;vertical-align:sub;}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:640px){.summary-grid{grid-template-columns:1fr;}}
+  .summary-item{background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:0.92em;}
+  .tag{display:inline-block;background:var(--accent);color:#fff;border-radius:20px;padding:2px 10px;font-size:0.75em;margin-right:6px;}
+  .answer-box{background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:14px;text-align:center;font-size:1.2em;font-weight:bold;color:#166534;margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>⚛️ Isotopes, Atomic Mass & Mass Spectrometry</h1>
+  <p class="subtitle">A visual guide from subatomic particles to average atomic mass calculations</p>
+
+  <div class="card">
+    <h2>1. Subatomic Particles</h2>
+    <div class="particles">
+      <div class="particle proton"><div class="charge">Proton</div>1+ charge<small>1.673×10⁻²⁷ kg ≈ 1.007 u</small><small>Inside nucleus</small></div>
+      <div class="particle neutron"><div class="charge">Neutron</div>0 charge<small>1.675×10⁻²⁷ kg ≈ 1.009 u</small><small>Inside nucleus</small></div>
+      <div class="particle electron"><div class="charge">Electron</div>1− charge<small>9.109×10⁻³¹ kg ≈ 5.486×10⁻⁴ u</small><small>Orbits nucleus</small></div>
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:0.9em;">Protons & neutrons are ~2000× more massive than electrons → nucleus holds nearly all the mass.</p>
+  </div>
+
+  <div class="card">
+    <h2>2. What Makes an Isotope?</h2>
+    <div class="flow">
+      <div class="step">Same <b>protons</b> (same element)</div>
+      <div class="arrow">+</div>
+      <div class="step">Different <b>neutrons</b></div>
+      <div class="arrow">=</div>
+      <div class="step">Isotope (different mass)</div>
+    </div>
+    <div class="formula-box">Mass Number = # protons + # neutrons</div>
+    <table>
+      <tr><th>Isotope</th><th>Protons</th><th>Neutrons</th><th>Mass Number</th></tr>
+      <tr><td>Carbon-12</td><td>6</td><td>6</td><td>12</td></tr>
+      <tr><td>Chromium-52</td><td>24</td><td>28</td><td>52</td></tr>
+    </table>
+    <p style="font-size:0.85em;color:var(--muted);">1 u is defined as exactly 1/12 the mass of a neutral carbon-12 atom.</p>
+  </div>
+
+  <div class="card">
+    <h2>3. Isotopic (Nuclear) Notation</h2>
+    <div class="notation">
+      <div class="notation-item">
+        <span class="super">3</span>₁H <span style="font-size:0.5em;">(neutral)</span>
+        <div style="font-size:0.45em;color:var(--muted);">mass number top-left, atomic number bottom-left</div>
+        <div class="isotope-badge">Hydrogen-3</div>
+      </div>
+      <div class="notation-item">
+        <span class="super">24</span>₁₂Mg<span class="super">2+</span>
+        <div class="isotope-badge">Magnesium-24 cation (2+)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. Average Atomic Mass = Weighted Average</h2>
+    <div class="formula-box">average atomic mass = Σ (relative abundance × atomic mass)</div>
+    <div class="example">
+      <b>Example — Chlorine:</b><br>
+      Cl-35 (34.97 u, 75.76%) + Cl-37 (36.97 u, 24.24%)<br>
+      = (0.7576 × 34.97) + (0.2424 × 36.97) = 26.49 + 8.96 = <b>35.45 u</b> ✅ matches periodic table
+    </div>
+    <p style="font-size:0.9em;color:var(--muted);margin-top:10px;"><span class="tag">Rule of thumb</span>The more abundant isotope pulls the average closer to its own mass.</p>
+  </div>
+
+  <div class="card">
+    <h2>5. How Mass Spectrometry Finds Relative Abundance</h2>
+    <div class="flow">
+      <div class="step">💧 Sample injected</div><div class="arrow">→</div>
+      <div class="step">🔥 Vaporized</div><div class="arrow">→</div>
+      <div class="step">⚡ Ionized by e⁻ beam</div><div class="arrow">→</div>
+      <div class="step">🧲 Deflected by magnetic field (by m/z)</div><div class="arrow">→</div>
+      <div class="step">📊 Detector → Mass Spectrum</div>
+    </div>
+    <p style="font-size:0.9em;color:var(--muted);text-align:center;">Lighter ions / higher charge → deflected more. Heavier ions / lower charge → deflected less.</p>
+  </div>
+
+  <div class="card">
+    <h2>6. Reading a Mass Spectrum — Zirconium Example</h2>
+    <div class="spectrum">
+      <div class="bar-wrap"><div class="bar" style="height:96%;"></div><div class="bar-label">Zr-90<br>51.45%<br>89.905 u</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:21%;"></div><div class="bar-label">Zr-91<br>11.22%<br>90.906 u</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:32%;"></div><div class="bar-label">Zr-92<br>17.15%<br>91.905 u</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:33%;"></div><div class="bar-label">Zr-94<br>17.38%<br>93.906 u</div></div>
+      <div class="bar-wrap"><div class="bar" style="height:5%;"></div><div class="bar-label">Zr-96<br>2.80%<br>95.908 u</div></div>
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:0.85em;">Bar height = relative abundance (peak height in real spectrum). Zr-90 is the tallest → most abundant isotope.</p>
+    <div class="answer-box">
+      Average atomic mass of Zr ≈ 91.22 u<br>
+      <span style="font-size:0.7em;font-weight:normal;">(0.5145×89.905)+(0.1122×90.906)+(0.1715×91.905)+(0.1738×93.906)+(0.0280×95.908)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📌 Summary</h2>
+    <div class="summary-grid">
+      <div class="summary-item">Isotopes = same protons, different neutrons</div>
+      <div class="summary-item">Isotopes → different atomic masses</div>
+      <div class="summary-item">Relative abundance = % of a specific isotope in nature</div>
+      <div class="summary-item">Average atomic mass = weighted average of isotope masses</div>
+      <div class="summary-item">Mass spectrometry measures relative abundance experimentally</div>
+      <div class="summary-item">Spectrometer sorts ions by mass-to-charge ratio (m/z)</div>
+      <div class="summary-item">Spectrum: y-axis = abundance, x-axis = m/z (or mass if z=1)</div>
+      <div class="summary-item">Periodic table masses = relative/average atomic masses, not mass numbers</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

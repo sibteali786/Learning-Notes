@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>13 - Error Analysis</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .d3-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px;}
+  .d3-fig svg{display:block; margin:0 auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px; text-align:center;}
+
+  .steps{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .step{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .step .n{font-weight:700; color:var(--accent); min-width:20px;}
+
+  .category-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .cat-row{display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 16px;}
+  .cat-row .count{font-weight:700; color:#fff; font-size:1.0rem;}
+  .cat-row.big{border-left:4px solid var(--bad);}
+  .cat-row.small{border-left:4px solid var(--muted);}
+  .cat-row .badge2{font-size:0.7rem; font-weight:700; text-transform:uppercase; padding:2px 8px; border-radius:12px; margin-left:8px;}
+  .badge2.priority{background:rgba(255,107,129,0.15); color:var(--bad);}
+  .badge2.low{background:rgba(154,160,180,0.15); color:var(--muted);}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .caveat{background:rgba(255,209,102,0.08); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin-top:14px;}
+  .caveat .h{color:var(--warn); font-weight:700; margin-bottom:6px;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px;}
+  .compare-card .h{font-weight:700; color:#fff; margin-bottom:8px;}
+  .compare-card.good{border-left:4px solid var(--good);}
+  .compare-card.hard{border-left:4px solid var(--accent2);}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">ML Development Process</span>
+  <h1>Lesson 13 — Error Analysis</h1>
+  <p class="subtitle">The second key diagnostic after bias/variance — manually reading what your model actually gets wrong, so you stop guessing where to spend your time.</p>
+
+  <section>
+    <h2><span class="num">1</span> What Error Analysis Actually Is</h2>
+    <p>Take the examples your algorithm <strong>misclassified</strong> in the cross-validation set, and manually read through them, grouping them by common traits. That's it — it's a manual, qualitative process, not another formula.</p>
+    <div class="scenario">
+      <div class="stitle">Worked example</div>
+      <p style="margin:0;">With <code>m_cv = 500</code> and 100 misclassified examples, you'd read through all 100 by hand and bucket them: how many are pharmaceutical spam? How many use deliberate misspellings? How many have unusual routing? How many are phishing attempts? How many hide the message inside an embedded image?</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The Counts Tell You Where to Focus</h2>
+    <div class="d3-fig">
+      <svg id="chart-errors" viewBox="0 0 460 280" width="100%" style="max-width:460px"></svg>
+      <div class="fig-caption">Out of 100 misclassified emails — pharma spam and phishing dominate; misspellings barely register.</div>
+    </div>
+    <div class="category-list">
+      <div class="cat-row big"><span>Pharmaceutical spam</span><span class="count">21 <span class="badge2 priority">high impact</span></span></div>
+      <div class="cat-row big"><span>Phishing (steal passwords)</span><span class="count">18 <span class="badge2 priority">high impact</span></span></div>
+      <div class="cat-row"><span>Spam hidden in embedded image</span><span class="count">5</span></div>
+      <div class="cat-row"><span>Unusual email routing</span><span class="count">7</span></div>
+      <div class="cat-row small"><span>Deliberate misspellings</span><span class="count">3 <span class="badge2 low">low impact</span></span></div>
+    </div>
+    <p style="margin-top:12px;"><strong>Categories can overlap</strong> — one email can be pharma spam <em>and</em> have unusual routing <em>and</em> contain misspellings. Counting isn't about clean mutually-exclusive buckets; it's about spotting which traits show up most often across the misclassified set.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The Lesson from a Real Mistake</h2>
+    <div class="scenario">
+      <div class="stitle">A cautionary story from the instructor</div>
+      <p style="margin:0;">Significant time was once spent building sophisticated misspelling-detection algorithms for a spam classifier — only to later realize misspellings accounted for just 3 out of 100 misclassified emails. Even a perfect misspelling detector would only have fixed 3% of the errors. Wishing this error analysis had been done first, before investing in that feature, is exactly the trap this technique prevents.</p>
+    </div>
+    <p>From the counts above: sophisticated pharma-detection and phishing-detection features could meaningfully help; misspelling detection would barely move the needle. This directly informs the "which idea to chase" decision from the iterative loop (Lesson 12).</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> What to Do With the Categories You Find</h2>
+    <div class="steps">
+      <div class="step"><span class="n">→</span><div><strong>Targeted data collection</strong> — not "more data" generally, but specifically more pharma-spam examples or more phishing examples, so the model gets more signal exactly where it's weak.</div></div>
+      <div class="step"><span class="n">→</span><div><strong>Targeted features</strong> — e.g. features for specific drug/product names for pharma spam, or checking URLs against suspicious-link patterns for phishing.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Scaling It Up: Sampling When There's Too Much to Read</h2>
+    <div class="caveat">
+      <div class="h">5,000 CV examples, 1,000 misclassified — now what?</div>
+      <p style="margin:0;">Reading all 1,000 by hand often isn't realistic given time constraints. The practical move: randomly sample ~100–200 of the misclassified examples and analyze just that subset. That's usually enough to get reliable statistics on which error categories dominate, without requiring the full read-through.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> The One Real Limitation</h2>
+    <div class="compare-grid">
+      <div class="compare-card good">
+        <div class="h">Where error analysis shines</div>
+        <p style="margin:0; font-size:0.88rem;">Tasks humans are naturally good at — reading an email and judging "why did the algorithm get this wrong?" is intuitive when a human could do the task themselves.</p>
+      </div>
+      <div class="compare-card hard">
+        <div class="h">Where it's harder</div>
+        <p style="margin:0; font-size:0.88rem;">Tasks even humans struggle with — e.g. predicting exactly which ad someone will click. If a human reading the example can't say what the "right" answer should have been, categorizing the error is much less useful.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Bias/variance + error analysis = the full diagnostic toolkit</div>
+      <p style="margin:0;">Bias/variance analysis tells you <em>whether</em> more data would help at all. Error analysis tells you <em>what kind</em> of data or features would help most. Used together, on tasks humans can reasonably judge, this combination can save months of effort spent chasing fixes that only address a handful of the actual errors.</p>
+    </div>
+    <p style="margin-top:14px;">Next: once error analysis or a bias/variance check points toward "more data," there are specific techniques to make data collection more efficient — covered next.</p>
+  </section>
+
+  <footer>Lesson 13 · ML Development Process · ML Fundamentals</footer>
+</div>
+
+<script>
+const data = [
+  {label:"Pharma", value:21, color:"#ff6b81"},
+  {label:"Phishing", value:18, color:"#ff6b81"},
+  {label:"Embedded img", value:5, color:"#7c9bff"},
+  {label:"Unusual routing", value:7, color:"#7c9bff"},
+  {label:"Misspellings", value:3, color:"#9aa0b4"}
+];
+
+const svg = d3.select("#chart-errors");
+const width = 460, height = 280;
+const margin = {top: 20, right: 20, bottom: 70, left: 40};
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+const xScale = d3.scaleBand().domain(data.map(d => d.label)).range([0, innerWidth]).padding(0.35);
+const yScale = d3.scaleLinear().domain([0, 25]).range([innerHeight, 0]);
+
+const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+g.append("g").attr("transform", `translate(0,${innerHeight})`)
+  .call(d3.axisBottom(xScale).tickSize(0))
+  .call(a => a.select(".domain").attr("stroke","#4a4f66"))
+  .selectAll("text")
+  .attr("fill","#9aa0b4").attr("font-size","10px")
+  .attr("transform","rotate(-20)").style("text-anchor","end");
+
+g.append("g")
+  .call(d3.axisLeft(yScale).ticks(5))
+  .call(a => a.select(".domain").attr("stroke","#4a4f66"))
+  .selectAll("text").attr("fill","#9aa0b4").attr("font-size","10px");
+
+g.selectAll(".bar")
+  .data(data).enter().append("rect")
+  .attr("x", d => xScale(d.label))
+  .attr("y", d => yScale(d.value))
+  .attr("width", xScale.bandwidth())
+  .attr("height", d => innerHeight - yScale(d.value))
+  .attr("fill", d => d.color)
+  .attr("rx", 4);
+
+g.selectAll(".label")
+  .data(data).enter().append("text")
+  .attr("x", d => xScale(d.label) + xScale.bandwidth()/2)
+  .attr("y", d => yScale(d.value) - 8)
+  .attr("text-anchor","middle").attr("fill","#fff").attr("font-size","12px").attr("font-weight","700")
+  .text(d => d.value);
+</script>
+</body>
+</html>

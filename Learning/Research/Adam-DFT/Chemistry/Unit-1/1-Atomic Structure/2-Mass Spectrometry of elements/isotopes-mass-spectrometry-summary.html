@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Isotopes & Mass Spectrometry — Visual Summary</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #171a23;
+    --card2: #1c2030;
+    --border: #2a2f42;
+    --text: #e6e8f0;
+    --muted: #9aa0b4;
+    --blue: #5aa9ff;
+    --orange: #ff9d5a;
+    --green: #4fd995;
+    --purple: #b48cff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    padding: 40px 20px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1, h2, h3 { font-family: 'Syne', sans-serif; margin: 0 0 12px; }
+  h1 {
+    font-size: 2.1em;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .subtitle { color: var(--muted); margin-bottom: 30px; }
+  h2 {
+    font-size: 1.35em;
+    margin-top: 46px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin: 16px 0;
+  }
+  .pill {
+    display: inline-block;
+    font-size: 0.72em;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+  .pill.blue   { background: rgba(90,169,255,.15); color: var(--blue); border:1px solid rgba(90,169,255,.4);}
+  .pill.orange { background: rgba(255,157,90,.15); color: var(--orange); border:1px solid rgba(255,157,90,.4);}
+  .pill.green  { background: rgba(79,217,149,.15); color: var(--green); border:1px solid rgba(79,217,149,.4);}
+  .pill.purple { background: rgba(180,140,255,.15); color: var(--purple); border:1px solid rgba(180,140,255,.4);}
+
+  code, .kbd {
+    background: #10131c;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: var(--green);
+    font-size: 0.92em;
+  }
+  .formula {
+    background: #10131c;
+    border-left: 3px solid var(--blue);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    color: var(--blue);
+    font-size: 1.02em;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.92em;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  th { background: var(--card2); color: var(--orange); font-family: 'Syne', sans-serif; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 700px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .compare-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .compare-card h3 { font-size: 1em; color: var(--purple); margin-bottom: 8px;}
+  .compare-card ul { margin: 0; padding-left: 18px; color: var(--muted); }
+  .compare-card li { margin-bottom: 4px; }
+
+  ul { padding-left: 20px; }
+  li { margin-bottom: 6px; }
+
+  .example {
+    border-left: 3px solid var(--green);
+    background: rgba(79,217,149,.06);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+  }
+  .example .tag { color: var(--green); font-weight: 700; font-size: 0.8em; text-transform: uppercase; }
+
+  .tip {
+    border-left: 3px solid var(--orange);
+    background: rgba(255,157,90,.06);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 10px 0;
+  }
+  .tip .tag { color: var(--orange); font-weight: 700; font-size: 0.8em; text-transform: uppercase; }
+
+  svg { display: block; margin: 16px auto; max-width: 100%; }
+  .caption { text-align: center; color: var(--muted); font-size: 0.85em; margin-top: -8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Isotopes &amp; Mass Spectrometry</h1>
+  <div class="subtitle">AP Chemistry · Atomic Structure and Properties — visual notes</div>
+
+  <!-- PROBLEM STATEMENT -->
+  <h2><span class="pill blue">Why</span> The Problem</h2>
+  <div class="card">
+    Every atom of an element has the same number of protons, but the number of <b>neutrons</b> can vary.
+    That means atoms of the same element can have different masses — these variants are called
+    <b>isotopes</b>. Chemists needed a way to (1) name/notate these variants, (2) figure out how much of
+    each variant actually exists in nature, and (3) use that to compute the single "atomic mass" value
+    printed on the periodic table. <b>Mass spectrometry</b> is the experimental technique that makes this possible.
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <h2><span class="pill orange">Core</span> Isotopes &amp; Notation</h2>
+  <div class="card">
+    <p><b>Isotope</b> = atoms of the same element (same # protons) with a different # of neutrons → different atomic mass.</p>
+    <p>The word comes from Greek <i>iso-</i> ("same") + <i>-topos</i> ("place") — isotopes sit at the same spot on the periodic table.</p>
+    <div class="formula"># neutrons = mass number − # protons</div>
+    <p><b>Example:</b> Carbon-12 → mass number 12, atomic number 6 → 12 − 6 = <code>6 neutrons</code>.<br>
+       Chromium-52 → mass number 52, atomic number 24 → 52 − 24 = <code>28 neutrons</code>.</p>
+  </div>
+
+  <h2><span class="pill purple">Unit</span> The Unified Atomic Mass Unit (u)</h2>
+  <div class="card">
+    Working in kilograms for atom-sized masses is unwieldy (protons ≈ 1.673×10⁻²⁷ kg). So chemists defined
+    <code>1 u</code> = exactly 1/12 the mass of a neutral carbon-12 atom. In these units, protons and neutrons
+    both have a mass very close to <code>1 u</code>, and electrons are almost negligible (≈ 5.486×10⁻⁴ u).
+    <table>
+      <tr><th>Particle</th><th>Charge</th><th>Mass (u)</th><th>Location</th></tr>
+      <tr><td>proton</td><td>1+</td><td>1.007</td><td>nucleus</td></tr>
+      <tr><td>neutron</td><td>0</td><td>1.009</td><td>nucleus</td></tr>
+      <tr><td>electron</td><td>1−</td><td>0.0005486</td><td>outside nucleus</td></tr>
+    </table>
+    <div class="tip"><span class="tag">Note</span> "amu" (older textbooks) and "u" mean the same thing.</div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <h2><span class="pill green">Compare</span> Key Distinctions</h2>
+  <div class="grid3">
+    <div class="compare-card">
+      <h3>Mass Number</h3>
+      <ul>
+        <li>Whole number: # protons + # neutrons</li>
+        <li>Used in notation: e.g. carbon-<b>12</b></li>
+        <li>No units</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h3>Atomic Mass</h3>
+      <ul>
+        <li>Actual measured mass of <i>one specific isotope</i></li>
+        <li>Expressed in <code>u</code></li>
+        <li>Close to, but not identical to, mass number</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h3>Average Atomic Mass</h3>
+      <ul>
+        <li>Weighted average across <i>all</i> naturally occurring isotopes</li>
+        <li>This is the number on the periodic table</li>
+        <li>Also called "atomic weight" (unitless when shown that way)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="pill blue">Formula</span> Average Atomic Mass = Weighted Average</h2>
+  <div class="card">
+    <div class="formula">average atomic mass = Σ (relative abundance × atomic mass)ᵢ</div>
+    <div class="example">
+      <span class="tag">Worked Example — Chlorine</span>
+      <p>Cl-35: 75.76% abundant, atomic mass 34.97 u<br>
+         Cl-37: 24.24% abundant, atomic mass 36.97 u</p>
+      <div class="formula">
+        (0.7576 × 34.97 u) + (0.2424 × 36.97 u)<br>
+        = 26.49 u + 8.96 u<br>
+        = <b>35.45 u</b> ✓ matches periodic table
+      </div>
+      <p style="color:var(--muted); font-size:0.9em;">Because Cl-35 is ~3× more abundant, the weighted average lands much closer to 35 than to 37 — this is the whole point of "weighted."</p>
+    </div>
+  </div>
+
+  <!-- DIAGRAM: helium atom -->
+  <h2><span class="pill orange">Diagram</span> Anatomy of an Atom</h2>
+  <svg viewBox="0 0 520 300" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="260" cy="150" r="120" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <circle cx="245" cy="140" r="14" fill="var(--orange)"/>
+    <circle cx="270" cy="140" r="14" fill="var(--blue)"/>
+    <circle cx="245" cy="163" r="14" fill="var(--blue)"/>
+    <circle cx="270" cy="163" r="14" fill="var(--orange)"/>
+    <circle cx="150" cy="60" r="8" fill="var(--purple)"/>
+    <circle cx="380" cy="235" r="8" fill="var(--purple)"/>
+    <text x="260" y="290" text-anchor="middle" fill="var(--muted)" font-family="JetBrains Mono" font-size="12">Helium atom — 2 protons (orange), 2 neutrons (blue), 2 electrons (purple)</text>
+    <text x="440" y="70" fill="var(--orange)" font-family="JetBrains Mono" font-size="11">proton</text>
+    <line x1="435" y1="65" x2="280" y2="145" stroke="var(--orange)" stroke-width="1"/>
+    <text x="440" y="100" fill="var(--blue)" font-family="JetBrains Mono" font-size="11">neutron</text>
+    <line x1="435" y1="95" x2="280" y2="155" stroke="var(--blue)" stroke-width="1"/>
+    <text x="60" y="50" fill="var(--purple)" font-family="JetBrains Mono" font-size="11">electron</text>
+    <line x1="90" y1="55" x2="148" y2="62" stroke="var(--purple)" stroke-width="1"/>
+  </svg>
+
+  <!-- MASS SPECTROMETER DIAGRAM -->
+  <h2><span class="pill purple">Diagram</span> How a Mass Spectrometer Works</h2>
+  <svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg">
+    <rect x="30" y="100" width="380" height="50" rx="10" fill="var(--card2)" stroke="var(--border)"/>
+    <text x="70" y="90" fill="var(--blue)" font-family="JetBrains Mono" font-size="12">1. Vaporize</text>
+    <text x="180" y="90" fill="var(--orange)" font-family="JetBrains Mono" font-size="12">2. Ionize (e⁻ beam)</text>
+    <text x="330" y="90" fill="var(--green)" font-family="JetBrains Mono" font-size="12">3. Accelerate</text>
+    <path d="M410 125 Q 470 60 520 100" fill="none" stroke="var(--purple)" stroke-width="30" stroke-linecap="round" opacity="0.25"/>
+    <text x="440" y="55" fill="var(--purple)" font-family="JetBrains Mono" font-size="12">4. Magnetic deflection</text>
+    <text x="420" y="45" fill="var(--muted)" font-family="JetBrains Mono" font-size="10">(lighter ions deflect more)</text>
+    <rect x="500" y="90" width="70" height="60" rx="8" fill="var(--card2)" stroke="var(--border)"/>
+    <text x="505" y="170" fill="var(--text)" font-family="JetBrains Mono" font-size="12">5. Detector</text>
+    <line x1="45" y1="125" x2="405" y2="125" stroke="var(--green)" stroke-width="2" stroke-dasharray="6 4"/>
+  </svg>
+  <p class="caption">Sample → vapor → ions → accelerated → bent by a magnetic field by mass-to-charge ratio (m/z) → detector counts each ion type</p>
+
+  <div class="card">
+    <ul>
+      <li>Detector measures two things: the <code>m/z</code> ratio for each ion, and how many ions hit it at that ratio.</li>
+      <li>Output = <b>mass spectrum</b>: relative abundance (y-axis) vs. m/z or atomic mass (x-axis).</li>
+      <li>If every ion has charge <code>z = 1+</code>, the x-axis simplifies to just atomic mass in <code>u</code>.</li>
+      <li>Peak <b>height</b> = relative abundance of that isotope. Tallest peak = most common isotope.</li>
+    </ul>
+  </div>
+
+  <!-- REAL WORLD EXAMPLE -->
+  <h2><span class="pill green">Example</span> Real-World Scenario — Zirconium</h2>
+  <div class="example">
+    <span class="tag">Scenario</span>
+    <p>A geologist runs a pure zirconium sample through a mass spectrometer to determine its average
+    atomic mass — the same process used to certify reference materials or verify a sample's elemental identity.</p>
+    <table>
+      <tr><th>Isotope</th><th>Zr-90</th><th>Zr-91</th><th>Zr-92</th><th>Zr-94</th><th>Zr-96</th></tr>
+      <tr><td>Atomic mass (u)</td><td>89.905</td><td>90.906</td><td>91.905</td><td>93.906</td><td>95.908</td></tr>
+      <tr><td>Relative abundance (%)</td><td>51.45</td><td>11.22</td><td>17.15</td><td>17.38</td><td>2.80</td></tr>
+    </table>
+    <div class="formula">
+      = (0.5145×89.905) + (0.1122×90.906) + (0.1715×91.905) + (0.1738×93.906) + (0.0280×95.908)<br>
+      = <b>91.22 u</b>
+    </div>
+    <p style="color:var(--muted); font-size:0.9em;">Zr-90 dominates the spectrum (tallest peak, 51.45%), which is why the average lands closest to 90–91 rather than the midpoint of the full range.</p>
+  </div>
+
+  <div class="example">
+    <span class="tag">Scenario</span>
+    <p>A geochronologist measures the ratio of Chlorine-36 (a rare, radioactive isotope with a ~301,000-year
+    half-life) versus stable Cl-35/Cl-37 in groundwater or rock samples — mass spectrometry lets them date
+    when that water was last exposed to the atmosphere.</p>
+  </div>
+
+  <!-- TIPS -->
+  <h2><span class="pill orange">Tips</span> Interview / Practical Tips</h2>
+  <div class="tip"><span class="tag">Tip</span> Relative abundances of all stable isotopes of an element always sum to 100%.</div>
+  <div class="tip"><span class="tag">Tip</span> Don't round intermediate steps in weighted-average calculations — round only the final answer, or you'll drift off by hundredths.</div>
+  <div class="tip"><span class="tag">Tip</span> Deflection in the magnetic field is inversely proportional to m/z — heavier ions (or lower charge) deflect <i>less</i>.</div>
+  <div class="tip"><span class="tag">Tip</span> The masses printed on the periodic table are technically <i>relative</i> atomic masses (average atomic mass ÷ 1 u), which is why they're unitless.</div>
+  <div class="tip"><span class="tag">Tip</span> If two isotopes are roughly equally abundant, the average atomic mass will land roughly halfway between their masses — a fast sanity check before crunching the full formula.</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>rss_poller: Containerize + Dedup Fix</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#161a22; --panel2:#1c212b; --border:#2a3140;
+    --text:#e6e9ef; --muted:#94a1b8; --accent:#5eb0ff; --good:#59d499;
+    --warn:#f5c34d; --bad:#ff6b6b; --code:#0b0d12;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.55;padding:0 0 60px}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 24px}
+  h1{font-size:1.7rem;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0 0 32px;font-size:.95rem}
+  h2{font-size:1.15rem;margin:40px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);color:var(--accent)}
+  h3{font-size:1rem;margin:24px 0 10px;color:var(--text)}
+  p{margin:0 0 12px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:14px}
+  .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
+  .step{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.85rem;min-width:120px;text-align:center}
+  .arrow{color:var(--muted);font-size:1.1rem}
+  .step.bad{border-color:var(--bad);color:#ffb3b3}
+  .step.good{border-color:var(--good);color:#bdf3d6}
+  .step.warn{border-color:var(--warn);color:#ffe4a1}
+  code, pre{font-family:"SF Mono",Consolas,Monaco,monospace}
+  code{background:var(--code);padding:2px 6px;border-radius:4px;font-size:.85em;color:#a9d6ff}
+  pre{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.82rem;color:#d3d9e6}
+  pre .cmt{color:var(--muted)}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin-bottom:6px}
+  .tag{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-right:8px}
+  .tag.gotcha{background:#3a2a12;color:var(--warn)}
+  .tag.fix{background:#123a24;color:var(--good)}
+  .tag.reason{background:#12233a;color:var(--accent)}
+  .tag.verify{background:#2a1a3a;color:#d3a9ff}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two-col{grid-template-columns:1fr}}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--border);font-size:.88rem}
+  .kv:last-child{border-bottom:none}
+  .kv b{color:var(--text)}
+  .kv span{color:var(--muted)}
+  .toggle-row{display:flex;gap:8px;margin-bottom:16px}
+  .toggle-btn{background:var(--panel2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:.82rem;cursor:pointer}
+  .toggle-btn.active{background:var(--accent);color:#08131f;border-color:var(--accent)}
+  .pane{display:none}
+  .pane.active{display:block}
+  .badurl{color:var(--bad)}
+  .goodurl{color:var(--good)}
+  .rownum{font-weight:700}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;margin:10px 0}
+  th,td{padding:6px 10px;border-bottom:1px solid var(--border);text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .footer-note{margin-top:40px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>rss_poller.py — Containerize + Duplicate-Row Fix</h1>
+  <p class="sub">2026-09-12 session · Live Feed Engine · learning-mode (hand-written code, Socratic guidance)</p>
+
+  <h2>1. Containerizing rss_poller</h2>
+
+  <div class="card">
+    <p><span class="tag reason">Reasoned first</span> The poller's <code>main()</code> already had a
+    <code>while True: poll_once(); sleep(300)</code> loop from earlier work — "run manually" only
+    meant <code>poll_once()</code> had been called directly, not that the loop structure was
+    missing. Containerizing was mostly plumbing, not new logic.</p>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>Decision: no asyncpg pool</h3>
+      <p>api.py juggles hundreds of concurrent HTTP requests → needed a pool.
+      rss_poller is one sequential process, one connection, no concurrency →
+      pooling solves a problem this process doesn't have.</p>
+    </div>
+    <div class="card">
+      <h3>Decision: separate Dockerfile</h3>
+      <p>Different <code>CMD</code>, different dependency set (no fastapi/gunicorn/uvicorn
+      needed). One shared Dockerfile handling two images invites confusion for
+      future readers → <code>Dockerfile.poller</code> + <code>requirements-poller.txt</code>.</p>
+    </div>
+  </div>
+
+  <h3>Bugs caught along the way</h3>
+  <div class="flow">
+    <div class="step bad">Dockerfile.poller<br><code>COPY main.py</code></div>
+    <span class="arrow">→</span>
+    <div class="step warn">CMD still runs<br><code>rss_poller.py</code></div>
+    <span class="arrow">→</span>
+    <div class="step good">Fixed:<br><code>COPY rss_poller.py</code></div>
+  </div>
+
+  <div class="card">
+    <span class="tag gotcha">Gotcha</span>
+    <b>Empty <code>docker logs</code> despite the poller clearly working</b>
+    <p style="margin-top:8px">Rows were inserting (confirmed via <code>SELECT count(*)</code> climbing),
+    but <code>docker logs rss_poller</code> showed nothing. Cause: Python buffers <code>stdout</code>
+    differently depending on whether it's a TTY. In a container, stdout is piped — not a terminal —
+    so CPython switches from line-buffered to block-buffered, and <code>print()</code> output sits
+    in a buffer instead of flushing.</p>
+    <pre><span class="cmt"># fix — either works</span>
+CMD ["python", "-u", "rss_poller.py"]
+<span class="cmt"># or: ENV PYTHONUNBUFFERED=1</span></pre>
+    <p><span class="tag verify">Verified</span> After the fix, <code>docker logs -f rss_poller</code> showed
+    live per-publisher output every cycle:</p>
+    <pre>Polling BBC World....
+  -> 23 entries processed
+Polling Reuters World....
+  -> 0 entries processed
+Polling TechCrunch....
+  -> 20 entries processed
+Polling Hacker News....
+  -> 20 entries processed</pre>
+  </div>
+
+  <h3>Final docker-compose.yml service</h3>
+  <div class="card">
+    <div class="kv"><b>DATABASE_URL</b><span>same pattern as <code>api</code>, points at compose service <code>postgres</code></span></div>
+    <div class="kv"><b>depends_on</b><span><code>postgres: condition: service_healthy</code></span></div>
+    <div class="kv"><b>restart</b><span><code>unless-stopped</code> — a flaky feed fetch shouldn't leave it dead</span></div>
+    <div class="kv"><b>ports / EXPOSE</b><span>none — not serving anything over HTTP</span></div>
+  </div>
+
+  <h2>2. Duplicate-Row Bug</h2>
+
+  <p>Every 5-minute cycle re-fetches the <em>same</em> live feed entries. With a plain
+  <code>INSERT</code> and no identity check on <code>url</code>, that means every cycle
+  re-inserts every still-live article as a brand new row.</p>
+
+  <div class="flow">
+    <div class="step bad">poll_once()<br>every 5 min</div>
+    <span class="arrow">→</span>
+    <div class="step bad">same feed entries<br>re-fetched</div>
+    <span class="arrow">→</span>
+    <div class="step bad">plain INSERT,<br>no url check</div>
+    <span class="arrow">→</span>
+    <div class="step bad">duplicate rows<br>pile up forever</div>
+  </div>
+
+  <h3>Diagnosis: ROW_NUMBER() OVER (PARTITION BY url)</h3>
+  <div class="card">
+    <pre>SELECT id, url, ROW_NUMBER() OVER (PARTITION BY url ORDER BY id) AS row_num
+FROM article;</pre>
+    <p>Ranks every row within its own <code>url</code> group, ordered by <code>id</code> —
+    the first-inserted copy gets <code>row_num = 1</code>, every re-fetch after that gets 2, 3, 4...</p>
+    <table>
+      <tr><th>id</th><th>url</th><th>row_num</th></tr>
+      <tr><td>10000124</td><td class="goodurl">blinkenlights.de</td><td class="rownum">1</td></tr>
+      <tr><td>10000187</td><td class="badurl">blinkenlights.de</td><td class="rownum">2</td></tr>
+      <tr><td>10000250</td><td class="badurl">blinkenlights.de</td><td class="rownum">3</td></tr>
+      <tr><td>10000315</td><td class="badurl">blinkenlights.de</td><td class="rownum">4</td></tr>
+      <tr><td>...</td><td>...(6 copies total)</td><td>...</td></tr>
+    </table>
+    <p>Confirmed the synthetic seed data (<code>example.com/article/N</code>) was all unique
+    — every duplicate traced back to the poller's own re-fetch pattern, nothing to do with the seed.</p>
+  </div>
+
+  <h3>Why DB constraint, not app-level check-then-insert</h3>
+  <div class="card">
+    <span class="tag reason">Reasoned</span>
+    <p>Rejected "<code>SELECT</code> to check, then <code>INSERT</code> if absent" from the app —
+    it has a TOCTOU (time-of-check-to-time-of-use) gap between the check and the write where a
+    duplicate could still slip through, plus it costs two round trips per row instead of one.
+    A DB-level <code>UNIQUE</code> constraint + <code>ON CONFLICT</code> enforces it atomically,
+    in a single round trip.</p>
+  </div>
+
+  <h3>The fix, in order</h3>
+  <div class="toggle-row">
+    <button class="toggle-btn active" data-pane="p1">1. Schema (future)</button>
+    <button class="toggle-btn" data-pane="p2">2. Migrate live table</button>
+    <button class="toggle-btn" data-pane="p3">3. App code</button>
+  </div>
+
+  <div class="pane active" id="p1">
+    <div class="card">
+      <p>Added to <code>init.sql</code> so any fresh volume starts clean:</p>
+      <pre>CREATE TABLE article (
+    id            BIGSERIAL PRIMARY KEY,
+    title         TEXT NOT NULL,
+    url           TEXT NOT NULL <span style="color:var(--good)">UNIQUE</span>,
+    ...
+);</pre>
+    </div>
+  </div>
+
+  <div class="pane" id="p2">
+    <div class="card">
+      <p>The live table already had duplicates, so a straight <code>ALTER TABLE</code> failed first:</p>
+      <pre><span class="cmt">ERROR:  could not create unique index "uq_url"
+DETAIL:  Key (url)=(...) is duplicated.</span></pre>
+      <p>Fixed by deleting all but the earliest copy of each duplicated <code>url</code>, using a CTE
+      (a window function like <code>ROW_NUMBER()</code> can't be referenced directly in a
+      <code>WHERE</code> clause, and <code>DELETE</code> must target a real table — so the CTE computes
+      the <em>ids to delete</em>, and the outer <code>DELETE</code> matches against them):</p>
+      <pre>WITH duplicate_rows AS (
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY url ORDER BY id) AS row_num
+    FROM article
+)
+DELETE FROM article
+WHERE id IN (SELECT id FROM duplicate_rows WHERE row_num > 1);
+<span class="cmt">-- DELETE 418</span>
+
+ALTER TABLE article ADD CONSTRAINT uq_url UNIQUE (url);
+<span class="cmt">-- ALTER TABLE ✓</span></pre>
+    </div>
+  </div>
+
+  <div class="pane" id="p3">
+    <div class="card">
+      <p>Updated <code>insert_article</code> so a re-seen <code>url</code> on a future poll silently
+      no-ops instead of crashing on <code>UniqueViolation</code>:</p>
+      <pre>cur.execute(
+    """
+    INSERT INTO article (title, url, publisher_id, category, region, published_at)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        <span style="color:var(--good)">ON CONFLICT (url) DO NOTHING</span>
+    """,
+    (title, url, publisher_id, category, region, published_at),
+)</pre>
+    </div>
+  </div>
+
+  <h2>3. Verification</h2>
+  <div class="card">
+    <span class="tag verify">Verified, not assumed</span>
+    <ul>
+      <li>Rebuilt <code>rss_poller</code> image, ran a full 5-minute cycle</li>
+      <li><code>docker logs -f rss_poller</code> — no crash, no <code>UniqueViolation</code></li>
+      <li><code>SELECT count(*) FROM article</code> — stopped incrementing for already-seen URLs;
+      only genuinely new feed entries add rows now</li>
+    </ul>
+  </div>
+
+  <div class="footer-note">
+    Live Feed Engine · Phase 1 closed out, rss_poller.py now containerized as its own service with
+    an independent 5-minute polling loop and a hardened, idempotent insert path.
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.toggle-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.pane).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

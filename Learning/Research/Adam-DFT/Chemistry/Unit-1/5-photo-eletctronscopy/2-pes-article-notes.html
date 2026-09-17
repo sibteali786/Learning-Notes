@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PES Article Notes — BE Formula & Worked Spectra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5da8ff; --orange:#ff9f5a; --green:#5ce0a0; --purple:#c792ea;
+    --red:#ff6b81; --text:#e6e8ef; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono',monospace; line-height:1.6;}
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 12px;}
+  .wrap{max-width:980px; margin:0 auto;}
+  header{margin-bottom:40px;}
+  header h1{font-size:1.9rem; font-weight:800;}
+  header p{color:var(--muted); margin:0;}
+  .pill{display:inline-block; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; margin-right:6px; margin-bottom:6px;}
+  .pill-blue{background:rgba(93,168,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill-orange{background:rgba(255,159,90,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill-green{background:rgba(92,224,160,.15); color:var(--green); border:1px solid var(--green);}
+  .pill-purple{background:rgba(199,146,234,.15); color:var(--purple); border:1px solid var(--purple);}
+  section{margin-bottom:44px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:16px;}
+  .card h3{color:var(--orange); font-size:1.05rem;}
+  .formula{background:#1a1d2b; border-left:3px solid var(--purple); border-radius:6px; padding:14px 18px; margin:14px 0; font-size:1.15rem; color:var(--purple); font-weight:700; text-align:center;}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.88rem;}
+  th,td{border:1px solid var(--border); padding:10px 12px; text-align:left;}
+  th{background:#1b1f2d; color:var(--orange); font-family:'Syne',sans-serif;}
+  tr:nth-child(even){background:#141724;}
+  .callout{border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.88rem;}
+  .tip{background:rgba(92,224,160,.08); border:1px solid var(--green);}
+  .tip::before{content:"💡 TIP  "; color:var(--green); font-weight:700;}
+  .example{background:rgba(93,168,255,.08); border:1px solid var(--blue);}
+  .example::before{content:"🧪 EXAMPLE  "; color:var(--blue); font-weight:700;}
+  .warning{background:rgba(255,107,129,.08); border:1px solid var(--red);}
+  .warning::before{content:"⚠️ WATCH OUT  "; color:var(--red); font-weight:700;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>PES Article Notes: BE Formula & Worked Spectra</h1>
+  <p>AP Chemistry · Unit 1 · Khan Academy article companion (Li, O, mystery-element cases)</p>
+  <div style="margin-top:12px;">
+    <span class="pill pill-blue">PES DEFINITION</span>
+    <span class="pill pill-blue">BE = hν − KE</span>
+    <span class="pill pill-orange">PEAK GROUPS = SHELLS</span>
+    <span class="pill pill-green">Al IDENTIFICATION</span>
+  </div>
+</header>
+
+<section>
+  <h2 style="color:var(--blue);">📌 Problem Statement</h2>
+  <div class="card">
+    <p>The Khan Academy article formalizes PES beyond "peaks = subshells": it gives the actual physics equation behind binding energy, and works through real idealized spectra (Li, O, and a mystery element) step by step.</p>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--orange);">⚙️ How It Works</h2>
+
+  <div class="card">
+    <h3>0. What is PES? (Definition)</h3>
+    <p><b style="color:var(--green);">Photoelectron spectroscopy (PES)</b> is an experimental technique that measures the relative energies of electrons in atoms and molecules. A sample is bombarded with high-energy UV or X-ray radiation, ejecting electrons ("photoelectrons"); their kinetic energies are recorded by an energy analyzer and counted by a detector. Scientists use it to study elemental composition and bonding — here, we use it to confirm electron shells, subshells, and electron configurations.</p>
+  </div>
+
+  <div class="card">
+    <h3>1. The Physics: Deriving BE = hν − KE</h3>
+    <p>PES is built on Einstein's <b>photoelectric effect</b> (1905): light of sufficient energy striking a surface ejects electrons.</p>
+    <p>By <b>conservation of energy</b>, the ionizing photon's energy must be split between (a) overcoming the electron's binding energy and (b) whatever's left over becomes the ejected electron's kinetic energy:</p>
+    <div class="formula">E<sub>photon</sub> = BE + KE<sub>electron</sub></div>
+    <p>The energy of a photon is given by Planck's relation:</p>
+    <div class="formula">E<sub>photon</sub> = hν</div>
+    <p style="color:var(--muted);">(h = Planck's constant, 6.626×10⁻³⁴ J·s; ν = frequency in Hz)</p>
+    <p>Substituting and rearranging to solve for BE:</p>
+    <div class="formula">hν = BE + KE<sub>electron</sub>  →  BE = hν − KE<sub>electron</sub></div>
+    <div class="callout tip">
+      hν is fixed (you chose the radiation source). KE is what the detector measures directly. BE is calculated from the two — and that calculated BE is exactly the x-axis value of each peak in the spectrum.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2. Reading Conventions</h3>
+    <ul style="margin:0; padding-left:20px;">
+      <li>X-axis: binding energy, <b>decreasing</b> left → right, and <b>logarithmic scale</b> (not linear!) — units MJ/mol or eV.</li>
+      <li>Y-axis: relative electron count → peak height ∝ number of electrons in that subshell.</li>
+      <li>Electrons in the <b>same shell</b> cluster into a "group" of peaks with similar BE (e.g., 2s and 2p are close together, both much lower BE than 1s).</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>3. Worked Example — Lithium (1s² 2s¹)</h3>
+    <svg viewBox="0 0 500 160" width="100%" height="160">
+      <line x1="30" y1="140" x2="470" y2="140" stroke="#8b93a7" stroke-width="1.5"/>
+      <rect x="100" y="20" width="10" height="120" fill="#ff6b81"/>
+      <text x="105" y="12" fill="#ff6b81" font-size="13" text-anchor="middle">1s² (high BE)</text>
+      <rect x="330" y="80" width="10" height="60" fill="#5ce0a0"/>
+      <text x="335" y="72" fill="#5ce0a0" font-size="13" text-anchor="middle">2s¹ (low BE)</text>
+      <text x="90" y="155" fill="#8b93a7" font-size="11">←higher BE</text>
+      <text x="360" y="155" fill="#8b93a7" font-size="11">lower BE→</text>
+    </svg>
+    <p style="margin-bottom:0;">Two peaks, 2:1 intensity ratio. The taller/closer-to-origin peak (higher BE) = 1s² (2 electrons, less shielded, closer to nucleus). The shorter/farther peak = 2s¹ (1 electron).</p>
+    <div class="callout example">
+      For Li, the 2s peak's BE <b>equals</b> the first ionization energy exactly — it's the outermost/least-bound electron. But the 1s peak's BE is <b>not</b> the 2nd ionization energy — once you remove the 2s electron, the 1s electrons get pulled in tighter and their BE changes.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4. Worked Example — Oxygen (1s² 2s² 2p⁴)</h3>
+    <table>
+      <tr><th>Peak (L→R)</th><th>Subshell</th><th>Relative height</th><th>Why</th></tr>
+      <tr><td>1 (highest BE, ~100 MJ/mol)</td><td>1s</td><td>1×</td><td>Closest to nucleus, least shielded</td></tr>
+      <tr><td>2</td><td>2s</td><td>1×</td><td>Same shell as 2p, so similar BE to peak 3</td></tr>
+      <tr><td>3 (lowest BE)</td><td>2p</td><td>2×</td><td>4 electrons vs. 2 in 1s/2s → double height</td></tr>
+    </table>
+    <div class="callout tip">
+      Grouping check: 2s and 2p sit close together (both between 1–10 MJ/mol) since they're the same shell — while 1s sits far off alone (~100 MJ/mol). That "2 peaks close, 1 far" pattern is your visual shell/subshell signal.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>5. Concept Check — Predicting Peak Count (Calcium)</h3>
+    <p>You don't need a spectrum to predict how many peaks an element will show — just count occupied subshells in its electron configuration.</p>
+    <div class="formula">Ca: 1s² 2s² 2p⁶ 3s² 3p⁶ 4s²  →  6 occupied subshells  →  6 peaks</div>
+  </div>
+
+  <div class="card">
+    <h3>6. Identifying a Mystery Element — Aluminum</h3>
+    <p>5 peaks → 5 subshells: 1s, 2s, 2p, 3s, 3p. Intensities (L→R): 2×, 2×, 6×, 2×, 1×.</p>
+    <div class="formula">1s² 2s² 2p⁶ 3s² 3p¹  →  Al</div>
+    <p>The giveaway is the tiny rightmost peak — only <b>half</b> the height of 1s/2s/3s → just 1 electron in 3p → first element of the 3rd-row p-block → aluminum.</p>
+    <div class="callout example">
+      Cross-check: 3 "groups" of peaks visible (⟨1s⟩, ⟨2s,2p⟩, ⟨3s,3p⟩) → matches 3 occupied electron shells in Al. Everything lines up.
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--green);">🔍 Key Distinctions</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="color:var(--orange);">Core electrons</h3>
+      <p>Higher BE · closer to nucleus · less shielded · left side of spectrum · large groups isolated from valence peaks.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--blue);">Valence electrons</h3>
+      <p>Lowest BE · outermost · most shielded · rightmost peak(s) · BE of this peak = first ionization energy.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 style="color:var(--red);">🎯 Exam Tips</h2>
+  <div class="card">
+    <ul style="margin:0; padding-left:20px;">
+      <li>Memorize BE = hν − KE; you may be asked to compute BE given hν and KE directly.</li>
+      <li>The x-axis is logarithmic and reversed — always double check which way BE increases before reading peaks.</li>
+      <li>Use peak <b>grouping</b> (clusters close together = same shell) to sanity-check subshell assignments, not just individual heights.</li>
+      <li>Only the outermost (lowest BE) peak's value equals the 1st ionization energy — never assume other peaks correspond to any ionization energy.</li>
+      <li>Total electrons summed across all peaks = atomic number Z (for a neutral atom) → identifies the element.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
