@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>16 - Full Cycle of an ML Project</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .cycle-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:20px; margin-top:14px; text-align:center;}
+  .cycle-fig svg{max-width:100%; height:auto;}
+
+  .stage-grid{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .stage-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px 16px;}
+  .stage-row .dot{width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0;}
+  .dot.scope{background:var(--good);}
+  .dot.collect{background:var(--accent);}
+  .dot.train{background:var(--warn);}
+  .dot.deploy{background:var(--cv);}
+  .stage-row .stitle{font-weight:700; color:#fff;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .deploy-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:20px; margin-top:14px; text-align:center;}
+  .deploy-fig svg{max-width:100%; height:auto;}
+
+  .software-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .software-item{display:flex; gap:10px; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; font-size:0.88rem;}
+  .software-item .pill{font-size:0.7rem; font-weight:700; background:rgba(124,155,255,0.15); color:var(--accent); padding:2px 10px; border-radius:12px; white-space:nowrap;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">ML Development Process</span>
+  <h1>Lesson 16 — Full Cycle of an ML Project</h1>
+  <p class="subtitle">Training the model is one piece of a much bigger picture — scoping, data, deployment, and ongoing maintenance, illustrated with a speech recognition example.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Four-Stage Cycle</h2>
+    <div class="cycle-fig">
+      <svg viewBox="0 0 620 220" width="600">
+        <polygon points="20,60 130,60 150,110 130,160 20,160 40,110" fill="#5ed6a422" stroke="#5ed6a4" stroke-width="2"/>
+        <text x="80" y="100" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Scope</text>
+        <text x="80" y="118" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">project</text>
+
+        <polygon points="170,60 280,60 300,110 280,160 170,160 190,110" fill="#7c9bff22" stroke="#7c9bff" stroke-width="2"/>
+        <text x="230" y="100" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Collect</text>
+        <text x="230" y="118" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">data</text>
+
+        <polygon points="320,60 430,60 450,110 430,160 320,160 340,110" fill="#ffd16622" stroke="#ffd166" stroke-width="2"/>
+        <text x="380" y="100" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Train</text>
+        <text x="380" y="118" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">model</text>
+
+        <polygon points="470,60 580,60 600,110 580,160 470,160 490,110" fill="#c792ea22" stroke="#c792ea" stroke-width="2"/>
+        <text x="530" y="100" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Deploy in</text>
+        <text x="530" y="118" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">production</text>
+
+        <path d="M 380 55 L 380 30 L 230 30 L 230 55" fill="none" stroke="#ffd166" stroke-width="1.5" marker-end="url(#a1)"/>
+        <path d="M 530 55 L 530 20 L 150 20 L 150 55" fill="none" stroke="#c792ea" stroke-width="1.5" marker-end="url(#a2)"/>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L5,8 L10,0 z" fill="#ffd166"/></marker>
+          <marker id="a2" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L5,8 L10,0 z" fill="#c792ea"/></marker>
+        </defs>
+
+        <text x="80" y="185" text-anchor="middle" fill="#5ed6a4" font-size="10">Define project</text>
+        <text x="230" y="185" text-anchor="middle" fill="#7c9bff" font-size="10">Define &amp; collect data</text>
+        <text x="380" y="185" text-anchor="middle" fill="#ffd166" font-size="10">Training, error analysis,</text>
+        <text x="380" y="198" text-anchor="middle" fill="#ffd166" font-size="10">iterative improvement</text>
+        <text x="530" y="185" text-anchor="middle" fill="#c792ea" font-size="10">Deploy, monitor,</text>
+        <text x="530" y="198" text-anchor="middle" fill="#c792ea" font-size="10">maintain system</text>
+      </svg>
+    </div>
+    <p style="margin-top:12px;">The feedback loops matter: training can send you back to collecting more (or more targeted) data, and deployment can reveal problems that send you back to training — or even back to collecting more data, now sourced from real production traffic.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Walking Through Each Stage — Speech Recognition Example</h2>
+    <div class="stage-grid">
+      <div class="stage-row"><span class="dot scope"></span><div><span class="stitle">Scope the project</span> — decide what to build. e.g. "voice search: let people search by speaking into their phone instead of typing."</div></div>
+      <div class="stage-row"><span class="dot collect"></span><div><span class="stitle">Collect data</span> — decide what data is needed, then go get the audio clips and their transcripts (labels).</div></div>
+      <div class="stage-row"><span class="dot train"></span><div><span class="stitle">Train the model</span> — train, run error analysis, iterate. It's completely normal for this stage to loop back to "collect more data" — sometimes broadly, sometimes very specifically.</div></div>
+      <div class="stage-row"><span class="dot deploy"></span><div><span class="stitle">Deploy in production</span> — make it available to real users, then monitor and maintain it, since performance can degrade after launch.</div></div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">A concrete error-analysis-to-data loop</div>
+      <p style="margin:0;">The instructor found their speech system performed poorly specifically on car-background-noise audio. Rather than collecting more data generally, they used <strong>data augmentation</strong> (Lesson 14) to synthesize more car-noise training examples — directly closing the gap error analysis had revealed.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Deployment Architecture: Inference Server</h2>
+    <div class="deploy-fig">
+      <svg viewBox="0 0 560 220" width="540">
+        <rect x="20" y="40" width="200" height="140" rx="10" fill="#1d2130" stroke="#7c9bff" stroke-width="2"/>
+        <text x="120" y="65" text-anchor="middle" fill="#7c9bff" font-size="13" font-weight="700">Inference Server</text>
+        <rect x="45" y="85" width="150" height="70" rx="6" fill="#0c0e14" stroke="#2a2f42"/>
+        <text x="120" y="125" text-anchor="middle" fill="#fff" font-size="12">ML model</text>
+
+        <rect x="340" y="40" width="200" height="140" rx="10" fill="#1d2130" stroke="#c792ea" stroke-width="2"/>
+        <text x="440" y="65" text-anchor="middle" fill="#c792ea" font-size="13" font-weight="700">Mobile App</text>
+
+        <line x1="340" y1="90" x2="222" y2="90" stroke="#4a4f66" stroke-width="2" marker-end="url(#a3)"/>
+        <text x="280" y="82" text-anchor="middle" fill="#9aa0b4" font-size="10">API call (x)</text>
+        <text x="280" y="105" text-anchor="middle" fill="#9aa0b4" font-size="9">audio clip</text>
+
+        <line x1="222" y1="145" x2="338" y2="145" stroke="#4a4f66" stroke-width="2" marker-end="url(#a4)"/>
+        <text x="280" y="137" text-anchor="middle" fill="#9aa0b4" font-size="10">Inference (ŷ)</text>
+        <text x="280" y="160" text-anchor="middle" fill="#9aa0b4" font-size="9">text transcript</text>
+
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4a4f66"/></marker>
+          <marker id="a4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4a4f66"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <p style="margin-top:12px;">The mobile app records audio and sends it via API call as input <code>x</code> to the inference server. The server runs the trained model and returns a prediction <code>ŷ</code> — here, the transcribed text. This request/response pattern (send <code>x</code>, get back <code>ŷ</code>) is the common shape for serving any trained model.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Software Engineering Behind Deployment</h2>
+    <div class="software-list">
+      <div class="software-item"><span class="pill">reliability</span> Ensure predictions are consistently correct and available</div>
+      <div class="software-item"><span class="pill">efficiency</span> Keep computational cost of inference low</div>
+      <div class="software-item"><span class="pill">scaling</span> Handle anywhere from a handful of users to hundreds of millions</div>
+      <div class="software-item"><span class="pill">logging</span> Record inputs (x) and predictions (ŷ), with user privacy/consent respected</div>
+      <div class="software-item"><span class="pill">monitoring</span> Watch for performance degradation over time</div>
+      <div class="software-item"><span class="pill">updates</span> Retrain and redeploy the model as needed</div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">Real example: why monitoring matters</div>
+      <p style="margin:0;">A speech system trained on a fixed dataset started performing poorly whenever new celebrities became famous or new politicians got elected — names that simply weren't in the training data. Monitoring surfaced this <strong>data shift</strong>, which triggered retraining and a model update to bring accuracy back up. Without monitoring, this degradation could have gone unnoticed indefinitely.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> MLOps</h2>
+    <p><strong>MLOps</strong> (Machine Learning Operations) is the practice of systematically building, deploying, and maintaining ML systems — ensuring reliability, scalability, good logging, active monitoring, and a clear path to model updates. It's a growing field of its own, distinct from the model-training work covered throughout this course, and the team that trains a model isn't always the same team that deploys and operates it.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Training is the critical piece — not the only piece</div>
+      <p style="margin:0;">Everything covered about bias/variance, error analysis, and adding data is essential to getting a high-performing model. But shipping that model to real users at any meaningful scale brings a second, genuinely different set of engineering concerns — reliability, scaling, logging, monitoring, and the discipline to keep improving after launch, not just before it.</p>
+    </div>
+    <p style="margin-top:14px;">Next: the ethics of building machine learning systems — a crucial consideration for many real-world applications.</p>
+  </section>
+
+  <footer>Lesson 16 · ML Development Process · ML Fundamentals</footer>
+</div>
+</body>
+</html>
