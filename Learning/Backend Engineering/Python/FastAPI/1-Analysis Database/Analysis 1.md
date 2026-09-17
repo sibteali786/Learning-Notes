@@ -57,3 +57,32 @@ LIMIT 20;
  Planning Time: 0.668 ms
  Execution Time: 2.001 ms
 (14 rows)
+
+
+## 50M Rows
+```sql
+EXPLAIN ANALYZE
+SELECT a.id, a.title, a.url, p.name AS "publisherName", a.category, a.region, a.published_at AS "publishedAt"
+FROM article a
+JOIN publisher p ON p.id = a.publisher_id
+WHERE a.region = 'US'
+ORDER BY a.id DESC
+LIMIT 20
+```
+
+                                                                         QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.72..11.38 rows=20 width=121) (actual time=0.037..0.063 rows=20 loops=1)
+   ->  Nested Loop  (cost=0.72..6687520.48 rows=12557622 width=121) (actual time=0.036..0.059 rows=20 loops=1)
+         ->  Index Scan Backward using article_pkey on article a  (cost=0.56..6373886.00 rows=12557622 width=93) (actual time=0.022..0.029 rows=20 loops=1)
+               Filter: (region = 'US'::text)
+         ->  Memoize  (cost=0.16..1.38 rows=1 width=36) (actual time=0.001..0.001 rows=1 loops=20)
+               Cache Key: a.publisher_id
+               Cache Mode: logical
+               Hits: 18  Misses: 2  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+               ->  Index Scan using publisher_pkey on publisher p  (cost=0.15..1.37 rows=1 width=36) (actual time=0.005..0.005 rows=1 loops=2)
+                     Index Cond: (id = a.publisher_id)
+ Planning Time: 0.155 ms
+ Execution Time: 0.094 ms
+(12 rows)
+

@@ -15,3 +15,11 @@ https://github.com/97Greyfox/pms-frontend
 - [https://www.hellointerview.com/learn/system-design/core-concepts/db-indexing](https://www.hellointerview.com/learn/system-design/core-concepts/db-indexing)
     
 - [https://www.hellointerview.com/learn/system-design/core-concepts/caching](https://www.hellointerview.com/learn/system-design/core-concepts/caching)
+
+## User created
+```json
+{"data":{"signup":{"id":"6aac051ad35dd9c32d7b5b4a","firstName":"Test","lastName":"User1","email":"test@test.com","role":"admin","__typename":"User"}}}
+
+```
+
+http://167.233.45.235/dashboard

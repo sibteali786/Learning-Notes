@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>20 - Assignment: Advice for Applying ML</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  pre{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:0.82rem; margin:12px 0;}
+  pre code{background:none; border:none; padding:0; color:#d4d8e8;}
+  .cm{color:#546079; font-style:italic;} .fn{color:#82aaff;} .str{color:#c3e88d;} .kw{color:#c792ea;}
+
+  .steps{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .step{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px;}
+  .step .n{font-weight:700; color:var(--accent); min-width:20px;}
+
+  table{width:100%; border-collapse:collapse; margin-top:14px; font-size:0.86rem;}
+  th, td{padding:8px 12px; text-align:center; border-bottom:1px solid var(--border);}
+  th{color:var(--accent); font-weight:600;}
+  td:first-child, th:first-child{text-align:left;}
+
+  .qa{background:rgba(124,155,255,0.08); border:1px solid var(--accent); border-radius:10px; padding:16px 18px; margin-top:14px;}
+  .qa .q{color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .qa .a{margin:0;}
+
+  .model-compare{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.model-compare{grid-template-columns:1fr;}}
+  .model-card{border-radius:10px; padding:16px; border:1px solid var(--border);}
+  .model-card.complex{background:rgba(255,107,129,0.08); border-color:rgba(255,107,129,0.4);}
+  .model-card.simple{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .model-card .h{font-weight:700; margin-bottom:8px;}
+  .model-card.complex .h{color:var(--bad);}
+  .model-card.simple .h{color:var(--good);}
+  .model-card .arch{font-family:'Cascadia Code',monospace; font-size:0.78rem; color:var(--muted); margin-bottom:8px;}
+
+  .signal-grid{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .signal-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--warn); border-radius:8px; padding:10px 16px; font-size:0.88rem;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Graded Assignment</span><span class="badge">C2W3</span>
+  <h1>Lesson 20 — Assignment: Advice for Applying Machine Learning</h1>
+  <p class="subtitle">The full end-to-end lab: polynomial regression evaluation, bias/variance diagnosis, and applying it all to a neural network classifier.</p>
+
+  <section>
+    <h2><span class="num">1</span> Part 1 — Polynomial Regression: Setting Up the Baseline</h2>
+    <p>Data comes from <code>gen_data()</code>, which builds a noisy quadratic dataset (<code>y = x² + noise</code>) alongside a clean, noise-free reference curve.</p>
+    <pre><code>X, y, x_ideal, y_ideal = gen_data(<span class="kw">18</span>, <span class="kw">2</span>, <span class="kw">0.7</span>)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=<span class="kw">0.33</span>, random_state=<span class="kw">1</span>)</code></pre>
+    <p>A degree-10 polynomial fit to a small dataset produces a huge train/test gap — <code>err_train</code> low, <code>err_test</code> high — the classic overfitting signature from Lessons 5–8, now reproduced in code.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Part 2 — Three-Way Split &amp; Finding the Optimal Degree</h2>
+    <table>
+      <thead><tr><th>Split</th><th>% of data</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td>Training</td><td>60%</td><td>Fitting w, b</td></tr>
+        <tr><td>Cross-Validation</td><td>20%</td><td>Tuning degree, λ, architecture</td></tr>
+        <tr><td>Test</td><td>20%</td><td>Final, one-time generalization estimate</td></tr>
+      </tbody>
+    </table>
+    <pre><code>X_train, X_, y_train, y_ = train_test_split(X, y, test_size=<span class="kw">0.40</span>, random_state=<span class="kw">1</span>)
+X_cv, X_test, y_cv, y_test = train_test_split(X_, y_, test_size=<span class="kw">0.50</span>, random_state=<span class="kw">1</span>)</code></pre>
+    <p>Sweeping polynomial degree 1 through 9, the lab plots J_train and J_cv against degree — reproducing the exact U-shaped J_cv curve from Lesson 5, with <code>optimal_degree = np.argmin(err_cv) + 1</code> picking the winner automatically. It also reruns the same sweep on λ (Lesson 6) and on training-set size m (Lesson 8), directly confirming: more data helps a high-variance model, but wouldn't have helped a high-bias one.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Part 3 — Same Diagnosis, Now on a Neural Network</h2>
+    <p>The second half applies identical reasoning to a 6-class classification problem (blob-shaped clusters) using a neural network instead of polynomial regression.</p>
+    <div class="model-compare">
+      <div class="model-card complex">
+        <div class="h">Complex Model</div>
+        <div class="arch">Dense(120, relu) → Dense(40, relu) → Dense(6, linear)</div>
+        <p style="margin:0; font-size:0.85rem;">"Worked very hard to capture outliers" — low training error, but visibly overfit decision boundaries and higher CV error.</p>
+      </div>
+      <div class="model-card simple">
+        <div class="h">Simple Model</div>
+        <div class="arch">Dense(6, relu) → Dense(6, linear)</div>
+        <p style="margin:0; font-size:0.85rem;">Slightly higher training error, but <strong>lower</strong> CV error than the complex model — a smoother, better-generalizing fit.</p>
+      </div>
+    </div>
+    <p style="margin-top:12px;">This is the neural-network low-bias-machine story from Lesson 10 in action: the complex network easily drove training error down, but that extra capacity turned into overfitting rather than better generalization — until regularization was added.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Part 4 — Regularizing the Complex Model</h2>
+    <pre><code>Dense(<span class="kw">120</span>, activation=<span class="str">"relu"</span>, kernel_regularizer=tf.keras.regularizers.l2(<span class="kw">0.1</span>))
+Dense(<span class="kw">40</span>, activation=<span class="str">"relu"</span>, kernel_regularizer=tf.keras.regularizers.l2(<span class="kw">0.1</span>))
+Dense(<span class="kw">6</span>, activation=<span class="str">"linear"</span>)</code></pre>
+    <p>With L2 regularization added to the same large architecture, results end up looking "very similar to the ideal model" — confirming Lesson 10's claim that a large, properly regularized network can match or beat a small one, rather than the smaller network being inherently safer against overfitting.</p>
+    <p>A final λ sweep (<code>[0.0, 0.001, 0.01, 0.05, 0.1, 0.2, 0.3]</code>) shows train and CV error converging as λ increases — the same regularization/bias-variance curve from Lesson 6, reproduced for a neural network this time.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Clarifying Q&A</h2>
+
+    <div class="qa">
+      <div class="q">Q: What are x_ideal and y_ideal in this lab?</div>
+      <p class="a">The clean, noise-free quadratic curve that <code>gen_data()</code> generates before adding noise to create the actual dataset. They're pure plotting reference — never used in training or evaluation — showing visually how far a fitted model's predictions drift from the true underlying relationship.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: What does <code>x = np.linspace(0, int(X.max()), 100)</code> do?</div>
+      <p class="a">Creates 100 evenly-spaced x-values spanning the data's range, purely for plotting a smooth prediction curve — not used in training or error calculation at all.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: What does <code>np.zeros((100, max_degree))</code> do?</div>
+      <p class="a">Pre-allocates a 100-row × max_degree-column array. Each column stores the predicted y-values (over those 100 plotting points) for one specific polynomial degree's model, so all degree curves can be overlaid on one plot afterward.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: Besides the initial train/test gap, how did we identify high variance?</div>
+      <p class="a">Three additional signals: (1) the degree-vs-error sweep showing the classic U-shaped J_cv curve — CV error rising again past the optimal degree while training error kept falling; (2) visual inspection of the neural network's decision boundary, described as having "worked very hard to capture outliers"; (3) directly comparing the complex and simple models side by side — complex had lower training error but higher CV error than simple, isolating the variance effect from the regularization sweep, which then confirmed it by converging train/CV error as λ increased.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: What does "target values are the index of the category, not one-hot encoded" mean?</div>
+      <p class="a">With 6 classes, a label could be represented as a one-hot vector (<code>[0,0,0,1,0,0]</code> for class 3) or as a plain integer (<code>3</code>). This lab uses the plain-integer form, which is why <code>eval_cat_err</code> can just do a direct <code>yhat[i] != y[i]</code> comparison rather than comparing full vectors or taking an argmax first.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Signals Worth Remembering</h2>
+    <div class="signal-grid">
+      <div class="signal-row">Rising CV error after the optimal-degree point on a degree sweep = variance, independent of any single number.</div>
+      <div class="signal-row">A visually "wiggly" or outlier-chasing decision boundary is a qualitative overfitting tell, alongside the quantitative J_train/J_cv gap.</div>
+      <div class="signal-row">Train/CV error converging as λ increases is direct evidence the original gap was a variance problem, not bias.</div>
+      <div class="signal-row">A bigger, well-regularized network matching a smaller network's performance confirms network size itself isn't the risk — lack of regularization is.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Same diagnostic toolkit, two different model types</div>
+      <p style="margin:0;">This assignment is the practical proof that everything from Lessons 5–10 — bias/variance signatures, the degree/λ/m sweeps, and the neural-network recipe — applies identically whether the model is polynomial regression or a neural network classifier. The tools don't change; only the knob being tuned does.</p>
+    </div>
+  </section>
+
+  <footer>Lesson 20 · Graded Assignment · C2W3: Advice for Applying Machine Learning</footer>
+</div>
+</body>
+</html>

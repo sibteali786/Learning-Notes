@@ -662,5 +662,498 @@ Keeping track of time in a message-sending application is _critical_. Imagine ge
 Complete the code using a computed constant to print the number of seconds in an hour.
 
 ```go
+package main
+
+import "fmt"
+
+func main() {
+	const secondsInMinute = 60
+	const minutesInHour = 60
+	const secondsInHour = minutesInHour * secondsInMinute
+
+	// don't edit below this line
+	fmt.Println("number of seconds in an hour:", secondsInHour)
+}
+```
+
+
+# Comparing Go's Speed
+
+Go is _generally_ faster and more lightweight than interpreted or VM-powered languages like:
+
+- Python
+- JavaScript
+- PHP
+- Ruby
+- Java
+
+However, in terms of execution speed, Go does lag behind some other compiled languages like:
+
+- C
+- C++
+- Rust
+
+Go is a bit slower mostly due to its automated memory management, also known as the "Go runtime". Slightly slower speed is the price we pay for memory safety and simple syntax!
+
+![speed comparison](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/tUIWLob-705x400.png)
+
+Textio is an amazing candidate for a Go project. We'll be able to quickly process large amounts of text all while using a language that is safe and simple to write.
+
+# Formatting Strings in Go
+
+Go follows the [printf tradition](https://cplusplus.com/reference/cstdio/printf/) from the C language. In my opinion, string formatting/interpolation in Go is _less_ elegant than Python's f-strings, unfortunately.
+
+- [fmt.Printf()](https://pkg.go.dev/fmt#Printf) - Prints a formatted string to [standard out](https://stackoverflow.com/questions/3385201/confused-about-stdin-stdout-and-stderr).
+- [fmt.Sprintf()](https://pkg.go.dev/fmt#Sprintf) - Returns the formatted string
+
+These following "formatting verbs" work with the formatting functions above:
+
+## Default Representation
+
+The `%v` variant prints any value in a default format. It can be used as a catchall.
+
+```go
+s := fmt.Sprintf("I am %v years old", 10)
+// I am 10 years old
+
+s := fmt.Sprintf("I am %v years old", "way too many")
+// I am way too many years old
+```
+
+If you want to print in a more specific way, you can use the following formatting verbs:
+
+## String
+
+```go
+s := fmt.Sprintf("I am %s years old", "way too many")
+// I am way too many years old
+```
+## Integer
+
+```go
+s := fmt.Sprintf("I am %d years old", 10)
+// I am 10 years old
+```
+
+## Float
+
+```go
+s := fmt.Sprintf("I am %f years old", 10.523)
+// I am 10.523000 years old
+
+// The ".2" rounds the number to 2 decimal places
+s := fmt.Sprintf("I am %.2f years old", 10.523)
+// I am 10.52 years old
+```
+
+If you're interested in all the formatting options, you can look at the `fmt` package's [docs](https://pkg.go.dev/fmt#hdr-Printing).
+
+## Assignment
+
+Create a new variable called `msg` on line 11 and use the appropriate formatting function to return a string that contains the following:
+
+```text
+Hi NAME, your open rate is OPENRATE percentNEWLINE
+```
+
+- Replace `NAME` with the variable `name`,
+- Replace `OPENRATE` with the variable `openRate` rounded to the nearest "tenths" place, e.g `10.523` should be rounded down to `10.5`
+- The word percent should appear as part of the string following the open rate value
+- Replace `NEWLINE` with the newline [`\n`](https://en.wikipedia.org/wiki/Newline) escape sequence.
+
+For example, with the inputs `"Jimmy McGill"` and `2.5`, the expected output would be:
+
+```text
+Hi Jimmy McGill, your open rate is 2.5 percent
+```
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	const name = "Saul Goodman"
+	const openRate = 30.54
+
+	// don't edit above this line
+
+	msg := fmt.Sprintf("Hi %s, your open rate is %.1f percent\n", name, openRate)
+
+	// don't edit below this line
+
+	fmt.Print(msg)
+}
 
 ```
+
+# Runes and String Encoding
+
+In many programming languages (cough, C, cough), a "character" is a single byte. Using [ASCII](https://www.asciitable.com/) encoding, the standard for the C programming language, we can represent 128 characters with 7 bits. This is enough for the English alphabet, numbers, and some special characters.
+
+In Go, strings are just sequences of bytes: they can hold arbitrary data. However, Go also has a special type, [`rune`](https://go.dev/blog/strings), which is an alias for `int32`. This means that a `rune` is a 32-bit integer, which is large enough to hold any [Unicode](https://home.unicode.org/) code point.
+
+When you're working with strings, you need to be aware of the encoding (bytes -> representation). Go uses [UTF-8](https://en.wikipedia.org/wiki/UTF-8) encoding, which is a variable-length encoding.
+
+### UTF-8 Text
+
+Type text to see its code points and bytes. Joining adjacent emoji inserts a [zero width joiner](https://en.wikipedia.org/wiki/Zero-width_joiner) (U+200D).
+
+boots🐻é👨‍👩密碼
+
+6 code points· 9 bytes
+
+bU+0062
+
+0x62
+
+oU+006F
+
+0x6F
+
+oU+006F
+
+0x6F
+
+tU+0074
+
+0x74
+
+sU+0073
+
+0x73
+
+🐻U+1F43B
+
+0xF00x9F0x900xBB
+
+## What Does This Mean?
+
+There are 2 main takeaways:
+
+1. When you need to work with individual characters in a string, you should use the `rune` type. It breaks strings up into their individual characters, which can be more than one byte long.
+2. We can include a wide variety of Unicode characters in our strings, such as emojis and Chinese characters, and Go will handle them just fine.
+
+## Assignment
+
+Boots is a _bear_. (Not a dog, haters).
+
+1. [ ] Run the code as-is. Notice that the simple string "boots" has 5 bytes, and 5 runes (characters).
+2. [ ] Update the `name` constant to be the [bear emoji](https://emojipedia.org/bear) instead of the word "boots".
+
+```text
+🐻
+```
+
+If you've got it right, you should notice that the emoji is only one rune, but it takes up 4 bytes.
+
+```go
+package main
+
+import (
+	"fmt"
+	"unicode/utf8"
+)
+
+func main() {
+	const name = "🐻"
+	fmt.Printf("constant 'name' byte length: %d\n", len(name))
+	fmt.Printf("constant 'name' rune length: %d\n", utf8.RuneCountInString(name))
+	fmt.Println("=====================================")
+	fmt.Printf("Hi %s, so good to have you back in the arcanum\n", name)
+}
+
+```
+
+# Format Practice
+
+You've been asked to improve the logs to include information about individual users and their recent messages.
+
+## Assignment
+
+Create a `userLog` variable on line 15. It should contain:
+
+```text
+Name: FNAME LNAME, Age: AGE, Rate: MESSAGERATE, Is Subscribed: ISSUBSCRIBED, Message: MESSAGE
+```
+
+Where `FNAME` `LNAME` `AGE` `MESSAGERATE` `ISSUBSCRIBED` and `MESSAGE` correspond to the variables above.
+
+`MESSAGERATE` should be rounded to the `tenths` place.
+
+## Tips
+
+- [fmt.Sprintf](https://golang.org/pkg/fmt/#Sprintf) can be used to format strings.
+- `%.1f` rounds a float to the tenths place, `%.2f` rounds to the hundredths place, etc.
+- `%t` formats a boolean value.
+- `%v` can be used to format any value in its default representation.
+- `%s` can be used to format a string.
+- `%d` can be used to format an integer.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fname := "Dalinar"
+	lname := "Kholin"
+	age := 45
+	messageRate := 0.5
+	isSubscribed := false
+	message := "Sometimes a hypocrite is nothing more than a man in the process of changing."
+
+	// Don't touch above this line
+
+	userLog := fmt.Sprintf("Name: %s %s, Age: %d, Rate: %.1f, Is Subscribed: %t, Message: %s", fname, lname, age, messageRate, isSubscribed, message)
+
+	// Don't touch below this line
+
+	fmt.Println(userLog)
+}
+
+```
+
+# Conditionals
+
+`if` statements in Go do not use parentheses around the condition:
+
+```go
+if height > 4 {
+    fmt.Println("You are tall enough!")
+}
+```
+
+`else if` and `else` are supported as you might expect:
+
+```go
+if height > 6 {
+    fmt.Println("You are super tall!")
+} else if height > 4 {
+    fmt.Println("You are tall enough!")
+} else {
+    fmt.Println("You are not tall enough!")
+}
+```
+
+Unlike other languages, you _must_ put the opening brace on the same line as the condition and not on a new line.
+
+## Assignment
+
+Fix the bug on line `12`. If `messageLen` is less than or equal to the `maxMessageLen` the program should print "Message sent", else it should print "Message not sent".
+
+## Tips
+
+Here are some of the comparison operators in Go:
+
+- `==` equal to
+- `!=` not equal to
+- `<` less than
+- `>` greater than
+- `<=` less than or equal to
+- `>=` greater than or equal to
+
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	messageLen := 10
+	maxMessageLen := 20
+	fmt.Println("Trying to send a message of length:", messageLen, "and a max length of:", maxMessageLen)
+
+	// don't touch above this line
+
+	if messageLen <= maxMessageLen {
+		fmt.Println("Message sent")
+	} else {
+		fmt.Println("Message not sent")
+	}
+}
+
+```
+
+# The Initial Statement of an If Block
+
+An `if` conditional can have an "initial" statement. The variable(s) created in the initial statement are _only_ defined within the scope of the `if`, `else if`, and `else` blocks.
+
+```go
+if INITIAL_STATEMENT; CONDITION {
+}
+```
+
+## Why Would I Use This?
+
+It has two valuable purposes:
+
+1. It's a bit shorter
+2. It limits the scope of the initialized variable(s) to the `if` statement
+
+For example, instead of writing:
+
+```go
+length := getLength(email)
+if length < 10 {
+    fmt.Printf("Email must be at least 10 characters, is %d\n", length)
+}
+```
+
+We can do:
+
+```go
+if length := getLength(email); length < 10 {
+    fmt.Printf("Email must be at least 10 characters, is %d\n", length)
+}
+```
+
+In the example above, `length` isn't available in the parent scope, which is nice because we don't need it there - we won't accidentally use it elsewhere in the function. It would still be available in any `else if` or `else` blocks attached to that `if`.
+
+# Switch
+
+Switch statements are a way to compare a value against multiple options. They are similar to if-else statements but are more concise and readable when the number of options is more than 2.
+
+```go
+func getCreator(os string) string {
+    var creator string
+    switch os {
+    case "linux":
+        creator = "Linus Torvalds"
+    case "windows":
+        creator = "Bill Gates"
+    case "mac":
+        creator = "A Steve"
+    default:
+        creator = "Unknown"
+    }
+    return creator
+}
+```
+
+Notice that in Go, the `break` statement is not required at the end of a `case` to stop it from falling through to the next `case`. The `break` statement is implicit in Go.
+
+If you _do_ want a `case` to fall through to the next `case`, you can use the `fallthrough` keyword.
+
+```go
+func getCreator(os string) string {
+    var creator string
+    switch os {
+    case "linux":
+        creator = "Linus Torvalds"
+    case "windows":
+        creator = "Bill Gates"
+
+    // all three of these cases will set creator to "A Steve"
+    case "macOS":
+        fallthrough
+    case "Mac OS X":
+        fallthrough
+    case "mac":
+        creator = "A Steve"
+
+    default:
+        creator = "Unknown"
+    }
+    return creator
+}
+```
+
+The `default` case does what you'd expect: it's the case that runs if none of the other cases match.
+
+## Assignment
+
+I know we haven't covered function syntax in depth yet, but _bear_ with me.
+
+Fix the bug in the `billingCost` function. The "basic" plan is set correctly, but we need matches for the "pro" and "enterprise" plans too. If the `plan` is:
+
+- "pro", the cost should be `20.0`
+- "enterprise", the cost should be `50.0`
+
+```go
+package main
+
+import "fmt"
+
+func billingCost(plan string) float64 {
+	switch plan {
+	case "basic":
+		return 10.0
+	case "pro":
+		return 20.0
+	case "enterprise":
+		return 50.0
+	default:
+		return 0.0
+	}
+}
+
+// don't touch below this line
+
+func main() {
+	plan := "basic"
+	fmt.Printf("The cost for a %s plan is $%.2f\n", plan, billingCost(plan))
+	plan = "pro"
+	fmt.Printf("The cost for a %s plan is $%.2f\n", plan, billingCost(plan))
+	plan = "enterprise"
+	fmt.Printf("The cost for a %s plan is $%.2f\n", plan, billingCost(plan))
+	plan = "free"
+	fmt.Printf("The cost for a %s plan is $%.2f\n", plan, billingCost(plan))
+	plan = "unknown"
+	fmt.Printf("The cost for a %s plan is $%.2f\n", plan, billingCost(plan))
+}
+
+```
+
+# Calculate Balance
+
+We need to calculate the total cost for a batch of messages, and update the user's balance if they have enough money.
+
+## Assignment
+
+Using the given variables, write conditional statements to calculate and update the variables.
+
+1. [ ] Set `finalCost` to the `bulkMessageCost`.
+2. [ ] If the user is a premium user, apply the `discountRate` to the `finalCost`.
+    - For example, a `discountRate` of 0.10 means the discounted price per message would be 90% of the original price.
+3. [ ] If the user has enough money in their `accountBalance`:
+    - [ ] Deduct `finalCost` from their `accountBalance`.
+    - [ ] Print the `purchaseSuccessMessage`
+4. [ ] If not, just print the `insufficientFundMessage`.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var insufficientFundMessage string = "Purchase failed. Insufficient funds."
+	var purchaseSuccessMessage string = "Purchase successful."
+	var accountBalance float64 = 100.0
+	var bulkMessageCost float64 = 75.0
+	var isPremiumUser bool = true
+	var discountRate float64 = 0.10
+	var finalCost float64
+
+	// don't edit above this line
+
+	finalCost = bulkMessageCost
+	if isPremiumUser {
+		finalCost -= finalCost * discountRate
+	}
+
+	if finalCost <= accountBalance {
+		accountBalance -= finalCost
+		fmt.Println(purchaseSuccessMessage)
+	}else {
+		fmt.Println(insufficientFundMessage)
+	}
+
+
+	// don't edit below this line
+
+	fmt.Println("Account balance:", accountBalance)
+}
+
+```
+

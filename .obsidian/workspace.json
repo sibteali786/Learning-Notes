@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "94cd8871d059b4b7",
+        "id": "d220402d0cc5417c",
         "type": "tabs",
         "children": [
           {
-            "id": "266e054c52fb9172",
+            "id": "b3fa9c7d2808d86b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Learning/Portfolio/Inspirations.md",
+                "file": "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,7 +28,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Inspirations"
+              "title": "3-Skewed Run"
             }
           }
         ]
@@ -196,27 +196,41 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "b3fa9c7d2808d86b",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/Precision-Recall-F1Score/19-precision-recall-tradeoff-f1.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/Precision-Recall-F1Score/18-precision-recall.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/Precision-Recall-F1Score",
-    "Learning/Portfolio/Inspirations.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/8-learning-curves-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/17-fairness-bias-ethics.html",
-    "conflict-files-obsidian-git.md",
-    "Learning/Backend Engineering/Redis-POstgres/load_redis_from_pg.py",
-    "Learning/Backend Engineering/Redis-POstgres",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/utils.py",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/deeplearning.mplstyle",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/data_w3_ex2.csv",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/data_w3_ex1.csv",
+    "Pasted image 20260917232945.png",
+    "Pasted image 20260917232941.png",
+    "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/6-cpu-ceiling.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/7-rss-poller-containerize-and-dedup.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/8-chunked-seeding-islice.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/9-k6-hotkey-scenario-and-redis-verdict.html",
     "Learning/Backend Engineering/Python/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/3-live-feed-engine-command-cheatsheet.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-fastapi-phase1-learnings.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.html",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/4-cpu-profiling-command-cheatsheet.html",
+    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
+    "Pasted image 20260917225052.png",
+    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2026-09-17-k6-hotkey-scenario-and-redis-verdict.html.tmp.259607.b99cec6f3720",
+    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/2-50M Rows Run.md",
+    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/1-Final Run.md",
+    "Learning/Side Projects/HospitalityOS/Resources.md",
+    "Learning/Side Projects/HospitalityOS/Untitled.md",
+    "Learning/Side Projects/HospitalityOS/Concerns.md",
+    "Learning/Side Projects/HospitalityOS/Missing Items/Items.md",
+    "Learning/Side Projects/HospitalityOS/concerns/Multi-tenancy.md",
+    "Learning/Work Stuff/Freelance/Builders's Website/Creds.md",
+    "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/Portfolio/Inspirations.md",
+    "conflict-files-obsidian-git.md",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/370147-2026-09-10T21:15:44+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/337266-2026-09-10T18:54:22+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/142893-2026-09-12T15:30:01+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
     "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
     "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
@@ -228,22 +242,8 @@
     "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/what_is_partitioning_diagram.svg",
     "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/Drawing 2026-09-04 17.23.15.excalidraw.md",
     "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
-    "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/AI&ML Engineering/Resources.md",
     "Learning/Backend Engineering/Python/FastAPI/Commands.md",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/Final Run.md",
-    "Learning/Backend Engineering/Python/FastAPI/attachments/Pasted image 20260910173927.png",
-    "Learning/Backend Engineering/Python/FastAPI/attachments/Pasted image 20260910160054.png",
-    "Learning/Backend Engineering/Python/FastAPI/2-Server Analysis/First.md",
-    "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
-    "Learning/Backend Engineering/Memory Management in C/Notes.md",
-    "Learning/Backend Engineering/Memory Management in C/Memory_Storage.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/5-Rotting Oranges.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/1-Minimum Knight Moves.excalidraw.md",
-    "Learning/DSA/BFS/4-Maximum Width of Binary Tree.excalidraw.md",
-    "Learning/DSA/BFS/3-ZigZag-Level-traversal.excalidraw.md",
-    "Learning/DSA/BFS/2-Binary-Tree-View.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

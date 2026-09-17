@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coulomb's Law & Lattice Energy</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5b9dff; --orange:#ff9a4d; --green:#4ade80; --purple:#c084fc;
+    --text:#e4e6eb; --muted:#9198a8;
+  }
+  *{box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono',monospace; line-height:1.6; }
+  h1,h2,h3{ font-family:'Syne',sans-serif; margin:0 0 12px; }
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-size:2rem;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:32px;}
+  .pill{ display:inline-block; padding:3px 12px; border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.03em; margin-right:6px; }
+  .pill.blue{background:rgba(91,157,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill.orange{background:rgba(255,154,77,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill.green{background:rgba(74,222,128,.15); color:var(--green); border:1px solid var(--green);}
+  .pill.purple{background:rgba(192,132,252,.15); color:var(--purple); border:1px solid var(--purple);}
+
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:24px; }
+  .section-label{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .bar{width:4px;height:22px;border-radius:2px;}
+  .bar.blue{background:var(--blue);} .bar.orange{background:var(--orange);}
+  .bar.green{background:var(--green);} .bar.purple{background:var(--purple);}
+
+  code, .formula{ background:#0b0d13; border-left:3px solid var(--blue); border-radius:4px; padding:2px 8px; font-size:.9rem; color:var(--orange); }
+  .formula-block{ background:#0b0d13; border-left:3px solid var(--purple); border-radius:6px; padding:14px 18px; margin:12px 0; font-size:1.15rem; text-align:center; }
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:.9rem;}
+  th,td{border:1px solid var(--border); padding:8px 12px; text-align:left;}
+  th{background:#1b1f2c; color:var(--blue);}
+  .callout{ border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.9rem; border:1px solid; display:flex; gap:10px; }
+  .callout.tip{border-color:var(--green); background:rgba(74,222,128,.06);}
+  .callout.example{border-color:var(--blue); background:rgba(91,157,255,.06);}
+  .callout.warning{border-color:var(--orange); background:rgba(255,154,77,.06);}
+  .callout .tag{font-weight:700; flex-shrink:0;}
+
+  #chart, #lattice{width:100%;}
+  #chart svg, #lattice svg{width:100%; height:auto; display:block;}
+  .axis text{ fill:var(--muted); font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .axis path, .axis line{ stroke:var(--border); }
+  .chart-label{ font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; fill:var(--text); }
+  .axis-title{ fill:var(--orange); font-family:'JetBrains Mono',monospace; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Coulomb's Law & Lattice Energy</h1>
+  <div class="subtitle">Why does NaCl, RbCl, and MgF₂ take different amounts of energy to pull apart? <span class="pill purple">D3.js chart</span></div>
+
+  <div class="card">
+    <div class="section-label"><div class="bar blue"></div><h2>Problem Statement</h2></div>
+    <p>Ionic compounds like table salt (<span class="formula">NaCl</span>) form a repeating 3D <b>lattice</b> of alternating cations and anions, held together by electrostatic (Coulomb) attraction. <b>Lattice energy</b> is the energy needed to pull all the ions infinitely far apart — the ionic-bond equivalent of covalent bond energy.</p>
+    <p>The question: given a few ionic compounds, how do you predict which has the <i>highest</i> lattice energy?</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label"><div class="bar orange"></div><h2>How It Works</h2></div>
+    <div class="formula-block">
+      F &prop; <span style="display:inline-block;text-align:center;vertical-align:middle;"><span style="border-bottom:1px solid var(--text);padding:0 4px;">q₁q₂</span><br>r²</span>
+    </div>
+    <p>Coulomb's Law: the force between two ions scales with the <b>product of their charges</b> (q₁, q₂) and inversely with the <b>square of the distance</b> between their nuclei (r).</p>
+    <ul>
+      <li><span class="pill orange">CHARGE ↑</span> → stronger attraction → higher lattice energy (a 2+/2− pair pulls much harder than a 1+/1− pair).</li>
+      <li><span class="pill blue">DISTANCE ↓</span> → smaller ions sit closer together → stronger attraction → higher lattice energy.</li>
+      <li><span class="pill green">Opposite charges</span> attract, <span class="pill green">same charges</span> repel — this is what holds the alternating lattice pattern together.</li>
+    </ul>
+
+    <h3 style="margin-top:20px;">The NaCl lattice (2D slice)</h3>
+    <div id="lattice"></div>
+    <p style="color:var(--muted);font-size:.85rem;">Purple = Na⁺ (small — lost its outer shell, now neon-like), Green = Cl⁻ (larger — gained an electron, now argon-like).</p>
+  </div>
+
+  <div class="card">
+    <div class="section-label"><div class="bar green"></div><h2>Key Distinctions — Lattice Energy Comparison</h2></div>
+    <table>
+      <tr><th>Compound</th><th>Ions</th><th>Charges</th><th>Relative ion size</th><th>≈ Lattice energy</th></tr>
+      <tr><td><b>RbCl</b></td><td>Rb⁺, Cl⁻</td><td>+1 / −1</td><td>Rb⁺ larger (Kr config.)</td><td>~695 kJ/mol</td></tr>
+      <tr><td><b>NaCl</b></td><td>Na⁺, Cl⁻</td><td>+1 / −1</td><td>Na⁺ smaller (Ne config.)</td><td>~787 kJ/mol</td></tr>
+      <tr><td><b>MgF₂</b></td><td>Mg²⁺, F⁻</td><td>+2 / −1</td><td>both ions smaller</td><td>~2957 kJ/mol</td></tr>
+    </table>
+    <div id="chart"></div>
+    <div class="callout tip">
+      <span class="tag">💡 Two levers, same direction:</span>
+      <span>Going from NaCl → RbCl, only the cation radius changes (charges stay +1/−1) — smaller Na⁺ wins on distance alone. Going from NaCl → MgF₂, <i>both</i> the charge (2+ instead of 1+) and the radii (both ions smaller) push lattice energy up — which is why MgF₂'s lattice energy is dramatically higher, not just a little.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label"><div class="bar purple"></div><h2>Real-World Example Scenario</h2></div>
+    <div class="callout example">
+      <span class="tag">🧪 Scenario:</span>
+      <span>
+        This is why table salt (NaCl) dissolves easily in water at room temperature but compounds like MgF₂ or MgO are used in high-temperature refractory materials (furnace linings) — their huge lattice energies mean it takes enormous heat (or a very polar solvent with strong ion-dipole interactions) to pull the ions apart. Charge, more than size, is usually the biggest lever on lattice energy.
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-label"><div class="bar blue"></div><h2>Practical / Interview Tips</h2></div>
+    <ul>
+      <li>Two-factor checklist for ranking lattice energy: <b>(1) charge magnitude</b> (dominant factor — squares/products of charge swing energy the most), <b>(2) ionic radius</b> (secondary — smaller ions = shorter r = stronger force).</li>
+      <li>When comparing same-charge compounds (e.g., NaCl vs RbCl), radius is the only variable — smaller cation wins.</li>
+      <li>When charge changes too (e.g., NaCl vs MgF₂), expect a much bigger jump — charge effects compound with radius effects rather than just adding to them.</li>
+      <li>Remember: lattice energy and covalent bond energy are conceptually the same idea (energy to separate to infinity) — just applied to ionic vs. covalent bonding.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  // ---- Lattice diagram (SVG grid, alternating ions) ----
+  (function drawLattice() {
+    const cols = 9, rows = 6, spacing = 62, r = 26;
+    const w = cols * spacing + spacing;
+    const h = rows * spacing + spacing * 0.8;
+    const svg = d3.select('#lattice').append('svg').attr('viewBox', `0 0 ${w} ${h}`);
+    const g = svg.append('g').attr('transform', `translate(${spacing/2},${spacing/2})`);
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const isNa = (row + col) % 2 === 0;
+        const cx = col * spacing + (row % 2 === 0 ? 0 : spacing / 2);
+        const cy = row * spacing * 0.87;
+        g.append('circle')
+          .attr('cx', cx).attr('cy', cy)
+          .attr('r', isNa ? r * 0.72 : r)
+          .attr('fill', isNa ? '#c084fc' : '#4ade80')
+          .attr('opacity', 0.9);
+      }
+    }
+  })();
+
+  // ---- Lattice energy bar chart ----
+  (function drawChart() {
+    const data = [
+      { name: 'RbCl', value: 695, color: '#5b9dff' },
+      { name: 'NaCl', value: 787, color: '#4ade80' },
+      { name: 'MgF₂', value: 2957, color: '#c084fc' }
+    ];
+
+    const width = 700, height = 320;
+    const margin = { top: 20, right: 20, bottom: 50, left: 70 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const svg = d3.select('#chart').append('svg').attr('viewBox', `0 0 ${width} ${height}`);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    const xScale = d3.scaleBand().domain(data.map(d => d.name)).range([0, innerWidth]).padding(0.35);
+    const yScale = d3.scaleLinear().domain([0, 3200]).range([innerHeight, 0]);
+
+    g.append('g').attr('class', 'axis')
+      .attr('transform', `translate(0,${innerHeight})`)
+      .call(d3.axisBottom(xScale));
+
+    g.append('g').attr('class', 'axis').call(d3.axisLeft(yScale).ticks(6));
+
+    g.append('text').attr('class', 'axis-title')
+      .attr('transform', 'rotate(-90)')
+      .attr('x', -innerHeight / 2).attr('y', -50).attr('text-anchor', 'middle')
+      .text('Lattice Energy (kJ/mol)');
+
+    g.selectAll('rect')
+      .data(data)
+      .join('rect')
+      .attr('x', d => xScale(d.name))
+      .attr('y', d => yScale(d.value))
+      .attr('width', xScale.bandwidth())
+      .attr('height', d => innerHeight - yScale(d.value))
+      .attr('fill', d => d.color)
+      .attr('rx', 4);
+
+    g.selectAll('.value-label')
+      .data(data)
+      .join('text')
+      .attr('class', 'chart-label')
+      .attr('x', d => xScale(d.name) + xScale.bandwidth() / 2)
+      .attr('y', d => yScale(d.value) - 10)
+      .attr('text-anchor', 'middle')
+      .text(d => d.value + ' kJ/mol');
+  })();
+})();
+</script>
+</body>
+</html>
