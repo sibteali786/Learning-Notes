@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>11 - Lab: Diagnosing Bias and Variance</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  pre{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:0.82rem; margin:12px 0;}
+  pre code{background:none; border:none; padding:0; color:#d4d8e8;}
+  .cm{color:#546079; font-style:italic;} .fn{color:#82aaff;} .str{color:#c3e88d;} .kw{color:#c792ea;}
+
+  .d3-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px;}
+  .d3-fig svg{display:block; margin:0 auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px; text-align:center;}
+
+  .fix-table{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .fix-row{display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px 16px;}
+  .fix-row .label{font-weight:600; color:#fff; font-size:0.9rem;}
+  .fix-row .tag{font-size:0.72rem; font-weight:700; text-transform:uppercase; padding:4px 12px; border-radius:20px; white-space:nowrap;}
+  .tag.bias{background:rgba(255,107,129,0.15); color:var(--bad);}
+  .tag.variance{background:rgba(255,138,107,0.15); color:var(--accent2);}
+
+  .qa{background:rgba(124,155,255,0.08); border:1px solid var(--accent); border-radius:10px; padding:16px 18px; margin-top:14px;}
+  .qa .q{color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .qa .a{margin:0;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Lab Notebook</span><span class="badge">C2W3 Lab 2</span>
+  <h1>Lesson 11 — Lab: Diagnosing Bias and Variance</h1>
+  <p class="subtitle">Applying every fix from Lessons 1–9 with real code — polynomial degree, features, regularization, dataset size — using sklearn's Ridge regression.</p>
+
+  <section>
+    <h2><span class="num">1</span> Setup: Establishing a Baseline First</h2>
+    <p>Before diagnosing anything, the lab sets a baseline — same principle as Lesson 7. An arbitrary baseline of <code>400</code> (then later <code>250</code>) is used to represent "the error level you'd hope to reach," making the plots meaningful rather than just showing raw numbers in isolation.</p>
+    <pre><code>x_train, y_train, x_cv, y_cv, x_test, y_test = utils.<span class="fn">prepare_dataset</span>(<span class="str">'data/c2w3_lab2_data1.csv'</span>)
+model = <span class="fn">LinearRegression</span>()
+utils.<span class="fn">train_plot_poly</span>(model, x_train, y_train, x_cv, y_cv, max_degree=<span class="kw">10</span>, baseline=<span class="kw">400</span>)</code></pre>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Fixing High Bias — Three Techniques Tried in Code</h2>
+    <div class="fix-table">
+      <div class="fix-row"><span class="label">Add polynomial features (degree 1→10)</span><span class="tag bias">Fixes High Bias</span></div>
+      <div class="fix-row"><span class="label">Add a second real feature to the dataset</span><span class="tag bias">Fixes High Bias</span></div>
+      <div class="fix-row"><span class="label">Decrease λ (regularization) via Ridge</span><span class="tag bias">Fixes High Bias</span></div>
+    </div>
+    <p style="margin-top:12px;">With just polynomial features, training error at degree &gt;4 drops below the baseline — those models count as low-bias. But if the baseline is set stricter (250 instead of 400), those same models are still high bias — the diagnosis depends entirely on where the baseline sits, exactly as Lesson 7 emphasized.</p>
+    <p>Adding a second real feature to the input (going from 1 feature to 2) pushes training error even closer to baseline — a second genuinely predictive feature gives the model more real signal to reduce training error, which a bigger polynomial alone couldn't fully do.</p>
+
+    <div class="scenario">
+      <div class="stitle">Ridge and λ in code</div>
+      <p style="margin:0;"><code>Ridge</code> is sklearn's L2-regularized linear regression — the same <code>J(w,b) = MSE + λΣw²</code> cost from the lectures, with λ passed as the <code>alpha</code> parameter. The lab sweeps <code>reg_params = [10, 5, 2, 1, 0.5, 0.2, 0.1]</code>: at λ=10 the penalty is so strong that training error sits worse than baseline (underfitting), and as λ decreases, training error approaches baseline — the model is allowed to actually fit the data instead of being forced toward near-zero weights.</p>
+    </div>
+    <pre><code>reg_params = [<span class="kw">10</span>, <span class="kw">5</span>, <span class="kw">2</span>, <span class="kw">1</span>, <span class="kw">0.5</span>, <span class="kw">0.2</span>, <span class="kw">0.1</span>]
+utils.<span class="fn">train_plot_reg_params</span>(reg_params, x_train, y_train, x_cv, y_cv, degree=<span class="kw">4</span>, baseline=<span class="kw">250</span>)</code></pre>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Fixing High Variance — Three More Techniques</h2>
+    <div class="fix-table">
+      <div class="fix-row"><span class="label">Increase λ (regularization)</span><span class="tag variance">Fixes High Variance</span></div>
+      <div class="fix-row"><span class="label">Remove irrelevant/redundant features</span><span class="tag variance">Fixes High Variance</span></div>
+      <div class="fix-row"><span class="label">Get more training examples</span><span class="tag variance">Fixes High Variance</span></div>
+    </div>
+    <p style="margin-top:12px;">Sweeping λ in the opposite direction (<code>[0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1]</code>) shows the mirror effect from Lesson 6: very small λ keeps bias low but does little for CV error, while increasing λ pulls CV error down — the model stops fitting noise.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Random-ID Experiment: Irrelevant Features Hurt Variance</h2>
+    <p>The lab adds a synthetic "patient ID" column — a random number with zero real relationship to the target — and compares polynomial regression with 2 real features vs. 3 features (2 real + 1 random ID):</p>
+    <div class="d3-fig">
+      <svg id="chart-randomid" viewBox="0 0 460 260" width="100%" style="max-width:460px"></svg>
+      <div class="fig-caption">Solid = 2 real features. Dotted = 2 real features + 1 random ID. Same training error trend, but CV error diverges sharply with the random ID included.</div>
+    </div>
+    <p>At degree 4: training error is actually <em>lower</em> with the random ID included — but the <strong>gap</strong> between training and CV error is far wider than with just the 2 real features. That widening gap is the overfitting signature from Lesson 5, and it's exactly why the random ID needs to be removed.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> More Data Closes the Gap</h2>
+    <p>Finally, the lab plots an actual learning curve (Lesson 8) for a 4th-degree polynomial model as training set size grows. CV error trends downward and approaches training error — but training error stays roughly flat throughout, confirming that <strong>if this were instead a high-bias problem, more data wouldn't have moved the needle</strong> — the flat training-error line is the tell either way.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Clarifying Q&A</h2>
+
+    <div class="qa">
+      <div class="q">Q: How does the Ridge class work — what's it actually doing?</div>
+      <p class="a"><code>Ridge</code> is sklearn's built-in L2-regularized linear regression — a drop-in replacement for <code>LinearRegression()</code> that adds the same <code>λ·Σw²</code> penalty term from the lecture's cost function. In sklearn, that regularization strength is passed as <code>alpha</code> (their name for λ). Higher <code>alpha</code> shrinks weights more aggressively (simpler model, less overfitting risk, but too high causes underfitting); lower <code>alpha</code> lets weights grow more freely (more flexible, but more overfitting risk). Same <code>.fit()</code>/<code>.predict()</code> interface as any other sklearn regressor.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Q: If random patient IDs have no relationship to tumor detection, how does the model know to ignore them?</div>
+      <p class="a">It doesn't know in advance — that's the key insight. The optimizer's only goal during training is minimizing error <em>on the training set it sees</em>. A random ID has no true relationship to the target, but with enough polynomial flexibility and a finite sample, the model can still find some coincidental numerical pattern between specific ID values and specific training labels — not a real relationship, just noise it happens to fit. That coincidental pattern doesn't hold on the cross-validation set, since there was never a real signal to generalize — it was specific to the training sample. So training error looks fine (or even better), while CV error gets worse. The widening train/CV gap is literally the mechanism that reveals a feature is irrelevant; there's no built-in filter that flags it beforehand. A genuinely predictive feature produces a pattern that holds up on unseen data; a random one only "works" on the exact sample it was fit to.</p>
+    </div>
+  </section>
+
+  <footer>Lesson 11 · Lab Walkthrough · C2W3 Lab 2: Diagnosing Bias and Variance</footer>
+</div>
+
+<script>
+function drawCurve(svgId, series, options) {
+  const svg = d3.select("#" + svgId);
+  const width = 460, height = 260;
+  const margin = {top: 20, right: 20, bottom: 40, left: 20};
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+  const m = d3.range(1, series[0].values.length + 1);
+  const yMax = options.yMax || d3.max(series.flatMap(s => s.values)) * 1.05;
+
+  const xScale = d3.scaleLinear().domain([1, m.length]).range([0, innerWidth]);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([innerHeight, 0]);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  g.append("g").attr("transform", `translate(0,${innerHeight})`)
+    .call(d3.axisBottom(xScale).ticks(4).tickSize(0).tickFormat(() => ""))
+    .call(a => a.select(".domain").attr("stroke","#4a4f66"));
+  g.append("text").attr("x", innerWidth/2).attr("y", innerHeight + 26)
+    .attr("text-anchor","middle").attr("fill","#9aa0b4").attr("font-size","11px")
+    .text(options.xLabel);
+
+  const line = d3.line().x((d,i) => xScale(m[i])).y(d => yScale(d)).curve(d3.curveMonotoneX);
+
+  series.forEach(s => {
+    g.append("path").datum(s.values).attr("fill","none").attr("stroke", s.color)
+      .attr("stroke-width", 2.2)
+      .attr("stroke-dasharray", s.dashed ? "5,4" : "none")
+      .attr("d", line);
+    g.append("text")
+      .attr("x", innerWidth - 4)
+      .attr("y", yScale(s.values[s.values.length-1]) + s.labelOffset)
+      .attr("text-anchor","end").attr("fill", s.color).attr("font-size","10px").attr("font-weight","600")
+      .text(s.name);
+  });
+}
+
+drawCurve("chart-randomid", [
+  {name:"train (3 feat)", color:"#7c9bff", dashed:true, labelOffset:-6, values:[180,110,60,20]},
+  {name:"cv (3 feat)", color:"#ff6b81", dashed:true, labelOffset:14, values:[350,260,300,420]},
+  {name:"train (2 feat)", color:"#7c9bff", dashed:false, labelOffset:12, values:[190,130,80,55]},
+  {name:"cv (2 feat)", color:"#c792ea", dashed:false, labelOffset:-8, values:[330,240,210,205]}
+], {yMax: 450, xLabel: "degree of polynomial"});
+</script>
+</body>
+</html>
