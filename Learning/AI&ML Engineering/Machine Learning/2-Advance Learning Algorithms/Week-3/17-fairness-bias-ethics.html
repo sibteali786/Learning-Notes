@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>17 - Fairness, Bias, and Ethics in ML</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .case-grid{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .case-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--bad); border-left:4px solid var(--bad); border-radius:8px; padding:12px 16px;}
+  .case-row .icon{color:var(--bad); font-weight:700; font-size:1.1rem;}
+
+  .misuse-grid{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .misuse-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--accent2); border-left:4px solid var(--accent2); border-radius:8px; padding:12px 16px;}
+
+  .quote-box{background:var(--panel2); border-left:4px solid var(--accent); border-radius:8px; padding:16px 20px; margin-top:14px; font-style:italic; color:#cfd2e0;}
+
+  .pipeline-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:20px; margin-top:14px; text-align:center;}
+  .pipeline-fig svg{max-width:100%; height:auto;}
+
+  .guideline-list{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .guideline-row{display:flex; gap:12px; align-items:flex-start; background:var(--panel2); border:1px solid var(--border); border-left:4px solid var(--good); border-radius:8px; padding:12px 16px;}
+  .guideline-row .n{font-weight:700; color:var(--good); min-width:22px;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{border-radius:10px; padding:16px; border:1px solid var(--border);}
+  .compare-card.low{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .compare-card.high{background:rgba(255,107,129,0.08); border-color:rgba(255,107,129,0.4);}
+  .compare-card .h{font-weight:700; margin-bottom:6px;}
+  .compare-card.low .h{color:var(--good);}
+  .compare-card.high .h{color:var(--bad);}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">ML Development Process</span>
+  <h1>Lesson 17 — Fairness, Bias, and Ethics in ML</h1>
+  <p class="subtitle">No checklist exists for being ethical — but there are concrete practices that make systems meaningfully less biased and more accountable.</p>
+
+  <section>
+    <h2><span class="num">1</span> Real Cases of Unacceptable Bias</h2>
+    <div class="case-grid">
+      <div class="case-row"><span class="icon">✕</span><div><strong>Hiring tool</strong> shown to discriminate against women — the company stopped using it, but only after it had already been deployed.</div></div>
+      <div class="case-row"><span class="icon">✕</span><div><strong>Face recognition systems</strong> that matched dark-skinned individuals to criminal mugshots far more often than lighter-skinned individuals.</div></div>
+      <div class="case-row"><span class="icon">✕</span><div><strong>Bank loan approval systems</strong> that discriminated against certain subgroups.</div></div>
+      <div class="case-row"><span class="icon">✕</span><div><strong>Reinforcing negative stereotypes</strong> — e.g. a search for a profession that never surfaces anyone who looks like the searcher can discourage them before they even try.</div></div>
+    </div>
+    <div class="quote-box">
+      "I have a daughter, and if she searches online for certain professions and doesn't see anyone that looks like her, I would hate for that to discourage her."
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Beyond Bias: Adverse Use Cases</h2>
+    <div class="misuse-grid">
+      <div class="misuse-row"><div><strong>Deepfakes</strong> — a widely-viewed BuzzFeed deepfake of President Obama was released with full transparency and disclosure, which made it acceptable as a demonstration; using this technology <em>without</em> consent or disclosure would not be.</div></div>
+      <div class="misuse-row"><div><strong>Engagement-optimized toxicity</strong> — algorithms tuned purely for engagement can end up amplifying toxic or incendiary content as a side effect.</div></div>
+      <div class="misuse-row"><div><strong>Bots for fake content</strong> — generating fake product reviews or politically-motivated fake content.</div></div>
+      <div class="misuse-row"><div><strong>Fraud</strong> — the same techniques used to fight spam and financial fraud are also used by the spammers and fraudsters themselves — an ongoing arms race.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> A Personal Line to Draw</h2>
+    <div class="quote-box">
+      "There have been multiple times that I have looked at a project that seemed to be financially sound... but I have killed the project just on ethical grounds, because I felt that it makes the world worse off — and I just don't ever want to be involved in a project like that."
+    </div>
+    <p>The advice is direct: if asked to work on something you consider unethical, walk away. Financial soundness alone isn't sufficient justification to build something.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Why There's No Checklist</h2>
+    <p>Ethics has been studied for millennia without producing a simple, universal algorithm. Attempting to reduce it to "do these 5 things and you're ethical" doesn't work — what follows instead is general guidance, not a guarantee.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Practical Guidelines</h2>
+    <div class="guideline-list">
+      <div class="guideline-row"><span class="n">1</span><div><strong>Assemble a diverse team to brainstorm</strong> what could go wrong — with particular emphasis on harm to vulnerable groups. Diversity across gender, ethnicity, culture, and other traits was found to meaningfully improve a team's ability to spot problems before rollout.</div></div>
+      <div class="guideline-row"><span class="n">2</span><div><strong>Search the literature</strong> for existing standards or guidelines in your industry — e.g. emerging fairness standards in the financial industry for loan-approval systems.</div></div>
+      <div class="guideline-row"><span class="n">3</span><div><strong>Audit the system</strong> against the identified dimensions of possible harm, <em>after training but before deployment</em> — e.g. explicitly measure performance across genders or ethnicities if bias there was flagged as a risk.</div></div>
+      <div class="guideline-row"><span class="n">4</span><div><strong>Develop a mitigation plan</strong> (e.g. rollback to a known-fair earlier version), and continue monitoring for harm even after deployment so the plan can be triggered quickly if needed.</div></div>
+    </div>
+    <div class="pipeline-fig">
+      <svg viewBox="0 0 640 200" width="600">
+        <polygon points="20,50 130,50 150,100 130,150 20,150 40,100" fill="#5ed6a422" stroke="#5ed6a4" stroke-width="2"/>
+        <text x="80" y="95" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Scope</text>
+        <text x="80" y="112" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">project</text>
+
+        <polygon points="170,50 280,50 300,100 280,150 170,150 190,100" fill="#7c9bff22" stroke="#7c9bff" stroke-width="2"/>
+        <text x="230" y="95" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Collect</text>
+        <text x="230" y="112" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">data</text>
+
+        <polygon points="320,50 430,50 450,100 430,150 320,150 340,100" fill="#ffd16622" stroke="#ffd166" stroke-width="2"/>
+        <text x="380" y="95" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Train</text>
+        <text x="380" y="112" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">model</text>
+
+        <polygon points="470,50 580,50 600,100 580,150 470,150 490,100" fill="#c792ea22" stroke="#c792ea" stroke-width="2"/>
+        <text x="530" y="95" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">Deploy in</text>
+        <text x="530" y="112" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">production</text>
+
+        <line x1="450" y1="45" x2="450" y2="20" stroke="#7c9bff" stroke-width="2" marker-end="url(#au)"/>
+        <text x="450" y="14" text-anchor="middle" fill="#7c9bff" font-size="11" font-weight="700">Audit</text>
+        <defs><marker id="au" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L5,8 L10,0 z" fill="#7c9bff"/></marker></defs>
+      </svg>
+      <div class="fig-caption" style="color:var(--muted); font-size:0.82rem; margin-top:8px;">The audit step sits squarely between "train model" and "deploy in production" — the last checkpoint before real users are affected.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Not All Applications Carry Equal Weight</h2>
+    <div class="compare-grid">
+      <div class="compare-card low">
+        <div class="h">Low ethical stakes</div>
+        <p style="margin:0; font-size:0.88rem;">A neural network deciding how long to roast coffee beans — errors here have minimal real-world consequence.</p>
+      </div>
+      <div class="compare-card high">
+        <div class="h">High ethical stakes</div>
+        <p style="margin:0; font-size:0.88rem;">A system deciding which bank loans get approved — bias here can cause significant, compounding harm to real people's financial lives.</p>
+      </div>
+    </div>
+    <p style="margin-top:12px;">The level of scrutiny an application deserves should scale with the real-world consequences of it getting things wrong.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> The Self-Driving Car Example: Mitigation Before Deployment</h2>
+    <div class="scenario">
+      <div class="stitle">Plan before, not after</div>
+      <p style="margin:0;">Self-driving car teams developed accident-response mitigation plans <strong>before</strong> rolling cars out on the road — so that if an accident occurred, there was already a plan to execute immediately, rather than scrambling to figure out what to do after the fact. This is the general pattern worth adopting: plan the mitigation before deployment, not in reaction to a crisis.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">This isn't optional homework</div>
+      <p style="margin:0;">Ethics, fairness, and bias should be treated as seriously as accuracy or performance — not brushed off as secondary concerns. There's no algorithm for being ethical, but diverse brainstorming, industry-standard research, pre-deployment auditing, and a ready mitigation plan are concrete, repeatable practices that meaningfully reduce the odds of shipping something harmful.</p>
+    </div>
+    <p style="margin-top:14px;">This closes out the required content on the ML development process. Next (optional): techniques for handling skewed datasets — where the ratio of positive to negative examples is far from 50/50.</p>
+  </section>
+
+  <footer>Lesson 17 · ML Development Process · ML Fundamentals</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>18 - Skewed Datasets: Precision and Recall</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .trap-compare{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.trap-compare{grid-template-columns:1fr;}}
+  .trap-card{border-radius:10px; padding:16px; border:1px solid var(--border); text-align:center;}
+  .trap-card.model{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .trap-card.dumb{background:rgba(255,107,129,0.08); border-color:rgba(255,107,129,0.4);}
+  .trap-card .h{font-weight:700; margin-bottom:8px; font-size:0.9rem;}
+  .trap-card.model .h{color:var(--good);}
+  .trap-card.dumb .h{color:var(--bad);}
+  .trap-card .val{font-size:1.6rem; font-weight:700; color:#fff;}
+  .trap-card .sub{font-size:0.78rem; color:var(--muted); margin-top:4px;}
+
+  .cm-table{width:100%; border-collapse:collapse; margin-top:16px; max-width:480px;}
+  .cm-table th, .cm-table td{border:1px solid var(--border); padding:14px; text-align:center; font-size:0.9rem;}
+  .cm-table th{background:var(--panel2); color:var(--accent); font-weight:600;}
+  .cm-table td.tp{background:rgba(124,155,255,0.15); color:var(--accent); font-weight:700;}
+  .cm-table td.fp{background:rgba(199,146,234,0.15); color:var(--cv); font-weight:700;}
+  .cm-table td.fn{background:rgba(255,209,102,0.15); color:var(--warn); font-weight:700;}
+  .cm-table td.tn{background:rgba(94,214,164,0.15); color:var(--good); font-weight:700;}
+  .cm-caption{text-align:center; font-size:0.8rem; color:var(--muted); margin-top:8px;}
+
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; font-size:1.05rem; margin:12px 0; color:#fff;}
+  .formula-box .val{color:var(--good); font-weight:700;}
+
+  .term-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;}
+  @media(max-width:600px){.term-grid{grid-template-columns:1fr;}}
+  .term-card{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:0.85rem;}
+  .term-card .name{font-weight:700; margin-bottom:4px;}
+  .term-card.tp .name{color:var(--accent);}
+  .term-card.fp .name{color:var(--cv);}
+  .term-card.fn .name{color:var(--warn);}
+  .term-card.tn .name{color:var(--good);}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Optional — Skewed Datasets</span>
+  <h1>Lesson 18 — Skewed Datasets: Precision and Recall</h1>
+  <p class="subtitle">When 99% accuracy can mean nothing — and the two metrics that actually reveal whether a model is useful.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Trap: Accuracy Lies When Classes Are Skewed</h2>
+    <p>A rare-disease classifier (y=1 if disease present) achieves <strong>1% error on the test set</strong> — sounds great. But if only <strong>0.5%</strong> of patients actually have the disease, a program that just always prints <code>y=0</code> — never diagnosing anyone — beats it.</p>
+    <div class="trap-compare">
+      <div class="trap-card model">
+        <div class="h">Trained Model</div>
+        <div class="val">1% error</div>
+        <div class="sub">99% accuracy</div>
+      </div>
+      <div class="trap-card dumb">
+        <div class="h"><code>print("y=0")</code></div>
+        <div class="val">0.5% error</div>
+        <div class="sub">99.5% accuracy — but useless</div>
+      </div>
+    </div>
+    <div class="scenario">
+      <div class="stitle">The core problem</div>
+      <p style="margin:0;">The trivial "always predict 0" program <strong>wins</strong> on accuracy, despite never diagnosing a single patient. This makes it impossible to tell whether small changes in error (0.5% → 1% → 1.2%) reflect a genuinely better model, or just how aggressively the model avoids predicting the rare class. Accuracy alone can't distinguish "useful diagnostic tool" from "does nothing."</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The Fix: The Confusion Matrix</h2>
+    <p>For a rare positive class (y=1), evaluate performance on the CV/test set with a 2×2 breakdown of predicted vs. actual class:</p>
+    <table class="cm-table">
+      <thead><tr><th></th><th>Actual = 1</th><th>Actual = 0</th></tr></thead>
+      <tbody>
+        <tr><th>Predicted = 1</th><td class="tp">True Positive<br>15</td><td class="fp">False Positive<br>5</td></tr>
+        <tr><th>Predicted = 0</th><td class="fn">False Negative<br>10</td><td class="tn">True Negative<br>70</td></tr>
+      </tbody>
+    </table>
+    <div class="cm-caption">100 CV examples: 25 actually positive, 75 actually negative.</div>
+
+    <div class="term-grid">
+      <div class="term-card tp"><div class="name">True Positive</div>Predicted 1, actually 1 — correctly caught.</div>
+      <div class="term-card fp"><div class="name">False Positive</div>Predicted 1, actually 0 — a false alarm.</div>
+      <div class="term-card fn"><div class="name">False Negative</div>Predicted 0, actually 1 — a missed case.</div>
+      <div class="term-card tn"><div class="name">True Negative</div>Predicted 0, actually 0 — correctly cleared.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Precision — "When It Says Yes, Is It Right?"</h2>
+    <p>Of all patients the model predicted as positive, what fraction actually have the disease?</p>
+    <div class="formula-box">
+      Precision = True Positives / (True Positives + False Positives) = 15 / (15 + 5) = <span class="val">0.75 (75%)</span>
+    </div>
+    <p>When this model flags a patient as having the rare disease, it's right 75% of the time.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Recall — "Of the Real Cases, How Many Did We Catch?"</h2>
+    <p>Of all patients who actually have the disease, what fraction did the model correctly detect?</p>
+    <div class="formula-box">
+      Recall = True Positives / (True Positives + False Negatives) = 15 / (15 + 10) = <span class="val">0.6 (60%)</span>
+    </div>
+    <p>The model catches 60% of the patients who truly have the disease.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> Why This Exposes the "Always Predict 0" Trick</h2>
+    <div class="scenario">
+      <div class="stitle">The dumb algorithm gets caught immediately</div>
+      <p style="margin:0;">If a model always predicts <code>y=0</code>, its number of true positives is exactly zero — it never predicts positive at all. That makes <strong>recall = 0 / (0 + actual positives) = 0</strong>, instantly flagging the model as useless. Precision technically becomes an undefined 0/0 in this case, but in practice is treated as 0 too. Accuracy couldn't catch this trick; precision and recall catch it immediately.</p>
+    </div>
+    <p>A model with either precision or recall at (or near) zero is not a useful model — no matter how good its raw accuracy looks.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Two numbers, both need to be decently high</div>
+      <p style="margin:0;">For skewed classification problems, judge a model by <strong>precision</strong> (is it trustworthy when it predicts positive?) and <strong>recall</strong> (does it actually catch the real positive cases?) together — not by accuracy alone. A model that's reasonably confident when it flags something <em>and</em> catches a meaningful share of real cases is doing real work, unlike a model that just avoids predicting the rare class to game its accuracy score.</p>
+    </div>
+    <p style="margin-top:14px;">Next: how to trade off precision against recall, and how to combine them into a single number when comparing models.</p>
+  </section>
+
+  <footer>Lesson 18 · Optional — Skewed Datasets · ML Fundamentals</footer>
+</div>
+</body>
+</html>
