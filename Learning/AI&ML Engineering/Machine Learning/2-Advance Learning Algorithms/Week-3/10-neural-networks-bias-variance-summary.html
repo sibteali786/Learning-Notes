@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>10 - Neural Networks and Bias/Variance</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  pre{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:0.82rem; margin:12px 0;}
+  pre code{background:none; border:none; padding:0; color:#d4d8e8;}
+  .cm{color:#546079; font-style:italic;} .fn{color:#82aaff;} .str{color:#c3e88d;} .kw{color:#c792ea;}
+
+  .d3-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px;}
+  .d3-fig svg{display:block; margin:0 auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px; text-align:center;}
+
+  .tradeoff-labels{display:flex; justify-content:space-between; margin-top:10px; font-size:0.85rem;}
+  .tradeoff-labels .side{text-align:center; flex:1;}
+  .tradeoff-labels .side.left{color:var(--bad);}
+  .tradeoff-labels .side.right{color:var(--accent2);}
+  .tradeoff-labels .mid{color:var(--muted); flex:1; text-align:center;}
+
+  .flow{display:flex; flex-direction:column; gap:0; margin-top:16px; align-items:center;}
+  .flow-box{background:var(--panel2); border:2px solid var(--accent); border-radius:10px; padding:14px 20px; text-align:center; max-width:280px;}
+  .flow-box .metric{color:var(--cv); font-size:0.78rem; margin-top:6px;}
+  .flow-arrow{display:flex; gap:24px; align-items:center; margin:8px 0;}
+  .flow-arrow .branch{display:flex; flex-direction:column; align-items:center; font-size:0.8rem;}
+  .flow-arrow .branch .lbl{color:var(--muted); margin-bottom:4px;}
+  .flow-arrow .branch .action{background:var(--panel2); border:1px solid var(--bad); color:var(--bad); padding:6px 14px; border-radius:8px; font-weight:600;}
+  .flow-arrow .yes{color:var(--good); font-weight:700; font-size:0.85rem;}
+
+  .nn-compare{display:flex; align-items:center; justify-content:center; gap:30px; margin-top:16px; flex-wrap:wrap;}
+  .nn-diagram{text-align:center;}
+  .nn-diagram svg{display:block; margin:0 auto;}
+  .nn-diagram .lbl{font-size:0.8rem; color:var(--muted); margin-top:6px;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  .caveat{background:rgba(255,209,102,0.08); border:1px solid var(--warn); border-radius:10px; padding:14px 18px; margin-top:14px;}
+  .caveat .h{color:var(--warn); font-weight:700; margin-bottom:6px;}
+
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; font-size:1.0rem; margin:12px 0; color:#fff; overflow-x:auto;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Advice for Applying ML</span>
+  <h1>Lesson 10 — Neural Networks and Bias/Variance</h1>
+  <p class="subtitle">Why deep learning largely sidesteps the classic bias-variance tradeoff — and the practical recipe that follows from it.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Classic Bias-Variance Tradeoff</h2>
+    <p>Before neural networks dominated, model complexity was a balancing act: too simple → high bias; too complex → high variance. Choosing the "just right" polynomial degree meant trading one off against the other.</p>
+    <div class="d3-fig">
+      <svg id="chart-tradeoff" viewBox="0 0 460 260" width="100%" style="max-width:460px"></svg>
+      <div class="fig-caption">The classic U-shaped tradeoff curve — J_cv minimized somewhere in the middle, never able to escape both problems at once.</div>
+    </div>
+    <div class="tradeoff-labels">
+      <div class="side left"><strong>f = w₁x + b</strong><br>Simple model → High bias</div>
+      <div class="mid">↔ tradeoff ↔</div>
+      <div class="side right"><strong>f = w₁x+...+w₄x⁴+b</strong><br>Complex model → High variance</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Neural Networks Break the Tradeoff</h2>
+    <p><strong>Large neural networks trained on small-to-moderate datasets are low-bias machines</strong> — make the network big enough (more layers, more units per layer) and it can almost always fit the training set well. This decouples the two problems: instead of trading bias against variance, you can address each independently.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> The Practical Recipe</h2>
+    <div class="flow">
+      <div class="flow-box">Train on training set<div class="metric">Does it do well on training set? (J_train)</div></div>
+      <div class="flow-arrow">
+        <div class="branch"><span class="lbl">No — high bias</span><span class="action">Bigger network</span></div>
+        <div class="yes">Yes ↓</div>
+      </div>
+      <div class="flow-box">Check cross-validation set<div class="metric">Does it do well on CV set? (J_cv)</div></div>
+      <div class="flow-arrow">
+        <div class="branch"><span class="lbl">No — high variance</span><span class="action">More data</span></div>
+        <div class="yes">Yes ↓</div>
+      </div>
+      <div class="flow-box" style="border-color:var(--good); color:var(--good);">Done!</div>
+    </div>
+    <p style="margin-top:14px;">Both failed branches loop back: a bigger network gets retrained and re-checked against J_train again; more data gets the model retrained and re-checked against J_cv again. You cycle through this loop — sometimes fighting bias, sometimes variance, at different points in development — until both checks pass.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Two Real Limits of This Recipe</h2>
+    <div class="caveat">
+      <div class="h">Limit 1 — Computation</div>
+      <p style="margin:0;">Bigger networks cost more to train. GPUs have made this recipe practical at scale, but beyond a certain size, training becomes infeasible even with hardware acceleration. This computational trade is arguably the real driver behind the modern rise of deep learning — the recipe works, but only where enough compute exists to keep looping through "bigger network."</p>
+    </div>
+    <div class="caveat" style="margin-top:12px;">
+      <div class="h">Limit 2 — Data availability</div>
+      <p style="margin:0;">"Get more data" is a straightforward fix for high variance — until you can't get more. Some domains have a hard ceiling on available data, at which point this branch of the loop isn't usable anymore.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> "Isn't a Bigger Network Just... More Overfitting?"</h2>
+    <p>A common worry: won't a larger network have more variance? Not if regularized appropriately.</p>
+    <div class="nn-compare">
+      <div class="nn-diagram">
+        <svg viewBox="0 0 160 100" width="160">
+          <circle cx="30" cy="35" r="8" fill="none" stroke="#7c9bff" stroke-width="1.5"/><circle cx="30" cy="60" r="8" fill="none" stroke="#7c9bff" stroke-width="1.5"/>
+          <circle cx="80" cy="35" r="8" fill="none" stroke="#7c9bff" stroke-width="1.5"/><circle cx="80" cy="60" r="8" fill="none" stroke="#7c9bff" stroke-width="1.5"/>
+          <circle cx="130" cy="47" r="8" fill="none" stroke="#7c9bff" stroke-width="1.5"/>
+          <line x1="38" y1="35" x2="72" y2="35" stroke="#4a4f66"/><line x1="38" y1="35" x2="72" y2="60" stroke="#4a4f66"/>
+          <line x1="38" y1="60" x2="72" y2="35" stroke="#4a4f66"/><line x1="38" y1="60" x2="72" y2="60" stroke="#4a4f66"/>
+          <line x1="88" y1="35" x2="122" y2="47" stroke="#4a4f66"/><line x1="88" y1="60" x2="122" y2="47" stroke="#4a4f66"/>
+        </svg>
+        <div class="lbl">10 → 10 → 1 units (3 layers)</div>
+      </div>
+      <div style="color:var(--muted); font-size:1.5rem;">→</div>
+      <div class="nn-diagram">
+        <svg viewBox="0 0 220 100" width="220">
+          <circle cx="20" cy="30" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/><circle cx="20" cy="50" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/><circle cx="20" cy="70" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/>
+          <circle cx="70" cy="30" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/><circle cx="70" cy="50" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/><circle cx="70" cy="70" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/>
+          <circle cx="130" cy="30" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/><circle cx="130" cy="50" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/><circle cx="130" cy="70" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/>
+          <circle cx="190" cy="50" r="6" fill="none" stroke="#c792ea" stroke-width="1.5"/>
+        </svg>
+        <div class="lbl">30 → 30 → 30 → 1 units (4 layers)</div>
+      </div>
+    </div>
+    <div class="rule-box">
+      <div class="title">Key finding</div>
+      <p style="margin:0;">A large neural network with appropriate regularization will usually do <strong>as well or better</strong> than a smaller one — never meaningfully worse in performance. The real cost of going bigger isn't overfitting risk, it's <strong>compute time</strong> for training and inference.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Regularizing a Neural Network</h2>
+    <div class="formula-box">
+      J(W,B) = 1/m·Σ L(f(x⁽ⁱ⁾), y⁽ⁱ⁾) + λ/2m·Σ(w²) <span style="color:var(--muted); font-size:0.7em;">(sum over all weights W)</span>
+    </div>
+    <p>Same idea as linear/logistic regression regularization — penalize the sum of squared weights across the whole network. Biases (b) are typically left unregularized, though in practice this makes little difference either way.</p>
+    <pre><code><span class="cm"># Unregularized MNIST model</span>
+layer_1 = Dense(units=<span class="kw">25</span>, activation=<span class="str">"relu"</span>)
+layer_2 = Dense(units=<span class="kw">15</span>, activation=<span class="str">"relu"</span>)
+layer_3 = Dense(units=<span class="kw">1</span>, activation=<span class="str">"sigmoid"</span>)
+model = Sequential([layer_1, layer_2, layer_3])
+
+<span class="cm"># Regularized MNIST model — add kernel_regularizer to each layer</span>
+layer_1 = Dense(units=<span class="kw">25</span>, activation=<span class="str">"relu"</span>, kernel_regularizer=<span class="fn">L2</span>(<span class="kw">0.01</span>))
+layer_2 = Dense(units=<span class="kw">15</span>, activation=<span class="str">"relu"</span>, kernel_regularizer=<span class="fn">L2</span>(<span class="kw">0.01</span>))
+layer_3 = Dense(units=<span class="kw">1</span>, activation=<span class="str">"sigmoid"</span>, kernel_regularizer=<span class="fn">L2</span>(<span class="kw">0.01</span>))
+model = Sequential([layer_1, layer_2, layer_3])</code></pre>
+    <p><code>kernel_regularizer=L2(0.01)</code> sets λ = 0.01 for that layer's weights. You can use a different λ per layer, but using the same value across all layers is common for simplicity.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> Key Takeaways</h2>
+    <div class="rule-box">
+      <div class="title">1. It almost never hurts to go bigger</div>
+      <p style="margin:0;">As long as you regularize appropriately, a larger network matches or beats a smaller one. The only real downside is slower training and inference.</p>
+    </div>
+    <div class="rule-box" style="margin-top:12px;">
+      <div class="title">2. Neural networks are (usually) low-bias machines</div>
+      <p style="margin:0;">So long as the training set isn't enormous, a sufficiently large network fits it well — which is why, in practice, variance tends to be the more common problem to fight when training neural nets, not bias.</p>
+    </div>
+    <p style="margin-top:14px;">Bias and variance still matter for neural networks — measuring both and using them to guide next steps remains one of the most useful habits in developing any learning algorithm, deep or otherwise. Next: pulling everything together into the full development process for machine learning systems.</p>
+  </section>
+
+  <footer>Lesson 10 · Advice for Applying Machine Learning · ML Fundamentals</footer>
+</div>
+
+<script>
+function drawCurve(svgId, series, options) {
+  const svg = d3.select("#" + svgId);
+  const width = 460, height = 260;
+  const margin = {top: 20, right: 20, bottom: 40, left: 20};
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+  const m = d3.range(1, series[0].values.length + 1);
+  const yMax = options.yMax || d3.max(series.flatMap(s => s.values)) * 1.05;
+
+  const xScale = d3.scaleLinear().domain([1, m.length]).range([0, innerWidth]);
+  const yScale = d3.scaleLinear().domain([0, yMax]).range([innerHeight, 0]);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  g.append("g").attr("transform", `translate(0,${innerHeight})`)
+    .call(d3.axisBottom(xScale).ticks(5).tickSize(0).tickFormat(() => ""))
+    .call(a => a.select(".domain").attr("stroke","#4a4f66"));
+  g.append("text").attr("x", innerWidth/2).attr("y", innerHeight + 26)
+    .attr("text-anchor","middle").attr("fill","#9aa0b4").attr("font-size","11px")
+    .text(options.xLabel);
+
+  const line = d3.line().x((d,i) => xScale(m[i])).y(d => yScale(d)).curve(d3.curveMonotoneX);
+
+  series.forEach(s => {
+    g.append("path").datum(s.values).attr("fill","none").attr("stroke", s.color)
+      .attr("stroke-width", 2.5).attr("d", line);
+    g.append("text")
+      .attr("x", innerWidth - 4)
+      .attr("y", yScale(s.values[s.values.length-1]) + s.labelOffset)
+      .attr("text-anchor","end").attr("fill", s.color).attr("font-size","11px").attr("font-weight","600")
+      .text(s.name);
+  });
+
+  if (options.minMarker) {
+    const idx = options.minMarker - 1;
+    g.append("circle")
+      .attr("cx", xScale(m[idx]))
+      .attr("cy", yScale(series[0].values[idx]))
+      .attr("r", 5).attr("fill", "none").attr("stroke", "#ffd166").attr("stroke-width", 2);
+  }
+}
+
+drawCurve("chart-tradeoff", [
+  {name:"J_cv", color:"#c792ea", labelOffset:-8, values:[5.5,3.5,2.2,1.5,1.2,1.15,1.3,1.9,2.8,4.2]},
+  {name:"J_train", color:"#7c9bff", labelOffset:16, values:[4.8,2.6,1.4,0.8,0.5,0.35,0.25,0.18,0.13,0.1]}
+], {yMax: 6.0, xLabel: "degree of polynomial", minMarker: 6});
+</script>
+</body>
+</html>

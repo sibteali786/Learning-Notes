@@ -18,8 +18,33 @@
               "icon": "code-glyph",
               "title": "8-learning-curves-summary"
             }
+          },
+          {
+            "id": "5ded3b2bbe1394e9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -184,24 +209,25 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "5ded3b2bbe1394e9",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/MLOps/12-iterative-loop-ml-development.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/8-learning-curves-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/MLOps/16-full-cycle-ml-project.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/MLOps",
-    "Learning/Backend Engineering/Python/FastAPI/8-chunked-seeding-islice.html",
+    "conflict-files-obsidian-git.md",
+    "Learning/Backend Engineering/Redis-POstgres/load_redis_from_pg.py",
+    "Learning/Backend Engineering/Redis-POstgres",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/utils.py",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/deeplearning.mplstyle",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/data_w3_ex2.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/data_w3_ex1.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data4.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data3.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data2.csv",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-3/notebooks/data/c2w3_lab2_data1.csv",
     "Learning/Backend Engineering/Python/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/1-fastapi-phase0-learnings.html",
-    "Learning/Backend Engineering/Python/FastAPI/2-fastapi-phase1-learnings.html",
-    "Learning/System Design/Practice/News Aggregator/part1_news_aggregator.html",
-    "Learning/System Design/Practice/News Aggregator/part2_news_aggregator.html",
     "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
-    "Learning/Backend Engineering/Python/FastAPI/7-rss-poller-containerize-and-dedup.html",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/370147-2026-09-10T21:15:44+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/337266-2026-09-10T18:54:22+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/142893-2026-09-12T15:30:01+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/6-cpu-ceiling.html",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
     "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
     "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
@@ -210,7 +236,6 @@
     "Pasted Image 20260904172659_828.png",
     "Pasted Image 20260904172615_090.png",
     "Learning/Backend Engineering/Pasted Image 20260317121120_013.png",
-    "conflict-files-obsidian-git.md",
     "Learning/IELTS/Resources.md",
     "Learning/Failed Interview Learings.md",
     "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/what_is_partitioning_diagram.svg",
