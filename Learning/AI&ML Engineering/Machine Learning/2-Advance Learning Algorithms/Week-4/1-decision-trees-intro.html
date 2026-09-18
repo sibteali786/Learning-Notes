@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Decision Trees — Intro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2.1rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px;}
+  th,td{padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  code, .code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  svg{width:100%;height:auto;}
+  .tag{font-size:.75rem;color:var(--dim);}
+</style>
+</head>
+<body>
+
+<h1>🌳 Decision Trees — Introduction</h1>
+<div class="sub">Advanced Learning Algorithms · Week on Decision Trees & Tree Ensembles</div>
+
+<!-- WHY IT MATTERS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Decision Trees Matter</h2></div>
+  <p>One of the most powerful, widely-used ML algorithms — heavily used to win competitions, yet underrepresented in academia. Well worth having in your toolbox.</p>
+  <span class="pill blue">Competition favorite</span>
+  <span class="pill purple">Underrated in academia</span>
+  <span class="pill green">Tree ensembles later</span>
+</div>
+
+<!-- DATASET -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Running Example: Cat Classification</h2></div>
+  <p>10 training examples (5 cats, 5 dogs). Features <code>X</code> are <b>categorical</b> — each takes only 2 discrete values here. Label <code>y</code> is binary (cat = 1, not cat = 0).</p>
+  <table>
+    <tr><th>Ear shape (X₁)</th><th>Face shape (X₂)</th><th>Whiskers (X₃)</th><th>Cat (y)</th></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Present</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Not round</td><td>Present</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Round</td><td>Absent</td><td>0</td></tr>
+    <tr><td>Pointy</td><td>Not round</td><td>Present</td><td>0</td></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Present</td><td>1</td></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Absent</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Not round</td><td>Absent</td><td>0</td></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Absent</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Round</td><td>Absent</td><td>0</td></tr>
+    <tr><td>Floppy</td><td>Round</td><td>Absent</td><td>0</td></tr>
+  </table>
+  <div class="note">Binary classification task — this is a warm-up dataset; later lessons cover features with >2 values and continuous-valued features.</div>
+</div>
+
+<!-- ANATOMY OF A TREE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Anatomy of a Decision Tree</h2></div>
+  <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- edges -->
+    <line x1="380" y1="70" x2="210" y2="170" stroke="#4d9dff" stroke-width="2"/>
+    <line x1="380" y1="70" x2="550" y2="170" stroke="#4d9dff" stroke-width="2"/>
+    <line x1="210" y1="210" x2="100" y2="310" stroke="#8a90a6" stroke-width="2"/>
+    <line x1="210" y1="210" x2="310" y2="310" stroke="#8a90a6" stroke-width="2"/>
+    <line x1="550" y1="210" x2="450" y2="310" stroke="#8a90a6" stroke-width="2"/>
+    <line x1="550" y1="210" x2="650" y2="310" stroke="#8a90a6" stroke-width="2"/>
+
+    <!-- edge labels -->
+    <text x="270" y="115" fill="#ff9d4d" font-size="13" font-family="JetBrains Mono">Pointy</text>
+    <text x="450" y="115" fill="#ff9d4d" font-size="13" font-family="JetBrains Mono">Floppy</text>
+    <text x="120" y="265" fill="#ff9d4d" font-size="12" font-family="JetBrains Mono">Round</text>
+    <text x="250" y="265" fill="#ff9d4d" font-size="12" font-family="JetBrains Mono">Not round</text>
+    <text x="400" y="265" fill="#ff9d4d" font-size="12" font-family="JetBrains Mono">Present</text>
+    <text x="600" y="265" fill="#ff9d4d" font-size="12" font-family="JetBrains Mono">Absent</text>
+
+    <!-- root node -->
+    <ellipse cx="380" cy="55" rx="90" ry="32" fill="#161923" stroke="#4d9dff" stroke-width="2.5"/>
+    <text x="380" y="60" fill="#e6e8ef" font-size="14" text-anchor="middle" font-family="JetBrains Mono">Ear shape</text>
+    <text x="380" y="10" fill="#4d9dff" font-size="12" text-anchor="middle" font-family="JetBrains Mono">ROOT NODE</text>
+
+    <!-- decision nodes -->
+    <ellipse cx="210" cy="190" rx="85" ry="30" fill="#161923" stroke="#b58cff" stroke-width="2.5"/>
+    <text x="210" y="195" fill="#e6e8ef" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Face shape</text>
+    <ellipse cx="550" cy="190" rx="85" ry="30" fill="#161923" stroke="#b58cff" stroke-width="2.5"/>
+    <text x="550" y="195" fill="#e6e8ef" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Whiskers</text>
+    <text x="640" y="150" fill="#b58cff" font-size="12" text-anchor="middle" font-family="JetBrains Mono">DECISION NODES</text>
+
+    <!-- leaf nodes -->
+    <rect x="55" y="320" width="90" height="42" rx="6" fill="#0b1f16" stroke="#4dd992" stroke-width="2.5"/>
+    <text x="100" y="346" fill="#4dd992" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Cat</text>
+    <rect x="260" y="320" width="105" height="42" rx="6" fill="#1f0b0b" stroke="#ff6b6b" stroke-width="2.5"/>
+    <text x="312" y="346" fill="#ff6b6b" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Not cat</text>
+    <rect x="405" y="320" width="90" height="42" rx="6" fill="#0b1f16" stroke="#4dd992" stroke-width="2.5"/>
+    <text x="450" y="346" fill="#4dd992" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Cat</text>
+    <rect x="605" y="320" width="105" height="42" rx="6" fill="#1f0b0b" stroke="#ff6b6b" stroke-width="2.5"/>
+    <text x="657" y="346" fill="#ff6b6b" font-size="13" text-anchor="middle" font-family="JetBrains Mono">Not cat</text>
+    <text x="380" y="390" fill="#4dd992" font-size="12" text-anchor="middle" font-family="JetBrains Mono">LEAF NODES (predictions)</text>
+  </svg>
+
+  <div class="grid2" style="margin-top:14px">
+    <div>
+      <span class="pill blue">Root node</span> — topmost node, first feature checked.
+    </div>
+    <div>
+      <span class="pill purple">Decision node</span> — oval; checks a feature, sends example left/right.
+    </div>
+    <div>
+      <span class="pill green">Leaf node</span> — rectangle at the bottom; outputs the final prediction.
+    </div>
+    <div>
+      <span class="pill orange">Branch label</span> — value of the feature that routes left vs right.
+    </div>
+  </div>
+  <div class="note">🌱 Why roots on top? Think of it like an indoor <i>hanging</i> plant — roots up top, leaves fall to the bottom. Not a biological tree.</div>
+</div>
+
+<!-- WALKTHROUGH EXAMPLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Real-World Inference Walkthrough</h2></div>
+  <p>New test example: <code>Ear shape = Pointy</code>, <code>Face shape = Round</code>, <code>Whiskers = Present</code></p>
+  <table>
+    <tr><th>Step</th><th>Node</th><th>Feature value</th><th>Direction</th></tr>
+    <tr><td>1</td><td>Root — Ear shape</td><td>Pointy</td><td>← go left</td></tr>
+    <tr><td>2</td><td>Decision — Face shape</td><td>Round</td><td>← go left</td></tr>
+    <tr><td>3</td><td>Leaf</td><td>—</td><td>✅ Predict: <b style="color:#4dd992">Cat</b></td></tr>
+  </table>
+  <div class="note">This is exactly how a trained tree makes predictions at inference time — no math, just following feature checks down to a leaf.</div>
+</div>
+
+<!-- MULTIPLE POSSIBLE TREES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Many Possible Trees, Same Data</h2></div>
+  <p>For a given dataset, there are <b>many valid decision trees</b> you could build — they differ in which feature gets checked first, and how deep the tree goes.</p>
+  <div class="grid2">
+    <div class="note">Tree A: Ear shape → Whiskers → leaf</div>
+    <div class="note">Tree B: Ear shape → Face shape → leaf</div>
+    <div class="note">Tree C: Face shape only → leaf (simplest)</div>
+    <div class="note">Tree D: Face shape → Ear shape → Whiskers → leaf (deepest)</div>
+  </div>
+  <p style="margin-top:14px">Some trees fit the <span class="pill green">training set</span> better; some <span class="pill purple">generalize</span> better to cross-validation/test data. The learning algorithm's job: search over possible trees and pick one that does well on <i>both</i>.</p>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Key Terms — Quick Reference</h2></div>
+  <table>
+    <tr><th>Term</th><th>What it means</th></tr>
+    <tr><td>Root node</td><td>Topmost node — first feature checked</td></tr>
+    <tr><td>Decision node</td><td>Any internal node that splits on a feature</td></tr>
+    <tr><td>Leaf node</td><td>Terminal node — outputs the prediction</td></tr>
+    <tr><td>Categorical feature</td><td>Discrete values (e.g., Pointy/Floppy) — this week's focus</td></tr>
+  </table>
+</div>
+
+<!-- WHAT'S NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill blue">How to build a tree algorithmically</span>
+  <span class="pill orange">Features with >2 categories</span>
+  <span class="pill purple">Continuous-valued features</span>
+  <span class="pill green">Tree ensembles</span>
+</div>
+
+</body>
+</html>

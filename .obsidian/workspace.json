@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "d220402d0cc5417c",
+        "id": "1c1459c2606e2157",
         "type": "tabs",
         "children": [
           {
-            "id": "b3fa9c7d2808d86b",
+            "id": "e8d1fd8b4919786c",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "excalidraw",
               "state": {
-                "file": "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md"
               },
-              "icon": "lucide-file",
-              "title": "3-Skewed Run"
+              "icon": "excalidraw-icon",
+              "title": "4-Bus Routes.excalidraw"
             }
           }
         ]
@@ -90,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 461.8359375
+    "width": 461.8359375,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -196,8 +185,17 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "b3fa9c7d2808d86b",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
+    "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/4-information-gain.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/5-recursive-splitting-full-algorithm.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/1-decision-trees-intro.html",
+    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/3-entropy-impurity.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/2-decision-tree-learning-process.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4",
     "Pasted image 20260917232945.png",
     "Pasted image 20260917232941.png",
     "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
@@ -206,16 +204,9 @@
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/7-rss-poller-containerize-and-dedup.html",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/8-chunked-seeding-islice.html",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/9-k6-hotkey-scenario-and-redis-verdict.html",
     "Learning/Backend Engineering/Python/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/3-live-feed-engine-command-cheatsheet.html",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-fastapi-phase1-learnings.html",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.html",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/4-cpu-profiling-command-cheatsheet.html",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
     "Pasted image 20260917225052.png",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2026-09-17-k6-hotkey-scenario-and-redis-verdict.html.tmp.259607.b99cec6f3720",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/2-50M Rows Run.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/1-Final Run.md",
     "Learning/Side Projects/HospitalityOS/Resources.md",
@@ -231,15 +222,12 @@
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/370147-2026-09-10T21:15:44+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/337266-2026-09-10T18:54:22+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/142893-2026-09-12T15:30:01+05:00.svg",
-    "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
     "Learning/AI&ML Engineering/Learnings/Books.md",
     "Pasted Image 20260904172659_828.png",
     "Pasted Image 20260904172615_090.png",
     "Learning/Backend Engineering/Pasted Image 20260317121120_013.png",
     "Learning/IELTS/Resources.md",
     "Learning/Failed Interview Learings.md",
-    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/what_is_partitioning_diagram.svg",
     "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/Drawing 2026-09-04 17.23.15.excalidraw.md",
     "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
     "Learning/AI&ML Engineering/Resources.md",
