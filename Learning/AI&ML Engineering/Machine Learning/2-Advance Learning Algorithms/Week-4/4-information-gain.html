@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Information Gain — Choosing a Split</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px;}
+  th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media(max-width:900px){.grid3{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:16px 20px;text-align:center;font-size:1rem;color:var(--green);margin:12px 0;}
+  .split-card{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;}
+  .split-card h3{font-size:.95rem;color:#fff;margin-bottom:8px;}
+  .winner{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
+  svg{width:100%;height:auto;}
+</style>
+</head>
+<body>
+
+<h1>📊 Information Gain — Choosing the Best Split</h1>
+<div class="sub">Advanced Learning Algorithms · Turning entropy into a decision rule</div>
+
+<!-- CONCEPT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Core Idea</h2></div>
+  <p>Pick the feature that <b>reduces entropy the most</b> when you split on it. This reduction has a name: <b style="color:var(--green)">Information Gain</b>.</p>
+  <div class="formula">Information Gain = Entropy(before split) − Weighted Entropy(after split)</div>
+</div>
+
+<!-- WHY WEIGHTED AVERAGE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Why Weight by Branch Size?</h2></div>
+  <p>A branch with high entropy matters more if it holds <b>many</b> examples than if it holds just a few. So instead of comparing raw left/right entropy values directly, we take a <b>weighted average</b>, weighted by what fraction of examples went to each branch.</p>
+  <div class="formula"><code>w<sup>left</sup></code> = fraction of examples that went left &nbsp;|&nbsp; <code>w<sup>right</sup></code> = fraction that went right</div>
+</div>
+
+<!-- THREE CANDIDATE SPLITS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Comparing 3 Candidate Root Splits</h2></div>
+  <p>Root node starts with 10 examples (5 cats / 5 dogs) → <code>p₁ᵣₒₒₜ = 0.5</code> → <code>H(0.5) = 1</code> (max impurity).</p>
+  <div class="grid3">
+    <div class="split-card winner">
+      <h3>🟢 Ear shape</h3>
+      <table>
+        <tr><td>Left</td><td>p₁=4/5=0.8</td><td>H=0.72</td></tr>
+        <tr><td>Right</td><td>p₁=1/5=0.2</td><td>H=0.72</td></tr>
+      </table>
+      <div class="formula" style="font-size:.8rem">1 − (5/10·0.72 + 5/10·0.72)<br><b style="font-size:1.2rem">= 0.28</b></div>
+    </div>
+    <div class="split-card">
+      <h3>Face shape</h3>
+      <table>
+        <tr><td>Left</td><td>p₁=4/7=0.57</td><td>H=0.99</td></tr>
+        <tr><td>Right</td><td>p₁=1/3=0.33</td><td>H=0.92</td></tr>
+      </table>
+      <div class="formula" style="font-size:.8rem">1 − (7/10·0.99 + 3/10·0.92)<br><b style="font-size:1.2rem">= 0.03</b></div>
+    </div>
+    <div class="split-card">
+      <h3>Whiskers</h3>
+      <table>
+        <tr><td>Left</td><td>p₁=3/4=0.75</td><td>H=0.81</td></tr>
+        <tr><td>Right</td><td>p₁=2/6=0.33</td><td>H=0.92</td></tr>
+      </table>
+      <div class="formula" style="font-size:.8rem">1 − (4/10·0.81 + 6/10·0.92)<br><b style="font-size:1.2rem">= 0.12</b></div>
+    </div>
+  </div>
+  <div class="note">🏆 <b style="color:var(--green)">Ear shape wins</b> with the highest information gain (0.28 > 0.12 > 0.03) → chosen as the root node split.</div>
+</div>
+
+<!-- FORMAL FORMULA -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>General Formula</h2></div>
+  <div class="formula">
+    Information Gain = H(p₁<sup>root</sup>) − ( w<sup>left</sup>·H(p₁<sup>left</sup>) + w<sup>right</sup>·H(p₁<sup>right</sup>) )
+  </div>
+  <table>
+    <tr><th>Symbol</th><th>Meaning</th><th>Ear-shape example</th></tr>
+    <tr><td>p₁<sup>root</sup></td><td>Fraction cats at current node (before split)</td><td>5/10 = 0.5</td></tr>
+    <tr><td>p₁<sup>left</sup></td><td>Fraction cats in left branch (after split)</td><td>4/5</td></tr>
+    <tr><td>p₁<sup>right</sup></td><td>Fraction cats in right branch (after split)</td><td>1/5</td></tr>
+    <tr><td>w<sup>left</sup></td><td>Fraction of examples routed left</td><td>5/10</td></tr>
+    <tr><td>w<sup>right</sup></td><td>Fraction of examples routed right</td><td>5/10</td></tr>
+  </table>
+</div>
+
+<!-- WHY REDUCTION NOT RAW ENTROPY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Compute the Reduction (not just weighted entropy)?</h2></div>
+  <p>Mathematically equivalent for ranking splits — but computing the <i>reduction</i> gives a directly useful number: it becomes one of the <b>stopping criteria</b>.</p>
+  <div class="note">If information gain from the best available split is below a threshold, stop splitting — further splitting isn't buying meaningful purity and just risks overfitting.</div>
+</div>
+
+<!-- SEQUENCE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Algorithm in One Line</h2></div>
+  <p>At every node: compute information gain for <b>every candidate feature</b> → pick the feature with the <b>highest</b> information gain → split on it → repeat on each child node until a stopping criterion is hit.</p>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill blue">Putting it all together: the full decision tree building algorithm</span>
+</div>
+
+</body>
+</html>

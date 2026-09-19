@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Entropy — Measuring Impurity</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px;}
+  th,td{padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:16px 20px;text-align:center;font-size:1.05rem;color:var(--green);margin:12px 0;}
+  svg{width:100%;height:auto;}
+</style>
+</head>
+<body>
+
+<h1>📐 Entropy — Measuring Impurity</h1>
+<div class="sub">Advanced Learning Algorithms · Formalizing "how mixed is this set?"</div>
+
+<!-- WHY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Problem This Solves</h2></div>
+  <p>We already knew "all cats" or "all dogs" = pure, and "50/50 mix" = impure. Entropy gives a precise <b>number</b> for anything in between — so different candidate splits can be compared objectively.</p>
+</div>
+
+<!-- DEFINITION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Definitions</h2></div>
+  <div class="grid2">
+    <div>
+      <code>p₁</code> = fraction of examples that are <b>cats</b> (label = 1)
+    </div>
+    <div>
+      <code>p₀</code> = fraction that are <b>not cats</b> = <code>1 − p₁</code>
+    </div>
+  </div>
+  <div class="formula">
+    H(p₁) = −p₁·log₂(p₁) − p₀·log₂(p₀)<br>
+    <span style="color:var(--dim);font-size:.8rem">= −p₁·log₂(p₁) − (1−p₁)·log₂(1−p₁)</span>
+  </div>
+  <div class="note">📌 Log base 2 (not natural log) — chosen purely so the peak of the curve lands exactly at <b>1</b>, a clean round number. Base-e would work too, just rescaled.</div>
+  <div class="note">⚠️ Edge case: <code>0·log₂(0)</code> is mathematically undefined (technically −∞), but <b>by convention we define it as 0</b> — so a perfectly pure set correctly gives entropy = 0.</div>
+</div>
+
+<!-- CURVE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Entropy Curve — Shape & Intuition</h2></div>
+  <svg viewBox="0 0 620 320" xmlns="http://www.w3.org/2000/svg">
+    <!-- axes -->
+    <line x1="60" y1="270" x2="580" y2="270" stroke="#8a90a6" stroke-width="1.5"/>
+    <line x1="60" y1="270" x2="60" y2="30" stroke="#8a90a6" stroke-width="1.5"/>
+    <text x="300" y="305" fill="#8a90a6" font-size="13" text-anchor="middle">p₁ (fraction of cats)</text>
+    <text x="25" y="150" fill="#8a90a6" font-size="13" text-anchor="middle" transform="rotate(-90 25 150)">H(p₁)</text>
+    <text x="55" y="285" fill="#8a90a6" font-size="11" text-anchor="middle">0.0</text>
+    <text x="320" y="285" fill="#8a90a6" font-size="11" text-anchor="middle">0.5</text>
+    <text x="580" y="285" fill="#8a90a6" font-size="11" text-anchor="middle">1.0</text>
+    <text x="35" y="35" fill="#8a90a6" font-size="11">1.0</text>
+    <text x="35" y="270" fill="#8a90a6" font-size="11">0.0</text>
+
+    <!-- entropy curve (approximate parabola-like shape) -->
+    <path d="M 60,270 Q 100,60 320,40 Q 540,60 580,270" fill="none" stroke="#4dd992" stroke-width="3"/>
+
+    <!-- key points -->
+    <circle cx="60" cy="270" r="6" fill="#ff6b6b"/>
+    <circle cx="320" cy="40" r="6" fill="#4d9dff"/>
+    <circle cx="580" cy="270" r="6" fill="#ff6b6b"/>
+    <circle cx="220" cy="90" r="5" fill="#ff9d4d"/>
+    <circle cx="460" cy="120" r="5" fill="#b58cff"/>
+
+    <text x="60" y="255" fill="#ff6b6b" font-size="11" text-anchor="middle">all dogs</text>
+    <text x="320" y="25" fill="#4d9dff" font-size="11" text-anchor="middle">50/50 — MAX impurity</text>
+    <text x="580" y="255" fill="#ff6b6b" font-size="11" text-anchor="middle">all cats</text>
+  </svg>
+  <table>
+    <tr><th>p₁</th><th>Class mix</th><th>H(p₁)</th><th>Meaning</th></tr>
+    <tr><td>0</td><td>0 cat / 6 dog</td><td>0</td><td style="color:var(--green)">Perfectly pure</td></tr>
+    <tr><td>2/6 ≈ 0.33</td><td>2 cat / 4 dog</td><td>0.92</td><td style="color:var(--orange)">Fairly impure</td></tr>
+    <tr><td>3/6 = 0.5</td><td>3 cat / 3 dog</td><td style="color:var(--red)"><b>1.0</b></td><td style="color:var(--red)">Max impurity</td></tr>
+    <tr><td>5/6 ≈ 0.83</td><td>5 cat / 1 dog</td><td>0.65</td><td style="color:var(--orange)">Fairly pure</td></tr>
+    <tr><td>6/6 = 1</td><td>6 cat / 0 dog</td><td>0</td><td style="color:var(--green)">Perfectly pure</td></tr>
+  </table>
+  <div class="note">Shape: starts at 0 (p₁=0), rises to peak of 1 at p₁=0.5, symmetric, falls back to 0 at p₁=1. It's <b>symmetric</b> — 2/6 cats (0.92) is more impure than 5/6 cats (0.65) because 2/6 is closer to the 50/50 midpoint.</div>
+</div>
+
+<!-- REAL WORLD ANALOGY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Real-World Intuition</h2></div>
+  <p>Think of entropy as "how surprised would you be, guessing randomly?" A jar of 3 red and 3 blue marbles (p=0.5) — you genuinely can't guess which color comes out next, maximum uncertainty. A jar of 6 red marbles — you already know the answer before you look, zero uncertainty. Entropy quantifies exactly that uncertainty/surprise.</p>
+</div>
+
+<!-- ALTERNATIVE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Alternative: Gini Impurity</h2></div>
+  <p>Open-source packages (like scikit-learn) also offer the <b>Gini criterion</b> — a similarly-shaped 0→1→0 curve, computed differently.</p>
+  <div class="grid2">
+    <div class="note"><b style="color:var(--green)">Entropy</b><br>Used in this course; standard, information-theory grounded; the formula used going forward for decision trees here.</div>
+    <div class="note"><b style="color:var(--blue)">Gini impurity</b><br>Faster to compute (no logarithms); scikit-learn's default; produces very similar trees in practice.</div>
+  </div>
+  <div class="note">Pros/cons: for learning purposes, entropy is more standard and interpretable (ties to information theory). Gini is marginally cheaper computationally since it avoids log operations — a minor speed edge for very large datasets, but rarely a deciding factor.</div>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill green">Using entropy to choose which feature to split on</span>
+  <span class="pill purple">Information Gain</span>
+</div>
+
+</body>
+</html>

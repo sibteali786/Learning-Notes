@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>19 - Precision/Recall Tradeoff and F1 Score</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+  .formula-box{background:#0c0e14; border:1px solid var(--border); border-radius:10px; padding:16px; text-align:center; font-size:1.0rem; margin:12px 0; color:#fff;}
+
+  .d3-fig{background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:16px; margin-top:14px;}
+  .d3-fig svg{display:block; margin:0 auto;}
+  .fig-caption{color:var(--muted); font-size:0.82rem; margin-top:8px; text-align:center;}
+
+  .compare-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{border-radius:10px; padding:16px; border:1px solid var(--border);}
+  .compare-card.high-p{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .compare-card.high-r{background:rgba(255,138,107,0.08); border-color:rgba(255,138,107,0.4);}
+  .compare-card .h{font-weight:700; margin-bottom:8px;}
+  .compare-card.high-p .h{color:var(--good);}
+  .compare-card.high-r .h{color:var(--accent2);}
+  .compare-card .thresh{font-family:'Cascadia Code',monospace; color:var(--warn); font-size:0.85rem; margin-top:8px;}
+
+  table{width:100%; border-collapse:collapse; margin-top:14px; font-size:0.88rem;}
+  th, td{padding:10px 12px; text-align:center; border-bottom:1px solid var(--border);}
+  th{color:var(--accent); font-weight:600;}
+  td.win{color:var(--good); font-weight:700;}
+  td.lose{color:var(--bad);}
+
+  .scenario{background:var(--panel2); border-left:4px solid var(--warn); border-radius:8px; padding:14px 18px; margin-top:14px;}
+  .scenario .stitle{color:var(--warn); font-weight:700; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;}
+
+  .rule-box{background:linear-gradient(135deg, rgba(124,155,255,0.12), rgba(199,146,234,0.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 20px; margin-top:14px;}
+  .rule-box .title{color:var(--accent); font-weight:700; margin-bottom:6px;}
+
+  footer{color:var(--muted); font-size:0.8rem; text-align:center; margin-top:30px;}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<div class="wrap">
+
+  <span class="badge">ML Fundamentals</span><span class="badge">Optional — Skewed Datasets</span>
+  <h1>Lesson 19 — Precision/Recall Tradeoff and F1 Score</h1>
+  <p class="subtitle">Precision and recall usually pull against each other — the threshold decides where you land, and F1 score gives one number to compare algorithms.</p>
+
+  <section>
+    <h2><span class="num">1</span> The Threshold Controls the Tradeoff</h2>
+    <p>Logistic regression outputs a probability <code>0 &lt; f(x) &lt; 1</code>. The usual rule predicts 1 if <code>f(x) ≥ 0.5</code>. But that 0.5 cutoff is just a default — you can move it, and moving it changes precision and recall in opposite directions.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card high-p">
+        <div class="h">Raise the threshold → High Precision, Lower Recall</div>
+        <p style="margin:0; font-size:0.88rem;">"Only diagnose if very confident" — appropriate when treatment is invasive/expensive and mild consequences don't demand aggressive treatment.</p>
+        <div class="thresh">predict 1 if f(x) ≥ 0.7 or even 0.9</div>
+      </div>
+      <div class="compare-card high-r">
+        <div class="h">Lower the threshold → Lower Precision, Higher Recall</div>
+        <p style="margin:0; font-size:0.88rem;">"When in doubt, predict positive" — appropriate when missing a real case is far worse than a false alarm, and treatment isn't too costly or invasive.</p>
+        <div class="thresh">predict 1 if f(x) ≥ 0.3</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> The Precision-Recall Curve</h2>
+    <div class="d3-fig">
+      <svg id="chart-pr" viewBox="0 0 460 280" width="100%" style="max-width:460px"></svg>
+      <div class="fig-caption">Sweeping the threshold from 0.99 down to 0.01 traces this curve — high threshold sits top-left (high precision, low recall), low threshold sits bottom-right (low precision, high recall).</div>
+    </div>
+    <p>Threshold selection is a judgment call specific to the application's real-world costs — this is <strong>not</strong> something cross-validation picks for you automatically. You plot the curve, then manually choose the point that reflects the right tradeoff between false positives and false negatives for your use case.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> Comparing Algorithms: One Metric Isn't Enough</h2>
+    <p>With three candidate algorithms, precision and recall alone can leave the choice ambiguous — no single algorithm wins on both:</p>
+    <table>
+      <thead><tr><th>Algorithm</th><th>Precision</th><th>Recall</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>0.5</td><td>0.4</td></tr>
+        <tr><td>2</td><td>0.7</td><td>0.1</td></tr>
+        <tr><td>3</td><td>0.02</td><td>1.0</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px;">Algorithm 2 wins on precision, Algorithm 3 wins on recall, Algorithm 1 sits between them. No clear winner from the raw numbers alone.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> Why Simple Averaging Fails</h2>
+    <table>
+      <thead><tr><th>Algorithm</th><th>Precision</th><th>Recall</th><th>Average (P+R)/2</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>0.5</td><td>0.4</td><td>0.45</td></tr>
+        <tr><td>2</td><td>0.7</td><td>0.1</td><td>0.4</td></tr>
+        <tr><td>3</td><td>0.02</td><td>1.0</td><td class="win">0.501</td></tr>
+      </tbody>
+    </table>
+    <div class="scenario">
+      <div class="stitle">The average is fooled by the same trick as accuracy</div>
+      <p style="margin:0;">Algorithm 3 (precision 0.02, recall 1.0) has the <strong>highest average</strong> — but this is essentially a model that predicts positive for almost everyone (like <code>print("y=1")</code> always). It "catches" every real case only because it flags nearly everyone as positive, making it practically useless despite its perfect recall. A plain average rewards this degenerate strategy.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> The F1 Score</h2>
+    <p>F1 is the standard way to combine precision and recall into one number — it gives more weight to whichever of the two is <strong>lower</strong>, so an algorithm can't hide a terrible precision (or recall) behind a great score on the other.</p>
+    <div class="formula-box">
+      F1 = 1 / (½·(1/P + 1/R)) = 2PR / (P + R)
+      <div style="font-size:0.75rem; color:var(--muted); margin-top:6px;">This is the harmonic mean of P and R</div>
+    </div>
+    <table>
+      <thead><tr><th>Algorithm</th><th>Precision</th><th>Recall</th><th>Average</th><th>F1 Score</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>0.5</td><td>0.4</td><td>0.45</td><td class="win">0.444</td></tr>
+        <tr><td>2</td><td>0.7</td><td>0.1</td><td>0.4</td><td>0.175</td></tr>
+        <tr><td>3</td><td>0.02</td><td>1.0</td><td>0.501</td><td class="lose">0.0392</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:10px;">With F1, Algorithm 1 clearly comes out on top — the opposite conclusion from the plain average. Notice Algorithm 2's F1 (0.175) sits much closer to its lower value (recall 0.1) than its higher one (precision 0.7) — that's the harmonic mean actively penalizing the imbalance, exactly the behavior a plain average lacks.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> Key Takeaway</h2>
+    <div class="rule-box">
+      <div class="title">Threshold is a judgment call; F1 is a comparison tool</div>
+      <p style="margin:0;">Moving the decision threshold is how you personally trade off precision against recall based on the real-world cost of false positives vs. false negatives — this stays a manual, application-specific choice. F1 score is a separate tool: once you have precision/recall numbers for several candidate algorithms (each perhaps at their own best threshold), F1 gives a single number to compare them fairly, without being fooled by a degenerate model that games one metric at the expense of the other.</p>
+    </div>
+    <p style="margin-top:14px;">This wraps up the optional material on skewed datasets — and with it, the full "Advice for Applying Machine Learning" unit. Next week: decision trees, another widely-used technique alongside neural networks in production ML systems.</p>
+  </section>
+
+  <footer>Lesson 19 · Optional — Skewed Datasets · ML Fundamentals</footer>
+</div>
+
+<script>
+const svg = d3.select("#chart-pr");
+const width = 460, height = 280;
+const margin = {top: 20, right: 20, bottom: 40, left: 40};
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+const xScale = d3.scaleLinear().domain([0, 1]).range([0, innerWidth]);
+const yScale = d3.scaleLinear().domain([0, 1]).range([innerHeight, 0]);
+
+const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+g.append("g").attr("transform", `translate(0,${innerHeight})`)
+  .call(d3.axisBottom(xScale).ticks(5))
+  .call(a => a.select(".domain").attr("stroke","#4a4f66"))
+  .selectAll("text").attr("fill","#9aa0b4").attr("font-size","10px");
+g.append("g")
+  .call(d3.axisLeft(yScale).ticks(5))
+  .call(a => a.select(".domain").attr("stroke","#4a4f66"))
+  .selectAll("text").attr("fill","#9aa0b4").attr("font-size","10px");
+
+g.append("text").attr("x", innerWidth/2).attr("y", innerHeight + 32)
+  .attr("text-anchor","middle").attr("fill","#9aa0b4").attr("font-size","11px").text("Recall");
+g.append("text").attr("transform", `rotate(-90)`).attr("x", -innerHeight/2).attr("y", -28)
+  .attr("text-anchor","middle").attr("fill","#9aa0b4").attr("font-size","11px").text("Precision");
+
+const points = [
+  {x: 0.15, y: 0.97, label: "threshold = 0.99"},
+  {x: 0.35, y: 0.88},
+  {x: 0.55, y: 0.72},
+  {x: 0.75, y: 0.5},
+  {x: 0.95, y: 0.18, label: "threshold = 0.01"}
+];
+
+const line = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).curve(d3.curveNatural);
+g.append("path").datum(points).attr("fill","none").attr("stroke","#7c9bff").attr("stroke-width", 2.5).attr("d", line);
+
+g.selectAll(".pt").data(points).enter().append("circle")
+  .attr("cx", d => xScale(d.x)).attr("cy", d => yScale(d.y))
+  .attr("r", 5).attr("fill", "#c792ea");
+
+g.selectAll(".lbl").data(points.filter(d => d.label)).enter().append("text")
+  .attr("x", d => xScale(d.x) + (d.x < 0.5 ? 8 : -8))
+  .attr("y", d => yScale(d.y) - 8)
+  .attr("text-anchor", d => d.x < 0.5 ? "start" : "end")
+  .attr("fill", "#ffd166").attr("font-size","10px").attr("font-weight","600")
+  .text(d => d.label);
+</script>
+</body>
+</html>

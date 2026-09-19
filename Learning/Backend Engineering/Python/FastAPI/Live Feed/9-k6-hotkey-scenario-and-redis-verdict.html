@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hot Keys, Buffer Pools, and the Cache You Don't Need Yet</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #171a23;
+    --panel-alt: #1e2230;
+    --border: #2a2f3f;
+    --text: #e6e8ef;
+    --text-dim: #9aa1b5;
+    --accent: #7dd3fc;
+    --accent2: #c4b5fd;
+    --good: #86efac;
+    --bad: #fca5a5;
+    --warn: #fde68a;
+    --code-bg: #11141b;
+    --max-width: 900px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 6rem;
+  }
+  h1 {
+    font-size: 1.9rem;
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+    margin-top: 3rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    scroll-margin-top: 1rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+    margin-top: 2rem;
+    color: var(--accent);
+  }
+  p { margin: 1rem 0; }
+  a { color: var(--accent); }
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    border: 1px solid var(--border);
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .toc h2 { border: none; margin: 0 0 0.75rem; font-size: 1.05rem; }
+  .toc ol { margin: 0; padding-left: 1.3rem; }
+  .toc li { margin: 0.35rem 0; }
+  .toc a { text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--panel);
+    padding: 1rem 1.2rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1.5rem 0;
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.bad { border-left-color: var(--bad); }
+  .callout.good { border-left-color: var(--good); }
+  .callout-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+
+  .diagram {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .diagram-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .flow-box {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    min-width: 90px;
+  }
+  .flow-box .big { font-size: 1.1rem; font-weight: 600; color: var(--accent); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.2rem; padding: 0 0.2rem; }
+
+  .bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin: 1rem 0;
+  }
+  .bar-row { display: flex; align-items: center; gap: 0.8rem; }
+  .bar-label { width: 90px; font-size: 0.85rem; color: var(--text-dim); flex-shrink: 0; }
+  .bar-track {
+    flex: 1;
+    background: var(--code-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    height: 26px;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 6px 0 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0f1117;
+    white-space: nowrap;
+  }
+
+  .num-line {
+    position: relative;
+    height: 60px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 1.5rem 0 2.5rem;
+  }
+  .num-segment {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0f1117;
+    border-right: 2px solid var(--bg);
+  }
+  .num-segment .seg-label {
+    position: absolute;
+    bottom: -28px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    font-weight: 400;
+  }
+  .num-tick {
+    position: absolute;
+    top: -22px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    transform: translateX(-50%);
+  }
+  .num-dot {
+    position: absolute;
+    top: -8px;
+    width: 3px;
+    height: 76px;
+    background: #fff;
+  }
+  .num-dot::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+  }
+  th { background: var(--panel-alt); color: var(--text-dim); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .diff-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-family: "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.82rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+  .diff-add { background: rgba(134, 239, 172, 0.12); display: block; padding: 0.1rem 0.4rem; border-radius: 3px; }
+  .diff-add::before { content: "+ "; color: var(--good); }
+  .diff-rem { background: rgba(252, 165, 165, 0.12); display: block; padding: 0.1rem 0.4rem; border-radius: 3px; }
+  .diff-rem::before { content: "- "; color: var(--bad); }
+  .diff-ctx { display: block; padding: 0.1rem 0.4rem; color: var(--text-dim); }
+
+  .quiz-q {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.3rem;
+    margin: 1.5rem 0;
+  }
+  .quiz-q p.question { font-weight: 600; margin-top: 0; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .quiz-option {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.15s;
+  }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--good); background: rgba(134,239,172,0.1); }
+  .quiz-option.incorrect { border-color: var(--bad); background: rgba(252,165,165,0.1); }
+  .quiz-feedback {
+    margin-top: 0.8rem;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct-fb { background: rgba(134,239,172,0.1); border: 1px solid var(--good); }
+  .quiz-feedback.incorrect-fb { background: rgba(252,165,165,0.1); border: 1px solid var(--bad); }
+
+  .verdict-box {
+    background: linear-gradient(135deg, rgba(125,211,252,0.08), rgba(196,181,253,0.08));
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.5rem; }
+    .wrap { padding: 1.5rem 1rem 4rem; }
+    .bar-label { width: 60px; font-size: 0.75rem; }
+    .flow-box { min-width: 70px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Hot Keys, Buffer Pools, and the Cache You Don't Need Yet</h1>
+  <p class="subtitle">How a weighted-random k6 scenario proved, with numbers instead of assumptions, that Redis wouldn't help the Live Feed Engine's <code>/feed</code> endpoint — and why that's a genuine engineering result, not a wasted afternoon.</p>
+
+  <div class="toc">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#background">Background</a></li>
+      <li><a href="#intuition">Intuition</a></li>
+      <li><a href="#code">The Code</a></li>
+      <li><a href="#quiz">Quiz</a></li>
+    </ol>
+  </div>
+
+  <h2 id="background">Background</h2>
+
+  <h3>For readers new to this project</h3>
+  <p>
+    The Live Feed Engine is a small news-aggregation service: a FastAPI app (<code>main.py</code>) serves
+    <code>GET /feed?region=&limit=&cursor=</code> over a Postgres table of articles, paginated by cursor
+    (<code>WHERE id &lt; cursor ORDER BY id DESC LIMIT n</code>) rather than by offset, so pagination stays cheap
+    even as the table grows. A separate poller ingests real RSS feeds every five minutes, and a synthetic
+    seeder (<code>seed.py</code>) can pad the table with millions of fake rows on demand, to simulate scale the
+    real feeds would take years to produce.
+  </p>
+  <p>
+    Earlier work (an entire previous phase, not covered here) chased the system's raw throughput ceiling:
+    profiling with <code>py-spy</code>, moving from a single Uvicorn process to four Gunicorn workers, tuning
+    the <code>asyncpg</code> connection pool, and bypassing FastAPI's automatic query-parameter parsing.
+    That took the endpoint's p99 latency at 1000 concurrent virtual users from <strong>10.93 seconds</strong>
+    down to roughly <strong>1.3–1.4 seconds</strong> — and then it stopped improving. Profiling showed why:
+    all four CPU cores sat at 0% idle under load. The bottleneck had moved from "one thread doing everything"
+    to "four threads, still all busy," which is a ceiling that adding more application-level cleverness
+    can't push past. That's the state the project was in walking into today's session.
+  </p>
+
+  <h3>What's directly relevant here</h3>
+  <p>
+    The project's plan (borrowed from a system-design case study assuming ~100 million daily active
+    users) calls for adding Redis as a read-through cache — <code>ZADD feed:US &lt;timestamp&gt; &lt;articleId&gt;</code>
+    per region — specifically to handle <em>hot keys</em>: a small number of regions or feeds receiving a
+    disproportionate share of traffic, the classic shape of real-world news consumption (everyone reads the
+    top headlines; almost nobody reads yesterday's regional business digest).
+  </p>
+  <p>
+    But the project's own stated philosophy, written into its plan document, is blunt about sequencing:
+    <em>"Don't add Redis speculatively — prove you need it first."</em> Today's session took that seriously.
+    Two questions needed answering before touching Redis at all:
+  </p>
+  <ol>
+    <li>Does raw data volume alone (going from 1 million rows to 50 million) move the needle?</li>
+    <li>Does skewing traffic toward a hot key — the exact pattern Redis is meant to solve — actually break
+      anything, given everything already known about where this system's bottleneck lives?</li>
+  </ol>
+  <p>
+    Answering question 2 required teaching the load-testing tool, k6, to simulate realistic hot-key traffic
+    instead of its original uniform-random region picks — and that's the code change this document walks
+    through.
+  </p>
+
+  <div class="callout">
+    <div class="callout-label">Why this matters beyond one file</div>
+    A one-line uniform <code>Math.random()</code> pick is easy to write and easy to trust. But if your entire
+    argument for adding a piece of infrastructure rests on "traffic isn't evenly spread," your load test had
+    better not spread traffic evenly. Today's work is really about closing that gap between the test and the
+    real-world assumption it's supposed to validate.
+  </div>
+
+  <h2 id="intuition">Intuition</h2>
+
+  <h3>From "any region, equally likely" to "usually the same region"</h3>
+  <p>
+    The original <code>k6/load_test.js</code> picked a region like rolling a fair four-sided die: each of
+    <code>US</code>, <code>EU</code>, <code>APAC</code>, and <code>LATAM</code> had exactly a 25% chance on
+    every request. That's a fine test of raw throughput, but it can never produce a hot key — by construction,
+    no region is "hot," they're all identically warm.
+  </p>
+  <p>
+    To simulate a hot key, you need a <em>weighted</em> random choice: say 70% of requests should land on
+    <code>US</code>, 20% on <code>EU</code>, 7% on <code>APAC</code>, and 3% on <code>LATAM</code>. JavaScript
+    has no built-in equivalent of Python's <code>random.choices(options, weights=...)</code>, so the weighting
+    has to be built by hand — and the cleanest way to do that is to think of the interval from 0 to 1 as a
+    number line, sliced into four pieces sized by each region's weight.
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">Weighted regions as slices of a 0–1 number line</div>
+    <div class="num-line">
+      <div class="num-segment" style="left:0%; width:70%; background:#7dd3fc;">
+        US — 70%
+        <span class="seg-label">[0, 0.7)</span>
+      </div>
+      <div class="num-segment" style="left:70%; width:20%; background:#c4b5fd;">
+        EU — 20%
+        <span class="seg-label">[0.7, 0.9)</span>
+      </div>
+      <div class="num-segment" style="left:90%; width:7%; background:#fde68a;">
+        A
+        <span class="seg-label">[0.9, 0.97)</span>
+      </div>
+      <div class="num-segment" style="left:97%; width:3%; background:#fca5a5;">
+        L
+        <span class="seg-label">[0.97, 1)</span>
+      </div>
+      <div class="num-dot" style="left:75%;" data-label="r = 0.75 → EU"></div>
+    </div>
+  </div>
+
+  <p>
+    A single call to <code>Math.random()</code> produces a random point on that line. Wherever it lands
+    determines the region. The mechanism for finding "where it lands" is a running total: walk through the
+    regions in order, adding up their weights as you go, and stop at the first region where that running
+    total exceeds your random draw.
+  </p>
+  <p>Traced by hand, with <code>r = 0.75</code> and weights <code>US: 0.7, EU: 0.2, APAC: 0.07, LATAM: 0.03</code>:</p>
+  <table>
+    <tr><th>Step</th><th>Region examined</th><th>Running total</th><th>Running total &gt; 0.75?</th></tr>
+    <tr><td>1</td><td>US (0.7)</td><td>0 + 0.7 = 0.7</td><td>No — keep going</td></tr>
+    <tr><td>2</td><td>EU (0.2)</td><td>0.7 + 0.2 = 0.9</td><td><strong>Yes</strong> — stop, pick EU</td></tr>
+  </table>
+  <p>That's the whole algorithm: no libraries, no lookup tables, just a running sum and a comparison.</p>
+
+  <h3>Why the hot key didn't break anything</h3>
+  <p>
+    Here's where the story gets more interesting than "we simulated hot keys, the end." The hot-key scenario
+    was built, verified to actually produce a 70/20/7/3 split, and run against the 50-million-row table — and
+    latency barely moved. To understand why, it helps to see the request's actual path:
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">Where a /feed request actually spends its time</div>
+    <div class="flow-row">
+      <div class="flow-box">k6 VU<br><span class="big">picks region</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">FastAPI<br><span class="big">solve_dependencies</span><br>(parse query params)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">asyncpg<br><span class="big">~0.09ms</span><br>index scan</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Pydantic<br><span class="big">validate + serialize</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Response<br><span class="big">JSON</span></div>
+    </div>
+  </div>
+
+  <p>
+    Two of those five boxes barely care which region was requested. <code>solve_dependencies</code> and the
+    Pydantic validation/serialization step run <em>identically</em> whether the query says
+    <code>region=US</code> or <code>region=LATAM</code> — their cost is driven by "a request arrived," full
+    stop, not by which rows it touches. And the database step, even though it's the box people usually
+    suspect first, was already shown (by <code>EXPLAIN ANALYZE</code>) to take about 0.09 milliseconds
+    regardless of region or table size, because it's an index scan on a primary key with a
+    <code>LIMIT 20</code> — the query only ever touches the newest 20 rows for whichever region it's asked
+    about. Postgres's own buffer pool keeps that tiny "top of the feed" slice in memory permanently; hammering
+    it harder doesn't make it any less already-cached.
+  </p>
+
+  <div class="callout warn">
+    <div class="callout-label">The bottleneck that skewing traffic can't touch</div>
+    Earlier profiling (in the prior phase of this project) found the real ceiling: with four Gunicorn
+    workers spread across four CPU cores, all four cores sit at 0% idle under load. That's a bottleneck
+    shaped by <em>how many requests per second arrive</em>, not by <em>which data those requests ask for</em>.
+    Skewing 1000 virtual users toward one region changes nothing about total request volume or per-request
+    CPU cost — so the same four saturated cores stay exactly as saturated.
+  </div>
+
+  <p>
+    Put differently: a cache is a trade — pay an expensive cost once, then serve repeats for free. That trade
+    only pays off when two things are both true: the underlying work is genuinely expensive, <em>and</em>
+    many requests overlap on the same result so the cache actually gets reused. This endpoint fails the first
+    condition outright. Its query is already cheap and already effectively cached by Postgres. No amount of
+    "make the traffic lopsided" can manufacture expense that was never there. Repeating a cheap operation
+    just keeps it cheap.
+  </p>
+
+  <div class="verdict-box">
+    <strong>The actual result</strong><br>
+    p99 latency went from 1.67–1.68 seconds (uniform-random, 50M rows) to <strong>1.83 seconds</strong>
+    (70/20/7/3 hot-key, 50M rows) — a small, unremarkable bump, nowhere close to the dramatic
+    "Postgres collapses under a hot key" outcome the ~100M-DAU case study assumes. That's not a failed
+    experiment. It's a successful one: it proved, with a real measurement instead of an assumption, that
+    Redis would not move this specific endpoint's numbers today.
+  </div>
+
+  <h2 id="code">The Code</h2>
+
+  <p>
+    <code>k6/load_test.js</code> evolved through several small, hand-written iterations over the course of
+    the session, each one catching a real bug before the final version worked. There's no git diff to walk
+    — this is a learning-mode project where the code is written by hand, iteration by iteration — but the
+    "before" and "after" states of the file tell the story clearly enough.
+  </p>
+
+  <h3>1. Uniform pick → weighted pick</h3>
+  <p>The starting point was a flat, equally-likely pick among four regions:</p>
+  <div class="diff-block"><span class="diff-rem">const REGIONS = ["US", "EU", "APAC", "LATAM"];</span><span class="diff-ctx">
+export default function () {</span><span class="diff-rem">  const region = REGIONS[Math.floor(Math.random() * REGIONS.length)];
+  const res = http.get(`${BASE_URL}/feed?region=${region}&limit=20`);</span></div>
+
+  <p>It was replaced with a list of <code>{region, value}</code> weight pairs and a running-total walk:</p>
+  <div class="diff-block"><span class="diff-add">const REGIONS = [
+  { region: "US", value: 0.7 },
+  { region: "EU", value: 0.2 },
+  { region: "APAC", value: 0.07 },
+  { region: "LATAM", value: 0.03 },
+];</span><span class="diff-ctx">
+export default function () {</span><span class="diff-add">  const randomNo = Math.random();
+  let chosenRegion = "";
+  let runningTotal = 0;
+  for (const region of REGIONS) {
+    runningTotal += region.value;
+    if (runningTotal > randomNo) {
+      chosenRegion = region.region;
+      break;
+    }
+  }
+  const res = http.get(`${BASE_URL}/feed?region=${chosenRegion}&limit=20`);</span></div>
+
+  <h3>2. Two bugs, caught before they could quietly break the result</h3>
+  <p>
+    The first attempt at the weighted logic shipped with two mistakes that would have silently produced
+    garbage data — worth dwelling on because they're both classic JavaScript traps, not exotic ones.
+  </p>
+
+  <table>
+    <tr><th>Bug</th><th>What it actually did</th><th>Fix</th></tr>
+    <tr>
+      <td><code>Math.floor(Math.random())</code></td>
+      <td><code>Math.random()</code> always returns a value in <code>[0, 1)</code> — never reaching 1.
+        <code>Math.floor()</code> of anything in that range is always <code>0</code>. Every single "random"
+        draw was identical: zero. That would have made every request land in whichever region owns the
+        <code>[0, x)</code> slice starting at zero — <code>US</code>, unconditionally, every time.</td>
+      <td>Drop the <code>Math.floor</code> — use the raw float from <code>Math.random()</code> directly.</td>
+    </tr>
+    <tr>
+      <td><code>for (const region in REGIONS)</code></td>
+      <td><code>for...in</code> over an array yields the <em>indices</em> as strings
+        (<code>"0"</code>, <code>"1"</code>, <code>"2"</code>, <code>"3"</code>), not the array's actual
+        elements. So <code>region</code> was the string <code>"0"</code>, not
+        <code>{region: "US", value: 0.7}</code> — and <code>region.value</code> was <code>undefined</code>,
+        which would have poisoned the running total with <code>NaN</code>.</td>
+      <td>Use <code>for...of</code>, which iterates over an array's actual elements.</td>
+    </tr>
+  </table>
+
+  <div class="callout bad">
+    <div class="callout-label">Why this mattered</div>
+    Neither bug would have thrown an error. The script would have run to completion, printed a normal-looking
+    k6 summary, and quietly produced a meaningless or 100%-<code>US</code> distribution — the exact kind of
+    silent failure that makes "trust but verify" essential before drawing conclusions from a load test.
+  </div>
+
+  <h3>3. Proving the weights actually worked</h3>
+  <p>
+    Writing the weighting logic correctly is one thing; trusting that it worked under real load is another.
+    A k6 <code>Counter</code> metric, tagged per region, was added to measure the actual distribution rather
+    than assume it:
+  </p>
+  <div class="diff-block"><span class="diff-add">import { Counter } from "k6/metrics";
+const counterPerRegion = new Counter("region_counter");</span><span class="diff-ctx">
+// ...inside the region-selection loop, right where a region is chosen:</span><span class="diff-add">      counterPerRegion.add(1, { region: region.region });</span></div>
+
+  <p>
+    There was one more wrinkle: k6's default terminal summary doesn't automatically break a tagged custom
+    metric down by tag value — it just shows one aggregate total. The workaround is to add a deliberately
+    unfailable threshold for each region's submetric, whose only job is to force k6 to print that submetric's
+    line:
+  </p>
+  <div class="diff-block"><span class="diff-add">thresholds: {
+  http_req_duration: ["p(99)<200"],
+  "region_counter{region:US}": ["count>=0"],
+  "region_counter{region:EU}": ["count>=0"],
+  "region_counter{region:APAC}": ["count>=0"],
+  "region_counter{region:LATAM}": ["count>=0"],
+},</span></div>
+
+  <p>The resulting run showed the distribution matched the intended weights closely:</p>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <div class="bar-label">US</div>
+      <div class="bar-track"><div class="bar-fill" style="width:69.98%; background:#7dd3fc;">69.98%</div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">EU</div>
+      <div class="bar-track"><div class="bar-fill" style="width:20.12%; background:#c4b5fd;">20.12%</div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">APAC</div>
+      <div class="bar-track"><div class="bar-fill" style="width:6.97%; background:#fde68a;">6.97%</div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">LATAM</div>
+      <div class="bar-track"><div class="bar-fill" style="width:2.95%; background:#fca5a5;">2.95%</div></div>
+    </div>
+  </div>
+  <p style="text-align:center; color:var(--text-dim); font-size:0.85rem; margin-top:-0.5rem;">
+    Actual split across 136,883 requests — intended weights were 70 / 20 / 7 / 3.
+  </p>
+
+  <h3>4. The numbers that closed the loop</h3>
+  <table>
+    <tr><th>Scenario</th><th>Table size</th><th>p99 latency</th></tr>
+    <tr><td>Uniform-random region</td><td>1M rows (earlier phase)</td><td>~1.34–1.4s</td></tr>
+    <tr><td>Uniform-random region</td><td>50M rows</td><td>1.67–1.68s</td></tr>
+    <tr><td>Weighted hot-key (70/20/7/3)</td><td>50M rows</td><td><strong>1.83s</strong></td></tr>
+  </table>
+  <p>
+    <code>EXPLAIN ANALYZE</code> on the hot-key query at 50M rows still showed an <code>Index Scan Backward</code>
+    on <code>article_pkey</code> with execution time of roughly 0.086 milliseconds — the query didn't get
+    more expensive with fifty times more data, and it didn't get more expensive when hammered on one region.
+    Both results point the same direction: the CPU-bound framework overhead identified in the earlier phase
+    is still the ceiling, and neither more data nor skewed access changes that.
+  </p>
+
+  <div class="callout good">
+    <div class="callout-label">What's next</div>
+    Redis stays deprioritized — correctly, and now backed by a measurement rather than a hunch. If a cache
+    is revisited later, it'll need to be justified by a genuinely expensive per-request cost (a complex
+    ranking query, a slow downstream call, or a dataset too large to fit in Postgres's buffer pool) —
+    conditions this endpoint doesn't currently meet.
+  </div>
+
+  <h2 id="quiz">Quiz</h2>
+  <p>Five questions to check whether the reasoning above actually landed. Click an answer to see feedback.</p>
+
+  <div class="quiz-q" data-answer="1">
+    <p class="question">1. In the original uniform-random version, each region had a 25% chance of being picked on every request. What was fundamentally impossible to test with that setup?</p>
+    <div class="quiz-options">
+      <button class="quiz-option" data-correct="false">Whether the API returns a 200 status code</button>
+      <button class="quiz-option" data-correct="true">A hot-key access pattern, since no region can ever be "hotter" than any other by construction</button>
+      <button class="quiz-option" data-correct="false">Whether Postgres's index scan is fast</button>
+      <button class="quiz-option" data-correct="false">Cursor-based pagination correctness</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="quiz-q">
+    <p class="question">2. Given weights US: 0.7, EU: 0.2, APAC: 0.07, LATAM: 0.03 and a random draw of r = 0.05, which region does the cumulative-total walk select?</p>
+    <div class="quiz-options">
+      <button class="quiz-option" data-correct="true">US</button>
+      <button class="quiz-option" data-correct="false">EU</button>
+      <button class="quiz-option" data-correct="false">APAC</button>
+      <button class="quiz-option" data-correct="false">LATAM</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="quiz-q">
+    <p class="question">3. What was actually wrong with the first buggy attempt, <code>Math.floor(Math.random())</code>?</p>
+    <div class="quiz-options">
+      <button class="quiz-option" data-correct="false">Math.random() can occasionally return exactly 1, breaking the boundary logic</button>
+      <button class="quiz-option" data-correct="true">Math.floor() of any value in [0, 1) is always 0, so every "random" draw was identical</button>
+      <button class="quiz-option" data-correct="false">Math.floor() only works on integers, so it threw a TypeError</button>
+      <button class="quiz-option" data-correct="false">It made the weights sum to more than 1</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="quiz-q">
+    <p class="question">4. Why didn't skewing 70% of traffic onto one region meaningfully increase p99 latency, given everything known from the earlier profiling phase?</p>
+    <div class="quiz-options">
+      <button class="quiz-option" data-correct="false">Because Redis was already caching the hot region behind the scenes</button>
+      <button class="quiz-option" data-correct="false">Because k6 automatically throttles requests to a single region to prevent overload</button>
+      <button class="quiz-option" data-correct="true">Because the actual bottleneck is CPU saturation from fixed per-request framework overhead, which scales with request count, not with which data is requested</button>
+      <button class="quiz-option" data-correct="false">Because the article table only contains data for one region</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <div class="quiz-q">
+    <p class="question">5. Under what condition would a cache like Redis actually be expected to help this endpoint, based on the general principle discussed?</p>
+    <div class="quiz-options">
+      <button class="quiz-option" data-correct="false">As soon as the table exceeds 10 million rows, regardless of query cost</button>
+      <button class="quiz-option" data-correct="false">Whenever more than one region is queried in the same load test</button>
+      <button class="quiz-option" data-correct="true">If the underlying fetch became genuinely expensive (e.g. a complex query, or data too large to fit in Postgres's buffer pool) and many requests overlapped on the same result</button>
+      <button class="quiz-option" data-correct="false">Only once the RSS poller starts running more frequently than every 5 minutes</button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+  <footer>
+    Live Feed Engine — session notes, 2026-09-17. Generated as a learning artifact; see <code>PROGRESS.md</code> in the project repo for the full running log.
+  </footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.quiz-q').forEach(function (q) {
+  const options = q.querySelectorAll('.quiz-option');
+  const feedback = q.querySelector('.quiz-feedback');
+  let answered = false;
+  options.forEach(function (opt) {
+    opt.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      const isCorrect = opt.getAttribute('data-correct') === 'true';
+      options.forEach(function (o) {
+        if (o.getAttribute('data-correct') === 'true') {
+          o.classList.add('correct');
+        } else if (o === opt) {
+          o.classList.add('incorrect');
+        }
+      });
+      feedback.classList.add('show');
+      if (isCorrect) {
+        feedback.classList.add('correct-fb');
+        feedback.textContent = '✓ Correct.';
+      } else {
+        feedback.classList.add('incorrect-fb');
+        feedback.textContent = '✗ Not quite — the correct answer is highlighted above.';
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

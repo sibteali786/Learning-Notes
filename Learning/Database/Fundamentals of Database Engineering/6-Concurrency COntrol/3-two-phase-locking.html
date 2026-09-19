@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Two-Phase Locking (2PL)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161925;--panel2:#1c2030;--border:#2a2f42;
+    --text:#e6e8f0;--muted:#8b91a7;--blue:#4f8cff;--orange:#ff9d4d;
+    --green:#4ade80;--purple:#b487ff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:32px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .section{margin:36px 0;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;}
+  .pill-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2);border-radius:12px;padding:18px 20px;}
+  .compare-card.c1{border:1px solid rgba(255,107,107,.4);}
+  .compare-card.c2{border:1px solid rgba(74,222,128,.4);}
+  .compare-card h3{font-size:15px;display:flex;align-items:center;gap:8px;}
+  .compare-card ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;}
+  .compare-card li{margin-bottom:6px;}
+  code,.inline-code{background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);}
+  pre.codeblock{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12.5px;overflow-x:auto;margin:10px 0 0;}
+  pre.codeblock code{background:none;border:none;padding:0;color:var(--text);}
+  table.rule-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+  .rule-table th,.rule-table td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
+  .rule-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  .rule-table td.yes{color:var(--red);font-weight:600;}
+  .rule-table td.ok{color:var(--green);font-weight:600;}
+  .callout{background:var(--panel2);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px;}
+  .callout b{color:var(--orange);}
+  .example-box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:14px;}
+  .example-box h4{margin:0 0 8px;color:var(--purple);font-size:14px;}
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.tip-grid{grid-template-columns:1fr;}}
+  .tip-card{background:var(--panel2);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .tip-card .tip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .step-list{counter-reset:step;list-style:none;padding:0;margin:14px 0 0;}
+  .step-list li{counter-increment:step;position:relative;padding:10px 12px 10px 44px;margin-bottom:8px;background:var(--panel2);border-radius:8px;font-size:13.5px;border:1px solid var(--border);}
+  .step-list li::before{content:counter(step);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+  .step-list li.fail::before{background:var(--red);}
+  .step-list li.ok::before{background:var(--green);}
+  .split-terms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media(max-width:640px){.split-terms{grid-template-columns:1fr;}}
+  .term-panel{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;}
+  .term-panel .head{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+  .term-line{white-space:pre;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔐 Two-Phase Locking (2PL)</h1>
+  <div class="subtitle">Acquire, acquire, acquire → release, release, release. Never go back.</div>
+
+  <!-- PROBLEM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem — Double Booking</h2></div>
+    <div class="card">
+      Two users try to book the <b>same cinema seat</b> at the same millisecond. Both check availability, both see it's free, both update it, both commit. Without a locking discipline, the <b>last write wins</b> silently — someone paid for a seat they don't actually own.
+      <div class="callout">💡 Builds on <b>Exclusive Locks</b>: the fix is to stop a second transaction from reading a "clean" but soon-to-be-stale row in the first place.</div>
+    </div>
+  </div>
+
+  <!-- CORE IDEA -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>How It Works — Two Phases</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c1">
+        <h3>📈 Phase 1 — Growing</h3>
+        <p style="margin:8px 0 0;font-size:13.5px;">Transaction <b>acquires</b> locks as it goes. It can keep taking more locks, but can't release any yet.</p>
+        <ul><li>Acquire, acquire, acquire...</li><li>No releases allowed here</li></ul>
+      </div>
+      <div class="compare-card c2">
+        <h3>📉 Phase 2 — Shrinking</h3>
+        <p style="margin:8px 0 0;font-size:13.5px;">Transaction starts <b>releasing</b> locks (on commit/rollback). Once it releases one, it can never acquire a new lock again.</p>
+        <ul><li>Release, release, release...</li><li>No new acquisitions allowed here</li></ul>
+      </div>
+    </div>
+    <div class="callout"><b>The core rule:</b> once you release a lock, you can't go back and acquire another. This strict separation is what guarantees serializability.</div>
+  </div>
+
+  <!-- SCENARIO A: WITHOUT 2PL -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Scenario A — Without 2PL (Double Booking Happens)</h2></div>
+    <div class="card">
+      <div class="split-terms">
+        <div class="term-panel">
+          <div class="head">Client 1 (Hussein)</div>
+<span class="term-line">BEGIN;
+SELECT * FROM seats WHERE id=13;
+  → isbooked=0  (looks free)
+UPDATE seats SET isbooked=1,
+  name='Hussein' WHERE id=13;
+COMMIT;
+SELECT * FROM seats WHERE id=13;
+  → 13 | 1 | Hussein  ✅ "it's mine!"</span>
+        </div>
+        <div class="term-panel">
+          <div class="head">Client 2 (Edmond)</div>
+<span class="term-line">BEGIN;
+SELECT * FROM seats WHERE id=13;
+  → isbooked=0  (also looks free!)
+UPDATE seats SET isbooked=1,
+  name='Edmond' WHERE id=13;
+  ⏳ waits (Postgres row lock)
+... (unblocks after Client 1 commits)
+COMMIT;
+  → 13 | 1 | Edmond  😬 overwrote it</span>
+        </div>
+      </div>
+      <div class="callout">⚠️ Both transactions read the row as "available" <b>before</b> either committed. The plain <code>SELECT</code> gave no protection — the second writer silently clobbers the first the moment it commits.</div>
+    </div>
+  </div>
+
+  <!-- SCENARIO B: WITH 2PL -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Scenario B — With 2PL (Fixed)</h2></div>
+    <div class="card">
+      The fix: <code>SELECT ... FOR UPDATE</code> — this grabs an <b>exclusive lock</b> on the row at read time, not just at write time.
+      <div class="split-terms">
+        <div class="term-panel">
+          <div class="head">Client 1</div>
+<span class="term-line">BEGIN;
+SELECT * FROM seats WHERE id=14
+  FOR UPDATE;
+  → 14 | 0 |   (EX lock acquired ✅ phase 1)</span>
+        </div>
+        <div class="term-panel">
+          <div class="head">Client 2</div>
+<span class="term-line">BEGIN;
+SELECT * FROM seats WHERE id=14
+  FOR UPDATE;
+  ⏳ BLOCKS — can't get EX lock,
+     Client 1 already holds it</span>
+        </div>
+      </div>
+
+      <ol class="step-list">
+        <li class="ok"><b>Client 1:</b> <code>SELECT ... FOR UPDATE</code> → phase 1 (growing), row 14 is now exclusively locked.</li>
+        <li class="fail"><b>Client 2:</b> same <code>FOR UPDATE</code> query → <b>blocked</b>, can't acquire the same EX lock.</li>
+        <li class="ok"><b>Client 1:</b> <code>UPDATE seats SET isbooked=1, name='Hussein' WHERE id=14;</code> then <code>COMMIT;</code> → enters phase 2 (shrinking), lock released.</li>
+        <li class="ok"><b>Client 2:</b> immediately unblocks the moment Client 1 commits — re-reads the row and now sees <code>isbooked=1, name='Hussein'</code> → app correctly rejects the second booking instead of overwriting it.</li>
+      </ol>
+      <div class="callout">✅ Because the lock was taken <b>before</b> the read result was trusted, the second transaction never acts on stale data — it waits, then sees the truth.</div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Growing vs Shrinking Phase — Visual</h2></div>
+    <div class="card">
+      <svg viewBox="0 0 760 220" width="100%" style="max-width:700px;display:block;margin:0 auto;">
+        <line x1="40" y1="110" x2="720" y2="110" stroke="#2a2f42" stroke-width="2"/>
+        <text x="40" y="130" fill="#8b91a7" font-size="11">time →</text>
+
+        <!-- growing phase -->
+        <rect x="60" y="60" width="280" height="18" rx="4" fill="#ff6b6b"/>
+        <text x="60" y="52" fill="#ff6b6b" font-size="12" font-weight="600">Phase 1 — Growing (acquire locks)</text>
+
+        <!-- peak marker -->
+        <circle cx="340" cy="69" r="5" fill="#fff"/>
+        <text x="340" y="45" fill="#e6e8f0" font-size="10.5" text-anchor="middle">lock point (max)</text>
+
+        <!-- shrinking phase -->
+        <rect x="340" y="60" width="280" height="18" rx="4" fill="#4ade80"/>
+        <text x="480" y="52" fill="#4ade80" font-size="12" font-weight="600" text-anchor="middle">Phase 2 — Shrinking (release locks)</text>
+
+        <!-- commit marker -->
+        <line x1="340" y1="95" x2="340" y2="145" stroke="#8b91a7" stroke-dasharray="3,3"/>
+        <text x="340" y="160" fill="#8b91a7" font-size="10.5" text-anchor="middle">COMMIT / ROLLBACK</text>
+
+        <text x="60" y="185" fill="#ff6b6b" font-size="10.5">← can only ACQUIRE here</text>
+        <text x="450" y="185" fill="#4ade80" font-size="10.5">can only RELEASE here →</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Key Distinctions</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th></th><th>Plain SELECT</th><th>SELECT ... FOR UPDATE</th></tr>
+        <tr><td>Locks the row?</td><td class="yes">No</td><td class="ok">Yes — exclusive lock</td></tr>
+        <tr><td>Blocks other writers?</td><td class="yes">No</td><td class="ok">Yes, until commit/rollback</td></tr>
+        <tr><td>Protects against double-booking?</td><td class="yes">No — race condition possible</td><td class="ok">Yes</td></tr>
+        <tr><td>When lock releases</td><td>—</td><td>On <code>COMMIT</code> or <code>ROLLBACK</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Real-World Scenarios</h2></div>
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--blue)">🎬 Seat/Ticket Booking</div>
+        Cinemas, flights, concerts — any inventory with exactly one unit per slot needs <code>FOR UPDATE</code> at read time, not just an update-time check.
+      </div>
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--orange)">🛒 E-commerce Inventory</div>
+        "Last item in stock" race conditions are the same problem: two checkouts reading stock=1 simultaneously. 2PL (or optimistic locking with a version column) prevents overselling.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROS/CONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Advantages vs Disadvantages</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c2">
+        <h3>✅ Advantages</h3>
+        <ul>
+          <li>Guarantees <b>serializability</b> — no double-booking / lost updates</li>
+          <li>Simple mental model: grow then shrink, never mix</li>
+          <li>Well supported natively (<code>SELECT ... FOR UPDATE</code> in Postgres/MySQL)</li>
+        </ul>
+      </div>
+      <div class="compare-card c1">
+        <h3>⚠️ Disadvantages</h3>
+        <ul>
+          <li>Second transaction has to <b>wait</b> — reduced throughput under contention</li>
+          <li>Can lead to <b>deadlocks</b> if multiple rows are locked in inconsistent order</li>
+          <li>Long-held locks (slow transactions) can stall many waiters</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW TIPS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Interview / Practical Tips</h2></div>
+    <div class="card">
+      <ul>
+        <li>Definition to nail: <i>"a concurrency control protocol where all lock acquisitions happen before any lock release, in a transaction."</i></li>
+        <li>Know the two variants: <b>Strict 2PL</b> (all locks held until commit/rollback — what Postgres does, and what avoids cascading rollbacks) vs. basic 2PL (can release early, riskier).</li>
+        <li>Connect it forward to <b>Deadlocks</b>: since 2PL holds locks across multiple statements, it's exactly the mechanism that creates the circular-wait conditions deadlocks are about.</li>
+        <li>Good follow-up: "Why not just always use <code>FOR UPDATE</code>?" → Answer: it serializes access and hurts concurrency; use it only where a genuine check-then-act race exists (booking, inventory, balance transfers).</li>
+        <li>Mention the alternative: <b>optimistic concurrency control</b> (version/timestamp column, fail-and-retry on conflict) avoids holding locks at all, trading blocking for occasional retries.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
