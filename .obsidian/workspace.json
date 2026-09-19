@@ -8,13 +8,27 @@
         "type": "tabs",
         "children": [
           {
-            "id": "2647817558893382",
+            "id": "f3e9d8dac7129021",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/Concurrency Control.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Concurrency Control.excalidraw"
+            }
+          },
+          {
+            "id": "7fc5706c2d957349",
+            "type": "leaf",
+            "state": {
+              "type": "html-view",
+              "state": {
+                "file": "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html"
+              },
+              "icon": "code-glyph",
+              "title": "2-database-deadlocks"
             }
           }
         ]
@@ -76,7 +90,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 447.4537773132324
+    "width": 445.7643241882324,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,6 +199,11 @@
   },
   "active": "88876276e2a2dd54",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/1-exclusive-vs-shared-locks.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/3-two-phase-locking.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/Concurrency Control.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html",
+    "Learning/System Design/Patterns/Contention/contention-summary.html",
     "conflict-files-obsidian-git.md",
     "Personal/Me/Journal.md",
     "Personal/Me",
@@ -197,10 +217,6 @@
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/2-diatomic-bond-comparison-d3.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/1-bond-potential-energy-h2-d3.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/3-two-phase-locking.html",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/1-exclusive-vs-shared-locks.html",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/2-50M Rows Run.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/1-Final Run.md",
@@ -228,8 +244,6 @@
     "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
-    "Learning/Backend Engineering/Python/FastAPI/Commands.md",
-    "Learning/Backend Engineering/Redis-POstgres/redis-bench-env/lib/python3.14/site-packages/pip-26.1.2.dist-info/licenses/src/pip/_vendor/idna/LICENSE.md",
     "Learning/System Design/Practice/Local Delivery Service/Untitled.canvas",
     "Untitled.canvas",
     "Untitled 1.canvas"
