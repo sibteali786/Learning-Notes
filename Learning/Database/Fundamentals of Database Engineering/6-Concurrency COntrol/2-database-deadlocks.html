@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Deadlocks in Databases</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#0f1117;
+    --panel:#161925;
+    --panel2:#1c2030;
+    --border:#2a2f42;
+    --text:#e6e8f0;
+    --muted:#8b91a7;
+    --blue:#4f8cff;
+    --orange:#ff9d4d;
+    --green:#4ade80;
+    --purple:#b487ff;
+    --red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:32px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .section{margin:36px 0;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;}
+  .pill-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2);border-radius:12px;padding:18px 20px;}
+  .compare-card.c1{border:1px solid rgba(79,140,255,.4);}
+  .compare-card.c2{border:1px solid rgba(255,157,77,.4);}
+  .compare-card h3{font-size:15px;display:flex;align-items:center;gap:8px;}
+  .compare-card ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;}
+  .compare-card li{margin-bottom:6px;}
+  code,.inline-code{background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);}
+  pre.codeblock{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12.5px;overflow-x:auto;margin:10px 0 0;}
+  pre.codeblock code{background:none;border:none;padding:0;color:var(--text);}
+  .term-line{white-space:pre;}
+  table.rule-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+  .rule-table th,.rule-table td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
+  .rule-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  .rule-table td.yes{color:var(--red);font-weight:600;}
+  .rule-table td.ok{color:var(--green);font-weight:600;}
+  .callout{background:var(--panel2);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px;}
+  .callout b{color:var(--orange);}
+  .example-box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:14px;}
+  .example-box h4{margin:0 0 8px;color:var(--purple);font-size:14px;}
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.tip-grid{grid-template-columns:1fr;}}
+  .tip-card{background:var(--panel2);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .tip-card .tip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .step-list{counter-reset:step;list-style:none;padding:0;margin:14px 0 0;}
+  .step-list li{counter-increment:step;position:relative;padding:10px 12px 10px 44px;margin-bottom:8px;background:var(--panel2);border-radius:8px;font-size:13.5px;border:1px solid var(--border);}
+  .step-list li::before{content:counter(step);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+  .step-list li.fail::before{background:var(--red);}
+  .step-list li.ok::before{background:var(--green);}
+  .split-terms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media(max-width:640px){.split-terms{grid-template-columns:1fr;}}
+  .term-panel{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;}
+  .term-panel .head{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔁 Deadlocks in Databases</h1>
+  <div class="subtitle">Two transactions, waiting on each other forever — until the DB steps in</div>
+
+  <!-- WHAT IS IT -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem</h2></div>
+    <div class="card">
+      A <b>deadlock</b> happens when two (or more) transactions each hold a lock the other needs, and each is <i>waiting</i> for the other to release theirs. Neither can proceed — an infinite stalemate.
+      <div class="callout">💡 Builds directly on <b>Exclusive Locks</b>: when transaction A holds an EX lock row #1 and wants row #2, but transaction B holds EX lock on row #2 and wants row #1 → deadlock.</div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>How It Works — Setup</h2></div>
+    <div class="card">
+      Two Postgres client terminals, one table <code>test</code> with a single <code>PRIMARY KEY</code> column (unique values only).
+      <pre class="codeblock"><code>-- Client 1                    -- Client 2
+BEGIN;                          BEGIN;</code></pre>
+      Both transactions are open and uncommitted at the same time.
+    </div>
+  </div>
+
+  <!-- SCENARIO 1: DEADLOCK -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Scenario 1 — The Deadlock</h2></div>
+    <div class="card">
+      <ol class="step-list">
+        <li class="ok"><b>Client 1:</b> <code>INSERT INTO test VALUES (21);</code> → succeeds, EX lock held on value <code>21</code> (uncommitted).</li>
+        <li class="ok"><b>Client 2:</b> <code>INSERT INTO test VALUES (20);</code> → succeeds, EX lock held on value <code>20</code> (uncommitted).</li>
+        <li class="fail"><b>Client 1:</b> tries <code>INSERT INTO test VALUES (20);</code> → <b>blocks</b> (Client 2 holds the EX lock on 20).</li>
+        <li class="fail"><b>Client 2:</b> tries <code>INSERT INTO test VALUES (21);</code> → <b>blocks</b> too (Client 1 holds the EX lock on 21).</li>
+        <li class="fail">Now both are waiting on each other → <b>circular wait</b> → Postgres detects it (~1 second later).</li>
+      </ol>
+
+      <div class="example-box">
+        <h4>What Postgres actually returned</h4>
+        <pre class="codeblock"><code>ERROR:  deadlock detected
+DETAIL:  Process 56 waits for ShareLock on transaction 706; blocked by process 43.
+         Process 43 waits for ShareLock on transaction 705; blocked by process 56.
+HINT:    See server log for query details.
+CONTEXT: while inserting index tuple (0,17) in relation "test_pkey"</code></pre>
+      </div>
+
+      <div class="callout"><b>Rule of thumb:</b> the transaction that entered the deadlock <i>last</i> is the one the database kills/rolls back. The other one wins and can continue.</div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Visualizing the Circular Wait</h2></div>
+    <div class="card">
+      <svg viewBox="0 0 700 260" width="100%" style="max-width:560px;display:block;margin:0 auto;">
+        <!-- Client 1 node -->
+        <rect x="60" y="40" width="160" height="60" rx="10" fill="#1c2030" stroke="#4f8cff" stroke-width="2"/>
+        <text x="140" y="65" fill="#4f8cff" text-anchor="middle" font-size="13" font-weight="600">Client 1</text>
+        <text x="140" y="82" fill="#8b91a7" text-anchor="middle" font-size="10.5">holds EX(21)</text>
+
+        <!-- Client 2 node -->
+        <rect x="480" y="40" width="160" height="60" rx="10" fill="#1c2030" stroke="#ff9d4d" stroke-width="2"/>
+        <text x="560" y="65" fill="#ff9d4d" text-anchor="middle" font-size="13" font-weight="600">Client 2</text>
+        <text x="560" y="82" fill="#8b91a7" text-anchor="middle" font-size="10.5">holds EX(20)</text>
+
+        <!-- arrows: waits for -->
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L8,3 L0,6 Z" fill="#ff6b6b"/>
+          </marker>
+        </defs>
+        <path d="M220,55 C 340,10 360,10 480,55" stroke="#ff6b6b" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <text x="350" y="20" fill="#ff6b6b" text-anchor="middle" font-size="11">wants 20 (blocked)</text>
+
+        <path d="M480,85 C 360,130 340,130 220,85" stroke="#ff6b6b" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <text x="350" y="150" fill="#ff6b6b" text-anchor="middle" font-size="11">wants 21 (blocked)</text>
+
+        <!-- deadlock badge -->
+        <circle cx="350" cy="180" r="34" fill="rgba(255,107,107,.12)" stroke="#ff6b6b" stroke-width="1.5"/>
+        <text x="350" y="178" fill="#ff6b6b" text-anchor="middle" font-size="11" font-weight="700">DEAD-</text>
+        <text x="350" y="192" fill="#ff6b6b" text-anchor="middle" font-size="11" font-weight="700">LOCK</text>
+
+        <text x="350" y="240" fill="#8b91a7" text-anchor="middle" font-size="10.5">Postgres detects the cycle → kills the later entrant</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- SCENARIO 2 & 3: NO DEADLOCK -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Scenario 2 — No Deadlock, Just a Wait</h2></div>
+    <div class="card">
+      When there's <b>no circular wait</b>, the blocked transaction just waits — it's a normal lock queue, not a deadlock.
+      <div class="split-terms">
+        <div class="term-panel">
+          <div class="head">Client 1</div>
+<span class="term-line">BEGIN;
+INSERT INTO test VALUES (23);  -- ok
+INSERT INTO test VALUES (30);  -- ok
+INSERT INTO test VALUES (20);  -- ⏳ blocks
+   (waiting on Client 2's lock)</span>
+        </div>
+        <div class="term-panel">
+          <div class="head">Client 2</div>
+<span class="term-line">BEGIN;
+INSERT INTO test VALUES (20);  -- ok
+
+ROLLBACK;  -- releases lock</span>
+        </div>
+      </div>
+      <div class="callout">✅ The moment Client 2 rolls back, Client 1's blocked insert of <code>20</code> immediately <b>succeeds</b> — the row is now free.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Scenario 3 — Wait Ends in a Real Conflict</h2></div>
+    <div class="card">
+      Same setup, but this time Client 2 <b>commits</b> instead of rolling back.
+      <div class="split-terms">
+        <div class="term-panel">
+          <div class="head">Client 1</div>
+<span class="term-line">BEGIN;
+INSERT INTO test VALUES (30);  -- ok
+INSERT INTO test VALUES (20);  -- ⏳ blocks... then:
+ERROR: duplicate key value violates
+       unique constraint "test_pkey"
+DETAIL: Key (id)=(20) already exists.</span>
+        </div>
+        <div class="term-panel">
+          <div class="head">Client 2</div>
+<span class="term-line">BEGIN;
+INSERT INTO test VALUES (20);  -- ok
+
+COMMIT;  -- 20 is now permanent</span>
+        </div>
+      </div>
+      <div class="callout">⚠️ Once Client 2 commits, <code>20</code> is permanently taken — Client 1's blocked insert wakes up and fails with a <b>duplicate key</b> error instead of succeeding.</div>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Key Distinctions</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th>Outcome</th><th>Trigger</th><th>Result</th></tr>
+        <tr><td>Simple block</td><td>Other tx holds needed lock, no cycle</td><td class="ok">Waits, then proceeds once released</td></tr>
+        <tr><td>Deadlock</td><td>Circular wait — each tx wants what the other holds</td><td class="yes">DB detects & kills the later transaction</td></tr>
+        <tr><td>Post-wait failure</td><td>Waited tx's target was committed by the other</td><td class="yes">Fails with constraint/duplicate key error</td></tr>
+        <tr><td>Post-wait success</td><td>Waited tx's target was rolled back by the other</td><td class="ok">Proceeds normally</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Real-World Scenarios</h2></div>
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--blue)">💸 Fund Transfers</div>
+        Two concurrent transfers moving money between the <i>same two accounts</i> in opposite order (A→B and B→A) is a textbook deadlock trigger. Fix: always lock accounts in a consistent order (e.g. by ID).
+      </div>
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--orange)">📦 Order Processing</div>
+        Two batch jobs updating overlapping rows of an <code>orders</code> and <code>inventory</code> table in reversed sequence can deadlock under load — common in e-commerce checkout systems.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROS/CONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Handling Deadlocks — Trade-offs</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c1">
+        <h3>✅ What the DB does well</h3>
+        <ul>
+          <li>Detects cycles automatically (usually within ~1s)</li>
+          <li>Rolls back one transaction to unblock the other</li>
+          <li>Prevents infinite hangs</li>
+        </ul>
+      </div>
+      <div class="compare-card c2">
+        <h3>⚠️ What you must handle</h3>
+        <ul>
+          <li>Your app must <b>catch & retry</b> the failed transaction</li>
+          <li>Deadlocks are non-deterministic under load — hard to reproduce</li>
+          <li>Frequent deadlocks usually signal a <b>lock-ordering</b> design flaw</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW TIPS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Interview / Practical Tips</h2></div>
+    <div class="card">
+      <ul>
+        <li>Definition to nail: <i>"circular wait where each transaction holds a lock the other needs."</i></li>
+        <li>Best-known fix: <b>consistent lock ordering</b> — always acquire locks on resources in the same global order (e.g. sort account IDs before locking) so cycles can't form.</li>
+        <li>Mention <b>deadlock detection vs. deadlock prevention</b>: Postgres/MySQL detect after the fact and kill a victim; some systems use timeouts or wait-graphs to prevent them proactively.</li>
+        <li>Good follow-up: "What's the difference between a deadlock and just a slow/blocked query?" → A block resolves once the lock is released; a deadlock never resolves on its own — it needs external intervention.</li>
+        <li>Mention <span class="pill pill-blue">retry logic</span> as the standard app-side mitigation — deadlock errors are expected and recoverable, not exceptional failures.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

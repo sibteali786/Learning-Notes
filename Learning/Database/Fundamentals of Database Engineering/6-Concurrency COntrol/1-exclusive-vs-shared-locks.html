@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exclusive Lock vs Shared Lock</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#0f1117;
+    --panel:#161925;
+    --panel2:#1c2030;
+    --border:#2a2f42;
+    --text:#e6e8f0;
+    --muted:#8b91a7;
+    --blue:#4f8cff;
+    --orange:#ff9d4d;
+    --green:#4ade80;
+    --purple:#b487ff;
+    --red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono', monospace;
+    padding:32px 16px 80px;
+    line-height:1.55;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:32px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+
+  .section{margin:36px 0;}
+  .label{
+    display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  }
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:20px 22px;
+  }
+
+  .pill{
+    display:inline-block;
+    padding:3px 11px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    margin:2px 4px 2px 0;
+  }
+  .pill-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .pill-purple{background:rgba(180,135,255,.15);color:var(--purple);border:1px solid rgba(180,135,255,.35);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+
+  .compare-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+
+  .compare-card{
+    background:var(--panel2);
+    border-radius:12px;
+    padding:18px 20px;
+  }
+  .compare-card.excl{border:1px solid rgba(255,107,107,.4);}
+  .compare-card.shared{border:1px solid rgba(79,140,255,.4);}
+  .compare-card h3{font-size:16px;display:flex;align-items:center;gap:8px;}
+  .compare-card ul{margin:10px 0 0;padding-left:18px;color:var(--text);font-size:13.5px;}
+  .compare-card li{margin-bottom:6px;}
+
+  code, .inline-code{
+    background:#0b0d14;
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:1px 6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--green);
+  }
+
+  table.rule-table{
+    width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;
+  }
+  .rule-table th, .rule-table td{
+    border:1px solid var(--border);padding:8px 10px;text-align:left;
+  }
+  .rule-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  .rule-table td.yes{color:var(--red);font-weight:600;}
+  .rule-table td.ok{color:var(--green);font-weight:600;}
+
+  /* Timeline diagram */
+  .timeline-wrap{overflow-x:auto;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+
+  .callout{
+    background:var(--panel2);
+    border-left:3px solid var(--orange);
+    padding:10px 14px;
+    border-radius:0 8px 8px 0;
+    font-size:13.5px;
+    color:var(--text);
+    margin-top:14px;
+  }
+  .callout b{color:var(--orange);}
+
+  .example-box{
+    background:var(--panel2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-top:14px;
+  }
+  .example-box h4{margin:0 0 8px;color:var(--purple);font-family:'Syne',sans-serif;font-size:14px;}
+
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.tip-grid{grid-template-columns:1fr;}}
+  .tip-card{background:var(--panel2);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .tip-card .tip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+
+  .step-list{counter-reset:step;list-style:none;padding:0;margin:14px 0 0;}
+  .step-list li{
+    counter-increment:step;
+    position:relative;
+    padding:10px 12px 10px 44px;
+    margin-bottom:8px;
+    background:var(--panel2);
+    border-radius:8px;
+    font-size:13.5px;
+    border:1px solid var(--border);
+  }
+  .step-list li::before{
+    content:counter(step);
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    width:22px;height:22px;border-radius:50%;
+    background:var(--blue);color:#fff;
+    font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Syne',sans-serif;
+  }
+  .step-list li.fail::before{background:var(--red);}
+  .step-list li.ok::before{background:var(--green);}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px;}
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .swatch{width:12px;height:12px;border-radius:3px;display:inline-block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🔒 Exclusive Lock vs Shared Lock</h1>
+  <div class="subtitle">DBMS Concurrency Control — <span class="inline-code">EX Lock</span> vs <span class="inline-code">S Lock</span></div>
+
+  <!-- PROBLEM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem</h2></div>
+    <div class="card">
+      When multiple transactions touch the same row/column concurrently, you risk:
+      <ul style="margin-top:10px;">
+        <li><b>Dirty reads</b> — reading a value mid-update</li>
+        <li><b>Lost updates</b> — two writers clobbering each other</li>
+        <li><b>Inconsistent reporting</b> — value changes while you're still reading it</li>
+      </ul>
+      Locks are the DB's way of saying: <i>"only one writer at a time, and readers can block writers."</i>
+    </div>
+  </div>
+
+  <!-- CORE DEFINITIONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>How It Works</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card excl">
+        <h3>🔴 Exclusive Lock <span class="pill pill-red">Write Lock</span></h3>
+        <p style="margin:8px 0 0;font-size:13.5px;">Acquired when a transaction wants to <b>write/update</b> a row. Guarantees total isolation — nobody else can read or write it.</p>
+        <ul>
+          <li>Only <b>one</b> transaction can hold it</li>
+          <li>Blocks all other reads and writes on that row</li>
+          <li>Needed for: <code>UPDATE</code>, <code>DELETE</code>, <code>INSERT</code></li>
+        </ul>
+      </div>
+      <div class="compare-card shared">
+        <h3>🔵 Shared Lock <span class="pill pill-blue">Read Lock</span></h3>
+        <p style="margin:8px 0 0;font-size:13.5px;">Acquired when a transaction wants to <b>read</b> a row and guarantee it won't change mid-read.</p>
+        <ul>
+          <li><b>Many</b> transactions can hold it simultaneously</li>
+          <li>Blocks writes, but not other reads</li>
+          <li>Needed for: <code>SELECT</code> in a consistency-sensitive context (e.g. reporting)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <h4>The Golden Rule</h4>
+      <table class="rule-table">
+        <tr><th>Wants to acquire</th><th>Blocked if...</th></tr>
+        <tr><td>Exclusive Lock</td><td class="yes">any Shared Lock already exists on the row</td></tr>
+        <tr><td>Shared Lock</td><td class="yes">an Exclusive Lock already exists on the row</td></tr>
+        <tr><td>Shared Lock</td><td class="ok">other Shared Locks exist — this is fine, they stack</td></tr>
+      </table>
+      <div class="callout">💡 <b>Key insight:</b> 7 shared locks on a row = nobody can acquire an exclusive lock until all 7 are released. Reads can "starve out" writes.</div>
+    </div>
+  </div>
+
+  <!-- WALKTHROUGH TIMELINE -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Worked Example — Alice, Bob & Charlie</h2></div>
+    <div class="card">
+      <p style="margin-top:0;">Starting balances: <span class="pill pill-blue">Alice $1000</span><span class="pill pill-orange">Bob $600</span><span class="pill pill-green">Charlie $1200</span></p>
+
+      <div class="timeline-wrap">
+        <svg viewBox="0 0 980 300" width="100%" style="min-width:820px;">
+          <!-- axis -->
+          <line x1="40" y1="150" x2="940" y2="150" stroke="#2a2f42" stroke-width="2"/>
+          <text x="40" y="170" fill="#8b91a7" font-size="11">time →</text>
+
+          <!-- Alice EX (deposit) -->
+          <rect x="60" y="60" width="90" height="16" rx="4" fill="#ff6b6b"/>
+          <text x="60" y="52" fill="#ff6b6b" font-size="11">Alice: EX lock (deposit $200)</text>
+
+          <!-- Alice S lock (long reporting) -->
+          <rect x="170" y="60" width="620" height="16" rx="4" fill="#ff6b6b" opacity=".25"/>
+          <rect x="170" y="90" width="620" height="14" rx="4" fill="#4f8cff"/>
+          <text x="170" y="82" fill="#4f8cff" font-size="11">Alice: S lock (reporting job — long running)</text>
+
+          <!-- Bob S lock -->
+          <rect x="330" y="120" width="290" height="14" rx="4" fill="#ff9d4d"/>
+          <text x="330" y="112" fill="#ff9d4d" font-size="11">Bob: S lock (reporting job)</text>
+
+          <!-- Charlie attempt 1 - fail -->
+          <rect x="470" y="150" width="60" height="14" rx="4" fill="#4ade80" opacity=".4" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <text x="470" y="180" fill="#ff6b6b" font-size="10.5">Charlie: EX attempt ✕ FAILS</text>
+          <text x="470" y="193" fill="#8b91a7" font-size="10">(Bob's S lock blocks it)</text>
+
+          <!-- Bob releases -->
+          <text x="620" y="112" fill="#8b91a7" font-size="10">Bob releases S lock ✓</text>
+
+          <!-- Charlie attempt 2 - success -->
+          <rect x="700" y="150" width="60" height="14" rx="4" fill="#4ade80"/>
+          <text x="700" y="140" fill="#4ade80" font-size="10.5">Charlie: EX lock ✓ SUCCESS</text>
+          <text x="695" y="180" fill="#8b91a7" font-size="10">transfers $300 → Bob</text>
+
+          <!-- final balances -->
+          <text x="820" y="60" fill="#e6e8f0" font-size="11" font-weight="600">Final:</text>
+          <text x="820" y="76" fill="#4f8cff" font-size="10.5">Alice: $1200</text>
+          <text x="820" y="90" fill="#ff9d4d" font-size="10.5">Bob: $900</text>
+          <text x="820" y="104" fill="#4ade80" font-size="10.5">Charlie: $900</text>
+        </svg>
+        <div class="legend">
+          <span><span class="swatch" style="background:#ff6b6b"></span>Exclusive Lock</span>
+          <span><span class="swatch" style="background:#4f8cff"></span>Alice's Shared Lock</span>
+          <span><span class="swatch" style="background:#ff9d4d"></span>Bob's Shared Lock</span>
+          <span><span class="swatch" style="background:#4ade80"></span>Charlie's Exclusive Attempts</span>
+        </div>
+      </div>
+
+      <ol class="step-list">
+        <li class="ok">Alice starts a transaction to deposit $200 → acquires <b>Exclusive Lock</b> on her own row. No one else connected → <b>SUCCESS</b>. Balance updates to $1200, transaction commits, lock released.</li>
+        <li class="ok">Alice starts a long-running <b>reporting job</b> on her account → acquires a <b>Shared Lock</b>. No exclusive lock exists → <b>SUCCESS</b>.</li>
+        <li class="ok">Bob starts his own reporting job on his account → acquires a <b>Shared Lock</b> on <i>his</i> row. Different row than Alice's → <b>SUCCESS</b> (unrelated to Alice's lock).</li>
+        <li class="fail">Charlie wants to transfer $300 to Bob → needs an <b>Exclusive Lock</b> on Bob's row. But Bob already holds a <b>Shared Lock</b> there → <b>FAILS</b>.</li>
+        <li class="ok">Bob finishes his reporting job → releases his Shared Lock.</li>
+        <li class="ok">Charlie retries the transfer → acquires the Exclusive Lock on Bob's row → <b>SUCCESS</b>. $300 moves: Charlie $1200→$900, Bob $600→$900.</li>
+      </ol>
+
+      <div class="callout">💡 <b>Why this matters:</b> the system deliberately blocked Charlie's write while Bob was mid-read, protecting Bob's report from seeing a half-finished transfer.</div>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Key Distinctions</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th></th><th>Exclusive Lock</th><th>Shared Lock</th></tr>
+        <tr><td>Purpose</td><td>Write / Update</td><td>Read / Consistent view</td></tr>
+        <tr><td>Concurrent holders</td><td class="yes">Only 1</td><td class="ok">Many</td></tr>
+        <tr><td>Blocks other reads?</td><td class="yes">Yes</td><td class="ok">No</td></tr>
+        <tr><td>Blocks other writes?</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        <tr><td>Typical use case</td><td>Bank transfer, config update</td><td>Reporting job, audit query</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Real-World Scenarios</h2></div>
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--blue)">🏦 Banking Systems</div>
+        Transfers need EX locks on both accounts; reporting/statements need S locks. This is why banks sometimes go "unavailable" for transactions during nightly batch reporting — long S locks block writers.
+      </div>
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--orange)">⚙️ Central Config Systems</div>
+        While pushing a critical config change, you want an EX lock so no client reads a half-updated config. Once committed, all clients read the latest & consistent value.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROS / CONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Advantages vs Disadvantages</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card shared">
+        <h3>✅ Advantages</h3>
+        <ul>
+          <li>Guarantees <b>consistency</b> — no dirty reads/writes</li>
+          <li>Critical for financial & config systems</li>
+          <li>Predictable, well-understood model</li>
+        </ul>
+      </div>
+      <div class="compare-card excl">
+        <h3>⚠️ Disadvantages</h3>
+        <ul>
+          <li><b>Concurrency suffers</b> — writers can starve behind long-held shared locks</li>
+          <li>Increased chance of transaction <b>failures/retries</b></li>
+          <li>Can cause visible downtime windows (e.g. batch reporting hours)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW TIPS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Interview / Practical Tips</h2></div>
+    <div class="card">
+      <ul>
+        <li>Be ready to explain: <span class="pill pill-red">EX ⊥ EX</span> <span class="pill pill-blue">EX ⊥ S</span> <span class="pill pill-green">S ✓ S</span> — only shared locks can co-exist.</li>
+        <li>Connect it to <b>isolation levels</b> (Read Committed, Repeatable Read, Serializable) — shared/exclusive locking is one mechanism to implement these.</li>
+        <li>Mention <b>MVCC</b> (Postgres, MySQL InnoDB) as the modern alternative — readers don't block writers because they read a snapshot instead of taking a shared lock.</li>
+        <li>Good follow-up question to expect: "How would you avoid the concurrency penalty of shared locks?" → Answer: MVCC / optimistic concurrency / row versioning.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "1c1459c2606e2157",
+        "id": "2ef23fbfab060e92",
         "type": "tabs",
         "children": [
           {
-            "id": "e8d1fd8b4919786c",
+            "id": "8ecbfd5a28dedbc0",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "html-view",
               "state": {
-                "file": "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md"
+                "file": "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html"
               },
-              "icon": "excalidraw-icon",
-              "title": "4-Bus Routes.excalidraw"
+              "icon": "code-glyph",
+              "title": "2-database-deadlocks"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 461.8359375,
-    "collapsed": true
+    "width": 260.62434005737305
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -185,10 +184,14 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "8ecbfd5a28dedbc0",
   "lastOpenFiles": [
-    "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/3-two-phase-locking.html",
+    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/1-exclusive-vs-shared-locks.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html",
     "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
+    "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/4-information-gain.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/5-recursive-splitting-full-algorithm.html",
     "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/1-decision-trees-intro.html",
@@ -202,8 +205,6 @@
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/6-cpu-ceiling.html",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.html",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/7-rss-poller-containerize-and-dedup.html",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/8-chunked-seeding-islice.html",
     "Learning/Backend Engineering/Python/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
     "Pasted image 20260917225052.png",
@@ -231,7 +232,6 @@
     "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/Drawing 2026-09-04 17.23.15.excalidraw.md",
     "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
     "Learning/AI&ML Engineering/Resources.md",
-    "Learning/Backend Engineering/Python/FastAPI/Commands.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
