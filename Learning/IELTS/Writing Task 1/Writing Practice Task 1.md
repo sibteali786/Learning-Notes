@@ -35,3 +35,19 @@ Starting from 1995 tea shows the largest usage of about 8 litres which decreased
 In 2020 however coffee became the most used beverage, where tea dropped to only 4 litres for given person while soft drink usage rose from 1995 and was at hghest usage for its tenure in 2010 with almost 7 litres per person but then declined and us lowest used drink in 2020 with only 3 litres per person.
 
 ```
+
+
+## Structure preffered 
+Para 1 (Intro): Paraphrase the question in 1 sentence
+Para 2 (Overview): 2-3 sentences, trends only, NO numbers
+Para 3 (Body 1): Numbers for first half of story (1995→mid)
+Para 4 (Body 2): Numbers for second half / comparisons (mid→2020)
+
+![[Pasted image 20260920185449.png]]
+
+```
+Given Tabular representation shows household with internet access in 5 countries for for 3 different years. Overall Germany and USA are consistently high, while India and Brazil show fastest growth with South Africa having slowest growth among all. 
+In between year 2000 and 2010 Germany and USA have highest internet access with 35 and 24 percent which rises to 38 and 29 percent respectively by 2010, Brazil and India are second in place with 6 and 4 percent increase while south africa shows steady growth of only 3 percent from 9 to 11 percent.
+
+From 2010 to 2020 India shows highest percentage growth of 8 percent, Brazil with 6 percent, South africa with only 3 percent being slowest among all, USA and Germany are highest in percentage but overall growth for both only rises by 3 and 4 percent respevtively with values 33 and 41 percent for 2020.
+```

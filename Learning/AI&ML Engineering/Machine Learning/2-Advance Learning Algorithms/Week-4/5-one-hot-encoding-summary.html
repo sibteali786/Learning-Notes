@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>One-Hot Encoding — Handling Multi-Valued Features</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .hot{color:var(--green);font-weight:700;}
+</style>
+</head>
+<body>
+
+<h1>🎯 One-Hot Encoding — Features With &gt;2 Values</h1>
+<div class="sub">Advanced Learning Algorithms · Extending decision trees beyond binary features</div>
+
+<!-- THE PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Problem</h2></div>
+  <p>So far, every feature had exactly 2 values (Pointy/Floppy, Round/Not round, Present/Absent). But what if <code>Ear shape</code> can now be <b>Pointy, Floppy, or Oval</b> — 3 values?</p>
+  <div class="grid2">
+    <div class="note"><b>Option A — direct k-way split</b><br>Split into 3 branches at once. Works, but adds complexity/asymmetry to the tree-building logic.</div>
+    <div class="note"><b>Option B — one-hot encoding</b> ✅<br>Convert to multiple binary features so the existing binary-split algorithm keeps working unchanged.</div>
+  </div>
+</div>
+
+<!-- THE TRANSFORM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>The Transform</h2></div>
+  <p>Rule: a categorical feature with <code>k</code> possible values → replace with <code>k</code> new binary (0/1) features. In each row, <b>exactly one</b> of these new columns is 1 — that's the "hot" one, hence the name.</p>
+  <table>
+    <tr><th>Original ear shape</th><th>Pointy ears</th><th>Floppy ears</th><th>Oval ears</th></tr>
+    <tr><td>Pointy</td><td class="hot">1</td><td>0</td><td>0</td></tr>
+    <tr><td>Oval</td><td>0</td><td>0</td><td class="hot">1</td></tr>
+    <tr><td>Floppy</td><td>0</td><td class="hot">1</td><td>0</td></tr>
+  </table>
+  <div class="note">After this, every feature is back to binary (0/1) — the same decision-tree splitting algorithm from earlier applies with <b>zero modification</b>.</div>
+</div>
+
+<!-- WHY IT WORKS FOR TREES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Why This Works Seamlessly for Trees</h2></div>
+  <p>A tree can now split on <code>"Pointy ears = 1?"</code> as its own yes/no decision node — same mechanics as splitting on <code>Whiskers present?</code>. No changes needed to information gain, entropy, or the recursive splitting algorithm.</p>
+</div>
+
+<!-- BONUS: NEURAL NETS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Bonus: Works Beyond Decision Trees Too</h2></div>
+  <p>One-hot encoding isn't tree-specific — it's a general technique to turn <b>any</b> categorical feature into numbers, which is required input for neural networks, linear regression, and logistic regression (they all expect numeric inputs, not text labels).</p>
+  <table>
+    <tr><th>Feature</th><th>Encoding</th></tr>
+    <tr><td>Ear shape (3 values)</td><td>3 one-hot columns: Pointy / Floppy / Oval</td></tr>
+    <tr><td>Face shape (2 values)</td><td>1 binary column: Round=1 / Not round=0</td></tr>
+    <tr><td>Whiskers (2 values)</td><td>1 binary column: Present=1 / Absent=0</td></tr>
+  </table>
+  <div class="note">Total: 5 numeric input features ready to feed into a neural net for the same cat classification task.</div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Key Distinctions</h2></div>
+  <div class="grid2">
+    <div class="note"><b>Binary feature (2 values)</b><br>Encode directly as a single 0/1 column — no need for multiple one-hot columns.</div>
+    <div class="note"><b>Categorical feature (k &gt; 2 values)</b><br>Needs k one-hot columns — one per possible value.</div>
+  </div>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill green">Continuous-valued features (numbers, not just categories)</span>
+</div>
+
+</body>
+</html>
