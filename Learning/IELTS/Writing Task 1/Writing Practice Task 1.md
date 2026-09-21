@@ -1,3 +1,7 @@
+Para 1 (Intro): Paraphrase the question in 1 sentence
+Para 2 (Overview): 2-3 sentences, trends only, NO numbers
+Para 3 (Body 1): Numbers for first half of story (1995→mid)
+Para 4 (Body 2): Numbers for second half / comparisons (mid→2020)
 # First ever write
 ```
 The given chart shows total number of trips in millions in 1990 and 2010 made by children to and from their schools in a particular country using different modes of transport such as Car, Bus, Walking, Cycling, Bus and Waking combined.  Its quite evident children in 1990 used walking and bus as large source of transport with 12 and 7 million trips respectively where cycling and car were the second large followers with 6 million and 4 millions trips. We see large increase in car usage as transport in 2010 with increase from 4 million to 11 million while cycling is the least mode of transport reducing from 6 to only 2 million trips a year in 2010. The usage of bus reduced from 7 to 5 million where as walking and bus saw about 6 to 3 million decrease from 1990 to 2010 showing children still use buses as mode of transport.
@@ -38,10 +42,8 @@ In 2020 however coffee became the most used beverage, where tea dropped to only 
 
 
 ## Structure preffered 
-Para 1 (Intro): Paraphrase the question in 1 sentence
-Para 2 (Overview): 2-3 sentences, trends only, NO numbers
-Para 3 (Body 1): Numbers for first half of story (1995→mid)
-Para 4 (Body 2): Numbers for second half / comparisons (mid→2020)
+
+
 
 ![[Pasted image 20260920185449.png]]
 
@@ -51,3 +53,4 @@ In between year 2000 and 2010 Germany and USA have highest internet access with 
 
 From 2010 to 2020 India shows highest percentage growth of 8 percent, Brazil with 6 percent, South africa with only 3 percent being slowest among all, USA and Germany are highest in percentage but overall growth for both only rises by 3 and 4 percent respevtively with values 33 and 41 percent for 2020.
 ```
+
