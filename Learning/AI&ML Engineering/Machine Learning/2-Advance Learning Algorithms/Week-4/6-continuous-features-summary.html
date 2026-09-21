@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Continuous Features — Splitting on Numbers</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;font-size:.85rem;color:var(--green);margin:8px 0;}
+  .winner{border-color:var(--green) !important;box-shadow:0 0 0 1px var(--green);}
+  svg{width:100%;height:auto;}
+</style>
+</head>
+<body>
+
+<h1>📏 Continuous Features — Splitting on Numbers</h1>
+<div class="sub">Advanced Learning Algorithms · Handling features like weight, price, age, etc.</div>
+
+<!-- THE PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The New Feature: Weight</h2></div>
+  <p>Added <code>Weight (lbs.)</code> to the cat dataset — cats tend to be lighter than dogs on average, though there's overlap. Unlike ear shape or whiskers, this feature can be <b>any number</b>, not a fixed set of categories.</p>
+  <table>
+    <tr><th>Ear shape</th><th>Face shape</th><th>Whiskers</th><th>Weight</th><th>Cat</th></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Present</td><td>7.2</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Not round</td><td>Present</td><td>8.8</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Round</td><td>Absent</td><td>15</td><td>0</td></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Absent</td><td>7.6</td><td>1</td></tr>
+    <tr><td>Floppy</td><td>Round</td><td>Absent</td><td>18</td><td>0</td></tr>
+  </table>
+  <div class="note">10 rows total in the actual dataset — table trimmed here for space.</div>
+</div>
+
+<!-- THE IDEA -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>The Splitting Idea</h2></div>
+  <p>Instead of splitting on discrete categories, split on a <b>threshold</b>: <code>weight ≤ t</code>? The algorithm must decide (1) whether to split on weight at all, and (2) <b>which threshold t</b> to use — that's the new piece.</p>
+  <div class="formula">Try many threshold values → compute information gain for each → keep the best one</div>
+</div>
+
+<!-- VISUALIZATION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Visualizing Candidate Thresholds</h2></div>
+  <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg">
+    <line x1="60" y1="60" x2="600" y2="60" stroke="#262b3a" stroke-width="1"/>
+    <line x1="60" y1="200" x2="600" y2="200" stroke="#8a90a6" stroke-width="1.5"/>
+    <text x="20" y="65" fill="#4dd992" font-size="12">Cat</text>
+    <text x="20" y="205" fill="#ff6b6b" font-size="12">Not Cat</text>
+    <text x="600" y="225" fill="#8a90a6" font-size="12" text-anchor="end">Weight (lbs.)</text>
+
+    <!-- cat points top -->
+    <circle cx="90" cy="60" r="5" fill="#4dd992"/>
+    <circle cx="110" cy="60" r="5" fill="#4dd992"/>
+    <circle cx="150" cy="60" r="5" fill="#4dd992"/>
+    <circle cx="170" cy="60" r="5" fill="#4dd992"/>
+    <circle cx="230" cy="60" r="5" fill="#4dd992"/>
+
+    <!-- not cat points bottom -->
+    <circle cx="185" cy="200" r="5" fill="#ff6b6b"/>
+    <circle cx="260" cy="200" r="5" fill="#ff6b6b"/>
+    <circle cx="360" cy="200" r="5" fill="#ff6b6b"/>
+    <circle cx="440" cy="200" r="5" fill="#ff6b6b"/>
+    <circle cx="500" cy="200" r="5" fill="#ff6b6b"/>
+
+    <!-- threshold lines -->
+    <line x1="140" y1="30" x2="140" y2="230" stroke="#4d9dff" stroke-width="2" stroke-dasharray="4"/>
+    <text x="140" y="20" fill="#4d9dff" font-size="12" text-anchor="middle">t=8</text>
+    <line x1="195" y1="30" x2="195" y2="230" stroke="#4dd992" stroke-width="2.5"/>
+    <text x="195" y="245" fill="#4dd992" font-size="12" text-anchor="middle">t=9 ★ best</text>
+    <line x1="380" y1="30" x2="380" y2="230" stroke="#b58cff" stroke-width="2" stroke-dasharray="4"/>
+    <text x="380" y="20" fill="#b58cff" font-size="12" text-anchor="middle">t=13</text>
+  </svg>
+</div>
+
+<!-- CANDIDATES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Comparing Candidate Thresholds</h2></div>
+  <div class="grid2">
+    <div class="note">
+      <b style="color:var(--blue)">Threshold = 8 lbs</b><br>
+      Left: 2/2 cats · Right: 3/8 cats<br>
+      <span class="formula">H(0.5) − (2/10·H(2/2) + 8/10·H(3/8)) = <b>0.24</b></span>
+    </div>
+    <div class="note winner">
+      <b style="color:var(--green)">Threshold = 9 lbs ★</b><br>
+      Left: 4/4 cats · Right: 1/6 cats<br>
+      <span class="formula">H(0.5) − (4/10·H(4/4) + 6/10·H(1/6)) = <b>0.61</b></span>
+    </div>
+  </div>
+  <div class="note" style="margin-top:14px">
+    <b style="color:var(--purple)">Threshold = 13 lbs</b><br>
+    Left: 5/7 cats · Right: 0/3 cats<br>
+    <span class="formula">H(0.5) − (7/10·H(5/7) + 3/10·H(0/3)) = <b>0.40</b></span>
+  </div>
+  <div class="note">🏆 <b style="color:var(--green)">t = 9 lbs wins</b> with IG = 0.61 — highest of all thresholds tried, and higher than any other feature at this node. So the tree splits on <code>weight ≤ 9</code>.</div>
+</div>
+
+<!-- HOW MANY THRESHOLDS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>How Many Thresholds to Try?</h2></div>
+  <p><b>Convention:</b> sort all examples by the feature value, then test the <b>midpoints</b> between every pair of consecutive sorted values.</p>
+  <div class="formula">n training examples → n − 1 candidate thresholds to test</div>
+  <div class="note">With 10 examples here, that's 9 threshold values tested — compute information gain for each, keep the best.</div>
+</div>
+
+<!-- RESULTING SPLIT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Resulting Split</h2></div>
+  <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+    <line x1="250" y1="60" x2="150" y2="130" stroke="#4d9dff" stroke-width="2"/>
+    <line x1="250" y1="60" x2="350" y2="130" stroke="#4d9dff" stroke-width="2"/>
+    <ellipse cx="250" cy="45" rx="90" ry="28" fill="#161923" stroke="#4dd992" stroke-width="2.5"/>
+    <text x="250" y="50" fill="#e6e8ef" font-size="13" text-anchor="middle">Weight ≤ 9 lbs?</text>
+    <text x="180" y="95" fill="#ff9d4d" font-size="12">Yes</text>
+    <text x="330" y="95" fill="#ff9d4d" font-size="12">No</text>
+    <text x="150" y="150" fill="#4dd992" font-size="12" text-anchor="middle">4/4 cats</text>
+    <text x="350" y="150" fill="#ff6b6b" font-size="12" text-anchor="middle">1/6 cats</text>
+  </svg>
+  <div class="note">Recurse as usual: build subtrees on the left and right subsets, just like with any categorical split.</div>
+</div>
+
+<!-- SUMMARY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Summary: Handling Continuous Features</h2></div>
+  <p>At every node, when considering splits: test candidate thresholds → compute standard information gain for each → if the best continuous-feature split beats every other feature's IG, split there.</p>
+  <div class="note">No new theory — just more candidate splits to try. Information gain, entropy, and the recursive algorithm all stay exactly the same.</div>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Coming Up Next (Optional)</h2></div>
+  <span class="pill green">Regression Trees — predicting a number instead of a class</span>
+</div>
+
+</body>
+</html>

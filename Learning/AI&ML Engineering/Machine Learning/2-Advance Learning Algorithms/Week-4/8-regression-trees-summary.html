@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Regression Trees — Predicting a Number</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;font-size:.82rem;color:var(--green);margin:8px 0;}
+  .split-card{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;}
+  .split-card h3{font-size:.9rem;color:#fff;margin-bottom:6px;}
+  .winner{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
+  svg{width:100%;height:auto;}
+</style>
+</head>
+<body>
+
+<h1>📈 Regression Trees — Predicting a Number</h1>
+<div class="sub">Advanced Learning Algorithms (Optional) · Generalizing decision trees beyond classification</div>
+
+<!-- WHAT CHANGES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>What's Different Here</h2></div>
+  <div class="grid2">
+    <div class="note"><b style="color:var(--red)">Classification tree</b><br>Target y = category (cat / not cat)</div>
+    <div class="note"><b style="color:var(--green)">Regression tree</b><br>Target y = a number (animal's weight in lbs)</div>
+  </div>
+  <p style="margin-top:12px">Same features as before (<code>Ear shape</code>, <code>Face shape</code>, <code>Whiskers</code>) — but now <b>weight is the thing being predicted</b>, not an input feature.</p>
+</div>
+
+<!-- TREE + PREDICTION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Making a Prediction: Average at the Leaf</h2></div>
+  <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg">
+    <line x1="380" y1="70" x2="210" y2="170" stroke="#4d9dff" stroke-width="2"/>
+    <line x1="380" y1="70" x2="550" y2="170" stroke="#4d9dff" stroke-width="2"/>
+    <line x1="210" y1="210" x2="100" y2="310" stroke="#8a90a6" stroke-width="2"/>
+    <line x1="210" y1="210" x2="310" y2="310" stroke="#8a90a6" stroke-width="2"/>
+    <line x1="550" y1="210" x2="450" y2="310" stroke="#8a90a6" stroke-width="2"/>
+    <line x1="550" y1="210" x2="650" y2="310" stroke="#8a90a6" stroke-width="2"/>
+
+    <text x="270" y="115" fill="#ff9d4d" font-size="13">Pointy</text>
+    <text x="450" y="115" fill="#ff9d4d" font-size="13">Floppy</text>
+    <text x="115" y="270" fill="#ff9d4d" font-size="12">Round</text>
+    <text x="245" y="270" fill="#ff9d4d" font-size="12">Not round</text>
+    <text x="400" y="270" fill="#ff9d4d" font-size="12">Round</text>
+    <text x="600" y="270" fill="#ff9d4d" font-size="12">Not round</text>
+
+    <ellipse cx="380" cy="55" rx="90" ry="32" fill="#161923" stroke="#4d9dff" stroke-width="2.5"/>
+    <text x="380" y="60" fill="#e6e8ef" font-size="14" text-anchor="middle">Ear shape</text>
+
+    <ellipse cx="210" cy="190" rx="85" ry="30" fill="#161923" stroke="#b58cff" stroke-width="2.5"/>
+    <text x="210" y="195" fill="#e6e8ef" font-size="13" text-anchor="middle">Face shape</text>
+    <ellipse cx="550" cy="190" rx="85" ry="30" fill="#161923" stroke="#b58cff" stroke-width="2.5"/>
+    <text x="550" y="195" fill="#e6e8ef" font-size="13" text-anchor="middle">Face shape</text>
+
+    <rect x="55" y="320" width="90" height="42" rx="6" fill="#0b1f16" stroke="#4dd992" stroke-width="2.5"/>
+    <text x="100" y="341" fill="#4dd992" font-size="14" text-anchor="middle" font-weight="bold">8.35</text>
+    <text x="100" y="357" fill="#8a90a6" font-size="9" text-anchor="middle">avg of 7.2,8.4,7.6,10.2</text>
+
+    <rect x="260" y="320" width="105" height="42" rx="6" fill="#0b1116" stroke="#4d9dff" stroke-width="2.5"/>
+    <text x="312" y="341" fill="#4d9dff" font-size="14" text-anchor="middle" font-weight="bold">9.2</text>
+    <text x="312" y="357" fill="#8a90a6" font-size="9" text-anchor="middle">only 1 example</text>
+
+    <rect x="405" y="320" width="90" height="42" rx="6" fill="#1f0b0b" stroke="#ff6b6b" stroke-width="2.5"/>
+    <text x="450" y="341" fill="#ff6b6b" font-size="14" text-anchor="middle" font-weight="bold">17.7</text>
+    <text x="450" y="357" fill="#8a90a6" font-size="9" text-anchor="middle">avg of 15,18,20</text>
+
+    <rect x="605" y="320" width="105" height="42" rx="6" fill="#1f170b" stroke="#ff9d4d" stroke-width="2.5"/>
+    <text x="657" y="341" fill="#ff9d4d" font-size="14" text-anchor="middle" font-weight="bold">9.9</text>
+    <text x="657" y="357" fill="#8a90a6" font-size="9" text-anchor="middle">avg of 8.8,11</text>
+  </svg>
+  <div class="note">📌 Prediction rule: follow branches down to a leaf, then predict the <b>average</b> of all training weights that landed in that leaf. Same tree structure logic as classification — just a different leaf output.</div>
+</div>
+
+<!-- VARIANCE INSTEAD OF ENTROPY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Splitting Criterion: Variance Instead of Entropy</h2></div>
+  <p>Classification minimizes <b>entropy</b> (label impurity). Regression minimizes <b>variance</b> (how spread out the numeric values are).</p>
+  <div class="formula">Variance = how widely a set of numbers is spread out<br><span style="color:var(--dim)">Low variance = numbers clustered together = good, homogeneous split</span></div>
+</div>
+
+<!-- COMPARING SPLITS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Comparing Candidate Root Splits</h2></div>
+  <div class="grid3">
+    <div class="split-card winner">
+      <h3>🟢 Ear shape</h3>
+      <table>
+        <tr><td>Left</td><td>Var=1.47</td></tr>
+        <tr><td>Right</td><td>Var=21.87</td></tr>
+      </table>
+      <div class="formula">20.51 − (5/10·1.47 + 5/10·21.87)<br><b style="font-size:1.15rem">= 8.84</b></div>
+    </div>
+    <div class="split-card">
+      <h3>Face shape</h3>
+      <table>
+        <tr><td>Left</td><td>Var=27.80</td></tr>
+        <tr><td>Right</td><td>Var=1.37</td></tr>
+      </table>
+      <div class="formula">20.51 − (7/10·27.80 + 3/10·1.37)<br><b style="font-size:1.15rem">= 0.64</b></div>
+    </div>
+    <div class="split-card">
+      <h3>Whiskers</h3>
+      <table>
+        <tr><td>Left</td><td>Var=0.75</td></tr>
+        <tr><td>Right</td><td>Var=23.32</td></tr>
+      </table>
+      <div class="formula">20.51 − (4/10·0.75 + 6/10·23.32)<br><b style="font-size:1.15rem">= 6.22</b></div>
+    </div>
+  </div>
+  <div class="note">🏆 <b style="color:var(--green)">Ear shape wins</b> with the largest <b>variance reduction</b> (8.84) — this is the regression-tree equivalent of information gain. Root node variance across all 10 examples = 20.51.</div>
+</div>
+
+<!-- FORMULA COMPARISON -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Direct Parallel to Classification Trees</h2></div>
+  <table>
+    <tr><th>Concept</th><th>Classification</th><th>Regression</th></tr>
+    <tr><td>Impurity measure</td><td>Entropy H(p₁)</td><td>Variance</td></tr>
+    <tr><td>Split quality metric</td><td>Information gain</td><td>Variance reduction</td></tr>
+    <tr><td>Formula shape</td><td>H(root) − weighted avg H</td><td>Var(root) − weighted avg Var</td></tr>
+    <tr><td>Leaf node output</td><td>Majority class</td><td>Average of values</td></tr>
+    <tr><td>Splitting algorithm</td><td>Recursive, same stopping criteria</td><td>Identical — no changes</td></tr>
+  </table>
+  <div class="note">✅ Nothing else changes — same recursive algorithm, same stopping criteria (max depth, min examples, min gain), same one-hot encoding and continuous-threshold handling.</div>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill purple">Tree Ensembles — training many trees together for better performance</span>
+</div>
+
+</body>
+</html>

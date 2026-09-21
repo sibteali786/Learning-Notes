@@ -42,9 +42,33 @@
               "icon": "lucide-file",
               "title": "Resources"
             }
+          },
+          {
+            "id": "e7e5c1cc78758615",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "conflict-files-obsidian-git.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "conflict-files-obsidian-git"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -209,22 +233,35 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "bff56f64df0407f5",
+  "active": "e7e5c1cc78758615",
   "lastOpenFiles": [
+    "Learning/IELTS/Resources.md",
+    "conflict-files-obsidian-git.md",
+    "Personal/Maryam/Pasted image 20260630145507.png",
+    "Personal/Maryam/Pasted image 20260630145449.png",
+    "Personal/Maryam/Pasted image 20260630145343.png",
+    "Personal/Maryam/Memories.md",
+    "Personal/Maryam/07-zarlish-engagement-2.png",
+    "Personal/Maryam/07-zarlish-engagement-1.png",
+    "Personal/Maryam/06-dino-valley-2.png",
+    "Personal/Maryam/06-dino-valley-1.png",
+    "Personal/Maryam/05-makkah-4.png",
+    "Personal/Maryam/05-makkah-3.png",
+    "Personal/Maryam/05-makkah-2.png",
+    "Learning/IELTS/Writing Task 1/Writing Practice Task 1.md",
+    "Learning/IELTS/Writing Task 1",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/Concurrency Control.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/8-regression-trees-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/7-recursive-splitting-full-algorithm.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/6-continuous-features-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/5-one-hot-encoding-summary.html",
     "Learning/IELTS/Cambridge 17_text.pdf",
     "Learning/IELTS/Cambridge-IELTS-18-Academic.pdf",
     "Learning/IDEADS/Ideas.md",
-    "Learning/IELTS/Resources.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/1-bond-potential-energy-h2-d3.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/2-diatomic-bond-comparison-d3.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/4-ionic-solid-arrangement.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/3-coulombs-law-lattice-energy-d3.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys/metals-and-alloys.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/Drawing 2026-09-21 15.47.41.excalidraw.md",
-    "Learning/IDEADS",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/4-information-gain.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/6-tree-ensembles-sampling.html",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
@@ -232,14 +269,7 @@
     "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/4- Skewed Run For Redis.md",
-    "Pasted image 20260919233339.png",
-    "Pasted image 20260919233304.png",
-    "Pasted image 20260919233251.png",
-    "Pasted image 20260919233246.png",
     "Learning/System Design/Technologies/Redis/Key Ideas.md",
-    "Pasted image 20260919210237.png",
-    "Pasted image 20260919210219.png",
-    "Pasted image 20260919210212.png",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
     "Learning/Work Stuff/Freelance/Builders's Website/Creds.md",
     "Learning/Work Stuff/Freelance/Cargo Bussiness/Cargo Bussiness.md",
@@ -250,13 +280,7 @@
     "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
     "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
     "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
-    "Pasted image 20260917232945.png",
-    "Pasted image 20260917232941.png",
     "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
-    "Learning/Backend Engineering/Python/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/2-50M Rows Run.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
