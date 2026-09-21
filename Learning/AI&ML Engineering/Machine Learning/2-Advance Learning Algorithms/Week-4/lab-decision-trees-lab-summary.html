@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lab: Decision Trees — Code Walkthrough</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;color:#e6e8ef;margin:8px 0;}
+  .kw{color:#b58cff}.fn{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+</style>
+</head>
+<body>
+
+<h1>🧪 Lab: Decision Trees — Code Walkthrough</h1>
+<div class="sub">C2 W4 Lab 01 · Implementing entropy, information gain & recursive splitting in Python</div>
+
+<!-- DATASET -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Dataset (Same Cat Example, Now as Arrays)</h2></div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+X_train = np.array([[1,1,1],[0,0,1],[0,1,0],[1,0,1],[1,1,1],
+                     [1,1,0],[0,0,0],[1,1,0],[0,1,0],[0,1,0]])
+y_train = np.array([1,1,0,0,1,1,0,1,0,0])</pre>
+  <p>Each row of <code>X_train</code> = <code>[Ear shape, Face shape, Whiskers]</code>, all pre-encoded as 1/0 (Pointy=1/Floppy=0, Round=1/Not round=0, Present=1/Absent=0). <code>y_train</code> = 1 if cat, 0 if not.</p>
+</div>
+
+<!-- ENTROPY FN -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>1. Entropy Function</h2></div>
+  <pre><span class="kw">def</span> <span class="fn">entropy</span>(p):
+    <span class="kw">if</span> p == 0 <span class="kw">or</span> p == 1:
+        <span class="kw">return</span> 0
+    <span class="kw">else</span>:
+        <span class="kw">return</span> -p * np.log2(p) - (1-p)*np.log2(1-p)</pre>
+  <div class="note">Direct translation of <code>H(p₁) = −p·log₂(p) − (1−p)·log₂(1−p)</code>, with the <code>0·log(0)=0</code> convention handled explicitly via the <code>if</code> check (avoids a math error).</div>
+</div>
+
+<!-- SPLIT INDICES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>2. Splitting: Which Rows Go Left/Right</h2></div>
+  <pre><span class="kw">def</span> <span class="fn">split_indices</span>(X, index_feature):
+    left_indices, right_indices = [], []
+    <span class="cm"># feature == 1 → left, feature == 0 → right</span>
+    <span class="kw">return</span> left_indices, right_indices</pre>
+  <p><code>split_indices(X_train, 0)</code> (splitting on ear shape) returns which row-numbers have Pointy (→ left) vs Floppy (→ right).</p>
+</div>
+
+<!-- YOUR QUESTION 1: p_left -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>❓ 3. Why <code>sum(y[left_indices])/len(...)</code> for p_left?</h2></div>
+  <pre><span class="kw">def</span> <span class="fn">weighted_entropy</span>(X, y, left_indices, right_indices):
+    w_left  = len(left_indices)/len(X)
+    w_right = len(right_indices)/len(X)
+    p_left  = sum(y[left_indices]) / len(left_indices)
+    p_right = sum(y[right_indices]) / len(right_indices)
+    <span class="kw">return</span> w_left*entropy(p_left) + w_right*entropy(p_right)</pre>
+  <div class="grid2">
+    <div class="note">
+      <b style="color:var(--blue)">y[left_indices]</b><br>
+      Pulls out labels of only the animals in the left branch. Since labels are 1 (cat) or 0 (not cat)...
+    </div>
+    <div class="note">
+      <b style="color:var(--green)">sum(...)</b><br>
+      ...summing them literally <b>counts cats</b> (zeros contribute nothing, ones count).
+    </div>
+  </div>
+  <div class="note">📐 <code>sum(y[left]) / len(left)</code> = (cats in branch) / (total in branch) = <b>p₁<sup>left</sup></b> exactly as defined in the lecture. This "sum of a 0/1 array = count of positives" trick works because labels are binary — no loop needed.</div>
+</div>
+
+<!-- YOUR QUESTION 2: p_node -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>❓ 4. Why the Same Pattern for p_node?</h2></div>
+  <pre><span class="kw">def</span> <span class="fn">information_gain</span>(X, y, left_indices, right_indices):
+    p_node = sum(y) / len(y)
+    h_node = entropy(p_node)
+    w_entropy = weighted_entropy(X, y, left_indices, right_indices)
+    <span class="kw">return</span> h_node - w_entropy</pre>
+  <p>Identical logic, applied to the <b>whole node</b> instead of one branch: <code>y</code> here is every label currently at that node (before splitting). <code>sum(y)/len(y)</code> = fraction of cats in the whole node = <b>p₁<sup>node</sup></b>, fed into <code>entropy()</code> to get <code>H(p_node)</code> — the "before split" baseline subtracted in information gain.</div>
+</div>
+
+<!-- RESULTS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>5. Running It — Feature Comparison</h2></div>
+  <pre><span class="kw">for</span> i, name <span class="kw">in</span> enumerate([<span class="str">'Ear Shape'</span>, <span class="str">'Face Shape'</span>, <span class="str">'Whiskers'</span>]):
+    left, right = split_indices(X_train, i)
+    print(information_gain(X_train, y_train, left, right))</pre>
+  <table>
+    <tr><th>Feature</th><th>Information Gain</th></tr>
+    <tr><td>Ear Shape</td><td style="color:var(--green)"><b>0.28</b> ✅ winner</td></tr>
+    <tr><td>Face Shape</td><td>0.03</td></tr>
+    <tr><td>Whiskers</td><td>0.12</td></tr>
+  </table>
+  <div class="note">Matches the hand-calculated lecture values exactly — confirms Ear Shape is chosen at the root.</div>
+</div>
+
+<!-- RECURSIVE BUILD -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>6. Building the Full Tree Recursively</h2></div>
+  <pre>tree = []
+build_tree_recursive(X_train, y_train, [0,1,2,3,4,5,6,7,8,9],
+                      <span class="str">"Root"</span>, max_depth=2, current_depth=0, tree=tree)
+generate_tree_viz([0,1,2,3,4,5,6,7,8,9], y_train, tree)</pre>
+  <p>Provided helper (not required to implement by hand) — repeats the same information-gain calculation at each new node until a stopping criterion hits:</p>
+  <span class="pill blue">Tree depth exceeds max_depth</span>
+  <span class="pill green">Node is single class</span>
+  <span class="pill purple">Information gain below threshold</span>
+</div>
+
+<!-- KEY TAKEAWAY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Pattern to Remember</h2></div>
+  <div class="note"><code>sum(binary_array) / len(binary_array)</code> is a reusable NumPy idiom for "fraction of positives" — same trick applies anywhere you need a proportion from 0/1-encoded data (accuracy calculations, class balance checks, etc.), not just decision trees.</div>
+</div>
+
+</body>
+</html>

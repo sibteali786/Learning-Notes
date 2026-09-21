@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ionic Solids — Arrangement & Relative Ion Size</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --card:#161923; --border:#262b3a;
+    --blue:#5b9dff; --orange:#ff9a4d; --green:#4ade80; --purple:#c084fc; --red:#ff6b6b; --teal:#2dd4bf;
+    --text:#e4e6eb; --muted:#9198a8;
+  }
+  *{box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--text); margin:0; padding:40px 20px; font-family:'JetBrains Mono',monospace; line-height:1.6; }
+  h1,h2,h3{ font-family:'Syne',sans-serif; margin:0 0 12px; }
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-size:2rem;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:32px;}
+  .pill{ display:inline-block; padding:3px 12px; border-radius:999px; font-size:.75rem; font-weight:700; letter-spacing:.03em; margin-right:6px; }
+  .pill.blue{background:rgba(91,157,255,.15); color:var(--blue); border:1px solid var(--blue);}
+  .pill.orange{background:rgba(255,154,77,.15); color:var(--orange); border:1px solid var(--orange);}
+  .pill.green{background:rgba(74,222,128,.15); color:var(--green); border:1px solid var(--green);}
+  .pill.purple{background:rgba(192,132,252,.15); color:var(--purple); border:1px solid var(--purple);}
+  .pill.red{background:rgba(255,107,107,.15); color:var(--red); border:1px solid var(--red);}
+
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:24px; }
+  .section-label{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .bar{width:4px;height:22px;border-radius:2px;}
+  .bar.blue{background:var(--blue);} .bar.orange{background:var(--orange);}
+  .bar.green{background:var(--green);} .bar.purple{background:var(--purple);}
+
+  code, .formula{ background:#0b0d13; border-left:3px solid var(--blue); border-radius:4px; padding:2px 8px; font-size:.9rem; color:var(--orange); }
+  .formula-block{ background:#0b0d13; border-left:3px solid var(--purple); border-radius:6px; padding:12px 16px; margin:12px 0; font-size:1.05rem; }
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:.9rem;}
+  th,td{border:1px solid var(--border); padding:8px 12px; text-align:left;}
+  th{background:#1b1f2c; color:var(--blue);}
+  .callout{ border-radius:8px; padding:14px 16px; margin:14px 0; font-size:.9rem; border:1px solid; display:flex; gap:10px; }
+  .callout.tip{border-color:var(--green); background:rgba(74,222,128,.06);}
+  .callout.example{border-color:var(--blue); background:rgba(91,157,255,.06);}
+  .callout.warning{border-color:var(--orange); background:rgba(255,154,77,.06);}
+  .callout .tag{font-weight:700; flex-shrink:0;}
+
+  .model-row{ display:flex; gap:20px; flex-wrap:wrap; margin-top:14px; }
+  .model-box{ flex:1; min-width:220px; background:#0b0d13; border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; }
+  .model-box svg{ width:100%; height:auto; display:block; margin:10px 0; }
+  .model-label{ font-size:.85rem; font-weight:700; }
+  .model-verdict{ font-size:.78rem; margin-top:6px; }
+  .verdict-bad{color:var(--red);} .verdict-good{color:var(--green);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Ionic Solids — How Ions Arrange Themselves</h1>
+  <div class="subtitle">Checkerboard vs. clumped vs. random — and why relative ion size matters (RbBr example)</div>
+
+  <!-- PROBLEM STATEMENT -->
+  <div class="card">
+    <div class="section-label"><div class="bar blue"></div><h2>Problem Statement</h2></div>
+    <p>Given a 1:1 mix of cations and anions forming a solid crystal, what's the actual 2D "particulate model" slice going to look like? Would ions <b>segregate</b> into blocks, arrange <b>randomly</b>, or settle into a <b>checkerboard pattern</b>?</p>
+    <p>And separately: when drawing two different ions (like Rb⁺ and Br⁻), how do you decide which circle to draw <i>bigger</i>?</p>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="card">
+    <div class="section-label"><div class="bar orange"></div><h2>How It Works</h2></div>
+    <p>Ions arrange to <b>maximize attractive forces</b> (opposite charges near each other) and <b>minimize repulsive forces</b> (like charges far apart) — straight from Coulomb's law. The checkerboard pattern is the only one of the three layouts below that achieves this everywhere.</p>
+
+    <div class="model-row">
+      <div class="model-box">
+        <div class="model-label"><span class="pill red">Segregated</span></div>
+        <svg viewBox="0 0 200 200">
+          <g fill="none" stroke="#e4e6eb" stroke-width="2">
+            <circle cx="40" cy="40" r="16"/><circle cx="90" cy="40" r="16"/><circle cx="140" cy="40" r="16"/><circle cx="185" cy="40" r="16"/>
+            <circle cx="40" cy="90" r="16"/><circle cx="90" cy="90" r="16"/><circle cx="140" cy="90" r="16"/><circle cx="185" cy="90" r="16"/>
+          </g>
+          <g fill="none" stroke="#2dd4bf" stroke-width="2">
+            <circle cx="35" cy="145" r="16"/><circle cx="85" cy="145" r="16"/><circle cx="135" cy="145" r="16"/><circle cx="180" cy="145" r="16"/>
+            <circle cx="30" cy="185" r="16"/><circle cx="80" cy="185" r="16"/><circle cx="130" cy="185" r="16"/><circle cx="175" cy="185" r="16"/>
+          </g>
+          <text x="20" y="20" fill="#e4e6eb" font-size="14" font-family="JetBrains Mono">+</text>
+          <text x="20" y="170" fill="#2dd4bf" font-size="14" font-family="JetBrains Mono">−</text>
+        </svg>
+        <div class="model-verdict verdict-bad">✗ Like charges bunched together — maximizes repulsion</div>
+      </div>
+
+      <div class="model-box">
+        <div class="model-label"><span class="pill red">Random</span></div>
+        <svg viewBox="0 0 200 200">
+          <g stroke-width="2" fill="none">
+            <circle cx="35" cy="40" r="16" stroke="#e4e6eb"/>
+            <circle cx="90" cy="35" r="16" stroke="#2dd4bf"/>
+            <circle cx="140" cy="45" r="16" stroke="#2dd4bf"/>
+            <circle cx="55" cy="95" r="16" stroke="#2dd4bf"/>
+            <circle cx="105" cy="90" r="16" stroke="#e4e6eb"/>
+            <circle cx="160" cy="100" r="16" stroke="#e4e6eb"/>
+            <circle cx="30" cy="150" r="16" stroke="#2dd4bf"/>
+            <circle cx="80" cy="155" r="16" stroke="#2dd4bf"/>
+            <circle cx="150" cy="160" r="16" stroke="#e4e6eb"/>
+          </g>
+        </svg>
+        <div class="model-verdict verdict-bad">✗ No consistent pattern — leaves some like-charge pairs adjacent</div>
+      </div>
+
+      <div class="model-box">
+        <div class="model-label"><span class="pill green">Checkerboard</span></div>
+        <svg viewBox="0 0 200 200">
+          <g fill="none" stroke-width="2">
+            <circle cx="30" cy="30" r="16" stroke="#e4e6eb"/><circle cx="80" cy="30" r="16" stroke="#2dd4bf"/><circle cx="130" cy="30" r="16" stroke="#e4e6eb"/><circle cx="180" cy="30" r="16" stroke="#2dd4bf"/>
+            <circle cx="30" cy="80" r="16" stroke="#2dd4bf"/><circle cx="80" cy="80" r="16" stroke="#e4e6eb"/><circle cx="130" cy="80" r="16" stroke="#2dd4bf"/><circle cx="180" cy="80" r="16" stroke="#e4e6eb"/>
+            <circle cx="30" cy="130" r="16" stroke="#e4e6eb"/><circle cx="80" cy="130" r="16" stroke="#2dd4bf"/><circle cx="130" cy="130" r="16" stroke="#e4e6eb"/><circle cx="180" cy="130" r="16" stroke="#2dd4bf"/>
+            <circle cx="30" cy="180" r="16" stroke="#2dd4bf"/><circle cx="80" cy="180" r="16" stroke="#e4e6eb"/><circle cx="130" cy="180" r="16" stroke="#2dd4bf"/><circle cx="180" cy="180" r="16" stroke="#e4e6eb"/>
+          </g>
+        </svg>
+        <div class="model-verdict verdict-good">✓ Every ion is surrounded only by opposite charges — real crystal structure</div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <span class="tag">💡 Rule of thumb:</span>
+      <span>Every cation's nearest neighbors are anions, and vice versa — that's the defining feature of an ionic lattice, not just a stylistic choice.</span>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS: RbBr sizing -->
+  <div class="card">
+    <div class="section-label"><div class="bar green"></div><h2>Key Distinctions — Sizing Ions Correctly (RbBr)</h2></div>
+    <p>When drawing a particulate model, ion <b>size</b> matters — it's not just decorative. Compare Rb⁺ and Br⁻:</p>
+    <table>
+      <tr><th></th><th>Rb⁺</th><th>Br⁻</th></tr>
+      <tr><td>Protons</td><td>37</td><td>35</td></tr>
+      <tr><td>Electrons (after ionizing)</td><td>36 (lost 1)</td><td>36 (gained 1)</td></tr>
+      <tr><td>Electron configuration</td><td>Krypton-like</td><td>Krypton-like</td></tr>
+      <tr><td>Relative size</td><td><span class="pill blue">Smaller</span></td><td><span class="pill purple">Larger</span></td></tr>
+    </table>
+    <div class="formula-block">
+      Same number of electrons (isoelectronic), but Rb⁺ has 2 more protons → stronger pull on the shared electron shell → <b>Rb⁺ is smaller than Br⁻</b>, though not dramatically so.
+    </div>
+
+    <div class="model-row">
+      <div class="model-box" style="flex:0 0 100%;max-width:400px;margin:0 auto;">
+        <div class="model-label">RbBr particulate model (checkerboard, size-accurate)</div>
+        <svg viewBox="0 0 220 220">
+          <g stroke-width="2" fill="none">
+            <circle cx="35" cy="35" r="20" stroke="#c084fc"/><circle cx="90" cy="35" r="15" stroke="#5b9dff"/><circle cx="145" cy="35" r="20" stroke="#c084fc"/><circle cx="195" cy="35" r="15" stroke="#5b9dff"/>
+            <circle cx="35" cy="90" r="15" stroke="#5b9dff"/><circle cx="90" cy="90" r="20" stroke="#c084fc"/><circle cx="145" cy="90" r="15" stroke="#5b9dff"/><circle cx="195" cy="90" r="20" stroke="#c084fc"/>
+            <circle cx="35" cy="145" r="20" stroke="#c084fc"/><circle cx="90" cy="145" r="15" stroke="#5b9dff"/><circle cx="145" cy="145" r="20" stroke="#c084fc"/><circle cx="195" cy="145" r="15" stroke="#5b9dff"/>
+            <circle cx="35" cy="195" r="15" stroke="#5b9dff"/><circle cx="90" cy="195" r="20" stroke="#c084fc"/><circle cx="145" cy="195" r="15" stroke="#5b9dff"/><circle cx="195" cy="195" r="20" stroke="#c084fc"/>
+          </g>
+        </svg>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:6px;">
+          <span style="color:#c084fc;">●</span> Br⁻ (larger) &nbsp;&nbsp;
+          <span style="color:#5b9dff;">●</span> Rb⁺ (smaller)
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <span class="tag">⚠️ Don't overdo the size gap:</span>
+      <span>Rb⁺ and Br⁻ are isoelectronic (same electron count) and differ by only 2 protons — draw them as close in size, with Rb⁺ just slightly smaller. Save dramatic size differences for pairs with very different electron shell counts (e.g., Mg²⁺ vs. O²⁻).</span>
+    </div>
+  </div>
+
+  <!-- REAL WORLD EXAMPLE -->
+  <div class="card">
+    <div class="section-label"><div class="bar purple"></div><h2>Real-World Example Scenario</h2></div>
+    <div class="callout example">
+      <span class="tag">🧪 Scenario:</span>
+      <span>
+        This checkerboard packing principle is exactly what X-ray crystallographers rely on to identify unknown ionic compounds — the diffraction pattern reveals a repeating unit cell, and the ratio + spacing of bright spots tells you the ion sizes and charges, letting you reconstruct which cation/anion pair (and what structure, like rock-salt vs. fluorite) you're looking at, without ever "seeing" the atoms directly.
+      </span>
+    </div>
+  </div>
+
+  <!-- WORKED PRACTICE PROBLEM -->
+  <div class="card">
+    <div class="section-label"><div class="bar red"></div><h2>Worked Practice Problem</h2></div>
+    <p><b>Question:</b> Two particulate diagrams show <span class="formula">SrO</span> and an unknown <span class="formula">MO</span>. In SrO, Sr²⁺ is drawn <i>smaller</i> than O²⁻. In MO, M²⁺ is drawn the <i>same size</i> as O²⁻. Which metal is M?</p>
+    <div class="model-row">
+      <div class="model-box">
+        <div class="model-label">Choices</div>
+        <table style="margin-top:8px;">
+          <tr><td>A</td><td>Mg²⁺</td></tr>
+          <tr><td>B</td><td>Ti²⁺</td></tr>
+          <tr><td>C</td><td>Fe²⁺</td></tr>
+          <tr><td>D</td><td><b style="color:var(--green)">Ba²⁺</b> ✓</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <p><b>Step 1 — Why is Sr²⁺ smaller than O²⁻ despite both having a full outer p-shell?</b><br>
+    They're <i>not</i> isoelectronic: Sr²⁺ (Z=38, −2e⁻) still has electrons through the <b>4th shell</b> (Kr configuration), while O²⁻ (Z=8, +2e⁻) only fills through the <b>2nd shell</b> (Ne configuration). Different shell counts dominate — Sr²⁺'s extra shell would normally make it bigger, but here it's drawn smaller, so the diagram is testing something else.</p>
+
+    <div class="callout warning">
+      <span class="tag">⚠️ Common trap:</span>
+      <span>It's tempting to reach for "same electron count → same size" (the isoelectronic-series logic from Rb⁺/Br⁻ above). But electron count alone isn't the full story — <b>Mg²⁺ is isoelectronic with O²⁻ (both 10 electrons, Ne configuration)</b>, yet Mg's 12 protons vs. O's 8 protons would pull that shared shell in much tighter, making Mg²⁺ noticeably <i>smaller</i> than O²⁻, not equal. So "same size" in the diagram rules Mg <b>out</b>, not in.</span>
+    </div>
+
+    <p><b>Step 2 — Use the group trend instead.</b> Sr, Mg, and Ba are all Group 2 (same charge, same general chemistry). Moving <b>up</b> the group (Sr → Mg) removes a shell → cation gets smaller → widens the gap with O²⁻ (wrong direction). Moving <b>down</b> the group (Sr → Ba) adds a shell → cation gets bigger → closes the gap with O²⁻ (right direction, matching the diagram).</p>
+
+    <div class="formula-block">
+      Sr²⁺ &lt; O²⁻ (given) &nbsp;→&nbsp; need a bigger Group 2 cation &nbsp;→&nbsp; Ba²⁺ (one period down) ≈ O²⁻
+    </div>
+
+    <div class="callout tip">
+      <span class="tag">💡 Takeaway:</span>
+      <span>When a diagram gives you a size relationship, don't just check "same electron count" — check whether the trend direction (shells added/removed relative to a known reference ion) actually explains the size you're shown. Ti²⁺ and Fe²⁺ are transition metals with more complex shielding and weren't even needed here, since the Group 2 trend already nails it.</span>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="card">
+    <div class="section-label"><div class="bar blue"></div><h2>Practical / Interview Tips</h2></div>
+    <ul>
+      <li>Any question asking "would this ionic arrangement be stable?" → check whether like charges are adjacent. If yes, it's not the real structure.</li>
+      <li>To compare ion sizes quickly: same electron count (isoelectronic) → more protons = smaller ion (stronger nuclear pull on the same shell).</li>
+      <li>When protons AND electron shells both differ (e.g., comparing across periods), shell count usually dominates — more shells = bigger, regardless of protons.</li>
+      <li>In particulate models, size differences should be proportionate to the actual radius gap — small proton differences (2–3) → subtle size difference; full extra electron shells → dramatic size difference.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1157,3 +1157,489 @@ func main() {
 
 ```
 
+# Functions
+
+Functions in Go can take zero or more arguments.
+
+To make code easier to read, the variable type comes _after_ the variable name.
+
+For example, the following function:
+
+```go
+func sub(x int, y int) int {
+    return x-y
+}
+```
+
+Accepts two integer parameters and returns another integer.
+
+Here, `func sub(x int, y int) int` is known as the "function signature".
+
+Go doesn't care where in a file a function is defined: you can call a function that's declared later, even below `main`.
+
+## Assignment
+
+We often will need to manipulate strings in our messaging app. For example, adding some personalization by using a customer's name within a template. The `concat` function should take two strings and smash them together.
+
+- `hello` + `world` = `helloworld`
+
+Fix the [function signature](https://en.wikipedia.org/wiki/Type_signature) of `concat` to reflect its behavior.
+
+```go
+package main
+
+import "fmt"
+
+func concat(s1 string, s2 string) string {
+	return s1 + s2
+}
+
+// don't touch below this line
+
+func main() {
+	test("Lane,", " happy birthday!")
+	test("Zuck,", " hope that Metaverse thing works out")
+	test("Go", " is fantastic")
+}
+
+func test(s1 string, s2 string) {
+	fmt.Println(concat(s1, s2))
+}
+
+```
+# Multiple Parameters
+
+When multiple arguments are of the same type, and are next to each other in the function signature, the type only needs to be declared after the last argument.
+
+Here are some examples:
+
+```go
+func addToDatabase(hp, damage int) {
+  // ...
+}
+```
+
+```go
+func addToDatabase(hp, damage int, name string) {
+  // ?
+}
+```
+
+```go
+func addToDatabase(hp, damage int, name string, level int) {
+  // ?
+}
+```
+
+# Unit Test Lessons
+
+Up until now, all the coding lessons in this course have been testing you based on your code's _console output_ (what's printed). For example, a lesson might expect your code (in conjunction with the code we provide) to `print` something like:
+
+```text
+Price: 0.2
+NumMessages: 18
+```
+
+If your code prints that _exact_ output, you pass. If it doesn't, you fail.
+
+## A New Type of Lesson
+
+Going forward, you'll also encounter a new type of lesson: [unit tests](https://en.wikipedia.org/wiki/Unit_testing). If you've taken a course with us before, you'll know what we are referring to. But in case you haven't, a unit test is just an automated program that tests a small "unit" of code. Usually just a function or two. The editor will have tabs: the "main.go" file containing your code, and the "main_test.go" file containing the unit tests.
+
+These new unit-test-style lessons will test your code's _functionality_ rather than its output. Our tests will call functions in your code with different arguments, and expect specific `return` values. If your code returns the correct values, you pass. If it doesn't, you fail.
+
+There are two reasons for this change:
+
+1. It's more realistic. In the real world, you'll be writing unit tests and running them against your code to make sure it works as expected.
+2. You can run and debug your code with `fmt.Println` statements, and leave those print statements in when you submit. Unlike the output-based lessons, you won't have to remove your `fmt.Println` statements to pass.
+
+## Assignment
+
+Complete the `getMonthlyPrice` function. It accepts a `tier` (string) as input and returns the monthly price for that tier in pennies. Here are the prices in dollars:
+
+- "basic" - $100.00
+- "premium" - $150.00
+- "enterprise" - $500.00
+
+Convert the prices from dollars to pennies. If the given tier doesn't match any of the above, return 0 pennies.
+
+To avoid pesky [floating-point errors](https://en.wikipedia.org/wiki/Floating-point_arithmetic#Accuracy_problems), we often store prices in the currency's **base unit**. In this case, we are storing the prices in pennies, and **a dollar consists of 100 pennies.**
+
+```go
+package main
+import "fmt"
+func getMonthlyPrice(tier string) int {
+	fmt.Println("String ---> ",tier)
+	switch tier  {
+	case "basic":
+		return 100 * 100
+	case "premium":
+		return 150 * 100
+	case "enterprise":
+		return 500 * 100
+	default:
+		return 0		
+	}
+}
+
+```
+
+# Declaration Syntax
+
+Developers often wonder why the declaration syntax in Go is different from the tradition established in the C family of languages.
+
+## C-Style Syntax
+
+The C language describes types with an expression including the name to be declared, and states what type that expression will have.
+
+```c
+int y;
+```
+
+The code above declares `y` as an `int`. In general, the type goes on the left and the expression on the right.
+
+Interestingly, the creators of the Go language agreed that the C-style of declaring types in signatures gets confusing really fast - take a look at this nightmare.
+
+```c
+int (*fp)(int (*ff)(int x, int y), int b)
+```
+## Go-Style Syntax
+
+Go's declarations are clear, you just read them left to right, just like you would in English.
+
+```go
+x int
+p *int
+a [3]int
+```
+
+It's nice for more complex signatures, it makes them easier to read.
+
+Don't worry if you haven't seen functions stored in variables yet – we'll cover that later. For now, just notice how you can still read the type from left to right.
+
+```go
+f func(func(int,int) int, int) int
+```
+
+## Reference
+
+The [following post on the Go blog](https://blog.golang.org/declaration-syntax) is a great resource for further reading on declaration syntax.
+
+# Passing Variables by Value
+
+Variables in Go are passed by value (except for a few data types we haven't covered yet). "Pass by value" means that when a variable is passed into a function, that function receives a _copy_ of the variable. The function is unable to mutate the caller's original data.
+
+```go
+func main() {
+    x := 5
+    increment(x)
+
+    fmt.Println(x)
+    // still prints 5,
+    // because the increment function
+    // received a copy of x
+}
+
+func increment(x int) {
+    x++
+}
+```
+
+## Assignment
+
+- `monthlyBillIncrease`: Should return the increase in the bill from the previous to the current month. If the bill decreased, return a negative number.
+- `getBillForMonth`: Should return the total cost for the number of messages sent.
+
+Fix the bugs in the `monthlyBillIncrease` and `getBillForMonth` functions. Looks like whoever wrote the functions didn't know the `getBillForMonth` function's `bill` parameter would be passed by value. It's not actually updating the `lastMonthBill` and `thisMonthBill` variables as intended so `monthlyBillIncrease` isn't returning the right result.
+
+1. [ ] Drop the `bill` parameter from `getBillForMonth`, so it only takes 2 parameters.
+2. [ ] Instead, simply _return_ the total cost of the messages.
+3. [ ] `monthlyBillIncrease` should use the result of calling `getBillForMonth` to calculate the increase between months.
+```go
+package main
+
+func monthlyBillIncrease(costPerSend, numLastMonth, numThisMonth int) int {
+	var lastMonthBill int
+	var thisMonthBill int
+	lastMonthBill = getBillForMonth( costPerSend, numLastMonth)
+	thisMonthBill = getBillForMonth( costPerSend, numThisMonth)
+	return thisMonthBill - lastMonthBill
+}
+
+func getBillForMonth(costPerSend, messagesSent int) int {
+	return costPerSend * messagesSent
+}
+
+```
+
+# Ignoring Return Values
+
+A function can return a value that the caller doesn't care about. We can explicitly ignore variables by using an underscore, or more precisely, the [blank identifier `_`](https://go.dev/doc/effective_go#blank).
+
+For example:
+
+```go
+func getPoint() (x int, y int) {
+    return 3, 4
+}
+
+// ignore y value
+x, _ := getPoint()
+```
+
+Even though `getPoint()` returns two values, we can capture the first one and ignore the second. In Go, the blank identifier isn't just a convention; it's a real language feature that completely discards the value.
+
+## Why Might You Ignore a Return Value?
+
+Maybe a function called `getCircle` returns the center point and the radius, but you only need the radius for your calculation. In that case, you can ignore the center point variable.
+
+The Go compiler will **return an error** if you have any unused variable declarations in your code, so you _need_ to ignore anything you don't intend to use.
+
+## Assignment
+
+1. [ ] Run the code as-is. You should get a compiler error.
+2. [ ] Fix `getProductMessage` to ignore the unused return value.
+
+```go
+package main
+
+func getProductMessage(tier string) string {
+	quantityMsg, priceMsg, _ := getProductInfo(tier)
+	return "You get " + quantityMsg + " for " + priceMsg + "."
+}
+
+// don't touch below this line
+
+func getProductInfo(tier string) (string, string, string) {
+	if tier == "basic" {
+		return "1,000 texts per month", "$30 per month", "most popular"
+	} else if tier == "premium" {
+		return "50,000 texts per month", "$60 per month", "best value"
+	} else if tier == "enterprise" {
+		return "unlimited texts per month", "$100 per month", "customizable"
+	} else {
+		return "", "", ""
+	}
+}
+
+```
+
+# Named Return Values
+
+Return values may be given names, and if they are, then they are treated the same as if they were new variables defined at the top of the function.
+
+Named return values are best thought of as a way to document the purpose of the returned values.
+
+According to the [tour of go](https://tour.golang.org/):
+
+> A return statement without arguments returns the named return values. This is known as a "naked" return. Naked return statements should be used only in short functions. They can harm readability in longer functions.
+
+Named return values are what enable naked returns. Use naked returns only in short functions where the purpose of the returned values is obvious.
+
+```go
+func getCoords() (x, y int) {
+	// x and y are initialized with zero values
+
+	return // automatically returns x and y
+}
+
+```
+
+Is the same as:
+
+```go
+func getCoords() (int, int) {
+	var x int
+	var y int
+	return x, y
+}
+```
+
+In the first example, `x` and `y` are the return values. At the end of the function, we could simply write `return` to return the values of those two variables, rather than writing `return x,y`.
+
+## Assignment
+
+One of our clients likes us to send text messages reminding users of life events coming up.
+
+Fix the bug by adding named return values to the _function signature_ – the bare `return` at the end is already a naked return that will return them. The variables need to be automatically initialized. Order them as they appear in the code. _Do not alter the body of the function_.
+
+```go
+package main
+
+func yearsUntilEvents(age int) (yearsUntilAdult int, yearsUntilDrinking int, yearsUntilCarRental int) {
+	// don't touch below this line
+
+	yearsUntilAdult = 18 - age
+	if yearsUntilAdult < 0 {
+		yearsUntilAdult = 0
+	}
+	yearsUntilDrinking = 21 - age
+	if yearsUntilDrinking < 0 {
+		yearsUntilDrinking = 0
+	}
+	yearsUntilCarRental = 25 - age
+	if yearsUntilCarRental < 0 {
+		yearsUntilCarRental = 0
+	}
+	return
+}
+
+```
+# The Benefits of Named Returns
+
+## Good for Documentation (Understanding)
+
+Named return parameters are great for documenting a function. We know what the function is returning directly from its signature, no need for a comment.
+
+Named return parameters are particularly important in longer functions with many return values.
+
+```go
+func calculator(a, b int) (mul, div int, err error) {
+    if b == 0 {
+      return 0, 0, errors.New("can't divide by zero")
+    }
+    mul = a * b
+    div = a / b
+    return mul, div, nil
+}
+```
+
+Which is easier to understand than:
+
+```go
+func calculator(a, b int) (int, int, error) {
+    if b == 0 {
+      return 0, 0, errors.New("can't divide by zero")
+    }
+    mul := a * b
+    div := a / b
+    return mul, div, nil
+}
+```
+
+We know _the meaning_ of each return value just by looking at the function signature: `func calculator(a, b int) (mul, div int, err error)`
+
+`nil` is the zero value of an error. More on this later.
+
+## Less Code (Sometimes)
+
+If there are multiple return statements in a function, you don't need to write all the return values each time, though you _probably_ should.
+
+When you choose to omit return values, it's called a _naked_ return. Naked returns should only be used in short and simple functions.
+
+# Explicit Returns
+
+Even though a function has named return values, we can still explicitly return values if we want to.
+
+```go
+func getCoords() (x, y int) {
+	return x, y // this is explicit
+}
+```
+
+Using this explicit pattern we can even overwrite the return values:
+
+```go
+func getCoords() (x, y int) {
+    return 5, 6 // this is explicit, x and y are NOT returned
+}
+```
+
+Otherwise, if we want to return the values defined in the function signature we can just use a naked `return` (blank return):
+
+```go
+func getCoords() (x, y int) {
+    return // implicitly returns x and y
+}
+```
+
+## Assignment
+
+Fix the bug in the code so that it returns the named values _explicitly_.
+
+```go
+package main
+
+func yearsUntilEvents(age int) (yearsUntilAdult, yearsUntilDrinking, yearsUntilCarRental int) {
+	yearsUntilAdult = 18 - age
+	if yearsUntilAdult < 0 {
+		yearsUntilAdult = 0
+	}
+	yearsUntilDrinking = 21 - age
+	if yearsUntilDrinking < 0 {
+		yearsUntilDrinking = 0
+	}
+	yearsUntilCarRental = 25 - age
+	if yearsUntilCarRental < 0 {
+		yearsUntilCarRental = 0
+	}
+	return yearsUntilAdult, yearsUntilDrinking, yearsUntilCarRental
+}
+
+```
+
+# Early Returns
+
+Go supports the ability to return early from a function. This is a powerful feature that can clean up code, especially when used as guard clauses.
+
+Guard Clauses leverage the ability to `return` early from a function (or `continue` through a loop) to make nested conditionals one-dimensional. Instead of using if/else chains, we just return early from the function at the end of each conditional block.
+
+```go
+func divide(dividend, divisor int) (int, error) {
+	if divisor == 0 {
+		return 0, errors.New("can't divide by zero")
+	}
+	return dividend/divisor, nil
+}
+```
+
+Error handling in Go naturally encourages developers to make use of guard clauses and early returns. JavaScript can use the same pattern, but many real-world JS codebases still lean heavily on nested conditionals. When I started writing more JavaScript, I noticed how much more deeply nested many of those functions were compared to their Go equivalents.
+
+Let's take a look at an exaggerated example of nested conditional logic:
+
+```go
+func getInsuranceAmount(status insuranceStatus) int {
+  amount := 0
+  if !status.hasInsurance(){
+    amount = 1
+  } else {
+    if status.isTotaled(){
+      amount = 10000
+    } else {
+      if status.isDented(){
+        amount = 160
+        if status.isBigDent(){
+          amount = 270
+        }
+      } else {
+        amount = 0
+      }
+    }
+  }
+  return amount
+}
+```
+
+This could be written with guard clauses instead:
+
+```go
+func getInsuranceAmount(status insuranceStatus) int {
+  if !status.hasInsurance(){
+    return 1
+  }
+  if status.isTotaled(){
+    return 10000
+  }
+  if !status.isDented(){
+    return 0
+  }
+  if status.isBigDent(){
+    return 270
+  }
+  return 160
+}
+```
+
+The example above is _much_ easier to read and understand. When writing code, it's important to try to reduce the cognitive load on the reader by reducing the number of entities they need to think about at any given time.
+
+In the first example, if the developer is trying to figure out when `270` is returned, they need to think about each branch in the logic tree and try to remember which cases matter and which cases don't. With the one-dimensional structure offered by guard clauses, it's as simple as stepping through each case in order.

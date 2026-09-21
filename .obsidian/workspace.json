@@ -4,22 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "2ef23fbfab060e92",
+        "id": "ec7096d07e530c03",
         "type": "tabs",
         "children": [
           {
-            "id": "8ecbfd5a28dedbc0",
+            "id": "e77ded669213f4c0",
             "type": "leaf",
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html"
+                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/3-coulombs-law-lattice-energy-d3.html"
               },
               "icon": "code-glyph",
-              "title": "2-database-deadlocks"
+              "title": "3-coulombs-law-lattice-energy-d3"
+            }
+          },
+          {
+            "id": "bff56f64df0407f5",
+            "type": "leaf",
+            "state": {
+              "type": "html-view",
+              "state": {
+                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/1-bond-potential-energy-h2-d3.html"
+              },
+              "icon": "code-glyph",
+              "title": "1-bond-potential-energy-h2-d3"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -78,7 +91,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 260.62434005737305
+    "width": 510.1015625
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -184,54 +197,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "8ecbfd5a28dedbc0",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/3-two-phase-locking.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/2-diatomic-bond-comparison-d3.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/4-ionic-solid-arrangement.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/3-coulombs-law-lattice-energy-d3.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/1-bond-potential-energy-h2-d3.html",
+    "Learning/IDEADS/Ideas.md",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys/metals-and-alloys.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/Drawing 2026-09-21 15.47.41.excalidraw.md",
+    "Learning/IDEADS",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/4-information-gain.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/6-tree-ensembles-sampling.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/7-random-forest.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/3-entropy-impurity.html",
+    "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
+    "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
+    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/4- Skewed Run For Redis.md",
+    "Pasted image 20260919233339.png",
+    "Pasted image 20260919233304.png",
+    "Pasted image 20260919233251.png",
+    "Pasted image 20260919233246.png",
+    "Learning/System Design/Technologies/Redis/Key Ideas.md",
+    "Pasted image 20260919210237.png",
+    "Pasted image 20260919210219.png",
+    "Pasted image 20260919210212.png",
+    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
+    "Learning/Work Stuff/Freelance/Builders's Website/Creds.md",
+    "Learning/Work Stuff/Freelance/Cargo Bussiness/Cargo Bussiness.md",
+    "Learning/Side Projects/HospitalityOS/Untitled.md",
+    "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
+    "Learning/Side Projects/HospitalityOS/Concerns.md",
+    "Learning/Side Projects/HospitalityOS/Resources.md",
     "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/1-exclusive-vs-shared-locks.html",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/2-database-deadlocks.html",
     "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
     "Learning/DSA/Graphs/BFS/3-01-Matrix.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/4-information-gain.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/5-recursive-splitting-full-algorithm.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/1-decision-trees-intro.html",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/3-Skewed Run.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/3-entropy-impurity.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/2-decision-tree-learning-process.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4",
     "Pasted image 20260917232945.png",
     "Pasted image 20260917232941.png",
     "Learning/Backend Engineering/Python/FastAPI/1-Analysis Database/Analysis 1.md",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/6-cpu-ceiling.html",
-    "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.html",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
     "Learning/Backend Engineering/Python/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
     "Learning/Backend Engineering/Python/FastAPI/Live Feed/2-2026-09-08-live-feed-engine-architecture-evolution.md",
-    "Pasted image 20260917225052.png",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/2-50M Rows Run.md",
     "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/1-Final Run.md",
-    "Learning/Side Projects/HospitalityOS/Resources.md",
-    "Learning/Side Projects/HospitalityOS/Untitled.md",
-    "Learning/Side Projects/HospitalityOS/Concerns.md",
-    "Learning/Side Projects/HospitalityOS/Missing Items/Items.md",
-    "Learning/Side Projects/HospitalityOS/concerns/Multi-tenancy.md",
-    "Learning/Work Stuff/Freelance/Builders's Website/Creds.md",
-    "Learning/Backend Engineering/Go/Basics/Lessons.md",
-    "Learning/Portfolio/Inspirations.md",
-    "conflict-files-obsidian-git.md",
-    "Learning/System Design/Practice/News Aggregator/News Aggregator.excalidraw.md",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/370147-2026-09-10T21:15:44+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/337266-2026-09-10T18:54:22+05:00.svg",
-    "Learning/Backend Engineering/Python/FastAPI/3-Stress test K6/142893-2026-09-12T15:30:01+05:00.svg",
-    "Learning/AI&ML Engineering/Learnings/Books.md",
-    "Pasted Image 20260904172659_828.png",
-    "Pasted Image 20260904172615_090.png",
-    "Learning/Backend Engineering/Pasted Image 20260317121120_013.png",
-    "Learning/IELTS/Resources.md",
-    "Learning/Failed Interview Learings.md",
-    "Learning/Database/Fundamentals of Database Engineering/4-Database-Partitioning/Drawing 2026-09-04 17.23.15.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/2-Rotting Oranges.excalidraw.md",
-    "Learning/AI&ML Engineering/Resources.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

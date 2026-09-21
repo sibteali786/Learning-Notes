@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Implicit Locking — The UPDATE...WHERE Trick</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161925;--panel2:#1c2030;--border:#2a2f42;
+    --text:#e6e8f0;--muted:#8b91a7;--blue:#4f8cff;--orange:#ff9d4d;
+    --green:#4ade80;--purple:#b487ff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:29px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .section{margin:36px 0;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;}
+  .pill-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+  .pill-purple{background:rgba(180,135,255,.15);color:var(--purple);border:1px solid rgba(180,135,255,.35);}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2);border-radius:12px;padding:18px 20px;}
+  .compare-card.c1{border:1px solid rgba(79,140,255,.4);}
+  .compare-card.c2{border:1px solid rgba(255,157,77,.4);}
+  .compare-card h3{font-size:15px;display:flex;align-items:center;gap:8px;}
+  .compare-card ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;}
+  .compare-card li{margin-bottom:6px;}
+  code,.inline-code{background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);}
+  pre.codeblock{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12.5px;overflow-x:auto;margin:10px 0 0;}
+  pre.codeblock code{background:none;border:none;padding:0;color:var(--text);}
+  .kw{color:var(--purple);}
+  .cmt{color:var(--muted);}
+  table.rule-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+  .rule-table th,.rule-table td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
+  .rule-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  .rule-table td.yes{color:var(--red);font-weight:600;}
+  .rule-table td.ok{color:var(--green);font-weight:600;}
+  .callout{background:var(--panel2);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px;}
+  .callout b{color:var(--orange);}
+  .example-box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:14px;}
+  .example-box h4{margin:0 0 8px;color:var(--purple);font-size:14px;}
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.tip-grid{grid-template-columns:1fr;}}
+  .tip-card{background:var(--panel2);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .tip-card .tip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .step-list{counter-reset:step;list-style:none;padding:0;margin:14px 0 0;}
+  .step-list li{counter-increment:step;position:relative;padding:10px 12px 10px 44px;margin-bottom:8px;background:var(--panel2);border-radius:8px;font-size:13.5px;border:1px solid var(--border);}
+  .step-list li::before{content:counter(step);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+  .step-list li.fail::before{background:var(--red);}
+  .step-list li.ok::before{background:var(--green);}
+  .split-terms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media(max-width:640px){.split-terms{grid-template-columns:1fr;}}
+  .term-panel{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;}
+  .term-panel .head{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+  .term-line{white-space:pre;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🕵️ Implicit Locking — The UPDATE...WHERE Trick</h1>
+  <div class="subtitle">Follow-up to double-booking prevention: why a plain conditional UPDATE also works, and why you shouldn't trust it blindly</div>
+
+  <!-- THE ALTERNATIVE APPROACH -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Alternative People Suggested</h2></div>
+    <div class="card">
+      Instead of <code>SELECT ... FOR UPDATE</code> then <code>UPDATE</code> (two explicit steps), skip straight to a conditional update and check its row count:
+      <pre class="codeblock"><code><span class="kw">UPDATE</span> seats <span class="kw">SET</span> isbooked = 1, u = <span style="color:var(--green)">'Hussein'</span>
+<span class="kw">WHERE</span> id = 1 <span class="kw">AND</span> isbooked = 0;</code></pre>
+      <div class="callout">💡 <b>This works</b> — but the video's real point is <i>why</i> it works, and that "why" is Postgres-specific, not a universal database guarantee.</div>
+    </div>
+  </div>
+
+  <!-- WALKTHROUGH -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>What Actually Happens Under the Hood</h2></div>
+    <div class="card">
+      <div class="split-terms">
+        <div class="term-panel">
+          <div class="head">Transaction 1 — Hussein</div>
+<span class="term-line">BEGIN;
+UPDATE seats SET isbooked=1, u='Hussein'
+  WHERE id=1 AND isbooked=0;
+  → UPDATE 1  ✅ (uncommitted)</span>
+        </div>
+        <div class="term-panel">
+          <div class="head">Transaction 2 — Rick</div>
+<span class="term-line">BEGIN;
+UPDATE seats SET isbooked=1, u='Rick'
+  WHERE id=1 AND isbooked=0;
+  ⏳ BLOCKS (row is implicitly locked)</span>
+        </div>
+      </div>
+
+      <ol class="step-list">
+        <li class="ok"><b>Transaction 1</b> runs its UPDATE → Postgres does a b-tree lookup on the <code>id</code> index, finds the tuple, and <b>implicitly acquires an exclusive lock</b> on that row the instant it updates it — no explicit <code>FOR UPDATE</code> needed.</li>
+        <li class="fail"><b>Transaction 2</b> runs the identical query → index lookup finds the same tuple → Postgres sees the row is locked → <b>blocks</b>, waiting.</li>
+        <li class="ok">Key detail: Transaction 2's <code>isbooked=0</code> condition was still <b>true</b> at the moment it started — it began at the same time as Transaction 1 and, under isolation, still sees the row as unbooked. It's not blocked because the condition failed; it's blocked because the row is <b>locked</b>.</li>
+        <li class="ok"><b>Transaction 1 commits</b> → lock released, row now permanently <code>isbooked=1, u='Hussein'</code>.</li>
+        <li class="fail"><b>Transaction 2 unblocks</b> → but instead of blindly resuming with its old (stale) view, Postgres <b>re-evaluates the WHERE clause against the fresh committed row</b> → <code>isbooked=0</code> is now <b>false</b> → 0 rows match → <code>UPDATE 0</code>, Rick's booking silently fails (no error, just no rows affected).</li>
+      </ol>
+      <div class="callout">✅ <b>Desired outcome achieved</b> — but through Postgres's specific behavior of <b>re-checking the WHERE clause after being unblocked</b>, under <b>Read Committed</b> isolation.</div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Why the Re-check Matters</h2></div>
+    <div class="card">
+      <svg viewBox="0 0 760 260" width="100%" style="max-width:700px;display:block;margin:0 auto;">
+        <rect x="30" y="30" width="220" height="50" rx="8" fill="#1c2030" stroke="#4f8cff" stroke-width="2"/>
+        <text x="140" y="58" fill="#4f8cff" text-anchor="middle" font-size="12" font-weight="600">Rick's UPDATE starts</text>
+        <text x="140" y="72" fill="#8b91a7" text-anchor="middle" font-size="10">sees isbooked=0 (still true)</text>
+
+        <path d="M250,55 L340,55" stroke="#8b91a7" stroke-width="2" marker-end="url(#a1)"/>
+        <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8b91a7"/></marker></defs>
+
+        <rect x="350" y="30" width="180" height="50" rx="8" fill="rgba(255,107,107,.12)" stroke="#ff6b6b" stroke-width="2"/>
+        <text x="440" y="58" fill="#ff6b6b" text-anchor="middle" font-size="12" font-weight="600">Row is locked</text>
+        <text x="440" y="72" fill="#8b91a7" text-anchor="middle" font-size="10">Rick blocks & waits</text>
+
+        <path d="M440,80 L440,140" stroke="#8b91a7" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#a1)"/>
+        <text x="460" y="115" fill="#8b91a7" font-size="10">Hussein commits</text>
+
+        <rect x="330" y="145" width="220" height="55" rx="8" fill="rgba(74,222,128,.12)" stroke="#4ade80" stroke-width="2"/>
+        <text x="440" y="170" fill="#4ade80" text-anchor="middle" font-size="12" font-weight="600">Postgres re-checks WHERE</text>
+        <text x="440" y="184" fill="#8b91a7" text-anchor="middle" font-size="10">against fresh committed row</text>
+
+        <path d="M440,200 L440,225" stroke="#8b91a7" stroke-width="2" marker-end="url(#a1)"/>
+        <text x="440" y="245" fill="#ff6b6b" text-anchor="middle" font-size="12" font-weight="700">isbooked=0 → FALSE → UPDATE 0</text>
+      </svg>
+      <div class="callout"><b>Critical nuance:</b> Postgres doesn't just "wake up and continue" — it goes back to the heap and re-evaluates the predicate. That re-check is exactly what makes the trick safe here.</div>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS: EXPLICIT VS IMPLICIT -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Explicit vs Implicit Locking</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c1">
+        <h3>🔒 Explicit — <code>SELECT ... FOR UPDATE</code></h3>
+        <ul>
+          <li>You control exactly when the lock is taken</li>
+          <li>Can do multiple things before committing</li>
+          <li>Clear intent — self-documenting</li>
+          <li>Works predictably across databases that support row locks</li>
+        </ul>
+      </div>
+      <div class="compare-card c2">
+        <h3>🎭 Implicit — conditional <code>UPDATE ... WHERE</code></h3>
+        <ul>
+          <li>Lock is a side-effect of the <code>UPDATE</code>, not something you asked for</li>
+          <li>Single statement — less flexible, but arguably more efficient</li>
+          <li>Correctness depends on <b>isolation level</b> (must be Read Committed) and on the specific DB's re-check behavior</li>
+          <li>Not guaranteed portable — MySQL, SQL Server may resolve the WHERE clause differently</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">⚠️ <b>Not guaranteed everywhere:</b> if <code>id</code> and <code>isbooked</code> were both in a composite index, some engines might resolve the WHERE entirely from the index without touching the heap for a fresh value — behavior varies by implementation.</div>
+  </div>
+
+  <!-- KEY CONCEPT: WHERE LOCK INFO LIVES -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Postgres Internals Worth Knowing</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th>Concept</th><th>What's happening</th></tr>
+        <tr><td>Lock storage</td><td>Postgres stores lock info as a field <b>inside the row itself</b> (in the heap), not a separate global lock table only</td></tr>
+        <tr><td>Index vs heap</td><td>A b-tree index lookup finds the tuple pointer; the actual lock/value check happens when you jump to the <b>heap</b></td></tr>
+        <tr><td>Isolation level</td><td>This trick <b>requires Read Committed</b> — the re-check on unblock is a Read Committed behavior</td></tr>
+        <tr><td>Concurrency model</td><td>Postgres is <b>pessimistic concurrency control</b> — it always takes a lock rather than detecting conflicts after the fact</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PESSIMISTIC VS OPTIMISTIC -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Pessimistic vs Optimistic Concurrency Control</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c1">
+        <h3>🔒 Pessimistic (Postgres, MySQL, most RDBMS)</h3>
+        <ul>
+          <li>"Take the umbrella before it rains" — lock first, act second</li>
+          <li>No retries needed — a failure is a real business rejection, not a concurrency artifact</li>
+          <li>Costs: lock management overhead, waiting transactions</li>
+        </ul>
+      </div>
+      <div class="compare-card c2">
+        <h3>🎲 Optimistic (common in NoSQL)</h3>
+        <ul>
+          <li>Proceed without locking; detect conflicts at commit time and fail/retry</li>
+          <li>Higher throughput when contention is rare</li>
+          <li>Application must handle retry logic for concurrency failures</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">💬 <b>Instructor's stated preference:</b> pessimistic — he'd rather a transaction fail for a real business reason (seat already booked) than fail from a retry-worthy concurrency artifact he now has to handle separately.</div>
+  </div>
+
+  <!-- INTERVIEW / PRACTICAL TIPS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Practical Takeaways</h2></div>
+    <div class="card">
+      <ul>
+        <li><b>Don't just copy a trick — understand why it works.</b> A conditional <code>UPDATE ... WHERE</code> can prevent double booking, but only because of Read Committed + Postgres's re-check-on-unblock behavior, not because the SQL "looks safe."</li>
+        <li>Prefer <span class="pill pill-purple">SELECT ... FOR UPDATE</span> when you need multiple steps inside one transaction before committing — it gives explicit, portable control.</li>
+        <li>The conditional-<code>UPDATE</code> approach is a valid, arguably leaner shortcut for simple single-statement check-and-write operations — just verify your isolation level and your specific database's semantics before relying on it in production.</li>
+        <li>Good interview question to expect: <i>"Why does <code>UPDATE ... WHERE isbooked=0</code> alone prevent a race condition?"</i> → Answer: implicit row lock on update + Read Committed re-evaluates the predicate against the committed value once unblocked.</li>
+        <li>Remember: <b>lock info lives in the row/heap</b> in Postgres — that's why the engine has to "jump" from index to heap to determine if something is locked and what its current value is.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
