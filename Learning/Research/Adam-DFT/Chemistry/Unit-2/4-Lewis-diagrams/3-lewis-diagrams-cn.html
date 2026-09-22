@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lewis Diagrams — Ions & Triple Bonds</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root{
+  --bg:#0f1117; --card:#171a23; --border:#262a38; --text:#e6e8ef; --muted:#9aa1b4;
+  --blue:#4da3ff; --orange:#ff9d4d; --green:#4ddd8f; --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 20px 80px;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.3rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:920px;margin:0 auto;}
+.section{margin-bottom:36px;}
+.label{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px;font-weight:600;}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;border-left:3px solid var(--blue);}
+.card.orange-b{border-left-color:var(--orange);}
+.card.green-b{border-left-color:var(--green);}
+.card.purple-b{border-left-color:var(--purple);}
+code{background:#1e2230;border:1px solid var(--border);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88rem;}
+.steps{list-style:none;padding:0;margin:0;counter-reset:step;}
+.steps li{counter-increment:step;position:relative;padding:12px 0 12px 44px;border-bottom:1px dashed var(--border);}
+.steps li:last-child{border-bottom:none;}
+.steps li::before{content:counter(step);position:absolute;left:0;top:10px;width:28px;height:28px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#0f1117;font-weight:700;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+.steps b{color:var(--orange);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+.math-box{background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.9rem;line-height:1.7;}
+.math-box .running-total{color:var(--orange);font-weight:600;}
+.svg-wrap{background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+.svg-caption{text-align:center;color:var(--muted);font-size:.78rem;margin-top:4px;}
+.tip{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border);align-items:flex-start;}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+.example-box{background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));border:1px solid rgba(77,221,143,.3);border-radius:12px;padding:18px 20px;}
+.badge-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.85rem;}
+.badge-flow .arrow{color:var(--muted);}
+.badge{padding:4px 10px;border-radius:6px;background:#1e2230;border:1px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Lewis Diagrams: Ions &amp; Triple Bonds</h1>
+<div class="subtitle">Worked through CN⁻ (cyanide anion) — charge adjustment and pushing past a double bond</div>
+
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    Two new wrinkles show up here that neutral molecules like SiF₄ and CH₂O didn't have:
+    <b>the species carries a charge</b> (so the electron count itself changes), and
+    <b>one double bond still isn't enough</b> — the central-atom check can force a second
+    conversion, turning a double bond into a triple bond.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">How It Works</span>
+  <h2 style="margin-bottom:14px;">Worked Example: CN⁻ (Cyanide Anion)</h2>
+
+  <ol class="steps">
+    <li><b>Count total valence electrons</b> — sum the neutral atoms' v.e., then <b>add 1 e⁻ per negative charge</b> (or subtract 1 e⁻ per positive charge).</li>
+    <li><b>Draw a single bond</b> between the two atoms — with only two atoms, neither is "more central," just connect them.</li>
+    <li><b>Allocate remaining electrons</b>, starting with the more electronegative atom, chasing octets.</li>
+    <li><b>Check every atom.</b> If one is short, convert a lone pair from the other into another bond — repeat until both hit 8.</li>
+    <li><b>Enclose the whole diagram in brackets</b> with the overall charge shown outside, top right.</li>
+  </ol>
+
+  <div class="grid2" style="margin-top:18px;">
+    <div class="card">
+      <span class="label green">Electron Count</span>
+      <div class="math-box">
+        C: 4 v.e.<br>
+        N: 5 v.e.<br>
+        neutral total = 9<br>
+        charge: −1 → <b>+1 e⁻</b><br>
+        <span class="running-total">Total = 9 + 1 = 10 valence e⁻</span>
+      </div>
+    </div>
+    <div class="card orange-b">
+      <span class="label orange">Electron Bookkeeping</span>
+      <div class="math-box">
+        10 → 1 single bond C–N (−2) → <span class="running-total">8 left</span><br>
+        8 → N gets 3 lone pairs (−6) → <span class="running-total">2 left</span><br>
+        2 → C gets 1 lone pair (−2) → <span class="running-total">0 left</span><br>
+        Check: N = 8 ✓ &nbsp; C = only 4 ✗
+      </div>
+    </div>
+  </div>
+
+  <div class="card purple-b" style="margin-top:14px;">
+    <span class="label purple">The Fix — Twice</span>
+    <div class="badge-flow">
+      <span class="badge">C at 4 e⁻, N at 8 e⁻</span>
+      <span class="arrow">→</span>
+      <span class="badge">1 N lone pair → 2nd bond (double bond)</span>
+      <span class="arrow">→</span>
+      <span class="badge">C at 6, N at 8 — still short</span>
+      <span class="arrow">→</span>
+      <span class="badge">another N lone pair → 3rd bond (triple bond)</span>
+      <span class="arrow">→</span>
+      <span class="badge">C = 8, N = 8 ✓</span>
+    </div>
+  </div>
+
+  <div class="svg-wrap" style="margin-top:16px;">
+    <div>
+      <svg width="230" height="140" viewBox="0 0 230 140">
+        <line x1="60" y1="70" x2="170" y2="70" stroke="#4da3ff" stroke-width="3"/>
+        <circle cx="45" cy="70" r="20" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+        <text x="45" y="76" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="14">C</text>
+        <circle cx="185" cy="70" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="185" y="76" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">N</text>
+        <g fill="#4ddd8f">
+          <circle cx="215" cy="45" r="2.3"/><circle cx="222" cy="40" r="2.3"/>
+          <circle cx="215" cy="95" r="2.3"/><circle cx="222" cy="100" r="2.3"/>
+          <circle cx="225" cy="70" r="2.3"/><circle cx="232" cy="70" r="2.3"/>
+        </g>
+        <g fill="#ff9d4d">
+          <circle cx="15" cy="63" r="2.3"/><circle cx="15" cy="77" r="2.3"/>
+        </g>
+      </svg>
+      <div class="svg-caption">Step 3 — single bond, N full at 8, C stuck at 4</div>
+    </div>
+    <div>
+      <svg width="260" height="150" viewBox="0 0 260 150">
+        <line x1="65" y1="66" x2="180" y2="66" stroke="#4da3ff" stroke-width="3"/>
+        <line x1="65" y1="76" x2="180" y2="76" stroke="#4da3ff" stroke-width="3"/>
+        <line x1="65" y1="86" x2="180" y2="86" stroke="#4da3ff" stroke-width="3"/>
+        <circle cx="45" cy="76" r="20" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+        <text x="45" y="82" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="14">C</text>
+        <circle cx="200" cy="76" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="200" y="82" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">N</text>
+        <g fill="#4ddd8f">
+          <circle cx="230" cy="76" r="2.3"/><circle cx="237" cy="76" r="2.3"/>
+        </g>
+        <g fill="#ff9d4d">
+          <circle cx="15" cy="70" r="2.3"/><circle cx="15" cy="82" r="2.3"/>
+        </g>
+        <text x="245" y="30" fill="var(--muted)" font-size="20" font-family="JetBrains Mono">]⁻</text>
+        <line x1="0" y1="20" x2="0" y2="132" stroke="var(--muted)" stroke-width="1.5" opacity=".6"/>
+        <line x1="255" y1="20" x2="255" y2="132" stroke="var(--muted)" stroke-width="1.5" opacity=".6"/>
+      </svg>
+      <div class="svg-caption">Final — C≡N triple bond, both at 8, whole ion bracketed with −1</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Case</th><th>Bond order needed</th><th>Charge handling</th></tr>
+      <tr><td>SiF₄ (neutral)</td><td>Single bonds only</td><td>None — 0 adjustment</td></tr>
+      <tr><td>CH₂O (neutral)</td><td>1 double bond</td><td>None — 0 adjustment</td></tr>
+      <tr><td>CN⁻ (anion)</td><td>Triple bond</td><td>+1 e⁻ for the −1 charge; brackets + charge shown on final diagram</td></tr>
+      <tr><td>General cation, e.g. NH₄⁺</td><td>—</td><td>−1 e⁻ per + charge</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:.85rem;margin:12px 0 0;">
+      <code>Keep converting lone pairs → bonds, one at a time, until EVERY non-H atom reads 8</code> — don't stop at the first double bond if the central atom is still short.
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario 1 — Cyanide toxicity:</b> The C≡N triple bond in cyanide is short, strong, and highly polar — this is exactly why the cyanide ion binds so tightly to the iron center in cytochrome c oxidase, blocking cellular respiration. The bond order you derive here directly explains its binding strength.
+  </div>
+  <div class="example-box" style="margin-top:10px;">
+    <b style="color:var(--blue);">Scenario 2 — Isoelectronic species:</b> CN⁻ has the same electron count (10 valence e⁻ arrangement, triple bond) as N₂ and CO — all three are described as "isoelectronic." Once you can build one Lewis diagram with a triple bond, you can predict the structure of the other two without redoing the math from scratch.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> For any ion: add 1 e⁻ per unit of negative charge, subtract 1 e⁻ per unit of positive charge — do this once, right after the neutral-atom sum, before anything else.</div>
+    <div class="tip"><span class="icon">→</span> With only 2 atoms, "central atom" doesn't apply — just connect them and let the octet check tell you the bond order.</div>
+    <div class="tip"><span class="icon">→</span> Don't assume one conversion is enough — re-check every atom after each lone-pair-to-bond conversion; CN⁻ needs two conversions to reach a triple bond.</div>
+    <div class="tip"><span class="icon">→</span> Always close ions in brackets with the charge as a superscript outside — an unbracketed diagram with the electrons all placed correctly is still an incomplete answer for a charged species.</div>
+    <div class="tip"><span class="icon">→</span> Formal charge is the deeper check behind "which atom should be central / how many bonds": for CN⁻ minimizing formal charges independently confirms the triple-bond structure.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

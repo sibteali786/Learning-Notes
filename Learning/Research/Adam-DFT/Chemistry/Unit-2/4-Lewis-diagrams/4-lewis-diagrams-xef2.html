@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>XeF₂ Lewis Diagram</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0f1117; --card:#171a23; --border:#262a38; --text:#e6e8ef; --muted:#9aa1b4;
+  --blue:#4da3ff; --orange:#ff9d4d; --green:#4ddd8f; --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 20px 80px;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.2rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:900px;margin:0 auto;}
+.section{margin-bottom:36px;}
+.label{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px;font-weight:600;}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;border-left:3px solid var(--blue);}
+.card.orange-b{border-left-color:var(--orange);}
+.card.purple-b{border-left-color:var(--purple);}
+code{background:#1e2230;border:1px solid var(--border);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88rem;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+.math-box{background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.9rem;line-height:1.7;}
+.math-box .running-total{color:var(--orange);font-weight:600;}
+.svg-wrap{background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:20px;display:flex;justify-content:center;}
+.svg-caption{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px;}
+.tip{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border);align-items:flex-start;}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+.example-box{background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));border:1px solid rgba(77,221,143,.3);border-radius:12px;padding:18px 20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>XeF₂ — Linear Expanded Octet</h1>
+<div class="subtitle">The simplest expanded-octet case: two bonds, three lone pairs, all on xenon</div>
+
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    XeF₂ is the cleanest example of an expanded octet: only <b>2 bonds</b> around the
+    central atom, yet Xe still ends up holding more than 8 electrons because the leftover
+    electrons — after satisfying both fluorines — have nowhere else to go.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">How It Works</span>
+  <div class="grid2">
+    <div class="card orange-b">
+      <h2>Electron Bookkeeping</h2>
+      <div class="math-box">
+        Xe: 8 v.e. &nbsp;+&nbsp; F×2: 14 v.e.<br>
+        <span class="running-total">Total = 22 valence e⁻</span><br><br>
+        2 single bonds (Xe–F ×2) → −4 → <span class="running-total">18 left</span><br>
+        2 F atoms × 6 e⁻ each → −12 → <span class="running-total">6 left</span><br>
+        6 leftover e⁻ → all go to Xe → <b>3 lone pairs on Xe</b>
+      </div>
+    </div>
+    <div class="card purple-b">
+      <h2>Final Count Check</h2>
+      <div class="math-box">
+        F (each): 6 lone-pair e⁻ + 2 shared = <span class="running-total">8 ✓</span><br>
+        Xe: 6 lone-pair e⁻ + 4 shared (2 bonds) = <span class="running-total">10</span><br>
+        Xe exceeds the octet — allowed, period 5 element
+      </div>
+    </div>
+  </div>
+
+  <div class="svg-wrap" style="margin-top:6px;">
+    <svg width="360" height="160" viewBox="0 0 360 160">
+      <line x1="90" y1="80" x2="150" y2="80" stroke="#4da3ff" stroke-width="3"/>
+      <line x1="210" y1="80" x2="270" y2="80" stroke="#4da3ff" stroke-width="3"/>
+
+      <circle cx="70" cy="80" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+      <text x="70" y="86" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">F</text>
+
+      <circle cx="180" cy="80" r="24" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+      <text x="180" y="87" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="15">Xe</text>
+
+      <circle cx="290" cy="80" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+      <text x="290" y="86" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">F</text>
+
+      <!-- F lone pairs -->
+      <g fill="#4ddd8f">
+        <circle cx="55" cy="55" r="2.3"/><circle cx="62" cy="50" r="2.3"/>
+        <circle cx="55" cy="105" r="2.3"/><circle cx="62" cy="110" r="2.3"/>
+        <circle cx="42" cy="80" r="2.3"/><circle cx="36" cy="80" r="2.3"/>
+
+        <circle cx="305" cy="55" r="2.3"/><circle cx="298" cy="50" r="2.3"/>
+        <circle cx="305" cy="105" r="2.3"/><circle cx="298" cy="110" r="2.3"/>
+        <circle cx="318" cy="80" r="2.3"/><circle cx="324" cy="80" r="2.3"/>
+      </g>
+      <!-- Xe lone pairs: 3 pairs, top and sides -->
+      <g fill="#b98dff">
+        <circle cx="165" cy="35" r="2.3"/><circle cx="172" cy="30" r="2.3"/>
+        <circle cx="188" cy="30" r="2.3"/><circle cx="195" cy="35" r="2.3"/>
+        <circle cx="180" cy="20" r="2.3"/><circle cx="180" cy="126" r="2.3"/>
+      </g>
+    </svg>
+  </div>
+  <div class="svg-caption">F–Xe–F linear geometry; Xe carries 3 lone pairs (6 e⁻) plus 2 bonding pairs = 10 e⁻ total</div>
+</div>
+
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Molecule</th><th>Bonds on central atom</th><th>Lone pairs on central atom</th><th>Total e⁻ on central atom</th></tr>
+      <tr><td>SiF₄</td><td>4</td><td>0</td><td>8 (normal octet)</td></tr>
+      <tr><td>XeF₂</td><td>2</td><td>3</td><td>10 (expanded)</td></tr>
+      <tr><td>XeF₅⁺</td><td>5</td><td>1</td><td>12 (expanded)</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:.85rem;margin:12px 0 0;">
+      <code>Fewer bonds ≠ smaller electron count</code> — XeF₂ has only 2 bonds but still ends up "over octet" because the leftover electrons pile up as lone pairs on Xe, not because of more bonding.
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario — XeF₂ as an industrial oxidizer/etchant:</b> Xenon difluoride is actually used in the semiconductor industry as a dry-etching agent for silicon (it reacts spontaneously with Si to release SiF₄ gas — tying back to the very first SiF₄ example in this series). Its reactivity and linear shape both trace back directly to this Lewis diagram: 2 bonding pairs + 3 lone pairs on Xe gives a linear electron geometry (VSEPR), which is why the F–Xe–F molecule is straight, not bent.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> Leftover electrons after terminal atoms are satisfied always go to the central atom as lone pairs — that's the mechanical trigger for "expanded octet," not a special rule you invoke.</div>
+    <div class="tip"><span class="icon">→</span> Don't confuse "few bonds" with "small electron count" — XeF₂ has only 2 bonds but 10 electrons around Xe once lone pairs are counted.</div>
+    <div class="tip"><span class="icon">→</span> Central-atom lone pairs matter for shape: 2 bonds + 3 lone pairs (5 electron domains) predicts trigonal bipyramidal electron geometry, but the 3 lone pairs occupy equatorial positions, leaving a <i>linear</i> molecular shape — a common VSEPR follow-up question.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lewis Diagrams</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root{
+  --bg:#0f1117;
+  --card:#171a23;
+  --border:#262a38;
+  --text:#e6e8ef;
+  --muted:#9aa1b4;
+  --blue:#4da3ff;
+  --orange:#ff9d4d;
+  --green:#4ddd8f;
+  --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  padding:32px 20px 80px;
+}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.3rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:920px;margin:0 auto;}
+
+.section{margin-bottom:36px;}
+.label{
+  display:inline-block;
+  font-size:.72rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:3px 10px;
+  border-radius:20px;
+  margin-bottom:12px;
+  font-weight:600;
+}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px 22px;
+  margin-bottom:14px;
+  border-left:3px solid var(--blue);
+}
+.card.orange-b{border-left-color:var(--orange);}
+.card.green-b{border-left-color:var(--green);}
+.card.purple-b{border-left-color:var(--purple);}
+
+code, .pill-code{
+  background:#1e2230;
+  border:1px solid var(--border);
+  color:var(--green);
+  padding:2px 8px;
+  border-radius:6px;
+  font-size:.88rem;
+}
+
+.steps{list-style:none;padding:0;margin:0;counter-reset:step;}
+.steps li{
+  counter-increment:step;
+  position:relative;
+  padding:12px 0 12px 44px;
+  border-bottom:1px dashed var(--border);
+}
+.steps li:last-child{border-bottom:none;}
+.steps li::before{
+  content:counter(step);
+  position:absolute;left:0;top:10px;
+  width:28px;height:28px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#0f1117;
+  font-weight:700;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+}
+.steps b{color:var(--orange);}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+
+.math-box{
+  background:#0c0e14;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px 18px;
+  font-size:.92rem;
+  line-height:1.7;
+}
+.math-box .running-total{color:var(--orange);font-weight:600;}
+
+.svg-wrap{
+  background:#0c0e14;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  display:flex;
+  justify-content:center;
+}
+
+.tip{
+  display:flex;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px dashed var(--border);
+  align-items:flex-start;
+}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+
+.example-box{
+  background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));
+  border:1px solid rgba(77,221,143,.3);
+  border-radius:12px;
+  padding:18px 20px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Lewis Diagrams</h1>
+<div class="subtitle">Mapping how atoms share and hold valence electrons — worked through SiF₄</div>
+
+<!-- PROBLEM STATEMENT -->
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    Given a molecular formula, you often need to know <b>which atoms are bonded to which</b>,
+    <b>how many bonds</b> exist between them, and <b>where the leftover (lone pair) electrons sit</b>.
+    A Lewis diagram answers all three in one picture — it's the starting point for predicting
+    molecular geometry, polarity, and reactivity.
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <span class="label orange">How It Works</span>
+  <h2 style="margin-bottom:14px;">Worked Example: SiF₄ (Silicon Tetrafluoride)</h2>
+
+  <ol class="steps">
+    <li><b>Count total valence electrons.</b> Add valence electrons of every atom (multiply by count of each). Add 1 e⁻ per negative charge, subtract 1 e⁻ per positive charge.</li>
+    <li><b>Pick the central atom</b> — least electronegative element, excluding H. Everything else becomes terminal.</li>
+    <li><b>Draw single bonds</b> from center to each terminal atom. Each bond = 2 electrons. Subtract these from the running total.</li>
+    <li><b>Fill terminal atoms</b> with lone pairs until each has an octet (H only needs 2). Subtract these from the running total.</li>
+    <li><b>Dump any leftovers on the central atom.</b> If the central atom still lacks an octet, convert lone pairs into double/triple bonds.</li>
+  </ol>
+
+  <div class="grid2" style="margin-top:18px;">
+    <div class="card">
+      <span class="label green">Electron Count</span>
+      <div class="math-box">
+        Si: 4 valence e⁻ <span style="color:var(--muted)">(group 14, shell 3)</span><br>
+        F: 7 valence e⁻ × 4 atoms = 28<br>
+        <span class="running-total">Total = 4 + 28 = 32 valence e⁻</span>
+      </div>
+    </div>
+    <div class="card orange-b">
+      <span class="label orange">Electron Bookkeeping</span>
+      <div class="math-box">
+        32 → 4 bonds drawn (−8) → <span class="running-total">24 left</span><br>
+        24 → 4 F atoms get 6 e⁻ each (−24) → <span class="running-total">0 left</span><br>
+        Si already has an octet (4 bonds) → <code>done</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="svg-wrap" style="margin-top:16px;">
+    <svg width="360" height="300" viewBox="0 0 360 300">
+      <!-- bonds -->
+      <line x1="180" y1="150" x2="180" y2="70"  stroke="#4da3ff" stroke-width="3"/>
+      <line x1="180" y1="150" x2="180" y2="230" stroke="#4da3ff" stroke-width="3"/>
+      <line x1="180" y1="150" x2="100" y2="150" stroke="#4da3ff" stroke-width="3"/>
+      <line x1="180" y1="150" x2="260" y2="150" stroke="#4da3ff" stroke-width="3"/>
+
+      <!-- center Si -->
+      <circle cx="180" cy="150" r="22" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+      <text x="180" y="157" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="16">Si</text>
+
+      <!-- 4 F atoms -->
+      <g font-family="JetBrains Mono" font-weight="700" font-size="15" fill="#4ddd8f">
+        <circle cx="180" cy="55"  r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="180" y="61" text-anchor="middle">F</text>
+
+        <circle cx="180" cy="245" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="180" y="251" text-anchor="middle">F</text>
+
+        <circle cx="80" cy="150" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="80" y="156" text-anchor="middle">F</text>
+
+        <circle cx="280" cy="150" r="20" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="280" y="156" text-anchor="middle">F</text>
+      </g>
+
+      <!-- lone pair dots (simplified, 3 pairs per F) -->
+      <g fill="#b98dff">
+        <!-- top F -->
+        <circle cx="165" cy="30" r="2.5"/><circle cx="172" cy="26" r="2.5"/>
+        <circle cx="195" cy="30" r="2.5"/><circle cx="188" cy="26" r="2.5"/>
+        <circle cx="180" cy="20" r="2.5"/><circle cx="180" cy="14" r="2.5"/>
+        <!-- bottom F -->
+        <circle cx="165" cy="270" r="2.5"/><circle cx="172" cy="274" r="2.5"/>
+        <circle cx="195" cy="270" r="2.5"/><circle cx="188" cy="274" r="2.5"/>
+        <circle cx="180" cy="280" r="2.5"/><circle cx="180" cy="286" r="2.5"/>
+        <!-- left F -->
+        <circle cx="55" cy="140" r="2.5"/><circle cx="55" cy="132" r="2.5"/>
+        <circle cx="55" cy="160" r="2.5"/><circle cx="55" cy="168" r="2.5"/>
+        <circle cx="48" cy="150" r="2.5"/><circle cx="42" cy="150" r="2.5"/>
+        <!-- right F -->
+        <circle cx="305" cy="140" r="2.5"/><circle cx="305" cy="132" r="2.5"/>
+        <circle cx="305" cy="160" r="2.5"/><circle cx="305" cy="168" r="2.5"/>
+        <circle cx="312" cy="150" r="2.5"/><circle cx="318" cy="150" r="2.5"/>
+      </g>
+    </svg>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:.8rem;margin-top:6px;">
+    4 Si–F single bonds · each F holds 3 lone pairs (6 e⁻) · Si and every F satisfy the octet rule
+  </div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Situation</th><th>Rule Applied</th><th>Result</th></tr>
+      <tr><td>Neutral molecule</td><td>No charge adjustment to e⁻ count</td><td>Total = sum of atomic valence e⁻</td></tr>
+      <tr><td>Polyatomic ion</td><td>+charge → subtract e⁻ ; −charge → add e⁻</td><td>Adjusted total before drawing bonds</td></tr>
+      <tr><td>Central atom choice</td><td>Least electronegative, never H</td><td>Si over F (F is most electronegative)</td></tr>
+      <tr><td>Terminal atom = H</td><td>Needs only 2 e⁻, not 8</td><td>No lone pairs added to H</td></tr>
+      <tr><td>Central atom short of octet</td><td>Convert a lone pair → double/triple bond</td><td>Used when single bonds alone can't complete octet (not needed in SiF₄)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- REAL WORLD EXAMPLES -->
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario 1 — Semiconductor etching:</b> SiF₄ is a real byproduct gas in silicon wafer etching (plasma etching with fluorine chemistry in chip fabrication). Knowing it's a symmetric, fully-bonded, nonpolar molecule (like CF₄) explains why it's volatile and easily pumped away as exhaust gas.
+  </div>
+  <div class="example-box" style="margin-top:10px;">
+    <b style="color:var(--blue);">Scenario 2 — CO₂ vs SiF₄ (double bonds vs single bonds):</b> In CO₂, carbon can't reach an octet with single bonds alone (4 e⁻ from single bonds + lone pairs won't fill C's octet), so step 4 kicks in — a lone pair on each O becomes a second bond, forming O=C=O. This is the branch of the algorithm SiF₄ never needed.
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> Always total valence electrons <i>before</i> drawing anything — it's your budget, and every subsequent step subtracts from it.</div>
+    <div class="tip"><span class="icon">→</span> Central atom = least electronegative (H is always terminal, never central, even if it's technically "electronegative enough").</div>
+    <div class="tip"><span class="icon">→</span> If electrons run out before every atom (except H) hits an octet, that's your signal to add multiple bonds — don't just leave atoms electron-deficient.</div>
+    <div class="tip"><span class="icon">→</span> Quick octet check at the end: central atom electrons in bonds + terminal atoms' shared + lone pair electrons should each total 8 (2 for H).</div>
+    <div class="tip"><span class="icon">→</span> Common trap: forgetting to add/subtract electrons for ionic charge on polyatomic ions (e.g., SO₄²⁻ needs +2 e⁻ added to the total).</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -4,34 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "76a170a0f34aae7f",
+        "id": "afa31af3f5882e67",
         "type": "tabs",
         "children": [
           {
-            "id": "dad5a5f7c41c8b07",
+            "id": "322b3363bb8fab78",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/5- Post Redis Lock Run.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys/metals-and-alloys.html"
               },
-              "icon": "lucide-file",
-              "title": "5- Post Redis Lock Run"
+              "icon": "code-glyph",
+              "title": "metals-and-alloys"
+            }
+          },
+          {
+            "id": "19a4abedd6135898",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "CN-"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -196,15 +197,24 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "dad5a5f7c41c8b07",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/4- Skewed Run For Redis.md",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/4-lewis-diagrams-xef2.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/3-lewis-diagrams-cn.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys/metals-and-alloys.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/2-lewis-diagrams-ch2o.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/1-lewis-diagrams.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/6-tree-ensembles-sampling.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/7-random-forest.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/10-decision-trees-vs-neural-networks.html",
+    "Learning/AI&ML Engineering/Machine Learning/hyperparameters-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/notebooks/Tree Ensemble Lab/heart.csv",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/5- Post Redis Lock Run.md",
-    "Learning/Backend Engineering/Python/Oop/asteroid-game-summary.html",
+    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/4- Skewed Run For Redis.md",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
-    "Learning/Backend Engineering/Python/News Aggregator",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/3-coulombs-law-lattice-energy-d3.html",
     "Learning/IELTS/Writing Task 1/Writing Practice Task 1.md",
     "Learning/IELTS/Writing Task 1/Pasted image 20260920185449.png",
     "Learning/IELTS/Writing Task 1/Pasted image 20260920152802.png",
@@ -219,14 +229,7 @@
     "Personal/Maryam/06-dino-valley-2.png",
     "Personal/Maryam/06-dino-valley-1.png",
     "Personal/Maryam/05-makkah-4.png",
-    "Learning/IELTS/Writing Task 1",
     "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/Concurrency Control.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/8-regression-trees-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/7-recursive-splitting-full-algorithm.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/6-continuous-features-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/5-one-hot-encoding-summary.html",
-    "Learning/IELTS/Cambridge 17_text.pdf",
-    "Learning/IELTS/Cambridge-IELTS-18-Academic.pdf",
     "Learning/IDEADS/Ideas.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/Drawing 2026-09-21 15.47.41.excalidraw.md",
     "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
@@ -242,8 +245,6 @@
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
     "Learning/Side Projects/HospitalityOS/Concerns.md",
     "Learning/Side Projects/HospitalityOS/Resources.md",
-    "Learning/Frontend Interview Preparation/Preparation/Models.excalidraw.md",
-    "Learning/DSA/Graphs/BFS/4-Bus Routes.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
