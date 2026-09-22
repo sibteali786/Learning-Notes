@@ -23,12 +23,24 @@
             "id": "19a4abedd6135898",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "markdown",
               "state": {
-                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md"
+                "file": "Personal/Movies To Watch/Mvoies.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "excalidraw-icon",
-              "title": "CN-"
+              "icon": "lucide-file",
+              "title": "Mvoies"
             }
           }
         ],
@@ -197,20 +209,20 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "19a4abedd6135898",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/6-offset-pagination-performance.html",
+    "Personal/Movies To Watch/Mvoies.md",
+    "Personal/Movies To Watch",
+    "Learning/Database/why-connection-pooling.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/btree-index-scan-backward.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/7-btree-index-scan-backward.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/5-implicit-locking-update-where.html",
+    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/offset.pdf",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/4-lewis-diagrams-xef2.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/3-lewis-diagrams-cn.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys/metals-and-alloys.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/2-lewis-diagrams-ch2o.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/1-lewis-diagrams.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/6-tree-ensembles-sampling.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/7-random-forest.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/10-decision-trees-vs-neural-networks.html",
-    "Learning/AI&ML Engineering/Machine Learning/hyperparameters-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/2-Advance Learning Algorithms/Week-4/notebooks/Tree Ensemble Lab/heart.csv",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/5- Post Redis Lock Run.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/4- Skewed Run For Redis.md",
     "Learning/Backend Engineering/Python/functional_programming/Notes.md",
@@ -244,7 +256,6 @@
     "Learning/Side Projects/HospitalityOS/Untitled.md",
     "Learning/Side Projects/HospitalityOS/OTA Integrations/Creds.md",
     "Learning/Side Projects/HospitalityOS/Concerns.md",
-    "Learning/Side Projects/HospitalityOS/Resources.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Connection Pooling — Node.js + Postgres</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161925;--panel2:#1c2030;--border:#2a2f42;
+    --text:#e6e8f0;--muted:#8b91a7;--blue:#4f8cff;--orange:#ff9d4d;
+    --green:#4ade80;--purple:#b487ff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:29px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .section{margin:36px 0;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;}
+  .pill-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+  .pill-purple{background:rgba(180,135,255,.15);color:var(--purple);border:1px solid rgba(180,135,255,.35);}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2);border-radius:12px;padding:18px 20px;}
+  .compare-card.c1{border:1px solid rgba(255,107,107,.4);}
+  .compare-card.c2{border:1px solid rgba(74,222,128,.4);}
+  .compare-card h3{font-size:15px;display:flex;align-items:center;gap:8px;}
+  .compare-card ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;}
+  .compare-card li{margin-bottom:6px;}
+  code,.inline-code{background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);}
+  pre.codeblock{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;overflow-x:auto;margin:10px 0 0;}
+  pre.codeblock code{background:none;border:none;padding:0;color:var(--text);}
+  .kw{color:var(--purple);}
+  .cmt{color:var(--muted);}
+  .str{color:var(--green);}
+  .fn{color:var(--blue);}
+  .num{color:var(--orange);}
+  table.rule-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+  .rule-table th,.rule-table td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
+  .rule-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  .rule-table td.yes{color:var(--red);font-weight:600;}
+  .rule-table td.ok{color:var(--green);font-weight:600;}
+  .callout{background:var(--panel2);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px;}
+  .callout b{color:var(--orange);}
+  .example-box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:14px;}
+  .example-box h4{margin:0 0 8px;color:var(--purple);font-size:14px;}
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.tip-grid{grid-template-columns:1fr;}}
+  .tip-card{background:var(--panel2);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .tip-card .tip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .step-list{counter-reset:step;list-style:none;padding:0;margin:14px 0 0;}
+  .step-list li{counter-increment:step;position:relative;padding:10px 12px 10px 44px;margin-bottom:8px;background:var(--panel2);border-radius:8px;font-size:13.5px;border:1px solid var(--border);}
+  .step-list li::before{content:counter(step);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+  .step-list li.fail::before{background:var(--red);}
+  .step-list li.ok::before{background:var(--green);}
+  table.perf-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px;}
+  .perf-table th,.perf-table td{border:1px solid var(--border);padding:8px 10px;text-align:center;}
+  .perf-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.03em;}
+  .perf-table td:first-child{text-align:left;}
+  .perf-table td.bad{color:var(--red);font-weight:700;}
+  .perf-table td.good{color:var(--green);font-weight:700;}
+  .bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;}
+  .bar-label{width:100px;font-size:11.5px;color:var(--muted);flex-shrink:0;}
+  .bar-track{flex:1;background:#0b0d14;border-radius:4px;overflow:hidden;height:16px;}
+  .bar-fill{height:100%;border-radius:4px;}
+  .repo-link{font-size:12px;color:var(--muted);}
+  .repo-link a{color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🏊 Connection Pooling — Node.js + Postgres</h1>
+  <div class="subtitle">Reusing TCP database connections instead of opening/closing one per request</div>
+  <div class="repo-link">Source: <a href="https://github.com/hnasr/javascript_playground/tree/master/postgresnode-pool">hnasr/javascript_playground — postgresnode-pool</a></div>
+
+  <!-- PROBLEM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem</h2></div>
+    <div class="card">
+      Establishing a database connection means a full <b>TCP three-way handshake</b> plus the Postgres protocol handshake (auth, session setup) — genuinely expensive. Tearing one down has its own cost too (releasing file descriptors, etc).
+      <p style="margin:10px 0 0;">The naive REST pattern does this <b>on every single request</b>: connect → query → close. Stateless, sure — but paying full connection setup/teardown cost per request is wasteful, especially under load or against a remote (cloud) database.</p>
+    </div>
+  </div>
+
+  <!-- THE OLD WAY -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>❌ The Old Way — Connect Per Request</h2></div>
+    <div class="card">
+      <pre class="codeblock"><code><span class="cmt">// old.js</span>
+<span class="kw">const</span> app = <span class="fn">require</span>(<span class="str">"express"</span>)();
+<span class="kw">const</span> {Client} = <span class="fn">require</span>(<span class="str">"pg"</span>);
+
+app.<span class="fn">get</span>(<span class="str">"/all"</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> fromDate = <span class="kw">new</span> <span class="fn">Date</span>();
+
+  <span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>({
+    <span class="str">"host"</span>: <span class="str">"husseinmac.local"</span>,
+    <span class="str">"port"</span>: <span class="num">5432</span>,
+    <span class="str">"user"</span>:<span class="str">"postgres"</span>,
+    <span class="str">"password"</span> : <span class="str">"postgres"</span>,
+    <span class="str">"database"</span> : <span class="str">"husseindb"</span>
+  })
+
+  <span class="cmt">// connect — full TCP + protocol handshake, every request</span>
+  <span class="kw">await</span> client.<span class="fn">connect</span>();
+  <span class="cmt">// ⚠️ select * with no WHERE/LIMIT — never do this in production</span>
+  <span class="kw">const</span> results = <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">"select * from employees"</span>)
+  console.<span class="fn">table</span>(results.rows)
+  <span class="cmt">// end — tear down the connection, every request</span>
+  client.<span class="fn">end</span>();
+
+  <span class="kw">const</span> toDate = <span class="kw">new</span> <span class="fn">Date</span>();
+  <span class="kw">const</span> elapsed = toDate.<span class="fn">getTime</span>() - fromDate.<span class="fn">getTime</span>();
+  res.<span class="fn">send</span>({<span class="str">"rows"</span>: results.rows, <span class="str">"elapsed"</span>: elapsed, <span class="str">"method"</span>: <span class="str">"old"</span>})
+})
+
+app.<span class="fn">listen</span>(<span class="num">9000</span>, () => console.<span class="fn">log</span>(<span class="str">"Listening on port 9000"</span>))</code></pre>
+      <div class="callout">⚠️ Every hit to <code>/all</code> pays the full connect + handshake + query + teardown cost from scratch. Also note the unbounded <code>SELECT *</code> — flagged in the video as a second, separate anti-pattern worth fixing (add proper paging).</div>
+    </div>
+  </div>
+
+  <!-- THE POOL WAY -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>✅ The Pool Way — Reuse a Shared Set of Connections</h2></div>
+    <div class="card">
+      <pre class="codeblock"><code><span class="cmt">// pool.js</span>
+<span class="kw">const</span> app = <span class="fn">require</span>(<span class="str">"express"</span>)();
+<span class="kw">const</span> {Pool} = <span class="fn">require</span>(<span class="str">"pg"</span>);
+
+<span class="cmt">// created ONCE, at server startup — not per request</span>
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({
+  <span class="str">"host"</span>: <span class="str">"husseinmac.local"</span>,
+  <span class="str">"port"</span>: <span class="num">5432</span>,
+  <span class="str">"user"</span>:<span class="str">"postgres"</span>,
+  <span class="str">"password"</span> : <span class="str">"postgres"</span>,
+  <span class="str">"database"</span> : <span class="str">"husseindb"</span>,
+  <span class="str">"max"</span>: <span class="num">20</span>,                     <span class="cmt">// max simultaneous connections in the pool</span>
+  <span class="str">"connectionTimeoutMillis"</span> : <span class="num">0</span>,  <span class="cmt">// 0 = wait forever for a free connection</span>
+  <span class="str">"idleTimeoutMillis"</span>: <span class="num">0</span>          <span class="cmt">// 0 = never destroy an idle connection</span>
+})
+
+app.<span class="fn">get</span>(<span class="str">"/employees"</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> fromDate = <span class="kw">new</span> <span class="fn">Date</span>();
+
+  <span class="cmt">// pool picks an available connection for you — no connect()/end()</span>
+  <span class="kw">const</span> results = <span class="kw">await</span> pool.<span class="fn">query</span>(<span class="str">"select employeeid eid,firstname,ssn from employees"</span>)
+  console.<span class="fn">table</span>(results.rows)
+
+  <span class="kw">const</span> toDate = <span class="kw">new</span> <span class="fn">Date</span>();
+  <span class="kw">const</span> elapsed = toDate.<span class="fn">getTime</span>() - fromDate.<span class="fn">getTime</span>();
+  res.<span class="fn">send</span>({<span class="str">"rows"</span>: results.rows, <span class="str">"elapsed"</span>: elapsed, <span class="str">"method"</span>: <span class="str">"pool"</span>})
+})
+
+app.<span class="fn">listen</span>(<span class="num">2015</span>, () => console.<span class="fn">log</span>(<span class="str">"Listening on port 2015"</span>))</code></pre>
+      <div class="callout">✅ <b>Key change:</b> <code>Pool</code> is created once, outside the route handler. Each request just calls <code>pool.query(...)</code> — the pool internally borrows a warm, already-connected client, runs the query, and returns the connection to the pool (not destroyed) for the next request to reuse.</div>
+    </div>
+  </div>
+
+  <!-- POOL CONFIG DIAGRAM -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>How the Pool Config Options Work</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th>Option</th><th>Meaning</th><th>Default</th></tr>
+        <tr><td><code>max</code></td><td>Max number of simultaneous connections the pool will ever open</td><td>10</td></tr>
+        <tr><td><code>connectionTimeoutMillis</code></td><td>How long a request waits for a free connection if all <code>max</code> are busy. <code>0</code> = wait forever</td><td>0</td></tr>
+        <tr><td><code>idleTimeoutMillis</code></td><td>How long an unused connection stays open before being destroyed (frees memory/file descriptors). <code>0</code> = never destroy</td><td>10,000 ms</td></tr>
+      </table>
+
+      <svg viewBox="0 0 780 200" width="100%" style="max-width:720px;display:block;margin:18px auto 0;">
+        <text x="390" y="18" fill="#8b91a7" text-anchor="middle" font-size="11">Pool of max=20 connections — requests borrow, use, return</text>
+        <!-- pool box -->
+        <rect x="40" y="35" width="340" height="130" rx="10" fill="#1c2030" stroke="#b487ff" stroke-width="2"/>
+        <text x="210" y="55" fill="#b487ff" text-anchor="middle" font-size="11" font-weight="700">POOL (max 20)</text>
+        <!-- little connection dots -->
+        <g>
+          <circle cx="70" cy="80" r="8" fill="#4ade80"/><circle cx="95" cy="80" r="8" fill="#4ade80"/><circle cx="120" cy="80" r="8" fill="#ff6b6b"/><circle cx="145" cy="80" r="8" fill="#4ade80"/><circle cx="170" cy="80" r="8" fill="#ff6b6b"/>
+          <circle cx="70" cy="105" r="8" fill="#4ade80"/><circle cx="95" cy="105" r="8" fill="#4ade80"/><circle cx="120" cy="105" r="8" fill="#4ade80"/><circle cx="145" cy="105" r="8" fill="#4ade80"/><circle cx="170" cy="105" r="8" fill="#4ade80"/>
+          <circle cx="70" cy="130" r="8" fill="#4ade80"/><circle cx="95" cy="130" r="8" fill="#ff6b6b"/><circle cx="120" cy="130" r="8" fill="#4ade80"/><circle cx="145" cy="130" r="8" fill="#4ade80"/><circle cx="170" cy="130" r="8" fill="#4ade80"/>
+        </g>
+        <text x="120" y="152" fill="#8b91a7" text-anchor="middle" font-size="9">green = idle/ready · red = in use</text>
+
+        <!-- incoming requests -->
+        <rect x="470" y="45" width="130" height="30" rx="6" fill="rgba(79,140,255,.15)" stroke="#4f8cff"/>
+        <text x="535" y="65" fill="#4f8cff" text-anchor="middle" font-size="10">Request A</text>
+        <rect x="470" y="85" width="130" height="30" rx="6" fill="rgba(79,140,255,.15)" stroke="#4f8cff"/>
+        <text x="535" y="105" fill="#4f8cff" text-anchor="middle" font-size="10">Request B</text>
+        <rect x="470" y="125" width="130" height="30" rx="6" fill="rgba(255,157,77,.15)" stroke="#ff9d4d"/>
+        <text x="535" y="145" fill="#ff9d4d" text-anchor="middle" font-size="10">Request C (waits)</text>
+
+        <path d="M380,60 L470,60" stroke="#4ade80" stroke-width="2" marker-end="url(#pc)"/>
+        <path d="M380,100 L470,100" stroke="#4ade80" stroke-width="2" marker-end="url(#pc)"/>
+        <path d="M380,140 L470,140" stroke="#ff9d4d" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#pc)"/>
+        <defs><marker id="pc" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker></defs>
+      </svg>
+      <div class="callout">🔑 If all 20 connections are busy, a new request queues up and waits (governed by <code>connectionTimeoutMillis</code>) — it does <b>not</b> open a 21st connection. This caps how hard your app can hammer the database, which protects the database server itself.</div>
+    </div>
+  </div>
+
+  <!-- BENCHMARK -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Measured Benchmark — 1,000 Requests Each</h2></div>
+    <div class="card">
+      <pre class="codeblock"><code><span class="cmt">// all.js — a combined server exposing both /old and /pool endpoints</span>
+<span class="kw">const</span> app = <span class="fn">require</span>(<span class="str">"express"</span>)();
+<span class="kw">const</span> {Pool} = <span class="fn">require</span>(<span class="str">"pg"</span>);
+<span class="kw">const</span> {Client} = <span class="fn">require</span>(<span class="str">"pg"</span>);
+
+<span class="kw">let</span> oldCount = <span class="num">0</span>, oldSum = <span class="num">0</span>, poolCount = <span class="num">0</span>, poolSum = <span class="num">0</span>;
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({ <span class="cmt">/* ...same config, max: 10 */</span> })
+
+app.<span class="fn">get</span>(<span class="str">"/old"</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> fromDate = <span class="kw">new</span> <span class="fn">Date</span>(); oldCount++;
+  <span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">Client</span>({ <span class="cmt">/* connection config */</span> })
+  <span class="kw">await</span> client.<span class="fn">connect</span>();
+  <span class="kw">const</span> results = <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">"select * from employees"</span>)
+  client.<span class="fn">end</span>();
+  <span class="kw">const</span> elapsed = <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">getTime</span>() - fromDate.<span class="fn">getTime</span>();
+  oldSum += elapsed;
+  res.<span class="fn">send</span>({rows: results.rows, elapsed, avg: <span class="fn">Math.round</span>(oldSum/oldCount), method: <span class="str">"old"</span>})
+})
+
+app.<span class="fn">get</span>(<span class="str">"/pool"</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> fromDate = <span class="kw">new</span> <span class="fn">Date</span>(); poolCount++;
+  <span class="kw">const</span> results = <span class="kw">await</span> pool.<span class="fn">query</span>(<span class="str">"select * from employees"</span>)
+  <span class="kw">const</span> elapsed = <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">getTime</span>() - fromDate.<span class="fn">getTime</span>();
+  poolSum += elapsed;
+  res.<span class="fn">send</span>({rows: results.rows, elapsed, avg: <span class="fn">Math.round</span>(poolSum/poolCount), method: <span class="str">"pool"</span>})
+})
+
+<span class="cmt">/* Load test from browser devtools console:
+for (let i = 0; i < 1000; i++) fetch(`http://localhost:9000/old`).then(a=>a.json()).then(console.log);
+for (let i = 0; i < 1000; i++) fetch(`http://localhost:9000/pool`).then(a=>a.json()).then(console.log);
+*/</span></code></pre>
+
+      <div class="example-box">
+        <h4>Results (local Postgres, 1,000 requests each)</h4>
+        <table class="perf-table">
+          <tr><th>Approach</th><th>Avg time / request</th></tr>
+          <tr><td>/old (new connection every request)</td><td class="bad">~40 ms</td></tr>
+          <tr><td>/pool (shared pool, max 10–20)</td><td class="good">~19 ms</td></tr>
+        </table>
+        <div style="margin-top:12px;">
+          <div class="bar-row"><span class="bar-label">/old</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--red)"></div></div></div>
+          <div class="bar-row"><span class="bar-label">/pool</span><div class="bar-track"><div class="bar-fill" style="width:48%;background:var(--green)"></div></div></div>
+        </div>
+      </div>
+      <div class="callout">✅ Pooling was roughly <b>2× faster</b> on a local database. Expect an <b>even bigger gap</b> against a remote/cloud database, where the network round-trip makes connection setup costlier — and the more concurrent connections a pool can amortize, the better it does.</div>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Key Distinctions</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th></th><th><code>Client</code> (old.js)</th><th><code>Pool</code> (pool.js)</th></tr>
+        <tr><td>Connection lifecycle</td><td class="yes">Opened & closed every request</td><td class="ok">Opened once, reused across requests</td></tr>
+        <tr><td>Handshake cost paid</td><td class="yes">Every request</td><td class="ok">Only when the pool grows a new connection</td></tr>
+        <tr><td>Concurrency control</td><td class="yes">Unbounded — one connection per in-flight request</td><td class="ok">Capped by <code>max</code>; extra requests queue</td></tr>
+        <tr><td>Good for transactions (multi-statement, atomic)?</td><td>N/A — always dedicated</td><td>Use <code>pool.connect()</code> to get a dedicated client, run statements, then <code>release()</code> it — <code>pool.query()</code> alone doesn't guarantee the same connection across calls</td></tr>
+        <tr><td>Typical use</td><td>Avoid in production</td><td>Standard pattern for any web backend hitting Postgres</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Real-World Scenarios</h2></div>
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--blue)">☁️ Serverless / Cloud DB Backends</div>
+        Against a remote managed Postgres (RDS, Supabase, etc.), network latency makes each fresh handshake far costlier than the local 40ms→19ms example — pooling matters even more there. (Note: serverless functions bring their own pooling headaches — e.g. PgBouncer — since each cold invocation can spawn a new pool.)
+      </div>
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--orange)">🏦 High-Traffic APIs</div>
+        Any backend fielding many concurrent requests (checkout APIs, dashboards) benefits from capping simultaneous DB connections via <code>max</code> — it protects the database from being overwhelmed by connection storms during traffic spikes.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROS/CONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Trade-offs</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c1">
+        <h3>⚠️ Per-Request Client</h3>
+        <ul>
+          <li>Simple mental model — fully stateless, no shared resource</li>
+          <li>Pays full connect/handshake/teardown cost every time</li>
+          <li>No cap on concurrent DB connections — risk of overwhelming the database under load</li>
+        </ul>
+      </div>
+      <div class="compare-card c2">
+        <h3>✅ Pool</h3>
+        <ul>
+          <li>~2× faster in this benchmark by reusing warm connections</li>
+          <li>Caps concurrent connections (<code>max</code>) — protects the database</li>
+          <li>Node's single-threaded, non-blocking event loop manages many pooled connections concurrently without blocking</li>
+          <li>Slightly more setup complexity; pool lives for the app's lifetime, so its config (max, timeouts) needs sizing to the database's actual connection limit</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRACTICAL TIPS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Practical Tips</h2></div>
+    <div class="card">
+      <ul>
+        <li>Always create the <code>Pool</code> <b>once</b>, at module/server scope — never inside a request handler (that would defeat the whole point).</li>
+        <li>For a sequence of statements that must run atomically (a transaction), use <code>pool.connect()</code> to check out a <b>dedicated</b> client, run your statements on it, then call <code>client.release()</code> — plain <code>pool.query()</code> calls may each land on a different underlying connection.</li>
+        <li>Size <code>max</code> against your actual Postgres <code>max_connections</code> setting and how many app instances you run — too high a pool size across many instances can itself exhaust the database's connection limit.</li>
+        <li>The video's other flagged issue — <code>SELECT * FROM employees</code> with no <code>WHERE</code>/paging — is a separate anti-pattern from pooling; combine pooling with proper query scoping (see the earlier OFFSET/keyset pagination notes) for a production-ready backend.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
