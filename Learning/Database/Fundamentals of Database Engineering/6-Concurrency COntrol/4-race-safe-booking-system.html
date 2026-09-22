@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Building a Race-Safe Booking System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161925;--panel2:#1c2030;--border:#2a2f42;
+    --text:#e6e8f0;--muted:#8b91a7;--blue:#4f8cff;--orange:#ff9d4d;
+    --green:#4ade80;--purple:#b487ff;--red:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px 80px;line-height:1.55;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:30px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:28px;font-size:14px;}
+  .section{margin:36px 0;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;}
+  .pill-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .pill-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .pill-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .pill-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{background:var(--panel2);border-radius:12px;padding:18px 20px;}
+  .compare-card.c1{border:1px solid rgba(255,107,107,.4);}
+  .compare-card.c2{border:1px solid rgba(74,222,128,.4);}
+  .compare-card h3{font-size:15px;display:flex;align-items:center;gap:8px;}
+  .compare-card ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;}
+  .compare-card li{margin-bottom:6px;}
+  code,.inline-code{background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);}
+  pre.codeblock{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;overflow-x:auto;margin:10px 0 0;}
+  pre.codeblock code{background:none;border:none;padding:0;color:var(--text);}
+  .cmt{color:var(--muted);}
+  .kw{color:var(--purple);}
+  .str{color:var(--green);}
+  .fn{color:var(--blue);}
+  table.rule-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px;}
+  .rule-table th,.rule-table td{border:1px solid var(--border);padding:8px 10px;text-align:left;}
+  .rule-table th{background:var(--panel2);color:var(--orange);font-family:'Syne',sans-serif;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
+  .rule-table td.yes{color:var(--red);font-weight:600;}
+  .rule-table td.ok{color:var(--green);font-weight:600;}
+  .callout{background:var(--panel2);border-left:3px solid var(--orange);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:14px;}
+  .callout b{color:var(--orange);}
+  .example-box{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:14px;}
+  .example-box h4{margin:0 0 8px;color:var(--purple);font-size:14px;}
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.tip-grid{grid-template-columns:1fr;}}
+  .tip-card{background:var(--panel2);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+  .tip-card .tip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .step-list{counter-reset:step;list-style:none;padding:0;margin:14px 0 0;}
+  .step-list li{counter-increment:step;position:relative;padding:10px 12px 10px 44px;margin-bottom:8px;background:var(--panel2);border-radius:8px;font-size:13.5px;border:1px solid var(--border);}
+  .step-list li::before{content:counter(step);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+  .step-list li.fail::before{background:var(--red);}
+  .step-list li.ok::before{background:var(--green);}
+  .split-terms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media(max-width:640px){.split-terms{grid-template-columns:1fr;}}
+  .term-panel{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;}
+  .term-panel .head{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
+  .term-line{white-space:pre;}
+  .stack-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>🎟️ Building a Race-Safe Booking System</h1>
+  <div class="subtitle">Express + Node.js + Postgres — applying exclusive locks & 2PL to a real app</div>
+
+  <div class="stack-row">
+    <span class="pill pill-blue">Express</span>
+    <span class="pill pill-orange">Node.js</span>
+    <span class="pill pill-green">Postgres</span>
+    <span class="pill pill-purple">pg pool</span>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The App</h2></div>
+    <div class="card">
+      A seat-booking grid: green = available, red = booked. Frontend polls <code>GET /seats</code>, renders a table, and clicking a seat prompts for a name then fires <code>PUT /:id/:name</code> to book it.
+      <div class="example-box">
+        <h4>Frontend logic (index.html)</h4>
+        <pre class="codeblock"><code><span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">`/${id}/${name}`</span>, {<span class="str">"method"</span>: <span class="str">"PUT"</span>})
+<span class="kw">const</span> j = <span class="kw">await</span> res.<span class="fn">json</span>();
+<span class="kw">if</span> (j.error) <span class="fn">alert</span>(<span class="str">"FAILED! Couldn't book! already booked."</span>)
+<span class="kw">else</span> <span class="fn">alert</span>(<span class="str">"Booked successfully!"</span>)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- BROKEN VERSION -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>❌ Version 1 — Race Condition (broken)</h2></div>
+    <div class="card">
+      The naive approach: check availability, then update — as two separate steps with a plain <code>SELECT</code>.
+      <pre class="codeblock"><code><span class="cmt">-- Step 1: check</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> seats <span class="kw">WHERE</span> id = $1 <span class="kw">AND</span> isbooked = 0
+<span class="cmt">-- Step 2: if found → update</span>
+<span class="kw">UPDATE</span> seats <span class="kw">SET</span> isbooked = 1, name = $2 <span class="kw">WHERE</span> id = $1</code></pre>
+
+      <div class="example-box">
+        <h4>Reproduced with a debugger breakpoint</h4>
+        <ol class="step-list">
+          <li class="ok">Client A (Rick) books seat 15 → <code>SELECT</code> runs, finds it available → <b>paused here on breakpoint</b>, hasn't updated yet.</li>
+          <li class="ok">Client B (Edmund) books the same seat 15 → no breakpoint, runs freely → <code>SELECT</code> also finds it available → <code>UPDATE</code> → <code>COMMIT</code>. Seat is now Edmund's.</li>
+          <li class="fail">Debugger resumes Client A → its <code>SELECT</code> result is stale but it doesn't know that → proceeds to <code>UPDATE</code> anyway → <b>overwrites Edmund's booking</b> with Rick's name.</li>
+        </ol>
+      </div>
+      <div class="callout">⚠️ <b>Result:</b> both users are told "Booked successfully!" — but only one of them actually owns the seat. Classic <b>double booking / lost update</b>.</div>
+    </div>
+  </div>
+
+  <!-- FIXED VERSION -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>✅ Version 2 — Fixed with Exclusive Lock</h2></div>
+    <div class="card">
+      The fix is a <b>two-character addition</b>: <code>FOR UPDATE</code> on the check query. This turns the read into a row-level exclusive lock (see <span class="pill pill-purple">Two-Phase Locking</span>).
+      <pre class="codeblock"><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> seats <span class="kw">WHERE</span> id = $1 <span class="kw">AND</span> isbooked = 0 <span class="kw" style="color:var(--red)">FOR UPDATE</span></code></pre>
+
+      <div class="example-box">
+        <h4>Full server route (index.mjs)</h4>
+        <pre class="codeblock"><code>app.<span class="fn">put</span>(<span class="str">"/:id/:name"</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">try</span>{
+    <span class="kw">const</span> id = req.params.id
+    <span class="kw">const</span> name = req.params.name
+
+    <span class="kw">const</span> conn = <span class="kw">await</span> pool.<span class="fn">connect</span>();
+    <span class="kw">await</span> conn.<span class="fn">query</span>(<span class="str">"BEGIN"</span>);
+
+    <span class="cmt">// row-level exclusive lock — phase 1 (growing)</span>
+    <span class="kw">const</span> sql = <span class="str">"SELECT * FROM seats where id = $1 and isbooked = 0 FOR UPDATE"</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> conn.<span class="fn">query</span>(sql,[id])
+
+    <span class="kw">if</span> (result.rowCount === 0) {
+      res.<span class="fn">send</span>({<span class="str">"error"</span>: <span class="str">"Seat already booked"</span>})
+      <span class="kw">return</span>;
+    }
+
+    <span class="kw">const</span> sqlU = <span class="str">"update seats set isbooked = 1, name = $2 where id = $1"</span>
+    <span class="kw">const</span> updateResult = <span class="kw">await</span> conn.<span class="fn">query</span>(sqlU,[id, name]);
+
+    <span class="cmt">// phase 2 (shrinking) — lock released here</span>
+    <span class="kw">await</span> conn.<span class="fn">query</span>(<span class="str">"COMMIT"</span>);
+    conn.<span class="fn">release</span>();
+    res.<span class="fn">send</span>(updateResult)
+  }
+  <span class="kw">catch</span>(ex){ res.<span class="fn">send</span>(500); }
+})</code></pre>
+      </div>
+
+      <ol class="step-list">
+        <li class="ok"><b>Client A:</b> <code>SELECT ... FOR UPDATE</code> on seat 15 → available → exclusive lock acquired, paused mid-debug.</li>
+        <li class="fail"><b>Client B:</b> tries the same query on seat 15 → <b>blocks / hangs indefinitely</b> (Postgres has no built-in lock timeout — unlike Oracle, which lets you set one).</li>
+        <li class="ok"><b>Client A:</b> resumes → <code>UPDATE</code> → <code>COMMIT</code> → lock released → "Booked successfully!"</li>
+        <li class="ok"><b>Client B:</b> unblocks instantly → re-runs its now-fresh <code>SELECT ... FOR UPDATE</code> → row count is <code>0</code> (already booked) → correctly returns <code>{"error": "Seat already booked"}</code>.</li>
+      </ol>
+      <div class="callout">✅ <b>Result:</b> no matter how close in time the two requests are, only one booking wins — the other is correctly rejected instead of silently overwritten.</div>
+    </div>
+  </div>
+
+  <!-- KEY DISTINCTIONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Key Distinctions</h2></div>
+    <div class="card">
+      <table class="rule-table">
+        <tr><th></th><th>Plain SELECT (v1)</th><th>SELECT ... FOR UPDATE (v2)</th></tr>
+        <tr><td>Locks the row?</td><td class="yes">No</td><td class="ok">Yes</td></tr>
+        <tr><td>Second reader sees stale data?</td><td class="yes">Yes — race possible</td><td class="ok">No — it waits, then sees committed truth</td></tr>
+        <tr><td>User experience if contested</td><td class="yes">Both may get "success" (wrong)</td><td class="yes">Loser waits, then gets a clean rejection</td></tr>
+        <tr><td>Downside</td><td>Correctness bug</td><td>Indefinite wait in Postgres (no lock timeout)</td></tr>
+      </table>
+      <div class="callout"><b>Note:</b> Oracle supports a lock <code>WAIT n</code> timeout on <code>FOR UPDATE</code>; vanilla Postgres blocks indefinitely unless you set <code>lock_timeout</code> or <code>statement_timeout</code> at the session/connection level.</div>
+    </div>
+  </div>
+
+  <!-- REAL WORLD -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Real-World Scenarios</h2></div>
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--blue)">🎥 Cinema/Concert Booking</div>
+        This is literally the historical example — "online cinema booking ~10 years ago always had double booking" because check-then-update wasn't atomic.
+      </div>
+      <div class="tip-card">
+        <div class="tip-title" style="color:var(--orange)">✈️ Flight Seat Selection</div>
+        Same pattern: seat map, race between two passengers picking the same seat during high-traffic booking windows (holiday sales, flash sales).
+      </div>
+    </div>
+  </div>
+
+  <!-- PROS/CONS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Trade-offs of This Fix</h2></div>
+    <div class="compare-grid">
+      <div class="compare-card c2">
+        <h3>✅ Advantages</h3>
+        <ul>
+          <li>Truly eliminates the race — verified via debugger-forced interleaving</li>
+          <li>Tiny code change: 2 words (<code>FOR UPDATE</code>)</li>
+          <li>The "loser" gets an honest, immediate rejection once unblocked</li>
+        </ul>
+      </div>
+      <div class="compare-card c1">
+        <h3>⚠️ Disadvantages</h3>
+        <ul>
+          <li>Postgres has <b>no default lock timeout</b> → a stuck/slow transaction can hang other requests indefinitely</li>
+          <li>Under real load (not a debugger), the wait is normally milliseconds — but worth setting a <code>statement_timeout</code> as a safety net in production</li>
+          <li>Locks reduce concurrency on hot rows (popular seats/events)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW / PRACTICAL TIPS -->
+  <div class="section">
+    <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Practical Tips</h2></div>
+    <div class="card">
+      <ul>
+        <li>This is a textbook <b>check-then-act</b> race condition — the general fix pattern is: make the check <b>and</b> the lock happen in a single atomic step, not two.</li>
+        <li>In production, always set a <code>lock_timeout</code> (e.g. <code>SET lock_timeout = '3s'</code>) so a blocked <code>FOR UPDATE</code> fails fast instead of hanging the request/connection pool.</li>
+        <li>Alternative to locking: an <b>atomic conditional UPDATE</b> —<br><code>UPDATE seats SET isbooked=1, name=$2 WHERE id=$1 AND isbooked=0</code> — then check <code>rowCount</code>. No explicit lock needed since the whole check+write is one statement.</li>
+        <li>This connects directly to the earlier lessons: <span class="pill pill-red">Exclusive Locks</span> <span class="pill pill-purple">Two-Phase Locking</span> — this app is <code>FOR UPDATE</code> in phase 1, <code>COMMIT</code> triggering phase 2 release.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

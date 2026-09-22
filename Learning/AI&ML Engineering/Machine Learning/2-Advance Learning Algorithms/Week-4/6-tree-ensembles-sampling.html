@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tree Ensembles & Sampling With Replacement</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .token{display:inline-block;width:34px;height:22px;border-radius:50%;margin:2px;}
+  .r{background:#ff6b6b}.y{background:#ff9d4d}.g{background:#4dd992}.b{background:#4d9dff}
+  svg{width:100%;height:auto;}
+</style>
+</head>
+<body>
+
+<h1>🗳️ Tree Ensembles — Voting Beats a Single Tree</h1>
+<div class="sub">Advanced Learning Algorithms · Setting up the case for Random Forest</div>
+
+<!-- THE PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Weakness: One Tree Is Fragile</h2></div>
+  <p>Change just <b>one</b> of the 10 training examples (one cat's ear shape flips from pointy→floppy, whiskers absent→present) and the <b>highest information-gain feature at the root flips</b> from Ear shape to Whiskers.</p>
+  <div class="note">Since the root split determines everything below it, one changed example cascades into a <b>completely different tree</b>. That instability is the core problem — a single tree isn't robust.</div>
+</div>
+
+<!-- SOLUTION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Fix: Build Many Trees, Let Them Vote</h2></div>
+  <p>A <b>tree ensemble</b> = a collection of multiple different decision trees, each a plausible way to classify the same data. For a new example, run it through <b>every</b> tree and take the majority vote.</p>
+  <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="40" rx="70" ry="26" fill="#161923" stroke="#4d9dff" stroke-width="2"/>
+    <text x="100" y="45" fill="#e6e8ef" font-size="12" text-anchor="middle">Tree 1: Cat</text>
+    <ellipse cx="350" cy="40" rx="70" ry="26" fill="#161923" stroke="#ff6b6b" stroke-width="2"/>
+    <text x="350" y="45" fill="#e6e8ef" font-size="12" text-anchor="middle">Tree 2: Not cat</text>
+    <ellipse cx="600" cy="40" rx="70" ry="26" fill="#161923" stroke="#4d9dff" stroke-width="2"/>
+    <text x="600" y="45" fill="#e6e8ef" font-size="12" text-anchor="middle">Tree 3: Cat</text>
+    <line x1="100" y1="66" x2="330" y2="130" stroke="#8a90a6" stroke-width="1.5"/>
+    <line x1="350" y1="66" x2="340" y2="130" stroke="#8a90a6" stroke-width="1.5"/>
+    <line x1="600" y1="66" x2="360" y2="130" stroke="#8a90a6" stroke-width="1.5"/>
+    <rect x="270" y="135" width="140" height="45" rx="8" fill="#0b1f16" stroke="#4dd992" stroke-width="2.5"/>
+    <text x="340" y="155" fill="#4dd992" font-size="13" text-anchor="middle">Majority vote:</text>
+    <text x="340" y="172" fill="#4dd992" font-size="14" text-anchor="middle" font-weight="bold">Cat ✓ (2 of 3)</text>
+  </svg>
+  <div class="note">💡 Any single tree only gets <b>one vote</b> out of many — so one tree's quirky mistake gets outvoted rather than becoming the final answer. That's what makes the ensemble more robust.</div>
+</div>
+
+<!-- SAMPLING WITH REPLACEMENT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Building Block: Sampling With Replacement</h2></div>
+  <p>To get multiple <i>different</i> trees, you first need multiple <i>different but related</i> training sets. That's what sampling with replacement gives you.</p>
+  <p><b>The token demo:</b> 4 tokens (red, yellow, green, blue) in a bag. Pick one, <b>note it, then put it back</b>, shake, pick again — 4 times.</p>
+  <div style="text-align:center;margin:14px 0">
+    <span class="token g"></span><span class="token y"></span><span class="token b"></span><span class="token b"></span>
+    <div style="color:var(--dim);font-size:.8rem;margin-top:4px">Result: Green, Yellow, Blue, Blue — blue appears twice, red not at all</div>
+  </div>
+  <div class="note">🔑 The "<b>with replacement</b>" part is essential — without putting the token back, you'd just get the same 4 tokens shuffled every time (no diversity). Replacing lets duplicates and omissions happen, which is exactly what creates variety.</div>
+</div>
+
+<!-- APPLYING TO TRAINING DATA -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Applying This to the Cat Dataset</h2></div>
+  <div class="grid3">
+    <div class="note">📦 Put all 10 training examples in a theoretical "bag."</div>
+    <div class="note">🎲 Randomly pick one, note it down, <b>put it back</b>, repeat 10 times.</div>
+    <div class="note">📋 End up with a new set of 10 examples — some repeated, some original ones missing entirely.</div>
+  </div>
+  <div class="note">This new training set is <b>similar to but meaningfully different from</b> the original — the exact "slightly different data" needed to grow a different tree.</div>
+</div>
+
+<!-- WHY IT MATTERS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why This Sets Up Random Forest</h2></div>
+  <p>Repeat the sampling-with-replacement process <code>B</code> times → get <code>B</code> different resampled training sets → train a tree on each → you now have an ensemble ready to vote. (Random Forest, covered next, adds one more twist: randomizing which features each split is even allowed to consider.)</p>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill purple">Random Forest — turning sampled datasets into a full ensemble algorithm</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Decision Trees vs Neural Networks</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .col{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:18px;}
+  .col h3{font-family:'Syne',sans-serif;font-size:1.05rem;margin-bottom:12px;}
+  .item{display:flex;gap:8px;margin-bottom:10px;font-size:.85rem;align-items:flex-start;}
+  .item .ic{flex-shrink:0}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px;}
+  th,td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+</style>
+</head>
+<body>
+
+<h1>🌳 vs 🧠 Decision Trees vs Neural Networks</h1>
+<div class="sub">Advanced Learning Algorithms · Wrap-up: choosing the right tool</div>
+
+<!-- HEAD TO HEAD -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Head-to-Head Comparison</h2></div>
+  <div class="grid2">
+    <div class="col" style="border-color:var(--green)">
+      <h3 style="color:var(--green)">🌳 Decision Trees / Tree Ensembles</h3>
+      <div class="item"><span class="ic">✅</span>Works well on <b>tabular (structured)</b> data — spreadsheet-style rows/columns</div>
+      <div class="item"><span class="ic">❌</span>Not recommended for <b>unstructured</b> data (images, audio, text)</div>
+      <div class="item"><span class="ic">⚡</span><b>Fast</b> to train</div>
+      <div class="item"><span class="ic">👁️</span>Small trees may be <b>human interpretable</b></div>
+    </div>
+    <div class="col" style="border-color:var(--blue)">
+      <h3 style="color:var(--blue)">🧠 Neural Networks</h3>
+      <div class="item"><span class="ic">✅</span>Works well on <b>all</b> data types — tabular, unstructured, and mixed</div>
+      <div class="item"><span class="ic">🐢</span>May be <b>slower</b> than a decision tree to train</div>
+      <div class="item"><span class="ic">🔄</span>Works with <b>transfer learning</b></div>
+      <div class="item"><span class="ic">🔗</span>Easier to <b>string multiple models together</b> and train end-to-end</div>
+    </div>
+  </div>
+</div>
+
+<!-- STRUCTURED VS UNSTRUCTURED -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Tabular vs Unstructured Data — The Key Deciding Factor</h2></div>
+  <table>
+    <tr><th>Data type</th><th>Example</th><th>Best fit</th></tr>
+    <tr><td>Tabular / structured</td><td>House price dataset: size, bedrooms, floors, age — spreadsheet rows</td><td style="color:var(--green)">Either works — often competitive</td></tr>
+    <tr><td>Unstructured</td><td>Images, video, audio, raw text</td><td style="color:var(--blue)">Neural networks strongly preferred</td></tr>
+  </table>
+  <div class="note">💡 Rule of thumb: if your data <b>looks like a giant spreadsheet</b>, decision trees are worth considering. If it's images/audio/text, go with neural networks.</div>
+</div>
+
+<!-- SPEED / ITERATION LOOP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Why Training Speed Matters</h2></div>
+  <p>Faster training → faster iterations through the ML development loop (train → diagnose error → improve → retrain). Decision trees/tree ensembles tend to train quickly, which lets you iterate and improve your model more efficiently. Large neural networks can take much longer to train, slowing down that loop.</p>
+</div>
+
+<!-- INTERPRETABILITY CAVEAT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>⚠️ The Interpretability Caveat</h2></div>
+  <p>A <b>single small</b> decision tree (a few dozen nodes) can be printed out and visually inspected to understand its logic — a genuine advantage.</p>
+  <div class="note">But this is <b>often overstated</b>: an ensemble of 100 trees, each with hundreds of nodes, is just as hard to interpret as a neural network — you'd need separate visualization tooling either way.</div>
+</div>
+
+<!-- PRACTICAL RECOMMENDATION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Practical Recommendation</h2></div>
+  <div class="grid2">
+    <div class="note"><b style="color:var(--green)">Going with trees?</b><br>Use <b>XGBoost</b> for most applications — a single tree is only worth it under a very constrained compute budget.</div>
+    <div class="note"><b style="color:var(--blue)">Going with neural nets?</b><br>Especially worthwhile when you need <b>transfer learning</b> or are chaining multiple models trained jointly via gradient descent.</div>
+  </div>
+</div>
+
+<!-- MULTI-MODEL SYSTEMS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Building Systems of Multiple Models</h2></div>
+  <p>If you're stringing together several models into one pipeline, neural networks are usually easier to combine — they can all be trained <b>jointly</b> using gradient descent. Decision trees can only be trained <b>one at a time</b>, making multi-model systems more awkward to assemble.</p>
+</div>
+
+<!-- COURSE WRAP UP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>🎓 End of Course: Advanced Learning Algorithms</h2></div>
+  <span class="pill blue">Neural networks — architecture, training, evaluation</span>
+  <span class="pill green">Decision trees & tree ensembles — entropy, information gain, bagging, boosting</span>
+  <span class="pill purple">Practical advice for both</span>
+  <div class="note">📍 Next up in the specialization: <b>Unsupervised Learning</b> — algorithms that find patterns in data <i>without</i> labeled targets Y.</div>
+</div>
+
+</body>
+</html>

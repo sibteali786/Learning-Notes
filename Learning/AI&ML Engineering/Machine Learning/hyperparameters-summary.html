@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hyperparameters — Visual Summary</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d2130; --border:#2a2f42;
+    --text:#e7e9f0; --muted:#9aa0b4; --accent:#7c9bff; --accent2:#ff8a6b;
+    --good:#5ed6a4; --bad:#ff6b81; --warn:#ffd166; --cv:#c792ea;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; line-height:1.55; padding:32px 18px 60px;}
+  .wrap{max-width:980px;margin:0 auto;}
+  h1{font-size:1.9rem; margin:0 0 6px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-bottom:22px; font-size:0.95rem;}
+  .badge{display:inline-block; background:var(--panel2); border:1px solid var(--border); color:var(--accent); font-size:0.75rem; padding:3px 10px; border-radius:20px; margin-right:8px; margin-bottom:14px;}
+  section{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 24px; margin-bottom:22px;}
+  h2{font-size:1.15rem; margin-top:0; color:#fff; display:flex; align-items:center; gap:8px;}
+  h2 .num{background:var(--accent); color:#0f1117; font-weight:700; font-size:0.8rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  p{color:#cfd2e0;}
+  code{font-family:'Cascadia Code','Fira Code',monospace; background:#0c0e14; border:1px solid var(--border); border-radius:6px; padding:2px 6px; color:#ffd166; font-size:0.9em;}
+
+  .vs-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+  @media(max-width:700px){.vs-grid{grid-template-columns:1fr;}}
+  .vs-card{border-radius:10px; padding:16px 18px; border:1px solid var(--border);}
+  .vs-card.param{background:rgba(94,214,164,0.08); border-color:rgba(94,214,164,0.4);}
+  .vs-card.hyper{background:rgba(124,155,255,0.08); border-color:rgba(124,155,255,0.4);}
+  .vs-card .tag{font-weight:700; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.4px; margin-bottom:8px;}
+  .vs-card.param .tag{color:var(--good);}
+  .vs-card.hyper .tag{color:var(--accent);}
+  .vs-card ul{margin:8px 0 0; padding-left:18px; color:#cfd2e0; font-size:0.9rem;}
+  .vs-card li{margin-bottom:4px;}
+
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:0.86rem;}
+  th,td{padding:7px 10px; text-align:left; border-bottom:1px solid var(--border);}
+  th{color:var(--accent); font-weight:600;}
+
+  .flow{display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .flow .step{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:0.85rem; flex:1; min-width:150px; text-align:center;}
+  .flow .arrow{color:var(--muted); font-size:1.1rem;}
+  .flow .step.pick{border-color:var(--good); color:var(--good); font-weight:700;}
+
+  .rule-box{background:rgba(255,209,102,0.08); border:1px solid var(--warn); border-radius:10px; padding:16px 18px; margin-top:14px;}
+  .rule-box .title{color:var(--warn); font-weight:700; text-transform:uppercase; font-size:0.78rem; margin-bottom:8px; letter-spacing:0.4px;}
+
+  .split-visual{display:flex; align-items:center; gap:14px; margin-top:16px; flex-wrap:wrap;}
+  .split-bar{flex:1; min-width:280px; height:34px; border-radius:8px; overflow:hidden; display:flex; border:1px solid var(--border);}
+  .split-bar .train{background:linear-gradient(90deg,var(--accent),#5c78d6); flex:6; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.78rem; color:#0f1117;}
+  .split-bar .cv{background:linear-gradient(90deg,var(--cv),#a06fd0); flex:2; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem; color:#0f1117;}
+  .split-bar .test{background:linear-gradient(90deg,var(--accent2),#e0674c); flex:2; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.75rem; color:#0f1117;}
+
+  .footer-note{color:var(--muted); font-size:0.82rem; text-align:center; margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Machine Learning · Concepts</span>
+  <h1>Hyperparameters</h1>
+  <p class="subtitle">Settings you choose before training that control how the model learns — not the numbers the model learns itself.</p>
+
+  <section>
+    <h2><span class="num">1</span> Parameter vs. Hyperparameter</h2>
+    <div class="vs-grid">
+      <div class="vs-card param">
+        <div class="tag">Parameter</div>
+        <p style="margin:0;">Learned automatically by the training algorithm. You never set these by hand.</p>
+        <ul>
+          <li><code>w</code>, <code>b</code> in linear/logistic regression</li>
+          <li>Weights inside a neural network</li>
+          <li>Found via gradient descent minimizing <code>J(w,b)</code></li>
+        </ul>
+      </div>
+      <div class="vs-card hyper">
+        <div class="tag">Hyperparameter</div>
+        <p style="margin:0;">Chosen by you before/around training. Controls how learning happens.</p>
+        <ul>
+          <li>Polynomial degree <code>d</code></li>
+          <li>Regularization strength <code>λ</code></li>
+          <li>Learning rate <code>α</code>, layers, units, epochs</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> Common Hyperparameters</h2>
+    <table>
+      <tr><th>Hyperparameter</th><th>Where it appears</th><th>Controls</th></tr>
+      <tr><td><code>d</code></td><td>Polynomial regression</td><td>Model complexity / curviness</td></tr>
+      <tr><td><code>λ</code> (lambda)</td><td>Regularized regression</td><td>Bias/variance tradeoff — penalizes large weights</td></tr>
+      <tr><td><code>α</code> (alpha)</td><td>Gradient descent</td><td>Step size per update</td></tr>
+      <tr><td>Layers / units</td><td>Neural network architecture</td><td>Model capacity</td></tr>
+      <tr><td>Epochs / iterations</td><td>Training loop</td><td>How long you train</td></tr>
+      <tr><td><code>k</code>, <code>C</code></td><td>k-NN, SVM</td><td>Algorithm-specific tuning</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> How You Pick One (Model Selection Loop)</h2>
+    <div class="flow">
+      <div class="step">Try candidate values<br><code>d = 1,2,3…</code></div>
+      <div class="arrow">→</div>
+      <div class="step">Train on <strong>train set</strong> for each</div>
+      <div class="arrow">→</div>
+      <div class="step">Score each on <strong>CV set</strong></div>
+      <div class="arrow">→</div>
+      <div class="step pick">Pick lowest J_cv</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> The Golden Rule</h2>
+    <div class="rule-box">
+      <div class="title">Best Practice</div>
+      <p style="margin:0;">Choose hyperparameters using only <strong>train</strong> and <strong>cross-validation</strong> data. Never touch the <strong>test set</strong> during selection — evaluate on test exactly once, after the model is locked in, to get an unbiased estimate of generalization.</p>
+    </div>
+    <div class="split-visual">
+      <div class="split-bar">
+        <div class="train">Train 60%</div>
+        <div class="cv">CV 20%</div>
+        <div class="test">Test 20%</div>
+      </div>
+    </div>
+    <p class="footer-note">Hyperparameter tuning happens across Train + CV only — Test stays untouched until the very end.</p>
+  </section>
+
+</div>
+</body>
+</html>

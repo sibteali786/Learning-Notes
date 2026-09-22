@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Boosted Trees & XGBoost</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.78rem;color:#e6e8ef;margin:8px 0;}
+  .kw{color:#b58cff}.fn{color:#4d9dff}.cm{color:#8a90a6}.str{color:#4dd992}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .step{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;margin-bottom:10px;}
+  .step .num{position:absolute;top:-10px;left:12px;background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;padding:2px 9px;border-radius:10px;}
+</style>
+</head>
+<body>
+
+<h1>🚀 Boosted Trees & XGBoost</h1>
+<div class="sub">Advanced Learning Algorithms · The most widely-used tree ensemble algorithm today</div>
+
+<!-- THE ONE CHANGE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The One Change From Bagging</h2></div>
+  <p>Same loop as bagged trees (<code>for b = 1 to B: sample with replacement, train a tree</code>) — <b>except</b> from the 2nd iteration onward:</p>
+  <div class="note">Instead of picking each of the m training examples with equal (1/m) probability, make it <b>more likely to pick examples the previous trees are still getting wrong</b>.</div>
+</div>
+
+<!-- ANALOGY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>🎹 The "Deliberate Practice" Analogy</h2></div>
+  <p>Learning a 5-minute piano piece: replaying the whole piece over and over is slow. Instead, identify the parts you keep messing up and drill <b>just those</b> repeatedly — you improve much faster.</p>
+  <div class="note">Boosting applies the same idea to trees: focus each new tree's training data on the examples the ensemble-so-far is still misclassifying.</div>
+</div>
+
+<!-- STEP BY STEP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>How It Works, Step by Step</h2></div>
+  <div class="step"><span class="num">1</span>Train tree #1 on a normal sampled-with-replacement dataset.</div>
+  <div class="step"><span class="num">2</span>Run tree #1 on the <b>original</b> 10 training examples — mark which ones it gets right ✅ / wrong ❌.</div>
+  <div class="step"><span class="num">3</span>Build the next sampled dataset, but give the <b>misclassified</b> examples a higher chance of being picked.</div>
+  <div class="step"><span class="num">4</span>Train tree #2 on this "harder examples emphasized" dataset.</div>
+  <div class="step"><span class="num">5</span>Repeat: for tree <code>b</code>, look at what the <b>ensemble of trees 1 through b−1</b> is still getting wrong, and bias sampling toward those.</div>
+  <div class="step"><span class="num">6</span>Do this for a total of <code>B</code> trees, then vote as usual.</div>
+  <div class="note">Exact math for how much to upweight misclassified examples is complex — but you don't need it to use boosted-tree libraries effectively.</div>
+</div>
+
+<!-- WORKED EXAMPLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Worked Example — Tree #1's Errors</h2></div>
+  <table>
+    <tr><th>Ear shape</th><th>Face shape</th><th>Whiskers</th><th>Prediction</th><th>Correct?</th></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Present</td><td>Cat</td><td style="color:var(--green)">✅</td></tr>
+    <tr><td>Floppy</td><td>Not round</td><td>Present</td><td>Not cat</td><td style="color:var(--red)">❌</td></tr>
+    <tr><td>Floppy</td><td>Round</td><td>Absent</td><td>Not cat</td><td style="color:var(--green)">✅</td></tr>
+    <tr><td>Pointy</td><td>Round</td><td>Absent</td><td>Not cat</td><td style="color:var(--red)">❌</td></tr>
+    <tr><td>Floppy</td><td>Not round</td><td>Absent</td><td>Not cat</td><td style="color:var(--red)">❌</td></tr>
+  </table>
+  <div class="note">These 3 misclassified rows get a higher chance of being sampled when building tree #2 — that tree's training set will contain them more often (with repeats) so the model is pushed to learn them.</div>
+</div>
+
+<!-- XGBOOST -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>🏆 XGBoost — eXtreme Gradient Boosting</h2></div>
+  <div class="grid2">
+    <div class="note">⚡ Fast, efficient open-source implementation</div>
+    <div class="note">🎯 Good default splitting & stopping criteria out of the box</div>
+    <div class="note">🛡️ Built-in regularization to prevent overfitting</div>
+    <div class="note">🥇 Highly competitive — dominant on Kaggle alongside deep learning</div>
+  </div>
+  <div class="note">🔧 <b>Technical difference:</b> XGBoost doesn't actually generate new resampled datasets each round — instead it assigns <b>different weights</b> to different training examples directly. Same underlying intuition (focus on hard examples), but more computationally efficient since it skips the repeated resampling step.</div>
+</div>
+
+<!-- CODE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Using XGBoost in Practice</h2></div>
+  <div class="grid2">
+    <div>
+      <p style="color:var(--dim);font-size:.85rem;margin-bottom:4px">Classification</p>
+      <pre><span class="kw">from</span> xgboost <span class="kw">import</span> XGBClassifier
+model = XGBClassifier()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)</pre>
+    </div>
+    <div>
+      <p style="color:var(--dim);font-size:.85rem;margin-bottom:4px">Regression</p>
+      <pre><span class="kw">from</span> xgboost <span class="kw">import</span> XGBRegressor
+model = XGBRegressor()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)</pre>
+    </div>
+  </div>
+  <div class="note">That's the whole API — same shape as scikit-learn, just swap the class name for regression vs classification.</div>
+</div>
+
+<!-- COMPARISON TABLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Bagging vs Boosting — Quick Comparison</h2></div>
+  <table>
+    <tr><th>Aspect</th><th>Bagged Trees / Random Forest</th><th>Boosting (XGBoost)</th></tr>
+    <tr><td>Sampling</td><td>Equal probability for all examples</td><td>Higher weight on previously misclassified examples</td></tr>
+    <tr><td>Trees trained</td><td>Independently, in parallel</td><td>Sequentially — each depends on prior trees' errors</td></tr>
+    <tr><td>Goal</td><td>Reduce variance via averaging</td><td>Directly target remaining errors</td></tr>
+  </table>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Coming Up Next (Final Video This Week)</h2></div>
+  <span class="pill blue">Decision trees vs neural networks — when to use which</span>
+</div>
+
+</body>
+</html>

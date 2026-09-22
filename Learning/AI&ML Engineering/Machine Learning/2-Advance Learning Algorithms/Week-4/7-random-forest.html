@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Random Forest — Tree Ensembles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:2rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.15rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:800px){.grid2{grid-template-columns:1fr;}}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .step{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;margin-bottom:10px;}
+  .step .num{position:absolute;top:-10px;left:12px;background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;padding:2px 9px;border-radius:10px;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;font-size:.9rem;color:var(--green);margin:8px 0;}
+  .qa{background:#0b0d14;border:1px solid var(--purple);border-radius:10px;padding:16px 18px;margin-top:10px;}
+  .qa b{color:var(--purple)}
+</style>
+</head>
+<body>
+
+<h1>🌲🌲🌲 Random Forest — Tree Ensembles</h1>
+<div class="sub">Advanced Learning Algorithms · Combining many trees for a stronger model</div>
+
+<!-- WHY ENSEMBLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Not Just One Tree?</h2></div>
+  <p>A single decision tree is <b>highly sensitive</b> to small changes in training data — swap out a few examples and the whole tree structure can change, since an early split cascades into everything below it. Solution: build <b>many</b> trees and let them vote.</p>
+</div>
+
+<!-- BAGGING STEPS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Generating the Ensemble — "Bagged Trees"</h2></div>
+  <div class="step"><span class="num">1</span>Training set has <code>m</code> examples.</div>
+  <div class="step"><span class="num">2</span>For <code>b = 1 to B</code> (typically B ≈ 64–128, ~100 is common): use <b>sampling with replacement</b> to build a new training set of size <code>m</code> — some original examples repeat, some are left out.</div>
+  <div class="step"><span class="num">3</span>Train a full decision tree on this resampled set.</div>
+  <div class="step"><span class="num">4</span>Repeat B times → B different (but related) trees.</div>
+  <div class="step"><span class="num">5</span>To predict: every tree votes, take the majority (classification) or average (regression).</div>
+  <div class="note">📛 Called "bagging" — putting examples in a virtual "bag" and sampling from it. Lowercase b = current tree index, uppercase B = total tree count.</div>
+</div>
+
+<!-- B CHOICE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Choosing B (number of trees)</h2></div>
+  <div class="grid2">
+    <div class="note">More trees <b>never hurts</b> accuracy.</div>
+    <div class="note">But returns <b>diminish</b> past ~100 — 1000 trees just wastes compute for little gain.</div>
+  </div>
+</div>
+
+<!-- RANDOM FOREST UPGRADE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>The Upgrade: Random Forest</h2></div>
+  <p>Problem with plain bagging: resampling alone often isn't enough — if one feature is clearly the strongest, <b>most/all trees still pick it at the root</b>, making the trees too similar to each other.</p>
+  <div class="formula">At each split: instead of choosing from all <code>n</code> features → randomly restrict to a subset of <code>k &lt; n</code> features → pick the best feature from just that subset</div>
+  <div class="note">Typical choice: <code>k = √n</code> (used for larger feature counts — tens/hundreds of features; less relevant with only 3 features like our cat example).</div>
+</div>
+
+<!-- DEEP DIVE Q&A -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>💬 Deep Dive: Why Does This Actually Work Better?</h2></div>
+  <div class="qa">
+    <b>The problem with one tree:</b> it's "high variance" — one early split decision cascades into a totally different tree if the training data shifts even slightly. The tree is making one big bet.
+  </div>
+  <div class="qa">
+    <b>What resampling does:</b> generates B plausible "alternate universe" versions of your training data → B different trees, each overfitting to its own resample's specific noise/quirks.
+  </div>
+  <div class="qa">
+    <b>Why voting helps (the real mechanism):</b> the noise each tree overfits to is <b>different and mostly uncorrelated</b> across trees — so when you average/vote, random errors cancel out. The <b>real signal</b> (genuinely useful patterns like "pointy ears → cat") shows up consistently across nearly all trees regardless of resample, so it survives the averaging. This is the standard statistics result: averaging many noisy-but-unbiased estimates reduces variance without adding bias.
+  </div>
+  <div class="qa">
+    <b>Why feature randomization is still needed:</b> if every tree can always pick the strongest feature, they end up structurally similar (correlated) despite different data — and correlated errors don't cancel out when you average. Forcing random feature subsets at each split <b>decorrelates the trees</b>, so their mistakes become independent — that's what unlocks the real benefit of averaging.
+  </div>
+  <div class="note">🎯 <b>Analogy:</b> 100 people each seeing a slightly different, partial slice of the evidence, then voting → their individual blind spots cancel out. Versus one person who saw everything but has one systematic blind spot — nothing to average against.</div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Key Distinctions</h2></div>
+  <div class="grid2">
+    <div class="note"><b>Bagged trees</b><br>Random resampling of training data only. All features available at every split.</div>
+    <div class="note"><b>Random forest</b><br>Resampling <i>+</i> random feature subset at every split → more diverse, less correlated trees → typically better performance.</div>
+  </div>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Coming Up Next</h2></div>
+  <span class="pill purple">Boosted trees — XGBoost</span>
+</div>
+
+</body>
+</html>

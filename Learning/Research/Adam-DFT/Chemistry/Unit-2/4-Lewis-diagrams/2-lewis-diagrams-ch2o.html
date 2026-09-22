@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lewis Diagrams — Double Bonds</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root{
+  --bg:#0f1117;
+  --card:#171a23;
+  --border:#262a38;
+  --text:#e6e8ef;
+  --muted:#9aa1b4;
+  --blue:#4da3ff;
+  --orange:#ff9d4d;
+  --green:#4ddd8f;
+  --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  padding:32px 20px 80px;
+}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.3rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:920px;margin:0 auto;}
+
+.section{margin-bottom:36px;}
+.label{
+  display:inline-block;
+  font-size:.72rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:3px 10px;
+  border-radius:20px;
+  margin-bottom:12px;
+  font-weight:600;
+}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px 22px;
+  margin-bottom:14px;
+  border-left:3px solid var(--blue);
+}
+.card.orange-b{border-left-color:var(--orange);}
+.card.green-b{border-left-color:var(--green);}
+.card.purple-b{border-left-color:var(--purple);}
+
+code{
+  background:#1e2230;
+  border:1px solid var(--border);
+  color:var(--green);
+  padding:2px 8px;
+  border-radius:6px;
+  font-size:.88rem;
+}
+
+.steps{list-style:none;padding:0;margin:0;counter-reset:step;}
+.steps li{
+  counter-increment:step;
+  position:relative;
+  padding:12px 0 12px 44px;
+  border-bottom:1px dashed var(--border);
+}
+.steps li:last-child{border-bottom:none;}
+.steps li::before{
+  content:counter(step);
+  position:absolute;left:0;top:10px;
+  width:28px;height:28px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#0f1117;
+  font-weight:700;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+}
+.steps b{color:var(--orange);}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+
+.math-box{
+  background:#0c0e14;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px 18px;
+  font-size:.9rem;
+  line-height:1.7;
+}
+.math-box .running-total{color:var(--orange);font-weight:600;}
+
+.svg-wrap{
+  background:#0c0e14;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  display:flex;
+  justify-content:center;
+  gap:24px;
+  flex-wrap:wrap;
+}
+.svg-caption{text-align:center;color:var(--muted);font-size:.78rem;margin-top:4px;}
+
+.tip{
+  display:flex;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px dashed var(--border);
+  align-items:flex-start;
+}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+
+.example-box{
+  background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));
+  border:1px solid rgba(77,221,143,.3);
+  border-radius:12px;
+  padding:18px 20px;
+}
+
+.badge-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.85rem;}
+.badge-flow .arrow{color:var(--muted);}
+.badge{padding:4px 10px;border-radius:6px;background:#1e2230;border:1px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Lewis Diagrams: Double Bonds</h1>
+<div class="subtitle">Worked through CH₂O (formaldehyde) — what to do when single bonds leave the central atom short</div>
+
+<!-- PROBLEM STATEMENT -->
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    Sometimes drawing all single bonds uses up every valence electron, but the <b>central atom still
+    isn't at 8</b>. Formaldehyde (CH₂O) is the classic case: single bonds alone leave carbon 2 electrons
+    short. This walks through the fix — <b>converting a terminal atom's lone pair into a second bond</b>.
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <span class="label orange">How It Works</span>
+  <h2 style="margin-bottom:14px;">Worked Example: CH₂O (Formaldehyde)</h2>
+
+  <ol class="steps">
+    <li><b>Account for valence electrons</b> — sum each atom's valence e⁻ (multiply by count).</li>
+    <li><b>Draw single bonds</b> first, central atom = least electronegative, non-H. Subtract from the total.</li>
+    <li><b>Allocate remaining e⁻</b> to terminal atoms as lone pairs, chasing the octet rule.</li>
+    <li><b>Check the central atom.</b> If it's short of 8, steal a lone pair from a terminal atom and turn it into a second bond (single → double bond).</li>
+  </ol>
+
+  <div class="grid2" style="margin-top:18px;">
+    <div class="card">
+      <span class="label green">Electron Count</span>
+      <div class="math-box">
+        C: 4 v.e.<br>
+        H: 1 v.e. × 2 = 2<br>
+        O: 6 v.e.<br>
+        <span class="running-total">Total = 4 + 2 + 6 = 12 valence e⁻</span>
+      </div>
+    </div>
+    <div class="card orange-b">
+      <span class="label orange">Electron Bookkeeping</span>
+      <div class="math-box">
+        12 → 3 single bonds drawn (C–O, C–H, C–H) (−6) → <span class="running-total">6 left</span><br>
+        6 → all given to O as 3 lone pairs (−6) → <span class="running-total">0 left</span><br>
+        Check C: only <b>6 e⁻</b> around it (3 bonds) → <span style="color:var(--orange);">short of octet!</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card purple-b" style="margin-top:14px;">
+    <span class="label purple">The Fix</span>
+    <div class="badge-flow">
+      <span class="badge">O has 3 lone pairs</span>
+      <span class="arrow">→</span>
+      <span class="badge">1 lone pair becomes a bonding pair</span>
+      <span class="arrow">→</span>
+      <span class="badge">C=O double bond forms</span>
+      <span class="arrow">→</span>
+      <span class="badge">C now has 8 e⁻, O still has 8 e⁻ (2 lone pairs + 4 shared)</span>
+    </div>
+  </div>
+
+  <div class="svg-wrap" style="margin-top:16px;">
+    <div>
+      <svg width="230" height="220" viewBox="0 0 230 220">
+        <line x1="115" y1="120" x2="115" y2="50"  stroke="#4da3ff" stroke-width="3"/>
+        <line x1="115" y1="120" x2="55" y2="165"  stroke="#4da3ff" stroke-width="3"/>
+        <line x1="115" y1="120" x2="175" y2="165" stroke="#4da3ff" stroke-width="3"/>
+
+        <circle cx="115" cy="120" r="20" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+        <text x="115" y="126" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="14">C</text>
+
+        <circle cx="115" cy="35" r="18" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="115" y="41" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="13">O</text>
+
+        <circle cx="45" cy="175" r="16" fill="#1e2230" stroke="#b98dff" stroke-width="2"/>
+        <text x="45" y="180" text-anchor="middle" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="12">H</text>
+
+        <circle cx="185" cy="175" r="16" fill="#1e2230" stroke="#b98dff" stroke-width="2"/>
+        <text x="185" y="180" text-anchor="middle" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="12">H</text>
+
+        <g fill="#4ddd8f">
+          <circle cx="100" cy="15" r="2.3"/><circle cx="108" cy="10" r="2.3"/>
+          <circle cx="130" cy="15" r="2.3"/><circle cx="122" cy="10" r="2.3"/>
+          <circle cx="90" cy="35" r="2.3"/><circle cx="90" cy="42" r="2.3"/>
+        </g>
+      </svg>
+      <div class="svg-caption">Step 2 — all single bonds, C only has 6 e⁻ (short)</div>
+    </div>
+    <div>
+      <svg width="230" height="220" viewBox="0 0 230 220">
+        <line x1="112" y1="120" x2="112" y2="50"  stroke="#4da3ff" stroke-width="3"/>
+        <line x1="118" y1="120" x2="118" y2="50"  stroke="#4da3ff" stroke-width="3"/>
+        <line x1="115" y1="120" x2="55" y2="165"  stroke="#4da3ff" stroke-width="3"/>
+        <line x1="115" y1="120" x2="175" y2="165" stroke="#4da3ff" stroke-width="3"/>
+
+        <circle cx="115" cy="120" r="20" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+        <text x="115" y="126" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="14">C</text>
+
+        <circle cx="115" cy="35" r="18" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+        <text x="115" y="41" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="13">O</text>
+
+        <circle cx="45" cy="175" r="16" fill="#1e2230" stroke="#b98dff" stroke-width="2"/>
+        <text x="45" y="180" text-anchor="middle" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="12">H</text>
+
+        <circle cx="185" cy="175" r="16" fill="#1e2230" stroke="#b98dff" stroke-width="2"/>
+        <text x="185" y="180" text-anchor="middle" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="12">H</text>
+
+        <g fill="#4ddd8f">
+          <circle cx="95" cy="20" r="2.3"/><circle cx="95" cy="27" r="2.3"/>
+          <circle cx="135" cy="20" r="2.3"/><circle cx="135" cy="27" r="2.3"/>
+        </g>
+      </svg>
+      <div class="svg-caption">Step 4 — one O lone pair → second bond. C=O double bond. Both atoms at 8.</div>
+    </div>
+  </div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Molecule</th><th>All single bonds enough?</th><th>Fix needed</th></tr>
+      <tr><td>SiF₄</td><td>Yes — Si hits octet with 4 single bonds</td><td>None</td></tr>
+      <tr><td>CH₂O</td><td>No — C stuck at 6 e⁻</td><td>1 lone pair on O → C=O double bond</td></tr>
+      <tr><td>CO₂ (for reference)</td><td>No — C stuck at 4 e⁻</td><td>2 lone pairs (one per O) → two C=O double bonds</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:.85rem;margin:12px 0 0;">
+      Rule of thumb: <code>only atoms with lone pairs can donate one to form a new bond</code> — hydrogen never has lone pairs, so it can never be part of a double bond.
+    </p>
+  </div>
+</div>
+
+<!-- REAL WORLD EXAMPLES -->
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario 1 — Formalin & preservation:</b> Formaldehyde (CH₂O) dissolved in water is "formalin," used to preserve biological specimens and, historically, embalming. Its reactivity (it cross-links proteins) traces directly back to that polar C=O double bond — the same double bond this diagram derives from first principles.
+  </div>
+  <div class="example-box" style="margin-top:10px;">
+    <b style="color:var(--blue);">Scenario 2 — Predicting shape from the diagram:</b> Because carbon here has 3 bonding groups (2 H, 1 O) and zero lone pairs, VSEPR theory predicts a trigonal planar shape — this is exactly why formaldehyde is a flat molecule, a fact you can read directly off the completed Lewis diagram before doing any geometry.
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> If, after allocating all remaining electrons to terminal atoms, the central atom is short of an octet, don't panic — it means you need a multiple bond, not more total electrons.</div>
+    <div class="tip"><span class="icon">→</span> Only convert a lone pair that belongs to an atom actually bonded to the electron-deficient central atom — you can't "borrow" electrons from an unrelated atom.</div>
+    <div class="tip"><span class="icon">→</span> After forming the double bond, always re-verify <i>both</i> atoms: the donor (O) should still land at 8 (fewer lone pairs, but more shared electrons compensates).</div>
+    <div class="tip"><span class="icon">→</span> Hydrogen is always a dead end for multiple bonds — it caps out at 2 electrons total, no lone pairs to give away.</div>
+    <div class="tip"><span class="icon">→</span> Double bonds shorten and strengthen the bond compared to a single bond — useful to mention if asked about bond length/strength trends in an interview.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
