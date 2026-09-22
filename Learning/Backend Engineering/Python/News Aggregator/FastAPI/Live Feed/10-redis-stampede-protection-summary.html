@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redis Stampede Protection — Session Summary</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #171a23;
+    --panel-alt: #1e2230;
+    --border: #2a2f3f;
+    --text: #e6e8ef;
+    --text-dim: #9aa1b5;
+    --accent: #7dd3fc;
+    --accent2: #c4b5fd;
+    --good: #86efac;
+    --bad: #fca5a5;
+    --warn: #fde68a;
+    --code-bg: #11141b;
+    --max-width: 900px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: var(--max-width); margin: 0 auto; padding: 2.5rem 1.25rem 6rem; }
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .subtitle { color: var(--text-dim); font-size: 1rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.3rem; margin-top: 2.8rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; color: var(--accent); }
+  p { margin: 0.8rem 0; }
+  code {
+    background: var(--code-bg); padding: 0.15em 0.4em; border-radius: 4px;
+    font-size: 0.88em; font-family: "SF Mono", Consolas, Monaco, monospace; border: 1px solid var(--border);
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+    font-family: "SF Mono", Consolas, Monaco, monospace; font-size: 0.82rem; line-height: 1.5;
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--panel);
+    padding: 0.9rem 1.1rem; border-radius: 0 8px 8px 0; margin: 1.2rem 0;
+  }
+  .callout.bad { border-left-color: var(--bad); }
+  .callout.good { border-left-color: var(--good); }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout-label {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-dim); margin-bottom: 0.35rem; font-weight: 600;
+  }
+
+  .timeline { position: relative; margin: 1.5rem 0; padding-left: 1.6rem; }
+  .timeline::before {
+    content: ""; position: absolute; left: 0.4rem; top: 0.4rem; bottom: 0.4rem;
+    width: 2px; background: var(--border);
+  }
+  .tl-step { position: relative; margin-bottom: 1.6rem; }
+  .tl-step::before {
+    content: ""; position: absolute; left: -1.6rem; top: 0.15rem;
+    width: 12px; height: 12px; border-radius: 50%; background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-step.bad::before { background: var(--bad); }
+  .tl-step.good::before { background: var(--good); }
+  .tl-title { font-weight: 600; margin-bottom: 0.2rem; }
+  .tl-body { color: var(--text-dim); font-size: 0.92rem; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.86rem; }
+  th, td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; }
+  th { background: var(--panel-alt); color: var(--text-dim); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  td.num { font-variant-numeric: tabular-nums; }
+  .hi { color: var(--good); font-weight: 700; }
+  .lo { color: var(--bad); font-weight: 700; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 0.7rem; margin: 1rem 0; }
+  .bar-row { display: flex; align-items: center; gap: 0.7rem; }
+  .bar-label { width: 130px; font-size: 0.78rem; color: var(--text-dim); flex-shrink: 0; }
+  .bar-track {
+    flex: 1; background: var(--code-bg); border-radius: 6px; overflow: hidden;
+    height: 24px; border: 1px solid var(--border);
+  }
+  .bar-fill {
+    height: 100%; display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px; font-size: 0.72rem; font-weight: 600; color: #0f1117; white-space: nowrap;
+  }
+
+  .diagram {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.3rem; margin: 1.3rem 0;
+  }
+  .diagram-title {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-dim); margin-bottom: 1rem; text-align: center;
+  }
+  .flow-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem; }
+  .flow-box {
+    background: var(--panel-alt); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 0.9rem; text-align: center; font-size: 0.8rem; min-width: 90px;
+  }
+  .flow-box .big { font-size: 1rem; font-weight: 600; color: var(--accent); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.1rem; padding: 0 0.15rem; }
+
+  .actors { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
+  .actor {
+    background: var(--panel-alt); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.5rem 0.8rem; font-size: 0.78rem; text-align: center; min-width: 70px;
+  }
+  .actor.winner { border-color: var(--good); background: rgba(134,239,172,0.08); }
+  .actor.dup { border-color: var(--bad); background: rgba(252,165,165,0.08); }
+
+  .matrix { border-collapse: collapse; margin: 1rem auto; width: auto; }
+  .matrix th, .matrix td {
+    border: 1px solid var(--border); padding: 0.9rem 1.1rem; text-align: center; font-size: 0.85rem;
+  }
+  .matrix th { background: var(--panel-alt); color: var(--text-dim); }
+  .matrix td.current { background: rgba(125,211,252,0.1); border-color: var(--accent); font-weight: 600; }
+  .matrix td.future { background: rgba(196,181,253,0.08); color: var(--text-dim); }
+
+  .diff-block {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; margin: 1rem 0; font-family: "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.8rem; white-space: pre-wrap; overflow-x: auto;
+  }
+  .diff-add { background: rgba(134,239,172,0.12); display: block; padding: 0.08rem 0.4rem; border-radius: 3px; }
+  .diff-add::before { content: "+ "; color: var(--good); }
+  .diff-rem { background: rgba(252,165,165,0.12); display: block; padding: 0.08rem 0.4rem; border-radius: 3px; }
+  .diff-rem::before { content: "- "; color: var(--bad); }
+
+  .toc { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 1.5rem 0; }
+  .toc h2 { border: none; margin: 0 0 0.6rem; font-size: 1rem; }
+  .toc ol { margin: 0; padding-left: 1.2rem; }
+  .toc li { margin: 0.3rem 0; font-size: 0.9rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  footer { margin-top: 3.5rem; padding-top: 1.3rem; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 0.82rem; text-align: center; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.4rem; }
+    .wrap { padding: 1.5rem 1rem 4rem; }
+    .bar-label { width: 90px; font-size: 0.7rem; }
+    .matrix th, .matrix td { padding: 0.6rem 0.6rem; font-size: 0.76rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Redis Stampede Protection</h1>
+  <p class="subtitle">Session summary, 2026-09-19 → 2026-09-21 — Live Feed Engine, <code>news_aggregator</code></p>
+
+  <div class="toc">
+    <h2>What's in this page</h2>
+    <ol>
+      <li><a href="#setup">The setup</a> — a genuinely expensive endpoint, cached</li>
+      <li><a href="#bug">The bug</a> — caching made it worse, not better</li>
+      <li><a href="#why">Why it happened</a> — thundering herd</li>
+      <li><a href="#fix">The fix</a> — a Redis distributed lock</li>
+      <li><a href="#bugs">Real bugs caught along the way</a></li>
+      <li><a href="#tuning">Tuning the lock — two iterations</a></li>
+      <li><a href="#results">Final results</a></li>
+      <li><a href="#next">What's next</a></li>
+    </ol>
+  </div>
+
+  <h2 id="setup">1. The setup</h2>
+  <p>
+    <code>/feed/full-scan?limit=</code> is a deliberately expensive endpoint: it fetches up to a million
+    rows, joins them, and serializes the result into a JSON blob that can be over 200MB. It was made
+    cacheable in Redis — key <code>fullscan:limit:{limit}</code>, value = the final serialized JSON
+    string, TTL 20 seconds.
+  </p>
+  <p>
+    It was load-tested with <code>k6</code> at 10 concurrent virtual users, each picking a random
+    <code>limit</code> from a weighted distribution — <code>800000</code> dominant at 70%, the rest
+    much rarer — so the cache would have a real "popular key" to demonstrate a benefit on.
+  </p>
+
+  <h2 id="bug">2. The bug: caching made things worse</h2>
+  <div class="callout bad">
+    <div class="callout-label">The surprising result</div>
+    Adding a cache to a struggling endpoint is supposed to help. Here it didn't — it made things
+    measurably <strong>worse</strong> than having no cache at all.
+  </div>
+
+  <div class="bar-chart">
+    <div class="bar-row">
+      <div class="bar-label">Uncached — failed</div>
+      <div class="bar-track"><div class="bar-fill" style="width:38.7%; background:#fde68a;">38.70%</div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Cached, no protection</div>
+      <div class="bar-track"><div class="bar-fill" style="width:66.66%; background:#fca5a5;">66.66%</div></div>
+    </div>
+  </div>
+  <p style="text-align:center; color:var(--text-dim); font-size:0.82rem; margin-top:-0.4rem;">
+    % of requests that failed outright, 10 VUs, 90s test
+  </p>
+
+  <p>
+    Average request duration rose from 30.27s (uncached) to 41.8s (cached), and the API container hit
+    an actual kernel <code>SIGKILL</code> out-of-memory event — something that hadn't happened at that
+    severity even without a cache.
+  </p>
+
+  <h2 id="why">3. Why: a cache stampede</h2>
+  <p>
+    The cache's 20-second TTL was far shorter than how long a request actually took to complete under
+    load (avg 41.8s). That mismatch is the whole story:
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">10 concurrent requests, same hot key, no coordination</div>
+    <div class="actors">
+      <div class="actor dup">VU 1<br>miss</div>
+      <div class="actor dup">VU 2<br>miss</div>
+      <div class="actor dup">VU 3<br>miss</div>
+      <div class="actor dup">VU 4<br>miss</div>
+      <div class="actor dup">VU 5<br>miss</div>
+      <div class="actor dup">...</div>
+    </div>
+    <p style="text-align:center; margin-top:1rem; font-size:0.85rem; color:var(--text-dim);">
+      Every VU checks <code>fullscan:limit:800000</code> at roughly the same instant, sees nothing
+      cached, and <strong>all of them</strong> independently fetch from Postgres, serialize ~200MB of
+      JSON, and write their own redundant copy into Redis — simultaneously.
+    </p>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-label">Why memory got worse, not better</div>
+    Without a cache: N duplicate ~200MB blobs live briefly in the API's own memory.<br>
+    With an unprotected cache: N duplicate blobs in the API's memory <em>plus</em> N duplicate ~200MB
+    copies written into Redis. Adding the cache added a second place for the same duplicated memory
+    to pile up.
+  </div>
+
+  <h2 id="fix">4. The fix: a Redis distributed lock (single-flight)</h2>
+  <p>
+    The goal: when a key is uncached, exactly <strong>one</strong> request should do the expensive
+    work while everyone else waits for it — "request coalescing."
+  </p>
+
+  <div class="diagram">
+    <div class="diagram-title">The protected flow</div>
+    <div class="flow-row">
+      <div class="flow-box">Check<br><span class="big">data key</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Miss →<br><span class="big">try lock</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Won?<br><span class="big">compute + cache</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Lost?<br><span class="big">poll & wait</span></div>
+    </div>
+  </div>
+
+  <h3>Three design decisions</h3>
+  <p><strong>A separate lock key.</strong> <code>fullscan:lock:limit:{limit}</code>, distinct from the
+  data key <code>fullscan:limit:{limit}</code> — so a "someone's working on this" marker can never be
+  mistaken for real cached data by an unrelated reader.</p>
+
+  <p><strong><code>SET lock_key token NX EX ttl</code> as the mutex.</strong> <code>NX</code> means
+  "only set if it doesn't already exist" — whichever request's <code>SET</code> succeeds is the winner.
+  <code>token</code> is a fresh <code>uuid.uuid4()</code> per request, held as a plain local variable
+  (each HTTP request is its own isolated async call — no shared state needed).</p>
+
+  <p><strong>Safe release — compare-and-delete, not a blind <code>DELETE</code>.</strong> This is the
+  part worth dwelling on:</p>
+
+  <div class="callout bad">
+    <div class="callout-label">The bug a blind DELETE would cause</div>
+    If Winner A's lock outlives its own TTL (because A is just slow, not dead) and Winner B legitimately
+    acquires a fresh lock in the gap — then A finally finishes and calls a blind <code>DELETE</code> on
+    the lock key. That deletes <strong>B's</strong> lock, not A's. A third request can now pile on too.
+    One unprotected delete cascades into exactly the stampede this whole lock was built to prevent.
+  </div>
+
+  <p>The fix, straight from Redis's own "Distributed locks with Redis" documentation, run as an atomic
+  Lua script so the check-and-delete can't be split by another operation in between:</p>
+
+  <pre><code>local current = redis.call("get", KEYS[1])
+if current == ARGV[1] then
+    return redis.call("del", KEYS[1])
+else
+    return 0
+end</code></pre>
+  <p style="font-size:0.85rem; color:var(--text-dim);">
+    Only delete the lock if it still holds <em>my own</em> token. (Redis 8.4 added a native
+    <code>DELEX key IFEQ</code> for exactly this — but this project runs <code>redis:7-alpine</code>,
+    so the Lua-script version was required.)
+  </p>
+
+  <p><strong>Losers poll the data key</strong>, not the lock key, at a fixed interval — and fall back
+  to computing it themselves (unprotected) if they wait too long without success.</p>
+
+  <h2 id="bugs">5. Real bugs caught along the way</h2>
+  <div class="timeline">
+    <div class="tl-step bad">
+      <div class="tl-title">Dockerfile only copied <code>main.py</code></div>
+      <div class="tl-body">
+        The new <code>scripts/</code> directory (holding the Lua script) never made it into the image.
+        Every Gunicorn worker crashed on boot with <code>ModuleNotFoundError: No module named
+        'scripts'</code>. Fixed with <code>COPY scripts/ ./scripts/</code>. No <code>__init__.py</code>
+        was needed — Python 3.3+ treats a plain directory as an implicit namespace package.
+      </div>
+    </div>
+    <div class="tl-step bad">
+      <div class="tl-title">Two missing <code>await</code>s</div>
+      <div class="tl-body">
+        <code>fetchFromDb(...)</code> and the registered Lua script call are both <code>async</code> —
+        calling either without <code>await</code> silently returns an unresolved coroutine/Script
+        object instead of the real value. No crash, just wrong behavior. Same recurring bug class as
+        the original <code>redis.get</code>/<code>redis.set</code> await bugs earlier this project.
+      </div>
+    </div>
+  </div>
+
+  <h2 id="tuning">6. Tuning the lock — two iterations, both tested</h2>
+  <p>
+    The lock alone wasn't enough on the first try. The TTL and the waiter's poll budget had to actually
+    match how long real work takes under contention — not a guess.
+  </p>
+
+  <h3>Iteration 1 — TTL 18s, wait budget 10s</h3>
+  <p>
+    Real improvement over the unprotected stampede, but still degraded: two consecutive runs showed
+    11.36% then 0% failed, avg duration 21.98s then 11.38s.
+  </p>
+  <div class="callout warn">
+    <div class="callout-label">Root cause (self-diagnosed)</div>
+    Requests under 10-VU contention took up to ~42s to finish — far longer than the 18s lock TTL.
+    The lock could expire <em>while the winner was still legitimately working</em>, letting a second
+    request grab a fresh lock and start a smaller duplicate stampede. And even fixing the TTL alone
+    wouldn't help: a waiter that gives up after only 10s of polling would still duplicate work against
+    a winner who's merely slow, not dead. Both numbers needed to move together.
+  </div>
+
+  <h3>Iteration 2 — TTL 45s, wait budget 40s</h3>
+  <p>
+    Comfortable margin above the observed ~42s worst case, and the waiter's patience extended to match.
+  </p>
+
+  <h2 id="results">7. Final results</h2>
+  <table>
+    <tr><th>Scenario</th><th>Failed</th><th>avg</th><th>median</th><th>peak api memory</th></tr>
+    <tr><td>Uncached</td><td class="num">38.70%</td><td class="num">30.27s</td><td class="num">28.1s</td><td class="num">4.38GB (OOM)</td></tr>
+    <tr><td>Cached, no protection</td><td class="num lo">66.66%</td><td class="num lo">41.8s</td><td class="num lo">47.23s</td><td class="num lo">OOM</td></tr>
+    <tr><td>Lock, 18s TTL / 10s wait</td><td class="num">0–11%</td><td class="num">12–22s</td><td class="num">10–14s</td><td class="num">3.35GB</td></tr>
+    <tr><td>Lock, 45s TTL / 40s wait</td><td class="num hi">0.00%</td><td class="num hi">~6.8s</td><td class="num hi">~4.1s</td><td class="num hi">~1.8GB</td></tr>
+    <tr><td><em>(reference) 2 VUs, lock</em></td><td class="num">0.00%</td><td class="num">2.87s</td><td class="num">0.91s</td><td class="num">&lt;1GB</td></tr>
+  </table>
+
+  <div class="callout good">
+    <div class="callout-label">The clean win</div>
+    Zero failures across two consecutive 10-VU runs, average duration cut roughly in half again from
+    the tighter-window attempt, memory contained under 2GB (down from OOM), and nearly double the
+    completed iterations in the same wall-clock time — more useful work done, not just fewer errors.
+  </div>
+
+  <p>
+    The remaining gap to the 2-VU numbers (~6.8s vs 2.87s avg) is <strong>structural, not a bug</strong>:
+    at 10 VUs spread across 5 different <code>limit</code> keys, with <code>800000</code> dominating
+    (88–100 of ~135–141 total requests per run), only one request per <em>key</em> can be the active
+    winner at a time — real queuing on the hottest key is expected, even with a perfectly correct lock.
+  </p>
+
+  <h2 id="next">8. What's next — two upgrades, deliberately deferred</h2>
+  <p>
+    Two further improvements were designed in detail but not built this round — the goal was a working,
+    understandable first version, not a fully production-hardened one.
+  </p>
+
+  <table class="matrix">
+    <tr>
+      <th></th>
+      <th>Fixed-interval polling</th>
+      <th>Pub/Sub or <code>BLPOP</code></th>
+    </tr>
+    <tr>
+      <td><strong>Fixed TTL</strong></td>
+      <td class="current">← built this session</td>
+      <td class="future">upgrade #2</td>
+    </tr>
+    <tr>
+      <td><strong>Lease renewal (heartbeat)</strong></td>
+      <td class="future">upgrade #1</td>
+      <td class="future">most production-correct</td>
+    </tr>
+  </table>
+
+  <p style="text-align:center; color:var(--text-dim); font-size:0.85rem;">
+    These two axes are independent — either can be upgraded without touching the other.
+  </p>
+
+  <h3>Lease renewal (heartbeat)</h3>
+  <p>
+    Instead of guessing one fixed TTL up front (the exact problem iteration 1 hit), the winner would
+    periodically extend its own lock's TTL while genuinely still working, and simply stop renewing
+    once done or crashed. The lock then lives exactly as long as real work is happening — no more
+    guessing a worst case.
+  </p>
+
+  <h3>Pub/Sub or <code>BLPOP</code> notification</h3>
+  <p>
+    Replaces the 500ms polling loop with a push notification — the winner announces "done" once,
+    and waiters wake up immediately instead of discovering it on their next poll tick. <code>BLPOP</code>
+    avoids a real pub/sub race (a message published before anyone's subscribed can be missed entirely;
+    a list item just sits there until popped).
+  </p>
+
+  <p><strong>Suggested order:</strong> lease renewal first (smaller, self-contained change to the
+  existing lock code), verified under the same 10-VU test — then Pub/Sub or <code>BLPOP</code> as the
+  larger structural change, tested against an already-correct lock lifetime.</p>
+
+  <footer>
+    Live Feed Engine — <code>news_aggregator</code> — session notes, 2026-09-19 to 2026-09-21.
+    Full running log in <code>PROGRESS.md</code>.
+  </footer>
+
+</div>
+</body>
+</html>

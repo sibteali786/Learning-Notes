@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>10 — Lock Heartbeat Renewal & the CPU-Starvation Bug</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1d212c; --border:#2a2f3d;
+    --text:#e6e8ee; --muted:#9aa3b8; --accent:#7dd3fc; --accent2:#a78bfa;
+    --good:#4ade80; --bad:#f87171; --warn:#fbbf24; --code-bg:#11131a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); margin:0; padding:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:48px 24px 96px;}
+  h1{font-size:28px; margin-bottom:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .subtitle{color:var(--muted); margin-top:0; margin-bottom:36px; font-size:15px;}
+  h2{font-size:20px; margin-top:52px; margin-bottom:14px; border-left:4px solid var(--accent); padding-left:12px;}
+  h3{font-size:16px; margin-top:28px; margin-bottom:10px; color:var(--accent);}
+  p{color:#c7cbd9;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:20px 22px; margin:18px 0;
+  }
+  .card.warn{border-color:#7a5b12; background:#1f1a10;}
+  .card.good{border-color:#1f5a3a; background:#0f1f16;}
+  .card.bad{border-color:#5a1f1f; background:#1f1010;}
+  .pill{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.04em;
+    text-transform:uppercase; padding:3px 10px; border-radius:999px; margin-right:8px;
+  }
+  .pill.concept{background:#1e2a4a; color:#93c5fd;}
+  .pill.bug{background:#3a1a1a; color:#fca5a5;}
+  .pill.fix{background:#123a24; color:#86efac;}
+  .pill.cmd{background:#2a2333; color:#d8b4fe;}
+  code, pre{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px;
+  }
+  code{background:var(--code-bg); padding:2px 6px; border-radius:5px; color:#f0c987;}
+  pre{
+    background:var(--code-bg); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; overflow-x:auto; margin:10px 0; color:#d7dbe8;
+  }
+  .timeline{border-left:2px solid var(--border); margin-left:8px; padding-left:24px;}
+  .tl-item{position:relative; margin-bottom:22px;}
+  .tl-item::before{
+    content:""; position:absolute; left:-30px; top:4px; width:11px; height:11px;
+    border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px rgba(125,211,252,.15);
+  }
+  .tl-item.bug::before{background:var(--bad); box-shadow:0 0 0 4px rgba(248,113,113,.15);}
+  .tl-item.fix::before{background:var(--good); box-shadow:0 0 0 4px rgba(74,222,128,.15);}
+  .tl-time{color:var(--muted); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:13px;}
+  th, td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--border);}
+  th{color:var(--muted); font-weight:600; text-transform:uppercase; font-size:11px; letter-spacing:.03em;}
+  tr:last-child td{border-bottom:none;}
+  .good-cell{color:var(--good); font-weight:600;}
+  .num{font-variant-numeric:tabular-nums;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:640px){.grid2{grid-template-columns:1fr;}}
+  .metric{background:var(--panel2); border-radius:10px; padding:14px 16px; text-align:center;}
+  .metric .val{font-size:22px; font-weight:700; color:var(--accent);}
+  .metric .label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin-top:4px;}
+  .arrow{color:var(--muted); font-size:12px; margin:0 8px;}
+  .ttl-trace{font-family:ui-monospace,monospace; font-size:12.5px; background:var(--code-bg); border-radius:10px; padding:14px 16px; border:1px solid var(--border);}
+  .ttl-row{display:flex; gap:10px; padding:2px 0;}
+  .ttl-row .t{color:var(--muted); width:60px;}
+  .ttl-row .v{color:#f0c987;}
+  .ttl-row.jump .v{color:var(--good); font-weight:700;}
+  .ttl-row.gone .v{color:var(--bad);}
+  .footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--border); color:var(--muted); font-size:12px;}
+  .toc{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px 22px;}
+  .toc a{color:var(--accent); text-decoration:none; font-size:14px;}
+  .toc li{margin-bottom:6px;}
+  .concept-box{background:var(--panel2); border-radius:10px; padding:16px 18px; margin:10px 0;}
+  .concept-box .title{font-weight:700; color:var(--accent2); margin-bottom:6px; font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Lock Heartbeat Renewal &amp; the CPU-Starvation Bug</h1>
+  <p class="subtitle">Live Feed Engine · Session log #11 · 2026-09-21 → 2026-09-23 · picks up after #10 (fixed-TTL stampede protection)</p>
+
+  <div class="toc">
+    <strong>Contents</strong>
+    <ul>
+      <li><a href="#recap">Quick recap: what happened before today</a></li>
+      <li><a href="#problem">The problem heartbeat renewal solves</a></li>
+      <li><a href="#concepts">Concepts learned</a></li>
+      <li><a href="#design">Design &amp; build (Socratic, hand-written)</a></li>
+      <li><a href="#bugs">Bug hunt: three small bugs, one big one</a></li>
+      <li><a href="#starvation">The real find: CPU-bound event-loop starvation</a></li>
+      <li><a href="#results">Before / after results</a></li>
+      <li><a href="#takeaways">Takeaways</a></li>
+      <li><a href="#verify">Verifying the two promised wins</a></li>
+      <li><a href="#next">What's left</a></li>
+    </ul>
+  </div>
+
+  <h2 id="recap">Quick recap: #9 → today</h2>
+  <p>File #9 closed out the hot-key k6 experiment and the verdict that Redis wasn't justified for <code>/feed</code> at this scale. Between then and this session, several more milestones landed that this doc doesn't re-narrate in full (see <code>PROGRESS.md</code> for the complete log) — in short:</p>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-time">2026-09-17</div><div>Built <code>/feed/full-scan</code> — a deliberately unbounded endpoint that finally produced a <em>genuinely</em> expensive computation (materializing up to 1M rows, building a ~200MB+ JSON blob), unlike <code>/feed</code> itself.</div></div>
+    <div class="tl-item"><div class="tl-time">2026-09-19</div><div>Wired in Redis caching for the serialized JSON blob per <code>limit</code>. First concurrent test at 10 VUs revealed a severe <strong>cache stampede</strong> — caching made things <em>worse</em> than no cache at all.</div></div>
+    <div class="tl-item"><div class="tl-time">2026-09-20/21</div><div>Built stampede protection: a Redis <code>SET NX EX</code> lock + safe compare-and-delete release via a Lua script. Landed on a fixed 45s TTL / 40s wait budget after one under-tuned iteration (18s TTL) reproduced the exact "lock expires while winner still working" bug.</div></div>
+    <div class="tl-item"><div class="tl-time">2026-09-21</div><div>Closed out the fixed-TTL lock with a clean 0%-failure result — but flagged the 45s number as a <em>hand-tuned guess</em>, and identified heartbeat/lease renewal as the fix. That's where this session picks up.</div></div>
+  </div>
+
+  <h2 id="problem">The problem heartbeat renewal solves</h2>
+  <div class="card">
+    <p>The fixed-TTL lock commits to <strong>one static guess</strong> for how long the winning request's work will take, decided the moment the lock is acquired — before anyone knows how long the work will actually take.</p>
+    <p style="margin-bottom:0"><strong>Guess too short</strong> → lock expires mid-computation, a second request piles on. <strong>Guess too long</strong> → a genuinely crashed process's lock lingers, slowing everyone else's recovery. Heartbeat renewal replaces the single guess with small, repeated extensions <em>while real work is still happening</em> — the lock lives almost exactly as long as work is happening, no longer.</p>
+  </div>
+
+  <h2 id="concepts">Concepts learned</h2>
+
+  <div class="concept-box">
+    <div class="title">asyncio.Event</div>
+    <p style="margin:0">A flag one coroutine can <code>.set()</code> and another can <code>await .wait()</code> on. Not polling — a real wake-up signal. The moment <code>.set()</code> fires, every waiter's <code>.wait()</code> returns immediately, no matter how long they'd been sitting there.</p>
+  </div>
+
+  <div class="concept-box">
+    <div class="title">asyncio.wait_for(awaitable, timeout)</div>
+    <p style="margin:0">Races an awaitable against a clock. Two outcomes: the awaitable finishes first → returns its result normally. The timeout elapses first → cancels the awaitable, raises <code>asyncio.TimeoutError</code>. Wrapping <code>event.wait()</code> (which alone would block forever) in <code>wait_for(..., timeout=interval)</code> gives "wake up early if signaled, otherwise wake up after N seconds regardless" — exactly the shape a heartbeat loop needs.</p>
+  </div>
+
+  <div class="concept-box">
+    <div class="title">asyncio.TaskGroup (Python 3.11+)</div>
+    <p style="margin:0">Structured concurrency: every task created inside the <code>async with</code> block must finish before the block exits. If <em>any</em> task raises, every sibling task is cancelled and the exception re-raises at the <code>async with</code> itself — wrapped in an <code>ExceptionGroup</code>, caught with the new <code>except*</code> syntax, not plain <code>except</code>. A task's own return value isn't handed back by the block; you hold the <code>Task</code> object from <code>tg.create_task(...)</code> and call <code>.result()</code> on it afterward.</p>
+  </div>
+
+  <div class="concept-box">
+    <div class="title">Cooperative scheduling — the rule that broke everything</div>
+    <p style="margin:0">asyncio can only switch which coroutine is running <strong>at <code>await</code> points</strong>. A stretch of plain synchronous Python with zero <code>await</code> in it — no matter how long it runs — freezes the <em>entire</em> event loop, including every other task's timers and callbacks. This is the root of the big bug below.</p>
+  </div>
+
+  <div class="concept-box">
+    <div class="title">asyncio.to_thread + the GIL</div>
+    <p style="margin:0">CPython's GIL lets only one thread execute Python bytecode at a time — so moving CPU-bound pure-Python work into a thread via <code>to_thread</code> doesn't make it <em>faster</em>. But the GIL is released and re-acquired on a timer (~5ms default switch interval), even without I/O — so a thread running that work still periodically hands control back. Critically, <code>await asyncio.to_thread(...)</code> is a real <code>await</code> point on the <em>main</em> thread, so the event loop stays free to run other coroutines while the worker thread grinds through the computation. Goal here wasn't speed — it was keeping the loop responsive.</p>
+  </div>
+
+  <h2 id="design">Design &amp; build</h2>
+  <p>Built end-to-end via one-question-at-a-time Socratic walkthrough — every line hand-written, corrections found by tracing logic rather than being handed fixes.</p>
+
+  <h3>1. Renewal Lua script — same shape as the existing release script</h3>
+  <pre>-- scripts/renewLock.py
+if redis.call("get", KEYS[1]) == ARGV[1] then
+    return redis.call("expire", KEYS[1], ARGV[2])
+else
+    return 0
+end</pre>
+  <p>Mirrors the compare-and-delete release script already in place — extending someone else's lock (after yours expired and a new one took over the key) would be just as wrong as blindly deleting theirs.</p>
+
+  <h3>2. The renew loop</h3>
+  <pre>async def renew_loop(event, key, token, ttl=10, interval=5):
+    while True:
+        try:
+            await asyncio.wait_for(event.wait(), timeout=interval)
+            break  # event fired -> winner is done, stop renewing
+        except asyncio.TimeoutError:
+            try:
+                await app.state.lockRenewScript(keys=[key], args=[token, ttl])
+            except Exception as e:
+                print("Error in redis script for renewal: ", e)</pre>
+
+  <h3>3. Wiring it into the winner branch via TaskGroup</h3>
+  <pre>event = asyncio.Event()
+
+async def fetch_and_signal():
+    try:
+        rows = await fetchFromDb(query, args)
+        return rows
+    finally:
+        event.set()   # fires on success AND failure
+
+try:
+    async with asyncio.TaskGroup() as tg:
+        fetch = tg.create_task(fetch_and_signal())
+        tg.create_task(renew_loop(event, lock_key, token))
+except* Exception as eg:
+    await release_lock(lock_key, token)
+    print(f"Request failed for database: {eg.exceptions}")
+    raise
+
+json_serialized = fetch.result()</pre>
+  <p><code>release_lock(lock_key, token)</code> was extracted as its own helper (wrapping the Lua call in its own try/except) to flatten what was becoming a try/except pyramid across two call sites — the success path and the new failure path.</p>
+
+  <h2 id="bugs">Bug hunt: three small bugs, one big one</h2>
+  <div class="timeline">
+    <div class="tl-item bug"><div class="tl-time">Bug 1</div><span class="pill bug">off-by-one</span>Lua arrays are 1-indexed — <code>KEYS[0]</code> in <code>renewLock.py</code> should have been <code>KEYS[1]</code> (both occurrences).</div>
+    <div class="tl-item bug"><div class="tl-time">Bug 2</div><span class="pill bug">typo / mismatch</span><code>renew_loop</code> called <code>app.state.renewLockLuaScript</code>, but the script was registered under <code>app.state.lockRenewScript</code> in <code>lifespan</code> — would have raised <code>AttributeError</code> on the very first renewal attempt.</div>
+    <div class="tl-item bug"><div class="tl-time">Bug 3</div><span class="pill bug">swallowed exception</span>An early version added a bare <code>except Exception: print(...)</code> in <code>fetch_and_signal</code> with no re-raise. <code>fetch.result()</code> would then silently return <code>None</code> on a real DB failure — which then got <em>cached and served as the response</em> to everyone until TTL expiry. Worse than the original unhandled-crash behavior. Fixed by dropping back to plain <code>try/finally</code> and letting <code>TaskGroup</code> propagate the exception naturally.</div>
+  </div>
+
+  <h2 id="starvation">The real find: CPU-bound event-loop starvation</h2>
+  <div class="card bad">
+    <span class="pill bug">Serious</span>
+    <p>Manual k6 runs showed <strong>0% failures</strong> — looked clean. But a direct Redis <code>TTL</code> watch during a real request told a different story: the lock's TTL just counted straight down to expiry, with <strong>no renewal ever firing</strong>, even though the fetch clearly ran past the 5-second renewal interval.</p>
+  </div>
+
+  <h3>Live evidence — before the fix</h3>
+  <div class="ttl-trace">
+    <div class="ttl-row"><span class="t">t=0.00</span><span class="v">renew_loop iteration start</span></div>
+    <div class="ttl-row gone"><span class="t">t=8.14</span><span class="v">fetch_and_signal completed → event set → loop breaks (no renewal ever attempted)</span></div>
+  </div>
+  <p>Root cause: after <code>rows = await conn.fetch(...)</code> — a genuine, non-blocking <code>await</code> — the rest of <code>fetchFromDb</code> was <strong>plain synchronous Python</strong>: a dict-comprehension building <code>rows_modified</code>, then <code>json.dumps(...)</code>. Zero <code>await</code> points. Since asyncio can only switch coroutines at <code>await</code> points, that multi-second block froze the <em>entire event loop</em> — including <code>renew_loop</code>'s own timer, the very thing built to protect against exactly this kind of stall.</p>
+
+  <div class="card warn">
+    <span class="pill bug">Bonus bug</span> Debug prints (and, silently, all along, the app's own error-logging prints) weren't showing up in <code>docker logs</code> at all — same root cause as the earlier <code>rss_poller.py</code> stdout-buffering gotcha, this time on a Gunicorn-managed process. Fixed with <code>ENV PYTHONUNBUFFERED=1</code> in the <code>Dockerfile</code> — an environment variable the interpreter reads at startup regardless of what actually invokes it, unlike the CLI-only <code>python -u</code> flag.
+  </div>
+
+  <h3>The fix</h3>
+  <pre>def processArticleResponse(rows) -> str:
+    rows_modified = [
+        dict(r) | {"publishedAt": r["publishedAt"].isoformat()} for r in rows
+    ]
+    return json.dumps(rows_modified)
+
+async def fetchFromDb(query, args):
+    async with app.state.pool.acquire() as conn:
+        rows = await conn.fetch(query, args)
+    return await asyncio.to_thread(processArticleResponse, rows)</pre>
+  <p>Along the way, a piece of pasted research correctly noted <code>to_thread</code> can't speed up pure-Python CPU-bound work under the GIL — and proposed <code>run_in_executor</code> as an alternative, not realizing <code>to_thread</code> <em>is</em> <code>run_in_executor</code> with the default thread pool. The actual fix needed wasn't speed — it was keeping the <strong>main thread's event loop free</strong> to keep servicing <code>renew_loop</code> while the worker thread did the (still GIL-bound, still not-faster) computation.</p>
+
+  <h3>Live evidence — after the fix</h3>
+  <div class="ttl-trace">
+    <div class="ttl-row"><span class="t">t=0.00</span><span class="v">renew_loop iteration start</span></div>
+    <div class="ttl-row jump"><span class="t">t=5.04</span><span class="v">renewed lock — TTL reset back toward 10 (confirmed live in parallel redis-cli TTL poll)</span></div>
+    <div class="ttl-row"><span class="t">t=5.05</span><span class="v">renew_loop iteration start (loop continues)</span></div>
+    <div class="ttl-row gone"><span class="t">t=6.87</span><span class="v">fetch_and_signal completed → event set → loop breaks cleanly</span></div>
+  </div>
+
+  <h2 id="results">Before / after results</h2>
+  <p>All runs: 10 VUs, weighted <code>limit</code> distribution, 90s, against <code>/feed/full-scan</code>.</p>
+  <table>
+    <tr><th>Scenario</th><th>Failed</th><th>avg</th><th>median</th><th>iterations</th><th>peak <code>feed_api</code> mem</th></tr>
+    <tr><td>Fixed 45s TTL / 40s wait <span class="pill fix">previous session</span></td><td class="good-cell">0.00%</td><td class="num">~6.8s</td><td class="num">~4.1s</td><td class="num">135–141</td><td class="num">~1.8GB</td></tr>
+    <tr><td>Heartbeat 10s/5s, pre-<code>to_thread</code></td><td class="good-cell">0.00%</td><td class="num">7.3–8.8s</td><td class="num">4.5–4.6s</td><td class="num">103–126</td><td class="num">~1.97GB</td></tr>
+    <tr><td>Heartbeat 10s/5s, post-<code>to_thread</code></td><td class="good-cell">0.00%</td><td class="num">7.4–8.0s</td><td class="num">5.3–6.5s</td><td class="num">114–123</td><td class="num"><strong>~1.16GB</strong></td></tr>
+  </table>
+
+  <div class="grid2">
+    <div class="metric"><div class="val">0.00%</div><div class="label">failures, every run</div></div>
+    <div class="metric"><div class="val">1.97 <span class="arrow">→</span> 1.16GB</div><div class="label">peak memory, to_thread fix</div></div>
+  </div>
+
+  <div class="card good">
+    <strong>Why memory dropped:</strong> before the fix, every multi-second CPU-bound freeze stalled <em>every</em> coroutine in that worker — new fetches, polling, renewals, all of it. Once the freeze ended, that backed-up work got a chance to run <strong>all at once</strong>, in a burst — several large row-lists/JSON blobs alive in memory simultaneously. With <code>to_thread</code>, the loop never freezes, so work gets serviced roughly as it arrives instead of piling into bursts. Same "queuing/burstiness beats raw compute cost" lesson as the original Phase 1 diagnosis — surfacing again in a completely different part of the system.
+  </div>
+
+  <h2 id="takeaways">Takeaways</h2>
+  <ul>
+    <li>Heartbeat renewal is a <strong>reliability</strong> win, not a throughput one — replacing one hand-guessed worst-case TTL with a small, self-correcting one. Throughput numbers were a wash; recovery-time-from-failure is the actual promised benefit (still to be directly demonstrated — see below).</li>
+    <li><strong>0% failures in a load test doesn't prove a concurrency mechanism actually works</strong> — the CPU-starvation bug never caused a real stampede in any k6 run purely because no second request happened to arrive during the ~5–8s unprotected gap. Direct instrumentation (a live TTL watch) was needed to catch it.</li>
+    <li>The CPU-bound-event-loop-starvation pattern is now a <strong>repeat offender</strong> in this project — first found via <code>py-spy</code>/<code>docker stats</code> against raw request throughput (Phase 1), now found again defeating a concurrency-based correctness mechanism (this session). Worth remembering as a first suspect whenever async code "should" be concurrent but isn't behaving that way.</li>
+    <li>Correcting your own research in real time is normal and good — a pasted explanation of <code>to_thread</code> vs. the GIL was factually accurate but answered the wrong question ("does this add parallelism?" vs. "does this keep the loop responsive?").</li>
+  </ul>
+
+  <h2 id="verify">Verifying the two promised wins</h2>
+  <p>The heartbeat design made two claims that hadn't actually been tested yet — only reasoned through. Both were verified directly this session.</p>
+
+  <h3>1. Crash recovery — measured, not asserted</h3>
+  <div class="card">
+    <p>Simulated a genuine crash: <code>kill -9</code> on one specific Gunicorn worker process mid-request (not the whole container — a real crash means the process disappears with zero chance to run any cleanup, fundamentally different from a caught <code>fetchFromDb</code> exception, which was already handled correctly).</p>
+    <p><strong>Tooling gotchas hit along the way:</strong> the slim base image has no <code>kill</code>/<code>ps</code> binaries (sent the signal via <code>docker exec ... python -c "os.kill(...)"</code> instead); <code>docker top</code> reports host-side PIDs but <code>docker exec</code> runs in the container's own PID namespace, so the two don't match — resolved by reading <code>/proc/*/cmdline</code> from <em>inside</em> the container to get its own view of PIDs (<code>1</code>=master, <code>7,8,9,10</code>=workers, matching Gunicorn's own boot-order logs).</p>
+  </div>
+  <div class="ttl-trace">
+    <div class="ttl-row"><span class="t">t=0.00</span><span class="v">worker acquires lock, TTL=10s</span></div>
+    <div class="ttl-row"><span class="t">t≈1.5s</span><span class="v">worker killed via SIGKILL — no cleanup runs</span></div>
+    <div class="ttl-row gone"><span class="t">t≈8.3–9.4s after kill</span><span class="v">live TTL watch shows lock naturally expiring — matches the 10s TTL exactly</span></div>
+    <div class="ttl-row jump"><span class="t">first probe after</span><span class="v">immediately reclaims lock, does the real fetch, populates cache</span></div>
+  </div>
+  <div class="card good">
+    <strong>Worst-case reasoning, confirmed correct on the first try:</strong> no matter <em>when</em> in the renewal cycle a crash happens, recovery is always bounded by the TTL itself (10s) — never TTL+interval. Crash right after a fresh renewal → full 10s must elapse (worst case). Crash right before a renewal was due → recovery is nearly immediate. <strong>10s is a hard ceiling</strong> — a direct, measured improvement over the old scheme's up-to-45s hand-guessed worst case.
+  </div>
+
+  <h3>2. The small throughput cost — explained, not dismissed</h3>
+  <p>Four k6 runs post-<code>to_thread</code>-fix, same 10-VU weighted scenario:</p>
+  <table>
+    <tr><th>Run</th><th>Failed</th><th>avg</th><th>median</th><th>iterations</th></tr>
+    <tr><td>1</td><td class="good-cell">0.00%</td><td class="num">8.02s</td><td class="num">6.52s</td><td class="num">114</td></tr>
+    <tr><td>2</td><td class="good-cell">0.00%</td><td class="num">7.39s</td><td class="num">5.34s</td><td class="num">123</td></tr>
+    <tr><td>3</td><td class="good-cell">0.00%</td><td class="num">7.52s</td><td class="num">5.38s</td><td class="num">128</td></tr>
+    <tr><td>4</td><td class="good-cell">0.00%</td><td class="num">8.13s</td><td class="num">6.31s</td><td class="num">114</td></tr>
+  </table>
+  <p>All four sit consistently below the old fixed-45s-TTL baseline (135–141 iterations, avg ~6.8s) — in the <em>same direction</em>, every time. Four independent samples agreeing is signal, not noise.</p>
+  <div class="card warn">
+    <strong>First hypothesis, corrected:</strong> "the periodic renewal Redis calls add overhead" — but renewals only fire on requests running past 5s, while the slowdown shows up across the <em>entire</em> run, including fast sub-5s requests that never trigger a single renewal. <strong>Actual cause:</strong> the fixed per-request setup cost of <code>asyncio.TaskGroup</code> + <code>asyncio.Event</code> + scheduling two concurrent tasks, present on every request regardless of whether a renewal ever fires — versus the old scheme's single bare <code>await fetchFromDb(...)</code> with none of that machinery.
+  </div>
+  <p><strong>Verdict:</strong> a real, understood, accepted trade-off — a hard 10s crash-recovery ceiling in exchange for a small, constant per-request concurrency-setup cost. Not a regression to chase; a deliberate reliability-for-throughput trade confirmed by evidence.</p>
+
+  <h2 id="next">What's left</h2>
+  <ul>
+    <li>Pub/Sub or <code>BLPOP</code>-based waiter notification (replacing fixed-interval polling) — still outstanding from 2026-09-21.</li>
+    <li>Decide on a Redis memory cap now that real cache/payload sizes are known.</li>
+    <li>Remaining duplication between the winner and loser-fallback branches in <code>getFullScanFeed</code> (fetch + cache-write logic) — partially addressed this session via <code>release_lock</code>, not fully.</li>
+  </ul>
+
+  <div class="footer">Live Feed Engine — session #11 · built in learning-mode (hand-written code, Socratic debugging) · see <code>PROGRESS.md</code> for the full project log.</div>
+
+</div>
+</body>
+</html>

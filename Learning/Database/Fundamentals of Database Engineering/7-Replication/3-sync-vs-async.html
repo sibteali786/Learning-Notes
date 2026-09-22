@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sync vs Async Replication</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --card:#171a23; --card2:#1d2130; --line:#2a2f40;
+  --text:#e6e8ef; --muted:#9aa1b5;
+  --blue:#4f9dff; --orange:#ff9f43; --green:#2ecc71; --purple:#a78bfa; --red:#ff5c5c; --yellow:#ffd166;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6;padding:40px 16px}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:Syne,sans-serif}
+h1{font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-.5px}
+.sub{color:var(--muted);margin-top:6px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pill{font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid;white-space:nowrap}
+.p-blue{color:var(--blue);border-color:#4f9dff55;background:#4f9dff14}
+.p-orange{color:var(--orange);border-color:#ff9f4355;background:#ff9f4314}
+.p-green{color:var(--green);border-color:#2ecc7155;background:#2ecc7114}
+.p-purple{color:var(--purple);border-color:#a78bfa55;background:#a78bfa14}
+.p-red{color:var(--red);border-color:#ff5c5c55;background:#ff5c5c14}
+section{margin-top:44px}
+.label{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.label .bar{width:5px;height:26px;border-radius:3px}
+.label h2{font-size:22px;font-weight:700}
+.label .num{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card h3{font-size:16px;margin-bottom:8px}
+ul{padding-left:18px}
+li{margin:4px 0}
+.muted{color:var(--muted)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:#0b0d12;border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--yellow)}
+pre{font-family:'JetBrains Mono',monospace;font-size:13px;background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto;line-height:1.55;margin-top:10px}
+.k{color:var(--purple)} .s{color:var(--green)} .c{color:#6b7289;font-style:italic} .f{color:var(--blue)} .n{color:var(--orange)} .e{color:var(--red)}
+.callout{border-left:4px solid var(--orange);background:#ff9f430d;padding:14px 16px;border-radius:0 10px 10px 0;margin-top:14px}
+.callout.blue{border-color:var(--blue);background:#4f9dff0d}
+.callout.green{border-color:var(--green);background:#2ecc710d}
+.callout.red{border-color:var(--red);background:#ff5c5c0d}
+.diagram{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+svg{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:Syne,sans-serif;color:var(--muted);font-weight:600}
+.tscroll{overflow-x:auto}
+.yes{color:var(--green);font-weight:600} .no{color:var(--red);font-weight:600}
+.step{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
+.step .dot{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#0f1117}
+footer{margin-top:50px;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="pill p-purple" style="display:inline-block">Database Replication · Part 3</div>
+  <h1 style="margin-top:10px">Synchronous vs Asynchronous Replication</h1>
+  <p class="sub">When a client writes to the master, does it wait for the standbys too — or return right away?</p>
+  <div class="tags">
+    <span class="pill p-blue">Sync = wait for replicas</span>
+    <span class="pill p-green">Async = return after master</span>
+    <span class="pill p-orange">Consistency vs speed</span>
+    <span class="pill p-purple">FIRST N / ANY N</span>
+    <span class="pill p-red">Quorum</span>
+  </div>
+</header>
+
+<!-- 1 PROBLEM -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">01</span><h2>The Question</h2></div>
+  <div class="card">
+    <p class="muted">Every write must commit on the master first — that's true for any database. The open question from Part 1: <b style="color:var(--text)">after the master commits, is the client unblocked immediately, or only after the standbys have the change too?</b></p>
+    <p class="muted" style="margin-top:8px">Master + its standbys together are called a <b style="color:var(--text)">cluster</b>.</p>
+  </div>
+</section>
+
+<!-- 2 TIMELINE -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><span class="num">02</span><h2>Side by Side — Timeline</h2></div>
+  <div class="diagram">
+  <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+    <defs>
+      <marker id="aw" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e6e8ef"/></marker>
+      <marker id="ag" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2ecc71"/></marker>
+      <marker id="ab" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4f9dff"/></marker>
+    </defs>
+    <!-- SYNC -->
+    <text x="20" y="28" fill="#4f9dff" font-size="16" font-weight="700" font-family="Syne">SYNCHRONOUS</text>
+    <text x="20" y="70" fill="#9aa1b5" font-size="13">Client</text>
+    <text x="20" y="120" fill="#ff5c5c" font-size="13">Master</text>
+    <text x="20" y="170" fill="#2ecc71" font-size="13">Standby</text>
+    <line x1="90" y1="66" x2="870" y2="66" stroke="#2a2f40"/>
+    <line x1="90" y1="116" x2="870" y2="116" stroke="#2a2f40"/>
+    <line x1="90" y1="166" x2="870" y2="166" stroke="#2a2f40"/>
+    <line x1="110" y1="66" x2="200" y2="112" stroke="#e6e8ef" stroke-width="2.5" marker-end="url(#aw)"/>
+    <text x="130" y="55" fill="#e6e8ef" font-family="JetBrains Mono" font-size="11">WRITE</text>
+    <rect x="205" y="106" width="110" height="20" rx="4" fill="#ff5c5c33" stroke="#ff5c5c"/>
+    <text x="260" y="121" fill="#e6e8ef" text-anchor="middle" font-size="11">commit</text>
+    <line x1="315" y1="116" x2="410" y2="162" stroke="#2ecc71" stroke-width="2.5" marker-end="url(#ag)"/>
+    <rect x="415" y="156" width="120" height="20" rx="4" fill="#2ecc7133" stroke="#2ecc71"/>
+    <text x="475" y="171" fill="#e6e8ef" text-anchor="middle" font-size="11">commit</text>
+    <line x1="535" y1="166" x2="600" y2="120" stroke="#4f9dff" stroke-width="2.5" marker-end="url(#ab)"/>
+    <text x="620" y="140" fill="#4f9dff" font-size="11">ack</text>
+    <line x1="610" y1="116" x2="690" y2="70" stroke="#e6e8ef" stroke-width="2.5" marker-end="url(#aw)"/>
+    <rect x="110" y="40" width="590" height="8" rx="4" fill="#ff9f4355"/>
+    <text x="405" y="36" fill="#ff9f43" text-anchor="middle" font-size="11">client blocked ⏳ (master + standby commit)</text>
+    <text x="715" y="72" fill="#2ecc71" font-size="12">✓ OK</text>
+
+    <!-- ASYNC -->
+    <text x="20" y="238" fill="#2ecc71" font-size="16" font-weight="700" font-family="Syne">ASYNCHRONOUS</text>
+    <text x="20" y="280" fill="#9aa1b5" font-size="13">Client</text>
+    <text x="20" y="330" fill="#ff5c5c" font-size="13">Master</text>
+    <text x="20" y="380" fill="#2ecc71" font-size="13">Standby</text>
+    <line x1="90" y1="276" x2="870" y2="276" stroke="#2a2f40"/>
+    <line x1="90" y1="326" x2="870" y2="326" stroke="#2a2f40"/>
+    <line x1="90" y1="376" x2="870" y2="376" stroke="#2a2f40"/>
+    <line x1="110" y1="276" x2="200" y2="322" stroke="#e6e8ef" stroke-width="2.5" marker-end="url(#aw)"/>
+    <text x="130" y="265" fill="#e6e8ef" font-family="JetBrains Mono" font-size="11">WRITE</text>
+    <rect x="205" y="316" width="110" height="20" rx="4" fill="#ff5c5c33" stroke="#ff5c5c"/>
+    <text x="260" y="331" fill="#e6e8ef" text-anchor="middle" font-size="11">commit</text>
+    <line x1="315" y1="322" x2="395" y2="280" stroke="#e6e8ef" stroke-width="2.5" marker-end="url(#aw)"/>
+    <rect x="110" y="250" width="290" height="8" rx="4" fill="#2ecc7155"/>
+    <text x="255" y="246" fill="#2ecc71" text-anchor="middle" font-size="11">client blocked (master only)</text>
+    <text x="410" y="282" fill="#2ecc71" font-size="12">✓ OK — done</text>
+    <line x1="330" y1="326" x2="600" y2="372" stroke="#2ecc71" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ag)"/>
+    <text x="470" y="345" fill="#9aa1b5" font-size="11">background process, later</text>
+    <rect x="605" y="366" width="120" height="20" rx="4" fill="#2ecc7133" stroke="#2ecc71"/>
+    <text x="665" y="381" fill="#e6e8ef" text-anchor="middle" font-size="11">applied</text>
+    <text x="735" y="400" fill="#ff9f43" font-size="11">lag window = stale reads</text>
+  </svg>
+  </div>
+</section>
+
+<!-- 3 SYNC -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">03</span><h2>Synchronous Replication</h2></div>
+  <div class="card">
+    <div class="step"><div class="dot" style="background:var(--blue)">1</div><div>Client writes to the master and waits for the master's commit (as in any DB).</div></div>
+    <div class="step"><div class="dot" style="background:var(--orange)">2</div><div>The master <b>also</b> has to get the transaction committed on the standby replicas.</div></div>
+    <div class="step"><div class="dot" style="background:var(--green)">3</div><div>Only then is the client <b>unblocked</b>.</div></div>
+  </div>
+  <div class="callout blue"><b>Result:</b> strong consistency instead of eventual — a write isn't "done" until the master and the required standbys have it. The cost is <b>slower writes</b>: each commit waits on network round trips to replicas.</div>
+</section>
+
+<!-- 4 WHICH REPLICAS -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><span class="num">04</span><h2>"I have 7 standbys — wait for all 7?"</h2></div>
+  <p class="muted" style="margin-bottom:12px">Waiting on every replica is overkill: the slowest one sets your write latency. So databases let you choose how many and which replicas to wait for.</p>
+  <div class="grid g3">
+    <div class="card"><span class="pill p-blue">FIRST 1</span><h3 style="margin-top:10px">Wait for the top-priority one</h3><p class="muted">Standbys are ranked. Wait for the highest-priority one that's connected.</p></div>
+    <div class="card"><span class="pill p-purple">FIRST 2</span><h3 style="margin-top:10px">Wait for the top two by priority</h3><p class="muted">Stronger durability: two copies are guaranteed before success.</p></div>
+    <div class="card"><span class="pill p-green">ANY N</span><h3 style="margin-top:10px">Whoever answers first</h3><p class="muted">Unblock as soon as any N standbys confirm. This is quorum-style, like Cassandra's <code>QUORUM</code>.</p></div>
+  </div>
+  <div class="diagram" style="margin-top:14px">
+  <svg viewBox="0 0 900 230" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+    <defs><marker id="ab2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4f9dff"/></marker>
+    <marker id="ag2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b7289"/></marker></defs>
+    <rect x="30" y="85" width="150" height="60" rx="10" fill="#3a1414" stroke="#ff5c5c" stroke-width="2"/>
+    <text x="105" y="120" fill="#ff5c5c" text-anchor="middle" font-size="15" font-weight="700" font-family="Syne">MASTER</text>
+    <!-- priority -->
+    <rect x="380" y="15" width="200" height="44" rx="8" fill="#0f2a1b" stroke="#4f9dff" stroke-width="2"/>
+    <text x="480" y="42" fill="#4f9dff" text-anchor="middle" font-size="13" font-weight="600">Standby A · priority 1 (sync)</text>
+    <rect x="380" y="70" width="200" height="44" rx="8" fill="#0f2a1b" stroke="#4f9dff" stroke-width="2"/>
+    <text x="480" y="97" fill="#4f9dff" text-anchor="middle" font-size="13" font-weight="600">Standby B · priority 2 (sync)</text>
+    <rect x="380" y="125" width="200" height="40" rx="8" fill="#171a23" stroke="#6b7289"/>
+    <text x="480" y="150" fill="#9aa1b5" text-anchor="middle" font-size="13">Standby C · async (reads)</text>
+    <rect x="380" y="175" width="200" height="40" rx="8" fill="#171a23" stroke="#6b7289"/>
+    <text x="480" y="200" fill="#9aa1b5" text-anchor="middle" font-size="13">Standby D · async (reads)</text>
+    <line x1="180" y1="105" x2="375" y2="38" stroke="#4f9dff" stroke-width="2.5" marker-end="url(#ab2)"/>
+    <line x1="180" y1="112" x2="375" y2="92" stroke="#4f9dff" stroke-width="2.5" marker-end="url(#ab2)"/>
+    <line x1="180" y1="120" x2="375" y2="145" stroke="#6b7289" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#ag2)"/>
+    <line x1="180" y1="128" x2="375" y2="195" stroke="#6b7289" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#ag2)"/>
+    <text x="740" y="60" fill="#4f9dff" text-anchor="middle" font-size="13">commit waits for these</text>
+    <text x="740" y="80" fill="#9aa1b5" text-anchor="middle" font-size="12">e.g. the DR backup</text>
+    <text x="740" y="170" fill="#9aa1b5" text-anchor="middle" font-size="13">catch up in background</text>
+    <text x="740" y="190" fill="#9aa1b5" text-anchor="middle" font-size="12">serve live queries</text>
+  </svg>
+  </div>
+  <div class="callout">You can mix per replica: for example, one <b>sync backup</b> that must never lose data, plus several <b>async</b> replicas that serve reads. Turning sync on for <b>every</b> node makes the cluster behave almost like one single database, fully consistent but paying the full latency cost.</div>
+</section>
+
+<!-- 5 POSTGRES -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--green)"></div><span class="num">05</span><h2>In Postgres</h2></div>
+  <div class="card">
+    <p class="muted">Configured on the master in <code>postgresql.conf</code>. Names are the standbys' <code>application_name</code>.</p>
+<pre><span class="c"># wait for the highest-priority 1 of these (A preferred, then B)</span>
+<span class="f">synchronous_standby_names</span> = <span class="s">'FIRST 1 (standby_a, standby_b)'</span>
+
+<span class="c"># wait for the top 2 by priority</span>
+<span class="f">synchronous_standby_names</span> = <span class="s">'FIRST 2 (standby_a, standby_b, standby_c)'</span>
+
+<span class="c"># quorum: any 2 of these 3, whoever answers first</span>
+<span class="f">synchronous_standby_names</span> = <span class="s">'ANY 2 (standby_a, standby_b, standby_c)'</span>
+
+<span class="c"># empty = fully asynchronous (the default)</span>
+<span class="f">synchronous_standby_names</span> = <span class="s">''</span></pre>
+    <p class="muted" style="margin-top:12px"><code>synchronous_commit</code> controls how far a sync standby must get before the client is unblocked. It can be set per transaction:</p>
+    <div class="tscroll" style="margin-top:8px">
+    <table>
+      <tr><th>Value</th><th>Client unblocked when…</th><th>Speed</th></tr>
+      <tr><td><code>off</code></td><td>Before even the master's WAL is flushed to disk</td><td class="yes">Fastest</td></tr>
+      <tr><td><code>local</code></td><td>Master flushed; standbys not waited on</td><td class="yes">Fast</td></tr>
+      <tr><td><code>remote_write</code></td><td>Standby received it (in OS memory)</td><td>Medium</td></tr>
+      <tr><td><code>on</code> (default)</td><td>Standby flushed it to disk (durable)</td><td>Slower</td></tr>
+      <tr><td><code>remote_apply</code></td><td>Standby applied it, so it's visible to reads there</td><td class="no">Slowest</td></tr>
+    </table>
+    </div>
+<pre><span class="c">-- critical write: make it visible on standbys before returning</span>
+<span class="k">BEGIN</span>;
+<span class="k">SET LOCAL</span> synchronous_commit = <span class="s">'remote_apply'</span>;
+<span class="k">UPDATE</span> accounts <span class="k">SET</span> balance = balance - <span class="n">500</span> <span class="k">WHERE</span> id = <span class="n">1</span>;
+<span class="k">COMMIT</span>;
+
+<span class="c">-- check which standbys are sync / async / quorum</span>
+<span class="k">SELECT</span> application_name, sync_state, sync_priority, replay_lag
+<span class="k">FROM</span>   pg_stat_replication;</pre>
+  </div>
+  <div class="callout red"><b>Nuance:</b> With the default <code>on</code>, the data is <i>durable</i> on the standby but may not be <i>visible</i> there yet. For true read-your-writes on a replica, you need <code>remote_apply</code>.</div>
+</section>
+
+<!-- 6 ASYNC -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--green)"></div><span class="num">06</span><h2>Asynchronous Replication</h2></div>
+  <div class="card">
+    <div class="step"><div class="dot" style="background:var(--blue)">1</div><div>Client writes to the master; once the master commits, the client is <b>done</b> and unblocked.</div></div>
+    <div class="step"><div class="dot" style="background:var(--orange)">2</div><div>A <b>background process</b> ships the changes to the standbys afterwards.</div></div>
+    <div class="step"><div class="dot" style="background:var(--green)">3</div><div>Standbys catch up a little later, which means <b>eventual consistency</b>.</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3 style="color:var(--green)">Faster writes & throughput</h3><p class="muted">The client never waits on the network to replicas. This is the <b style="color:var(--text)">default</b> in most databases.</p></div>
+    <div class="card"><h3 style="color:var(--orange)">Hidden background cost</h3><p class="muted">The background workers use CPU and I/O on the master. Under a heavy write load they can slow things down, and replicas fall further behind.</p></div>
+  </div>
+  <div class="callout red"><b>Data-loss risk:</b> If the master crashes after acking the client but before shipping the change, and a standby gets promoted, those last writes are <b>gone</b>, even though the client was told "success".</div>
+</section>
+
+<!-- 7 COMPARE -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--yellow)"></div><span class="num">07</span><h2>Compare Grid</h2></div>
+  <div class="card tscroll">
+    <table>
+      <tr><th></th><th style="color:var(--blue)">Synchronous</th><th style="color:var(--green)">Asynchronous</th></tr>
+      <tr><td><b>Client waits for</b></td><td>Master + required standbys</td><td>Master only</td></tr>
+      <tr><td><b>Consistency</b></td><td class="yes">Strong (for the waited-on replicas)</td><td class="no">Eventual</td></tr>
+      <tr><td><b>Write latency</b></td><td class="no">Higher (network round trips)</td><td class="yes">Low</td></tr>
+      <tr><td><b>Throughput</b></td><td>Lower</td><td class="yes">Higher</td></tr>
+      <tr><td><b>Data loss on master crash</b></td><td class="yes">None (for committed txns)</td><td class="no">Possible (the lag window)</td></tr>
+      <tr><td><b>If a sync standby dies</b></td><td class="no">Writes can <b>block</b> unless there are spare candidates</td><td class="yes">No impact on writes</td></tr>
+      <tr><td><b>Default?</b></td><td>Opt-in</td><td class="yes">Usually default</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 8 REAL WORLD -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">08</span><h2>Real-World Scenarios</h2></div>
+  <div class="grid g3">
+    <div class="card"><span class="pill p-red">Banking / payments</span><h3 style="margin-top:10px">Sync to a DR standby</h3><p class="muted">A confirmed transfer must survive a master crash. Wait for at least one standby (<code>FIRST 1</code>) and accept slower writes.</p></div>
+    <div class="card"><span class="pill p-green">Social feed</span><h3 style="margin-top:10px">Async everywhere</h3><p class="muted">A like or post appearing half a second late on a replica is fine. Speed and throughput matter more.</p></div>
+    <div class="card"><span class="pill p-purple">Mixed SaaS</span><h3 style="margin-top:10px">Per-transaction choice</h3><p class="muted">Billing writes use <code>remote_apply</code>; activity logs use <code>local</code>. One cluster, different guarantees.</p></div>
+    <div class="card"><span class="pill p-blue">Cross-region</span><h3 style="margin-top:10px">Sync nearby, async far</h3><p class="muted">A sync standby in the same region (a few ms away) plus an async replica on another continent, so writes stay fast.</p></div>
+    <div class="card"><span class="pill p-orange">Cassandra</span><h3 style="margin-top:10px">Quorum</h3><p class="muted">A write at <code>QUORUM</code> waits for a majority of replicas to acknowledge. It's the same "ANY N" idea, chosen per query.</p></div>
+    <div class="card"><span class="pill p-red">Outage trap</span><h3 style="margin-top:10px">Single sync standby dies</h3><p class="muted">With <code>FIRST 1 (a)</code> and only one name listed, if <code>a</code> goes down every commit hangs. Always list backup candidates.</p></div>
+  </div>
+</section>
+
+<!-- 9 ALTERNATIVES -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><span class="num">09</span><h2>Middle-Ground Options</h2></div>
+  <div class="card tscroll">
+    <table>
+      <tr><th>Option</th><th>Idea</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td><b style="color:var(--green)">Fully async</b></td><td>Never wait on replicas</td><td>Fastest, simplest</td><td>Stale reads, possible data loss</td></tr>
+      <tr><td><b style="color:var(--blue)">Sync to 1, async to rest</b></td><td><code>FIRST 1</code> plus async readers</td><td>No data loss, modest latency</td><td>Readers still stale</td></tr>
+      <tr><td><b style="color:var(--purple)">Quorum (ANY N)</b></td><td>Any N of M confirm</td><td>Tolerates slow or dead nodes</td><td>Still waits on network</td></tr>
+      <tr><td><b style="color:var(--yellow)">Semi-sync</b> (MySQL)</td><td>Wait until a replica <i>receives</i> the change, not applies it</td><td>Cheaper than full sync</td><td>Can fall back to async on timeout</td></tr>
+      <tr><td><b style="color:var(--orange)">Per-transaction</b></td><td>Set <code>synchronous_commit</code> per txn</td><td>Pay only for critical writes</td><td>App must pick correctly</td></tr>
+      <tr><td><b style="color:var(--red)">Fully sync (all nodes)</b></td><td>Wait for every replica</td><td>Everything consistent</td><td>Slowest node sets latency; any failure blocks writes</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 10 TIPS -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">10</span><h2>Interview / Practical Tips</h2></div>
+  <div class="grid g2">
+    <div class="card">
+      <ul>
+        <li>Frame it as a trade-off: <b>durability/consistency vs write latency</b>.</li>
+        <li>The common production answer: sync to one nearby standby, async to the rest.</li>
+        <li>Mention that <b>async can lose acknowledged writes</b> on failover.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ul>
+        <li>Sync doesn't automatically mean "readable on the replica". Know about <code>remote_apply</code>.</li>
+        <li>Never configure exactly one sync standby with no fallback.</li>
+        <li>Monitor <code>replay_lag</code>; async lag is your stale-read window.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- RECAP -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--red)"></div><span class="num">★</span><h2>One-Glance Recap</h2></div>
+  <div class="card">
+    <div class="tags" style="margin-top:0">
+      <span class="pill p-blue">sync: wait master + standbys</span>
+      <span class="pill p-green">async: wait master only</span>
+      <span class="pill p-purple">FIRST N · ANY N · priority</span>
+      <span class="pill p-orange">quorum (Cassandra)</span>
+      <span class="pill p-blue">sync = consistent, slower</span>
+      <span class="pill p-green">async = fast, eventual</span>
+      <span class="pill p-red">async bg work eats CPU</span>
+      <span class="pill p-red">all-sync ≈ one big DB</span>
+    </div>
+  </div>
+</section>
+
+<footer>Database Replication · Part 3 — Sync vs Async · based on Hussein Nasser's lecture</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master/Backup Replication</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --card:#171a23; --card2:#1d2130; --line:#2a2f40;
+  --text:#e6e8ef; --muted:#9aa1b5;
+  --blue:#4f9dff; --orange:#ff9f43; --green:#2ecc71; --purple:#a78bfa; --red:#ff5c5c; --yellow:#ffd166;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6;padding:40px 16px}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:Syne,sans-serif}
+h1{font-size:clamp(28px,5vw,44px);font-weight:800;letter-spacing:-.5px}
+.sub{color:var(--muted);margin-top:6px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pill{font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid;white-space:nowrap}
+.p-blue{color:var(--blue);border-color:#4f9dff55;background:#4f9dff14}
+.p-orange{color:var(--orange);border-color:#ff9f4355;background:#ff9f4314}
+.p-green{color:var(--green);border-color:#2ecc7155;background:#2ecc7114}
+.p-purple{color:var(--purple);border-color:#a78bfa55;background:#a78bfa14}
+.p-red{color:var(--red);border-color:#ff5c5c55;background:#ff5c5c14}
+section{margin-top:44px}
+.label{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.label .bar{width:5px;height:26px;border-radius:3px}
+.label h2{font-size:22px;font-weight:700}
+.label .num{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card h3{font-size:16px;margin-bottom:8px}
+ul{padding-left:18px}
+li{margin:4px 0}
+.muted{color:var(--muted)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:#0b0d12;border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--yellow)}
+pre{font-family:'JetBrains Mono',monospace;font-size:13px;background:#0b0d12;border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto;line-height:1.55;margin-top:10px}
+.k{color:var(--purple)} .s{color:var(--green)} .c{color:#6b7289;font-style:italic} .f{color:var(--blue)} .n{color:var(--orange)} .e{color:var(--red)}
+.callout{border-left:4px solid var(--orange);background:#ff9f430d;padding:14px 16px;border-radius:0 10px 10px 0;margin-top:14px}
+.callout.blue{border-color:var(--blue);background:#4f9dff0d}
+.callout.green{border-color:var(--green);background:#2ecc710d}
+.callout.red{border-color:var(--red);background:#ff5c5c0d}
+.diagram{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+svg{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:Syne,sans-serif;color:var(--muted);font-weight:600}
+.tscroll{overflow-x:auto}
+.yes{color:var(--green);font-weight:600} .no{color:var(--red);font-weight:600}
+.step{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
+.step .dot{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#0f1117}
+footer{margin-top:50px;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="pill p-purple" style="display:inline-block">Database Replication · Part 1</div>
+  <h1 style="margin-top:10px">Master / Backup Replication</h1>
+  <p class="sub">a.k.a. Master/Standby · Leader/Follower · Primary/Replica — one node writes, many nodes read.</p>
+  <div class="tags">
+    <span class="pill p-red">1 Master (writes)</span>
+    <span class="pill p-green">N Standbys (reads)</span>
+    <span class="pill p-blue">No write conflicts</span>
+    <span class="pill p-orange">Eventual consistency</span>
+    <span class="pill p-purple">Horizontal read scaling</span>
+  </div>
+</header>
+
+<!-- 1 PROBLEM -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">01</span><h2>The Problem</h2></div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>One database = one bottleneck</h3>
+      <p class="muted">A single DB node handles every read and write. As traffic grows, reads (usually the majority) crush it. Users far from that node (Asia vs US) suffer high latency, and if it dies, everything dies.</p>
+    </div>
+    <div class="card">
+      <h3>The idea</h3>
+      <p class="muted">Keep <b style="color:var(--text)">copies</b> of the data on multiple nodes. Let <b style="color:var(--red)">exactly one</b> node accept changes and push them to the others. Everyone else only serves reads.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 WHAT GOES TO MASTER -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--red)"></div><span class="num">02</span><h2>What Goes to the Master</h2></div>
+  <div class="grid g2">
+    <div class="card" style="border-color:#a78bfa55">
+      <h3 style="color:var(--purple)">DDL — Data Definition Language</h3>
+      <p class="muted">Changes to the <b>structure</b> of the database.</p>
+      <pre><span class="k">CREATE DATABASE</span> shop;
+<span class="k">CREATE TABLE</span> orders (id <span class="f">serial</span>, total <span class="f">numeric</span>);
+<span class="k">ALTER TABLE</span> orders <span class="k">ADD COLUMN</span> status <span class="f">text</span>;</pre>
+    </div>
+    <div class="card" style="border-color:#ff9f4355">
+      <h3 style="color:var(--orange)">DML (writes) — Data Manipulation</h3>
+      <p class="muted">Changes to the <b>rows</b> inside tables.</p>
+      <pre><span class="k">INSERT INTO</span> orders(total) <span class="k">VALUES</span> (<span class="n">99</span>);
+<span class="k">UPDATE</span> orders <span class="k">SET</span> status=<span class="s">'paid'</span> <span class="k">WHERE</span> id=<span class="n">1</span>;
+<span class="k">DELETE FROM</span> orders <span class="k">WHERE</span> id=<span class="n">7</span>;</pre>
+    </div>
+  </div>
+  <div class="callout red"><b>Rule:</b> Clients <u>never</u> write to standby nodes directly. All writes + DDLs → master. The master replicates to the standbys.</div>
+</section>
+
+<!-- 3 WRITE PATH DIAGRAM -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><span class="num">03</span><h2>Write Path</h2></div>
+  <div class="diagram">
+  <svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+    <defs>
+      <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff5c5c"/></marker>
+      <marker id="ag" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2ecc71"/></marker>
+    </defs>
+    <!-- client -->
+    <rect x="30" y="130" width="130" height="80" rx="10" fill="#1d2130" stroke="#4f9dff"/>
+    <text x="95" y="165" fill="#e6e8ef" text-anchor="middle" font-size="15" font-weight="600">Client / App</text>
+    <text x="95" y="188" fill="#9aa1b5" text-anchor="middle" font-size="12">writes</text>
+    <!-- arrow to master -->
+    <line x1="160" y1="170" x2="345" y2="170" stroke="#ff5c5c" stroke-width="3" marker-end="url(#ar)"/>
+    <text x="252" y="150" fill="#ff9f43" text-anchor="middle" font-family="JetBrains Mono" font-size="12">INSERT / UPDATE</text>
+    <text x="252" y="195" fill="#a78bfa" text-anchor="middle" font-family="JetBrains Mono" font-size="12">CREATE / ALTER</text>
+    <!-- master -->
+    <ellipse cx="420" cy="115" rx="65" ry="16" fill="#3a1414" stroke="#ff5c5c" stroke-width="2"/>
+    <path d="M355 115 v110 a65 16 0 0 0 130 0 v-110" fill="#3a1414" stroke="#ff5c5c" stroke-width="2"/>
+    <text x="420" y="165" fill="#ff5c5c" text-anchor="middle" font-size="16" font-weight="700" font-family="Syne">MASTER</text>
+    <text x="420" y="188" fill="#e6e8ef" text-anchor="middle" font-size="12">writes → WAL</text>
+    <text x="420" y="270" fill="#9aa1b5" text-anchor="middle" font-size="12">only writable node</text>
+    <!-- standbys -->
+    <g>
+      <ellipse cx="760" cy="45" rx="60" ry="14" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+      <path d="M700 45 v70 a60 14 0 0 0 120 0 v-70" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+      <text x="760" y="90" fill="#2ecc71" text-anchor="middle" font-size="14" font-weight="700" font-family="Syne">STANDBY 1</text>
+    </g>
+    <g>
+      <ellipse cx="760" cy="205" rx="60" ry="14" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+      <path d="M700 205 v70 a60 14 0 0 0 120 0 v-70" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+      <text x="760" y="250" fill="#2ecc71" text-anchor="middle" font-size="14" font-weight="700" font-family="Syne">STANDBY 2</text>
+    </g>
+    <line x1="487" y1="150" x2="695" y2="85" stroke="#2ecc71" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#ag)"/>
+    <line x1="487" y1="190" x2="695" y2="240" stroke="#2ecc71" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#ag)"/>
+    <text x="590" y="160" fill="#9aa1b5" text-anchor="middle" font-size="12">persistent bidirectional</text>
+    <text x="590" y="176" fill="#9aa1b5" text-anchor="middle" font-size="12">TCP + replication user</text>
+    <text x="760" y="310" fill="#9aa1b5" text-anchor="middle" font-size="12">read-only replicas</text>
+  </svg>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="step"><div class="dot" style="background:var(--blue)">1</div><div>Client sends a write/DDL to the <b style="color:var(--red)">master</b>.</div></div>
+    <div class="step"><div class="dot" style="background:var(--orange)">2</div><div>Master commits it (recorded in its <code>write-ahead log</code>).</div></div>
+    <div class="step"><div class="dot" style="background:var(--green)">3</div><div>Master <b>pushes</b> the change to each standby over an already-open, full-duplex TCP connection authenticated with a dedicated database replication user.</div></div>
+    <div class="step"><div class="dot" style="background:var(--purple)">4</div><div>Standbys apply the change and now hold the same data — eventually.</div></div>
+  </div>
+</section>
+
+<!-- 4 READ PATH -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--green)"></div><span class="num">04</span><h2>Read Path</h2></div>
+  <div class="diagram">
+  <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+    <defs><marker id="aw" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e6e8ef"/></marker></defs>
+    <rect x="30" y="95" width="130" height="64" rx="10" fill="#1d2130" stroke="#4f9dff"/>
+    <text x="95" y="132" fill="#e6e8ef" text-anchor="middle" font-size="14" font-weight="600">Client A</text>
+    <line x1="160" y1="127" x2="340" y2="127" stroke="#e6e8ef" stroke-width="3" marker-end="url(#aw)"/>
+    <text x="250" y="115" fill="#e6e8ef" text-anchor="middle" font-family="JetBrains Mono" font-size="12">SELECT</text>
+    <ellipse cx="410" cy="90" rx="60" ry="14" fill="#3a1414" stroke="#ff5c5c" stroke-width="2"/>
+    <path d="M350 90 v80 a60 14 0 0 0 120 0 v-80" fill="#3a1414" stroke="#ff5c5c" stroke-width="2"/>
+    <text x="410" y="135" fill="#ff5c5c" text-anchor="middle" font-size="14" font-weight="700" font-family="Syne">MASTER</text>
+    <text x="410" y="215" fill="#2ecc71" text-anchor="middle" font-size="12">✓ always fresh data</text>
+
+    <ellipse cx="720" cy="40" rx="55" ry="13" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+    <path d="M665 40 v55 a55 13 0 0 0 110 0 v-55" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+    <text x="720" y="78" fill="#2ecc71" text-anchor="middle" font-size="13" font-weight="700" font-family="Syne">STANDBY</text>
+    <ellipse cx="720" cy="170" rx="55" ry="13" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+    <path d="M665 170 v55 a55 13 0 0 0 110 0 v-55" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+    <text x="720" y="208" fill="#2ecc71" text-anchor="middle" font-size="13" font-weight="700" font-family="Syne">STANDBY</text>
+
+    <rect x="815" y="20" width="75" height="44" rx="8" fill="#1d2130" stroke="#4f9dff"/>
+    <text x="852" y="47" fill="#e6e8ef" text-anchor="middle" font-size="12">Client B</text>
+    <line x1="815" y1="50" x2="782" y2="60" stroke="#e6e8ef" stroke-width="2.5" marker-end="url(#aw)"/>
+    <rect x="815" y="190" width="75" height="44" rx="8" fill="#1d2130" stroke="#4f9dff"/>
+    <text x="852" y="217" fill="#e6e8ef" text-anchor="middle" font-size="12">Client C</text>
+    <line x1="815" y1="205" x2="782" y2="195" stroke="#e6e8ef" stroke-width="2.5" marker-end="url(#aw)"/>
+    <text x="600" y="135" fill="#ff9f43" text-anchor="middle" font-size="12">⚠ may be slightly stale</text>
+  </svg>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card"><h3 style="color:var(--red)">Read from Master</h3><p class="muted">Always up-to-date. But adds load to the one node that must also handle every write.</p></div>
+    <div class="card"><h3 style="color:var(--green)">Read from Standby</h3><p class="muted">Totally fine and the whole point — offloads the master. Data may lag behind by a bit.</p></div>
+    <div class="card"><h3 style="color:var(--orange)">Write to Standby</h3><p class="muted">Not allowed. Standbys are read-only; the DB rejects the write.</p></div>
+  </div>
+  <pre><span class="c">-- On a Postgres standby (hot standby):</span>
+<span class="k">INSERT INTO</span> orders(total) <span class="k">VALUES</span> (<span class="n">10</span>);
+<span class="e">ERROR:  cannot execute INSERT in a read-only transaction</span>
+
+<span class="k">SELECT</span> <span class="f">pg_is_in_recovery</span>();   <span class="c">-- true on standby, false on master</span></pre>
+</section>
+
+<!-- 5 WHY NO CONFLICTS -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><span class="num">05</span><h2>Why It's Simple — No Conflicts</h2></div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Single writer = single source of truth</h3>
+      <p class="muted">Only one node takes writes, so two nodes can never modify the same row at the same time. There's nothing to merge or resolve — changes flow one direction, in one order.</p>
+    </div>
+    <div class="card">
+      <h3>Contrast: Multi-Master <span class="pill p-purple" style="margin-left:6px">later video</span></h3>
+      <p class="muted">Multiple masters accept writes → two users can update the same row on different masters simultaneously → you <b style="color:var(--text)">must resolve conflicts</b>. More power, far more complexity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 GEO + EVENTUAL CONSISTENCY -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--yellow)"></div><span class="num">06</span><h2>Regions & Eventual Consistency</h2></div>
+  <div class="diagram">
+  <svg viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+    <defs><marker id="ay" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffd166"/></marker></defs>
+    <rect x="40" y="70" width="200" height="90" rx="12" fill="#3a1414" stroke="#ff5c5c" stroke-width="2"/>
+    <text x="140" y="105" fill="#ff5c5c" text-anchor="middle" font-size="15" font-weight="700" font-family="Syne">🇺🇸 America</text>
+    <text x="140" y="130" fill="#e6e8ef" text-anchor="middle" font-size="13">Master</text>
+    <rect x="360" y="20" width="200" height="80" rx="12" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+    <text x="460" y="55" fill="#2ecc71" text-anchor="middle" font-size="15" font-weight="700" font-family="Syne">🇪🇺 Europe</text>
+    <text x="460" y="78" fill="#e6e8ef" text-anchor="middle" font-size="13">Standby</text>
+    <rect x="360" y="130" width="200" height="80" rx="12" fill="#0f2a1b" stroke="#2ecc71" stroke-width="2"/>
+    <text x="460" y="165" fill="#2ecc71" text-anchor="middle" font-size="15" font-weight="700" font-family="Syne">🌏 Asia</text>
+    <text x="460" y="188" fill="#e6e8ef" text-anchor="middle" font-size="13">Standby</text>
+    <line x1="240" y1="100" x2="355" y2="62" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ay)"/>
+    <line x1="240" y1="130" x2="355" y2="168" stroke="#ffd166" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ay)"/>
+    <text x="300" y="120" fill="#ffd166" text-anchor="middle" font-size="12">lag</text>
+    <text x="730" y="80" fill="#e6e8ef" text-anchor="middle" font-size="13">Local users read</text>
+    <text x="730" y="100" fill="#e6e8ef" text-anchor="middle" font-size="13">from nearby replica</text>
+    <text x="730" y="130" fill="#2ecc71" text-anchor="middle" font-size="12">✓ low read latency</text>
+    <text x="730" y="152" fill="#ff9f43" text-anchor="middle" font-size="12">⚠ updates appear a bit later</text>
+  </svg>
+  </div>
+  <div class="callout">
+    <b>Key insight:</b> Eventual consistency is <u>not just a NoSQL thing</u>. A plain relational database (Postgres, MySQL) running master/backup replication is eventually consistent for reads served by replicas. Propagation across regions takes time — if your use case can tolerate that, great. If not, there are ways to handle it (see tips below).
+  </div>
+  <div class="callout blue">
+    <b>Teaser — does the client wait for standbys?</b> Either the write returns once it's in the master's WAL (<code>asynchronous</code>), or it waits until standbys confirm (<code>synchronous</code>: first 1, first 2, or any N). A trade-off between speed and consistency — covered in the next video.
+  </div>
+</section>
+
+<!-- 7 PROS CONS -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--green)"></div><span class="num">07</span><h2>Pros & Cons</h2></div>
+  <div class="grid g2">
+    <div class="card" style="border-color:#2ecc7155">
+      <h3 style="color:var(--green)">✓ Pros</h3>
+      <ul>
+        <li><b>Horizontal scaling</b> of reads — add more standbys as read traffic grows</li>
+        <li><b>Region-based queries</b> — a DB copy per region, near its users</li>
+        <li><b>Simple</b> — one writer, no conflict resolution</li>
+        <li><b>Redundancy</b> — standbys are live copies that can be promoted if the master fails</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:#ff5c5c55">
+      <h3 style="color:var(--red)">✗ Cons</h3>
+      <ul>
+        <li><b>Eventual consistency</b> — replica reads can be stale</li>
+        <li><b>Writes don't scale</b> — every write still hits one master</li>
+        <li><b>Slow writes</b> if you choose synchronous replication</li>
+        <li>Master is still a write <b>single point of failure</b> until failover happens</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8 REAL WORLD -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">08</span><h2>Real-World Scenarios</h2></div>
+  <div class="grid g3">
+    <div class="card">
+      <span class="pill p-blue">E-commerce</span>
+      <h3 style="margin-top:10px">Product catalog</h3>
+      <p class="muted">Thousands browse products (reads) for every one who places an order (write). Browsing → replicas; checkout → master. Classic 95/5 read-heavy split.</p>
+    </div>
+    <div class="card">
+      <span class="pill p-orange">The stale-read bug</span>
+      <h3 style="margin-top:10px">"I just updated my profile!"</h3>
+      <p class="muted">User saves a new name (master), page reloads and reads from a lagging replica → old name shows. Fix: read-your-own-writes by sending that user's reads to master for a few seconds.</p>
+    </div>
+    <div class="card">
+      <span class="pill p-green">Analytics</span>
+      <h3 style="margin-top:10px">Heavy reports</h3>
+      <p class="muted">Run expensive dashboard/BI queries on a dedicated replica so they never slow down production writes on the master.</p>
+    </div>
+    <div class="card">
+      <span class="pill p-purple">Multi-tenant SaaS</span>
+      <h3 style="margin-top:10px">Global users</h3>
+      <p class="muted">Master in the US, replicas in EU & Asia. Dashboards load fast everywhere; settings changes route to the US master.</p>
+    </div>
+    <div class="card">
+      <span class="pill p-red">Failover</span>
+      <h3 style="margin-top:10px">Master crashes</h3>
+      <p class="muted">A standby is promoted to master (e.g. <code>pg_promote()</code>). Managed services like AWS RDS / Aurora automate this.</p>
+    </div>
+    <div class="card">
+      <span class="pill p-blue">Banking</span>
+      <h3 style="margin-top:10px">Balance check</h3>
+      <p class="muted">Balance before transfer must be fresh → read from master (or use synchronous replication). A stale read here costs money.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 CODE -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><span class="num">09</span><h2>In Code — Read/Write Splitting</h2></div>
+  <div class="card">
+    <p class="muted">The app decides where each query goes. Writes → master pool; reads → replica pool.</p>
+<pre><span class="k">import</span> { Pool } <span class="k">from</span> <span class="s">"pg"</span>;
+
+<span class="k">const</span> master   = <span class="k">new</span> <span class="f">Pool</span>({ host: <span class="s">"db-master"</span>  });
+<span class="k">const</span> replicas = [<span class="k">new</span> <span class="f">Pool</span>({ host: <span class="s">"db-replica-1"</span> }),
+                  <span class="k">new</span> <span class="f">Pool</span>({ host: <span class="s">"db-replica-2"</span> })];
+
+<span class="k">const</span> <span class="f">pickReplica</span> = () =&gt; replicas[Math.<span class="f">floor</span>(Math.<span class="f">random</span>() * replicas.length)];
+
+<span class="c">// writes + DDL always go to master</span>
+<span class="k">export const</span> <span class="f">write</span> = (sql, params) =&gt; master.<span class="f">query</span>(sql, params);
+
+<span class="c">// reads can go to replicas, unless caller needs fresh data</span>
+<span class="k">export const</span> <span class="f">read</span> = (sql, params, { fresh = <span class="n">false</span> } = {}) =&gt;
+  (fresh ? master : <span class="f">pickReplica</span>()).<span class="f">query</span>(sql, params);
+
+<span class="c">// usage</span>
+<span class="k">await</span> <span class="f">write</span>(<span class="s">"UPDATE users SET name=$1 WHERE id=$2"</span>, [<span class="s">"Ali"</span>, <span class="n">1</span>]);
+<span class="k">await</span> <span class="f">read</span>(<span class="s">"SELECT * FROM users WHERE id=$1"</span>, [<span class="n">1</span>], { fresh: <span class="n">true</span> }); <span class="c">// read-your-writes</span></pre>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <p class="muted">Check replication status &amp; lag from the master:</p>
+<pre><span class="k">SELECT</span> client_addr, state, sync_state, replay_lag
+<span class="k">FROM</span>   pg_stat_replication;</pre>
+  </div>
+</section>
+
+<!-- 10 ALTERNATIVES -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><span class="num">10</span><h2>Alternatives & When to Pick Them</h2></div>
+  <div class="card tscroll">
+    <table>
+      <tr><th>Approach</th><th>Scales reads</th><th>Scales writes</th><th>Complexity</th><th>Best for</th></tr>
+      <tr><td><b style="color:var(--red)">Master/Backup</b></td><td class="yes">Yes</td><td class="no">No</td><td>Low</td><td>Read-heavy apps, geo reads, HA</td></tr>
+      <tr><td><b style="color:var(--purple)">Multi-Master</b></td><td class="yes">Yes</td><td class="yes">Partly</td><td>High (conflicts)</td><td>Writes needed in many regions</td></tr>
+      <tr><td><b style="color:var(--blue)">Sharding</b></td><td class="yes">Yes</td><td class="yes">Yes</td><td>High (routing, cross-shard joins)</td><td>Data too large / write-heavy for one node</td></tr>
+      <tr><td><b style="color:var(--green)">Caching (Redis)</b></td><td class="yes">Yes</td><td class="no">No</td><td>Medium (invalidation)</td><td>Hot, repeated reads</td></tr>
+      <tr><td><b style="color:var(--yellow)">Vertical scaling</b></td><td>Limited</td><td>Limited</td><td>Very low</td><td>Early stage — just buy a bigger box</td></tr>
+    </table>
+  </div>
+  <p class="muted" style="margin-top:10px">These combine: most production systems use master/backup + a cache, and add sharding only when writes outgrow one master.</p>
+</section>
+
+<!-- 11 TIPS -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><span class="num">11</span><h2>Interview / Practical Tips</h2></div>
+  <div class="grid g2">
+    <div class="card">
+      <ul>
+        <li>Name it clearly: "single-leader replication — writes to leader, reads fan out to followers."</li>
+        <li>Always follow with "reads from replicas are <b>eventually consistent</b>" and how you'd handle it.</li>
+        <li>Fixes for staleness: read-your-writes routing, sticky sessions to master after a write, sync replication for critical data.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ul>
+        <li>Remember: it scales <b>reads</b>, not <b>writes</b>. Write-heavy? → sharding.</li>
+        <li>Mention failover: promote a standby; beware of async lag = possible loss of last few writes.</li>
+        <li>Monitor replication lag — a replica far behind should be taken out of the read pool.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CHEATSHEET -->
+<section>
+  <div class="label"><div class="bar" style="background:var(--red)"></div><span class="num">★</span><h2>One-Glance Recap</h2></div>
+  <div class="card">
+    <div class="tags" style="margin-top:0">
+      <span class="pill p-red">writes + DDL → master only</span>
+      <span class="pill p-green">reads → master or standby</span>
+      <span class="pill p-blue">master pushes over TCP</span>
+      <span class="pill p-purple">no conflicts</span>
+      <span class="pill p-orange">replicas may lag</span>
+      <span class="pill p-green">scale reads horizontally</span>
+      <span class="pill p-blue">DB per region</span>
+      <span class="pill p-red">writes don't scale</span>
+    </div>
+  </div>
+</section>
+
+<footer>Database Replication · Part 1 — Master/Backup · based on Hussein Nasser's lecture</footer>
+</div>
+</body>
+</html>
