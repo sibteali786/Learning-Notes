@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PostgreSQL Deep Dive — Interview Notes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{
+    --bg:#0f1117; --card:#161923; --card2:#1b1f2c; --border:#272c3a;
+    --blue:#5a93ff; --orange:#f6b685; --green:#5bba7f; --purple:#c39bf0;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px;line-height:1.55}
+  .wrap{max-width:980px;margin:0 auto}
+  h1{font-family:'Syne',sans-serif;font-size:2rem;color:#fff;margin-bottom:4px}
+  .sub{color:var(--muted);margin-bottom:32px}
+  h2{font-family:'Syne',sans-serif;font-size:1.3rem;color:#fff;display:flex;align-items:center;gap:10px;margin-top:48px}
+  h2::before{content:'';width:6px;height:24px;border-radius:3px;background:var(--accent,var(--blue))}
+  h3{font-family:'Syne',sans-serif;font-size:1.05rem;color:var(--text);margin-top:22px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:14px 0}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;margin-right:6px}
+  .p-blue{background:rgba(90,147,255,.15);color:var(--blue)}
+  .p-orange{background:rgba(246,182,133,.15);color:var(--orange)}
+  .p-green{background:rgba(91,186,127,.15);color:var(--green)}
+  .p-purple{background:rgba(195,155,240,.15);color:var(--purple)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.85rem}
+  th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem}
+  code,.inline-code{background:#0c0e14;color:var(--green);padding:2px 6px;border-radius:4px;font-size:.85em}
+  pre{background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;color:#d7dbe6}
+  pre .cmt{color:var(--muted);font-style:italic}
+  ul{padding-left:20px} li{margin:4px 0} ol{padding-left:20px} ol li{margin:4px 0}
+  .verdict-good{color:var(--green)} .verdict-warn{color:var(--orange)} .verdict-bad{color:#ff8f8f}
+  .tip{border-left:3px solid var(--green);background:rgba(91,186,127,.06);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:.88rem}
+  .warn{border-left:3px solid #ff8f8f;background:rgba(255,107,107,.06);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:.88rem}
+  .glossary td:first-child{color:var(--blue);font-weight:700;white-space:nowrap}
+  svg{max-width:100%}
+  .flow-box{fill:var(--card2);stroke:var(--border)}
+  .flow-text{fill:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px}
+  .flow-arrow{stroke:var(--blue);stroke-width:2;fill:none;marker-end:url(#arrow)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PostgreSQL Deep Dive</h1>
+  <div class="sub">Hello Interview — System Design in a Hurry · Key Technologies</div>
+
+  <div class="card">
+    <span class="pill p-blue">Framing</span>
+    <p>Interviewer isn't grading you as a DBA. They want <b>architectural judgment</b>: when to pick Postgres, when to look elsewhere, and what trade-offs you're accepting. Two common failure modes: (1) diving into MVCC/WAL internals nobody asked for, (2) vague claims like "NoSQL scales better" with no reasoning behind them.</p>
+  </div>
+
+  <h2 style="--accent:var(--blue)">Motivating Example — Social Media Platform</h2>
+  <div class="card">
+    <p>Users: create posts · comment · follow · like posts/comments · DM each other.</p>
+    <ul>
+      <li>DM thread creation needs <b>atomicity</b> (thread + participants + first message together)</li>
+      <li>Comments/follows need <b>referential integrity</b> (can't comment on a nonexistent post, follow a nonexistent user)</li>
+      <li>Like counts can be <b>eventually consistent</b> — a few seconds' delay is fine</li>
+      <li>Profile view needs fast fetch of posts + follower count + metadata</li>
+      <li>Users need to search posts and other users</li>
+      <li>As the platform grows → more data, more complex queries</li>
+    </ul>
+    <p style="color:var(--muted);font-size:.85rem">Complex relationships + mixed consistency needs + search + growth = exactly the mix that makes Postgres worth exploring.</p>
+  </div>
+
+  <h2 style="--accent:var(--green)">Read Performance</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">Basic Indexing (B-tree, default)</h3>
+    <p>Good for: exact match, range queries, sorting (when ORDER BY matches index column order). Postgres auto-indexes the primary key; you add more yourself.</p>
+    <pre><span class="cmt">-- bread and butter index</span>
+CREATE INDEX idx_users_email ON users(email);
+
+<span class="cmt">-- multi-column for common query patterns</span>
+CREATE INDEX idx_posts_user_date ON posts(user_id, created_at);</pre>
+    <div class="warn"><b>Interview trap:</b> indexing every column. Each index slows writes (must be kept updated), costs disk space, and the planner may skip it anyway for a sequential scan.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Beyond Basic Indexes — replaces whole other systems</h3>
+
+    <p><span class="pill p-green">GIN</span><b>Full-Text Search</b> — like a book's index: maps each word → every location it appears.</p>
+    <pre>ALTER TABLE posts ADD COLUMN search_vector tsvector;
+CREATE INDEX idx_posts_search ON posts USING GIN(search_vector);
+
+SELECT * FROM posts
+WHERE search_vector @@ to_tsquery('postgresql & database');</pre>
+    <p style="font-size:.85rem">Supports stemming (find/finds/finding match), relevance ranking, multi-language, AND/OR/NOT.</p>
+    <table>
+      <tr><th>Stick with Postgres search when</th><th>Reach for Elasticsearch when you need</th></tr>
+      <tr><td>Simpler use cases, keeping architecture lean</td><td>Sophisticated relevancy scoring, faceted search, fuzzy/"search-as-you-type", distributed search at very large scale, advanced analytics</td></tr>
+    </table>
+
+    <p><span class="pill p-green">GIN</span><b>JSONB metadata</b> — NoSQL-style flexible schema inside Postgres.</p>
+    <pre>ALTER TABLE posts ADD COLUMN metadata JSONB;
+CREATE INDEX idx_posts_metadata ON posts USING GIN(metadata);
+
+SELECT * FROM posts
+WHERE metadata @> '{"type": "video"}'
+  AND metadata @> '{"hashtags": ["coding"]}';
+
+<span class="cmt">-- find all posts that mention a specific user</span>
+SELECT * FROM posts WHERE metadata @> '{"mentions": ["user123"]}';</pre>
+
+    <p><span class="pill p-purple">GiST</span><b>Geospatial via PostGIS extension</b> — index location data like you'd index text.</p>
+    <pre>CREATE EXTENSION postgis;
+ALTER TABLE posts ADD COLUMN location geography(Point, 4326);
+CREATE INDEX idx_posts_location ON posts USING GIST(location);
+
+<span class="cmt">-- all posts within 5km of SF</span>
+SELECT * FROM posts
+WHERE ST_DWithin(location, ST_MakePoint(-122.4194, 37.7749)::geography, 5000);</pre>
+    <p style="font-size:.85rem">GiST is a general-purpose index framework; PostGIS uses it for bounding-box strategies so "within X km" queries skip row-by-row checks. Handles points/lines/polygons, multiple distance calcs, coordinate systems. <b>Real example: Uber initially ran their entire ride-matching system on PostGIS</b> before moving to custom infra at massive scale.</p>
+    <div class="tip">You can combine all three in one query — full-text + JSONB + geospatial — e.g. "video posts within 5km of SF mentioning 'food', tagged #restaurant." This is a strong interview signal: sophisticated functionality without adding a new system.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Query Optimization Essentials</h3>
+    <p><b>Covering indexes</b> — store the columns you need right in the index, so Postgres never touches the table:</p>
+    <pre>CREATE INDEX idx_posts_user_include
+ON posts(user_id) INCLUDE (title, created_at);</pre>
+    <p style="font-size:.85rem">Trade-off: bigger index, slightly slower writes.</p>
+    <p><b>Partial indexes</b> — index only the subset you actually query:</p>
+    <pre>CREATE INDEX idx_active_users
+ON users(email) WHERE status = 'active';</pre>
+    <p style="font-size:.85rem">Great when most queries hit "active" rows and "inactive/deleted" rows are dead weight in the index.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Practical Performance Limits (rough rules of thumb)</h3>
+    <table>
+      <tr><th>Metric</th><th>Number</th></tr>
+      <tr><td>Simple indexed lookups</td><td>tens of thousands/sec/core (often 50k+)</td></tr>
+      <tr><td>Multi-table joins (indexed)</td><td>thousands to tens of thousands/sec</td></tr>
+      <tr><td>Complex analytical/aggregation queries</td><td>hundreds to low thousands/sec</td></tr>
+      <tr><td>Simple inserts</td><td>~5,000/sec/core</td></tr>
+      <tr><td>Updates w/ index modifications</td><td>~1,000–2,000/sec/core</td></tr>
+      <tr><td>Complex transactions (multi-table)</td><td>hundreds/sec</td></tr>
+      <tr><td>Tables get unwieldy</td><td>&gt;100M rows</td></tr>
+      <tr><td>Full-text search works well</td><td>up to tens of millions of docs</td></tr>
+      <tr><td>Complex joins get hard</td><td>&gt;10M rows</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:.85rem">Not hard limits — signals for when to consider partitioning/sharding. <b>Memory is king:</b> keep the working set in RAM; disk access is orders of magnitude slower.</p>
+  </div>
+
+  <h2 style="--accent:var(--orange)">Write Performance</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">What happens on a write (4 steps)</h3>
+    <ol>
+      <li><b>Buffer Cache + WAL record [Memory]</b> — data pages marked dirty, WAL record generated, both in memory</li>
+      <li><b>WAL Flush [Disk]</b> — at commit, WAL flushed to disk (sequential = fast). Transaction is now durable — crash-safe via WAL replay, even before data pages are written</li>
+      <li><b>Background Writer [Memory→Disk]</b> — dirty pages written to actual data files asynchronously, batched for efficiency</li>
+      <li><b>Index Updates [Memory+Disk]</b> — every index also needs a WAL entry; more indexes = slower writes</li>
+    </ol>
+    <div class="tip"><b>Key line for interviews:</b> write throughput is bounded by <b>WAL flush speed (disk I/O)</b> — that's the one synchronous step gating commit confirmation. Buffer cache just batches the rest for later.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Throughput limits (single node, Read Committed default)</h3>
+    <table>
+      <tr><th>Operation</th><th>Rate</th></tr>
+      <tr><td>Simple inserts</td><td>~5,000/sec/core</td></tr>
+      <tr><td>Updates w/ index mods</td><td>~1,000–2,000/sec/core</td></tr>
+      <tr><td>Complex transactions (multi-table/index)</td><td>hundreds/sec</td></tr>
+      <tr><td>Bulk operations</td><td>tens of thousands of rows/sec</td></tr>
+    </table>
+    <p style="font-size:.85rem"><b>What moves these numbers:</b> hardware (WAL disk I/O), index count, synchronous replication (adds latency waiting on replica ack), transaction complexity, and connection count — Postgres forks an OS process per connection, so use a pooler like <b>PgBouncer</b> in front when running many app instances.</p>
+    <div class="warn">5k writes/sec isn't a hard ceiling on Postgres overall — it's the per-node number. Beyond that, you shard across nodes.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">5 Write-Scaling Optimizations</h3>
+    <table>
+      <tr><th>#</th><th>Technique</th><th>Notes</th></tr>
+      <tr><td>1</td><td>Vertical Scaling</td><td>Faster NVMe (WAL), more RAM (buffer cache), more cores. Simple, but a weak standalone interview answer</td></tr>
+      <tr><td>2</td><td>Batch Processing</td><td>Combine many writes into one transaction. Risk: crash mid-batch loses the whole batch</td></tr>
+      <tr><td>3</td><td>Write Offloading</td><td>Non-critical writes (analytics, activity logs, "last seen") → message queue (Kafka) → background workers → async DB / separate analytics DB</td></tr>
+      <tr><td>4</td><td>Table Partitioning</td><td>Time-based split across physical tables. Helps concurrency (different sessions write different partitions) <i>and</i> reads (scan only recent partitions)</td></tr>
+      <tr><td>5</td><td>Sharding</td><td>Most common interview answer. Shard on the column you query by most (e.g. user_id) to avoid cross-shard scatter-gather</td></tr>
+    </table>
+    <pre><span class="cmt">-- 2. Batch insert instead of 1000 separate ones</span>
+INSERT INTO likes (post_id, user_id) VALUES (1,101),(1,102),...,(1,1000);</pre>
+    <pre><span class="cmt">-- 4. Time-based partitioning</span>
+CREATE TABLE posts (
+  id SERIAL, user_id INT, content TEXT, created_at TIMESTAMP
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE posts_2024_01 PARTITION OF posts
+  FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');</pre>
+    <p style="font-size:.85rem">Common pattern: recent partitions on fast NVMe, older ones moved to cheap storage.</p>
+    <div class="warn"><b>Sharding trade-offs:</b> cross-shard queries, keeping schema consistent across shards, more DBs to manage. Postgres has <b>no built-in sharding</b> (unlike DynamoDB) — build it yourself or use a managed layer like <b>Citus</b>.</div>
+  </div>
+
+  <h2 style="--accent:var(--purple)">Replication</h2>
+  <div class="card">
+    <p>Two purposes: <b>① scale reads</b> (spread queries across replicas) and <b>② high availability</b> (survive node failure).</p>
+    <table>
+      <tr><th>Type</th><th>Behavior</th><th>Trade-off</th></tr>
+      <tr><td><b>Asynchronous</b> (default)</td><td>Primary confirms write immediately, replicates in background</td><td>Best performance; risk of losing recent writes if primary fails before replicas catch up</td></tr>
+      <tr><td><b>Synchronous</b></td><td>Primary waits for ≥1 replica ack before confirming</td><td>Stronger durability/consistency; adds write latency</td></tr>
+    </table>
+    <p style="font-size:.85rem">Common hybrid: a few synchronous replicas for durability + more asynchronous ones purely for read scaling. Postgres lets you designate which replicas are synchronous.</p>
+    <div class="warn"><b>Replication lag ("read-your-writes"):</b> a user who just wrote data may not see it if their next read hits a replica that hasn't caught up.</div>
+    <p><b>Failover sequence:</b> detect primary is down → promote a replica → update connection info → repoint applications. In interviews, it's enough to know this is possible and roughly how it works — managed services (RDS, Cloud SQL) automate it.</p>
+  </div>
+
+  <h2 style="--accent:var(--blue)">Data Consistency & Transactions</h2>
+
+  <div class="card">
+    <p><b>A transaction</b> = a set of operations that all succeed or all fail together.</p>
+    <pre><span class="cmt">-- atomic money transfer</span>
+BEGIN;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;</pre>
+    <div class="warn">
+      <b>The trap: transactions alone don't protect you from concurrent transactions.</b><br>
+      Auction example — two users bid at once, default Read Committed isolation:
+      <ol style="margin:8px 0 0">
+        <li>User A reads maxBid = $90</li>
+        <li>User B reads maxBid = $90 (before A commits)</li>
+        <li>A bids $100, updates maxBid → $100, commits</li>
+        <li>B still thinks max is $90, bids $95 — the guard <code>UPDATE ... WHERE maxBid &lt; 100</code> updates 0 rows, but B's <code>INSERT</code> still goes through and commits</li>
+      </ol>
+      Result: an inconsistent $95 bid record exists after a $100 bid was already accepted. The read-then-write isn't atomic across transactions.
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Fix 1 — Row-Level Locking</h3>
+    <pre>BEGIN;
+SELECT maxBid FROM Auction WHERE id = 123 FOR UPDATE;
+INSERT INTO bids (item_id, user_id, amount) VALUES (123, 456, 100);
+UPDATE Auction SET maxBid = 100 WHERE id = 123;
+COMMIT;</pre>
+    <p style="font-size:.85rem"><code>FOR UPDATE</code> locks the row; other transactions trying to read it with <code>FOR UPDATE</code> wait. Say explicitly: <i>"transactions + row-level locking on the auction row"</i> — not just "we'll use transactions."</p>
+
+    <h3>Fix 2 — Higher Isolation Level</h3>
+    <pre>BEGIN;
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+-- same code as before
+COMMIT;</pre>
+    <p style="font-size:.85rem">Prevents all anomalies, but a conflicting transaction gets rolled back and must retry — your app needs retry logic.</p>
+
+    <h3>Fix 3 — Optimistic Concurrency Control (OCC), app-level</h3>
+    <pre>SELECT maxBid, version FROM Auction WHERE id = 123;
+<span class="cmt">-- returns maxBid=90, version=5</span>
+
+UPDATE Auction SET maxBid = 100, version = 6
+WHERE id = 123 AND version = 5;
+<span class="cmt">-- 0 rows updated → someone else got there first, retry</span></pre>
+    <p style="font-size:.85rem">No native Postgres syntax — you add a <code>version</code> column yourself. Good when conflicts are <b>rare</b> (no locking overhead); bad when conflicts are <b>frequent</b> (wasted retries).</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Serializable vs. Row-Level Locking</h3>
+    <table>
+      <tr><th>Aspect</th><th>Serializable Isolation</th><th>Row-Level Locking</th></tr>
+      <tr><td>Concurrency</td><td>Lower — may retry on conflict</td><td>Higher — only conflicts on same rows</td></tr>
+      <tr><td>Performance</td><td>More overhead (tracks all read/write deps)</td><td>Less overhead (locks specific rows)</td></tr>
+      <tr><td>Use case</td><td>Complex txns, hard to know what to lock</td><td>You know exactly which rows to lock</td></tr>
+      <tr><td>Error handling</td><td>Serialization failures</td><td>Deadlock scenarios</td></tr>
+      <tr><td>Example</td><td>Complex cross-table financial calcs</td><td>Auction bidding, inventory updates</td></tr>
+      <tr><td>Memory</td><td>Higher (tracks transaction history)</td><td>Lower (tracks locks only)</td></tr>
+      <tr><td>Scalability</td><td>Worse with concurrent txns</td><td>Better when conflicts are rare</td></tr>
+    </table>
+    <div class="tip">Prefer row-level locking when you know the rows involved. Reserve Serializable for transactions too complex to reason about manually.</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Isolation Levels (PG implements 3 of the SQL standard's 4)</h3>
+    <table>
+      <tr><th>Level</th><th>Dirty Read</th><th>Non-repeatable Read</th><th>Phantom Read</th><th>Serialization Anomaly</th></tr>
+      <tr><td>Read Uncommitted</td><td>Allowed by spec, <b>not in PG</b></td><td>Possible</td><td>Possible</td><td>Possible</td></tr>
+      <tr><td><b>Read Committed</b> (default)</td><td>Not possible</td><td>Possible</td><td>Possible</td><td>Possible</td></tr>
+      <tr><td>Repeatable Read</td><td>Not possible</td><td>Not possible</td><td>Allowed by spec, <b>not in PG</b></td><td>Possible</td></tr>
+      <tr><td>Serializable</td><td>Not possible</td><td>Not possible</td><td>Not possible</td><td>Not possible</td></tr>
+    </table>
+    <div class="tip">Postgres's <b>Repeatable Read is stronger than the SQL standard requires</b> — it also blocks phantom reads (via MVCC snapshotting), so you may not need Serializable where another DB would force it on you.</div>
+  </div>
+
+  <h2 style="--accent:var(--green)">When to Use PostgreSQL (and When Not)</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">✅ Default choice — go here first</h3>
+      <ul>
+        <li>Complex relationships between data</li>
+        <li>Strong consistency requirements</li>
+        <li>Rich querying, structured + unstructured (JSONB) mix</li>
+        <li>Built-in full-text search / geospatial</li>
+        <li>Scales reads well via replication</li>
+        <li><b>Fits:</b> e-commerce, financial systems, CMS, analytics (reasonable scale)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">🚫 Consider alternatives when</h3>
+      <ul>
+        <li><b>Extreme write throughput</b> (millions/sec) — WAL + index I/O bottlenecks even with sharding → Cassandra (event streaming), Redis (real-time counters)</li>
+        <li><b>Global multi-region active-active writes</b> — single-primary architecture can't do true multi-writer without heavy conflict/latency cost → CockroachDB, Cassandra, DynamoDB global tables</li>
+        <li><b>Pure key-value access</b> (no joins, no complex queries) — MVCC/WAL/planner overhead is wasted → Redis, DynamoDB, Cassandra</li>
+      </ul>
+      <div class="warn">Scalability alone is <b>not</b> a good reason to avoid Postgres — it scales far with replication + partitioning + sharding, properly designed.</div>
+    </div>
+  </div>
+
+  <div class="tip"><b>💡 Interview framing:</b> Start with Postgres, then justify deviating — much stronger than starting niche and justifying against Postgres. Never just say "ACID compliant" — explain <i>how</i> you'll use transactions/locking/isolation level to meet the actual consistency requirement.</div>
+
+  <h2 style="--accent:var(--orange)">Appendix — SQL & ACID Fundamentals</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0">Relational basics</h3>
+    <p>Tables (relations) = rows + typed columns. Example:</p>
+    <pre>CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),   <span class="cmt">-- foreign key</span>
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</pre>
+    <p><code>REFERENCES users(id)</code> is a <b>foreign key</b> — Postgres enforces that every post belongs to a real user.</p>
+    <table>
+      <tr><th>Relationship</th><th>Example</th></tr>
+      <tr><td>One-to-One</td><td>A user and their profile settings</td></tr>
+      <tr><td>One-to-Many</td><td>A user and their posts</td></tr>
+      <tr><td>Many-to-Many</td><td>Users and the posts they like (needs a join table)</td></tr>
+    </table>
+    <pre><span class="cmt">-- many-to-many join table</span>
+CREATE TABLE likes (
+  user_id INTEGER REFERENCES users(id),
+  post_id INTEGER REFERENCES posts(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, post_id)
+);</pre>
+    <p style="font-size:.85rem"><b>Normalization</b> = splitting data into related tables. Benefits: no duplicated data, easy integrity (username change updates everywhere), flexible schema. <b>Denormalization</b> (e.g. storing a like-count directly on posts instead of counting the likes table every time) trades consistency for read speed — worth raising explicitly in interviews.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">ACID, explained through a bank transfer ($100: savings → checking)</h3>
+    <table class="glossary">
+      <tr><td>Atomicity</td><td>Both updates happen or neither does. Crash mid-transfer → full rollback, money never vanishes.</td></tr>
+      <tr><td>Consistency</td><td>DB enforces its own rules on every transaction (constraints, FKs). E.g. <code>balance DECIMAL CHECK (balance >= 0)</code> — a transaction that would go negative is rejected outright. NoSQL DBs typically push this check into app code instead.</td></tr>
+      <tr><td>Isolation</td><td>Concurrent transactions don't corrupt each other — governed by isolation level (see table above).</td></tr>
+      <tr><td>Durability</td><td>Once committed, survives a crash — guaranteed via WAL. <code>synchronous_commit = off</code> trades this away for speed (unflushed writes can be lost in a power outage).</td></tr>
+    </table>
+    <div class="warn"><b>Don't conflate:</b> ACID "Consistency" = the DB always follows its own constraints. CAP-theorem "Consistency" = every read returns the latest write. Same word, different meaning — mixing them up in an interview is a red flag.</div>
+    <p style="font-size:.85rem"><b>When ACID actually matters:</b> financial transactions (must-have), user authentication (must-have), social media likes (fine to relax), analytics data (often fine to relax for performance).</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">SQL command categories</h3>
+    <table>
+      <tr><th>Type</th><th>Purpose</th><th>Examples</th></tr>
+      <tr><td>DDL</td><td>Structure</td><td>CREATE TABLE, ALTER TABLE, DROP TABLE</td></tr>
+      <tr><td>DML</td><td>Data</td><td>SELECT, INSERT, UPDATE, DELETE</td></tr>
+      <tr><td>DCL</td><td>Permissions</td><td>GRANT, REVOKE</td></tr>
+      <tr><td>TCL</td><td>Transactions</td><td>BEGIN, COMMIT, ROLLBACK</td></tr>
+    </table>
+    <p style="font-size:.85rem">You rarely write raw SQL in a system design interview — but for junior-level rounds you might. Expect conceptual questions like "how would you query this efficiently?" more than syntax tests.</p>
+  </div>
+
+  <div class="card" style="border-color:var(--purple)">
+    <h3 style="margin-top:0">🗣️ Comment-section debate (worth knowing going in)</h3>
+    <p style="font-size:.85rem">A recurring pushback: <i>"Postgres can't handle social-media scale — use DynamoDB."</i> Cited reasons: Aurora's 128TB storage ceiling, single-primary architecture blocking true multi-region active-active writes, and slow failover/rebuild. Counterpoints from other commenters:</p>
+    <ul style="font-size:.85rem">
+      <li>Aurora replicas share the same storage volume — failover is typically ~15–60s, not "hours" to rebuild</li>
+      <li>Media/images belong in object storage (S3) regardless of DB choice, which makes the 128TB text-only ceiling far less scary</li>
+      <li><b>OpenAI scaled Postgres to 800M users</b> on a single primary + 50 read replicas</li>
+      <li>Instagram, Facebook, Twitter, Pinterest all built their core platforms on <i>sharded relational</i> databases (Postgres/MySQL), not NoSQL</li>
+      <li>DynamoDB's genuine edge is global active-active multi-region writes with automatic sharding — that's the honest, narrow case for it, not "Postgres is bad"</li>
+    </ul>
+    <p style="color:var(--muted);font-size:.8rem">Takeaway for interviews: know the real DynamoDB advantages (global tables, no storage ceiling, managed sharding) and argue for Postgres with reasoning — not folklore in either direction.</p>
+  </div>
+
+  <div class="tip"><b>🎯 Quiz checkpoint from the article:</b> "What is the primary bottleneck for write performance in a single PostgreSQL instance?" → <b>Disk I/O for WAL writes</b> (not CPU, network, or RAM).</div>
+
+</div>
+</body>
+</html>

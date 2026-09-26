@@ -4,35 +4,34 @@
     "type": "split",
     "children": [
       {
-        "id": "afa31af3f5882e67",
+        "id": "2cc1c6eede05cf08",
         "type": "tabs",
         "children": [
           {
-            "id": "322b3363bb8fab78",
+            "id": "9e64955ac4a617fa",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/3-Structure of Metals and Alloys/metals-and-alloys.html"
+                "file": "Learning/AI&ML Engineering/Roadmap/Resources.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "code-glyph",
-              "title": "metals-and-alloys"
-            }
-          },
-          {
-            "id": "19a4abedd6135898",
-            "type": "leaf",
-            "state": {
-              "type": "html-view",
-              "state": {
-                "file": "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/11-lock-heartbeat-renewal-and-cpu-starvation-bug.html"
-              },
-              "icon": "code-glyph",
-              "title": "11-lock-heartbeat-renewal-and-cpu-starvation-bug"
+              "icon": "lucide-file",
+              "title": "Resources"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -91,7 +90,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 510.1015625
+    "width": 490.60546875
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -197,54 +196,54 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "19a4abedd6135898",
+  "active": "9e64955ac4a617fa",
   "lastOpenFiles": [
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/10-redis-stampede-protection-summary.html",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/9-k6-hotkey-scenario-and-redis-verdict.html",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/11-lock-heartbeat-renewal-and-cpu-starvation-bug.html",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/11-lock-heartbeat-renewal-and-cpu-starvation-bug.html.tmp.278459.76e4e7fd4bdb",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/11-lock-heartbeat-renewal-and-cpu-starvation-bug.html.tmp.278459.821e3f5b7858",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/4-cpu-profiling-command-cheatsheet.html",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/2-fastapi-phase1-learnings.html",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/3-live-feed-engine-command-cheatsheet.html",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/2026-09-23-redis-stampede-protection-summary.html.tmp.416888.d0c15a227bb0",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/6-Redis Heartbeat with Coroutines.md",
+    "Learning/AI&ML Engineering/Roadmap/Resources.md",
+    "Learning/AI&ML Engineering/Roadmap/START-HERE.md",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Web-Edition.zip",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Tracker.xlsx",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Playbook.pdf",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition.zip",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Interview-Question-Bank.pdf",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027.md",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027-Question-Bank.md",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown",
+    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition",
+    "Learning/AI&ML Engineering/Roadmap",
+    "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Presence Heartbeat/2026-09-24-explanation-redis-heartbeat-presence.html",
+    "Learning/Interview Practice/Coastal Research/Schema Design.excalidraw.md",
+    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Presence Heartbeat/architecture.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
+    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
+    "Learning/Database/Database Design/5-Relationships/1-ERD-Diagrams.excalidraw.md",
+    "Learning/Database/Database Design/One-To-Many Relations.excalidraw.md",
+    "Learning/Database/Database Design/Many-to-Many.excalidraw.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/Overview.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/2-SQL for Database.md",
+    "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
+    "Learning/Database/Database Design/4-Entities-and-Attributes/1-Intro-and-Keys.excalidraw.md",
+    "Learning/Database/Database Design/4-Entities-and-Attributes/2-Data-Types.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
+    "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
+    "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
+    "Learning/Database/Database Design/1-Intro to Database/1-Intro to Database.excalidraw.md",
     "Pasted image 20260923012351.png",
     "Pasted image 20260923011859.png",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/6-cpu-ceiling.html",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Live Feed/5-live-feed-engine-cpu-diagnosis-architecture.html",
     "Pasted image 20260923003407.png",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/5- Post Redis Lock Run.md",
-    "Personal/Movies To Watch/Mvoies.md",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/4- Skewed Run For Redis.md",
-    "Learning/Backend Engineering/Python/functional_programming/Notes.md",
-    "Learning/Backend Engineering/Go/Basics/Lessons.md",
-    "Learning/IELTS/Writing Task 1/Writing Practice Task 1.md",
     "Learning/IELTS/Writing Task 1/Pasted image 20260920185449.png",
     "Learning/IELTS/Writing Task 1/Pasted image 20260920152802.png",
-    "Learning/IELTS/Resources.md",
-    "conflict-files-obsidian-git.md",
     "Personal/Maryam/Pasted image 20260630145507.png",
     "Personal/Maryam/Pasted image 20260630145449.png",
     "Personal/Maryam/Pasted image 20260630145343.png",
-    "Personal/Maryam/Memories.md",
     "Personal/Maryam/07-zarlish-engagement-2.png",
     "Personal/Maryam/07-zarlish-engagement-1.png",
-    "Learning/Database/Fundamentals of Database Engineering/6-Concurrency COntrol/Concurrency Control.excalidraw.md",
-    "Learning/IDEADS/Ideas.md",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/2-Intramolecular forces and potential energy/Drawing 2026-09-21 15.47.41.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/5-Common Issues & Deep Dive.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/4-Cache Eviction Policies.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/3-Cache Architectures.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/2-Where To Cache.excalidraw.md",
-    "Learning/System Design/Core Concepts/5-Caching/1-Intuition.excalidraw.md",
-    "Learning/System Design/Technologies/Redis/Key Ideas.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Stress test K6/3-Skewed Run.md",
-    "Learning/Work Stuff/Freelance/Builders's Website/Creds.md",
-    "Learning/Work Stuff/Freelance/Cargo Bussiness/Cargo Bussiness.md",
-    "Learning/Side Projects/HospitalityOS/Untitled.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

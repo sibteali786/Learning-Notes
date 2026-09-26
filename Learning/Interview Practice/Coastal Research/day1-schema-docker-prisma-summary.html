@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PolicyLimits — Day 1 Learnings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--panel:#161925;--panel2:#1c2030;--border:#2a2f42;
+    --text:#e6e8f0;--muted:#8b91a7;--blue:#4f8cff;--orange:#ff9d4d;
+    --green:#4ade80;--purple:#b487ff;--red:#ff6b6b;--yellow:#facc15;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 16px 80px;line-height:1.55;font-size:14px;}
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+  h1{font-size:29px;font-weight:800;}
+  .subtitle{color:var(--muted);margin-bottom:12px;font-size:14px;}
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 8px;}
+  .toc a{color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:3px 11px;font-size:12px;}
+  .toc a:hover{color:var(--text);border-color:var(--blue);}
+  .section{margin:40px 0;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .label .bar{width:5px;height:20px;border-radius:3px;}
+  .label h2{font-size:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 22px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .mini{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+  .mini h3{font-size:14.5px;margin-bottom:6px;}
+  .mini p,.mini ul{margin:0;font-size:13px;color:#cfd3e1;}
+  .mini ul{padding-left:18px;}
+  .mini li{margin-bottom:4px;}
+  code{background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--green);}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:600;margin:2px 4px 2px 0;}
+  .p-blue{background:rgba(79,140,255,.15);color:var(--blue);border:1px solid rgba(79,140,255,.35);}
+  .p-orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.35);}
+  .p-green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35);}
+  .p-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35);}
+  .p-purple{background:rgba(180,135,255,.15);color:var(--purple);border:1px solid rgba(180,135,255,.35);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;}
+  .say{border-left:3px solid var(--yellow);background:rgba(250,204,21,.06);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0 0;font-size:13px;}
+  .say b{color:var(--yellow);font-family:'Syne',sans-serif;}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;}
+  .flow .step{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12.5px;}
+  .flow .arrow{color:var(--muted);}
+  svg text{font-family:'JetBrains Mono',monospace;}
+  .svgwrap{overflow-x:auto;}
+  .muted{color:var(--muted);}
+  .mistake{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .mistake .bad,.mistake .good{border-radius:8px;padding:8px 12px;font-size:12.5px;}
+  .mistake .bad{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);}
+  .mistake .good{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.3);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>PolicyLimits — Day 1 Learnings</h1>
+<div class="subtitle">Coastal Research prep · 2026-09-23/24 · domain → ERD → Docker → Prisma 7 + TypeScript → schema</div>
+<div class="toc">
+  <a href="#domain">1 · Domain → entities</a><a href="#erd">2 · ERD</a><a href="#design">3 · Design decisions</a>
+  <a href="#ondelete">4 · onDelete</a><a href="#indexes">5 · Indexes</a><a href="#docker">6 · Docker</a>
+  <a href="#secrets">7 · Secrets</a><a href="#tooling">8 · Node / TS / Prisma 7</a><a href="#prisma">9 · Schema gotchas</a><a href="#next">10 · Next</a>
+</div>
+
+<!-- 1 -->
+<div class="section" id="domain">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>1 · From a business story to entities</h2></div>
+  <div class="card">
+    <p style="margin-top:0">Coastal Research: a PI law firm's <b>paralegal</b> submits a <b>research request</b> for a <b>case</b> against a <b>defendant</b>; an <b>admin</b> assigns a <b>researcher</b>, who records the <b>insurance policies</b> found and their <b>limits</b>. Firms must never see each other's data.</p>
+    <div class="grid2" style="margin-top:12px">
+      <div class="mini"><h3>Noun-extraction technique</h3><ul>
+        <li><b>Nouns</b> → candidate tables (some shrink to columns)</li>
+        <li><b>Facts about a noun</b> → columns</li>
+        <li><b>Verbs between nouns</b> → relationships; "several", "more than one" hint cardinality</li>
+        <li><b>"never / must / only"</b> → rules: DB constraint or app logic?</li>
+      </ul></div>
+      <div class="mini"><h3>What changed between passes</h3><ul>
+        <li>Research + Request merged → one entity</li>
+        <li>Case "name" dropped → case_no, accident_date, jurisdiction_state, incident_type</li>
+        <li>Defendant promoted from embedded fields → own table (multiple defendants per case)</li>
+        <li>Roles are a column, not a table per role</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 -->
+<div class="section" id="erd">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>2 · Final ERD (min..max cardinality)</h2></div>
+  <div class="card svgwrap">
+    <svg viewBox="0 0 840 350" width="100%" style="min-width:640px" role="img" aria-label="ERD of User, Firm, Case, Defendant, Research, PolicyFinding">
+      <defs>
+        <style>
+          .box{fill:#1c2030;stroke:#4f8cff;stroke-width:1.5;rx:10;}
+          .nm{fill:#e6e8f0;font-size:14px;font-weight:600;}
+          .ln{stroke:#8b91a7;stroke-width:1.5;fill:none;}
+          .dash{stroke-dasharray:6 5;stroke:#ff9d4d;}
+          .card{fill:#4ade80;font-size:12px;font-weight:600;}
+          .note{fill:#8b91a7;font-size:11px;}
+        </style>
+      </defs>
+      <!-- edges -->
+      <line class="ln" x1="210" y1="68" x2="330" y2="68"/>
+      <line class="ln" x1="500" y1="68" x2="620" y2="68"/>
+      <line class="ln" x1="705" y1="96" x2="705" y2="250"/>
+      <line class="ln dash" x1="650" y1="96" x2="470" y2="250"/>
+      <line class="ln" x1="620" y1="278" x2="500" y2="278"/>
+      <line class="ln" x1="330" y1="278" x2="210" y2="278"/>
+      <line class="ln" x1="195" y1="96" x2="360" y2="250"/>
+      <!-- boxes -->
+      <rect class="box" x="40" y="40" width="170" height="56" rx="10"/><text class="nm" x="125" y="73" text-anchor="middle">User</text>
+      <rect class="box" x="330" y="40" width="170" height="56" rx="10"/><text class="nm" x="415" y="73" text-anchor="middle">Firm</text>
+      <rect class="box" x="620" y="40" width="170" height="56" rx="10"/><text class="nm" x="705" y="73" text-anchor="middle">Case</text>
+      <rect class="box" x="330" y="250" width="170" height="56" rx="10"/><text class="nm" x="415" y="283" text-anchor="middle">Research</text>
+      <rect class="box" x="620" y="250" width="170" height="56" rx="10"/><text class="nm" x="705" y="283" text-anchor="middle">Defendant</text>
+      <rect class="box" x="40" y="250" width="170" height="56" rx="10"/><text class="nm" x="125" y="283" text-anchor="middle">PolicyFinding</text>
+      <!-- cardinalities -->
+      <text class="card" x="216" y="60">0..N</text><text class="card" x="296" y="60">0..1</text>
+      <text class="card" x="506" y="60">1</text><text class="card" x="583" y="60">0..N</text>
+      <text class="card" x="712" y="116">1</text><text class="card" x="712" y="244">0..N</text>
+      <text class="card" x="632" y="118">1</text><text class="card" x="476" y="240">0..N</text>
+      <text class="card" x="600" y="270">1</text><text class="card" x="504" y="270">0..N</text>
+      <text class="card" x="312" y="270">1</text><text class="card" x="216" y="270">0..N</text>
+      <text class="card" x="204" y="116">1</text><text class="card" x="318" y="238">0..N</text>
+      <!-- notes -->
+      <text class="note" x="225" y="165">×3: created_by (req),</text>
+      <text class="note" x="225" y="179">assigned_to?, assigned_by?</text>
+      <text class="note" x="560" y="186" fill="#ff9d4d">denormalized</text>
+      <text class="note" x="560" y="200" fill="#ff9d4d">shortcut</text>
+      <text class="note" x="225" y="84">firm_id? = null → staff</text>
+      <text class="note" x="40" y="336">FK always lives on the "many" side. Dashed = redundant path (Research→Defendant→Case also exists).</text>
+    </svg>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="section" id="design">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>3 · Design decisions (interview answers)</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3>💰 Money → <code>Decimal(12,2)</code></h3><p>Decimal is stored base-10, exactly as typed. Float is binary, so <code>0.1</code> can't be represented and sums drift. Alternative: integer cents. Prisma returns a <code>Decimal</code> object, which serialises to a <b>string</b> in JSON.</p></div>
+    <div class="mini"><h3>🧮 Don't store derived data</h3><p><code>isApplicable</code> removed. Store <code>effective_from/to</code> and compute "active on accident date". A stored copy goes stale when a date is corrected. Only denormalise for a measured perf reason.</p></div>
+    <div class="mini"><h3>🏢 Tenant scoping = <code>User.firm_id?</code></h3><p>API knows only <i>who is logged in</i>. To return only their firm's cases, the user must point to a firm. Nullable because admins/researchers are internal staff. Filter every firm-user query by it (same idea as AsyncLocalStorage tenant isolation at work).</p></div>
+    <div class="mini"><h3>👤 Defendant is 1:N per Case, not M:N</h3><p>If two firms sue the same person, a shared row would link data <b>across tenants</b>. Two rows with the same name is the safer trade.</p></div>
+    <div class="mini"><h3>📄 PolicyFinding = snapshot per request</h3><p>Not a master policy registry, so no M:N join table. It records "what this researcher found on this date". Limits can change between two checks, so some duplication is accepted.</p></div>
+    <div class="mini"><h3>🔺 Research.case_id is denormalised</h3><p>It saves a hop, but <code>case_id</code> can disagree with <code>defendant.case_id</code>. Guards: the service derives it from the defendant and never trusts the client. DB level: composite FK <code>(defendant_id, case_id)</code> → <code>Defendant(id, case_id)</code>.</p></div>
+    <div class="mini"><h3>0️⃣ Min cardinality on the parent side</h3><p>A Firm can exist with zero users and zero cases, because the parent has to exist first. An FK <b>cannot enforce "at least one child"</b>. That needs app logic (create both in one transaction) or triggers.</p></div>
+    <div class="mini"><h3>👥 3 relations between the same two tables</h3><p><code>created_by</code> is required. <code>assigned_to</code> and <code>assigned_by</code> are nullable because a new request isn't assigned yet. Prisma needs a <b>relation name</b> on both sides to pair them.</p></div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="section" id="ondelete">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>4 · Referential actions (<code>onDelete</code>)</h2></div>
+  <div class="card">
+    <table>
+      <tr><th>Relation</th><th>Action</th><th>Why</th></tr>
+      <tr><td>Firm → User, Firm → Case</td><td><span class="pill p-red">Restrict</span></td><td>Legal/billing records. Refuse the delete; use soft delete (<code>deleted_at</code>) instead, like Asia Builders ERP.</td></tr>
+      <tr><td>Research.created_by</td><td><span class="pill p-red">Restrict</span></td><td>Audit trail: who submitted must not vanish.</td></tr>
+      <tr><td>Research.assigned_to / assigned_by</td><td><span class="pill p-orange">SetNull</span></td><td>A researcher leaves, so the request goes back to "unassigned" instead of disappearing.</td></tr>
+      <tr><td>Case → Defendant / Research, Defendant → Research, Research → PolicyFinding</td><td><span class="pill p-green">Cascade</span></td><td>Owned children with no meaning without their parent.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="section" id="indexes">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>5 · Indexes: every one justified by a query</h2></div>
+  <div class="grid3">
+    <div class="mini"><h3><code>Research(assigned_to_id, status)</code></h3><p>Researcher's queue: "my IN_PROGRESS requests". The equality column goes first; status narrows within it.</p></div>
+    <div class="mini"><h3><code>Research(status, created_at)</code></h3><p>Admin queue: "SUBMITTED requests, oldest first". Filter, then sort, from the same index.</p></div>
+    <div class="mini"><h3>Every FK column</h3><p><b>Postgres doesn't auto-index foreign keys.</b> Without them, joins and cascade deletes scan the whole child table.</p></div>
+  </div>
+  <div class="say"><b>Say it:</b> "<code>@@unique([firm_id, case_no])</code> already creates an index whose leftmost column is <code>firm_id</code>, so I didn't add a separate one on <code>Case.firm_id</code>."</div>
+</div>
+
+<!-- 6 -->
+<div class="section" id="docker">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>6 · Docker Compose for Postgres</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3>Ports</h3><ul><li><code>ports: "HOST:CONTAINER"</code> makes it reachable from the host</li><li><code>expose</code> is only visible to other containers on the network</li></ul></div>
+    <div class="mini"><h3>Pin the image tag</h3><p><code>postgres:17</code>, not <code>latest</code>. A future <code>pull</code> could bring a new major version whose data format or <b>data path</b> differs (18 moved it).</p></div>
+    <div class="mini"><h3>Named volume → data survives</h3><ul><li>Mounted at <code>/var/lib/postgresql/data</code> (v17)</li><li>Must also be declared under top-level <code>volumes:</code></li><li><code>down</code> keeps it; <code>down -v</code> deletes it</li></ul></div>
+    <div class="mini"><h3>⚠️ Init env vars run once</h3><p><code>POSTGRES_USER / PASSWORD / DB</code> only apply when the data directory is <b>empty</b>. Changing the password later does nothing while the volume exists.</p></div>
+    <div class="mini"><h3>Healthcheck</h3><p>Postgres has no HTTP endpoint, so use the <code>pg_isready</code> CLI inside the container. It's used by <code>depends_on: condition: service_healthy</code> (app container, CI).</p></div>
+    <div class="mini"><h3><code>restart</code> vs <code>up -d</code></h3><p>Container config is fixed at <b>creation</b>. <code>restart</code> reuses the old config; <code>up -d</code> detects the change and <b>recreates</b> it. The named volume keeps the data.</p></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3 style="font-size:15px">YAML gotcha I hit</h3>
+    <div class="mistake" style="margin-top:8px">
+      <div class="bad"><code>- pgdata: /var/lib/...</code><br>space after <code>:</code> → YAML parses it as a mapping, so "missing a mount target"</div>
+      <div class="good"><code>- pgdata:/var/lib/...</code><br>one string, <code>source:target</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 -->
+<div class="section" id="secrets">
+  <div class="label"><div class="bar" style="background:var(--yellow)"></div><h2>7 · Env vars, <code>${}</code> vs <code>$$</code>, and real secrets</h2></div>
+  <div class="card">
+    <div class="flow">
+      <div class="step"><code>.env</code> next to compose</div><div class="arrow">→</div>
+      <div class="step">Compose fills <code>${VAR}</code> <b>on the host</b></div><div class="arrow">→</div>
+      <div class="step">value baked into resolved config</div>
+    </div>
+    <div class="flow">
+      <div class="step"><code>$$VAR</code> in healthcheck</div><div class="arrow">→</div>
+      <div class="step">literal <code>$VAR</code> passed through</div><div class="arrow">→</div>
+      <div class="step">container shell expands it <b>at runtime</b></div>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div class="mini"><h3>What <code>$$</code> really buys</h3><p>One source of truth and no values in the resolved config. It is <b>not</b> security: <code>pg_isready</code> never needs the password, and user/db names aren't secrets.</p></div>
+      <div class="mini"><h3>Env vars ≠ secret storage</h3><p>Visible via <code>docker inspect</code>; leak through child processes, crash dumps, and logging that prints the environment.</p></div>
+      <div class="mini"><h3>Real options</h3><ul><li>Local: <code>POSTGRES_PASSWORD_FILE</code> + Compose secrets (mounted file)</li><li>AWS: Secrets Manager / SSM, fetched with the EC2 instance role</li><li>RDS can manage and rotate the master password in Secrets Manager</li></ul></div>
+      <div class="mini"><h3>Repo hygiene</h3><ul><li><code>.env</code> in <code>.gitignore</code></li><li>commit <code>.env.example</code> with placeholders</li></ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 -->
+<div class="section" id="tooling">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>8 · Node, TypeScript &amp; Prisma 7 tooling</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3>dependency vs devDependency</h3><p>Rule: <b>does the running server import it?</b></p><ul><li>deps: express, @prisma/client, @prisma/adapter-pg, pg, zod, bcrypt, jsonwebtoken</li><li>dev: prisma CLI, typescript, tsx, @types/node, dotenv (only the Prisma config uses it)</li></ul></div>
+    <div class="mini"><h3>Migrations in production</h3><p>The <code>prisma</code> CLI is dev-only, so <code>npm ci --omit=dev</code> on EC2 doesn't have it. Run <code>migrate deploy</code> as a <b>CI/CD step</b> against RDS before the new code goes live, or keep prisma in deps (bigger image).</p></div>
+    <div class="mini"><h3><code>migrate dev</code> vs <code>migrate deploy</code></h3><ul><li><b>dev</b>: creates migrations, may reset the DB. Local only.</li><li><b>deploy</b>: applies existing files only. CI and prod.</li></ul></div>
+    <div class="mini"><h3>Prisma 7 differences</h3><ul><li><code>prisma.config.ts</code> holds the datasource URL</li><li>client generated to <code>generated/prisma</code> (gitignored), not node_modules → <b><code>prisma generate</code> in every build</b></li><li>driver adapter (<code>@prisma/adapter-pg</code>) required</li><li>no automatic <code>.env</code> loading</li></ul></div>
+    <div class="mini"><h3>TypeScript on Node</h3><ul><li><code>module/moduleResolution: nodenext</code> follows Node's real ESM rules → relative imports need <code>.js</code></li><li>dev: <code>tsx watch</code> (fast, no type check)</li><li>prod: <code>tsc</code> once in CI → <code>node dist/…</code></li><li>pin runtime: <code>.nvmrc</code>, <code>engines</code>, matching <code>@types/node</code></li></ul></div>
+    <div class="mini"><h3>Env loading</h3><ul><li>Node 20.6+: <code>--env-file=.env</code> built in (dev script)</li><li>prod: variables come from platform / Secrets Manager, no file</li></ul></div>
+    <div class="mini"><h3>🐛 <code>npx prisma@latest</code> crashed</h3><p>The <code>latest</code> dist-tag pointed at <code>8.0.0-rc.15</code>, and npm's resolver crashed (<code>edgesOut</code>). Lesson: use the <b>locally installed</b> CLI (<code>npx prisma</code>) and check <code>npm view &lt;pkg&gt; dist-tags</code>.</p></div>
+    <div class="mini"><h3>🔒 npm allow-scripts</h3><p>New npm blocks install scripts (bcrypt, prisma, esbuild) until approved. Install scripts are the main supply-chain attack vector, so review before <code>npm approve-scripts</code>.</p></div>
+  </div>
+</div>
+
+<!-- 9 -->
+<div class="section" id="prisma">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>9 · Prisma schema mistakes I made (and the rule)</h2></div>
+  <div class="card">
+    <table>
+      <tr><th>Mistake</th><th>Rule</th></tr>
+      <tr><td><code>role: Roles</code></td><td>Fields are <code>name Type</code>, with no colon.</td></tr>
+      <tr><td><code>fields=[firm_id]</code></td><td>Attribute arguments use <code>fields: [...]</code>.</td></tr>
+      <tr><td><code>id @id …</code> / bare <code>case_id</code></td><td>Every field needs a type.</td></tr>
+      <tr><td><code>"ResearchCreater"</code> vs <code>"ResearchCreator"</code></td><td>Relation names must match <b>exactly</b> on both sides; that's how Prisma pairs them.</td></tr>
+      <tr><td><code>created_by_id Int?</code> + required <code>created_by User</code></td><td>Optionality of the FK scalar and the relation field must agree.</td></tr>
+      <tr><td>No <code>cases Case[]</code> on Firm</td><td>Every relation needs a field on <b>both</b> models (the list side is client-only, no column).</td></tr>
+      <tr><td>assigner/assignee names swapped</td><td>Name the list fields by meaning: <code>researches_assigned_to_me</code>.</td></tr>
+      <tr><td><code>@updated_at</code></td><td>Attributes are fixed keywords: <code>@updatedAt</code>, whatever your field naming style.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 10 -->
+<div class="section" id="next">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>10 · Where I stopped / what's next</h2></div>
+  <div class="card">
+    <div class="flow">
+      <div class="step">✅ Domain</div><div class="arrow">→</div><div class="step">✅ ERD</div><div class="arrow">→</div>
+      <div class="step">✅ Docker</div><div class="arrow">→</div><div class="step">✅ Prisma 7 + TS</div><div class="arrow">→</div>
+      <div class="step">✅ Schema</div><div class="arrow">→</div><div class="step" style="border-color:var(--yellow)">⏭ migrate init + read SQL</div><div class="arrow">→</div>
+      <div class="step">Express layers + /health</div><div class="arrow">→</div><div class="step">CRUD · zod · errors</div><div class="arrow">→</div><div class="step">JWT + RBAC + tenant scope</div>
+    </div>
+    <p class="muted" style="margin-bottom:0;margin-top:14px">Still to rehearse verbally: pagination (offset vs cursor), duplicate prevention (partial unique index), race-safe claim (conditional update / FOR UPDATE), expand→backfill→contract migrations, <code>CREATE INDEX CONCURRENTLY</code>. Tracker: <code>~/Documents/Projects/interview_prep/PROGRESS.md</code></p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

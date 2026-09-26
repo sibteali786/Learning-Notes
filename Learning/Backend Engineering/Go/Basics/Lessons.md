@@ -1643,3 +1643,155 @@ func getInsuranceAmount(status insuranceStatus) int {
 The example above is _much_ easier to read and understand. When writing code, it's important to try to reduce the cognitive load on the reader by reducing the number of entities they need to think about at any given time.
 
 In the first example, if the developer is trying to figure out when `270` is returned, they need to think about each branch in the logic tree and try to remember which cases matter and which cases don't. With the one-dimensional structure offered by guard clauses, it's as simple as stepping through each case in order.
+
+# Functions As Values
+
+Go supports [first-class](https://developer.mozilla.org/en-US/docs/Glossary/First-class_Function) and higher-order functions, which are just fancy ways of saying "functions as values". Functions are just another type -- like `int`s and `string`s and `bool`s.
+
+Let's assume we have two simple functions:
+
+```go
+func add(x, y int) int {
+	return x + y
+}
+
+func mul(x, y int) int {
+	return x * y
+}
+```
+
+We can create a new `aggregate` function that accepts a function as its 4th argument:
+
+```go
+func aggregate(a, b, c int, arithmetic func(int, int) int) int {
+  firstResult := arithmetic(a, b)
+  secondResult := arithmetic(firstResult, c)
+  return secondResult
+}
+```
+
+It calls the given `arithmetic` function (which could be `add` or `mul`, or any other function that accepts two `int`s and returns an `int`) and applies it to three inputs instead of two. It can be used like this:
+
+```go
+func main() {
+	sum := aggregate(2, 3, 4, add)
+	// sum is 9
+	product := aggregate(2, 3, 4, mul)
+	// product is 24
+}
+```
+
+## Assignment
+
+Complete the `reformat` function. It takes a `message` string and a `formatter` function as input:
+
+1. [ ] Apply the given `formatter` _three times_ to the `message`
+2. [ ] Add a prefix of `TEXTIO:` to the result
+3. [ ] Return the final string
+
+For example, if the `message` is "General Kenobi" and the given `formatter` adds a period to the end of the string, the final result should be
+
+```text
+TEXTIO: General Kenobi...
+```
+
+```go
+package main
+
+func reformat(message string, formatter func(string) string) string {
+	for i:= 0;  i < 3; i++ {
+		message = formatter(message)
+	}
+	return "TEXTIO: "+message
+}
+
+```
+
+# Anonymous Functions
+
+Anonymous functions are true to form in that they have _no name_. They're useful when defining a function that will only be used once or to create a quick [closure](https://en.wikipedia.org/wiki/Closure_\(computer_programming\)).
+
+Let's say we have a function `conversions` that accepts another function, `converter` as input:
+
+```go
+func conversions(converter func(int) int, x, y, z int) (int, int, int) {
+	convertedX := converter(x)
+	convertedY := converter(y)
+	convertedZ := converter(z)
+	return convertedX, convertedY, convertedZ
+}
+```
+
+We _could_ define a function normally and then pass it in by name... but it's usually easier to just define it anonymously:
+
+```go
+func double(a int) int {
+    return a + a
+}
+
+func main() {
+    // using a named function
+	newX, newY, newZ := conversions(double, 1, 2, 3)
+	// newX is 2, newY is 4, newZ is 6
+
+    // using an anonymous function
+	newX, newY, newZ = conversions(func(a int) int {
+	    return a + a
+	}, 1, 2, 3)
+	// newX is 2, newY is 4, newZ is 6
+}
+```
+
+## Assignment
+
+Complete the `printReports` function. It takes as input a sequence of messages, `intro`, `body`, `outro`. It should call `printCostReport` once for each message by making three separate calls (you don't need to use loops or arrays for this).
+
+For each call of `printCostReport`, give it an anonymous function that returns the `cost` of a message as an integer. Here are the costs:
+
+- Intro: 2x the message length
+- Body: 3x the message length
+- Outro: 4x the message length
+
+Use the built-in [`len()` function](https://pkg.go.dev/builtin#len) to get the length of a string:
+
+```go
+helloLen := len("hello")
+// helloLen = 5
+```
+
+```go
+package main
+
+import "fmt"
+
+func printReports(intro, body, outro string) {
+	printCostReport(func(s string) int {
+		return 2 * len(s)
+	}, intro)
+	
+	printCostReport(func(s string) int {
+		return 3 * len(s)
+	}, body)
+	printCostReport(func(s string) int {
+		return 4 * len(s)
+	}, outro)
+}
+
+// don't touch below this line
+
+func main() {
+	printReports(
+		"Welcome to the Hotel California",
+		"Such a lovely place",
+		"Plenty of room at the Hotel California",
+	)
+}
+
+func printCostReport(costCalculator func(string) int, message string) {
+	cost := costCalculator(message)
+	fmt.Printf(`Message: "%s" Cost: %v cents`, message, cost)
+	fmt.Println()
+}
+
+```
+

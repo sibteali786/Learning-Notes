@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Async Error Handling</title>
+<style>
+:root{
+  --bg:#fbfaf7;--fg:#1d1d1b;--muted:#6b6a64;--card:#ffffff;--line:#e3e0d8;
+  --accent:#2f5d8a;--accent-soft:#e6eef6;--good:#2e7d4f;--good-soft:#e5f3ea;
+  --bad:#b23b3b;--bad-soft:#f8e6e6;--warn:#9a6a00;--warn-soft:#fbf1d9;--code:#f3f1ec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a;--fg:#e8e6e1;--muted:#9c9a94;--card:#1f2024;--line:#33343a;
+    --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#6cc690;--good-soft:#1b2e23;
+    --bad:#e98080;--bad-soft:#3a2020;--warn:#e0b85a;--warn-soft:#352c16;--code:#25262b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16171a;--fg:#e8e6e1;--muted:#9c9a94;--card:#1f2024;--line:#33343a;
+  --accent:#7fb0e0;--accent-soft:#1f2c3a;--good:#6cc690;--good-soft:#1b2e23;
+  --bad:#e98080;--bad-soft:#3a2020;--warn:#e0b85a;--warn-soft:#352c16;--code:#25262b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Georgia,"Iowan Old Style",serif}
+main{max-width:820px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:2rem;line-height:1.2;margin:0 0 8px}
+h2{font-size:1.5rem;margin:56px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:1.15rem;margin:32px 0 8px}
+p,li{max-width:70ch}
+.sub{color:var(--muted);margin:0 0 24px}
+a{color:var(--accent)}
+code{font:0.88em/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+pre{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;white-space:pre}
+pre .hl{background:var(--warn-soft);display:inline-block;width:100%}
+pre .dim{color:var(--muted)}
+.file{font:12.5px ui-monospace,monospace;color:var(--muted);margin:16px 0 -6px}
+.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 20px}
+.toc ol{margin:6px 0;padding-left:20px}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:20px 0}
+.callout.good{border-color:var(--good);background:var(--good-soft)}
+.callout.bad{border-color:var(--bad);background:var(--bad-soft)}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout b.t{display:block;margin-bottom:4px;font-family:system-ui,sans-serif;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:16px 0}
+summary{cursor:pointer;font-weight:bold}
+/* Flow diagram family */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:18px 0;font:14px/1.35 system-ui,sans-serif}
+.flow .n{flex:1 1 120px;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;min-width:110px}
+.flow .n small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.flow .n code{font-size:11.5px}
+.flow .a{align-self:center;color:var(--muted);font-size:18px}
+.flow .n.good{border-color:var(--good)} .flow .n.bad{border-color:var(--bad)} .flow .n.warn{border-color:var(--warn)} .flow .n.acc{border-color:var(--accent)}
+.flow .n.dead{border-style:dashed;opacity:.6}
+.flowlabel{font:600 13px system-ui,sans-serif;color:var(--muted);margin:22px 0 -10px;text-transform:uppercase;letter-spacing:.04em}
+/* Comparison grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:18px 0;font:14.5px/1.5 system-ui,sans-serif}
+.grid .c{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.grid .c h4{margin:0 0 6px;font-size:15px}
+.grid .c ul{margin:0;padding-left:18px}
+table{border-collapse:collapse;width:100%;font:14px/1.4 system-ui,sans-serif;margin:16px 0;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:6px 10px;text-align:left;white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+td.y{color:var(--good);font-weight:600} td.n{color:var(--bad);font-weight:600} td.m{color:var(--warn);font-weight:600}
+/* Quiz */
+.q{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:18px 0}
+.q p.qt{margin:0 0 10px;font-weight:bold}
+.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,sans-serif;cursor:pointer}
+.q button:hover{border-color:var(--accent)}
+.q button.right{border-color:var(--good);background:var(--good-soft)}
+.q button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.q .fb{font:14.5px/1.5 system-ui,sans-serif;margin-top:8px;display:none}
+.theme{position:fixed;top:10px;right:10px;font:12px system-ui;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;cursor:pointer}
+</style>
+</head>
+<body>
+<button class="theme" onclick="toggleTheme()">◐ theme</button>
+<main>
+<h1>asyncHandler or try/catch? Error handling in WNP and Hospitality OS</h1>
+<p class="sub">A case study from my own code: WhatsNextPlease (<code>whatsnextplease-monolith/apps/backend</code>) and Hospitality OS (<code>hospitality-os/pms-backend</code>, mirrored in <code>ai-pms/apps/backend</code>). Written 2026-09-24 from the source code and git history.</p>
+
+<div class="callout good">
+<b class="t">Short answer for interviews</b>
+<strong>WNP:</strong> yes, I used an <code>asyncHandler</code> wrapper together with one centralized Express error middleware. I added both in January 2025 (<code>c06534a</code>, <code>5a7923f</code>). Services throw typed errors, and the middleware maps Zod, Prisma, AWS SDK and custom <code>BaseError</code> errors to a consistent JSON response.<br>
+<strong>Hospitality OS:</strong> no wrapper. The REST monitoring controllers handle try/catch by hand in every function and build a 500 response inline. The GraphQL side, which is most of the API, needs no wrapper at all, because Apollo catches resolver errors and <code>formatError</code> centralizes them.<br>
+<strong>What to be honest about:</strong> in WNP I adopted the wrapper inconsistently. Many handlers still have their own try/catch that calls <code>next(error)</code>, which is redundant but not harmful. The newest controllers use the clean style.
+</div>
+
+<nav class="toc"><b>Contents</b>
+<ol>
+<li><a href="#bg">Background</a>: why async errors are awkward in Express 4</li>
+<li><a href="#intuition">Intuition</a>: three ways an error can travel</li>
+<li><a href="#code">Code walkthrough</a>: WNP, then Hospitality OS</li>
+<li><a href="#talk">What to say if asked</a></li>
+<li><a href="#quiz">Quiz</a></li>
+</ol></nav>
+
+<!-- ========================================================= -->
+<h2 id="bg">1. Background</h2>
+
+<details>
+<summary>Beginner primer: middleware, <code>next</code>, and error middleware (skip if familiar)</summary>
+<p>An Express app is a pipeline of functions. Each has the signature <code>(req, res, next)</code>. A function either ends the request by writing a response (<code>res.json(...)</code>), or it passes control on by calling <code>next()</code>.</p>
+<p>Express has a second kind of middleware for errors. It has <em>four</em> parameters, <code>(err, req, res, next)</code>, and Express recognizes it by that arity alone. When any function calls <code>next(someError)</code>, Express skips every ordinary middleware and jumps to the next error middleware registered after it. That is why error middleware is always registered last, after all the routes.</p>
+<p>Express 4 also catches a <em>synchronous</em> <code>throw</code> inside a handler and turns it into <code>next(err)</code> for you. The problem, as we will see, is asynchronous code.</p>
+</details>
+
+<h3>The problem async handlers create in Express 4</h3>
+<p>Both projects run Express 4 (<code>^4.21.x</code> in every <code>package.json</code>). Express 4 was designed before <code>async</code>/<code>await</code>. When it calls your handler, it wraps the call in a synchronous <code>try/catch</code> and ignores the return value. An <code>async</code> function never throws synchronously. It returns a Promise, and if something inside fails, that Promise <em>rejects</em>. Express never looks at the Promise, so nobody observes the rejection.</p>
+
+<div class="flowlabel">Express 4, bare async handler, database is down</div>
+<div class="flow">
+  <div class="n">Client<small><code>GET /skill</code></small></div><div class="a">→</div>
+  <div class="n">Express router<small>calls handler, discards returned Promise</small></div><div class="a">→</div>
+  <div class="n bad">async handler<small><code>await prisma.skill.findMany()</code> rejects</small></div><div class="a">→</div>
+  <div class="n bad">Nothing<small><code>unhandledRejection</code> warning; the client waits until it times out</small></div>
+</div>
+
+<div class="callout">
+<b class="t">Key idea</b>
+An error that only exists as a rejected Promise is invisible to Express 4. It has to be <em>caught</em> and <em>handed over</em> by calling <code>next(err)</code>. There are two ways to do that: write a <code>try/catch</code> in every handler, or write it once in a higher-order function that wraps every handler. That function is <code>asyncHandler</code>. (Express 5 forwards rejected Promises itself, which makes the wrapper unnecessary. Neither project has moved to Express 5 yet.)
+</div>
+
+<h3>How the two codebases differ</h3>
+<div class="grid">
+  <div class="c"><h4>WNP backend</h4><ul>
+    <li>TypeScript, Express 4, Prisma/Postgres, Zod, AWS SDK</li>
+    <li>Layered: routes → controllers → services → repositories</li>
+    <li>Shared error classes in <code>@wnp/types</code> (<code>BaseError</code>, <code>BadRequestError</code>, <code>NotFoundError</code>…)</li>
+    <li>19 controllers, all REST</li>
+  </ul></div>
+  <div class="c"><h4>Hospitality OS (pms-backend)</h4><ul>
+    <li>JavaScript (CommonJS), Express 4, Mongoose/MongoDB</li>
+    <li>Mostly <strong>GraphQL</strong> via Apollo Server 4 (<code>/graphql</code>)</li>
+    <li>A small REST surface: <code>/api/monitoring</code> (3 controllers)</li>
+    <li>Built with a teammate; I added the GraphQL modules and pino logging (<code>fa9dfa2</code>, <code>45d762f</code>)</li>
+  </ul></div>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="intuition">2. Intuition: three ways an error can travel</h2>
+<p>With that background, we can follow a single failing request through each style. We use one toy request throughout: a client calls an endpoint without a required parameter, or the database throws. Watch where the error is caught and <em>who decides the HTTP status</em>.</p>
+
+<div class="flowlabel">A · Centralized (WNP, the intended pattern)</div>
+<div class="flow">
+  <div class="n">Client<small><code>GET /task-sequences/suggest-prefix</code> (no <code>categoryId</code>)</small></div><div class="a">→</div>
+  <div class="n acc">Handler<small><code>throw new BadRequestError(...)</code></small></div><div class="a">→</div>
+  <div class="n good">asyncHandler<small>catches, calls <code>next(err)</code></small></div><div class="a">→</div>
+  <div class="n good">errorMiddleware<small>recognizes <code>BaseError</code>, adds request context, logs</small></div><div class="a">→</div>
+  <div class="n">Response<small><code>400 {code, status, message, details}</code></small></div>
+</div>
+<p>The handler only describes <em>what</em> went wrong. One place decides how that becomes HTTP. A Prisma unique-constraint error, a Zod validation error and an AWS S3 404 all take this same route and come out in the same JSON shape.</p>
+
+<div class="flowlabel">B · Belt and braces (most WNP handlers)</div>
+<div class="flow">
+  <div class="n">Client<small><code>POST /skill</code> with bad body</small></div><div class="a">→</div>
+  <div class="n acc">Handler<small><code>SkillCreateSchema.parse</code> throws <code>ZodError</code></small></div><div class="a">→</div>
+  <div class="n warn">Inner try/catch<small><code>catch (e) { next(e) }</code></small></div><div class="a">→</div>
+  <div class="n dead">asyncHandler<small>its catch never fires</small></div><div class="a">→</div>
+  <div class="n good">errorMiddleware<small><code>ZodError</code> → <code>ValidationError</code></small></div>
+</div>
+<p>The result is identical to A. The error still reaches the middleware exactly once, because the inner catch swallows it before the wrapper could. The wrapper is only a safety net here, and the inner block is boilerplate.</p>
+
+<div class="flowlabel">C · Local handling (Hospitality OS REST)</div>
+<div class="flow">
+  <div class="n">Client<small><code>GET /api/monitoring/sensors</code></small></div><div class="a">→</div>
+  <div class="n acc">Handler<small><code>Sensor.find()</code> rejects</small></div><div class="a">→</div>
+  <div class="n bad">Its own catch<small>logs, <code>res.status(500).json({... error: error.message})</code></small></div><div class="a">→</div>
+  <div class="n dead">errorHandler.js<small>defined, never registered</small></div>
+</div>
+<p>Each function decides its own response. It works, but every function repeats the decision, every failure becomes a 500 (even ones that should be a 4xx), and the raw <code>error.message</code> goes to the client.</p>
+
+<div class="callout warn">
+<b class="t">GraphQL is a fourth case, and it is centralized too</b>
+Apollo Server catches any error thrown inside a resolver, sync or async, and puts it in the response's <code>errors</code> array. So Hospitality OS's resolvers simply <code>throw</code>, and <code>formatError</code> in <code>server.js</code> is the single place that logs errors and masks them in production. Architecturally, this is the GraphQL version of pattern A. The framework provides the wrapper.
+</div>
+
+<!-- ========================================================= -->
+<h2 id="code">3. Code walkthrough</h2>
+
+<h3>3.1 WNP: the wrapper and how it changed</h3>
+<p>The wrapper went in on 22 January 2025. The first version (<code>c06534a</code>) used Promise chaining:</p>
+<div class="file">apps/backend/api/utils/handlers/asyncHandler.ts, c06534a</div>
+<pre>export const asyncHandler = (handler: AsyncRouteHandler) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    Promise.resolve(handler(req, res, next).catch(next));
+  };
+};</pre>
+<p>Two hours later, <code>5a7923f</code> rewrote it as <code>async</code>/<code>await</code>. That is the current version:</p>
+<div class="file">apps/backend/api/utils/handlers/asyncHandler.ts, current</div>
+<pre>type AsyncRouteHandler = (req: Request, res: Response, next: NextFunction) => Promise&lt;unknown&gt;;
+
+export const asyncHandler = (handler: AsyncRouteHandler) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise&lt;void&gt; => {
+<span class="hl">    try {
+      await handler(req, res, next);
+    } catch (error) {
+      next(error); // This ensures error is passed to error middleware
+    }</span>
+  };
+};</pre>
+<div class="callout">
+<b class="t">Why the rewrite was an improvement</b>
+In the first version, <code>Promise.resolve(...)</code> wrapped the result of <code>.catch(next)</code>, which is already a Promise, so it did nothing. Worse, <code>handler(...).catch</code> assumes the handler returns a Promise. If a non-async handler threw synchronously, the throw would escape before <code>.catch</code> was attached. <code>await</code> inside <code>try</code> handles both cases: a synchronous throw and a rejected Promise.
+</div>
+
+<h3>3.2 WNP: the one place errors become HTTP</h3>
+<p>The middleware is registered last in <code>server.ts</code>, after the 404 fallback. That order matters: the 404 handler catches unmatched routes, and error middleware only receives errors passed via <code>next(err)</code>.</p>
+<div class="file">apps/backend/api/server.ts</div>
+<pre>  app.use((req, res) => {
+    res.status(404).json({ message: 'Not Found' });
+  });
+
+  // error Middleware
+  app.use(errorMiddleware);</pre>
+<p>The middleware is a chain of type checks. Each one turns a foreign error type into the app's own <code>BaseError</code> hierarchy, and <code>ErrorHandler.handleError</code> serializes it:</p>
+<div class="file">apps/backend/api/middleware/error/error.middleware.ts (condensed)</div>
+<pre>export const errorMiddleware = (error, req, res, next) => {
+<span class="hl">  if (res.headersSent) return next(error);          // response already started: let Express close it</span>
+  const requestContext = { method: req.method, path: req.path, ip: req.ip, ... };
+  try {
+    if (isAWSError(error))           → handleAwsErrors()  → NotFoundError | InternalServerError
+    if (error instanceof ZodError)   → new ValidationError(messages, { errors })
+    if (error instanceof Prisma.PrismaClientKnownRequestError)
+                                     → PrismaErrorMapper.mapError(error)
+    if (error instanceof BaseError)  → attach requestContext, use as-is
+    otherwise                        → log "Unhandled error type", new InternalServerError(...)
+    errorHandler.handleError(mapped, res);   // res.status(e.status).json(e.toResponse())
+  } catch (handlerError) {
+<span class="hl">    // failsafe: if error handling itself throws, still send a plain 500</span>
+  }
+};</pre>
+<p>Stack traces are only included in logs when <code>NODE_ENV === 'development'</code>. The services contain about 135 <code>throw new …Error</code> statements, so most failures arrive already typed.</p>
+
+<h3>3.3 WNP: what the controllers actually look like</h3>
+<p>This is where the codebase is less tidy than the design. I counted per controller:</p>
+<table>
+<tr><th>Controller</th><th>asyncHandler uses</th><th>inner try/catch</th><th>style</th></tr>
+<tr><td>serialNumber (Nov 2025)</td><td>5</td><td>0</td><td class="y">clean (A)</td></tr>
+<tr><td>notification</td><td>7</td><td>0</td><td class="y">clean (A)</td></tr>
+<tr><td>task</td><td>20</td><td>19</td><td class="m">redundant (B)</td></tr>
+<tr><td>user</td><td>18</td><td>12</td><td class="m">mixed</td></tr>
+<tr><td>auth, client, file, skill, comment, … (13 more)</td><td>✓</td><td>✓</td><td class="m">redundant (B)</td></tr>
+<tr><td>chat (Nov 2025)</td><td>0</td><td>3</td><td class="n">manual, inline responses (C)</td></tr>
+</table>
+
+<p>The redundant style, where each class method has its own try/catch and is <em>also</em> wrapped:</p>
+<div class="file">apps/backend/api/controller/skill.controller.ts</div>
+<pre>  private handleCreateSkills = async (req, res, next) => {
+<span class="hl">    try {</span>
+      const parsedInput = SkillCreateSchema.parse(req.body);
+      const skill = await this.skillService.createSkill(parsedInput);
+      res.status(200).json({ success: true, data: skill });
+<span class="hl">    } catch (error) {
+      next(error);
+    }</span>
+  };
+  ...
+  createSkills = asyncHandler(this.handleCreateSkills);</pre>
+
+<p>The clean style, where the handler just throws and returns through a response helper:</p>
+<div class="file">apps/backend/api/controller/serialNumber.controller.ts</div>
+<pre>export const suggestPrefix = asyncHandler(async (req: Request, res: Response) => {
+  const { categoryId } = req.query;
+  if (!categoryId || typeof categoryId !== 'string') {
+<span class="hl">    throw new BadRequestError('categoryId query parameter is required');</span>
+  }
+  const suggestion = await serialNumberService.suggestPrefixForCategory(categoryId);
+  return SuccessResponse.ok(res, { message: 'Prefix suggestion generated successfully', data: suggestion });
+});</pre>
+
+<div class="callout bad">
+<b class="t">The outlier</b>
+<code>chat.controller.ts</code> (added Nov 2025 for the chat-app integration) uses static methods without the wrapper, and returns <code>res.status(400|500).json({ success: false, error })</code> inline. Its error responses have a different shape from the rest of the API (<code>error</code> instead of <code>code/status/message</code>) and skip the centralized logging.
+</div>
+
+<h3>3.4 Hospitality OS: manual try/catch in REST controllers</h3>
+<p>The three monitoring controllers are plain async functions. Of their 39 <code>try</code> blocks, 36 end in a hand-written 500:</p>
+<div class="file">pms-backend/controllers/monitoring/sensor.controller.js</div>
+<pre>async function getSensors(req, res) {
+  try {
+    const { propertyId, type, zone, status } = req.query;
+    ...
+    const sensors = await Sensor.find(query).populate('propertyId', 'name address');
+    res.json({ success: true, data: sensors });
+<span class="hl">  } catch (error) {
+    logger.error('Get sensors error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch sensors',
+      error: error.message          // internal message leaks to the client
+    });
+  }</span>
+}</pre>
+<p>A generic error middleware does exist, but nothing registers it. <code>grep errorHandler</code> finds only its own definition, in both <code>pms-backend</code> and <code>ai-pms/apps/backend</code>:</p>
+<div class="file">pms-backend/middleware/errorHandler.js (dead code)</div>
+<pre>const errorHandler = (err, req, res, next) => {
+  logger.error(err.stack);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({ success: false, message: err.message || 'Internal Server Error', ... });
+};
+module.exports = errorHandler;   <span class="dim">// never app.use()'d</span></pre>
+<p>Because every handler catches its own errors, the missing registration never caused a hang. That is exactly why nobody noticed it.</p>
+
+<h3>3.5 Hospitality OS: GraphQL, where the framework is the wrapper</h3>
+<p>The resolvers contain no try/catch at all (0 across all six modules). They guard, throw, and return the service's Promise:</p>
+<div class="file">pms-backend/graphql/modules/task.resolvers.js</div>
+<pre>tasks: (_, args, { userId }) => {
+<span class="hl">  if (!userId) throw new Error('Not authenticated');</span>
+  return taskService.getTasks(args);    <span class="dim">// a rejection here is caught by Apollo</span>
+},</pre>
+<p>All errors meet in one hook:</p>
+<div class="file">pms-backend/server.js</div>
+<pre>formatError: (formattedError, error) => {
+  logger.error({ err: error?.originalError || error }, 'GraphQL Error');
+  if (process.env.NODE_ENV === 'production') {
+    const code = formattedError.extensions?.code;
+<span class="hl">    if (!code || code === 'INTERNAL_SERVER_ERROR') {
+      return { message: 'Internal server error', extensions: { code } };
+    }</span>
+  }
+  return formattedError;
+}</pre>
+<div class="callout warn">
+<b class="t">Subtle consequence</b>
+Apollo Server 4 gives a plain <code>new Error(...)</code> the code <code>INTERNAL_SERVER_ERROR</code>. So in production, <code>'Not authenticated'</code> is masked as <code>'Internal server error'</code>, and the frontend cannot tell an expired session from a server crash. The fix is to throw <code>new GraphQLError('Not authenticated', { extensions: { code: 'UNAUTHENTICATED' } })</code>. That is the GraphQL version of WNP's typed <code>BaseError</code> subclasses.
+</div>
+
+<h3>3.6 Side by side</h3>
+<table>
+<tr><th></th><th>WNP</th><th>Hospitality REST</th><th>Hospitality GraphQL</th></tr>
+<tr><td>Async errors caught by</td><td class="y">asyncHandler</td><td class="m">each function</td><td class="y">Apollo</td></tr>
+<tr><td>Central error translation</td><td class="y">errorMiddleware</td><td class="n">none (dead file)</td><td class="y">formatError</td></tr>
+<tr><td>Typed errors → correct 4xx</td><td class="y">BaseError family</td><td class="n">almost always 500</td><td class="m">plain Error</td></tr>
+<tr><td>Library error mapping</td><td class="y">Zod, Prisma, AWS</td><td class="n">—</td><td class="n">—</td></tr>
+<tr><td>Hides internals in prod</td><td class="y">yes</td><td class="n">leaks error.message</td><td class="y">yes</td></tr>
+<tr><td>Consistency in practice</td><td class="m">redundant inner try/catch</td><td class="y">uniform (uniformly manual)</td><td class="y">uniform</td></tr>
+</table>
+
+<!-- ========================================================= -->
+<h2 id="talk">4. What to say if asked</h2>
+<div class="callout good">
+<b class="t">A version you can say out loud</b>
+<p>"In WhatsNextPlease, which is TypeScript on Express 4, I wrote an <code>asyncHandler</code> higher-order function, because Express 4 doesn't forward rejected Promises. It awaits the handler inside a try/catch and calls <code>next(err)</code>. Behind it is one error middleware, registered last, that maps Zod errors to validation errors, Prisma known-request errors through a mapper (P2002 unique and P2003 foreign-key violations to validation errors, P2025 to not-found, anything else to a generic database error), AWS SDK errors, and our own <code>BaseError</code> subclasses to one response shape <code>{code, status, message, details}</code>. It hides stack traces outside development and has a failsafe if the handler itself throws. Services just throw typed errors like <code>NotFoundError</code>."</p>
+<p>"If I'm honest about the codebase, adoption wasn't perfectly clean. A lot of older handlers still had their own try/catch that called <code>next(error)</code> inside the wrapper, which is redundant. Newer controllers such as the serial-number API are just <code>asyncHandler(async (req, res) =&gt; { … throw new BadRequestError(…) })</code>. If I were cleaning it up, I'd delete the inner blocks, or move to Express 5 and drop the wrapper entirely."</p>
+<p>"Hospitality OS was mostly GraphQL on Apollo, so there was no wrapper to write. Resolvers throw, and <code>formatError</code> is the central place where we log and mask internal errors in production. The small REST monitoring API used manual try/catch per controller that returned a 500. That's the part I'd refactor to the WNP pattern, since it maps every failure to 500 and leaks error messages."</p>
+</div>
+<details>
+<summary>Likely follow-up questions</summary>
+<ul>
+<li><strong>Why not just use <code>express-async-errors</code>?</strong> It monkey-patches Express's router. An explicit wrapper is about 10 lines, typed, and has no global side effects. Express 5 makes both unnecessary.</li>
+<li><strong>Why check <code>res.headersSent</code>?</strong> If a response already started streaming (for example SSE), you can't send a new status. Delegating to Express's default handler closes the connection.</li>
+<li><strong>Where do you decide the status code?</strong> In the error class (<code>BadRequestError</code> → 400), not in the controller. Controllers express intent; the middleware owns the HTTP translation.</li>
+<li><strong>What's missing?</strong> Request IDs in the error response for correlation. Also a <code>process.on('unhandledRejection')</code> guard for errors that happen outside requests, such as schedulers and SSE.</li>
+</ul>
+</details>
+
+<!-- ========================================================= -->
+<h2 id="quiz">5. Quiz</h2>
+<p>Five questions to check that the mechanism, not just the vocabulary, has stuck.</p>
+<div id="quizzes"></div>
+
+</main>
+<script>
+function toggleTheme(){
+  const r=document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme = dark ? 'light' : 'dark';
+}
+const Q=[
+ {q:"In WNP (Express 4), an async handler with no wrapper and no try/catch awaits a Prisma query that rejects. What happens?",
+  a:["Express catches it and sends a 500 via the default handler","The rejection goes unobserved: no response is sent and Node logs an unhandledRejection","errorMiddleware receives it because it is registered last","Prisma retries the query automatically"],c:1,
+  f:"Express 4 wraps the handler call in a synchronous try/catch and ignores the returned Promise. A rejection never becomes next(err), so the request hangs until the client times out. That gap is what asyncHandler exists to close."},
+ {q:"skill.controller.ts has an inner try { … } catch (e) { next(e) } AND is wrapped in asyncHandler. A ZodError is thrown. How many times does errorMiddleware run?",
+  a:["Twice: once from the inner catch, once from the wrapper","Once, from the inner catch; the wrapper's catch never fires","Zero: the two catches cancel out","Once, from the wrapper; inner catches are skipped by Express"],c:1,
+  f:"The inner catch handles the error and returns normally, so the awaited handler resolves and the wrapper's catch has nothing to catch. The inner block is redundant, not harmful."},
+ {q:"In Hospitality OS, Sensor.find() throws a cast error because of a malformed propertyId. What does the client receive?",
+  a:["400 from middleware/errorHandler.js using err.statusCode","500 with {success:false, message:'Failed to fetch sensors', error:<raw message>} from the controller's own catch","A hung request, because there is no asyncHandler","A GraphQL errors array"],c:1,
+  f:"The controller catches everything itself and hard-codes a 500, including the raw error.message. errorHandler.js is never registered with app.use, so it plays no part. A client input error is reported as a server error."},
+ {q:"In production, a Hospitality OS resolver runs throw new Error('Not authenticated'). What message does the client see?",
+  a:["'Not authenticated' with code UNAUTHENTICATED","'Internal server error'","'Not authenticated' with no code","An HTTP 401 with an empty body"],c:1,
+  f:"A plain Error gets extensions.code = INTERNAL_SERVER_ERROR from Apollo, and formatError masks that code in production. To keep the message and a meaningful code, throw a GraphQLError with extensions.code 'UNAUTHENTICATED'."},
+ {q:"Why does the placement app.use(errorMiddleware) after all routes and the 404 handler matter?",
+  a:["Express runs middleware alphabetically, so it must be last","next(err) jumps only to error middleware (4-arg) registered after the point of failure, so it must come after the routes","It stops the 404 handler from ever running","Registering it last makes it apply only to GET requests"],c:1,
+  f:"Express identifies error middleware by its four parameters and, on next(err), skips forward to the next one in registration order. Registered before the routes, it would never see their errors."}
+];
+const box=document.getElementById('quizzes');
+Q.forEach((it,i)=>{
+  const d=document.createElement('div');d.className='q';
+  d.innerHTML='<p class="qt">'+(i+1)+'. '+it.q+'</p>';
+  const fb=document.createElement('div');fb.className='fb';
+  it.a.forEach((ans,j)=>{
+    const b=document.createElement('button');b.textContent=ans;
+    b.onclick=()=>{
+      d.querySelectorAll('button').forEach(x=>x.classList.remove('right','wrong'));
+      b.classList.add(j===it.c?'right':'wrong');
+      if(j!==it.c) d.querySelectorAll('button')[it.c].classList.add('right');
+      fb.style.display='block';
+      fb.innerHTML=(j===it.c?'<b style="color:var(--good)">Correct.</b> ':'<b style="color:var(--bad)">Not quite.</b> ')+it.f;
+    };
+    d.appendChild(b);
+  });
+  d.appendChild(fb);box.appendChild(d);
+});
+</script>
+</body>
+</html>
