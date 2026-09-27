@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>redis-py Pub/Sub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root{
+    --bg:#0f1117; --panel:#161a23; --panel2:#1c212c; --border:#2a3140;
+    --text:#e6e9f0; --muted:#8b93a7;
+    --blue:#5b9dff; --orange:#ff9a52; --green:#4ade80; --purple:#c084fc; --pink:#f472b6; --red:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg); color:var(--text); margin:0; padding:32px 20px 80px; font-family:'JetBrains Mono',monospace; line-height:1.55;}
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 8px}
+  .wrap{max-width:980px;margin:0 auto}
+  .hero{background:linear-gradient(135deg,#1a1f2c,#161a23); border:1px solid var(--border); border-radius:16px; padding:28px 30px; margin-bottom:28px;}
+  .hero h1{font-size:2rem;font-weight:800}
+  .hero .sub{color:var(--muted);font-size:.95rem;margin-top:6px}
+  .pill{display:inline-block;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px 4px 2px 0;letter-spacing:.03em}
+  .pill.blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.35)}
+  .pill.orange{background:rgba(255,154,82,.15);color:var(--orange);border:1px solid rgba(255,154,82,.35)}
+  .pill.green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35)}
+  .pill.purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.35)}
+  .section{margin:36px 0}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .label .bar{width:5px;height:22px;border-radius:3px}
+  .label h2{font-size:1.25rem}
+  .bar.blue{background:var(--blue)} .bar.orange{background:var(--orange)}
+  .bar.green{background:var(--green)} .bar.purple{background:var(--purple)} .bar.pink{background:var(--pink)}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+  .card p{margin:8px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+  code, .inline-code{background:#0c0e14; border:1px solid var(--border); border-radius:5px; padding:1px 7px; font-size:.85em; color:var(--orange);}
+  pre{background:#0a0c12; border:1px solid var(--border); border-radius:10px; padding:16px 18px; overflow-x:auto; font-size:.82rem; margin:10px 0;}
+  pre code{background:none;border:none;padding:0;color:var(--text)}
+  .cmt{color:#5c6577} .kw{color:var(--blue)} .str{color:var(--green)} .num{color:var(--orange)} .fn{color:var(--purple)}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.85rem}
+  th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--blue);font-family:'Syne',sans-serif;font-size:.75rem;letter-spacing:.04em;text-transform:uppercase}
+  .flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin:16px 0}
+  .node{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.85rem;text-align:center}
+  .node.blue{border-color:var(--blue);color:var(--blue)}
+  .node.green{border-color:var(--green);color:var(--green)}
+  .node.orange{border-color:var(--orange);color:var(--orange)}
+  .node.red{border-color:var(--red);color:var(--red)}
+  .arrow{color:var(--muted);font-size:1.1rem}
+  .tip{background:rgba(74,222,128,.06); border:1px solid rgba(74,222,128,.3); border-left:4px solid var(--green); border-radius:8px; padding:12px 16px; margin:12px 0; font-size:.88rem;}
+  .tip b{color:var(--green)}
+  .warn{background:rgba(255,107,107,.06); border:1px solid rgba(255,107,107,.3); border-left:4px solid var(--red); border-radius:8px; padding:12px 16px; margin:12px 0; font-size:.88rem;}
+  .warn b{color:var(--red)}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .toc a{color:var(--muted);text-decoration:none;font-size:.78rem;border:1px solid var(--border);padding:4px 10px;border-radius:16px}
+  .toc a:hover{color:var(--blue);border-color:var(--blue)}
+  ul{padding-left:20px} li{margin:5px 0}
+  .muted{color:var(--muted)} .small{font-size:.82rem}
+  .compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0}
+  @media(max-width:800px){.compare{grid-template-columns:1fr}}
+  .compare .box{border-radius:10px;padding:14px;border:1px solid var(--border)}
+  .compare .box.a{background:rgba(91,157,255,.06);border-color:rgba(91,157,255,.3)}
+  .compare .box.b{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.3)}
+  .compare .box.c{background:rgba(192,132,252,.06);border-color:rgba(192,132,252,.3)}
+  .compare h4{margin:0 0 6px;font-family:'Syne',sans-serif;font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill blue">REDIS-PY</span><span class="pill green">CLIENT LIBRARY</span><span class="pill orange">PUB/SUB</span>
+    <h1>redis-py Pub/Sub</h1>
+    <div class="sub">How the Python client wraps SUBSCRIBE/PUBLISH — the PubSub object, message dicts, handlers, and the 3 ways to read.</div>
+    <div class="toc">
+      <a href="#basics">1. Basics</a>
+      <a href="#msgshape">2. Message Shape</a>
+      <a href="#reading">3. Reading Strategies</a>
+      <a href="#handlers">4. Message Handlers</a>
+      <a href="#thread">5. run_in_thread Deep Dive</a>
+      <a href="#misc">6. Other Must-Knows</a>
+    </div>
+  </div>
+
+  <!-- 1 BASICS -->
+  <div class="section" id="basics">
+    <div class="label"><div class="bar blue"></div><h2>Creating &amp; Subscribing</h2></div>
+    <div class="card">
+      <pre><code>r = redis.Redis(...)
+p = r.pubsub()
+
+p.subscribe(<span class="str">'chan1'</span>, <span class="str">'chan2'</span>)
+p.psubscribe(<span class="str">'my-*'</span>)</code></pre>
+      <p class="small muted">Subscribing just tells Redis "send me stuff for this." Nothing is read from the socket yet — that's <code>get_message()</code>'s job (see §3).</p>
+    </div>
+  </div>
+
+  <!-- 2 MESSAGE SHAPE -->
+  <div class="section" id="msgshape">
+    <div class="label"><div class="bar green"></div><h2>The Message Dict</h2></div>
+    <div class="card">
+      <p>Every message read is a dict with 4 keys:</p>
+      <table>
+        <tr><th>key</th><th>meaning</th></tr>
+        <tr><td class="inline-code">type</td><td>subscribe / unsubscribe / psubscribe / punsubscribe / message / pmessage</td></tr>
+        <tr><td class="inline-code">channel</td><td>the channel involved</td></tr>
+        <tr><td class="inline-code">pattern</td><td><code>None</code> unless type is <code>pmessage</code></td></tr>
+        <tr><td class="inline-code">data</td><td>subscription count for [un]subscribe · actual payload for [p]message</td></tr>
+      </table>
+      <pre><code>{<span class="str">'type'</span>: <span class="str">'message'</span>, <span class="str">'channel'</span>: b<span class="str">'orders'</span>, <span class="str">'pattern'</span>: <span class="kw">None</span>, <span class="str">'data'</span>: b<span class="str">'order#123'</span>}</code></pre>
+    </div>
+  </div>
+
+  <!-- 3 READING STRATEGIES -->
+  <div class="section" id="reading">
+    <div class="label"><div class="bar orange"></div><h2>3 Ways to Read Messages</h2></div>
+    <div class="compare">
+      <div class="box a">
+        <h4 style="color:var(--blue)">get_message()</h4>
+        <p class="small">Non-blocking poll. Data ready → returns dict. Nothing ready → returns <code>None</code> immediately.</p>
+        <p class="small muted">Best for: your own event loop</p>
+      </div>
+      <div class="box b">
+        <h4 style="color:var(--green)">listen()</h4>
+        <p class="small">Blocking generator — <code>for msg in p.listen():</code>. Waits until something arrives.</p>
+        <p class="small muted">Best for: simple scripts, nothing else to do</p>
+      </div>
+      <div class="box c">
+        <h4 style="color:var(--purple)">run_in_thread()</h4>
+        <p class="small">Runs <code>get_message()</code> on a loop in a background thread automatically.</p>
+        <p class="small muted">Best for: fire-and-forget — <b>requires handlers on every subscription</b></p>
+      </div>
+    </div>
+    <div class="tip"><b>Core idea:</b> <code>get_message()</code> is the actual "pump." Subscribing sets up <i>what</i> to listen for; calling <code>get_message()</code> (directly, via <code>listen()</code>, or via the background thread) is the act of pulling bytes off the socket <i>right now</i>. No call = messages sit unread in the OS buffer.</div>
+    <pre><code><span class="cmt"># get_message() in your own loop</span>
+<span class="kw">while</span> <span class="kw">True</span>:
+    message = p.get_message()
+    <span class="kw">if</span> message:
+        <span class="cmt"># handle it</span>
+        <span class="kw">pass</span>
+    time.sleep(<span class="num">0.001</span>)</code></pre>
+  </div>
+
+  <!-- 4 HANDLERS -->
+  <div class="section" id="handlers">
+    <div class="label"><div class="bar purple"></div><h2>Message Handlers</h2></div>
+    <div class="card">
+      <p>Instead of manually branching on the dict, attach a callback per channel/pattern. When a handled message arrives, <code>get_message()</code> calls the handler internally and returns <code>None</code> — the message was already dealt with.</p>
+
+      <h3 style="font-size:1rem;color:var(--blue)">3 ways to attach a handler (mixable in one call)</h3>
+      <table>
+        <tr><th>Form</th><th>When to use</th><th>Example</th></tr>
+        <tr><td>Keyword arg</td><td>Plain, identifier-safe channel names</td><td><span class="inline-code">p.subscribe(**{'my-channel': handler})</span></td></tr>
+        <tr><td class="inline-code">redis.Subscription(name, handler)</td><td>Names kwargs can't express — binary, special chars</td><td><span class="inline-code">p.subscribe(redis.Subscription(b'\x80\x81', handler))</span></td></tr>
+        <tr><td>Mixed</td><td>Combine plain names + Subscription objects freely</td><td><span class="inline-code">p.subscribe('logs', redis.Subscription(b'\x82\x83', h))</span></td></tr>
+      </table>
+
+      <p class="small muted"><b>Why Subscription exists:</b> Python kwargs must be valid identifiers — no dashes, no raw bytes. <code>redis.Subscription</code> is just a small wrapper pairing (channel, handler) for names that can't be a kwarg.</p>
+
+      <pre><code><span class="kw">def</span> <span class="fn">order_handler</span>(message):
+    <span class="fn">print</span>(<span class="str">"New order:"</span>, message[<span class="str">'data'</span>])
+
+<span class="kw">def</span> <span class="fn">binary_handler</span>(message):
+    <span class="fn">print</span>(<span class="str">"Binary:"</span>, message[<span class="str">'data'</span>])
+
+p.subscribe(**{<span class="str">'orders'</span>: order_handler})
+p.subscribe(redis.Subscription(b<span class="str">'\x80\x81'</span>, binary_handler))
+
+r.publish(<span class="str">'orders'</span>, <span class="str">'order#123'</span>)
+p.get_message()  <span class="cmt"># → calls order_handler(), prints, returns None</span></code></pre>
+    </div>
+  </div>
+
+  <!-- 5 THREAD DEEP DIVE -->
+  <div class="section" id="thread">
+    <div class="label"><div class="bar red"></div><h2>run_in_thread() — Rules &amp; Safety Net</h2></div>
+    <div class="card">
+      <div class="flow">
+        <div class="node blue">subscribe + handler</div>
+        <div class="arrow">→</div>
+        <div class="node green">run_in_thread()</div>
+        <div class="arrow">→</div>
+        <div class="node orange">background loop calls get_message() on interval</div>
+      </div>
+
+      <div class="warn"><b>Hard rule:</b> every subscribed channel/pattern MUST have a handler attached before calling <code>run_in_thread()</code> — or it raises an error and refuses to start.</div>
+      <p class="small">Why: the background thread has no way to hand a message dict back to your main thread. If a channel had no handler, that message would just be silently dropped on a thread nobody's watching. redis-py blocks this scenario outright rather than let messages vanish.</p>
+
+      <pre><code>p.subscribe(**{<span class="str">'my-channel'</span>: my_handler})
+thread = p.run_in_thread(sleep_time=<span class="num">0.001</span>)
+<span class="cmt"># ... background loop now runs get_message() every 0.001s ...</span>
+thread.stop()</code></pre>
+
+      <h3 style="font-size:1rem;color:var(--red);margin-top:18px">Exception handler — catching crashes on the thread</h3>
+      <p class="small">If a handler raises inside the background thread, there's no <code>try/except</code> on your main thread to catch it — the thread would just die silently. <code>exception_handler</code> is your safety net.</p>
+      <pre><code><span class="kw">def</span> <span class="fn">exception_handler</span>(ex, pubsub, thread):
+    <span class="fn">print</span>(<span class="str">f"Handler crashed: {ex}"</span>)
+    thread.stop()
+
+thread = p.run_in_thread(exception_handler=exception_handler)</code></pre>
+      <p class="small muted">Receives 3 args: the exception itself, the <code>pubsub</code> object (to inspect/resubscribe), and the <code>thread</code> (to stop it or restart cleanly).</p>
+    </div>
+  </div>
+
+  <!-- 6 OTHER MUST-KNOWS -->
+  <div class="section" id="misc">
+    <div class="label"><div class="bar green"></div><h2>Other Practical Notes</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="font-size:.95rem;color:var(--blue)">Quiet mode</h3>
+        <p class="small"><code>r.pubsub(ignore_subscribe_messages=True)</code> — suppresses subscribe/unsubscribe confirmations so <code>get_message()</code> only surfaces real data.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.95rem;color:var(--orange)">Reconnect behavior</h3>
+        <p class="small">PubSub auto re-subscribes to all prior channels/patterns on reconnect — but messages published <i>during</i> the disconnect are lost (consistent with at-most-once delivery).</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.95rem;color:var(--purple)">Cleanup</h3>
+        <p class="small">Call <code>p.close()</code> when done to release the connection.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:.95rem;color:var(--green)">PUBSUB introspection</h3>
+        <p class="small"><code>r.pubsub_channels()</code>, <code>r.pubsub_numsub(...)</code>, <code>r.pubsub_numpat()</code> — same server commands, wrapped as methods.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

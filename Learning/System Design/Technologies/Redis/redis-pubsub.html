@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Redis Pub/Sub</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#0f1117; --panel:#161a23; --panel2:#1c212c; --border:#2a3140;
+    --text:#e6e9f0; --muted:#8b93a7;
+    --blue:#5b9dff; --orange:#ff9a52; --green:#4ade80; --purple:#c084fc; --pink:#f472b6; --red:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--text); margin:0; padding:32px 20px 80px;
+    font-family:'JetBrains Mono',monospace; line-height:1.55;
+  }
+  h1,h2,h3{font-family:'Syne',sans-serif; margin:0 0 8px}
+  .wrap{max-width:980px;margin:0 auto}
+
+  .hero{
+    background:linear-gradient(135deg,#1a1f2c,#161a23);
+    border:1px solid var(--border); border-radius:16px; padding:28px 30px; margin-bottom:28px;
+  }
+  .hero h1{font-size:2rem;font-weight:800}
+  .hero .sub{color:var(--muted);font-size:.95rem;margin-top:6px}
+  .pill{display:inline-block;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;margin:2px 4px 2px 0;letter-spacing:.03em}
+  .pill.blue{background:rgba(91,157,255,.15);color:var(--blue);border:1px solid rgba(91,157,255,.35)}
+  .pill.orange{background:rgba(255,154,82,.15);color:var(--orange);border:1px solid rgba(255,154,82,.35)}
+  .pill.green{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.35)}
+  .pill.purple{background:rgba(192,132,252,.15);color:var(--purple);border:1px solid rgba(192,132,252,.35)}
+  .pill.pink{background:rgba(244,114,182,.15);color:var(--pink);border:1px solid rgba(244,114,182,.35)}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.35)}
+
+  .section{margin:36px 0}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .label .bar{width:5px;height:22px;border-radius:3px}
+  .label h2{font-size:1.25rem}
+  .bar.blue{background:var(--blue)} .bar.orange{background:var(--orange)}
+  .bar.green{background:var(--green)} .bar.purple{background:var(--purple)}
+  .bar.pink{background:var(--pink)} .bar.red{background:var(--red)}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+  .card p{margin:8px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  code, .inline-code{
+    background:#0c0e14; border:1px solid var(--border); border-radius:5px;
+    padding:1px 7px; font-size:.85em; color:var(--orange);
+  }
+  pre{
+    background:#0a0c12; border:1px solid var(--border); border-radius:10px;
+    padding:16px 18px; overflow-x:auto; font-size:.82rem; margin:10px 0;
+  }
+  pre code{background:none;border:none;padding:0;color:var(--text)}
+  .cmt{color:#5c6577}
+  .kw{color:var(--blue)}
+  .str{color:var(--green)}
+  .num{color:var(--orange)}
+  .fn{color:var(--purple)}
+
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.85rem}
+  th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--blue);font-family:'Syne',sans-serif;font-size:.75rem;letter-spacing:.04em;text-transform:uppercase}
+  td .inline-code{white-space:nowrap}
+
+  .cmd-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;position:relative}
+  .cmd-card .cmd-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--blue)}
+  .cmd-card .since{float:right;font-size:.7rem;color:var(--muted)}
+  .cmd-syntax{background:#0a0c12;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:.85rem;color:var(--green)}
+  .cmd-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+
+  .flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin:20px 0}
+  .node{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.85rem;text-align:center}
+  .node.blue{border-color:var(--blue);color:var(--blue)}
+  .node.green{border-color:var(--green);color:var(--green)}
+  .node.orange{border-color:var(--orange);color:var(--orange)}
+  .arrow{color:var(--muted);font-size:1.1rem}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+  @media(max-width:720px){.compare{grid-template-columns:1fr}}
+  .compare .box{border-radius:10px;padding:16px;border:1px solid var(--border)}
+  .compare .box.a{background:rgba(91,157,255,.06);border-color:rgba(91,157,255,.3)}
+  .compare .box.b{background:rgba(192,132,252,.06);border-color:rgba(192,132,252,.3)}
+  .compare h4{margin:0 0 8px;font-family:'Syne',sans-serif}
+
+  .tip{
+    background:rgba(74,222,128,.06); border:1px solid rgba(74,222,128,.3);
+    border-left:4px solid var(--green); border-radius:8px; padding:12px 16px; margin:12px 0; font-size:.88rem;
+  }
+  .tip b{color:var(--green)}
+  .warn{
+    background:rgba(255,154,82,.06); border:1px solid rgba(255,154,82,.3);
+    border-left:4px solid var(--orange); border-radius:8px; padding:12px 16px; margin:12px 0; font-size:.88rem;
+  }
+  .warn b{color:var(--orange)}
+
+  .glossary-term{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+  .glossary-term .term{color:var(--purple);font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem}
+
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .toc a{color:var(--muted);text-decoration:none;font-size:.78rem;border:1px solid var(--border);padding:4px 10px;border-radius:16px}
+  .toc a:hover{color:var(--blue);border-color:var(--blue)}
+
+  ul{padding-left:20px} li{margin:5px 0}
+  .muted{color:var(--muted)}
+  .small{font-size:.82rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="pill blue">DATA STRUCTURES</span><span class="pill green">MESSAGING</span><span class="pill orange">REAL-TIME</span>
+    <h1>Redis Pub/Sub</h1>
+    <div class="sub">Publish/Subscribe messaging — decoupled channels, at-most-once delivery, wire protocol, and the full command set.</div>
+    <div class="toc">
+      <a href="#concept">1. Concept</a>
+      <a href="#resp">2. RESP &amp; Terms</a>
+      <a href="#commands">3. Commands</a>
+      <a href="#patterns">4. Pattern Matching</a>
+      <a href="#sharded">5. Sharded Pub/Sub</a>
+      <a href="#code">6. Code Example</a>
+      <a href="#realworld">7. Real-World Use</a>
+      <a href="#tips">8. Practical Tips</a>
+    </div>
+  </div>
+
+  <!-- 1. PROBLEM / CONCEPT -->
+  <div class="section" id="concept">
+    <div class="label"><div class="bar blue"></div><h2>The Problem It Solves</h2></div>
+    <div class="card">
+      <p>Normally, if service A wants to tell service B "something happened," A needs to know B exists and how to reach it. Pub/Sub removes that coupling.</p>
+      <div class="flow">
+        <div class="node blue">Publisher</div>
+        <div class="arrow">→</div>
+        <div class="node orange">channel: "news.tech"</div>
+        <div class="arrow">→</div>
+        <div class="node green">Subscriber A</div>
+      </div>
+      <div class="flow" style="margin-top:-8px">
+        <div class="node blue" style="visibility:hidden">Publisher</div>
+        <div class="arrow" style="visibility:hidden">→</div>
+        <div class="node orange" style="visibility:hidden">x</div>
+        <div class="arrow">→</div>
+        <div class="node green">Subscriber B</div>
+      </div>
+      <p class="small muted">Publishers send messages into a <b>channel</b> with zero awareness of who — if anyone — is listening. Subscribers listen to channels with zero awareness of who is publishing. Neither side needs the other's identity.</p>
+    </div>
+  </div>
+
+  <!-- 2. RESP + TERMINOLOGY -->
+  <div class="section" id="resp">
+    <div class="label"><div class="bar purple"></div><h2>Uncommon Terms Explained</h2></div>
+
+    <div class="glossary-term">
+      <div class="term">RESP (REdis Serialization Protocol)</div>
+      <p>The wire format Redis clients and servers speak. Every request and reply is encoded as simple typed lines — no JSON, no binary blobs. RESP2 is the classic version; RESP3 (opt-in via <code>HELLO 3</code>) adds richer types and, importantly for Pub/Sub, lets a subscribed client run <i>any</i> command instead of being restricted to a handful.</p>
+    </div>
+
+    <div class="glossary-term">
+      <div class="term">Array reply</div>
+      <p>A RESP reply type representing an ordered list of other replies. Every Pub/Sub push (a <code>subscribe</code> confirmation, an incoming <code>message</code>) is a 3-element array reply. In raw RESP it looks like <code>*3</code> (array of 3) followed by each element.</p>
+    </div>
+
+    <div class="glossary-term">
+      <div class="term">Integer reply</div>
+      <p>A RESP reply that's just a number, prefixed with <code>:</code> on the wire. <code>PUBLISH</code> returns an integer reply — the count of clients that received the message.</p>
+    </div>
+
+    <div class="glossary-term">
+      <div class="term">Bulk string ($) vs Simple string (+)</div>
+      <p>In RESP, <code>$9\r\nsubscribe\r\n</code> is a <b>bulk string</b> (length-prefixed, binary-safe) — this is how channel names and message payloads are sent. A <b>simple string</b> uses <code>+</code> and is for short fixed replies like <code>+OK</code>.</p>
+    </div>
+
+    <div class="tip"><b>Why this matters:</b> when you see raw <code>SUBSCRIBE</code> traffic on the wire, you're reading RESP directly — no client library in between. Understanding it makes debugging with <code>redis-cli --no-raw</code> or a raw TCP dump actually readable.</div>
+  </div>
+
+  <!-- 3. COMMANDS -->
+  <div class="section" id="commands">
+    <div class="label"><div class="bar green"></div><h2>Command Reference</h2></div>
+
+    <!-- SUBSCRIBE -->
+    <div class="cmd-card">
+      <span class="since">since 2.0.0</span>
+      <div class="cmd-name">SUBSCRIBE</div>
+      <div class="cmd-syntax">SUBSCRIBE channel [channel ...]</div>
+      <div class="cmd-meta">
+        <span class="pill blue">@pubsub</span><span class="pill orange">@slow</span>
+        <span class="pill green">O(N) — N = channels subscribed</span>
+      </div>
+      <p><b>Arguments:</b> one or more channel names (required).</p>
+      <p><b>Behavior:</b> enters the client into "subscribed" state. Once subscribed, a RESP2 client can only issue <code>PING</code>, <code>PSUBSCRIBE</code>, <code>PUNSUBSCRIBE</code>, <code>QUIT</code>, <code>RESET</code>, <code>SSUBSCRIBE</code>, <code>SUBSCRIBE</code>, <code>SUNSUBSCRIBE</code>, <code>UNSUBSCRIBE</code>. A RESP3 client (via <code>HELLO 3</code>) can run anything.</p>
+      <p><b>Return:</b> no direct return value — instead, for each channel, one array-reply push arrives: <code>["subscribe", channel, count]</code> where <code>count</code> is the total channels+patterns you're now subscribed to.</p>
+      <pre><code><span class="cmt"># subscribe to two channels</span>
+<span class="kw">SUBSCRIBE</span> channel11 ch:00
+<span class="cmt"># pushes back:</span>
+<span class="cmt">1) "subscribe"  2) "channel11"  3) (integer) 1</span>
+<span class="cmt">1) "subscribe"  2) "ch:00"      3) (integer) 2</span></code></pre>
+    </div>
+
+    <!-- UNSUBSCRIBE -->
+    <div class="cmd-card">
+      <span class="since">since 2.0.0</span>
+      <div class="cmd-name">UNSUBSCRIBE</div>
+      <div class="cmd-syntax">UNSUBSCRIBE [channel [channel ...]]</div>
+      <div class="cmd-meta">
+        <span class="pill blue">@pubsub</span><span class="pill orange">@slow</span>
+        <span class="pill green">O(N) — N = channels to unsubscribe</span>
+      </div>
+      <p><b>Arguments:</b> zero or more channel names (all optional). No arguments → unsubscribe from every channel.</p>
+      <p><b>Return:</b> one array-reply push per channel: <code>["unsubscribe", channel, count]</code>. When <code>count</code> hits 0, the client has fully exited Pub/Sub state and can run ordinary commands again.</p>
+      <pre><code><span class="kw">UNSUBSCRIBE</span>
+<span class="cmt">1) "unsubscribe"  2) "second"  3) (integer) 1</span>
+<span class="cmt">1) "unsubscribe"  2) "first"   3) (integer) 0</span></code></pre>
+      <div class="warn"><b>redis-cli gotcha:</b> inside <code>redis-cli</code>'s subscribed mode you cannot type <code>UNSUBSCRIBE</code> interactively — the CLI won't accept any command while subscribed. You must <code>Ctrl-C</code> out.</div>
+    </div>
+
+    <!-- PSUBSCRIBE -->
+    <div class="cmd-card">
+      <span class="since">since 2.0.0</span>
+      <div class="cmd-name">PSUBSCRIBE</div>
+      <div class="cmd-syntax">PSUBSCRIBE pattern [pattern ...]</div>
+      <div class="cmd-meta">
+        <span class="pill blue">@pubsub</span><span class="pill orange">@slow</span>
+        <span class="pill green">O(N) — N = patterns to subscribe</span>
+      </div>
+      <p><b>Arguments:</b> one or more glob-style patterns (required) — e.g. <code>news.*</code>, <code>user.???.login</code>.</p>
+      <p><b>Behavior:</b> subscribes to every channel whose name matches the glob pattern, present or future. Same "subscribed state" restrictions as <code>SUBSCRIBE</code> apply.</p>
+      <p><b>Return:</b> array-reply push per pattern: <code>["psubscribe", pattern, count]</code>.</p>
+      <pre><code><span class="fn">PSUBSCRIBE</span> news.*
+<span class="cmt"># matches: news.art.figurative, news.music.jazz, news.tech...</span></code></pre>
+    </div>
+
+    <!-- PUNSUBSCRIBE -->
+    <div class="cmd-card">
+      <span class="since">since 2.0.0</span>
+      <div class="cmd-name">PUNSUBSCRIBE</div>
+      <div class="cmd-syntax">PUNSUBSCRIBE [pattern [pattern ...]]</div>
+      <div class="cmd-meta">
+        <span class="pill blue">@pubsub</span><span class="pill orange">@slow</span>
+        <span class="pill green">O(N) — N = patterns to unsubscribe</span>
+      </div>
+      <p><b>Arguments:</b> zero or more patterns. No arguments → unsubscribe from all patterns (channel subscriptions are untouched).</p>
+      <p><b>Return:</b> array-reply push per pattern: <code>["punsubscribe", pattern, count]</code>.</p>
+      <pre><code><span class="fn">PUNSUBSCRIBE</span> news.*
+<span class="cmt"># only affects the "news.*" pattern subscription, nothing else</span></code></pre>
+    </div>
+
+    <!-- PUBLISH -->
+    <div class="cmd-card">
+      <span class="since">since 2.0.0</span>
+      <div class="cmd-name">PUBLISH</div>
+      <div class="cmd-syntax">PUBLISH channel message</div>
+      <div class="cmd-meta">
+        <span class="pill blue">@pubsub</span><span class="pill green">@fast</span>
+        <span class="pill orange">O(N+M) — N clients on channel, M patterns subscribed cluster-wide</span>
+      </div>
+      <p><b>Arguments:</b> <code>channel</code> (the target), <code>message</code> (the payload) — both required.</p>
+      <p><b>Return:</b> <span class="pill purple">Integer reply</span> — the number of clients the message was delivered to. In Redis Cluster, only clients connected to the <i>same node</i> as the publisher are counted.</p>
+      <pre><code><span class="fn">PUBLISH</span> second Hello
+<span class="cmt">(integer) 1   </span><span class="cmt"># one subscriber received it</span></code></pre>
+      <p class="small muted">A client subscribed to both <code>foo</code> (exact) and <code>f*</code> (pattern) will receive a published message to <code>foo</code> <b>twice</b> — once as <code>message</code>, once as <code>pmessage</code>.</p>
+    </div>
+
+    <!-- PUBSUB -->
+    <div class="cmd-card">
+      <span class="since">since 2.8.0</span>
+      <div class="cmd-name">PUBSUB &lt;subcommand&gt;</div>
+      <div class="cmd-syntax">PUBSUB CHANNELS [pattern] | PUBSUB NUMSUB [channel...] | PUBSUB NUMPAT</div>
+      <div class="cmd-meta"><span class="pill blue">@pubsub</span><span class="pill orange">@slow</span></div>
+      <p>Introspection commands — they don't subscribe you to anything, they just report the server's current Pub/Sub state.</p>
+      <table>
+        <tr><th>Subcommand</th><th>Args</th><th>Returns</th></tr>
+        <tr><td class="inline-code">PUBSUB CHANNELS [pattern]</td><td>optional glob pattern</td><td>Array of active channel names (channels with ≥1 subscriber) matching the pattern, or all if omitted</td></tr>
+        <tr><td class="inline-code">PUBSUB NUMSUB [ch ...]</td><td>zero or more channel names</td><td>Array alternating channel, subscriber-count pairs</td></tr>
+        <tr><td class="inline-code">PUBSUB NUMPAT</td><td>none</td><td>Integer reply — total number of pattern subscriptions across all clients</td></tr>
+      </table>
+      <pre><code><span class="fn">PUBSUB</span> CHANNELS news.*
+<span class="cmt">1) "news.tech"
+2) "news.jazz"</span>
+
+<span class="fn">PUBSUB</span> NUMSUB news.tech news.jazz
+<span class="cmt">1) "news.tech"  2) (integer) 3
+3) "news.jazz"  4) (integer) 1</span>
+
+<span class="fn">PUBSUB</span> NUMPAT
+<span class="cmt">(integer) 2</span></code></pre>
+    </div>
+  </div>
+
+  <!-- 4. PATTERN MATCHING & MESSAGE FORMATS -->
+  <div class="section" id="patterns">
+    <div class="label"><div class="bar orange"></div><h2>Message Formats &amp; Pattern Matching</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="color:var(--blue)">Direct message</h3>
+        <p class="small">Delivered when a subscriber matched via <code>SUBSCRIBE</code>.</p>
+        <pre><code><span class="str">["message", channel, payload]</span></code></pre>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--purple)">Pattern message</h3>
+        <p class="small">Delivered when a subscriber matched via <code>PSUBSCRIBE</code>.</p>
+        <pre><code><span class="str">["pmessage", pattern, channel, payload]</span></code></pre>
+      </div>
+    </div>
+    <div class="tip"><b>Subscription counter:</b> in every <code>subscribe</code>/<code>unsubscribe</code>/<code>psubscribe</code>/<code>punsubscribe</code> push, the last element is the total count of channels <i>and</i> patterns you're still subscribed to. It only reaches Pub/Sub exit (0) once every channel and pattern is gone.</div>
+  </div>
+
+  <!-- 5. SHARDED PUBSUB -->
+  <div class="section" id="sharded">
+    <div class="label"><div class="bar pink"></div><h2>Sharded Pub/Sub (Redis 7.0+)</h2></div>
+    <div class="card">
+      <p>Regular Pub/Sub messages propagate to <b>every node</b> in a Redis Cluster — fine at small scale, wasteful at large scale. Sharded Pub/Sub restricts propagation to just the shard that owns the channel's hash slot.</p>
+      <div class="compare">
+        <div class="box a">
+          <h4 style="color:var(--blue)">Regular Pub/Sub</h4>
+          <p class="small"><code>SUBSCRIBE</code> / <code>PUBLISH</code> — message fans out across the entire cluster bus, to every node, every time.</p>
+        </div>
+        <div class="box b">
+          <h4 style="color:var(--purple)">Sharded Pub/Sub</h4>
+          <p class="small"><code>SSUBSCRIBE</code> / <code>SPUBLISH</code> / <code>SUNSUBSCRIBE</code> — channel is hashed to a slot; message stays within that shard (master + its replicas) only.</p>
+        </div>
+      </div>
+      <p class="small muted">This lets you horizontally scale Pub/Sub throughput by adding shards, instead of every message hitting every node in the cluster.</p>
+    </div>
+  </div>
+
+  <!-- 6. CODE EXAMPLE -->
+  <div class="section" id="code">
+    <div class="label"><div class="bar green"></div><h2>Code Example — Python (redis-py)</h2></div>
+    <div class="card">
+      <p>Two processes: one subscribes and listens forever, the other publishes a message.</p>
+      <pre><code><span class="cmt"># subscriber.py — runs in a separate process/terminal</span>
+<span class="kw">import</span> redis
+
+r = redis.Redis(host=<span class="str">"localhost"</span>, port=<span class="num">6379</span>)
+pubsub = r.pubsub()
+pubsub.subscribe(<span class="str">"orders.new"</span>)
+
+<span class="cmt"># blocks, yielding a dict for every message/subscribe confirmation</span>
+<span class="kw">for</span> msg <span class="kw">in</span> pubsub.listen():
+    <span class="kw">if</span> msg[<span class="str">"type"</span>] == <span class="str">"message"</span>:
+        <span class="fn">print</span>(<span class="str">f"New order: {msg['data']}"</span>)</code></pre>
+      <pre><code><span class="cmt"># publisher.py</span>
+<span class="kw">import</span> redis
+
+r = redis.Redis(host=<span class="str">"localhost"</span>, port=<span class="num">6379</span>)
+n = r.publish(<span class="str">"orders.new"</span>, <span class="str">"order#4521 placed"</span>)
+<span class="fn">print</span>(<span class="str">f"delivered to {n} subscriber(s)"</span>)</code></pre>
+      <p class="small muted"><code>pubsub.listen()</code> internally wraps <code>SUBSCRIBE</code> + a blocking read loop that parses the raw RESP array-replies for you — this is the client library doing exactly what the wire-protocol example above shows manually.</p>
+    </div>
+  </div>
+
+  <!-- 7. REAL WORLD -->
+  <div class="section" id="realworld">
+    <div class="label"><div class="bar purple"></div><h2>Real-World Scenarios</h2></div>
+    <div class="grid3">
+      <div class="card">
+        <h3 style="color:var(--blue);font-size:1rem">Live chat / notifications</h3>
+        <p class="small">Each chat room = a channel. Every connected WebSocket server subscribes; any server can <code>PUBLISH</code> a new message and every other server (and its connected users) gets it instantly.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green);font-size:1rem">Cache invalidation</h3>
+        <p class="small">When a record changes, publish to <code>cache.invalidate.&lt;table&gt;</code>. Every app instance subscribed to that pattern drops its local cache entry — no polling needed.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--orange);font-size:1rem">Multiplayer game state</h3>
+        <p class="small">Game-room events (<code>PSUBSCRIBE room.42.*</code>) broadcast player moves to every client in that room with sub-millisecond fan-out.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. TIPS -->
+  <div class="section" id="tips">
+    <div class="label"><div class="bar red"></div><h2>Practical / Interview Tips</h2></div>
+    <div class="card">
+      <ul>
+        <li><b>At-most-once delivery.</b> If a subscriber is offline or crashes mid-message, that message is gone forever — Pub/Sub has zero persistence. If you need durability or replay, that's <span class="inline-code">Redis Streams (XADD/XREAD)</span>, not Pub/Sub. Interviewers love asking "what happens if the subscriber disconnects?" — this is the answer.</li>
+        <li><b>No relation to keyspace / databases.</b> Publishing on DB 10 is heard by a subscriber connected to DB 1 — channels are entirely separate from the key namespace. If you need isolation, prefix channel names yourself (e.g. <span class="inline-code">prod:orders.new</span> vs <span class="inline-code">staging:orders.new</span>).</li>
+        <li><b>A subscribed client is mostly "read-only."</b> Under RESP2 it can't run arbitrary commands while subscribed — only the Pub/Sub-adjacent ones. Use a separate connection for publishing/other commands, or upgrade to RESP3 via <span class="inline-code">HELLO 3</span>.</li>
+        <li><b>Fan-out cost scales with subscribers + patterns.</b> <span class="inline-code">PUBLISH</span> is O(N+M) — lots of pattern subscriptions across the cluster make every publish more expensive, even on unrelated channels.</li>
+        <li><b>Cluster mode:</b> plain Pub/Sub messages propagate to every node in the cluster bus; Sharded Pub/Sub (<span class="inline-code">SSUBSCRIBE</span>/<span class="inline-code">SPUBLISH</span>) confines them to one shard — know when to reach for which.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
