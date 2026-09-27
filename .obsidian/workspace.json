@@ -30,8 +30,33 @@
               "icon": "lucide-file",
               "title": "First"
             }
+          },
+          {
+            "id": "5e0db6441edff141",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Simple Docker tests/Notes.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Notes"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -90,7 +115,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 490.60546875
+    "width": 490.60546875,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -196,8 +222,13 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/2-Stress test K6/First.md",
+    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Simple Docker tests/Notes.md",
+    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Drawing 2026-09-27 16.08.50.excalidraw.md",
+    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Simple Docker tests",
+    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Drawing 2026-09-27 14.28.26.excalidraw.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/1-Analysis Database/Analysis 1.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Commands.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/307782-2026-09-10T17:42:38+05:00.svg",
@@ -214,7 +245,6 @@
     "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Tracker.xlsx",
     "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Playbook.pdf",
     "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition.zip",
-    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Interview-Question-Bank.pdf",
     "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027.md",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/Interview Practice/Coastal Research/Schema Design.excalidraw.md",
@@ -231,10 +261,6 @@
     "Learning/Database/Database Design/8-Using-AI-Database-Design/1-SQL.excalidraw.md",
     "Learning/Database/Database Design/4-Entities-and-Attributes/1-Intro-and-Keys.excalidraw.md",
     "Learning/Database/Database Design/4-Entities-and-Attributes/2-Data-Types.excalidraw.md",
-    "Learning/Database/Database Design/3-Overview of Database design/3-Summary.excalidraw.md",
-    "Learning/Database/Database Design/3-Overview of Database design/2-Phases of Database Design.excalidraw.md",
-    "Learning/Database/Database Design/3-Overview of Database design/1-Good Database Design.excalidraw.md",
-    "Learning/Database/Database Design/1-Intro to Database/2-First SQL Query.excalidraw.md",
     "Pasted image 20260923012351.png",
     "Pasted image 20260923011859.png",
     "Pasted image 20260923003407.png",
