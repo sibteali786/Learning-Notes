@@ -71,3 +71,4 @@ In 2000 housing takes slightly below one third of total household spending with 
 
 2020 is the year when housing is still the largest spending, increasing to 38 percent, Food drops to 18 percent still the second largest spending, while Education, Leisure see increment of 5 and 2 percent spending respectively. Transport and other decrease to 12 and 5 percent respectively.  
 ```
+
