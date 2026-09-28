@@ -1,3 +1,5 @@
+```table-of-contents
+```
 # Learn Go
 
 ![golang gopher](https://go.dev/blog/gopher/header.jpg)
@@ -1795,3 +1797,446 @@ func printCostReport(costCalculator func(string) int, message string) {
 
 ```
 
+# Defer
+
+The `defer` keyword is a fairly unique feature of Go. It allows a function to be executed automatically _just before_ its enclosing function returns. The deferred call's arguments are evaluated immediately, but the function call is not executed until the surrounding function returns.
+
+Deferred functions are typically used to clean up resources that are no longer being used. Often to close database connections, file handlers and the like.
+
+For example:
+
+```go
+func GetUsername(dstName, srcName string) (username string, err error) {
+	// Open a connection to a database
+	conn, _ := db.Open(srcName)
+
+	// Close the connection *anywhere* the GetUsername function returns
+	defer conn.Close()
+
+	username, err = db.FetchUser()
+	if err != nil {
+		// The defer statement is auto-executed if we return here
+		return "", err
+	}
+
+	// The defer statement is auto-executed if we return here
+	return username, nil
+}
+```
+
+In the above example, the `conn.Close()` function is not called here:
+
+```go
+defer conn.Close()
+```
+
+It's called:
+
+```go
+// here
+return "", err
+// or here
+return username, nil
+```
+
+Depending on whether the `FetchUser` function errored. (We'll cover errors later).
+
+Defer is a great way to **make sure** that something happens before a function exits, even if there are multiple return statements, a common occurrence in Go.
+
+## Multiple Defers
+
+The location of a `defer` statement inside a function matters. The deferred call is registered at the point where `defer` is executed, and it will run when the function returns. If you have multiple `defer` statements in a single function, they are executed in **last-in, first-out** order (the last deferred call runs first).
+
+For example, you'd want to close a file before trying to remove it:
+
+```go
+func CreateTempFile() {
+	f, _ := os.Create("temp-42.txt")
+	defer os.Remove(f.Name()) // executed second
+	defer f.Close()           // executed first
+
+	fmt.Fprintln(f, "How many roads must a man walk down?")
+}
+```
+
+## Assignment
+
+Complete the `bootup` function.
+
+1. Be sure to print the following string _just before_ the `bootup` function returns:
+    
+    ```text
+    TEXTIO BOOTUP DONE
+    ```
+    
+1. Use `defer` so that you only have to write this message once instead of before each `return` statement. The message should be printed on its own newline.
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func bootup() {
+	defer fmt.Println("TEXTIO BOOTUP DONE")
+	ok := connectToDB()
+	if !ok {
+		return
+	}
+	ok = connectToPaymentProvider()
+	if !ok {
+		return
+	}
+	fmt.Println("All systems ready!")
+}
+
+// don't touch below this line
+
+var shouldConnectToDB = true
+
+func connectToDB() bool {
+	fmt.Println("Connecting to database...")
+	if shouldConnectToDB {
+		fmt.Println("Connected!")
+		return true
+	}
+	fmt.Println("Connection failed")
+	return false
+}
+
+var shouldConnectToPaymentProvider = true
+
+func connectToPaymentProvider() bool {
+	fmt.Println("Connecting to payment provider...")
+	if shouldConnectToPaymentProvider {
+		fmt.Println("Connected!")
+		return true
+	}
+	fmt.Println("Connection failed")
+	return false
+}
+
+func test(dbSuccess, paymentSuccess bool) {
+	shouldConnectToDB = dbSuccess
+	shouldConnectToPaymentProvider = paymentSuccess
+	bootup()
+	fmt.Println("====================================")
+}
+
+func main() {
+	test(true, true)
+	test(false, true)
+	test(true, false)
+	test(false, false)
+}
+
+```
+
+# Block Scope
+
+Unlike Python, Go is _not_ function-scoped, it's [block-scoped](https://go.dev/ref/spec#Declarations_and_scope). Variables declared inside a block are only accessible within that block (and its nested blocks). There's also the package scope. We'll talk about packages later, but for now, you can think of it as the outermost, nearly global scope.
+
+```go
+package main
+
+// scoped to the entire "main" package (basically global)
+var age = 19
+
+func sendEmail() {
+    // scoped to the "sendEmail" function
+    name := "Jon Snow"
+
+    for i := 0; i < 5; i++ {
+        // scoped to the "for" body
+        email := "snow@winterfell.net"
+    }
+}
+```
+
+Blocks are defined by curly braces `{}`. New blocks are created for:
+
+- Functions
+- Loops
+- If statements
+- Switch statements
+- Select statements
+- Explicit blocks
+
+It's a bit unusual, but occasionally you'll see a plain old explicit block. It exists for no other reason than to create a new scope.
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+    {
+        age := 19
+        // this is okay
+        fmt.Println(age)
+    }
+
+    // this is not okay
+    // the age variable is out of scope
+    fmt.Println(age)
+}
+```
+
+## Assignment
+
+1. [ ] Run the code without changing anything: you should see a compilation error.
+2. [ ] Fix the scoping issue in the function so that it runs as you'd expect.
+
+```go
+package main
+
+func splitEmail(email string) (string, string) {
+	username, domain := "", ""
+	for i, r := range email {
+		if r == '@' {
+			username = email[:i]
+			domain = email[i+1:]
+			break
+		}
+	}
+	return username, domain
+}
+
+```
+
+# Processing Orders
+
+Management thinks our branding is so creative that our SaaS customers will pay for Textio merch.
+
+## Assignment
+
+Complete the `placeOrder` function.
+
+It returns a `bool` indicating whether the order was successful (`true` is a success) and a `float64` representing the user's balance after the order. The `placeOrder` function should always return the account balance regardless of whether it was adjusted.
+
+The `amountInStock` and `calcPrice` functions can be used to look up the current stock and price of an item.
+
+- If the quantity is greater than the amount in stock, the order should be rejected.
+- If the user doesn't have enough money in their account, the order should be rejected.
+- Otherwise, the order should be accepted and you should return the new balance.
+
+```go
+package main
+
+func placeOrder(productID string, quantity int, accountBalance float64) (bool, float64) {
+	if quantity > amountInStock(productID) {
+		return false, accountBalance
+	}
+	price := calcPrice(productID, quantity)
+	if price > accountBalance {
+		return false, accountBalance
+	}
+	accountBalance -= price
+	return true, accountBalance
+}
+
+// Don't touch below this line
+
+func calcPrice(productID string, quantity int) float64 {
+	return priceList(productID) * float64(quantity)
+}
+
+func priceList(productID string) float64 {
+	if productID == "1" {
+		return 1.50
+	} else if productID == "2" {
+		return 2.25
+	} else if productID == "3" {
+		return 3.00
+	} else if productID == "4" {
+		return 1.00
+	} else if productID == "5" {
+		return 2.50
+	} else if productID == "6" {
+		return 8.99
+	} else if productID == "7" {
+		return 22.50
+	} else if productID == "8" {
+		return 50.00
+	} else if productID == "9" {
+		return 999.99
+	} else {
+		return 0.00
+	}
+}
+
+func amountInStock(productID string) int {
+	if productID == "1" {
+		return 11
+	} else if productID == "2" {
+		return 25
+	} else if productID == "3" {
+		return 4
+	} else if productID == "4" {
+		return 6
+	} else if productID == "5" {
+		return 50
+	} else if productID == "6" {
+		return 2
+	} else if productID == "7" {
+		return 0
+	} else if productID == "8" {
+		return 99
+	} else if productID == "9" {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+```
+
+# Closures
+
+A [closure](https://en.wikipedia.org/wiki/Closure_\(computer_programming\)) is a function that references variables from outside its own function body. The function may access and _assign_ to the referenced variables.
+
+In this example, the `concatter()` function returns a function that has reference to an _enclosed_ `doc` value. Each successive call to `harryPotterAggregator` mutates that same `doc` variable.
+
+```go
+func concatter() func(string) string {
+	doc := ""
+	return func(word string) string {
+		doc += word + " "
+		return doc
+	}
+}
+
+func main() {
+	harryPotterAggregator := concatter()
+	harryPotterAggregator("Mr.")
+	harryPotterAggregator("and")
+	harryPotterAggregator("Mrs.")
+	harryPotterAggregator("Dursley")
+	harryPotterAggregator("of")
+	harryPotterAggregator("number")
+	harryPotterAggregator("four,")
+	harryPotterAggregator("Privet")
+
+	fmt.Println(harryPotterAggregator("Drive"))
+	// Mr. and Mrs. Dursley of number four, Privet Drive
+}
+```
+
+## Assignment
+
+Keeping track of how many texts we send is mission-critical at Textio. Complete the `adder()` [enclosing function](https://en.wikipedia.org/wiki/Nested_function).
+
+1. [ ] Create an enclosed `sum` value inside the `adder()` function.
+2. [ ] Return a function from the `adder()` function that adds its input (an `int`) to the `sum` and returns the new value of `sum`. (In other words, it keeps a running total of the `sum` variable within a closure.)
+```go
+package main
+
+func adder() func(int) int {
+	sum := 0
+	return func(val int) int {
+		sum += val
+		return sum
+	}
+}
+
+```
+# Currying
+
+Function [currying](https://en.wikipedia.org/wiki/Currying) is a concept from functional programming and involves [partial application](https://en.wikipedia.org/wiki/Partial_application) of functions. It allows a function with multiple arguments to be transformed into a sequence of functions, each taking a single argument.
+
+Let's simulate this behavior. For example:
+
+```go
+func main() {
+  squareFunc := selfMath(multiply)
+  doubleFunc := selfMath(add)
+
+  fmt.Println(squareFunc(5))
+  // prints 25
+
+  fmt.Println(doubleFunc(5))
+  // prints 10
+}
+
+func multiply(x, y int) int {
+  return x * y
+}
+
+func add(x, y int) int {
+  return x + y
+}
+
+func selfMath(mathFunc func(int, int) int) func (int) int {
+  return func(x int) int {
+    return mathFunc(x, x)
+  }
+}
+```
+
+In the example above:
+
+- `selfMath(multiply)` returns a new function and stores it in `squareFunc`; it doesn't run `multiply` yet.
+- `squareFunc(5)` runs the returned function, which calls `multiply(5, 5)`.
+
+## Assignment
+
+The Textio API needs a very robust error-logging system so we can see when things are going awry in the back-end system. We need a function that can create a custom "logger" (a function that prints to the console) given a specific formatter.
+
+These errors are test data, not runtime failures.
+
+Complete the `getLogger` function. It should take as input a `formatter` function and `return` _a new function_. The new logger function takes as input two strings and passes them to the `formatter`, then prints the result. Keep the order of the strings.
+
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// getLogger takes a function that formats two strings into
+// a single string and returns a function that formats two strings but prints
+// the result instead of returning it
+func getLogger(formatter func(string, string) string) func(string, string) {
+	return func(str1 , str2 string){
+		res := formatter(str1, str2)
+		fmt.Println(res)
+	}
+}
+
+// don't touch below this line
+
+func test(first string, errors []error, formatter func(string, string) string) {
+	defer fmt.Println("====================================")
+	logger := getLogger(formatter)
+	fmt.Println("Logs:")
+	for _, err := range errors {
+		logger(first, err.Error())
+	}
+}
+
+func colonDelimit(first, second string) string {
+	return first + ": " + second
+}
+
+func commaDelimit(first, second string) string {
+	return first + ", " + second
+}
+
+func main() {
+	dbErrors := []error{
+		errors.New("out of memory"),
+		errors.New("cpu is pegged"),
+		errors.New("networking issue"),
+		errors.New("invalid syntax"),
+	}
+	test("Error on database server", dbErrors, colonDelimit)
+
+	mailErrors := []error{
+		errors.New("email too large"),
+		errors.New("non alphanumeric symbols found"),
+	}
+	test("Error on mail server", mailErrors, commaDelimit)
+}
+
+```
