@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redis Heartbeat Presence</title>
+<style>
+:root{
+  --bg:#fbfaf7; --fg:#1f2328; --muted:#5b636d; --card:#ffffff; --line:#e3e0d8;
+  --accent:#2f6fb3; --accent-soft:#e6eef8; --green:#1f8a4c; --green-soft:#e3f4ea;
+  --amber:#a86400; --amber-soft:#fbf0dc; --red:#b42318; --red-soft:#fbe7e5;
+  --code-bg:#f3f1ec; --violet:#6b4bb3; --violet-soft:#eee8fa;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15171a; --fg:#e7e9ec; --muted:#9aa3ad; --card:#1d2024; --line:#30343a;
+    --accent:#7fb0e8; --accent-soft:#1d2a3a; --green:#5fc98b; --green-soft:#16291f;
+    --amber:#e2a54b; --amber-soft:#2d2415; --red:#f08a80; --red-soft:#321b19;
+    --code-bg:#23262b; --violet:#b59cf0; --violet-soft:#261f38;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Georgia,"Iowan Old Style",serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:2rem;line-height:1.2;margin:0 0 .3em}
+h2{font-size:1.5rem;margin:2.4em 0 .6em;padding-top:.6em;border-top:1px solid var(--line)}
+h3{font-size:1.15rem;margin:1.8em 0 .4em}
+h1,h2,h3,.sans{font-family:-apple-system,"Segoe UI",Inter,system-ui,sans-serif}
+.sub{color:var(--muted);margin:0 0 1.5em}
+a{color:var(--accent)}
+code{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;font-size:.85em;background:var(--code-bg);padding:.1em .35em;border-radius:4px}
+pre{white-space:pre;overflow-x:auto;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font:13.5px/1.5 "JetBrains Mono",ui-monospace,Menlo,monospace}
+pre code{background:none;padding:0;font-size:inherit}
+.file{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--muted);margin:1em 0 -.4em}
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 20px;font-family:system-ui,sans-serif;font-size:15px}
+nav.toc ol{margin:.3em 0;padding-left:1.3em}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:1.2em 0}
+.callout.warn{border-color:var(--amber);background:var(--amber-soft)}
+.callout.bad{border-color:var(--red);background:var(--red-soft)}
+.callout.good{border-color:var(--green);background:var(--green-soft)}
+.callout b.t{font-family:system-ui,sans-serif;display:block;margin-bottom:2px}
+details.beginner{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:1em 0}
+details.beginner summary{cursor:pointer;font-family:system-ui,sans-serif;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:1em 0;font-family:system-ui,sans-serif}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tablewrap{overflow-x:auto}
+
+/* system diagram family */
+.sys{display:grid;gap:10px;font-family:system-ui,sans-serif;font-size:14px;margin:1.2em 0}
+.lane{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.node{flex:1 1 160px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+.node h4{margin:0 0 4px;font-size:14px}
+.node.fe{border-color:var(--accent)} .node.be{border-color:var(--violet)} .node.redis{border-color:var(--red)} .node.mongo{border-color:var(--green)}
+.node .tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:99px;margin-bottom:4px}
+.fe .tag{background:var(--accent-soft);color:var(--accent)} .be .tag{background:var(--violet-soft);color:var(--violet)}
+.redis .tag{background:var(--red-soft);color:var(--red)} .mongo .tag{background:var(--green-soft);color:var(--green)}
+.arrow{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--muted);text-align:center;padding:2px 0}
+.arrow b{color:var(--fg)}
+.data{font-family:ui-monospace,monospace;font-size:12px;background:var(--code-bg);border-radius:6px;padding:6px 8px;margin-top:6px;white-space:pre-wrap;word-break:break-word}
+
+/* timeline family */
+.timeline{font-family:system-ui,sans-serif;font-size:13px;margin:1.2em 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.tl-row{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:8px;margin:8px 0}
+.tl-label{color:var(--muted);font-size:12.5px}
+.tl-track{position:relative;height:28px;background:var(--code-bg);border-radius:6px}
+.tl-seg{position:absolute;top:3px;bottom:3px;border-radius:4px;font-size:11px;display:flex;align-items:center;justify-content:center;color:#fff;white-space:nowrap;overflow:hidden}
+.tl-seg.on{background:var(--green)} .tl-seg.off{background:var(--muted)} .tl-seg.ttl{background:var(--red);opacity:.8}
+.tl-tick{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--accent);border-radius:2px}
+.tl-x{position:absolute;top:0;bottom:0;display:flex;align-items:center;font-weight:700;color:var(--red)}
+.tl-axis{display:grid;grid-template-columns:110px 1fr;gap:8px;color:var(--muted);font-size:11.5px}
+.tl-axis div:last-child{display:flex;justify-content:space-between}
+
+/* UI mock */
+.ui{font-family:system-ui,sans-serif;font-size:14px;border:1px solid var(--line);border-radius:10px;background:var(--card);max-width:340px;overflow:hidden}
+.ui .hd{padding:8px 12px;border-bottom:1px solid var(--line);font-weight:600;display:flex;justify-content:space-between}
+.ui .row{display:flex;align-items:center;gap:10px;padding:8px 12px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);position:relative;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--accent)}
+.dot{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--card)}
+.dot.g{background:#22c55e}.dot.a{background:#fbbf24}.dot.r{background:#ef4444}.dot.x{background:#9ca3af}
+.ui small{color:var(--muted);display:block;font-size:12px}
+.side{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+
+/* quiz */
+.q{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:1em 0}
+.q p.qt{margin:0 0 8px;font-weight:600;font-family:system-ui,sans-serif}
+.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:15px system-ui,sans-serif;cursor:pointer}
+.q button:hover{border-color:var(--accent)}
+.q button.right{background:var(--green-soft);border-color:var(--green)}
+.q button.wrong{background:var(--red-soft);border-color:var(--red)}
+.q .fb{font-size:15px;margin-top:8px;display:none}
+.pill{display:inline-block;font:12px ui-monospace,monospace;padding:1px 7px;border-radius:99px;background:var(--code-bg);border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<main>
+<h1>Who is online? A Redis heartbeat presence system</h1>
+<p class="sub sans">Case study from the chat app · backend <span class="pill">f79b5d4</span> <span class="pill">d4d5dfa</span> <span class="pill">24d8971</span> <span class="pill">4be4784</span> · frontend <span class="pill">57333c2</span> <span class="pill">8b37190</span> <span class="pill">49a2c02</span> <span class="pill">aea85eb</span></p>
+
+<nav class="toc">
+<b>Contents</b>
+<ol>
+  <li><a href="#background">Background</a>
+    <ol><li><a href="#bg-general">Presence, in general (for beginners)</a></li><li><a href="#bg-specific">The pieces this chat app already had</a></li></ol></li>
+  <li><a href="#intuition">Intuition</a>
+    <ol><li><a href="#int-lease">A lease that must be renewed</a></li><li><a href="#int-flow">One heartbeat, end to end</a></li><li><a href="#int-offline">Three ways to go offline</a></li></ol></li>
+  <li><a href="#code">Code walkthrough</a>
+    <ol><li><a href="#code-manager">PresenceManager</a></li><li><a href="#code-socket">Socket handler and broadcasting</a></li><li><a href="#code-mongo">Mongo side: connections and history</a></li><li><a href="#code-fe">Frontend provider, hooks and UI</a></li><li><a href="#code-evolution">How it evolved across commits</a></li><li><a href="#code-issues">Loose ends worth knowing</a></li></ol></li>
+  <li><a href="#quiz">Quiz</a></li>
+</ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="background">1. Background</h2>
+
+<p>The small green dot next to a colleague's name makes a promise: this person is here now. Keeping that promise is harder than it looks, because the one event you most want to detect, someone leaving, is the one the network is least likely to report.</p>
+
+<h3 id="bg-general">Presence, in general</h3>
+<details class="beginner" open>
+<summary>Beginner background: skip if you already know why presence needs heartbeats</summary>
+
+<p>A <em>presence system</em> answers one question for every user: are they reachable right now, and if not, when were they last seen? Two facts about networks make this tricky.</p>
+<ul>
+  <li><b>Clean departures are optional.</b> When a user clicks "log out," the browser can tell the server. When the laptop lid closes, the Wi-Fi drops, or the process is killed, nothing is sent. The server just stops hearing from the client.</li>
+  <li><b>Silence is ambiguous.</b> A client that hasn't spoken for ten seconds might be idle, slow, or gone. The server can't tell the difference by waiting passively.</li>
+</ul>
+<p>The standard answer is a <b>heartbeat</b>: the client proves it is alive by sending a small message on a fixed schedule. The server treats presence as a <b>lease</b> that each heartbeat renews. If the lease runs out, the user is considered gone. This turns an unknowable question ("did they leave?") into a checkable one ("has the lease expired?").</p>
+
+<div class="callout"><b class="t">Key idea: lease with TTL</b>A lease is a claim that is valid only for a fixed time-to-live (TTL). Renewing it before it expires keeps it alive, and missing a renewal makes it lapse automatically. You don't need to detect death. You only need to stop renewing.</div>
+
+<p><b>Why Redis?</b> Presence data is small, read constantly, written every few seconds per user, and it is fine to lose on a restart because clients will re-announce themselves. Redis fits this well: it lives in memory, and <code>SETEX key seconds value</code> writes a value and its expiry in one atomic command. When the TTL runs out, Redis deletes the key itself.</p>
+
+<p><b>Why Socket.IO?</b> Heartbeats and presence changes flow in both directions and should arrive instantly. A persistent WebSocket connection (which Socket.IO wraps) lets the client send <code>heartbeat</code> cheaply and lets the server push <code>user_online</code> to everyone else without polling. Socket.IO's <em>rooms</em> are named groups of sockets. <code>io.to("presence:u42").emit(...)</code> reaches every socket that has joined that room.</p>
+</details>
+
+<h3 id="bg-specific">The pieces this chat app already had</h3>
+<p>Before presence existed, the backend was an Express + Socket.IO server with MongoDB for durable data and a Redis client already in use (for example, <code>UnreadMessagesService</code> kept unread counts there). Every authenticated socket already carried a <code>userId</code> and, later, a <code>tenantId</code>, because the app is multi-tenant: several organisations share one deployment, and their data must not mix.</p>
+<p>On the frontend, a Next.js app had a <code>SocketProvider</code> that owned the socket connection, a Zustand <code>auth-store</code> with the logged-in user, and React Query for REST calls. Presence was built on all of these without replacing any.</p>
+
+<!-- ============================================================ -->
+<h2 id="intuition">2. Intuition</h2>
+<p>Now that the setting is clear, the design fits in one sentence: <b>the browser renews a 60-second lease every 30 seconds, and anyone who misses two renewals is marked offline.</b> Everything else serves this rule. Some parts make it fast (socket events), some make it visible (UI dots), and some make it durable (Mongo history).</p>
+
+<h3 id="int-lease">A lease that must be renewed</h3>
+<p>Picture Alice in tenant <code>acme</code>. Her presence is a single Redis key:</p>
+<pre><code>key:   presence:acme:alice
+value: {"userId":"alice","tenantId":"acme","status":"online",
+        "lastSeen":"2026-09-24T10:00:30Z",
+        "deviceInfo":{"type":"web","socketId":"k3Jx..."}}
+TTL:   60 seconds</code></pre>
+<p>Each heartbeat overwrites the key and resets the TTL to 60. With a 30-second interval there is always one spare beat of slack, so a single dropped packet doesn't make Alice flicker offline.</p>
+
+<div class="timeline">
+  <div class="tl-row"><div class="tl-label">Alice's heartbeats</div>
+    <div class="tl-track">
+      <div class="tl-tick" style="left:0%"></div><div class="tl-tick" style="left:16.6%"></div><div class="tl-tick" style="left:33.3%"></div>
+      <div class="tl-x" style="left:48%">✕</div>
+    </div></div>
+  <div class="tl-row"><div class="tl-label">Redis TTL (60 s)</div>
+    <div class="tl-track">
+      <div class="tl-seg ttl" style="left:0;width:16.6%">60→30</div>
+      <div class="tl-seg ttl" style="left:16.6%;width:16.7%">60→30</div>
+      <div class="tl-seg ttl" style="left:33.3%;width:33.3%">60 → 0</div>
+    </div></div>
+  <div class="tl-row"><div class="tl-label">Shown as</div>
+    <div class="tl-track">
+      <div class="tl-seg on" style="left:0;width:66.6%">online</div>
+      <div class="tl-seg off" style="left:66.6%;width:33.4%">offline</div>
+    </div></div>
+  <div class="tl-axis"><div></div><div><span>0 s</span><span>30</span><span>60</span><span>90</span><span>120</span><span>150</span><span>180 s</span></div></div>
+</div>
+<p class="sans" style="font-size:14px;color:var(--muted)">Alice's laptop sleeps just after the 60 s beat. No more beats arrive, and 60 s later (t = 120 s) her lease lapses. Blue ticks are heartbeats.</p>
+
+<div class="callout warn"><b class="t">Two clocks, not one</b>The server actually runs two expiry mechanisms side by side. <b>Redis TTL</b> makes the key disappear. An <b>in-process <code>setTimeout</code></b> of 60 s, reset on every beat, actively calls <code>setUserOffline()</code>, which writes an "offline" record and broadcasts it. The Redis TTL alone would be silent: the key would vanish, but no client would be told.</div>
+
+<h3 id="int-flow">One heartbeat, end to end</h3>
+<p>Here is what happens when Alice, who was offline, opens the app. Follow the data from top to bottom:</p>
+
+<div class="sys">
+  <div class="lane">
+    <div class="node fe"><span class="tag">frontend</span><h4>PresenceProvider</h4>Socket connected + user logged in → emit
+      <div class="data">authenticate_presence
+{ status: "online" }</div></div>
+  </div>
+  <div class="arrow">▼ Socket.IO</div>
+  <div class="lane">
+    <div class="node be"><span class="tag">backend</span><h4>presence.handler.ts</h4>Knows <code>userId=alice</code>, <code>tenantId=acme</code> from the socket's auth. Adds deviceInfo, calls
+      <div class="data">processHeartbeat("alice","acme","online",{type:"web",...})</div></div>
+  </div>
+  <div class="arrow">▼</div>
+  <div class="lane">
+    <div class="node be"><span class="tag">backend</span><h4>PresenceManager</h4>1. GET current → <code>null</code> (was offline)<br>2. SETEX new value, TTL 60<br>3. wasOffline → emit <code>userOnline</code><br>4. resetOfflineTimer(60 s)</div>
+    <div class="node redis"><span class="tag">redis</span><h4>Redis</h4><div class="data">SETEX presence:acme:alice 60 {...}</div></div>
+    <div class="node mongo"><span class="tag">mongo</span><h4>PresenceHistory</h4>Session row opened
+      <div class="data">{userId:"alice", status:"online",
+ sessionStart: 10:00:00}</div></div>
+  </div>
+  <div class="arrow">▼ EventEmitter → setupPresenceBroadcasting</div>
+  <div class="lane">
+    <div class="node be"><span class="tag">backend</span><h4>Broadcast</h4>
+      <div class="data">io.emit("user_online",
+ {userId:"alice", status:"online", timestamp})</div></div>
+  </div>
+  <div class="arrow">▼ to every connected socket</div>
+  <div class="lane">
+    <div class="node fe"><span class="tag">frontend</span><h4>Bob's browser</h4>Reducer: <code>UPDATE_USER_PRESENCE alice → online</code>. <code>useOnlineUsers</code> refetches the list. Alice's dot turns green.</div>
+  </div>
+</div>
+
+<p>After that first beat, Alice's browser sends <code>heartbeat {status}</code> every 30 s. These beats go through the same <code>processHeartbeat</code>. Because she is already online, no event fires unless her status changed. They simply refresh the TTL and reset the timer. This is why steady-state heartbeats are cheap: one Redis GET, one SETEX, and no broadcast.</p>
+
+<p>What Bob sees:</p>
+<div class="side">
+  <div class="ui">
+    <div class="hd">Direct messages <span style="color:var(--muted);font-weight:400">2 online</span></div>
+    <div class="row"><div class="av">A<span class="dot g"></span></div><div>Alice<small>Online</small></div></div>
+    <div class="row"><div class="av">C<span class="dot a"></span></div><div>Carol<small>Away</small></div></div>
+    <div class="row"><div class="av">D<span class="dot x"></span></div><div>Dave<small>Last seen 12 minutes ago</small></div></div>
+  </div>
+  <div style="flex:1 1 240px;font-size:15px">
+    <p style="margin-top:0">Dot colours come from <code>use-presence-indicator.ts</code>: green for online, amber for away, red for busy, grey for offline. Dave's "last seen" works because an offline record stays in Redis for 24 hours after he leaves.</p>
+    <p>"2 online" counts anyone who isn't offline, which is why Carol, who is away, is included.</p>
+  </div>
+</div>
+
+<h3 id="int-offline">Three ways to go offline</h3>
+<p>Detecting arrival is easy, and the system has three separate paths for detecting departure:</p>
+<div class="tablewrap"><table>
+<tr><th>Path</th><th>Trigger</th><th>Latency</th><th>What runs</th></tr>
+<tr><td><b>Clean disconnect</b></td><td>Tab closed, logout, socket <code>disconnect</code> event</td><td>Immediate</td><td><code>setUserOffline()</code> → offline record (24 h TTL) + <code>user_offline</code> broadcast + history session closed</td></tr>
+<tr><td><b>Missed heartbeats</b></td><td>No beat for 60 s (sleep, network loss)</td><td>≤ 60 s</td><td>In-memory <code>setTimeout</code> fires → <code>setUserOffline()</code></td></tr>
+<tr><td><b>Lease lapse</b></td><td>Redis TTL reaches 0</td><td>60 s</td><td>Key deleted silently. Readers treat a missing key as offline</td></tr>
+</table></div>
+<div class="callout"><b class="t">Why keep an "offline" record at all?</b>If going offline just deleted the key, "last seen 12 minutes ago" would be impossible. The system writes <code>status:"offline", lastSeen:now</code> with a 24-hour TTL instead, so the fact that a user was online recently outlives the session.</div>
+
+<!-- ============================================================ -->
+<h2 id="code">3. Code walkthrough</h2>
+<p>The intuition maps closely onto the code. The walkthrough follows the order a heartbeat travels through it: the core state machine first, then the socket layer, the Mongo side, and finally the React side.</p>
+
+<h3 id="code-manager">3.1 PresenceManager: the state machine</h3>
+<p class="file">chat-app-backend/src/presence/presence-manager.ts</p>
+<p>A single <code>PresenceManager</code> is created at boot in <code>server.ts</code> with the shared Redis client and registered in the <code>ServiceLocator</code>. It extends <code>EventEmitter</code>. It decides <em>what happened</em> and emits an event, and the socket layer decides <em>who to tell</em>. This separation keeps Socket.IO out of the manager.</p>
+<pre><code>export class PresenceManager extends EventEmitter {
+  private heartbeatInterval = 30000; // 30 seconds
+  private timeoutWindow = 60000;     // 60 seconds
+  private heartbeatTimers: Map&lt;string, NodeJS.Timeout&gt; = new Map();
+
+  async processHeartbeat(userId, tenantId, status, deviceInfo) {
+    const presenceKey = `presence:${tenantId}:${userId}`;
+    const currentPresence = await this.getUserPresence(userId, tenantId);
+    const wasOffline = !currentPresence || currentPresence.status === "offline";
+
+    await this.redis.setEx(presenceKey, Math.ceil(this.timeoutWindow / 1000),
+                           JSON.stringify({ userId, tenantId, status, lastSeen: now, deviceInfo }));
+
+    if (wasOffline) {
+      this.emit("userOnline", { userId, status, timestamp: now });
+      await this.broadcastPresenceChange(userId, tenantId, "online", status);
+    } else if (currentPresence.status !== status) {
+      this.emit("statusChanged", { userId, oldStatus: currentPresence.status, newStatus: status, ... });
+      await this.broadcastPresenceChange(userId, this.tenantId, "online", status);
+    }
+    this.resetOfflineTimer(userId, this.tenantId);
+  }</code></pre>
+<p>Notice that <b>status changes also go through <code>processHeartbeat</code></b>. Picking "busy" in the UI is simply a heartbeat with a different status, and the "status changed?" branch detects it. There is one write path for everything.</p>
+
+<p>The remaining methods are small:</p>
+<ul>
+  <li><code>resetOfflineTimer</code> / <code>clearOfflineTimer</code> keep one <code>setTimeout</code> per user in a <code>Map</code>. Every beat cancels the old timer and starts a new 60 s one that calls <code>setUserOffline</code>.</li>
+  <li><code>setUserOffline</code> rewrites the key as <code>offline</code> with an <b>86 400 s</b> TTL, emits <code>userOffline</code>, and broadcasts it. It checks <code>status !== "offline"</code> first, so calling it twice is harmless.</li>
+  <li><code>getBulkPresence</code> batches <code>GET</code>s in a <code>MULTI</code> so a sidebar of 30 DMs costs one round trip.</li>
+  <li><code>getOnlineUsers</code> uses <code>SCAN MATCH presence:{tenant}:*</code> with a cursor (non-blocking, unlike <code>KEYS</code>) and filters out offline records.</li>
+  <li>A 60 s <code>cleanupInterval</code> scans every <code>presence:*:*</code> key and gives any key without a TTL a 24 h expiry. This catches keys written by older code or by hand.</li>
+</ul>
+
+<h3 id="code-socket">3.2 Socket handler and broadcasting</h3>
+<p class="file">chat-app-backend/src/presence/socket/presence.handler.ts</p>
+<p><code>registerPresenceHandlers(io, socket, userId, tenantId)</code> is called for every authenticated connection from <code>src/socket/index.ts</code>. The identity comes from the socket's auth middleware, never from the payload, so a client can't send heartbeats for someone else.</p>
+<div class="tablewrap"><table>
+<tr><th>Client event</th><th>Server does</th><th>Acks with</th></tr>
+<tr><td><code>authenticate_presence</code></td><td>First heartbeat, open a <code>PresenceHistory</code> session, <code>socket.join("presence:"+userId)</code></td><td><code>{success, heartbeatInterval: 30000}</code></td></tr>
+<tr><td><code>heartbeat</code></td><td><code>processHeartbeat(status)</code></td><td><code>{success, timestamp, status}</code></td></tr>
+<tr><td><code>change_status</code></td><td>Validate with Zod enum → <code>processHeartbeat</code></td><td><code>{success, status}</code></td></tr>
+<tr><td><code>get_presence</code></td><td><code>getBulkPresence</code> (max 100 ids)</td><td><code>{presence: {id: …}}</code></td></tr>
+<tr><td><code>get_online_users</code></td><td><code>getOnlineUsers(limit, cursor)</code></td><td><code>{users, nextCursor}</code></td></tr>
+<tr><td><code>disconnect</code></td><td><code>setUserOffline</code> + <code>PresenceHistoryService.endSession</code></td><td>–</td></tr>
+</table></div>
+
+<p><code>setupPresenceBroadcasting</code>, called once at startup, translates manager events into socket events:</p>
+<pre><code>presenceManager.on("broadcastPresence", ({ connections, presenceUpdate }) =&gt;
+  connections.forEach(id =&gt; io.to(`presence:${id}`).emit("presence_update", presenceUpdate)));
+
+presenceManager.on("userOnline",    d =&gt; io.emit("user_online", d));
+presenceManager.on("userOffline",   d =&gt; io.emit("user_offline", d));
+presenceManager.on("statusChanged", d =&gt; io.emit("status_changed", d));</code></pre>
+<p>So there are two broadcast styles: a <b>targeted</b> <code>presence_update</code> to each contact's personal room, and a <b>global</b> <code>io.emit</code> to everyone.</p>
+
+<h3 id="code-mongo">3.3 Mongo side: connections and history</h3>
+<p>Redis holds the current state. Mongo holds two slower-moving things:</p>
+<ul>
+  <li><b><code>UserConnection</code></b> (+ <code>ConnectionService</code>) stores directed edges <code>userId → connectionId</code>, typed <code>direct_message</code> or <code>channel_member</code>. <code>broadcastPresenceChange</code> reads them to decide which rooms receive <code>presence_update</code>. Compound unique indexes (including <code>tenantId</code>) prevent duplicate edges, and inserts use <code>ordered:false</code> and ignore error 11000 so re-adding is idempotent.</li>
+  <li><b><code>PresenceHistory</code></b> (+ <code>PresenceHistoryService</code>) stores one document per session with <code>sessionStart</code>, <code>sessionEnd</code> and <code>duration</code>. Background jobs in <code>server.ts</code> delete history older than 90 days (daily) and close sessions left open by crashed sockets (hourly). This feeds the <code>/presence/history</code> and <code>/presence/analytics</code> endpoints.</li>
+</ul>
+<p>The REST routes in <code>presence.routes.ts</code> (<code>/me</code>, <code>/me/status</code>, <code>/bulk</code>, <code>/online</code>, <code>/connections</code>, <code>/history</code>, <code>/analytics</code>, <code>/admin/*</code>) call the same manager. They exist so the UI still works before the socket connects or after it fails.</p>
+
+<h3 id="code-fe">3.4 Frontend: provider, hooks and UI</h3>
+<p class="file">Chat-App-Frontend/providers/presence-provider.tsx</p>
+<p><code>PresenceProvider</code> wraps the app in <code>app/layout.tsx</code> inside the socket provider. A <code>useReducer</code> holds <code>currentStatus</code>, <code>isAuthenticated</code>, <code>lastHeartbeat</code>, a <code>userPresence</code> map, and <code>onlineUsers</code>. Three effects do the work:</p>
+<pre><code>// 1. Authenticate once socket + user are ready
+useEffect(() =&gt; {
+  if (socketConnected &amp;&amp; user &amp;&amp; isAuthenticated &amp;&amp; !state.isAuthenticated)
+    authenticatePresence();          // emits authenticate_presence {status}
+}, [...]);
+
+// 2. The heartbeat loop
+useEffect(() =&gt; {
+  if (!state.isAuthenticated) return;
+  const interval = setInterval(sendHeartbeat, 30000);  // emits heartbeat {status}
+  return () =&gt; clearInterval(interval);
+}, [state.isAuthenticated, sendHeartbeat]);
+
+// 3. Listen for others' changes
+socket.on("presence_update", ...); socket.on("user_online", ...);
+socket.on("user_offline", ...);    socket.on("status_changed", ...);</code></pre>
+<p>When the socket drops, effect 1's partner resets <code>isAuthenticated</code> to false. That stops the heartbeat loop, and on reconnect the provider authenticates again automatically. Every action (<code>changeStatus</code>, <code>getBulkPresence</code>, <code>getOnlineUsers</code>) uses the socket when authenticated and <code>presenceApi</code> (REST) otherwise.</p>
+
+<p class="file">Chat-App-Frontend/hooks/use-presence.ts, use-presence-indicator.ts, components/presence/*</p>
+<ul>
+  <li><code>useUserPresence(ids)</code> merges React Query REST data (refetched every 60 s) with the real-time context map. Real-time wins: <code>{...apiPresence, ...realtimePresence}</code>.</li>
+  <li><code>useOnlineUsers</code> calls <code>get_online_users</code> again whenever <code>user_online</code>, <code>user_offline</code> or <code>status_changed</code> arrives.</li>
+  <li><code>useMyPresence</code> powers <code>StatusSelector</code>. <code>usePresenceIndicator</code> turns a status into colours and "last seen" text for <code>PresenceIndicator</code>, <code>PresenceAwareAvatar</code>, <code>ChatWindow</code>, <code>ChatSidebar</code> and <code>ConversationList</code>.</li>
+</ul>
+
+<h3 id="code-evolution">3.5 How it evolved across commits</h3>
+<div class="tablewrap"><table>
+<tr><th>Commit</th><th>Change</th><th>Why it matters</th></tr>
+<tr><td><span class="pill">f79b5d4</span> BE</td><td>Whole <code>presence/</code> module added</td><td>Manager, handler, routes, models</td></tr>
+<tr><td><span class="pill">57333c2</span> FE</td><td>Provider, hooks, API client, UI components</td><td>The client half</td></tr>
+<tr><td><span class="pill">f3e885a</span> <span class="pill">2b0a367</span> BE</td><td>Fix parsing of <code>MULTI</code> results in bulk presence</td><td>node-redis v4 returns plain strings, not <code>[err, val]</code> tuples</td></tr>
+<tr><td><span class="pill">d4d5dfa</span> BE + <span class="pill">aea85eb</span> FE</td><td><b>Server-side <code>setInterval</code> heartbeat removed</b>. Client sends its status on authenticate</td><td>See below</td></tr>
+<tr><td><span class="pill">8b37190</span> <span class="pill">49a2c02</span> FE</td><td><code>useOnlineUsers</code> uses the socket and refetches on events</td><td>Live list</td></tr>
+<tr><td><span class="pill">24d8971</span> BE</td><td>Keys become <code>presence:{tenant}:{user}</code>. Tenant context added throughout</td><td>Multi-tenant isolation</td></tr>
+<tr><td><span class="pill">4be4784</span> BE</td><td><code>tenantId</code> removed from the manager's constructor</td><td>One manager for all tenants, but see the bug below</td></tr>
+</table></div>
+
+<div class="callout good"><b class="t">The key design decision (d4d5dfa)</b>The first version ran a heartbeat <em>on the server</em>: <code>setInterval(processHeartbeat(userId, ONLINE), 30000)</code> for each socket. That defeats the purpose. The server was vouching for a client it couldn't see, and it always re-sent <code>ONLINE</code>, which overwrote any "away" or "busy" the user had picked. After the change, the <em>client</em> must prove it is alive and says which status it is in. A heartbeat only means something if it comes from the party whose liveness is in question.</div>
+
+<h3 id="code-issues">3.6 Loose ends worth knowing</h3>
+<div class="callout bad"><b class="t">Bug: <code>this.tenantId</code> is undefined since 4be4784</b>The constructor stopped setting <code>this.tenantId</code>, but <code>processHeartbeat</code> still passes it to <code>resetOfflineTimer</code> and to the status-change broadcast. When the 60 s timer fires, it calls <code>setUserOffline(userId, undefined)</code>, which reads <code>presence:undefined:alice</code>, finds nothing, and does nothing. As a result, <b>path 2 (missed heartbeats) is broken</b>. Silently disconnected users fall back to path 3, where the Redis key lapses with no <code>user_offline</code> broadcast. Other clients keep a green dot until their 60 s REST refetch. The fix is to use the <code>tenantId</code> argument in both places.</div>
+<ul>
+  <li><b>Global broadcasts cross tenants.</b> <code>io.emit("user_online")</code> reaches every socket in every tenant. A per-tenant room (<code>io.to("tenant:"+tenantId)</code>) would scope it.</li>
+  <li><b>Multiple tabs.</b> Presence is keyed per user, not per socket. Closing one of two tabs sends <code>disconnect</code> → offline, even though the other tab is still open. The next heartbeat (≤ 30 s later) brings the user back online. A per-user socket count, or a Redis set of socket ids, would fix this.</li>
+  <li><b>Timers live in one process.</b> The <code>heartbeatTimers</code> map lives in one Node process. With several backend instances, a user's beats may land on different instances. Redis keyspace notifications or a sorted set of <code>lastSeen</code> scores would move expiry into Redis.</li>
+  <li><b><code>UserConnection</code> is mostly empty.</b> Only <code>POST /presence/connections</code> writes to it, and DM and channel creation don't call <code>ConnectionService</code>. The targeted <code>presence_update</code> therefore rarely reaches anyone, and the UI depends on the global events.</li>
+  <li><b>Enum drift.</b> The backend <code>PRESENCE_STATUS</code> includes <code>WORK</code>, but the frontend's doesn't.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="quiz">4. Quiz</h2>
+<p>Five questions to check that the model has stuck. Click an answer to see feedback.</p>
+<div id="quizbox"></div>
+
+</main>
+<script>
+const Q = [
+ { q:"Why is the heartbeat interval (30 s) half the Redis TTL (60 s)?",
+   a:["So Redis can evict keys in batches","So one lost or late heartbeat doesn't flip the user offline","Because Socket.IO requires it","So the server can send its own heartbeat in between"], c:1,
+   f:"Right. With TTL = 2× interval there is always one beat of slack, so a single dropped message doesn't make the dot flicker." },
+ { q:"Alice is online and picks 'busy' in StatusSelector. What does the backend actually do?",
+   a:["Calls a separate updateStatus() that only writes to Mongo","Runs processHeartbeat with status 'busy'. The 'status changed' branch emits statusChanged","Deletes her key and re-creates it on the next heartbeat","Nothing until the next 30 s heartbeat"], c:1,
+   f:"change_status is validated with Zod and then goes through processHeartbeat, the single write path. Since she was already online but the status differs, statusChanged fires and status_changed is broadcast." },
+ { q:"What was wrong with the original server-side setInterval heartbeat that d4d5dfa removed?",
+   a:["It used too much Redis memory","The server renewed presence for a client it couldn't observe, always as ONLINE, overwriting chosen statuses","It was not compatible with multi-tenancy","It fired too rarely"], c:1,
+   f:"A heartbeat only means something if it comes from the party whose liveness is in question. The server loop also hard-coded ONLINE, which clobbered 'away' and 'busy'." },
+ { q:"Why does setUserOffline write an 'offline' record with a 24 h TTL instead of deleting the key?",
+   a:["To support 'last seen X ago'","Because Redis can't delete keys with a TTL","To keep the history collection in sync","So getOnlineUsers returns offline users too"], c:0,
+   f:"The offline record keeps lastSeen around for a day, which the UI uses for 'Last seen 12 minutes ago'. getOnlineUsers actually filters offline records out." },
+ { q:"Given the 4be4784 bug, what happens when Bob's laptop sleeps (no clean disconnect)?",
+   a:["He is marked offline after 60 s and everyone gets user_offline","He stays online forever","The offline timer fires but targets presence:undefined:bob, so no broadcast. His key silently expires and others only notice on their next REST refetch","The server crashes"], c:2,
+   f:"this.tenantId is undefined, so the timer path does nothing useful. The Redis TTL still removes the key, but silently, so clients rely on their 60 s React Query refetch to notice." }
+];
+const box = document.getElementById("quizbox");
+Q.forEach((item,i)=>{
+  const d=document.createElement("div"); d.className="q";
+  d.innerHTML=`<p class="qt">${i+1}. ${item.q}</p>`;
+  const fb=document.createElement("div"); fb.className="fb";
+  item.a.forEach((txt,j)=>{
+    const b=document.createElement("button"); b.textContent=txt;
+    b.onclick=()=>{
+      d.querySelectorAll("button").forEach(x=>x.classList.remove("right","wrong"));
+      b.classList.add(j===item.c?"right":"wrong");
+      fb.style.display="block";
+      fb.innerHTML = j===item.c ? "✅ "+item.f : "❌ Not quite. Think about which component actually knows the client is alive, and try again.";
+    };
+    d.appendChild(b);
+  });
+  d.appendChild(fb); box.appendChild(d);
+});
+</script>
+</body>
+</html>

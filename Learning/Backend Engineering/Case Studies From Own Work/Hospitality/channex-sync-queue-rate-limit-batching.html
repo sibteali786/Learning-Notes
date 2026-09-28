@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Channex Sync Queue</title>
+<style>
+:root{
+  --bg:#fbfaf7;--surface:#ffffff;--ink:#1d1d1b;--muted:#5f5d57;--line:#e3e0d8;
+  --accent:#2f5d8a;--accent-soft:#e6eef6;--good:#2e7d4f;--good-soft:#e5f3ea;
+  --warn:#9a6200;--warn-soft:#fbf1dc;--bad:#b0362e;--bad-soft:#f8e4e2;
+  --code-bg:#f3f1ec;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161614;--surface:#1f1f1c;--ink:#ebe9e3;--muted:#a3a097;--line:#35342f;
+    --accent:#8db8e3;--accent-soft:#1f2c3a;--good:#78c795;--good-soft:#1c2e23;
+    --warn:#e0b25c;--warn-soft:#332913;--bad:#ec8b82;--bad-soft:#3a1f1c;--code-bg:#262622;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 Georgia,"Iowan Old Style",serif}
+main{max-width:860px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:2rem;line-height:1.2;margin:0 0 8px}
+h2{font-size:1.5rem;margin:56px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:1.15rem;margin:32px 0 8px}
+h1,h2,h3,.label,nav,button,.box,.tick,table{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.sub{color:var(--muted);margin:0 0 24px}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.5;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;white-space:pre}
+pre code{background:none;padding:0;font-size:inherit}
+.file{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin:18px 0 -8px}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 20px;font-size:15px}
+nav.toc ol{margin:6px 0 0;padding-left:20px}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:20px 0}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.bad{border-color:var(--bad);background:var(--bad-soft)}
+.callout.good{border-color:var(--good);background:var(--good-soft)}
+.callout .label{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px}
+.skip{font-size:14px;color:var(--muted);font-style:italic}
+/* flow diagrams */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:22px 0}
+.box{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.box b{display:block;font-size:14px;margin-bottom:4px}
+.box .ex{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:pre-wrap}
+.box.hl{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.box.ext{border-style:dashed}
+.arrow{align-self:center;color:var(--muted);font-family:system-ui;font-size:20px;flex:0 0 auto}
+@media (max-width:600px){.flow{flex-direction:column}.arrow{transform:rotate(90deg);align-self:center}}
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;background:var(--surface)}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--code-bg)}
+td.mono{font-family:var(--mono);font-size:12.5px}
+tr.dead td{color:var(--muted);text-decoration:line-through}
+.tablewrap{overflow-x:auto}
+/* timeline */
+.timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:20px 0}
+.tick{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12.5px;min-width:0}
+.tick .t{font-weight:700;display:block}
+.tick.send{border-color:var(--good);background:var(--good-soft)}
+.tick.skip2{border-color:var(--warn);background:var(--warn-soft)}
+.tick.pause{border-color:var(--bad);background:var(--bad-soft)}
+@media (max-width:600px){.timeline{grid-template-columns:repeat(2,1fr)}}
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;margin:18px 0}
+.q p{margin:0 0 10px;font-weight:600;font-family:system-ui,sans-serif;font-size:15.5px}
+.q button{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:14.5px;cursor:pointer}
+.q button:hover{border-color:var(--accent)}
+.q button.right{border-color:var(--good);background:var(--good-soft)}
+.q button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.fb{font-size:14.5px;margin-top:8px;display:none;font-family:system-ui,sans-serif}
+.qa{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 18px 12px;margin:18px 0}
+.qa h3{margin-top:16px}
+.script{font-style:italic;border-left:3px solid var(--line);padding-left:14px;color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<h1>Talking to Channex at 10 Requests a Minute</h1>
+<p class="sub">A case study of <code>channexSyncQueue.js</code> in HospitalityOS: how a property management system keeps rooms, rates and restrictions in sync with a rate-limited channel manager, and what that means for the interview story.</p>
+
+<nav class="toc">
+<strong>Contents</strong>
+<ol>
+<li><a href="#fact">First, a correction: it isn't BullMQ</a></li>
+<li><a href="#background">Background</a></li>
+<li><a href="#intuition">Intuition</a></li>
+<li><a href="#code">Code walkthrough</a></li>
+<li><a href="#interview">Interview answers</a></li>
+<li><a href="#quiz">Quiz</a></li>
+</ol>
+</nav>
+
+<!-- ============================================================ -->
+<h2 id="fact">1. First, a correction: it isn't BullMQ</h2>
+
+<p>The interview draft says this feature was built with BullMQ. The commit history says otherwise, and it's better to learn that here than from an interviewer who asks what your Redis connection settings were.</p>
+
+<div class="callout bad">
+<span class="label">What the code actually does</span>
+The Channex queue (<code>apps/backend/ChannelManager/services/channexSyncQueue.js</code>, added in commit <code>5ebac9b</code> on 2026-07-07) is a <strong>hand-written, in-memory queue</strong>: two JavaScript <code>Map</code>s of pending updates, a <code>setInterval</code> flush loop that fires every 5 seconds, and two token buckets per property. There is no Redis, no BullMQ worker, and no job objects.
+</div>
+
+<p>BullMQ is in <code>apps/backend/package.json</code>, but nothing imports it. The only queue-shaped code outside Channex is in <code>controllers/monitoring/analytics.controller.js</code>, which calls <code>require('bull')</code> (the older library, not BullMQ) to enqueue a <code>model-training</code> job. <code>bull</code> isn't a declared dependency, and no worker consumes that queue.</p>
+
+<p>BullMQ didn't disappear by accident. It was considered and deliberately deferred. The project's Known Issues log (<code>CHANNEX_PROGRESS.md</code>, issue #1) records the reasoning: at single-instance MVP scale, an in-memory queue was enough, and the daily full sync already repairs anything lost in a crash. It names a Redis-backed queue ("e.g. <code>BullMQ</code> or a Redis <code>INCR</code>+<code>EXPIRE</code> bucket") as the fix to make before running more than one backend instance.</p>
+
+<div class="callout good">
+<span class="label">How to tell the story honestly (and better)</span>
+"I built a rate-limited batching queue for our Channex integration. I chose an in-memory design over BullMQ on purpose, and I know exactly when that choice stops holding." That's a stronger answer than "I used BullMQ", because it shows you understood the trade-off. Section 5 has the full script.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="background">2. Background</h2>
+
+<h3>2.1 The broad picture <span class="skip">(skip if you know hotel distribution)</span></h3>
+
+<p>A hotel or hostel doesn't sell rooms only on its own website. It also lists them on <strong>OTAs</strong> (online travel agencies) such as Booking.com, Airbnb and Expedia. Each OTA needs to know three things for every room on every future date. The industry calls them <strong>ARI</strong>:</p>
+<ul>
+<li><strong>Availability</strong>: how many units of this room type can still be sold on 2026-10-03?</li>
+<li><strong>Rates</strong>: what does one night cost on that date?</li>
+<li><strong>Inventory restrictions</strong>: rules such as minimum stay, closed-to-arrival, or <em>stop sell</em> (don't sell this date at all).</li>
+</ul>
+
+<p>Keeping five OTAs in sync by hand is hopeless, so hotels use a <strong>channel manager</strong>. The property management system (PMS, here HospitalityOS) tells the channel manager about ARI once, and the channel manager fans it out to every connected OTA. Bookings travel the other way: a guest books on Booking.com, Booking.com tells Channex, and Channex sends a webhook to the PMS.</p>
+
+<div class="flow">
+  <div class="box hl"><b>HospitalityOS (PMS)</b><span class="ex">source of truth for rooms, prices, bookings</span></div>
+  <div class="arrow">→</div>
+  <div class="box ext"><b>Channex</b><span class="ex">channel manager
+POST /availability
+POST /restrictions</span></div>
+  <div class="arrow">→</div>
+  <div class="box ext"><b>OTAs</b><span class="ex">Booking.com, Airbnb, Expedia…</span></div>
+</div>
+
+<div class="callout">
+<span class="label">Key concept: token bucket</span>
+A token bucket is the usual way to stay under a rate limit. You hold N tokens, and every outbound request spends one. When the bucket is empty you wait. Tokens come back over time. Here the bucket is a simple <em>fixed window</em>: every 60 seconds it's topped back up to 10.
+</div>
+
+<h3>2.2 The narrow picture: Channex's rules</h3>
+
+<p>Channex's documentation (<code>docs.channex.io/api-v.1-documentation/rate-limits</code>) sets out the constraints this queue was built around:</p>
+<ul>
+<li><strong>Per property, per endpoint:</strong> 10 availability requests a minute and, separately, 10 restriction/price requests a minute. They're two budgets, not one shared budget of 20. An earlier draft of the plan used one combined bucket, and that got corrected.</li>
+<li><strong>Batching is expected:</strong> a single <code>POST /availability</code> or <code>POST /restrictions</code> can carry a <code>values</code> array covering many rooms and dates. The docs recommend combining changes into one call every few seconds instead of sending many small ones.</li>
+<li><strong>On a 429, pause the whole property for one minute.</strong> Short exponential backoff is not what Channex recommends.</li>
+<li><strong>200 OK isn't always success.</strong> A response can come back with <code>meta.warnings</code> listing values Channex rejected, such as "rate must be greater than 0".</li>
+<li><strong>Certification (CERT-4):</strong> during certification Channex watches real PMS actions trigger API calls. Every ARI push has to go through the rate-limited path, with no direct calls from resolvers or scripts.</li>
+</ul>
+
+<p>These rules already rule out the obvious design. A single room price change applies to every date for a year ahead, and a naive integration would send one request per date. The next section shows how bad that gets.</p>
+
+<!-- ============================================================ -->
+<h2 id="intuition">3. Intuition</h2>
+
+<p>The core idea fits in one sentence: <strong>don't send updates when they happen; write them down and send what's been written down on a fixed schedule, one request per endpoint per property.</strong> The rest of the design handles what that sentence leaves open: duplicate updates, rate limits and failures.</p>
+
+<h3>3.1 The fan-out problem, with toy data</h3>
+
+<p>Say a manager edits the Deluxe Double: base price 100, weekend price 130, and a Christmas season (Dec 20 to Jan 5) at 180. <code>enqueueRoomPriceUpdate</code> in <code>ChannelManager/index.js</code> turns that one edit into per-date updates across the next 365 days:</p>
+
+<div class="tablewrap"><table>
+<tr><th>Layer</th><th>Dates touched</th><th>Example entry</th></tr>
+<tr><td>1. Base price</td><td>365</td><td class="mono">2026-12-24 → rate 100.00</td></tr>
+<tr><td>2. Weekend override</td><td>~104</td><td class="mono">2026-12-26 (Sat) → rate 130.00</td></tr>
+<tr><td>3. Seasonal override</td><td>17</td><td class="mono">2026-12-24 → rate 180.00</td></tr>
+<tr><th>Total enqueue calls</th><th>~486</th><th></th></tr>
+</table></div>
+
+<p>At 10 requests a minute, 486 individual calls would take about <strong>49 minutes</strong> to reach Booking.com. If the manager edits the price twice in that time, the two batches of calls interleave and the final state on the OTAs depends on which call happened to land last.</p>
+
+<h3>3.2 Step one: merge by key (last write wins)</h3>
+
+<p>Each pending update is stored under the key <code>propertyId:roomId:date</code>. Writing to a key that already exists replaces the old value. Because the base layer is enqueued first, and weekend and seasonal layers after it, later layers overwrite earlier ones on the dates where they overlap:</p>
+
+<div class="tablewrap"><table>
+<tr><th>Order</th><th>Key</th><th>Value</th><th>Result</th></tr>
+<tr class="dead"><td>1</td><td class="mono">p1:rp_dlx:2026-12-26</td><td class="mono">{ rate: "100.00" }</td><td>overwritten</td></tr>
+<tr class="dead"><td>2</td><td class="mono">p1:rp_dlx:2026-12-26</td><td class="mono">{ rate: "130.00" }</td><td>overwritten</td></tr>
+<tr><td>3</td><td class="mono">p1:rp_dlx:2026-12-26</td><td class="mono">{ rate: "180.00" }</td><td><strong>kept</strong></td></tr>
+</table></div>
+
+<p>So ~486 enqueues collapse into exactly <strong>365 entries</strong>, one per date, each holding the correct final price. A JavaScript <code>Map</code> gives you this for free, since <code>map.set(key, v)</code> on an existing key overwrites it.</p>
+
+<h3>3.3 Step two: flush on a timer, one call per endpoint</h3>
+
+<p>Every 5 seconds, <code>flush()</code> collects all pending entries for each property and sends them as <strong>one</strong> <code>POST /restrictions</code> with all 365 values in the body, plus one <code>POST /availability</code> if there are pending availability entries. Each call spends one token from that endpoint's bucket.</p>
+
+<div class="flow">
+  <div class="box"><b>Domain event</b><span class="ex">room.updated
+price 100 / wknd 130
+season 180</span></div>
+  <div class="arrow">→</div>
+  <div class="box"><b>enqueueRestriction ×486</b><span class="ex">validate rate &gt; 0
+Map.set(key, fields)</span></div>
+  <div class="arrow">→</div>
+  <div class="box hl"><b>pendingRestrictions</b><span class="ex">365 keys
+(last write wins)</span></div>
+  <div class="arrow">→</div>
+  <div class="box hl"><b>flush() every 5s</b><span class="ex">token? yes → spend 1
+build values[365]</span></div>
+  <div class="arrow">→</div>
+  <div class="box ext"><b>Channex</b><span class="ex">POST /restrictions
+1 request</span></div>
+</div>
+
+<p>One request instead of 486. The rate limit stops being the bottleneck, and the batching window now decides latency: about 5 seconds from the edit to Channex.</p>
+
+<h3>3.4 Step three: what happens under pressure</h3>
+
+<p>Say restrictions keep getting enqueued continuously. Flushes run 12 times a minute (every 5 s), but the restriction bucket holds only 10 tokens. Here is one property's minute:</p>
+
+<div class="timeline">
+  <div class="tick send"><span class="t">t=0s</span>send · 9 left</div>
+  <div class="tick send"><span class="t">t=5s</span>send · 8 left</div>
+  <div class="tick send"><span class="t">…</span>send…</div>
+  <div class="tick send"><span class="t">t=45s</span>send · 0 left</div>
+  <div class="tick skip2"><span class="t">t=50s, 55s</span>no token → skip; items keep merging</div>
+  <div class="tick send"><span class="t">t=60s</span>refill to 10 → send</div>
+</div>
+
+<p>A skipped tick loses nothing. The entries stay in the map, and any newer values keep overwriting older ones, so the next send carries the <em>latest</em> state rather than a backlog of stale ones. Waiting makes the next batch <em>smaller</em> relative to the work done, which is the opposite of what happens in a FIFO job queue.</p>
+
+<p>If Channex still answers with <strong>429</strong>, perhaps because a second process is also calling it, the property is paused for a flat 60 s:</p>
+
+<div class="timeline">
+  <div class="tick send"><span class="t">t=0s</span>POST → 429</div>
+  <div class="tick pause"><span class="t">t=5s</span>paused (both buckets)</div>
+  <div class="tick pause"><span class="t">…</span>paused</div>
+  <div class="tick pause"><span class="t">t=55s</span>paused</div>
+  <div class="tick send"><span class="t">t=60s</span>pause cleared → send merged state</div>
+  <div class="tick send"><span class="t">other props</span>unaffected throughout</div>
+</div>
+
+<div class="callout warn">
+<span class="label">Two kinds of failure, two different responses</span>
+<strong>Transient</strong> (429, network error, 5xx): items stay pending and are retried on a later tick. <strong>Deterministic</strong> (<code>meta.warnings</code> in a 200, such as a rejected rate): items are <em>dropped</em> and recorded as a failed <code>ChannelEvent</code>, because resending the same invalid payload would fail the same way forever.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="code">4. Code walkthrough</h2>
+
+<p>With that picture in mind, the code is short. It's easiest to read in the order data moves through it: enqueue, flush, error handling, and then the code around the queue that feeds and protects it.</p>
+
+<h3>4.1 State: two maps and a per-property record</h3>
+<p class="file">apps/backend/ChannelManager/services/channexSyncQueue.js</p>
+<pre><code>const TOKENS_PER_BUCKET = 10;
+const REFILL_WINDOW_MS = 60_000;
+const PAUSE_MS = 60_000;
+const DEFAULT_FLUSH_INTERVAL_MS =
+  Number(process.env.CHANNEX_FLUSH_INTERVAL_MS) || 5000;
+
+// Map&lt;propertyId, { availabilityTokens, restrictionTokens, lastRefillAt, pausedUntil }&gt;
+const propertyState = new Map();
+
+// Map&lt;`${propertyId}:${roomId}:${date}`, item&gt; — Map.set on an existing key overwrites,
+// giving last-write-wins merge for free.
+const pendingAvailability = new Map();
+const pendingRestrictions = new Map();</code></pre>
+<p>All state lives in the Node process. That makes it fast and simple, and it's also why the design is limited to a single instance (see §5.4).</p>
+
+<h3>4.2 Enqueue: validate, then overwrite</h3>
+<pre><code>function enqueueRestriction(propertyId, channexPropertyId, roomId, date, fields) {
+  const errors = getRestrictionFieldErrors(fields);   // rate &gt; 0, min_stay ≥ 1, …
+  if (errors.length &gt; 0) {
+    logger.warn(`[channexSyncQueue] Skipping restriction enqueue: ...`);
+    recordSyncFailure({ propertyId, eventType: "restriction.pushed", error: ... });
+    return;                                           // never enters the map
+  }
+  const key = mergeKey(propertyId, roomId, date);
+  pendingRestrictions.set(key, { propertyId, channexPropertyId, roomId, date, fields });
+}</code></pre>
+<p>Enqueueing is synchronous and cheap. The caller, usually a GraphQL mutation that saved a room, returns right away. Bad data is rejected <em>before</em> it can use up a token, because Channex would only send it back as a warning.</p>
+
+<h3>4.3 The flush loop</h3>
+<pre><code>async function flush() {
+  const propertyIds = new Set();                       // every property with pending work
+  for (const item of pendingAvailability.values()) propertyIds.add(item.propertyId);
+  for (const item of pendingRestrictions.values()) propertyIds.add(item.propertyId);
+
+  for (const propertyId of propertyIds) {
+    const state = getOrInitState(propertyId);
+    if (state.pausedUntil &amp;&amp; Date.now() &lt; state.pausedUntil) continue;   // 429 pause
+    if (state.pausedUntil &amp;&amp; Date.now() &gt;= state.pausedUntil) state.pausedUntil = null;
+    ...
+    await flushAvailabilityForProperty(propertyId, channexPropertyId, state);
+    await flushRestrictionsForProperty(propertyId, channexPropertyId, state);
+  }
+}
+
+function startFlushLoop(intervalMs = DEFAULT_FLUSH_INTERVAL_MS) {
+  if (flushTimer) return flushTimer;
+  flushTimer = setInterval(() =&gt; {
+    flush().catch((err) =&gt; logger.error(`[channexSyncQueue] flush cycle failed: ${err.message}`));
+  }, intervalMs);
+  return flushTimer;
+}</code></pre>
+
+<h3>4.4 Per-property push: token, batch, classify the outcome</h3>
+<pre><code>async function flushRestrictionsForProperty(propertyId, channexPropertyId, state) {
+  const { keys, items } = itemsForProperty(pendingRestrictions, propertyId);
+  if (items.length === 0) return;
+  if (!hasToken(state, "restriction")) return;          // skip tick, keep items
+
+  consumeToken(state, "restriction");
+  try {
+    const payload = items.map((item) =&gt; ({ rate_plan_id: item.roomId, date: item.date, ...item.fields }));
+    const res = await channexService.pushRestrictions(channexPropertyId, payload);
+    const warnedKeys = processWarnings(res, propertyId, "rate_plan_id", "restriction.pushed");
+    for (const key of keys) pendingRestrictions.delete(key);   // success or warned → done
+  } catch (err) {
+    if (err.status === 429) {
+      state.pausedUntil = Date.now() + PAUSE_MS;               // whole property, 60s
+      recordSyncFailure({ ..., error: "Rate limit reached, retrying automatically in 60 seconds" });
+    }
+    // items stay pending, retried next cycle
+  }
+}</code></pre>
+<p>The token bucket itself is a fixed-window counter, refilled lazily when it's checked:</p>
+<pre><code>function refillIfDue(state) {
+  if (Date.now() - state.lastRefillAt &gt;= REFILL_WINDOW_MS) {
+    state.availabilityTokens = TOKENS_PER_BUCKET;
+    state.restrictionTokens = TOKENS_PER_BUCKET;
+    state.lastRefillAt = Date.now();
+  }
+}</code></pre>
+<p>The decisions log records why a fixed window was chosen over a rolling window: Channex states its limit as a per-minute quota, and a fixed window behaves predictably under <code>jest.advanceTimersByTime()</code>.</p>
+
+<h3>4.5 Making 429 detectable</h3>
+<p class="file">apps/backend/ChannelManager/services/channexService.js</p>
+<pre><code>} catch (err) {
+  const wrapped = new Error(unwrapError(err));
+  wrapped.status = err.response?.status;       // added in this commit — before, a
+  wrapped.channexMeta = err.response?.data;    // plain Error hid the 429 entirely
+  throw wrapped;
+}</code></pre>
+<p>A small change with a big effect: the service layer used to throw a plain string error, so the queue had no way to tell a 429 from any other failure.</p>
+
+<h3>4.6 Who feeds the queue</h3>
+<p>Core services (<code>RoomService</code>, <code>BookingService</code>) don't know Channex exists. They emit generic domain events, and <code>ChannelManager/index.js</code> turns those events into enqueues:</p>
+<ul>
+<li><code>enqueueChannexARIForBooking</code>: a booking created or cancelled sets <code>availability</code> to 0 or 1 for each night of the stay.</li>
+<li><code>enqueueRoomPriceUpdate</code>: base, then weekend, then seasonal rates over 365 days, as in §3.1.</li>
+<li><code>enqueueRoomStatusUpdate</code>: maintenance sets <code>stop_sell: true</code> for the next year.</li>
+<li><code>runDailyFullSync</code>: once a day it recomputes availability for every mapped room from the bookings table and enqueues all of it. This is the safety net that repairs drift.</li>
+</ul>
+<div class="callout">
+<span class="label">CERT-4 is enforced by structure</span>
+<code>channexService.pushAvailability</code> and <code>pushRestrictions</code> are called from exactly one file. <code>ChannexAdapter.pushAvailability()</code> deliberately <em>throws</em>, so an accidental direct call fails loudly in tests instead of quietly bypassing the rate limiter.
+</div>
+
+<h3>4.7 Graceful shutdown: a best-effort drain</h3>
+<p class="file">apps/backend/server.js</p>
+<pre><code>async function shutdownChannexSyncQueue() {
+  channexSyncQueue.stopFlushLoop();
+  stopRevisionsPoll();
+  stopDailyFullSync();
+  await Promise.race([
+    channexSyncQueue.flush(),                                         // one last batch
+    new Promise((resolve) =&gt; setTimeout(resolve, SHUTDOWN_DRAIN_TIMEOUT_MS))  // 5s cap
+  ]).catch(...);
+}</code></pre>
+<p>On <code>SIGTERM</code>, the normal redeploy signal, pending items get one more chance to go out. The drain still respects token buckets and pauses, so it's explicitly <em>not</em> a durability guarantee.</p>
+
+<h3>4.8 Tests</h3>
+<p><code>channexSyncQueue.test.js</code> uses <code>jest.useFakeTimers()</code>, which was new to this codebase, so 60-second pauses run in microseconds. It has 18 tests covering independent buckets, the 429 pause and resume, pause isolation between properties, <code>meta.warnings</code> being dropped, the rate/min-stay validators, one call per property per cycle, last-write-wins merging for both maps, and flush-loop start/stop.</p>
+
+<!-- ============================================================ -->
+<h2 id="interview">5. Interview answers</h2>
+
+<p>With the mechanism understood, here are answers to the follow-up questions from the coaching notes, each grounded in what the code actually does.</p>
+
+<div class="qa">
+<h3>5.1 The 60-second version of the story</h3>
+<p class="script">"HospitalityOS syncs room availability and prices to OTAs through Channex, a channel manager. Channex allows 10 availability calls and 10 price/restriction calls per property per minute. A single price edit in our system touches 365 future dates, so one call per change would take close to an hour to go out and could reach the OTAs in the wrong order.</p>
+<p class="script">I built a sync queue between our domain events and the Channex client. Updates are written to an in-memory map keyed by property, room and date, so repeated updates to the same date overwrite each other. Every five seconds a flush sends everything pending for each property as one batched request per endpoint, gated by a token bucket per endpoint. On a 429 we pause that property for a minute, as Channex recommends. A price edit now reaches Channex in about five seconds as a single request.</p>
+<p class="script">I considered BullMQ and chose not to use it yet. We run a single instance, and a daily full resync repairs anything lost in a crash. I documented that the queue has to move to Redis before we scale horizontally."</p>
+</div>
+
+<div class="qa">
+<h3>5.2 "What happens if a batch fails halfway? Could updates be lost or double-processed?"</h3>
+<p><strong>Halfway failure.</strong> A batch is one HTTP request, so it can't partly succeed on our side. Either the request fails and every item stays in the map to be retried on a later tick, or Channex accepts it and reports individual rejected values in <code>meta.warnings</code>. We sort failures into two groups:</p>
+<ul>
+<li><strong>Transient</strong> (429, 5xx, network): the items stay pending. A 429 pauses the property for a flat 60 s, per Channex's guidance. Other errors are retried on the next tick, limited by the token budget.</li>
+<li><strong>Deterministic</strong> (warnings on a 200): the items are dropped and written as a failed <code>ChannelEvent</code>, which the frontend shows to staff. Retrying would fail the same way every time.</li>
+</ul>
+<p><strong>Double-processing.</strong> This is where the design is safe by construction: every value we send is an <em>absolute state</em>, never a delta. We send <code>availability: 0</code> for that date and <code>rate: "180.00"</code>, never "subtract one" or "add 20". Sending the same batch twice leaves Channex in the same state, so retries are idempotent without idempotency keys.</p>
+<p><strong>Double-booking</strong> is a separate, inbound problem. Bookings arrive by webhook. <code>bookingInjector.js</code> looks up an existing booking by <code>channel.channelBookingId</code> before creating one, so a redelivered webhook updates or cancels the existing booking instead of duplicating it. If injection fails, the webhook returns HTTP 500 so Channex redelivers, and a revisions poll catches anything the webhooks missed.</p>
+</div>
+
+<div class="qa">
+<h3>5.3 "How did you choose the batch size and window?"</h3>
+<p><strong>The trigger is time, not size.</strong> The flush runs on a 5 s <code>setInterval</code>, which can be overridden with <code>CHANNEX_FLUSH_INTERVAL_MS</code>. A size trigger doesn't help here: the constraint is <em>how many requests</em> go out a minute, not how big they are, and one request can already carry hundreds of values. So the right move is to send as much as possible in each request and control only how often requests go out.</p>
+<p><strong>Why 5 s?</strong> Channex's best-practice docs give "combine into one call every ~6 seconds" as an example. 5 s means 12 ticks a minute, slightly more than the 10 tokens available, so under sustained load the token bucket is what actually enforces the limit and a couple of ticks a minute are skipped. That's harmless because skipped items keep merging. We kept 5 s rather than 6 s as a deliberate choice: the latency is a little lower, the bucket guarantees compliance either way, and the value is one environment variable away from changing.</p>
+<p><strong>The trade-off:</strong> a shorter window gives lower latency but more calls, and would hit the token ceiling more often. A longer window gives bigger batches but slower OTA updates, which matters because the risk is <em>overbooking</em>: a room sold on Booking.com after it was already booked directly.</p>
+</div>
+
+<div class="qa">
+<h3>5.4 "Why not just use BullMQ?" and the weaknesses you should volunteer</h3>
+<p><strong>Why not BullMQ yet:</strong> BullMQ is a FIFO job queue. Each job is a separate unit of work, so you'd have to layer a merge step on top to avoid sending stale values. What this problem needs is a <em>latest-state map</em> plus a rate limiter, and a <code>Map</code> is exactly that. Adding Redis to a single-instance MVP would bring in infrastructure without solving a problem we actually had.</p>
+<p><strong>Known limits, stated honestly:</strong></p>
+<ol>
+<li><strong>Crash loss.</strong> Unflushed items live only in RAM. Mitigations: the SIGTERM drain covers planned restarts, and the daily full sync repairs anything left after a crash.</li>
+<li><strong>Multiple instances.</strong> Two backend processes would each keep their own bucket and could together send 20 calls a minute. The fix is a shared Redis limiter (BullMQ's built-in <code>limiter</code>, or <code>INCR</code>+<code>EXPIRE</code>) with the pending map also in Redis, for example as a hash per property.</li>
+<li><strong>A lost-update race I found while writing this up.</strong> <code>flush</code> captures the keys, <code>await</code>s the HTTP call, then deletes those keys. If a newer value for the same key is enqueued <em>during</em> the await, the delete removes it, and that update is never sent. The fix is one line: delete only if the entry is still the one that was sent (<code>if (map.get(key) === item) map.delete(key)</code>). Until then, the daily full sync repairs availability. Mentioning something like this, found by reading your own code closely, tends to land well with interviewers.</li>
+</ol>
+<p><strong>What changes with BullMQ:</strong> a repeatable job every 5 s replaces <code>setInterval</code>, Redis holds the pending state so it survives crashes and is shared across instances, BullMQ's rate limiter replaces the in-process buckets, and failed flushes get retries with backoff and a dead-letter view. The merge-by-key idea stays the same whichever tool runs it.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="quiz">6. Quiz</h2>
+<p>Five questions to check that the design has sunk in. Click an answer.</p>
+
+<div id="quizzes"></div>
+
+</main>
+<script>
+const QUIZ = [
+  { q: "A manager changes a room's base price, which enqueues 365 restriction updates. Seconds later they change it again (another 365). How many POST /restrictions calls does the next flush send for that property?",
+    opts: ["730, one per enqueue", "2, one per price change", "1, containing 365 values", "365, one per date"],
+    a: 2,
+    fb: "Both edits write to the same 365 keys (property:ratePlan:date). The second edit overwrites the first, and one flush sends all pending entries for the property as a single batched request." },
+  { q: "The restriction bucket for property P is empty, but availability tokens remain. What happens on the next tick?",
+    opts: ["Both pushes are skipped until the minute refills", "Availability is pushed; restrictions stay pending and keep merging", "Restrictions borrow a token from the availability bucket", "The property is paused for 60 seconds"],
+    a: 1,
+    fb: "The two buckets are independent because Channex rate-limits each endpoint separately. Only the 60 s pause after a 429 blocks both endpoints for a property." },
+  { q: "Channex returns 200 OK with meta.warnings saying the rate for 2026-12-24 must be greater than 0. What does the queue do with that item?",
+    opts: ["Keeps it pending and retries next tick", "Pauses the property for 60 s", "Drops it and records a failed ChannelEvent", "Throws, stopping the flush loop"],
+    a: 2,
+    fb: "A warning is a deterministic validation rejection, so retrying the same payload would fail forever. It's dropped and made visible to staff. Only transient failures like 429 are retried." },
+  { q: "Why are retries safe from double-applying an update, even with no idempotency keys?",
+    opts: ["BullMQ deduplicates jobs by ID", "Every value is an absolute state (availability: 0, rate: 180.00), so resending it changes nothing", "Channex rejects duplicate requests within 60 s", "The token bucket prevents the same batch from being sent twice"],
+    a: 1,
+    fb: "Setting a value is idempotent; applying a delta is not. And there's no BullMQ here, since the queue is in-memory." },
+  { q: "Which scenario would break this design's rate-limit guarantee?",
+    opts: ["A burst of 50 bookings in one second", "Setting the flush interval to 2 seconds", "Running two backend instances behind a load balancer", "A price edit touching all 365 days"],
+    a: 2,
+    fb: "Each instance keeps its own in-memory token buckets, so together they could send 20 calls a minute. A shorter interval just means more skipped ticks, because the bucket still caps at 10. That's why a Redis-backed queue/limiter is the documented fix before scaling out." }
+];
+const root = document.getElementById("quizzes");
+QUIZ.forEach((item, qi) => {
+  const div = document.createElement("div");
+  div.className = "q";
+  const p = document.createElement("p");
+  p.textContent = (qi + 1) + ". " + item.q;
+  div.appendChild(p);
+  const fb = document.createElement("div");
+  fb.className = "fb";
+  item.opts.forEach((o, oi) => {
+    const b = document.createElement("button");
+    b.textContent = o;
+    b.addEventListener("click", () => {
+      div.querySelectorAll("button").forEach(x => x.classList.remove("right", "wrong"));
+      const ok = oi === item.a;
+      b.classList.add(ok ? "right" : "wrong");
+      if (!ok) div.querySelectorAll("button")[item.a].classList.add("right");
+      fb.style.display = "block";
+      fb.textContent = (ok ? "Correct. " : "Not quite. ") + item.fb;
+    });
+    div.appendChild(b);
+  });
+  div.appendChild(fb);
+  root.appendChild(div);
+});
+</script>
+</body>
+</html>
