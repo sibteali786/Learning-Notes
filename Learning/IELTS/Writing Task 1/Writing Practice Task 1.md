@@ -54,7 +54,6 @@ In between year 2000 and 2010 Germany and USA have highest internet access with 
 From 2010 to 2020 India shows highest percentage growth of 8 percent, Brazil with 6 percent, South africa with only 3 percent being slowest among all, USA and Germany are highest in percentage but overall growth for both only rises by 3 and 4 percent respevtively with values 33 and 41 percent for 2020.
 ```
 
-<<<<<<< HEAD
 
 Pie Chart
 ![[Pasted image 20260921183412.png]]
@@ -72,5 +71,3 @@ In 2000 housing takes slightly below one third of total household spending with 
 
 2020 is the year when housing is still the largest spending, increasing to 38 percent, Food drops to 18 percent still the second largest spending, while Education, Leisure see increment of 5 and 2 percent spending respectively. Transport and other decrease to 12 and 5 percent respectively.  
 ```
-=======
->>>>>>> origin/main
