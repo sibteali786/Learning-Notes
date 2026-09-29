@@ -25,13 +25,26 @@
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/1-lewis-diagrams-no3-resonance.html"
+                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/kmeans-image-compression-lab.html"
               },
               "icon": "code-glyph",
-              "title": "1-lewis-diagrams-no3-resonance"
+              "title": "kmeans-image-compression-lab"
+            }
+          },
+          {
+            "id": "11d64a16bd40b6fd",
+            "type": "leaf",
+            "state": {
+              "type": "jupyter-viewer",
+              "state": {
+                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/C3_W1_KMeans_Assignment.ipynb"
+              },
+              "icon": "lucide-file",
+              "title": "C3_W1_KMeans_Assignment"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -196,33 +209,35 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "11d64a16bd40b6fd",
   "lastOpenFiles": [
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/kmeans-image-compression-lab.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/1-lewis-diagrams-no3-resonance.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Drawing 2026-09-29 22.11.26.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home/jovyan/work",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/figure 3.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/figure 2.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/figure 1.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/bird_small.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home/jovyan",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/data/ex7_X.npy",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/__pycache__/utils.cpython-37.pyc",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/__pycache__/public_tests.cpython-37.pyc",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/utils.py",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/public_tests.py",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/bird_small.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/bird_small.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/figure 3.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/figure 2.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/figure 1.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/bird_small.png",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/2-lewis-diagrams-formal-charge.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/3-lewis-diagrams-scn-formal-charge.html",
-    "Learning/Research/Adam-DFT/Chemistry/periodic-table.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Pasted Image 20260929151237_030.png",
-    "redis_geosearch_grid_vs_radius.svg",
-    "Pasted image 20260929143248.png",
-    "Pasted image 20260929143244.png",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
-    "Excalidraw/Libraries/local-library.excalidrawlib",
-    "Excalidraw/Libraries",
-    "Excalidraw",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/4-lewis-diagrams-xef2.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/3-lewis-diagrams-cn.html",
     "Learning/Research/Resources.md",
-    "Pasted Image 20260904172659_828.png",
-    "Pasted Image 20260904172615_090.png",
-    "Pasted image 20260813204431.png",
-    "Screenshot 2026-04-06 at 11.24.37 AM.png",
-    "Screenshot 2026-03-20 at 3.14.04 AM.png",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "conflict-files-obsidian-git.md",
-    "Pasted image 20260921183412.png",
     "Learning/IELTS/Writing Task 1/Writing practice task 1 Part 2.md",
     "Learning/IELTS/Writing Task 1/Writing Task 2 - Part 1.md",
     "Learning/IELTS/Writing Task 1/Writing Practice Task 1 Part 1.md",
@@ -242,7 +257,6 @@
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
