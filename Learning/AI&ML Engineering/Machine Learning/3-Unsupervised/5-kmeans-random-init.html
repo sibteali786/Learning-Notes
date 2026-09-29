@@ -1,0 +1,92 @@
+<title>K-Means Random Init</title>
+<style>
+:root{
+  --bg:#0f1117; --panel:#161923; --border:#272c3d;
+  --blue:#5ba8ff; --orange:#ff9d5c; --green:#4ddb9b; --purple:#b58cff; --red:#ff6b6b;
+  --text:#e7e9f2; --dim:#8b91a8;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding-block:32px;padding-inline:20px;line-height:1.55;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:clamp(1.4rem,4vw,2rem);color:#fff;text-wrap:balance;}
+.sub{color:var(--dim);margin-bottom:26px;font-size:.85rem;}
+.wrap{max-width:960px;margin:0 auto;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bar{width:5px;height:22px;border-radius:3px;flex-shrink:0;}
+.label h2{font-size:1.05rem;color:#fff;}
+.pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;margin:3px 5px 3px 0;}
+.pill.blue{background:rgba(91,168,255,.14);color:var(--blue);border:1px solid rgba(91,168,255,.4);}
+.pill.orange{background:rgba(255,157,92,.14);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+.pill.green{background:rgba(77,219,155,.14);color:var(--green);border:1px solid rgba(77,219,155,.4);}
+.pill.red{background:rgba(255,107,107,.14);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+.note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:12px;}
+code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.82rem;color:#dfe3f0;}
+pre .kw{color:var(--purple);} pre .cm{color:var(--dim);font-style:italic;} pre .num{color:var(--orange);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+@media(max-width:680px){.grid2,.grid3{grid-template-columns:1fr;}}
+svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.capt{text-align:center;font-size:.76rem;color:var(--dim);margin-top:6px;}
+.jcard{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.jcard .jval{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;}
+</style>
+
+<div class="wrap">
+<h1>🎲 Random Initialization & Multiple Restarts</h1>
+<div class="sub">How to pick starting centroids, and why one attempt isn't enough</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Standard Way to Initialize</h2></div>
+  <p>Always choose <b style="color:var(--blue)">K &lt; m</b> — you need at least as many training examples as clusters. The most common initialization method: <b>randomly pick K actual training examples</b> and set μ₁...μ_K to sit exactly on top of them (not arbitrary random points, as earlier illustrations simplified).</p>
+  <svg viewBox="0 0 300 170" width="300" height="170">
+    <line x1="30" y1="150" x2="30" y2="15" stroke="#8b91a8" stroke-width="1.5"/>
+    <line x1="30" y1="150" x2="280" y2="150" stroke="#8b91a8" stroke-width="1.5"/>
+    <g fill="#e7e9f2">
+      <circle cx="60" cy="120" r="5"/><circle cx="80" cy="100" r="5"/><circle cx="70" cy="80" r="5"/>
+      <circle cx="200" cy="60" r="5"/><circle cx="220" cy="45" r="5"/><circle cx="230" cy="75" r="5"/><circle cx="250" cy="55" r="5"/>
+    </g>
+    <circle cx="70" cy="80" r="8" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+    <text x="55" y="65" fill="#ff6b6b" font-size="11" font-weight="bold">μ₁</text>
+    <circle cx="220" cy="45" r="8" fill="none" stroke="#5ba8ff" stroke-width="2"/>
+    <text x="225" y="35" fill="#5ba8ff" font-size="11" font-weight="bold">μ₂</text>
+  </svg>
+  <div class="capt">Two training examples are picked at random and become the initial μ₁, μ₂ directly</div>
+  <div class="note">Different random picks → K-means can converge to genuinely different final clusterings.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem: Local Optima</h2></div>
+  <p>With K=3 on a dataset, a lucky initialization finds a good split. But an <b style="color:var(--red)">unlucky one</b> — say two centroids landing inside the same true group — gets K-means stuck in a worse solution.</p>
+  <div class="grid3">
+    <div class="jcard"><div style="color:var(--green)">✅ Good init</div><div class="jval" style="color:var(--green)">J = low</div><div style="font-size:.75rem;color:var(--dim)">3 clean clusters</div></div>
+    <div class="jcard"><div style="color:var(--red)">❌ Bad init #1</div><div class="jval" style="color:var(--red)">J = higher</div><div style="font-size:.75rem;color:var(--dim)">local optimum</div></div>
+    <div class="jcard"><div style="color:var(--red)">❌ Bad init #2</div><div class="jval" style="color:var(--red)">J = higher</div><div style="font-size:.75rem;color:var(--dim)">different local optimum</div></div>
+  </div>
+  <div class="note">K-means always converges — but not necessarily to the <i>global</i> best clustering. It can get trapped wherever it starts.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Fix: Run It Many Times, Keep the Best</h2></div>
+  <pre><span class="kw">for</span> i = 1 <span class="kw">to</span> <span class="num">100</span>:
+    <span class="cm"># Randomly initialize K-means (pick K random examples)</span>
+    Run K-means to convergence → get c⁽¹⁾..c⁽ᵐ⁾, μ₁..μ_K
+    <span class="cm"># Compute the cost function (distortion) for this result</span>
+    Compute J(c⁽¹⁾,...,c⁽ᵐ⁾, μ₁,...,μ_K)
+
+<span class="cm"># After all 100 runs:</span>
+Pick the set of clusters that gave the <span class="kw">lowest</span> cost J</pre>
+  <p>Since J measures average squared distance to assigned centroid, comparing J across runs is an apples-to-apples way to pick the winner — <b style="color:var(--green)">lower J = tighter, better-separated clusters</b>.</p>
+  <div class="note"><b>Typical range:</b> 50–1000 random initializations. Fewer than 50 risks missing a good solution; beyond ~1000 you hit diminishing returns for the extra compute.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">Init = K random training examples</span>
+  <span class="pill red">Risk: local optima, not global best</span>
+  <span class="pill green">Fix: 50–1000 restarts, keep lowest J</span>
+  <div class="note">This is the standard practical recipe — the lecturer notes he "almost always uses more than one random initialization." Next: how to choose K itself.</div>
+</div>
+</div>

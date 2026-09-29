@@ -1,0 +1,116 @@
+<title>Choosing K</title>
+<style>
+:root{
+  --bg:#0f1117; --panel:#161923; --border:#272c3d;
+  --blue:#5ba8ff; --orange:#ff9d5c; --green:#4ddb9b; --purple:#b58cff; --red:#ff6b6b;
+  --text:#e7e9f2; --dim:#8b91a8;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding-block:32px;padding-inline:20px;line-height:1.55;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:clamp(1.4rem,4vw,2rem);color:#fff;text-wrap:balance;}
+.sub{color:var(--dim);margin-bottom:26px;font-size:.85rem;}
+.wrap{max-width:960px;margin:0 auto;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bar{width:5px;height:22px;border-radius:3px;flex-shrink:0;}
+.label h2{font-size:1.05rem;color:#fff;}
+.pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;margin:3px 5px 3px 0;}
+.pill.blue{background:rgba(91,168,255,.14);color:var(--blue);border:1px solid rgba(91,168,255,.4);}
+.pill.orange{background:rgba(255,157,92,.14);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+.pill.green{background:rgba(77,219,155,.14);color:var(--green);border:1px solid rgba(77,219,155,.4);}
+.pill.red{background:rgba(255,107,107,.14);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+.note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:12px;}
+.warn{background:rgba(255,107,107,.08);border-left:3px solid var(--red);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--text);margin-top:12px;}
+code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:680px){.grid2{grid-template-columns:1fr;}}
+svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.capt{text-align:center;font-size:.76rem;color:var(--dim);margin-top:6px;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px;}
+td,th{padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--dim);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;}
+</style>
+
+<div class="wrap">
+<h1>❓ Choosing the Value of K</h1>
+<div class="sub">Why K is often ambiguous, the elbow method, and what actually works in practice</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>K Is Often Genuinely Ambiguous</h2></div>
+  <p>Show the same data to different people and ask "how many clusters?" — some will say 2, others will say 4, and <b style="color:var(--blue)">both can be right</b>. Because clustering is unsupervised, there's no ground-truth label to check against.</p>
+  <svg viewBox="0 0 320 160" width="320" height="160">
+    <g fill="#e7c85c">
+      <circle cx="60" cy="50" r="5"/><circle cx="75" cy="35" r="5"/><circle cx="55" cy="70" r="5"/><circle cx="80" cy="65" r="5"/><circle cx="65" cy="85" r="5"/>
+      <circle cx="60" cy="110" r="5"/><circle cx="80" cy="120" r="5"/><circle cx="50" cy="130" r="5"/><circle cx="75" cy="140" r="5"/><circle cx="55" cy="150" r="5"/>
+      <circle cx="220" cy="45" r="5"/><circle cx="235" cy="60" r="5"/><circle cx="245" cy="35" r="5"/><circle cx="255" cy="55" r="5"/>
+      <circle cx="215" cy="95" r="5"/><circle cx="230" cy="110" r="5"/><circle cx="245" cy="90" r="5"/><circle cx="255" cy="105" r="5"/>
+    </g>
+    <ellipse cx="65" cy="100" rx="45" ry="65" fill="none" stroke="#5ba8ff" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <ellipse cx="238" cy="72" rx="55" ry="55" fill="none" stroke="#5ba8ff" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="20" y="30" fill="#5ba8ff" font-size="10">"2 clusters"</text>
+    <ellipse cx="65" cy="65" rx="28" ry="30" fill="none" stroke="#4ddb9b" stroke-width="1.5"/>
+    <ellipse cx="65" cy="132" rx="28" ry="28" fill="none" stroke="#4ddb9b" stroke-width="1.5"/>
+    <ellipse cx="235" cy="48" rx="28" ry="24" fill="none" stroke="#4ddb9b" stroke-width="1.5"/>
+    <ellipse cx="235" cy="100" rx="28" ry="24" fill="none" stroke="#4ddb9b" stroke-width="1.5"/>
+    <text x="140" y="135" fill="#4ddb9b" font-size="10">"4 clusters" (green)</text>
+  </svg>
+  <div class="capt">Same data — "2 broad groups" (blue) and "4 tighter groups" (green) are both defensible readings</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Elbow Method</h2></div>
+  <p>Run K-means for K = 1, 2, 3, ... and plot cost J vs. K. J always decreases as K grows — but sometimes it drops <b style="color:var(--green)">sharply</b> up to a point, then flattens. That bend is the "elbow."</p>
+  <div class="grid2">
+    <div>
+      <svg viewBox="0 0 260 170" width="260" height="170">
+        <line x1="35" y1="150" x2="35" y2="15" stroke="#8b91a8" stroke-width="1.5"/>
+        <line x1="35" y1="150" x2="240" y2="150" stroke="#8b91a8" stroke-width="1.5"/>
+        <text x="8" y="90" fill="#8b91a8" font-size="9">J</text>
+        <text x="220" y="165" fill="#8b91a8" font-size="9">K</text>
+        <polyline points="45,30 70,60 95,100 120,115 145,122 170,126 195,129 220,131" fill="none" stroke="#4ddb9b" stroke-width="2"/>
+        <circle cx="95" cy="100" r="5" fill="#ff9d5c"/>
+        <text x="85" y="90" fill="#ff9d5c" font-size="10">elbow → K=3</text>
+      </svg>
+      <div class="capt">Clear elbow — J drops fast then flattens at K=3</div>
+    </div>
+    <div>
+      <svg viewBox="0 0 260 170" width="260" height="170">
+        <line x1="35" y1="150" x2="35" y2="15" stroke="#8b91a8" stroke-width="1.5"/>
+        <line x1="35" y1="150" x2="240" y2="150" stroke="#8b91a8" stroke-width="1.5"/>
+        <text x="8" y="90" fill="#8b91a8" font-size="9">J</text>
+        <text x="220" y="165" fill="#8b91a8" font-size="9">K</text>
+        <polyline points="45,30 70,55 95,75 120,92 145,105 170,116 195,124 220,130" fill="none" stroke="#ff6b6b" stroke-width="2"/>
+      </svg>
+      <div class="capt">No clear elbow — smooth curve, common in practice</div>
+    </div>
+  </div>
+  <div class="warn">⚠️ <b>Don't just pick K to minimize J.</b> J keeps shrinking as K grows — taken to the extreme, K = m (one cluster per point) gives J = 0. That's not useful clustering, just overfitting.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>What Actually Works: Downstream Purpose</h2></div>
+  <p>In practice, clusters exist to serve some <b style="color:var(--orange)">later use</b> — so evaluate K by how well it serves that purpose, not by the shape of the J curve.</p>
+  <table>
+    <tr><th>K</th><th>Result</th><th>Trade-off</th></tr>
+    <tr><td>K=3</td><td>S / M / L t-shirts</td><td>Simpler, cheaper to manufacture &amp; ship — looser fit</td></tr>
+    <tr><td>K=5</td><td>XS / S / M / L / XL</td><td>Better individual fit — more manufacturing &amp; shipping cost</td></tr>
+  </table>
+  <div class="note">The "right" K is a business decision (fit quality vs. cost), not something the algorithm can output on its own. Run both, compare, decide.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Another Example: Image Compression</h2></div>
+  <p>In the practice lab, K = number of colors used to represent a compressed image. <b style="color:var(--purple)">Fewer colors</b> (small K) → smaller file, more visible quality loss. <b style="color:var(--purple)">More colors</b> (large K) → better image quality, bigger file. Again, K is chosen manually based on the actual trade-off you care about.</p>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">K is often genuinely ambiguous</span>
+  <span class="pill green">Elbow method: sometimes useful, often no clear elbow</span>
+  <span class="pill red">Never pick K just to minimize J</span>
+  <span class="pill orange">Best approach: evaluate K by downstream task performance</span>
+  <div class="note">This wraps up K-means. Next unsupervised algorithm: <b>anomaly detection</b> — finding unusual points in data.</div>
+</div>
+</div>
