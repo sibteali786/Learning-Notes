@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Resonance — NO₃⁻</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0f1117; --card:#171a23; --border:#262a38; --text:#e6e8ef; --muted:#9aa1b4;
+  --blue:#4da3ff; --orange:#ff9d4d; --green:#4ddd8f; --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 20px 80px;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.2rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:980px;margin:0 auto;}
+.section{margin-bottom:36px;}
+.label{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px;font-weight:600;}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;border-left:3px solid var(--blue);}
+.card.orange-b{border-left-color:var(--orange);}
+.card.green-b{border-left-color:var(--green);}
+.card.purple-b{border-left-color:var(--purple);}
+code{background:#1e2230;border:1px solid var(--border);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88rem;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+.math-box{background:#0c0e14;border:1px solid var(--border);border-radius:8px;padding:14px 18px;font-size:.88rem;line-height:1.7;}
+.math-box .running-total{color:var(--orange);font-weight:600;}
+.svg-wrap{background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;justify-content:center;}
+.svg-caption{text-align:center;color:var(--muted);font-size:.76rem;margin-top:8px;}
+.tip{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border);align-items:flex-start;}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+.example-box{background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));border:1px solid rgba(77,221,143,.3);border-radius:12px;padding:18px 20px;}
+.qa-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:12px;padding:18px 22px;margin-bottom:14px;}
+.qa-card h3{color:var(--green);font-size:1rem;}
+.qa-card.q2{border-left-color:var(--purple);}
+.qa-card.q2 h3{color:var(--purple);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Resonance — NO₃⁻</h1>
+<div class="subtitle">Nitrate anion: three valid Lewis structures, one real molecule</div>
+
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    Following the usual algorithm on NO₃⁻ gives a structure with <b>one N=O double bond and
+    two N–O single bonds</b> — implying one shorter, stronger bond and two longer, weaker ones.
+    But real nitrate has <b>three identical bonds</b>, same length, same energy. The single-structure
+    algorithm undersells reality — that gap is exactly what resonance explains.
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+  <span class="label orange">How It Works</span>
+  <h2 style="margin-bottom:14px;">Worked Example: NO₃⁻</h2>
+
+  <div class="grid2">
+    <div class="card">
+      <span class="label green">Electron Count</span>
+      <div class="math-box">
+        N: 5 v.e.<br>
+        O×3: 6 × 3 = 18 v.e.<br>
+        neutral total = 23<br>
+        charge −1 → <b>+1 e⁻</b> → <span class="running-total">24 total</span>
+      </div>
+    </div>
+    <div class="card orange-b">
+      <span class="label orange">Bookkeeping</span>
+      <div class="math-box">
+        24 → 3 single bonds N–O (−6) → <span class="running-total">18 left</span><br>
+        18 → 3 O × 6 e⁻ each (−18) → <span class="running-total">0 left</span><br>
+        Check N: only <b>6 e⁻</b> — short of octet
+      </div>
+    </div>
+  </div>
+
+  <div class="card purple-b" style="margin-top:4px;">
+    <span class="label purple">The Fix — and Why It's Ambiguous</span>
+    Same move as CH₂O: steal one lone pair from an O and turn it into a second N–O bond
+    so nitrogen reaches 8. But here's the catch — <b>any of the three oxygens</b> could donate
+    that lone pair. Nothing in the electron count favors one O over another, so there are
+    <b>three equally valid Lewis structures</b>, not one "correct" answer.
+  </div>
+
+  <div class="svg-wrap" style="margin-top:16px;">
+    <div class="grid3" style="width:100%;">
+      <div>
+        <svg width="220" height="190" viewBox="0 0 220 190">
+          <line x1="110" y1="100" x2="110" y2="45" stroke="#4da3ff" stroke-width="4"/>
+          <line x1="102" y1="100" x2="60" y2="150" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="118" y1="100" x2="160" y2="150" stroke="#4da3ff" stroke-width="2"/>
+          <circle cx="110" cy="100" r="18" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+          <text x="110" y="106" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="12">N</text>
+          <circle cx="110" cy="28" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="110" y="33" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+          <circle cx="45" cy="168" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="45" y="173" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+          <circle cx="175" cy="168" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="175" y="173" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+        </svg>
+        <div class="svg-caption">Structure A — double bond on top O</div>
+      </div>
+      <div>
+        <svg width="220" height="190" viewBox="0 0 220 190">
+          <line x1="108" y1="100" x2="55" y2="150" stroke="#4da3ff" stroke-width="4"/>
+          <line x1="112" y1="97" x2="65" y2="157" stroke="#4da3ff" stroke-width="0" opacity="0"/>
+          <line x1="106" y1="103" x2="52" y2="154" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="100" x2="110" y2="45" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="118" y1="100" x2="160" y2="150" stroke="#4da3ff" stroke-width="2"/>
+          <circle cx="110" cy="100" r="18" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+          <text x="110" y="106" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="12">N</text>
+          <circle cx="110" cy="28" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="110" y="33" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+          <circle cx="45" cy="168" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="45" y="173" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+          <circle cx="175" cy="168" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="175" y="173" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+        </svg>
+        <div class="svg-caption">Structure B — double bond on bottom-left O</div>
+      </div>
+      <div>
+        <svg width="220" height="190" viewBox="0 0 220 190">
+          <line x1="112" y1="100" x2="165" y2="150" stroke="#4da3ff" stroke-width="4"/>
+          <line x1="102" y1="100" x2="60" y2="150" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="110" y1="100" x2="110" y2="45" stroke="#4da3ff" stroke-width="2"/>
+          <circle cx="110" cy="100" r="18" fill="#1e2230" stroke="#ff9d4d" stroke-width="2"/>
+          <text x="110" y="106" text-anchor="middle" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="12">N</text>
+          <circle cx="110" cy="28" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="110" y="33" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+          <circle cx="45" cy="168" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="45" y="173" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+          <circle cx="175" cy="168" r="16" fill="#1e2230" stroke="#4ddd8f" stroke-width="2"/>
+          <text x="175" y="173" text-anchor="middle" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="11">O</text>
+        </svg>
+        <div class="svg-caption">Structure C — double bond on bottom-right O</div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center;color:var(--muted);font-size:.8rem;margin-top:2px;">
+    ↔ These are <b>resonance structures</b> — connected by a double-headed arrow, not separate molecules
+  </div>
+</div>
+
+<!-- Q&A: your two questions, answered directly -->
+<div class="section">
+  <span class="label green">Your Questions, Answered</span>
+
+  <div class="qa-card">
+    <h3>What is resonance, specifically, here?</h3>
+    Resonance is what you call it when a molecule needs <b>more than one valid Lewis structure</b>
+    to represent it, because more than one placement of a double bond (or lone pair) satisfies
+    the electron count and the octet rule equally well. For NO₃⁻, the "extra" bonding pair could
+    legitimately go to the top O, the bottom-left O, or the bottom-right O — three structures,
+    all with the same total energy, same validity, connected by <code>↔</code> (not ⇌ — that symbol
+    is reserved for chemical equilibrium, which this is not).
+  </div>
+
+  <div class="qa-card q2">
+    <h3>What do we mean by "resonance hybrid"?</h3>
+    None of the three individual structures is what actually exists in nature — nitrate doesn't
+    flip between them. The <b>resonance hybrid</b> is the real, single structure: each N–O bond is
+    a blend, roughly <b>1⅓ bonds</b> (average of two single bonds and one double bond across three
+    equivalent positions), and the "extra" pair of electrons is <b>delocalized</b> — spread
+    evenly across all three N–O bonds rather than sitting in one specific double bond. This
+    is why experiments show <b>three identical bond lengths</b>, all between a single and double
+    bond in length, instead of two long bonds and one short one.
+  </div>
+</div>
+
+<!-- KEY DISTINCTIONS -->
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Concept</th><th>What it is NOT</th><th>What it actually is</th></tr>
+      <tr><td>Resonance</td><td>The molecule oscillating/switching between structures over time</td><td>Multiple valid ways to draw electrons on paper for one static, real structure</td></tr>
+      <tr><td>Resonance hybrid</td><td>An average you compute after picking "the best" structure</td><td>The one true structure — bonds are all partial-double, electrons delocalized</td></tr>
+      <tr><td>Resonance arrow ↔</td><td>Chemical equilibrium (⇌, implies a forward/reverse reaction)</td><td>Same molecule, alternate electron-pushing depictions</td></tr>
+      <tr><td>Bond order here</td><td>1 double + 2 single (as any single structure implies)</td><td>All three bonds ≈ 1.33 (average order across 3 resonance forms)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- REAL WORLD EXAMPLES -->
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario 1 — Why nitrate is so stable (fertilizers, explosives):</b> The delocalization in NO₃⁻ spreads out (and stabilizes) the negative charge across all three oxygens instead of concentrating it on one atom. This extra "resonance stabilization" is part of why nitrate salts (like ammonium nitrate) are common, stable fertilizer components — the anion itself resists further reaction more than a hypothetical single-structure version would.
+  </div>
+  <div class="example-box" style="margin-top:10px;">
+    <b style="color:var(--blue);">Scenario 2 — Benzene, the classic resonance example:</b> The same idea scales up: benzene (C₆H₆) is usually drawn with alternating single/double bonds, but experimentally all six C–C bonds are identical length. Chemists draw benzene with a circle inside the ring specifically to represent the resonance hybrid — the same visual idea as the dashed partial-bond nitrate diagram.
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> Whenever converting a lone pair into a bond could equally be done at more than one equivalent terminal atom, that's your signal you're dealing with resonance — draw all valid structures, don't just pick one.</div>
+    <div class="tip"><span class="icon">→</span> Never say a molecule "switches between" resonance structures — say the true structure is a hybrid/blend, with delocalized electrons. This phrasing distinction is a common interview trip-up.</div>
+    <div class="tip"><span class="icon">→</span> Equal resonance structures (like NO₃⁻'s three, all with the same atoms, charges, and bond arrangement pattern) contribute equally to the hybrid — unequal ones (later topic) don't, and the more stable one contributes more.</div>
+    <div class="tip"><span class="icon">→</span> Real experimental clue for resonance: if measured bond lengths in a molecule are identical when a single Lewis diagram predicts unequal ones, suspect resonance immediately.</div>
+    <div class="tip"><span class="icon">→</span> Don't forget the anion bracket + charge on every resonance structure — it's a complete Lewis diagram requirement even mid-resonance.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

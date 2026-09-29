@@ -4,17 +4,31 @@
     "type": "split",
     "children": [
       {
-        "id": "8496f9995f46a116",
+        "id": "e645334cab3e7913",
         "type": "tabs",
         "children": [
           {
-            "id": "15bc0557143c16ff",
+            "id": "de568963406bb06d",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "excalidraw",
+              "state": {
+                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Hybrid Resonance.excalidraw"
+            }
+          },
+          {
+            "id": "14fad044e1018aac",
+            "type": "leaf",
+            "state": {
+              "type": "html-view",
+              "state": {
+                "file": "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/1-lewis-diagrams-no3-resonance.html"
+              },
+              "icon": "code-glyph",
+              "title": "1-lewis-diagrams-no3-resonance"
             }
           }
         ]
@@ -76,7 +90,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 368.359375
+    "width": 368.359375,
+    "collapsed": true
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -182,8 +197,18 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "15bc0557143c16ff",
+  "active": "957dbb181bb46970",
   "lastOpenFiles": [
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/1-lewis-diagrams-no3-resonance.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/2-lewis-diagrams-formal-charge.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/3-lewis-diagrams-scn-formal-charge.html",
+    "Learning/Research/Adam-DFT/Chemistry/periodic-table.html",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Pasted Image 20260929151237_030.png",
+    "redis_geosearch_grid_vs_radius.svg",
+    "Pasted image 20260929143248.png",
+    "Pasted image 20260929143244.png",
+    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
     "Excalidraw/Libraries/local-library.excalidrawlib",
     "Excalidraw/Libraries",
@@ -191,13 +216,6 @@
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/4-lewis-diagrams-xef2.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/3-lewis-diagrams-cn.html",
     "Learning/Research/Resources.md",
-    "Pasted image 20260929143248.png",
-    "Pasted image 20260929143244.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/1-clustering-intro.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/6-kmeans-choosing-k.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/5-kmeans-random-init.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/4-kmeans-cost-function.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/3-kmeans-formal.html",
     "Pasted Image 20260904172659_828.png",
     "Pasted Image 20260904172615_090.png",
     "Pasted image 20260813204431.png",
@@ -209,8 +227,6 @@
     "Learning/IELTS/Writing Task 1/Writing practice task 1 Part 2.md",
     "Learning/IELTS/Writing Task 1/Writing Task 2 - Part 1.md",
     "Learning/IELTS/Writing Task 1/Writing Practice Task 1 Part 1.md",
-    "Learning/IELTS/Writing Task 1/Pasted image 20260928122543.png",
-    "Learning/IELTS/Writing Task 1/Pasted image 20260928113317.png",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Redis Pub-Sub Tests/Notes.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/2-Stress test K6/First.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Redis Pub-Sub Flow.md",
@@ -228,7 +244,6 @@
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/UUID_vs_ULIDs/Drawing 2026-08-22 00.50.23.excalidraw.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/How Indexes are Stored/HOT_and_Vcuum.excalidraw.md",
-    "Learning/Database/Database Design/5-Relationships/1-ERD-Diagrams.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

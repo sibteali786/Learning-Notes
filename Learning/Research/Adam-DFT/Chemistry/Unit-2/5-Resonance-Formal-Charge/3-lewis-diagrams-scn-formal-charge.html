@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SCN⁻ Resonance &amp; Formal Charge</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0f1117; --card:#171a23; --border:#262a38; --text:#e6e8ef; --muted:#9aa1b4;
+  --blue:#4da3ff; --orange:#ff9d4d; --green:#4ddd8f; --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 20px 80px;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.2rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:1020px;margin:0 auto;}
+.section{margin-bottom:36px;}
+.label{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px;font-weight:600;}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;border-left:3px solid var(--blue);}
+.card.orange-b{border-left-color:var(--orange);}
+.card.green-b{border-left-color:var(--green);}
+.card.purple-b{border-left-color:var(--purple);}
+code{background:#1e2230;border:1px solid var(--border);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88rem;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:820px){.grid3{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;font-size:.85rem;}
+th,td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;}
+td.fc-pos{color:var(--orange);font-weight:700;}
+td.fc-neg{color:var(--purple);font-weight:700;}
+td.fc-zero{color:var(--green);font-weight:700;}
+.svg-wrap{background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;justify-content:center;}
+.svg-caption{text-align:center;color:var(--muted);font-size:.74rem;margin-top:8px;}
+.tip{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border);align-items:flex-start;}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+.example-box{background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));border:1px solid rgba(77,221,143,.3);border-radius:12px;padding:18px 20px;}
+.winner{outline:2px solid var(--green);}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:8px;}
+.badge.win{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.qa-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:12px;padding:18px 22px;margin-bottom:14px;}
+.qa-card h3{color:var(--green);font-size:1rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SCN⁻ — Resonance &amp; Formal Charge</h1>
+<div class="subtitle">Thiocyanate anion: three resonance structures, one dominant contributor</div>
+
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    SCN⁻ has 3 valid resonance structures (S≡C–N, S=C=N, S–C≡N), each moving the triple
+    bond to a different position. Formal charge tells you which one is closest to how the
+    real molecule actually behaves — the same tool used earlier for NO₃⁻ and HNO₂, now applied
+    to pick a winner among three very different-looking structures.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">How It Works</span>
+  <h2 style="margin-bottom:14px;">Formal Charge on Each Resonance Structure</h2>
+
+  <div class="grid3">
+
+    <div class="card orange-b">
+      <span class="label orange">Structure 1</span>
+      <div class="svg-wrap" style="margin-bottom:10px;">
+        <svg width="220" height="90" viewBox="0 0 220 90">
+          <line x1="55" y1="45" x2="95" y2="45" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="55" y1="40" x2="95" y2="40" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="55" y1="50" x2="95" y2="50" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="45" x2="155" y2="45" stroke="#4da3ff" stroke-width="2"/>
+          <text x="40" y="52" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="15">S</text>
+          <text x="102" y="52" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="15">C</text>
+          <text x="163" y="52" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="15">N</text>
+        </svg>
+      </div>
+      <table>
+        <tr><th>Atom</th><th>FC</th></tr>
+        <tr><td>S (triple-bonded)</td><td class="fc-pos">+1</td></tr>
+        <tr><td>C</td><td class="fc-zero">0</td></tr>
+        <tr><td>N (single-bonded, 3 LP)</td><td class="fc-neg">−2</td></tr>
+      </table>
+      <div style="color:var(--muted);font-size:.78rem;margin-top:8px;">Large charge separation: +1 / −2</div>
+    </div>
+
+    <div class="card green-b winner">
+      <span class="badge win">✓ Dominant contributor</span>
+      <span class="label green">Structure 2</span>
+      <div class="svg-wrap" style="margin-bottom:10px;">
+        <svg width="220" height="90" viewBox="0 0 220 90">
+          <line x1="55" y1="41" x2="95" y2="41" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="55" y1="49" x2="95" y2="49" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="41" x2="155" y2="41" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="49" x2="155" y2="49" stroke="#4da3ff" stroke-width="2"/>
+          <text x="40" y="52" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="15">S</text>
+          <text x="102" y="52" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="15">C</text>
+          <text x="163" y="52" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="15">N</text>
+        </svg>
+      </div>
+      <table>
+        <tr><th>Atom</th><th>FC</th></tr>
+        <tr><td>S (double-bonded, 2 LP)</td><td class="fc-zero">0</td></tr>
+        <tr><td>C</td><td class="fc-zero">0</td></tr>
+        <tr><td>N (double-bonded, 2 LP)</td><td class="fc-neg">−1</td></tr>
+      </table>
+      <div style="color:var(--green);font-size:.78rem;margin-top:8px;">Smallest charge separation: 0 / 0 / −1</div>
+    </div>
+
+    <div class="card purple-b">
+      <span class="label purple">Structure 3</span>
+      <div class="svg-wrap" style="margin-bottom:10px;">
+        <svg width="220" height="90" viewBox="0 0 220 90">
+          <line x1="55" y1="45" x2="95" y2="45" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="45" x2="155" y2="45" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="40" x2="155" y2="40" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="115" y1="50" x2="155" y2="50" stroke="#4da3ff" stroke-width="2"/>
+          <text x="40" y="52" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="15">S</text>
+          <text x="102" y="52" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="15">C</text>
+          <text x="163" y="52" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="15">N</text>
+        </svg>
+      </div>
+      <table>
+        <tr><th>Atom</th><th>FC</th></tr>
+        <tr><td>S (single-bonded, 3 LP)</td><td class="fc-neg">−1</td></tr>
+        <tr><td>C</td><td class="fc-zero">0</td></tr>
+        <tr><td>N (triple-bonded)</td><td class="fc-zero">0</td></tr>
+      </table>
+      <div style="color:var(--muted);font-size:.78rem;margin-top:8px;">Small separation, but −1 sits on S, not N</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label green">Which Structure Wins — and Why</span>
+  <div class="qa-card">
+    <h3>Step 1: Minimize nonzero formal charges</h3>
+    Structure 1 (+1/0/−2) has the largest spread — rule it out first. That leaves Structures 2 and 3,
+    both with only one nonzero atom.
+  </div>
+  <div class="qa-card">
+    <h3>Step 2: Put negative FC on the more electronegative atom</h3>
+    Structure 2 puts the −1 on <b>N (EN = 3.0)</b>. Structure 3 puts the −1 on <b>S (EN = 2.5)</b>.
+    Since nitrogen is more electronegative than sulfur, it's more "comfortable" holding extra
+    electron density — <b>Structure 2 is the dominant resonance contributor</b>.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Structure</th><th>Formal charges</th><th>Charge separation</th><th>Negative FC on...</th><th>Verdict</th></tr>
+      <tr><td>1 — S≡C–N</td><td>+1, 0, −2</td><td>Large (3 units apart)</td><td>N (correct atom, but too much)</td><td>Minor contributor</td></tr>
+      <tr><td>2 — S=C=N</td><td>0, 0, −1</td><td>Small (best)</td><td>N (EN 3.0 — most electronegative)</td><td class="fc-zero">Dominant</td></tr>
+      <tr><td>3 — S–C≡N</td><td>−1, 0, 0</td><td>Small</td><td>S (EN 2.5 — less electronegative)</td><td>Minor contributor</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:.85rem;margin:12px 0 0;">
+      <code>Rank by: (1) fewest nonzero formal charges, (2) negative charge on the most electronegative atom</code> — same two-step filter as any resonance-structure comparison.
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario 1 — Ambidentate ligand chemistry:</b> Because SCN⁻'s electron density is concentrated more on N in the dominant structure, it typically bonds to metal centers through nitrogen (forming "isothiocyanate" complexes) rather than through sulfur — a direct real-world consequence of the formal-charge analysis here, well known in coordination chemistry.
+  </div>
+  <div class="example-box" style="margin-top:10px;">
+    <b style="color:var(--blue);">Scenario 2 — Qualitative analysis / forensic tests:</b> Thiocyanate's reaction with Fe³⁺ to form the deep blood-red [Fe(SCN)]²⁺ complex is a classic qualitative test for iron — the SCN⁻ ion's actual reactive geometry (informed by which resonance form dominates) is why this specific color-forming reaction happens the way it does.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> Don't stop at "fewest nonzero charges" if there's a tie — that's only the first filter; always apply the electronegativity tiebreaker next.</div>
+    <div class="tip"><span class="icon">→</span> Sum of formal charges must equal the ion's overall charge in every structure — quick check: 0+0−1 = −1 ✓ for Structure 2, confirming the arithmetic.</div>
+    <div class="tip"><span class="icon">→</span> "Dominant contributor" doesn't mean the other two structures don't exist — the real resonance hybrid still blends all three, just weighted more toward Structure 2.</div>
+    <div class="tip"><span class="icon">→</span> This exact two-step ranking process (minimize charge spread, then place negative charge on the most electronegative atom) is the standard way exam questions ask you to compare resonance structures — memorize the order, not just the individual rules.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

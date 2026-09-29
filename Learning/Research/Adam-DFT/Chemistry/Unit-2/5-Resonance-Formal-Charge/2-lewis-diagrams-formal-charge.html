@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Formal Charge — HNO₂</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0f1117; --card:#171a23; --border:#262a38; --text:#e6e8ef; --muted:#9aa1b4;
+  --blue:#4da3ff; --orange:#ff9d4d; --green:#4ddd8f; --purple:#b98dff;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px 20px 80px;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:2rem;font-weight:800;}
+h2{font-size:1.2rem;font-weight:700;}
+.subtitle{color:var(--muted);margin-bottom:28px;font-size:.95rem;}
+.wrap{max-width:980px;margin:0 auto;}
+.section{margin-bottom:36px;}
+.label{display:inline-block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px;font-weight:600;}
+.label.blue{background:rgba(77,163,255,.15);color:var(--blue);border:1px solid rgba(77,163,255,.4);}
+.label.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+.label.green{background:rgba(77,221,143,.15);color:var(--green);border:1px solid rgba(77,221,143,.4);}
+.label.purple{background:rgba(185,141,255,.15);color:var(--purple);border:1px solid rgba(185,141,255,.4);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;border-left:3px solid var(--blue);}
+.card.orange-b{border-left-color:var(--orange);}
+.card.green-b{border-left-color:var(--green);}
+.card.purple-b{border-left-color:var(--purple);}
+code{background:#1e2230;border:1px solid var(--border);color:var(--green);padding:2px 8px;border-radius:6px;font-size:.88rem;}
+.formula-box{
+  background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:18px 22px;
+  text-align:center;font-size:1.05rem;margin-bottom:14px;
+}
+.formula-box .fc{color:var(--blue);font-weight:700;}
+.formula-box .ve{color:var(--green);}
+.formula-box .lpe{color:var(--orange);}
+.formula-box .be{color:var(--purple);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+table{width:100%;border-collapse:collapse;font-size:.88rem;}
+th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--blue);font-family:'Syne',sans-serif;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;}
+td.fc-pos{color:var(--orange);font-weight:700;}
+td.fc-neg{color:var(--purple);font-weight:700;}
+td.fc-zero{color:var(--green);font-weight:700;}
+.svg-wrap{background:#0c0e14;border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;justify-content:center;}
+.svg-caption{text-align:center;color:var(--muted);font-size:.78rem;margin-top:8px;}
+.tip{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border);align-items:flex-start;}
+.tip:last-child{border-bottom:none;}
+.tip .icon{color:var(--purple);font-weight:700;}
+.example-box{background:linear-gradient(135deg,rgba(77,221,143,.08),rgba(77,163,255,.05));border:1px solid rgba(77,221,143,.3);border-radius:12px;padding:18px 20px;}
+.winner{background:rgba(77,221,143,.08);border:1px solid rgba(77,221,143,.4);border-radius:10px;padding:10px 16px;font-size:.85rem;color:var(--green);text-align:center;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Formal Charge — HNO₂</h1>
+<div class="subtitle">A bookkeeping tool for picking which resonance structure matters most</div>
+
+<div class="section">
+  <span class="label blue">Problem</span>
+  <div class="card">
+    When a molecule has multiple valid resonance structures (like nitrous acid, HNO₂), they're
+    not always equally "good." <b>Formal charge</b> gives each atom, in each structure, a number
+    that flags how far it deviates from its free, neutral electron count — the structure with
+    formal charges closest to zero is the one that <b>contributes most</b> to the real resonance hybrid.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">How It Works</span>
+
+  <div class="formula-box">
+    <span class="fc">FC</span> = <span class="ve">VE</span> − [<span class="lpe">LPE</span> + ½(<span class="be">BE</span>)]
+    <div style="color:var(--muted);font-size:.8rem;margin-top:8px;">
+      <span class="ve">VE</span> = valence e⁻ of the free neutral atom &nbsp;·&nbsp;
+      <span class="lpe">LPE</span> = lone-pair e⁻ on that atom in the molecule &nbsp;·&nbsp;
+      <span class="be">BE</span> = bonding (shared) e⁻ around that atom
+    </div>
+  </div>
+
+  <div class="card purple-b">
+    Plain-language version: draw a circle around one atom. Count its lone-pair electrons in
+    full, plus <b>half</b> of every bond touching it (each bond = 2 shared e⁻, so you take 1 per bond).
+    That sum is "allocated" to the atom. <code>FC = free-atom valence e⁻ − allocated e⁻</code>.
+  </div>
+
+  <h2 style="margin:20px 0 12px;">Two Resonance Structures of HNO₂</h2>
+  <div class="grid2">
+    <div class="card orange-b">
+      <span class="label orange">Structure 1 — N=O, then O–H</span>
+      <div class="svg-wrap" style="margin-bottom:10px;">
+        <svg width="280" height="130" viewBox="0 0 280 130">
+          <line x1="30" y1="65" x2="70" y2="65" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="90" y1="65" x2="140" y2="65" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="158" y1="60" x2="210" y2="30" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="158" y1="70" x2="210" y2="40" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="165" y1="75" x2="220" y2="105" stroke="#4da3ff" stroke-width="2"/>
+          <text x="22" y="70" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="14">H</text>
+          <text x="78" y="70" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">O</text>
+          <text x="148" y="70" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="14">N</text>
+          <text x="222" y="30" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">O</text>
+          <text x="225" y="112" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">O</text>
+        </svg>
+      </div>
+      <table>
+        <tr><th>Atom</th><th>Calc</th><th>FC</th></tr>
+        <tr><td>H</td><td>1 − (0+1)</td><td class="fc-zero">0</td></tr>
+        <tr><td>O (single-bonded, 2 LP)</td><td>6 − (2+3)</td><td class="fc-pos">+1</td></tr>
+        <tr><td>N</td><td>5 − (2+3)</td><td class="fc-zero">0</td></tr>
+        <tr><td>O (double-bonded, 2 LP)</td><td>6 − (4+3)</td><td class="fc-neg">−1</td></tr>
+      </table>
+    </div>
+
+    <div class="card green-b">
+      <span class="label green">Structure 2 — all single bonds, extra LP on N</span>
+      <div class="svg-wrap" style="margin-bottom:10px;">
+        <svg width="280" height="130" viewBox="0 0 280 130">
+          <line x1="30" y1="65" x2="70" y2="65" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="90" y1="65" x2="140" y2="65" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="158" y1="60" x2="210" y2="30" stroke="#4da3ff" stroke-width="2"/>
+          <line x1="165" y1="75" x2="220" y2="105" stroke="#4da3ff" stroke-width="2"/>
+          <text x="22" y="70" fill="#b98dff" font-family="JetBrains Mono" font-weight="700" font-size="14">H</text>
+          <text x="78" y="70" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">O</text>
+          <text x="148" y="70" fill="#ff9d4d" font-family="JetBrains Mono" font-weight="700" font-size="14">N</text>
+          <text x="222" y="30" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">O</text>
+          <text x="225" y="112" fill="#4ddd8f" font-family="JetBrains Mono" font-weight="700" font-size="14">O</text>
+        </svg>
+      </div>
+      <table>
+        <tr><th>Atom</th><th>Calc</th><th>FC</th></tr>
+        <tr><td>H</td><td>1 − (0+1)</td><td class="fc-zero">0</td></tr>
+        <tr><td>O (single-bonded, 2 LP)</td><td>6 − (4+2)</td><td class="fc-zero">0</td></tr>
+        <tr><td>N (lone pair added)</td><td>5 − (2+3)</td><td class="fc-zero">0</td></tr>
+        <tr><td>O (single-bonded, 3 LP)</td><td>6 − (6+0)</td><td class="fc-zero">0</td></tr>
+      </table>
+      <div class="winner">All formal charges = 0 → this structure contributes MORE to the real resonance hybrid</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label purple">Key Distinctions</span>
+  <div class="card purple-b">
+    <table>
+      <tr><th>Idea</th><th>What it is NOT</th><th>What it actually is</th></tr>
+      <tr><td>Formal charge</td><td>The real charge on that atom</td><td>A bookkeeping number assuming perfectly equal electron sharing (ignores electronegativity)</td></tr>
+      <tr><td>Sum of formal charges</td><td>Can be anything</td><td>Always equals the overall charge on the molecule/ion (0 for a neutral molecule)</td></tr>
+      <tr><td>"Best" resonance structure</td><td>Arbitrarily chosen</td><td>The one whose formal charges are closest to 0 overall (and negative FC on the more electronegative atom, if any charge must appear)</td></tr>
+    </table>
+    <p style="color:var(--muted);font-size:.85rem;margin:12px 0 0;">
+      <code>Sum FC = molecule's total charge</code> — a good way to sanity-check your arithmetic on any structure, resonance or not.
+    </p>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label green">Real-World Example Scenarios</span>
+  <div class="example-box">
+    <b style="color:var(--green);">Scenario 1 — Predicting reactive sites:</b> A nonzero formal charge often marks where a molecule is more reactive or unstable — the +1 oxygen in HNO₂'s minor structure is electron-poor and more likely to be attacked by a nucleophile, which is exactly the kind of prediction formal charge is used for in reaction mechanism analysis.
+  </div>
+  <div class="example-box" style="margin-top:10px;">
+    <b style="color:var(--blue);">Scenario 2 — Choosing between candidate structures generally:</b> Formal charge is the standard first filter chemists use (before even getting to electronegativity-based refinements) whenever a molecule like SO₄²⁻, PO₄³⁻, or O₃ has more than one plausible skeleton — it quickly rules out structures that pile up charge where it doesn't belong.
+  </div>
+</div>
+
+<div class="section">
+  <span class="label orange">Interview / Practical Tips</span>
+  <div class="card orange-b">
+    <div class="tip"><span class="icon">→</span> Fast mental shortcut: <code>FC = (group number) − (lone pair e⁻) − (number of bonds)</code> — same formula, easier to run in your head during an exam.</div>
+    <div class="tip"><span class="icon">→</span> Always double-check: the formal charges in one structure must sum to the molecule's actual overall charge (0 here, since HNO₂ is neutral) — a fast way to catch an arithmetic slip.</div>
+    <div class="tip"><span class="icon">→</span> Formal charge ≠ real/partial charge from electronegativity — that's a separate, complementary concept covered later; formal charge purely assumes equal sharing.</div>
+    <div class="tip"><span class="icon">→</span> When ranking resonance structures: (1) minimize the number of atoms with nonzero FC, (2) if charge must exist, put the negative FC on the more electronegative atom.</div>
+    <div class="tip"><span class="icon">→</span> Don't confuse "formal charge of the whole atom set" with "charge of the ion/molecule" — formal charge is calculated per atom, then summed, not read off the bracket.</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
