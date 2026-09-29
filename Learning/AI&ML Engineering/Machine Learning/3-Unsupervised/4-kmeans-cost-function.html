@@ -1,0 +1,130 @@
+<title>K-Means Cost Function</title>
+<style>
+:root{
+  --bg:#0f1117; --panel:#161923; --border:#272c3d;
+  --blue:#5ba8ff; --orange:#ff9d5c; --green:#4ddb9b; --purple:#b58cff; --red:#ff6b6b;
+  --text:#e7e9f2; --dim:#8b91a8;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding-block:32px;padding-inline:20px;line-height:1.55;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:clamp(1.4rem,4vw,2rem);color:#fff;text-wrap:balance;}
+.sub{color:var(--dim);margin-bottom:26px;font-size:.85rem;}
+.wrap{max-width:960px;margin:0 auto;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bar{width:5px;height:22px;border-radius:3px;flex-shrink:0;}
+.label h2{font-size:1.05rem;color:#fff;}
+.pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;margin:3px 5px 3px 0;}
+.pill.blue{background:rgba(91,168,255,.14);color:var(--blue);border:1px solid rgba(91,168,255,.4);}
+.pill.orange{background:rgba(255,157,92,.14);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+.pill.green{background:rgba(77,219,155,.14);color:var(--green);border:1px solid rgba(77,219,155,.4);}
+.pill.red{background:rgba(255,107,107,.14);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+.pill.purple{background:rgba(181,140,255,.14);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+.note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:12px;}
+code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+.formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:center;font-size:1.05rem;margin:10px 0;color:var(--green);overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px;}
+td,th{padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--dim);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:680px){.grid2,.grid3{grid-template-columns:1fr;}}
+svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.capt{text-align:center;font-size:.76rem;color:var(--dim);margin-top:6px;}
+.numcard{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.numcard .big{font-size:1.4rem;font-weight:700;font-family:'Syne',sans-serif;}
+</style>
+
+<div class="wrap">
+<h1>📉 The K-Means Cost Function ("Distortion")</h1>
+<div class="sub">Why K-means always converges — and what it's actually minimizing</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Notation — What x⁽ⁱ⁾, μₖ, and μ_c⁽ⁱ⁾ Mean</h2></div>
+  <p>This is the part that confuses most people at first — here's a concrete worked example with 3 labeled points.</p>
+  <table>
+    <tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr>
+    <tr><td><code>x⁽ⁱ⁾</code></td><td>The i-th training example itself (its raw features)</td><td><code>x⁽¹⁰⁾</code> = the 10th data point, say (7, 3)</td></tr>
+    <tr><td><code>c⁽ⁱ⁾</code></td><td>Which cluster index (1..K) point i is <b>currently assigned</b> to</td><td><code>c⁽¹⁰⁾ = 2</code> → point 10 belongs to cluster 2 (blue)</td></tr>
+    <tr><td><code>μₖ</code></td><td>The location (centroid) of cluster k, for any k</td><td><code>μ₁</code> = red centroid, <code>μ₂</code> = blue centroid, say μ₂ = (6, 4)</td></tr>
+    <tr><td><code>μ_c⁽ⁱ⁾</code></td><td>The centroid of <b>whichever</b> cluster point i was assigned to — a lookup, not a fixed index</td><td>Since <code>c⁽¹⁰⁾=2</code>, <code>μ_c⁽¹⁰⁾ = μ₂</code> = (6, 4)</td></tr>
+  </table>
+  <div class="note">Read <code>μ_c⁽ⁱ⁾</code> as: "first look up which cluster point i belongs to (via c⁽ⁱ⁾), then go get that cluster's centroid." It's indirection, not a new variable.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Cost Function (Distortion)</h2></div>
+  <div class="formula">J(c⁽¹⁾,...,c⁽ᵐ⁾, μ₁,...,μ_K) = (1/m) Σᵢ₌₁ᵐ ‖x⁽ⁱ⁾ − μ_c⁽ⁱ⁾‖²</div>
+  <p>In words: <b style="color:var(--green)">average squared distance</b> between every point and the centroid it's currently assigned to. Also called <b>distortion</b>.</p>
+  <div class="formula" style="color:var(--blue)">min over c⁽¹⁾,...,c⁽ᵐ⁾, μ₁,...,μ_K &nbsp; of &nbsp; J(...)</div>
+  <div class="note">K-means jointly searches over assignments <code>c</code> AND centroid positions <code>μ</code> to make this number as small as possible.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Step 1 Reduces J — by Choosing c⁽ⁱ⁾</h2></div>
+  <p>Holding centroids fixed, each point's own term <code>‖x⁽ⁱ⁾ − μ_c⁽ⁱ⁾‖²</code> is smallest when it's assigned to whichever centroid is <b style="color:var(--orange)">physically closest</b>.</p>
+  <svg viewBox="0 0 320 160" width="320" height="160">
+    <line x1="20" y1="130" x2="300" y2="130" stroke="#8b91a8" stroke-width="1.5"/>
+    <text x="60" y="150" fill="#5ba8ff" font-size="11">μ₁ (cluster 1)</text>
+    <text x="230" y="150" fill="#ff6b6b" font-size="11">μ₂ (cluster 2)</text>
+    <text x="60" y="120" fill="#8b91a8" font-size="10">1</text><text x="280" y="120" fill="#8b91a8" font-size="10">9</text>
+    <circle cx="70" cy="100" r="6" fill="#5ba8ff"/>
+    <circle cx="280" cy="100" r="6" fill="#ff6b6b"/>
+    <circle cx="220" cy="60" r="6" fill="#e7c85c"/>
+    <text x="210" y="45" fill="#e7c85c" font-size="11">x⁽ⁱ⁾</text>
+    <line x1="70" y1="100" x2="220" y2="60" stroke="#5ba8ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <text x="130" y="75" fill="#5ba8ff" font-size="10">far (big)</text>
+    <line x1="280" y1="100" x2="220" y2="60" stroke="#ff6b6b" stroke-width="1.5"/>
+    <text x="235" y="90" fill="#ff6b6b" font-size="10">near (small)</text>
+  </svg>
+  <div class="capt">Assigning x⁽ⁱ⁾ to the far centroid (μ₁) → large squared distance. Assigning to the near one (μ₂) → small squared distance → lower J. So step 1 always picks the nearer one.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Step 2 Reduces J — by Moving μₖ to the Mean</h2></div>
+  <p>Holding assignments fixed, the numeric example from the lecture: 2 points on a line, at x=1 and x=11.</p>
+  <div class="grid2">
+    <div class="numcard">
+      <div style="color:var(--red);font-weight:700;">Centroid at x = 2 (bad guess)</div>
+      <div class="big" style="color:var(--red);">J = 41</div>
+      <div style="font-size:.78rem;color:var(--dim);">½(1² + 9²) = ½(1+81) = 41</div>
+    </div>
+    <div class="numcard">
+      <div style="color:var(--green);font-weight:700;">Centroid at x = 6 (the mean)</div>
+      <div class="big" style="color:var(--green);">J = 25</div>
+      <div style="font-size:.78rem;color:var(--dim);">½(5² + 5²) = ½(25+25) = 25</div>
+    </div>
+  </div>
+  <svg viewBox="0 0 320 90" width="320" height="90">
+    <line x1="20" y1="60" x2="300" y2="60" stroke="#8b91a8" stroke-width="1.5"/>
+    <circle cx="40" cy="60" r="5" fill="#e7c85c"/>
+    <circle cx="280" cy="60" r="5" fill="#e7c85c"/>
+    <text x="30" y="40" fill="#ff6b6b" font-size="14" font-weight="bold">✕</text>
+    <text x="10" y="30" fill="#ff6b6b" font-size="10">bad: x=2</text>
+    <text x="153" y="40" fill="#4ddb9b" font-size="14" font-weight="bold">✕</text>
+    <text x="130" y="30" fill="#4ddb9b" font-size="10">mean: x=6</text>
+  </svg>
+  <div class="capt">Moving the centroid from x=2 to the mean x=6 (=(1+11)/2) drops J from 41 → 25. Any other location scores worse than the mean — the mean is mathematically the minimizer of average squared distance.</div>
+  <div class="note">This is exactly why step 2 computes an <b>average</b>: the mean is the unique point that minimizes the sum of squared distances to a set of points.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>What Is J Actually Reducing?</h2></div>
+  <div class="grid3">
+    <div class="numcard"><span class="pill blue">Step 1</span><br><span style="font-size:.82rem;">Fixes μ, optimizes <code>c</code> → picks nearest centroid</span></div>
+    <div class="numcard"><span class="pill green">Step 2</span><br><span style="font-size:.82rem;">Fixes <code>c</code>, optimizes μ → moves to the mean</span></div>
+    <div class="numcard"><span class="pill red">Result</span><br><span style="font-size:.82rem;">J never increases, only ↓ or stays flat</span></div>
+  </div>
+  <p style="margin-top:14px;">Concretely, J is reducing the <b style="color:var(--purple)">average squared "tightness"</b> of each cluster — how far, on average, points sit from the centroid they're grouped under. Each of the two alternating steps is <b>coordinate descent</b>: optimize one set of variables (c, or μ) while freezing the other, then swap.</p>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">J = avg squared distance to assigned centroid</span>
+  <span class="pill green">Step 1 & 2 = coordinate descent on J</span>
+  <span class="pill red">J monotonically decreases → guaranteed convergence</span>
+  <div class="note">Practical use: if J ever <i>increases</i>, that's a bug. If J stops decreasing (or decreases very slowly), that's your convergence signal to stop. Next: using multiple random initializations to avoid bad local minima.</div>
+</div>
+</div>

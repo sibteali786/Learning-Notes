@@ -1,0 +1,118 @@
+<title>Clustering Basics</title>
+<style>
+:root{
+  --bg:#0f1117; --panel:#161923; --panel2:#1b1f2d; --border:#272c3d;
+  --blue:#5ba8ff; --orange:#ff9d5c; --green:#4ddb9b; --purple:#b58cff; --red:#ff6b6b;
+  --text:#e7e9f2; --dim:#8b91a8;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding-block:32px;padding-inline:20px;line-height:1.55;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:clamp(1.5rem,4vw,2.1rem);color:#fff;text-wrap:balance;}
+.sub{color:var(--dim);margin-bottom:26px;font-size:.85rem;}
+.wrap{max-width:900px;margin:0 auto;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bar{width:5px;height:22px;border-radius:3px;flex-shrink:0;}
+.label h2{font-size:1.05rem;color:#fff;}
+.pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;margin:3px 5px 3px 0;}
+.pill.blue{background:rgba(91,168,255,.14);color:var(--blue);border:1px solid rgba(91,168,255,.4);}
+.pill.orange{background:rgba(255,157,92,.14);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+.pill.green{background:rgba(77,219,155,.14);color:var(--green);border:1px solid rgba(77,219,155,.4);}
+.pill.purple{background:rgba(181,140,255,.14);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+.note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:12px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid2b{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:640px){.grid2,.grid2b{grid-template-columns:1fr;}}
+code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.appcard{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.8rem;color:var(--dim);}
+.appcard b{display:block;color:#fff;font-family:'Syne',sans-serif;font-size:.92rem;margin-bottom:6px;}
+.capt{text-align:center;font-size:.76rem;color:var(--dim);margin-top:6px;}
+</style>
+
+<div class="wrap">
+<h1>🔍 What Is Clustering?</h1>
+<div class="sub">Unsupervised Learning · Intro to Clustering</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Supervised vs. Unsupervised — Same Data, No Labels</h2></div>
+  <p>With <b style="color:var(--blue)">supervised learning</b>, the training set has both inputs <code>x</code> and target labels <code>y</code>, so a model (logistic regression, a neural net) can learn a decision boundary separating classes.</p>
+  <div class="grid2">
+    <div>
+      <svg viewBox="0 0 260 200" width="260" height="200">
+        <line x1="30" y1="170" x2="30" y2="10" stroke="#8b91a8" stroke-width="1.5"/>
+        <line x1="30" y1="170" x2="240" y2="170" stroke="#8b91a8" stroke-width="1.5"/>
+        <text x="10" y="90" fill="#8b91a8" font-size="11">x₂</text>
+        <text x="220" y="188" fill="#8b91a8" font-size="11">x₁</text>
+        <path d="M100,20 L200,170" stroke="#ff6b6b" stroke-width="2" fill="none"/>
+        <circle cx="65" cy="110" r="6" fill="none" stroke="#5ba8ff" stroke-width="2.5"/>
+        <circle cx="90" cy="135" r="6" fill="none" stroke="#5ba8ff" stroke-width="2.5"/>
+        <circle cx="110" cy="150" r="6" fill="none" stroke="#5ba8ff" stroke-width="2.5"/>
+        <circle cx="70" cy="145" r="6" fill="none" stroke="#5ba8ff" stroke-width="2.5"/>
+        <g stroke="#ff6b6b" stroke-width="2.5">
+          <path d="M160,35 L172,47 M172,35 L160,47"/>
+          <path d="M190,50 L202,62 M202,50 L190,62"/>
+          <path d="M175,80 L187,92 M187,80 L175,92"/>
+          <path d="M150,95 L162,107 M162,95 L150,107"/>
+          <path d="M200,110 L212,122 M212,110 L200,122"/>
+        </g>
+      </svg>
+      <div class="capt">Supervised: <code>{(x⁽¹⁾,y⁽¹⁾),...,(x⁽ᵐ⁾,y⁽ᵐ⁾)}</code></div>
+    </div>
+    <div>
+      <svg viewBox="0 0 260 200" width="260" height="200">
+        <line x1="30" y1="170" x2="30" y2="10" stroke="#8b91a8" stroke-width="1.5"/>
+        <line x1="30" y1="170" x2="240" y2="170" stroke="#8b91a8" stroke-width="1.5"/>
+        <text x="10" y="90" fill="#8b91a8" font-size="11">x₂</text>
+        <text x="220" y="188" fill="#8b91a8" font-size="11">x₁</text>
+        <g fill="#e7e9f2">
+          <circle cx="65" cy="110" r="6"/><circle cx="90" cy="135" r="6"/><circle cx="110" cy="150" r="6"/><circle cx="70" cy="145" r="6"/>
+          <circle cx="160" cy="40" r="6"/><circle cx="190" cy="55" r="6"/><circle cx="175" cy="85" r="6"/><circle cx="150" cy="98" r="6"/><circle cx="200" cy="112" r="6"/>
+        </g>
+      </svg>
+      <div class="capt">Unsupervised: <code>{x⁽¹⁾,...,x⁽ᵐ⁾}</code> — no <code>y</code>, just dots</div>
+    </div>
+  </div>
+  <div class="note">No labels means the algorithm can't be told the "right answer." Instead, it's asked to find <b>interesting structure</b> on its own.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>What Is Clustering?</h2></div>
+  <p>A <b style="color:var(--green)">clustering algorithm</b> looks at unlabeled data points and automatically finds points that are related or similar to each other — grouping them into <b>clusters</b>.</p>
+  <svg viewBox="0 0 260 200" width="260" height="200">
+    <line x1="30" y1="170" x2="30" y2="10" stroke="#8b91a8" stroke-width="1.5"/>
+    <line x1="30" y1="170" x2="240" y2="170" stroke="#8b91a8" stroke-width="1.5"/>
+    <text x="10" y="90" fill="#8b91a8" font-size="11">x₂</text>
+    <text x="220" y="188" fill="#8b91a8" font-size="11">x₁</text>
+    <ellipse cx="80" cy="135" rx="45" ry="35" fill="rgba(91,168,255,.1)" stroke="#5ba8ff" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <ellipse cx="180" cy="65" rx="45" ry="35" fill="rgba(77,219,155,.1)" stroke="#4ddb9b" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <g fill="#5ba8ff">
+      <circle cx="65" cy="120" r="6"/><circle cx="90" cy="140" r="6"/><circle cx="105" cy="150" r="6"/><circle cx="70" cy="150" r="6"/><circle cx="95" cy="120" r="6"/>
+    </g>
+    <g fill="#4ddb9b">
+      <circle cx="165" cy="45" r="6"/><circle cx="195" cy="55" r="6"/><circle cx="180" cy="80" r="6"/><circle cx="160" cy="80" r="6"/><circle cx="200" cy="75" r="6"/>
+    </g>
+  </svg>
+  <div class="note">Here the algorithm finds this dataset comprises <b>two clusters</b> — without ever being told what a cluster should look like.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Applications of Clustering</h2></div>
+  <div class="grid2b">
+    <div class="appcard"><b style="color:var(--blue)">📰 Grouping Similar News</b>Story about pandas surfaced across many outlets → clustered as one topic</div>
+    <div class="appcard"><b style="color:var(--purple)">🎯 Market Segmentation</b>DeepLearning.AI learners naturally cluster into: growing skills, developing career, staying current with AI</div>
+    <div class="appcard"><b style="color:var(--green)">🧬 DNA / Genetic Analysis</b>Group individuals by similar gene-expression data / traits</div>
+    <div class="appcard"><b style="color:var(--orange)">🌌 Astronomical Data Analysis</b>Group celestial bodies to identify galaxies or coherent structures in space</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaway</h2></div>
+  <span class="pill blue">No labels (y)</span>
+  <span class="pill green">Algorithm finds structure itself</span>
+  <span class="pill purple">Clustering = group similar points</span>
+  <div class="note">Next lecture: the most widely used clustering algorithm — <b>k-means</b>.</div>
+</div>
+</div>

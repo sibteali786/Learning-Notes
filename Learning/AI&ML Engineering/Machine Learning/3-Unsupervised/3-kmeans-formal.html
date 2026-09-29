@@ -1,0 +1,126 @@
+<title>K-Means Formalized</title>
+<style>
+:root{
+  --bg:#0f1117; --panel:#161923; --border:#272c3d;
+  --blue:#5ba8ff; --orange:#ff9d5c; --green:#4ddb9b; --purple:#b58cff; --red:#ff6b6b;
+  --text:#e7e9f2; --dim:#8b91a8;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding-block:32px;padding-inline:20px;line-height:1.55;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:clamp(1.4rem,4vw,2rem);color:#fff;text-wrap:balance;}
+.sub{color:var(--dim);margin-bottom:26px;font-size:.85rem;}
+.wrap{max-width:940px;margin:0 auto;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bar{width:5px;height:22px;border-radius:3px;flex-shrink:0;}
+.label h2{font-size:1.05rem;color:#fff;}
+.pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;margin:3px 5px 3px 0;}
+.pill.blue{background:rgba(91,168,255,.14);color:var(--blue);border:1px solid rgba(91,168,255,.4);}
+.pill.orange{background:rgba(255,157,92,.14);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+.pill.green{background:rgba(77,219,155,.14);color:var(--green);border:1px solid rgba(77,219,155,.4);}
+.pill.red{background:rgba(255,107,107,.14);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+.note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:12px;}
+.warn{background:rgba(255,107,107,.08);border-left:3px solid var(--red);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--text);margin-top:12px;}
+code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.82rem;color:#dfe3f0;}
+pre .kw{color:var(--purple);} pre .cm{color:var(--dim);font-style:italic;} pre .fn{color:var(--blue);}
+.formula{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;font-size:1rem;margin:10px 0;color:var(--green);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:680px){.grid2{grid-template-columns:1fr;}}
+svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.capt{text-align:center;font-size:.76rem;color:var(--dim);margin-top:6px;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px;}
+td,th{padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;}
+th{color:var(--dim);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;}
+</style>
+
+<div class="wrap">
+<h1>📐 K-Means, Formalized</h1>
+<div class="sub">Writing out the algorithm precisely — plus two edge cases</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Algorithm in Pseudocode</h2></div>
+  <pre><span class="cm"># Randomly initialize K cluster centroids</span>
+μ₁, μ₂, ..., μ_K
+
+<span class="kw">Repeat</span> {
+    <span class="cm"># Step 1: Assign points to cluster centroids</span>
+    <span class="kw">for</span> i = 1 <span class="kw">to</span> m:
+        c⁽ⁱ⁾ := index k that minimizes ||x⁽ⁱ⁾ − μ_k||²
+
+    <span class="cm"># Step 2: Move cluster centroids</span>
+    <span class="kw">for</span> k = 1 <span class="kw">to</span> K:
+        μ_k := average (mean) of points assigned to cluster k
+}</pre>
+  <p style="margin-top:10px;">μ₁...μ_K are vectors with the <b style="color:var(--blue)">same dimension as your features</b> — 2 numbers each if <code>n=2</code>, n numbers if you have n features.</p>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Step 1 — Nearest Centroid (L2 norm)</h2></div>
+  <p>For each point, find the centroid index <code>k</code> that minimizes the squared distance:</p>
+  <div class="formula">c⁽ⁱ⁾ = argmin<sub>k</sub> ‖x⁽ⁱ⁾ − μ<sub>k</sub>‖²</div>
+  <p style="font-size:.85rem;color:var(--dim);">Squared distance is used in practice (not plain distance) — same minimizing k, but avoids an unnecessary square root.</p>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Step 2 — Recompute as the Mean</h2></div>
+  <p>Example: if cluster 1 was assigned training examples 1, 5, 6, 10:</p>
+  <div class="formula">μ₁ = ¼ [ x⁽¹⁾ + x⁽⁵⁾ + x⁽⁶⁾ + x⁽¹⁰⁾ ]</div>
+  <p style="font-size:.85rem;color:var(--dim);">Divide by the count of points in that cluster (4 here). Each x is a vector, so μ comes out as a vector too.</p>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>⚠️ Edge Case: The Empty Cluster</h2></div>
+  <p>What if <b style="color:var(--red)">zero points</b> get assigned to a centroid? Step 2 needs to average zero points — <code>0/0</code>, undefined.</p>
+  <div class="grid2">
+    <div class="warn"><b>✅ Common fix</b><br>Eliminate that cluster entirely → you end up with K−1 clusters.</div>
+    <div class="warn"><b>🔁 Alternative</b><br>Randomly re-initialize that centroid and hope it picks up points next round (used if you truly need exactly K clusters).</div>
+  </div>
+  <div class="note">Why this happens: a bad random init can place a centroid far from all data — every point ends up closer to some other centroid, leaving this one with nothing to average.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>K-Means Without Natural Separation — T-Shirt Sizing</h2></div>
+  <p>K-means doesn't need visually distinct blobs to be useful. Height and weight vary <b style="color:var(--purple)">continuously</b> — no natural gaps — yet running K-means with K=3 still produces a useful result.</p>
+  <svg viewBox="0 0 320 220" width="320" height="220">
+    <line x1="35" y1="190" x2="35" y2="15" stroke="#8b91a8" stroke-width="1.5"/>
+    <line x1="35" y1="190" x2="300" y2="190" stroke="#8b91a8" stroke-width="1.5"/>
+    <text x="8" y="105" fill="#8b91a8" font-size="10">Weight</text>
+    <text x="260" y="208" fill="#8b91a8" font-size="10">Height</text>
+    <!-- diagonal continuous cloud -->
+    <g fill="#e7c85c" opacity="0.9">
+      <circle cx="60" cy="165" r="4"/><circle cx="70" cy="150" r="4"/><circle cx="80" cy="170" r="4"/><circle cx="55" cy="140" r="4"/>
+      <circle cx="95" cy="155" r="4"/><circle cx="100" cy="130" r="4"/><circle cx="115" cy="145" r="4"/><circle cx="120" cy="120" r="4"/>
+      <circle cx="130" cy="135" r="4"/><circle cx="140" cy="110" r="4"/><circle cx="150" cy="125" r="4"/><circle cx="160" cy="100" r="4"/>
+      <circle cx="170" cy="115" r="4"/><circle cx="180" cy="90" r="4"/><circle cx="190" cy="105" r="4"/><circle cx="200" cy="80" r="4"/>
+      <circle cx="210" cy="95" r="4"/><circle cx="220" cy="70" r="4"/><circle cx="230" cy="85" r="4"/><circle cx="240" cy="60" r="4"/>
+      <circle cx="250" cy="75" r="4"/><circle cx="145" cy="150" r="4"/><circle cx="175" cy="135" r="4"/><circle cx="205" cy="115" r="4"/>
+    </g>
+    <ellipse cx="80" cy="158" rx="42" ry="30" fill="none" stroke="#ff6b6b" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <ellipse cx="160" cy="118" rx="42" ry="30" fill="none" stroke="#5ba8ff" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <ellipse cx="230" cy="78" rx="42" ry="30" fill="none" stroke="#4ddb9b" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="70" y="130" fill="#ff6b6b" font-size="11" font-weight="bold">S</text>
+    <text x="150" y="92" fill="#5ba8ff" font-size="11" font-weight="bold">M</text>
+    <text x="222" y="50" fill="#4ddb9b" font-size="11" font-weight="bold">L</text>
+  </svg>
+  <div class="capt">Continuous height/weight cloud — K-means still slices it into 3 usable regions</div>
+  <table>
+    <tr><th>What people picture</th><th>What K-means actually does</th></tr>
+    <tr><td>Separates pre-existing "islands" of data</td><td>Partitions <i>any</i> space into K nearest-centroid regions</td></tr>
+    <tr><td>Needs visible gaps between groups</td><td>Works fine on one continuous cloud</td></tr>
+    <tr><td>Finds "the real clusters"</td><td>Finds K representative centers that minimize within-group spread</td></tr>
+  </table>
+  <div class="note">Practical payoff: μ_S, μ_M, μ_L become the "average" small/medium/large person — exactly the dimensions you'd want to design each t-shirt size around.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">c⁽ⁱ⁾ = argmin‖x⁽ⁱ⁾−μ_k‖²</span>
+  <span class="pill green">μ_k = mean of its points</span>
+  <span class="pill red">Empty cluster → drop it (or reinit)</span>
+  <span class="pill orange">Works even without visible gaps</span>
+  <div class="note">Next: why does this loop converge? K-means is secretly minimizing a cost function — covered next.</div>
+</div>
+</div>

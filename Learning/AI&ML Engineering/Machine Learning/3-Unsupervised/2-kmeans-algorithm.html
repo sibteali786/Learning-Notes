@@ -1,0 +1,115 @@
+<title>K-Means Algorithm</title>
+<style>
+:root{
+  --bg:#0f1117; --panel:#161923; --border:#272c3d;
+  --blue:#5ba8ff; --orange:#ff9d5c; --green:#4ddb9b; --purple:#b58cff; --red:#ff6b6b;
+  --text:#e7e9f2; --dim:#8b91a8;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding-block:32px;padding-inline:20px;line-height:1.55;}
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 6px;}
+h1{font-size:clamp(1.5rem,4vw,2.1rem);color:#fff;text-wrap:balance;}
+.sub{color:var(--dim);margin-bottom:26px;font-size:.85rem;}
+.wrap{max-width:920px;margin:0 auto;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-bottom:20px;}
+.label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bar{width:5px;height:22px;border-radius:3px;flex-shrink:0;}
+.label h2{font-size:1.05rem;color:#fff;}
+.pill{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600;margin:3px 5px 3px 0;}
+.pill.blue{background:rgba(91,168,255,.14);color:var(--blue);border:1px solid rgba(91,168,255,.4);}
+.pill.orange{background:rgba(255,157,92,.14);color:var(--orange);border:1px solid rgba(255,157,92,.4);}
+.pill.green{background:rgba(77,219,155,.14);color:var(--green);border:1px solid rgba(77,219,155,.4);}
+.pill.red{background:rgba(255,107,107,.14);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+.note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:12px;}
+code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:640px){.steps{grid-template-columns:1fr;}}
+.step{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;}
+.step .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:.75rem;font-weight:700;margin-right:8px;}
+svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.capt{text-align:center;font-size:.76rem;color:var(--dim);margin-top:6px;}
+.loop{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:14px 0;}
+.loopbox{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:.85rem;text-align:center;}
+.arrow{color:var(--dim);font-size:1.3rem;}
+</style>
+
+<div class="wrap">
+<h1>🎯 The K-Means Algorithm</h1>
+<div class="sub">Unsupervised Learning · How K-means Clusters Data</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Setup — 30 Unlabeled Points, K = 2</h2></div>
+  <p>Given a training set <code>{x⁽¹⁾, x⁽²⁾, ..., x⁽³⁰⁾}</code> with no labels, K-means is asked to find <b style="color:var(--blue)">2 clusters</b>. It starts by <b>randomly guessing</b> the location of 2 <b>cluster centroids</b> — shown as a red ✕ and a blue ✕. These first guesses are usually not good, but they're a starting point.</p>
+  <svg viewBox="0 0 300 210" width="300" height="210">
+    <line x1="30" y1="180" x2="30" y2="10" stroke="#8b91a8" stroke-width="1.5"/>
+    <line x1="30" y1="180" x2="280" y2="180" stroke="#8b91a8" stroke-width="1.5"/>
+    <g fill="#e7c85c">
+      <circle cx="60" cy="150" r="5"/><circle cx="75" cy="120" r="5"/><circle cx="55" cy="90" r="5"/><circle cx="90" cy="100" r="5"/>
+      <circle cx="105" cy="130" r="5"/><circle cx="115" cy="150" r="5"/><circle cx="130" cy="115" r="5"/><circle cx="140" cy="140" r="5"/>
+      <circle cx="100" cy="170" r="5"/><circle cx="120" cy="165" r="5"/><circle cx="150" cy="170" r="5"/><circle cx="70" cy="170" r="5"/>
+      <circle cx="150" cy="60" r="5"/><circle cx="160" cy="80" r="5"/><circle cx="170" cy="50" r="5"/><circle cx="180" cy="95" r="5"/>
+      <circle cx="195" cy="65" r="5"/><circle cx="200" cy="90" r="5"/><circle cx="210" cy="55" r="5"/><circle cx="220" cy="80" r="5"/>
+      <circle cx="240" cy="70" r="5"/><circle cx="250" cy="95" r="5"/><circle cx="165" cy="105" r="5"/><circle cx="185" cy="115" r="5"/>
+      <circle cx="205" cy="110" r="5"/><circle cx="225" cy="100" r="5"/><circle cx="145" cy="90" r="5"/><circle cx="175" cy="70" r="5"/>
+      <circle cx="230" cy="55" r="5"/><circle cx="110" cy="80" r="5"/>
+    </g>
+    <text x="90" y="70" fill="#ff6b6b" font-size="22" font-weight="bold">✕</text>
+    <text x="180" y="150" fill="#5ba8ff" font-size="22" font-weight="bold">✕</text>
+  </svg>
+  <div class="capt">Random initial cluster centroids — not yet good guesses</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Two Repeating Steps</h2></div>
+  <p>K-means repeatedly does two things until nothing changes:</p>
+  <div class="loop">
+    <div class="loopbox"><span class="pill blue">Step 1</span><br>Assign each point to its <b>closest</b> centroid</div>
+    <span class="arrow">⇄</span>
+    <div class="loopbox"><span class="pill green">Step 2</span><br>Move each centroid to the <b>mean</b> of its assigned points</div>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <span class="n" style="background:rgba(91,168,255,.2);color:var(--blue)">1</span><b>Assign points to centroids</b>
+      <p style="font-size:.85rem;margin:8px 0 0;">For every example x⁽¹⁾...x⁽³⁰⁾, check: is it closer to the red centroid or the blue centroid? Color/label it accordingly.</p>
+    </div>
+    <div class="step">
+      <span class="n" style="background:rgba(77,219,155,.2);color:var(--green)">2</span><b>Recompute centroids</b>
+      <p style="font-size:.85rem;margin:8px 0 0;">Take all points now colored red → average their location → move the red ✕ there. Do the same for blue.</p>
+    </div>
+  </div>
+  <div class="note">Repeat step 1 → step 2 → step 1 → step 2 ... As centroids move, some points switch color because they're now closer to the <i>other</i> centroid.</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Convergence</h2></div>
+  <p>Each pass through the loop refines the centroid positions. Eventually, running the two steps again produces <b style="color:var(--orange)">no further changes</b> — no point switches color, and no centroid moves. At this point, K-means has <b>converged</b>.</p>
+  <svg viewBox="0 0 300 210" width="300" height="210">
+    <line x1="30" y1="180" x2="30" y2="10" stroke="#8b91a8" stroke-width="1.5"/>
+    <line x1="30" y1="180" x2="280" y2="180" stroke="#8b91a8" stroke-width="1.5"/>
+    <g fill="#5ba8ff">
+      <circle cx="60" cy="150" r="5"/><circle cx="75" cy="120" r="5"/><circle cx="55" cy="90" r="5"/><circle cx="90" cy="100" r="5"/>
+      <circle cx="105" cy="130" r="5"/><circle cx="115" cy="150" r="5"/><circle cx="130" cy="115" r="5"/><circle cx="140" cy="140" r="5"/>
+      <circle cx="100" cy="170" r="5"/><circle cx="120" cy="165" r="5"/><circle cx="150" cy="170" r="5"/><circle cx="70" cy="170" r="5"/>
+    </g>
+    <g fill="#ff6b6b">
+      <circle cx="150" cy="60" r="5"/><circle cx="160" cy="80" r="5"/><circle cx="170" cy="50" r="5"/><circle cx="180" cy="95" r="5"/>
+      <circle cx="195" cy="65" r="5"/><circle cx="200" cy="90" r="5"/><circle cx="210" cy="55" r="5"/><circle cx="220" cy="80" r="5"/>
+      <circle cx="240" cy="70" r="5"/><circle cx="250" cy="95" r="5"/><circle cx="165" cy="105" r="5"/><circle cx="185" cy="115" r="5"/>
+      <circle cx="205" cy="110" r="5"/><circle cx="225" cy="100" r="5"/><circle cx="145" cy="90" r="5"/><circle cx="175" cy="70" r="5"/>
+      <circle cx="230" cy="55" r="5"/><circle cx="110" cy="80" r="5"/>
+    </g>
+    <text x="185" y="82" fill="#ff6b6b" font-size="20" font-weight="bold">✕</text>
+    <text x="95" y="140" fill="#5ba8ff" font-size="20" font-weight="bold">✕</text>
+  </svg>
+  <div class="capt">Final state — stable assignment, stable centroids</div>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaway</h2></div>
+  <span class="pill blue">Init: random centroids</span>
+  <span class="pill green">Loop: assign → recompute mean</span>
+  <span class="pill red">Stop: no more changes = converged</span>
+  <div class="note">Next lecture: the formal math notation for these two steps (nearest-centroid assignment and mean update).</div>
+</div>
+</div>

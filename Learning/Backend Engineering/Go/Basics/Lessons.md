@@ -2240,6 +2240,7 @@ func main() {
 }
 
 ```
+<<<<<<< HEAD
 
 # Structs in Go
 
@@ -2704,3 +2705,5 @@ func newUser(name string, membershipType string) User {
 }
 
 ```
+=======
+>>>>>>> origin/main
