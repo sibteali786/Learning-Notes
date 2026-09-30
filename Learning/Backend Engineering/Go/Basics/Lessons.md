@@ -2240,3 +2240,470 @@ func main() {
 }
 
 ```
+<<<<<<< HEAD
+
+# Structs in Go
+
+We use [structs](https://go.dev/ref/spec#Struct_types) in Go to represent structured data. It's often convenient to group different types of variables together. For example, if we want to represent a car we could do the following:
+
+```go
+type car struct {
+	brand      string
+	model      string
+	doors      int
+	mileage    int
+}
+```
+
+This creates a new struct type called `car`. All cars have a `brand`, `model`, `doors` and `mileage`.
+
+To create a `car`, use a struct literal:
+
+```go
+myCar := car{
+	brand:   "Toyota",
+	model:   "Camry",
+	doors:   4,
+	mileage: 5000,
+}
+```
+
+Structs in Go are often used to represent data that you might use a dictionary or object for in other languages.
+
+## Assignment
+
+Complete the definition of the `messageToSend` struct. It needs two fields:
+
+- `phoneNumber` - an integer
+- `message` - a string.
+
+```go
+package main
+
+type messageToSend struct {
+	phoneNumber int
+	message string
+}
+
+```
+
+# Nested Structs in Go
+
+Structs can be nested to represent more complex entities:
+
+```go
+type car struct {
+  brand string
+  model string
+  doors int
+  mileage int
+  frontWheel wheel
+  backWheel wheel
+}
+
+type wheel struct {
+  radius int
+  material string
+}
+```
+
+The fields of a struct can be accessed using the dot `.` operator.
+
+```go
+myCar := car{}
+myCar.frontWheel.radius = 5
+```
+
+## Assignment
+
+Textio has a bug, we've been sending texts that are missing critical bits of information! Before we send text messages in Textio, we must check to make sure the required fields have non-[zero values](https://go.dev/tour/basics/12).
+
+Notice that the `user` struct is a nested struct within the `messageToSend` struct. Both `sender` and `recipient` are `user` struct types.
+
+Complete the `canSendMessage` function. It should return `true` only if the `sender` and `recipient` fields each contain a `name` and a `number`. If any of the default zero values are present, return `false` instead.
+
+## Tip
+
+Zero values:
+
+- int: `0`
+- bool: `false`
+- string: `""`
+
+```go
+package main
+
+type messageToSend struct {
+	message   string
+	sender    user
+	recipient user
+}
+
+type user struct {
+	name   string
+	number int
+}
+
+func canSendMessage(mToSend messageToSend) bool {
+	if mToSend.sender.name != "" && mToSend.sender.number != 0 && mToSend.recipient.name != "" && mToSend.recipient.number != 0 {
+		return true
+	}
+	return false
+}
+
+```
+
+# Anonymous Structs in Go
+
+An anonymous struct is just like a normal struct, but it is defined without a name and therefore cannot be referenced elsewhere in the code.
+
+To create an anonymous struct, just instantiate the instance immediately using a second pair of brackets after declaring the type:
+
+```go
+myCar := struct {
+  brand string
+  model string
+} {
+  brand: "Toyota",
+  model: "Camry",
+}
+```
+
+You can even nest anonymous structs as fields within other structs:
+
+```go
+type car struct {
+  brand string
+  model string
+  doors int
+  mileage int
+  // wheel is a field containing an anonymous struct
+  wheel struct {
+    radius int
+    material string
+  }
+}
+
+var myCar = car{
+  brand:   "Rezvani",
+  model:   "Vengeance",
+  doors:   4,
+  mileage: 35000,
+  wheel: struct {
+    radius   int
+    material string
+  }{
+    radius:   35,
+    material: "alloy",
+  },
+}
+```
+
+## When Should You Use an Anonymous Struct?
+
+In general, _prefer named structs_. Named structs make it easier to read and understand your code, and they have the nice side-effect of being reusable. I sometimes use anonymous structs when I _know_ I won't ever need to use a struct again. For example, sometimes I'll use one to create the shape of some JSON data in HTTP handlers.
+
+If a struct is only meant to be used once, then it makes sense to declare it in such a way that developers down the road won't be tempted to accidentally use it again.
+
+# Embedded Structs
+
+Go is not an [object-oriented](https://en.wikipedia.org/wiki/Object-oriented_programming) language. However, embedded structs provide a kind of _data-only_ inheritance that can be useful at times. Keep in mind, Go doesn't support classes or inheritance in the _complete_ sense, but embedded structs are a way to elevate and **share fields between struct definitions.**
+
+```go
+type car struct {
+  brand string
+  model string
+}
+
+type truck struct {
+  // "car" is embedded, so the definition of a
+  // "truck" now also additionally contains all
+  // of the fields of the car struct
+  car
+  bedSize int
+}
+```
+
+## Embedded vs. Nested
+
+- Unlike nested structs, an embedded struct's fields are accessed at the top level like normal fields.
+- Like nested structs, you assign the promoted fields with the embedded struct in a [composite literal](https://golang.org/ref/spec#Composite_literals).
+
+```go
+lanesTruck := truck{
+  bedSize: 10,
+  car: car{
+    brand: "Toyota",
+    model: "Tundra",
+  },
+}
+
+fmt.Println(lanesTruck.brand) // Toyota
+fmt.Println(lanesTruck.model) // Tundra
+```
+
+In the example above, `car` is an embedded struct within `truck`. You can see that both `brand` and `model` are accessible from the top-level, while the nested equivalent to this object would require you to access these fields via a nested `car` struct: `lanesTruck.car.brand` or `lanesTruck.car.model`.
+
+## Assignment
+
+At Textio, a "user" struct represents an account holder, and a "sender" is just a "user" with some additional "sender" specific data. A "sender" is a user that has a `rateLimit` field that tells us how many messages they are allowed to send.
+
+Fix the bug by embedding the proper struct in the other
+
+```go
+package main
+
+type sender struct {
+	user
+	rateLimit int
+}
+
+type user struct {
+	name   string
+	number int
+}
+```
+
+# Struct Methods in Go
+
+While Go is **not** object-oriented, it does support methods that can be defined on structs. Methods are just functions that have a receiver. A receiver is a special parameter that syntactically goes _before_ the name of the function.
+
+```go
+type rect struct {
+  width int
+  height int
+}
+
+// area has a receiver of (r rect)
+// rect is the struct
+// r is the placeholder
+func (r rect) area() int {
+  return r.width * r.height
+}
+
+var r = rect{
+  width: 5,
+  height: 10,
+}
+
+fmt.Println(r.area())
+// prints 50
+```
+
+A receiver is just a special kind of function parameter. In the example above, the `r` in `(r rect)` could just as easily have been `rec` or even `x`, `y` or `z`. By convention, Go code will often use the first letter of the struct's name.
+
+Receivers are important because they will, as you'll learn in the exercises to come, allow us to define interfaces that our structs (and other types) can implement.
+
+## Assignment
+
+Let's clean up Textio's authentication logic. We store our user's authentication data inside an `authenticationInfo` struct. We need a method that can take that data and return a basic authorization string.
+
+The format of the string should be:
+
+```text
+Authorization: Basic USERNAME:PASSWORD
+```
+
+Create a method on the `authenticationInfo` struct called `getBasicAuth` that returns the formatted string.
+
+```go
+package main
+import "fmt"
+type authenticationInfo struct {
+	username string
+	password string
+}
+
+// create the method below
+func (a authenticationInfo) getBasicAuth() string {
+	auth_str := fmt.Sprintf("Authorization: Basic %s:%s", a.username, a.password)
+	return  auth_str
+}
+```
+
+
+# Memory Layout
+
+In Go, structs sit in memory in a contiguous block, with fields placed one after another as defined in the struct. For example this struct:
+
+```go
+type stats struct {
+	Reach    uint16
+	NumPosts uint8
+	NumLikes uint8
+}
+```
+
+Looks like this in memory:
+
+![struct layout](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/qFsTyxI-980x550.png)
+
+## Field ordering... Matters?
+
+the order of fields in a struct can have a big impact on memory usage. This is the same struct as above, but _poorly_ designed:
+
+```go
+type stats struct {
+	NumPosts uint8
+	Reach    uint16
+	NumLikes uint8
+}
+```
+
+It looks like this in memory:
+
+![struct layout](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/qcX53j6-1180x550.png)
+
+Notice that Go has "aligned" the fields, meaning that it has added some padding (wasted space) to make up for the size difference between the `uint16` and `uint8` types. It's done for execution speed, but it can lead to increased memory usage.
+
+## Should I Panic?
+
+To be honest, you _should not stress_ about [memory layout](https://go101.org/article/memory-layout.html). However, if you have a specific reason to be concerned about memory usage, aligning the fields by size (largest to smallest) can help. You can also use the [reflect package](https://pkg.go.dev/reflect) to debug the memory layout of a struct:
+
+```go
+typ := reflect.TypeOf(stats{})
+fmt.Printf("Struct is %d bytes\n", typ.Size())
+```
+
+## Real Story
+
+I once had a server in production that held _a lot_ of structs in memory. Like _hundreds of thousands_ in a list. When I re-ordered the fields in the struct, the memory usage of the program dropped by over 2 gigabytes! It was a _huge_ performance win.
+
+## Assignment
+
+Our over-engineering boss is at it again. He's heard about memory layout and wants to squeeze every last byte out of our structs.
+
+Run the tests to see the current size of the structs, then update the struct definitions to minimize memory usage.
+
+```go
+package main
+
+type contact struct {
+	sendingLimit int32
+	age          int32
+	userID       string
+}
+
+type perms struct {
+	permissionLevel int
+	canSend         bool
+	canReceive      bool
+	canManage       bool
+}
+
+```
+
+# Empty Struct
+
+[Empty structs](https://dave.cheney.net/2014/03/25/the-empty-struct) are used in Go as a [unary](https://en.wikipedia.org/wiki/Unary_operation) value.
+
+```go
+
+// anonymous empty struct type
+empty := struct{}{}
+
+// named empty struct type
+type emptyStruct struct{}
+empty := emptyStruct{}
+```
+
+Later in this course, you'll see how and when they're used: it's surprisingly often! Mostly with maps and channels.
+
+# Empty Struct Memory
+
+Empty structs are Go's smallest possible type: they take up **zero bytes of memory**.
+
+Compare their size with the other types below:
+
+![memory usage](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/hXAvfvS-1280x448.png)
+
+# Update Users
+
+We need a way to differentiate between standard and premium users. When a new user is created, they need a membership type, and that type will determine the message character limit.
+
+## Assignment
+
+1. [ ] Create a new struct called `Membership`, it should have:
+    - [ ] A `Type` string field
+    - [ ] A `MessageCharLimit` integer field
+2. [ ] Update the `User` struct to [embed](https://gobyexample.com/struct-embedding) a `Membership`.
+3. [ ] Complete the `newUser` function. It should return a new `User` with all the fields set as you would expect based on the inputs. If the user is a `"premium"` member, the `MessageCharLimit` should be `1000`, otherwise, it should only be `100`.
+
+```go
+package main
+
+type Membership struct {
+	Type string
+	MessageCharLimit int
+}
+type User struct {
+	Membership
+	Name string
+}
+
+func newUser(name string, membershipType string) User {
+	if membershipType == "premium" {
+		return User{
+			Name: name,
+			Membership: Membership{
+				Type: membershipType,
+				MessageCharLimit: 1000,
+			},
+		}
+	} 
+	return User{
+		Name: name,
+		Membership: Membership{
+			Type: membershipType,
+			MessageCharLimit: 100,
+		},
+	}
+}
+
+```
+# Send Message
+
+## Assignment
+
+Create a `SendMessage` method for the `User` struct.
+
+It should take a `message` string and `messageLength` int as inputs.
+
+If the `messageLength` is within the user's `MessageCharLimit`, return the original `message` and `true` (indicating the message can be sent), otherwise, return an empty string and `false`.
+
+```go
+package main
+
+func (u User) SendMessage(message string, messageLength int) (string, bool) {
+	if messageLength <= u.MessageCharLimit {
+		return message, true
+	}
+	return "", false
+}
+
+// don't touch below this line
+
+type User struct {
+	Name string
+	Membership
+}
+
+type Membership struct {
+	Type             string
+	MessageCharLimit int
+}
+
+func newUser(name string, membershipType string) User {
+	membership := Membership{Type: membershipType}
+	if membershipType == "premium" {
+		membership.MessageCharLimit = 1000
+	} else {
+		membership.Type = "standard"
+		membership.MessageCharLimit = 100
+	}
+	return User{Name: name, Membership: membership}
+}
+
+```
+=======
+>>>>>>> origin/main
