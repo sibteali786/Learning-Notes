@@ -2240,8 +2240,6 @@ func main() {
 }
 
 ```
-<<<<<<< HEAD
-
 # Structs in Go
 
 We use [structs](https://go.dev/ref/spec#Struct_types) in Go to represent structured data. It's often convenient to group different types of variables together. For example, if we want to represent a car we could do the following:
@@ -2705,5 +2703,174 @@ func newUser(name string, membershipType string) User {
 }
 
 ```
-=======
->>>>>>> origin/main
+
+# Interfaces in Go
+
+[Interfaces](https://go.dev/tour/methods/9) allow you to focus on what a type does rather than how it's built. They can help you write more flexible and reusable code by defining behaviors (like methods) that different types can share. This makes it easy to swap out or update parts of your code without changing everything else.
+
+Interfaces are just collections of method signatures. A type "implements" an interface if it has methods that match the interface's method signatures.
+
+In the following example, a "shape" must be able to return its area and perimeter. Both `rect` and `circle` fulfill the interface.
+
+```go
+type shape interface {
+  area() float64
+  perimeter() float64
+}
+
+type rect struct {
+    width, height float64
+}
+func (r rect) area() float64 {
+    return r.width * r.height
+}
+func (r rect) perimeter() float64 {
+    return 2*r.width + 2*r.height
+}
+
+type circle struct {
+    radius float64
+}
+func (c circle) area() float64 {
+    return math.Pi * c.radius * c.radius
+}
+func (c circle) perimeter() float64 {
+    return 2 * math.Pi * c.radius
+}
+```
+
+When a type implements an interface, it can then be used as that interface type.
+
+```go
+func printShapeData(s shape) {
+	fmt.Printf("Area: %v - Perimeter: %v\n", s.area(), s.perimeter())
+}
+```
+
+Because we say the input is of type `shape`, we know that any argument must implement the `.area()` and `.perimeter()` methods.
+
+As an example, because [the empty interface](https://go.dev/tour/methods/14) doesn't require a type to have any methods at all, every type automatically implements the empty interface, written as:
+
+```go
+interface{}
+```
+
+## Assignment
+
+The `birthdayMessage` and `sendingReport` structs already have implementations of the `getMessage` method. The `getMessage` method returns a string, and any type that implements the method can be considered a `message` (meaning it implements the `message` interface).
+
+1. [ ] Add the `getMessage()` method signature as a requirement on the message interface.
+2. [ ] Complete the `sendMessage` function. It should return:
+    1. [ ] The content of the message.
+    2. [ ] The cost of the message, which is the length of the message multiplied by 3.
+
+_Notice that your code doesn't care at all about whether a specific message is a `birthdayMessage` or a `sendingReport`!_
+
+## Tip
+
+The length of a string can be obtained using the `len` function, which [returns the number of bytes](https://pkg.go.dev/builtin#len).
+
+```go
+s := "Hello, World!"
+fmt.Println(len(s))
+// 13
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func sendMessage(msg message) (string, int) {
+	message := msg.getMessage()
+	cost := len(message) * 3
+	return message, cost
+}
+
+type message interface {
+	getMessage() string
+}
+
+// don't edit below this line
+
+type birthdayMessage struct {
+	birthdayTime  time.Time
+	recipientName string
+}
+
+func (bm birthdayMessage) getMessage() string {
+	return fmt.Sprintf("Hi %s, it is your birthday on %s", bm.recipientName, bm.birthdayTime.Format(time.RFC3339))
+}
+
+type sendingReport struct {
+	reportName    string
+	numberOfSends int
+}
+
+func (sr sendingReport) getMessage() string {
+	return fmt.Sprintf(`Your "%s" report is ready. You've sent %v messages.`, sr.reportName, sr.numberOfSends)
+}
+
+```
+
+# Interface Implementation
+
+Interfaces are implemented _implicitly_.
+
+A type never declares that it implements a given interface. If an interface exists and a type has the proper methods defined, then the type automatically fulfills that interface.
+
+A quick way of checking whether a struct implements an interface is to declare a function that takes an interface as an argument. If the function can take the struct as an argument, then the struct implements the interface.
+
+## Assignment
+
+At Textio we have full-time employees and contract employees. We have been tasked with making a more general `employee` interface so that dealing with different employee types is simpler.
+
+1. [ ] Run the code. You should see an error indicating the `contractor` type does not fulfill the `employee` interface.
+2. [ ] Implement the missing `getSalary` method for the `contractor` type so that it fulfills the `employee` interface.
+    - A contractor's salary is their hourly pay multiplied by how many hours they work per year.
+
+```go
+package main
+
+type employee interface {
+	getName() string
+	getSalary() int
+}
+
+type contractor struct {
+	name         string
+	hourlyPay    int
+	hoursPerYear int
+}
+
+func (c contractor) getName() string {
+	return c.name
+}
+
+func (c contractor) getSalary() int {
+	return c.hourlyPay * c.hoursPerYear
+}
+
+type fullTime struct {
+	name   string
+	salary int
+}
+
+func (ft fullTime) getSalary() int {
+	return ft.salary
+}
+
+func (ft fullTime) getName() string {
+	return ft.name
+}
+
+```
+
+# Interfaces Are Implemented Implicitly
+
+A type implements an interface by implementing its methods. Unlike in many other languages, there is no explicit declaration of intent, there is no "implements" keyword.
+
+Implicit interfaces _decouple_ the definition of an interface from its implementation. You may add methods to a type and in the process be unknowingly implementing various interfaces, and _that's okay_.

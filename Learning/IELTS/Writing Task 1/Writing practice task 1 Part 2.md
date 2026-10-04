@@ -36,3 +36,7 @@ In 2002, City P has 80,000 cars registered with 25 accidents per 10,000 cars. Th
 For following decade, initially from 2012 to 2017 both figures follow same falling trend with 110,000 registered cars and rate of 15 road accidents, By 2022 the number of registered cars rise to highest value of 140,000 while road accidents rate is 10 lowest for the whole 20 years period.  
 ```
 
+
+```
+
+```
