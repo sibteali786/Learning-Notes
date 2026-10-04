@@ -2874,3 +2874,126 @@ func (ft fullTime) getName() string {
 A type implements an interface by implementing its methods. Unlike in many other languages, there is no explicit declaration of intent, there is no "implements" keyword.
 
 Implicit interfaces _decouple_ the definition of an interface from its implementation. You may add methods to a type and in the process be unknowingly implementing various interfaces, and _that's okay_.
+
+# Interfaces Quiz
+
+Remember, interfaces are collections of method signatures. A type "implements" an interface if it has all of the methods of the given interface defined on it.
+
+```go
+type shape interface {
+  area() float64
+}
+```
+
+If a type in your code implements an `area` method, with the same signature (e.g. accepts nothing and returns a `float64`), then that object is said to _implement_ the `shape` interface.
+
+```go
+type circle struct{
+	radius float64
+}
+
+func (c circle) area() float64 {
+  return 3.14 * c.radius * c.radius
+}
+```
+
+This is _different from most other languages_, where you have to _explicitly_ assign an interface type to an object, like with Java:
+
+```java
+class Circle implements Shape
+```
+
+# Multiple Interfaces
+
+A type can implement any number of interfaces in Go. For example, the [empty interface](https://go.dev/tour/methods/14), `interface{}`, is _always_ implemented by every type because it has no requirements.
+
+## Assignment
+
+Complete the required methods so that the `email` type implements both the `expense` and `formatter` interfaces.
+
+Complete the `cost()` method:
+
+1. [ ] If the email is _not_ "subscribed", then the cost is `5` cents for each character in the body.
+2. [ ] If it _is_, then the cost is `2` cents per character.
+3. [ ] Return the _total_ cost of the entire email in cents.
+
+Complete the `format()` method.
+
+1. It should return a string in this format:
+    
+    ```text
+    'CONTENT' | Subscribed
+    ```
+    
+2. If the email is not subscribed, change the second part to "Not Subscribed":
+    
+    ```text
+    'CONTENT' | Not Subscribed
+    ```
+    
+    The single quotes are included in the string, and `CONTENT` is the email's body. For example:
+    
+    ```text
+    'Hello, World!' | Subscribed
+    ```
+    
+
+You may want to import the `fmt` package and use [`Sprintf`](https://pkg.go.dev/fmt#Sprintf).
+
+```go
+package main
+import "fmt"
+
+func (e email) cost() int {
+	if e.isSubscribed == false {
+		return 5 * len(e.body)
+	}
+	return 2 * len(e.body)
+}
+
+func (e email) format() string {
+	if e.isSubscribed == false {
+		return fmt.Sprintf("'%s' | Not Subscribed", e.body)
+	}
+	return fmt.Sprintf("'%s' | Subscribed", e.body)
+}
+
+type expense interface {
+	cost() int
+}
+
+type formatter interface {
+	format() string
+}
+
+type email struct {
+	isSubscribed bool
+	body         string
+}
+
+```
+
+# Name Your Interface Parameters
+
+Consider the following interface:
+
+```go
+type Copier interface {
+  Copy(string, string) int
+}
+```
+
+This is a valid interface, but based on the code alone, can you deduce what _kinds_ of strings you should pass into the `Copy` function?
+
+We know the function signature expects 2 string types, but what are they? Filenames? URLs? Raw string data? For that matter, what the heck is that `int` that's being returned?
+
+Let's add some named parameters and return data to make it more clear.
+
+```go
+type Copier interface {
+  Copy(sourceFile string, destinationFile string) (bytesCopied int)
+}
+```
+
+Much better. We can see what the expectations are now. The first parameter is the `sourceFile`, the second parameter is the `destinationFile`, and `bytesCopied`, an integer, is returned.
+
