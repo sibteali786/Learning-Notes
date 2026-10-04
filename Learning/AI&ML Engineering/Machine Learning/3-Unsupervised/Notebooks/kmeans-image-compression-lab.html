@@ -68,6 +68,21 @@ svg{display:block;margin:0 auto;max-width:100%;height:auto;}
   <p>This has <b>nothing to do with 8-bit color values</b> — it's pure shape arithmetic. <code>original_img</code> is a 3D block: 128 rows × 128 columns × 3 channels = <b style="color:var(--orange)">16,384 individual pixels</b>, each with 3 numbers.</p>
   <p>K-means needs a flat 2D table (like any dataset X): one row per example. So you multiply <code>128 × 128</code> just to compute <b>how many total pixels/rows</b> the flattened table needs — that number becomes the row count, and <code>3</code> stays as the column count (R, G, B stay 3 features, they're not reduced to 2).</p>
   <div class="note">Think of it as unstacking a 128×128 grid of pixels into one long list of 16,384 pixels — the multiplication just counts the grid's total cells.</div>
+
+  <p style="margin-top:16px;"><b style="color:var(--orange)">Tiny worked example</b> — a 2×2 image instead of 128×128, so it's easy to see nothing gets merged:</p>
+  <pre><span class="cm"># Before reshape: shape (2, 2, 3)</span>
+original_img[0,0] = [255,   0,   0]   <span class="cm"># top-left, red</span>
+original_img[0,1] = [  0, 255,   0]   <span class="cm"># top-right, green</span>
+original_img[1,0] = [  0,   0, 255]   <span class="cm"># bottom-left, blue</span>
+original_img[1,1] = [255, 255,   0]   <span class="cm"># bottom-right, yellow</span></pre>
+  <p>4 pixels total, each still holding its own 3 separate RGB numbers. After <code>reshape((2*2, 3))</code> → shape <code>(4, 3)</code>:</p>
+  <pre>X_img = [
+  [255,   0,   0],   <span class="cm"># was original_img[0,0]</span>
+  [  0, 255,   0],   <span class="cm"># was original_img[0,1]</span>
+  [  0,   0, 255],   <span class="cm"># was original_img[1,0]</span>
+  [255, 255,   0],   <span class="cm"># was original_img[1,1]</span>
+]</pre>
+  <p>Same 4 pixels, same 12 numbers (4×3) — just relaid out as 4 rows × 3 columns instead of a 2×2 grid of triples. <code>2*2=4</code> only computed the row count. Scale up: <code>128×128 = 16,384</code> rows, each still keeping its own 3 RGB values as separate columns — <b>no pixel's RGB is summed or averaged into one number.</b> It's a reshape (relayout), not a reduction.</p>
 </div>
 
 <div class="card">
@@ -102,6 +117,64 @@ svg{display:block;margin:0 auto;max-width:100%;height:auto;}
     <tr><td><code>128 × 128 × 4</code></td><td>Each <b>pixel's label</b> (which of the 16 colors it uses)</td><td>16,384 pixels, but now each just stores an index 0–15. Since 2⁴=16, that index fits in <b>4 bits</b> instead of 24</td></tr>
   </table>
   <div class="note">The key shift: instead of paying 24 bits <i>per pixel</i> (16,384 × 24), you pay 24 bits <i>16 times total</i> (once per color) + a cheap 4-bit pointer per pixel. That's the entire compression trick — store the expensive full-color data once, and reference it cheaply everywhere else.</div>
+
+  <h3 style="margin-top:22px;color:var(--purple);font-size:.95rem;">🔢 Worked Example with Real Numbers (6 pixels, K=4)</h3>
+  <p>A tiny image so every bit is visible. Each pixel stores R, G, B (0–255), and 8 bits can hold 0–255 (2⁸=256), so <b>3 channels × 8 bits = 24 bits</b> per pixel.</p>
+
+  <p><b style="color:var(--red)">Before</b>: every pixel stores its full RGB.</p>
+  <table>
+    <tr><th>Pixel</th><th>(R, G, B)</th><th>Looks like</th><th>Bits</th></tr>
+    <tr><td>1</td><td>(200, 30, 30)</td><td>reddish</td><td>24</td></tr>
+    <tr><td>2</td><td>(205, 28, 35)</td><td>reddish</td><td>24</td></tr>
+    <tr><td>3</td><td>(20, 180, 40)</td><td>greenish</td><td>24</td></tr>
+    <tr><td>4</td><td>(25, 175, 45)</td><td>greenish</td><td>24</td></tr>
+    <tr><td>5</td><td>(10, 10, 200)</td><td>bluish</td><td>24</td></tr>
+    <tr><td>6</td><td>(240, 240, 240)</td><td>whiteish</td><td>24</td></tr>
+  </table>
+  <div class="note" style="border-left-color:var(--red);">Total: 6 × 24 = <b>144 bits</b>. Pixel 1 in binary: 200 = <code>11001000</code>, 30 = <code>00011110</code>, 30 = <code>00011110</code> → 24 bits.</div>
+
+  <p style="margin-top:14px;"><b style="color:var(--green)">Step 1</b>: K-means (K=4) finds the palette. Each entry is still a full RGB color = 24 bits, stored <i>once</i>.</p>
+  <table>
+    <tr><th>Index</th><th>Binary</th><th>Centroid (R, G, B)</th><th>Bits</th></tr>
+    <tr><td>0</td><td><code>00</code></td><td>(202, 29, 32)</td><td>24</td></tr>
+    <tr><td>1</td><td><code>01</code></td><td>(22, 177, 42)</td><td>24</td></tr>
+    <tr><td>2</td><td><code>10</code></td><td>(10, 10, 200)</td><td>24</td></tr>
+    <tr><td>3</td><td><code>11</code></td><td>(240, 240, 240)</td><td>24</td></tr>
+  </table>
+  <div class="note" style="border-left-color:var(--green);">Palette cost: 4 × 24 = <b>96 bits</b></div>
+
+  <p style="margin-top:14px;"><b style="color:var(--green)">Step 2</b>: each pixel now stores only an index. 4 colors → 2 bits (2²=4). In the real lab, 16 colors → 4 bits (2⁴=16).</p>
+  <table>
+    <tr><th>Pixel</th><th>Nearest centroid</th><th>Stored</th></tr>
+    <tr><td>1</td><td>0</td><td><code>00</code></td></tr>
+    <tr><td>2</td><td>0</td><td><code>00</code></td></tr>
+    <tr><td>3</td><td>1</td><td><code>01</code></td></tr>
+    <tr><td>4</td><td>1</td><td><code>01</code></td></tr>
+    <tr><td>5</td><td>2</td><td><code>10</code></td></tr>
+    <tr><td>6</td><td>3</td><td><code>11</code></td></tr>
+  </table>
+  <div class="note" style="border-left-color:var(--green);">Index cost: 6 × 2 = <b>12 bits</b></div>
+
+  <p style="margin-top:14px;"><b style="color:var(--blue)">Step 3</b>: decoding = <code>centroids[idx]</code>. Stored <code>[00, 00, 01, 01, 10, 11]</code> becomes:</p>
+  <pre>00 → (202,  29,  32)   <span class="cm"># Pixel 1 was (200, 30, 30): close, not identical</span>
+00 → (202,  29,  32)
+01 → ( 22, 177,  42)
+01 → ( 22, 177,  42)
+10 → ( 10,  10, 200)
+11 → (240, 240, 240)</pre>
+  <div class="note" style="border-left-color:var(--blue);">That small difference (200 → 202) is the <b>lossy</b> part of the compression.</div>
+
+  <div class="grid2" style="margin-top:14px;">
+    <div class="bitbox">
+      <div style="color:var(--red);font-weight:700;">Tiny image, original</div>
+      <div class="big" style="color:var(--red);">6 × 24 = 144 bits</div>
+    </div>
+    <div class="bitbox">
+      <div style="color:var(--green);font-weight:700;">Tiny image, compressed</div>
+      <div class="big" style="color:var(--green);">96 + 12 = 108 bits</div>
+    </div>
+  </div>
+  <div class="note">Only a small saving here: with 6 pixels, the 96-bit palette dominates. With the real 16,384 pixels the palette (384 bits) becomes negligible next to 16,384 × 4 bits, giving 393,216 → 65,920 bits (~6× smaller). The more pixels share one palette, the bigger the win.</div>
 </div>
 
 <div class="card">
