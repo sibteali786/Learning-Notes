@@ -2997,3 +2997,102 @@ type Copier interface {
 
 Much better. We can see what the expectations are now. The first parameter is the `sourceFile`, the second parameter is the `destinationFile`, and `bytesCopied`, an integer, is returned.
 
+# Type Assertions in Go
+
+When working with interfaces in Go, every once-in-awhile you'll need access to the underlying type of an interface value. You can cast an interface to its underlying type using a [type assertion](https://go.dev/tour/methods/15).
+
+The example below shows how to safely access the `radius` field of `s` when it is not known that `s` is a `circle`:
+
+```go
+type shape interface {
+	area() float64
+}
+
+type circle struct {
+	radius float64
+}
+
+func (c circle) area() float64 {
+	// ...
+}
+
+func printShapeInfo(s shape) {
+	c, ok := s.(circle)
+	if ok {
+		radius := c.radius
+		fmt.Printf("s is a circle, radius: %v\n", radius)
+		return
+	}
+}
+```
+
+In `printShapeInfo`:
+
+- We want to check if `s` is a `circle` in order to cast it into its underlying concrete type
+- We know (from the function signature) that `s` is an instance of the `shape` interface, but we do not know if it's also a `circle`
+- `c` is a new `circle` struct cast from `s`
+- `ok` is `true` if `s` is indeed a `circle`, or `false` if `s` is NOT a `circle`
+
+`c` and `ok` aren't duplicates: the assertion returns the concrete `circle` value and a separate boolean that says whether the assertion succeeded.
+
+## Assignment
+
+Implement the `getExpenseReport` function.
+
+1. [ ] If the `expense` is an `email`, return the email's `toAddress` and the `cost` of the email.
+2. [ ] If the `expense` is an `sms`, return the sms's `toPhoneNumber` and its `cost`.
+3. [ ] If the `expense` has any other underlying type, return an empty string and `0.0` for the cost.
+
+```go
+package main
+
+func getExpenseReport(e expense) (string, float64) {
+	switch v := e.(type) {
+	case email:
+		return v.toAddress, v.cost()
+	case sms:
+		return v.toPhoneNumber, v.cost()
+	default:
+		return "",0.0
+	}
+}
+
+// don't touch below this line
+
+type expense interface {
+	cost() float64
+}
+
+type email struct {
+	isSubscribed bool
+	body         string
+	toAddress    string
+}
+
+type sms struct {
+	isSubscribed  bool
+	body          string
+	toPhoneNumber string
+}
+
+type invalid struct{}
+
+func (em email) cost() float64 {
+	if !em.isSubscribed {
+		return float64(len(em.body)) * .05
+	}
+	return float64(len(em.body)) * .01
+}
+
+func (sm sms) cost() float64 {
+	if !sm.isSubscribed {
+		return float64(len(sm.body)) * .1
+	}
+	return float64(len(sm.body)) * .03
+}
+
+func (inv invalid) cost() float64 {
+	return 0.0
+}
+
+```
