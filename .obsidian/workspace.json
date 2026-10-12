@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "e645334cab3e7913",
+        "id": "d313d57be8388b12",
         "type": "tabs",
         "children": [
           {
-            "id": "de568963406bb06d",
+            "id": "e8617e74971bdab5",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Learning/Backend Engineering/Go/Basics/Lessons.md",
+                "file": "Personal/Me/Journal.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,7 +28,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Lessons"
+              "title": "Journal"
             }
           }
         ]
@@ -90,8 +90,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 368.359375,
-    "collapsed": true
+    "width": 368.359375
   },
   "right": {
     "id": "aebe34db1c50c5fc",
@@ -107,7 +106,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Personal/Me/Journal.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -117,7 +116,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks"
             }
           },
           {
@@ -155,35 +154,24 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
+                "file": "Personal/Me/Journal.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Notes"
-            }
-          },
-          {
-            "id": "957dbb181bb46970",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
+              "title": "Outline"
             }
           }
-        ],
-        "currentTab": 4
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125
+    "width": 328.8203125,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
-      "vault-lens:Vault Lens Dev: 打开当前文件": false,
       "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
@@ -191,22 +179,32 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "obsidian-excalidraw-plugin:New drawing": false,
-      "obsidian-git:Open Git source control": false,
       "publish:Publish changes...": false,
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "e8617e74971bdab5",
   "lastOpenFiles": [
-    "Learning/AI Patient Cosultant.md",
+    "Personal/Maryam's Things.md",
+    "Personal/Maryam/Pasted image 20260630145343.png",
+    "Personal/Maryam/Pasted image 20260630145449.png",
+    "Personal/Maryam/Pasted image 20260630145507.png",
+    "Personal/Maryam/05-makkah-3.png",
+    "Personal/Maryam/06-dino-valley-1.png",
+    "Personal/Maryam/06-dino-valley-2.png",
+    "Personal/Maryam/07-zarlish-engagement-1.png",
+    "Personal/Maryam/03-zainab-1.png",
+    "Personal/Maryam/04-brothers-wedding.png",
+    "Personal/Maryam/Memories.md",
+    "Personal/Maryam/Maryam's Things.md",
+    "Personal/Maryam/07-zarlish-engagement-2.png",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/AI Patient Cosultant.md",
     "conflict-files-obsidian-git.md",
     "Learning/IELTS/Writing Task 1/Writing Task 2  - Discussion Essay.md",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/6-kmeans-choosing-k.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/3-lewis-diagrams-scn-formal-charge.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Pasted Image 20260929151237_030.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Drawing 2026-09-29 22.11.26.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/kmeans-image-compression-lab.html",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/1-clustering-intro.html",
@@ -214,17 +212,8 @@
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/C3_W1_KMeans_Assignment.ipynb",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/1-lewis-diagrams-no3-resonance.html",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home/jovyan/work",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/figure 3.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/figure 2.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/figure 1.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/images/bird_small.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home/jovyan",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/data/ex7_X.npy",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/bird_small.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/bird_small.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/figure 3.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/figure 2.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Files/images/figure 1.png",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
     "Learning/Research/Resources.md",
     "Learning/IELTS/Writing Task 1/Writing practice task 1 Part 2.md",
@@ -242,9 +231,6 @@
     "Learning/AI&ML Engineering/Roadmap/START-HERE.md",
     "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027.md",
     "Learning/Interview Practice/Coastal Research/Schema Design.excalidraw.md",
-    "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Presence Heartbeat/architecture.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
