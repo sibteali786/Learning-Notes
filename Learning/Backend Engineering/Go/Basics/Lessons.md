@@ -3096,3 +3096,713 @@ func (inv invalid) cost() float64 {
 }
 
 ```
+
+
+# Type Switches
+
+A [type switch](https://go.dev/tour/methods/16) makes it easy to do several type assertions in a series.
+
+A type switch is similar to a regular switch statement, but the cases specify _types_ instead of _values_.
+
+```go
+func printNumericValue(num interface{}) {
+	switch v := num.(type) {
+	case int:
+		fmt.Printf("%T\n", v)
+	case string:
+		fmt.Printf("%T\n", v)
+	default:
+		fmt.Printf("%T\n", v)
+	}
+}
+
+func main() {
+	printNumericValue(1)
+	// prints "int"
+
+	printNumericValue("1")
+	// prints "string"
+
+	printNumericValue(struct{}{})
+	// prints "struct {}"
+}
+```
+
+`fmt.Printf("%T\n", v)` prints the _type_ of a variable.
+
+## Assignment
+
+After submitting our last snippet of code for review, a more experienced gopher told us to use a type switch instead of successive assertions. Let's make that improvement!
+
+Implement the `getExpenseReport` function _using a type switch_.
+
+1. [ ] If the `expense` is an `email`, return the email's `toAddress` and the `cost` of the email.
+2. [ ] If the `expense` is an `sms`, return the sms's `toPhoneNumber` and its `cost`.
+3. [ ] If the `expense` has any other underlying type, return an empty string and `0.0` for the cost.
+
+```go
+package main
+
+func getExpenseReport(e expense) (string, float64) {
+	switch v:= e.(type) {
+	case email:
+		return v.toAddress, v.cost()
+	case sms: 
+		return v.toPhoneNumber, v.cost()
+	default:
+		return "", 0.0
+	}
+}
+
+// don't touch below this line
+
+type expense interface {
+	cost() float64
+}
+
+type email struct {
+	isSubscribed bool
+	body         string
+	toAddress    string
+}
+
+type sms struct {
+	isSubscribed  bool
+	body          string
+	toPhoneNumber string
+}
+
+type invalid struct{}
+
+func (e email) cost() float64 {
+	if !e.isSubscribed {
+		return float64(len(e.body)) * .05
+	}
+	return float64(len(e.body)) * .01
+}
+
+func (s sms) cost() float64 {
+	if !s.isSubscribed {
+		return float64(len(s.body)) * .1
+	}
+	return float64(len(s.body)) * .03
+}
+
+func (i invalid) cost() float64 {
+	return 0.0
+}
+
+```
+
+# Clean Interfaces
+
+Writing clean interfaces is _hard_. Frankly, any time you're dealing with abstractions in code, the simple can become complex very quickly if you're not careful. Let's go over some rules of thumb for keeping interfaces clean.
+
+## 1. Keep Interfaces Small
+
+If there is only one piece of advice that you take away from this lesson, make it this: **keep interfaces small**! Interfaces are meant to define the minimal behavior necessary to accurately represent an idea or concept.
+
+Here is an example from the standard HTTP package of a larger interface that's a good example of defining minimal behavior:
+
+```go
+type File interface {
+    io.Closer
+    io.Reader
+    io.Seeker
+    Readdir(count int) ([]os.FileInfo, error)
+    Stat() (os.FileInfo, error)
+}
+```
+
+Any type that satisfies the interface's behaviors can be considered by the HTTP package as a _File_. This is convenient because the HTTP package doesn't need to know if it's dealing with a file on disk, a network buffer, or a simple `[]byte`.
+
+## 2. Interfaces Should Have No Knowledge of Satisfying Types
+
+An interface should define what is necessary for other types to classify as a member of that interface. They shouldn't be aware of any types that happen to satisfy the interface at design time.
+
+For example, let's assume we are building an interface to describe the components necessary to define a car.
+
+```go
+type car interface {
+	Color() string
+	Speed() int
+	IsFiretruck() bool
+}
+```
+
+`Color()` and `Speed()` make perfect sense. They are methods confined to the scope of a car. `IsFiretruck()` is an anti-pattern. We are forcing all cars to declare whether or not they are firetrucks. In order for this pattern to make any amount of sense, we would need a whole list of possible subtypes. `IsPickup()`, `IsSedan()`, `IsTank()`... where does it end??
+
+Instead, the developer should have relied on the native functionality of type assertion to derive the underlying type when given an instance of the car interface. Or, if a sub-interface is needed, it can be defined as:
+
+```go
+type firetruck interface {
+	car
+	HoseLength() int
+}
+```
+
+Which inherits the required methods from `car` as an [embedded interface](https://gobyexample.com/struct-embedding) and adds one additional required method to make the `car` a `firetruck`.
+
+## 3. Interfaces Are Not Classes
+
+- Interfaces are not classes, they are slimmer.
+- Interfaces don't have constructors or destructors that require that data is created or destroyed.
+- Interfaces aren't hierarchical by nature, though there is syntactic sugar to create interfaces that happen to be supersets of other interfaces.
+- Interfaces define function signatures, but not underlying behavior. Making an interface often won't [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) up your code in regard to struct methods. For example, if five types satisfy the [`fmt.Stringer`](https://go.dev/tour/methods/17) interface, they all need their own version of the `String()` function.
+
+# Message Formatter
+
+As Textio evolves, the team has decided to introduce a new feature for custom message formats. Depending on the user's preferences, messages can be sent in different formats, such as plain text, markdown, code, or even encrypted text. To efficiently manage this, you'll implement a system using interfaces.
+
+## Assignment
+
+1. Implement the `formatter` interface with a method `format` that returns a formatted string.
+2. Define structs that satisfy the `formatter` interface: `plainText`, `bold`, `code`.
+    - The structs must all have a `message` field of type `string`
+
+- `plainText` should return the message as is.
+- `bold` should wrap the message in two asterisks (**) to simulate bold text (e.g., `**message**`).
+- `code` should wrap the message in a single backtick (`) to simulate inline code (e.g., `` `message` ``)
+
+```go
+package main
+import "fmt"
+type formatter interface {
+	format() string
+}
+
+type plainText struct {
+	message string
+}
+type bold struct {
+	message string
+}
+type code struct {
+	message string
+}
+
+func (p plainText) format() string {
+	return p.message
+}
+
+func (b bold) format() string {
+	return fmt.Sprintf("**%s**",b.message)
+}
+
+func (c code) format() string {
+	return fmt.Sprintf("`%s`", c.message)
+}
+
+// Don't Touch below this line
+
+func sendMessage(format formatter) string {
+	return format.format() // Adjusted to call Format without an argument
+}
+
+```
+
+# Process Notifications
+
+Textio now has a system to process different types of notifications: direct messages, group messages, and system alerts. Each notification type has a unique way of calculating its importance score based on user interaction and content.
+
+## Assignment
+
+1. [ ] Implement the `importance` methods for each message type. They should return the importance score for each message type.
+    1. [ ] For a `directMessage` the importance score is based on if the message `isUrgent` or not. If it is urgent, the importance score is `50` otherwise the importance score is equal to the DM's `priorityLevel`.
+    2. [ ] For a `groupMessage` the importance score is based on the message's `priorityLevel`
+    3. [ ] All `systemAlert` messages should return a `100` importance score.
+2. [ ] Complete the `processNotification` function. It should identify the type and return different values for each type
+    1. [ ] For a `directMessage`, return the sender's username and importance score.
+    2. [ ] For a `groupMessage`, return the group's name and the importance score.
+    3. [ ] For a `systemAlert`, return the alert code and the importance score.
+    4. [ ] If the notification does not match any known type, return an empty string and a score of 0.
+
+
+```go
+package main
+
+type notification interface {
+	importance() int
+}
+
+type directMessage struct {
+	senderUsername string
+	messageContent string
+	priorityLevel  int
+	isUrgent       bool
+}
+
+type groupMessage struct {
+	groupName      string
+	messageContent string
+	priorityLevel  int
+}
+
+type systemAlert struct {
+	alertCode      string
+	messageContent string
+}
+
+func (dm directMessage) importance() int {
+	if dm.isUrgent == true {
+		return 50
+	}else {
+		return dm.priorityLevel
+	}
+}
+
+func (gm groupMessage) importance() int {
+	return gm.priorityLevel
+}
+
+func (sa systemAlert) importance() int {
+	return 100
+}
+
+func processNotification(n notification) (string, int) {
+	switch v := n.(type) {
+	case directMessage:
+		return v.senderUsername, v.importance()
+	case groupMessage:
+		return v.groupName, v.importance()
+	case systemAlert:
+		return v.alertCode, v.importance()
+	default:
+		return "",0
+	}
+}
+
+```
+
+
+# The Error Interface
+
+Go programs express errors with `error` values. An Error is any type that implements the simple built-in [error interface](https://blog.golang.org/error-handling-and-go):
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+When something can go wrong in a function, that function should return an `error` as its last return value. Any code that calls a function that can return an `error` should handle errors by testing whether the error is `nil`.
+
+## Atoi
+
+Let's look at how the [`strconv.Atoi`](https://pkg.go.dev/strconv#Atoi) function uses this pattern. The function signature of `Atoi` is:
+
+```go
+func Atoi(s string) (int, error)
+```
+
+This means `Atoi` takes a string argument and returns two values: an integer and an `error`. If the string can be successfully converted to an integer, `Atoi` returns the integer and a `nil` error. If the conversion fails, it returns zero and a non-nil error.
+
+Here's how you would safely use `Atoi`:
+
+```go
+// Atoi converts a stringified number to an integer
+i, err := strconv.Atoi("42b")
+if err != nil {
+    fmt.Println("couldn't convert:", err)
+    // because "42b" isn't a valid integer, we print:
+    // couldn't convert: strconv.Atoi: parsing "42b": invalid syntax
+    // Note:
+    // 'parsing "42b": invalid syntax' is returned by the .Error() method
+    return
+}
+// if we get here, then the
+// variable i was converted successfully
+```
+
+A `nil` error denotes success; a non-nil error denotes failure.
+
+## Assignment
+
+We offer a product that allows businesses to send pairs of messages to couples. It is mostly used by flower shops and movie theaters.
+
+Complete the `sendSMSToCouple` function. It should send 2 messages, first to the customer and then to the customer's spouse.
+
+1. [ ] Use `sendSMS()` to send the `msgToCustomer`. If an error is encountered, return `0` and the error.
+2. [ ] Do the same for the `msgToSpouse`
+3. [ ] If both messages are sent successfully, return the total cost of the messages added together.
+
+When you return a non-nil error in Go, it's conventional to return the "zero" values of all other return values.
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func sendSMSToCouple(msgToCustomer, msgToSpouse string) (int, error) {
+	costCustomer, err := sendSMS(msgToCustomer)
+	if err != nil {
+		return 0, err
+	}
+
+	costSpouse, err := sendSMS(msgToSpouse)
+	if err != nil {
+		return 0, err
+	}
+
+	return costCustomer + costSpouse, nil
+}
+
+// don't edit below this line
+
+func sendSMS(message string) (int, error) {
+	const maxTextLen = 25
+	const costPerChar = 2
+	if len(message) > maxTextLen {
+		return 0, fmt.Errorf("can't send texts over %v characters", maxTextLen)
+	}
+	return costPerChar * len(message), nil
+}
+
+```
+
+# Formatting Strings Review
+
+A convenient way to format strings in Go is by using the standard library's [fmt.Sprintf()](https://pkg.go.dev/fmt#example-Sprintf) function. It's a string interpolation function, similar to Python's [f-strings](https://docs.python.org/3/reference/lexical_analysis.html#f-strings). The `%v` substring uses the type's default formatting, which is often what you want.
+
+## Default Values
+
+```go
+const name = "Kim"
+const age = 22
+s := fmt.Sprintf("%v is %v years old.", name, age)
+// s = "Kim is 22 years old."
+```
+
+The equivalent Python code:
+
+```py
+name = "Kim"
+age = 22
+s = f"{name} is {age} years old."
+# s = "Kim is 22 years old."
+```
+## Rounding Floats
+
+```go
+s := fmt.Sprintf("I am %f years old", 10.523)
+// s = I am 10.523000 years old
+
+// The ".2" rounds the number to 2 decimal places
+s := fmt.Sprintf("I am %.2f years old", 10.523)
+// s = I am 10.52 years old
+```
+
+## Assignment
+
+We need better error logs for our backend developers to help them debug their code.
+
+Complete the `getSMSErrorString()` function. It should return a string with this format:
+
+```text
+SMS that costs $COST to be sent to 'RECIPIENT' cannot be sent
+```
+
+- `COST` is the cost of the SMS, always showing the price formatted to 2 decimal places.
+- `RECIPIENT` is the stringified representation of the recipient's phone number
+
+_Be sure to include the $ symbol, and wrap the recipient in single quotes._
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func getSMSErrorString(cost float64, recipient string) string {
+	return fmt.Sprintf("SMS that costs $%.2f to be sent to '%s' cannot be sent", cost, recipient)
+}
+
+```
+
+```go
+# The Error Interface
+
+Because errors are just interfaces, you can build your own custom types that implement the `error` interface. Here's an example of a `userError` struct that implements the `error` interface:
+
+```go
+type userError struct {
+    name string
+}
+
+func (e userError) Error() string {
+    return fmt.Sprintf("%v has a problem with their account", e.name)
+}
+```
+
+It can then be used as an error:
+
+```go
+func sendSMS(msg, userName string) error {
+    if !canSendToUser(userName) {
+        return userError{name: userName}
+    }
+    ...
+}
+```
+
+## Assignment
+
+Our users frequently try to run custom analytics queries on their message deliverability metrics, and end up writing a bad query that tries to divide a number by zero. It's become such a problem that we need to make a new type of error for division by zero.
+
+Update the code so that the `divideError` type implements the `error` interface. Its `Error()` method should just return a string formatted in the following way:
+
+```text
+cannot divide DIVIDEND by zero
+```
+
+Where `DIVIDEND` is the actual dividend of the `divideError`. Use the `%v` [verb](https://pkg.go.dev/fmt#hdr-Printing) to format the dividend as a float.
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type divideError struct {
+	dividend float64
+}
+
+func (d divideError) Error() string {
+	return fmt.Sprintf("cannot divide %v by zero", d.dividend)
+}
+
+func divide(dividend, divisor float64) (float64, error) {
+	if divisor == 0 {
+		return 0, divideError{dividend: dividend}
+	}
+	return dividend / divisor, nil
+}
+
+```
+
+# Errors Quiz
+
+Click to hide video
+
+Your browser does not support playing HTML5 video. You can instead. Here is a description of the content: Go Errors
+
+Go programs express errors with `error` values. Error-values are any type that implements the simple built-in [error interface](https://blog.golang.org/error-handling-and-go).
+
+Keep in mind that the way Go handles errors is fairly unique. Most languages treat errors as something special and different. For example, Python raises exception types and JavaScript throws and catches errors. In Go, an `error` is just another value that we handle like any other value - however we want! There aren't any special keywords for dealing with them.
+
+# The Errors Package
+
+The Go standard library provides an "errors" package that makes it easy to deal with errors.
+
+Read the godoc for the [errors.New()](https://pkg.go.dev/errors#New) function, but here's a simple example:
+
+```go
+var err error = errors.New("something went wrong")
+```
+
+## Assignment
+
+Textio's software architects may have overcomplicated the requirements from the last coding assignment... oops. All we needed was a new generic error message that returns the string `no dividing by 0` when a user attempts to get us to perform the taboo.
+
+Complete the `divide` function. If `y == 0`, return `0` and an error created with `errors.New()` that reads "no dividing by 0".
+
+## Hint
+
+Remember that it's conventional to return the "zero" values of all other return values when you return a non-nil error in Go.
+
+```go
+package main
+
+import (
+	"errors"
+)
+
+func divide(x, y float64) (float64, error) {
+	if y == 0 {
+		return 0, errors.New("no dividing by 0")
+	}
+	return x / y, nil
+}
+```
+# Panic
+
+As we've seen, the proper way to handle errors in Go is to make use of the [error](https://golang.org/pkg/errors/) interface. Pass errors up the call stack, treating them as normal values:
+
+```go
+func enrichUser(userID string) (User, error) {
+    user, err := getUser(userID)
+    if err != nil {
+        // fmt.Errorf is GOATed: it wraps an error with additional context
+        return User{}, fmt.Errorf("failed to get user: %w", err)
+    }
+    return user, nil
+}
+```
+
+However, there is another way to deal with errors in Go: the [`panic`](https://golang.org/ref/spec#Handling_panics) function. When a function calls `panic`, the program crashes and prints a stack trace.
+
+As a general rule, _do not use panic!_
+
+The `panic` function yeets control out of the current function and up the call stack until it reaches a function that [defers a `recover`](https://go.dev/blog/defer-panic-and-recover). If the panic isn't recovered in the same goroutine, the entire program crashes.
+
+```go
+func enrichUser(userID string) User {
+    user, err := getUser(userID)
+    if err != nil {
+        panic(err)
+    }
+    return user
+}
+
+func main() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("recovered from panic:", r)
+        }
+    }()
+
+    // this panics, but the defer/recover block catches it
+    // a truly astonishingly bad way to handle errors
+    enrichUser("123")
+}
+```
+
+Sometimes new Go developers look at `panic/recover`, and think, "This is like `try/catch`! I like this!" Don't be like them.
+
+I use error values for all "normal" error handling, and if I have a truly unrecoverable error, I use [log.Fatal](https://golang.org/pkg/log/#Fatal) to print a message and exit the program.
+
+# User Input
+
+In Textio, users can set their profile status to communicate their current activity to those that choose to read it... However, there are some restrictions on what these statuses can contain. Your task is to implement a function that validates a user's status update. The status update cannot be empty and must not exceed 140 characters.
+
+## Assignment
+
+Complete the `validateStatus` function. It should return an error when the status update violates any of the rules:
+
+- If the status is empty, return an error that reads `status cannot be empty`.
+- If the status exceeds 140 characters, return an error that says `status exceeds 140 characters`.
+- Otherwise, return `nil`.
+
+```go
+package main
+
+import (
+	"errors"
+)
+
+func validateStatus(status string) error {
+	if status == "" {
+		return errors.New("status cannot be empty")
+	}
+	if len(status) > 140 {
+		return errors.New("status exceeds 140 characters")
+	}
+
+	return nil
+}
+
+```
+# Loops in Go
+
+The basic loop in Go is written in standard C-like syntax:
+
+```go
+for INITIAL; CONDITION; AFTER{
+  // do something
+}
+```
+
+`INITIAL` is run once at the beginning of the loop and can create variables within the scope of the loop.
+
+`CONDITION` is checked before each iteration. If the condition doesn't pass then the loop breaks.
+
+`AFTER` is run after each iteration.
+
+For example:
+
+```go
+for i := 0; i < 10; i++ {
+  fmt.Println(i)
+}
+// Prints 0 through 9
+```
+
+## Assignment
+
+At Textio we have a dynamic formula for determining how much a batch of bulk messages costs to send. Complete the `bulkSend()` function.
+
+It should return the total cost (as a `float64`) to send a batch of `numMessages` messages. Each message costs `1.0`, plus an additional fee. The fee structure is:
+
+- 1st message: `1.0 + 0.00`
+- 2nd message: `1.0 + 0.01`
+- 3rd message: `1.0 + 0.02`
+- 4th message: `1.0 + 0.03`
+- ...
+
+Use a loop to calculate the total cost and return it.
+
+## Tip
+
+You can use `float64(x)` to convert the value to float64.
+
+```go
+package main
+
+func bulkSend(numMessages int) float64 {
+	cost := 1.0
+	var totalCost float64 = 0.0
+	for i := 0; i < numMessages; i++ {
+		totalCost += cost + (float64(i) * 0.01)
+	}
+	return totalCost
+}
+
+```
+
+# Omitting Conditions from a for Loop in Go
+
+Loops in Go can omit sections of a for loop. For example, the `CONDITION` (middle part) can be omitted which causes the loop to run forever.
+
+```go
+for INITIAL; ; AFTER {
+  // do something forever
+}
+```
+
+## Assignment
+
+Complete the `maxMessages` function. The parameter `thresh` is your total budget in pennies. Return the maximum number of whole messages you can send without the total cost ever exceeding `thresh`.
+
+Each message costs `100` pennies, plus an additional fee. The fee structure is:
+
+- 1st message: `100 + 0`
+- 2nd message: `100 + 1`
+- 3rd message: `100 + 2`
+- 4th message: `100 + 3`
+
+## Browser Freeze
+
+If you lock up your browser by creating an infinite loop that isn't breaking, just click the `cancel` button.
+
+```go
+package main
+import "fmt"
+func maxMessages(thresh int) int {
+	maxNoOfMessages := 0
+	cost := 100
+	totalCost := 0
+	for i := 0;; i++ {
+		totalCost += cost + i
+		if (totalCost > thresh) {
+			break
+		}
+		maxNoOfMessages+=1
+		fmt.Println("No Of Messages -> ",maxNoOfMessages, totalCost)
+	}
+	return maxNoOfMessages
+}
+
+```
