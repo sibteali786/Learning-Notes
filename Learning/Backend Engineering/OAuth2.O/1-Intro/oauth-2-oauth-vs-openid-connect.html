@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OAuth 2 – OAuth vs OpenID Connect</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--card:#171a23;--card2:#1d212c;--line:#2a2f3d;--text:#e6e8ee;--mute:#9aa1b2;
+--blue:#4d9fff;--orange:#ff9d4d;--green:#4ddb8f;--purple:#b48cff;--red:#ff5d6c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6;padding:40px 20px 80px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:Syne,sans-serif}
+h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px}
+h1 span{color:var(--blue)}h1 em{color:var(--green);font-style:normal}
+.sub{color:var(--mute);margin:8px 0 28px}
+.label{display:flex;align-items:center;gap:10px;font-family:Syne,sans-serif;font-weight:700;font-size:1.15rem;margin:44px 0 16px}
+.label::before{content:"";width:5px;height:24px;border-radius:3px;background:var(--c,var(--blue))}
+.label small{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.7rem;color:var(--mute);margin-left:auto;text-transform:uppercase;letter-spacing:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card h3{font-size:1rem;margin-bottom:8px}
+.card p,.card li{color:#c9cdd8;font-size:.93rem}
+.card ul{padding-left:18px;margin-top:6px}
+.pill{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.7rem;padding:2px 10px;border-radius:99px;border:1px solid;margin:0 6px 8px 0}
+.p-blue{color:var(--blue);border-color:var(--blue);background:#4d9fff14}
+.p-orange{color:var(--orange);border-color:var(--orange);background:#ff9d4d14}
+.p-green{color:var(--green);border-color:var(--green);background:#4ddb8f14}
+.p-purple{color:var(--purple);border-color:var(--purple);background:#b48cff14}
+.p-red{color:var(--red);border-color:var(--red);background:#ff5d6c14}
+code{font-family:'IBM Plex Mono',monospace;font-size:.82rem;background:#0b0d13;border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--orange)}
+pre{font-family:'IBM Plex Mono',monospace;font-size:.8rem;background:#0b0d13;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.7;margin-top:10px}
+.k{color:var(--purple)}.s{color:var(--green)}.c{color:#6b7385}.u{color:var(--blue)}.o{color:var(--orange)}
+.callout{border-left:4px solid var(--c,var(--orange));background:var(--card2);padding:14px 18px;border-radius:0 12px 12px 0;margin-top:16px;font-size:.93rem;color:#d4d8e2}
+.callout b{color:var(--c,var(--orange))}
+.cmp{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cmp>div{padding:14px 20px;border-bottom:1px solid var(--line);font-size:.9rem;color:#c9cdd8}
+.cmp>div:nth-last-child(-n+2){border-bottom:none}
+.cmp .h{font-family:Syne,sans-serif;font-weight:700;background:var(--card2)}
+.cmp>div:nth-child(odd){border-right:1px solid var(--line)}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:Inter,sans-serif}
+.mono{font-family:'IBM Plex Mono',monospace}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:#c9cdd8;vertical-align:top}
+th{font-family:Syne,sans-serif;color:var(--text);background:var(--card2)}
+@media(max-width:600px){.cmp{grid-template-columns:1fr}.cmp>div:nth-child(odd){border-right:none}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="pill p-blue">OAuth · Lesson 2</span><span class="pill p-green">OpenID Connect</span>
+<h1><span>OAuth</span> vs <em>OpenID Connect</em></h1>
+<p class="sub">They're often used together but are different things — with very different security considerations (details in a later section). This lesson: the high-level difference.</p>
+
+<!-- 1 ONE-LINER -->
+<div class="label" style="--c:var(--red)">The Core Distinction<small>memorize this</small></div>
+<div class="grid g2">
+<div class="card" style="border-color:var(--blue)"><span class="pill p-blue">OAuth</span><h3>Accessing APIs</h3>
+<p>Designed for <b>applications to get access to APIs</b>. The app only needs the <i>ability</i> to call the API — it does <b>not</b> need to know who the user is.</p>
+<p style="margin-top:8px">Issues: <span class="pill p-blue">Access Token</span></p></div>
+<div class="card" style="border-color:var(--green)"><span class="pill p-green">OpenID Connect (OIDC)</span><h3>Identifying the user</h3>
+<p>An <b>extension of OAuth</b> that adds <b>user identity information</b> on top, so the OAuth server can tell the app who the user is.</p>
+<p style="margin-top:8px">Issues: <span class="pill p-green">ID Token</span> (plus the access token)</p></div>
+</div>
+<div class="callout" style="--c:var(--orange)"><b>Terminology note:</b> you'll hear "authorization vs authentication". The instructor dislikes these terms — they're nearly the same word and confusing, especially for non-native English speakers. Just think: <b>accessing APIs</b> (OAuth) vs <b>identifying users</b> (OIDC).</div>
+
+<!-- 2 HOTEL ANALOGY -->
+<div class="label" style="--c:var(--purple)">The Hotel Analogy<small>OAuth in the real world</small></div>
+<div class="card">
+<p>You check in at a hotel: show <b>ID + credit card</b> at the front desk → they hand you a <b>key card</b>. You swipe it at your room door and it opens. <b>The door doesn't know who you are</b> — the front desk did that part. The door only checks whether the card is encoded as allowed.</p>
+</div>
+
+<div class="card" style="margin-top:16px">
+<svg viewBox="0 0 820 250" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="p" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b48cff"/></marker>
+<marker id="g" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ddb8f"/></marker></defs>
+<rect x="15" y="85" width="140" height="80" rx="12" fill="#1d212c" stroke="#4d9fff"/>
+<text x="85" y="118" fill="#4d9fff" text-anchor="middle" font-weight="700">Guest</text>
+<text x="85" y="140" fill="#9aa1b2" text-anchor="middle" font-size="12">= App / User</text>
+<rect x="300" y="20" width="200" height="75" rx="12" fill="#1d212c" stroke="#b48cff"/>
+<text x="400" y="50" fill="#b48cff" text-anchor="middle" font-weight="700">Front Desk</text>
+<text x="400" y="72" fill="#9aa1b2" text-anchor="middle" font-size="12">= Authorization Server</text>
+<rect x="300" y="160" width="200" height="75" rx="12" fill="#1d212c" stroke="#4ddb8f"/>
+<text x="400" y="190" fill="#4ddb8f" text-anchor="middle" font-weight="700">Room Door / Gym / Pool</text>
+<text x="400" y="212" fill="#9aa1b2" text-anchor="middle" font-size="12">= Resource Server (API)</text>
+<rect x="640" y="85" width="165" height="80" rx="12" fill="#1d212c" stroke="#ff9d4d"/>
+<text x="722" y="118" fill="#ff9d4d" text-anchor="middle" font-weight="700">Key Card</text>
+<text x="722" y="140" fill="#9aa1b2" text-anchor="middle" font-size="12">= Access Token</text>
+<line x1="150" y1="100" x2="298" y2="65" stroke="#b48cff" stroke-width="2" marker-end="url(#p)"/>
+<text x="150" y="72" fill="#b48cff" font-size="11">① show ID + card</text>
+<line x1="500" y1="60" x2="640" y2="105" stroke="#b48cff" stroke-width="2" marker-end="url(#p)"/>
+<text x="545" y="68" fill="#b48cff" font-size="11">② issues key</text>
+<line x1="640" y1="145" x2="502" y2="190" stroke="#4ddb8f" stroke-width="2" marker-end="url(#g)"/>
+<text x="560" y="186" fill="#4ddb8f" font-size="11">③ swipe → opens</text>
+</svg>
+</div>
+
+<table style="margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden">
+<tr><th>Hotel</th><th>OAuth term</th></tr>
+<tr><td>Person at the front desk (checks ID)</td><td><span class="pill p-purple">Authorization Server</span> authenticates the user</td></tr>
+<tr><td>Key card</td><td><span class="pill p-orange">Access Token</span></td></tr>
+<tr><td>Room doors, gym, pool</td><td><span class="pill p-green">Resource Server</span> (the API)</td></tr>
+<tr><td>Card contents: list of doors + expiry date</td><td>Token encodes <b>what</b> it may access + <b>expiration</b> — no user data needed</td></tr>
+</table>
+
+<div class="callout" style="--c:var(--purple)"><b>Key insight:</b> the key card needn't encode who you are — only <b>which doors it opens</b> and <b>when it expires</b>. Likewise an access token can grant access without telling the API or the app anything about the user's identity.</div>
+
+<!-- 3 SOFTWARE EXAMPLE -->
+<div class="label" style="--c:var(--blue)">Software Example: Upload to Google Drive<small>OAuth alone is enough</small></div>
+<div class="card">
+<p>An app only needs to show an <b>upload UI</b>. It gets an <b>access token</b> from Google, then calls the Drive API to upload the file to the user's Drive. <b>It never needs to know who the user is.</b></p>
+<pre><span class="c">// OAuth only: no identity needed</span>
+<span class="k">POST</span> <span class="u">https://www.googleapis.com/upload/drive/v3/files</span>
+<span class="o">Authorization</span>: Bearer <span class="s">&lt;access_token&gt;</span>   <span class="c">← all the app needs</span></pre>
+</div>
+
+<!-- 4 WHERE OAUTH STOPS -->
+<div class="label" style="--c:var(--red)">Where OAuth Alone Falls Short<small>need the user's identity?</small></div>
+<div class="card">
+<p>If the app wants to <b>show the user's name</b> in the UI or a <b>profile photo in the corner</b>, OAuth can't help: <b>nothing in OAuth communicates user information</b>. It's all added externally — mainly by <b>OpenID Connect</b>.</p>
+</div>
+
+<!-- 5 OIDC -->
+<div class="label" style="--c:var(--green)">How OpenID Connect Adds Identity<small>same framework + one new token</small></div>
+<div class="card">
+<p>OIDC builds on OAuth as a foundation. The <b>same framework</b> — how data moves and who the players are in the transaction — is unchanged. It simply adds <b>user information into the flow</b>, letting the OAuth server <b>communicate data about the user back to the app</b>.</p>
+</div>
+
+<div class="card" style="margin-top:16px">
+<svg viewBox="0 0 820 190" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9aa1b2"/></marker></defs>
+<rect x="20" y="60" width="180" height="70" rx="12" fill="#1d212c" stroke="#4d9fff"/>
+<text x="110" y="92" fill="#4d9fff" text-anchor="middle" font-weight="700">Application</text>
+<text x="110" y="112" fill="#9aa1b2" text-anchor="middle" font-size="12">wants API access + identity</text>
+<rect x="320" y="60" width="180" height="70" rx="12" fill="#1d212c" stroke="#b48cff"/>
+<text x="410" y="92" fill="#b48cff" text-anchor="middle" font-weight="700">Auth Server</text>
+<text x="410" y="112" fill="#9aa1b2" text-anchor="middle" font-size="12">OAuth + OIDC</text>
+<rect x="620" y="15" width="185" height="60" rx="12" fill="#1d212c" stroke="#ff9d4d"/>
+<text x="712" y="42" fill="#ff9d4d" text-anchor="middle" font-weight="700">Access Token</text>
+<text x="712" y="60" fill="#9aa1b2" text-anchor="middle" font-size="12">→ call APIs</text>
+<rect x="620" y="110" width="185" height="60" rx="12" fill="#1d212c" stroke="#4ddb8f"/>
+<text x="712" y="137" fill="#4ddb8f" text-anchor="middle" font-weight="700">ID Token (OIDC)</text>
+<text x="712" y="155" fill="#9aa1b2" text-anchor="middle" font-size="12">→ who the user is</text>
+<line x1="200" y1="95" x2="318" y2="95" stroke="#9aa1b2" stroke-width="2" marker-end="url(#a)"/>
+<line x1="500" y1="80" x2="618" y2="48" stroke="#ff9d4d" stroke-width="2" marker-end="url(#a)"/>
+<line x1="500" y1="110" x2="618" y2="140" stroke="#4ddb8f" stroke-width="2" marker-end="url(#a)"/>
+</svg>
+</div>
+
+<div class="cmp" style="margin-top:20px">
+<div class="h" style="color:var(--blue)">OAuth 2.0</div><div class="h" style="color:var(--green)">OpenID Connect</div>
+<div>Purpose: <b>access APIs</b></div><div>Purpose: <b>identify the user</b></div>
+<div>Issues <b>access tokens</b></div><div>Issues <b>ID tokens</b> (a statement about the user)</div>
+<div>Token says what is allowed &amp; until when</div><div>Token says who the user is</div>
+<div>Carries <b>no</b> user information</div><div>Built <b>on top of</b> OAuth — same flow &amp; players</div>
+<div>Example: upload a file to Drive</div><div>Example: show name + profile photo / "Sign in with…"</div>
+</div>
+
+<div class="callout" style="--c:var(--green)"><b>Real-world scenarios:</b><br>
+• <b>Photo-backup app</b> uploading to Google Drive → OAuth only (access token).<br>
+• <b>Same app</b> showing "Welcome, Ali" with your avatar in the corner → needs OIDC (ID token).<br>
+• <b>"Sign in with Apple / Google"</b> buttons → identity is the whole point, so OIDC.</div>
+
+<!-- 6 TAKEAWAYS -->
+<div class="label" style="--c:var(--orange)">Key Takeaways &amp; Tips<small>interview-ready</small></div>
+<div class="grid g2">
+<div class="card"><h3>Remember</h3>
+<ul>
+<li>OAuth = <b>accessing APIs</b>. OIDC = <b>identifying users</b>.</li>
+<li>OIDC is an <b>extension</b>, not a replacement — same framework.</li>
+<li>OAuth by itself conveys <b>no user info</b>.</li>
+<li>Different tokens: <b>access token</b> vs <b>ID token</b>.</li>
+</ul></div>
+<div class="card"><h3>Interview one-liner</h3>
+<p>"OAuth gives apps an access token to call APIs without knowing who the user is. OpenID Connect extends OAuth with an ID token that tells the app who the user is."</p></div>
+</div>
+<div class="callout" style="--c:var(--blue)"><b>Coming up:</b> the details of both protocols, what an ID token actually looks like, and their differing security considerations — in later sections.</div>
+
+</div>
+</body>
+</html>

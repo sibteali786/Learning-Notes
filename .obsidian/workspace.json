@@ -11,24 +11,12 @@
             "id": "e8617e74971bdab5",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Personal/Me/Journal.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-5-user-consent-and-password-grant.html"
               },
-              "icon": "lucide-file",
-              "title": "Journal"
+              "icon": "code-glyph",
+              "title": "oauth-5-user-consent-and-password-grant"
             }
           }
         ]
@@ -106,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Me/Journal.md",
+                "file": "Learning/Backend Engineering/Books/Designing Data Intensive Applications by Martin Kleppmann.pdf",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Backend Engineering/Books/Designing Data Intensive Applications by Martin Kleppmann.pdf",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cargo Bussiness"
+              "title": "Outgoing links"
             }
           },
           {
@@ -154,7 +142,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Personal/Me/Journal.md",
+                "file": "Learning/Backend Engineering/Books/Designing Data Intensive Applications by Martin Kleppmann.pdf",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -163,7 +151,8 @@
               "title": "Outline"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -180,40 +169,47 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "publish:Publish changes...": false,
-      "audio-recorder:Start/stop recording": false
+      "audio-recorder:Start/stop recording": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "obsidian-git:Open Git source control": false,
+      "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
   "active": "e8617e74971bdab5",
   "lastOpenFiles": [
+    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-4-client-types.html",
+    "Learning/Backend Engineering/OAuth2.O/1-Intro/oauth-1-before-oauth.html",
+    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-5-user-consent-and-password-grant.html",
+    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-3-roles-and-authorization-server.html",
+    "Learning/Backend Engineering/OAuth2.O/2-Api Security",
+    "Untitled",
+    "Learning/Backend Engineering/OAuth2.O/1-Intro/oauth-2-oauth-vs-openid-connect.html",
+    "Learning/Backend Engineering/Books/Oauth 2.0 Simplified (Aaron Parecki) (z-library.sk, 1lib.sk, z-lib.sk).pdf",
+    "Learning/Backend Engineering/OAuth2.O/1-Intro",
+    "Learning/Backend Engineering/OAuth2.O/untitled folder",
+    "Learning/Backend Engineering/OAuth2.O/oauth-1-before-oauth.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/movie_camera.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_strip_vertical.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_reel.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_rating.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_movie_camera.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_man_action.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_filter.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_award.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/distmatrix.PNG",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/RecSysNN.png",
+    "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/System Design/Technologies/Cassandra/Drawing 2026-10-12 20.07.50.excalidraw.md",
+    "Personal/Me/Journal.md",
+    "Learning/System Design/Technologies/Cassandra/Untitled.md",
     "Personal/Maryam's Things.md",
-    "Personal/Maryam/Pasted image 20260630145343.png",
-    "Personal/Maryam/Pasted image 20260630145449.png",
-    "Personal/Maryam/Pasted image 20260630145507.png",
-    "Personal/Maryam/05-makkah-3.png",
-    "Personal/Maryam/06-dino-valley-1.png",
-    "Personal/Maryam/06-dino-valley-2.png",
-    "Personal/Maryam/07-zarlish-engagement-1.png",
-    "Personal/Maryam/03-zainab-1.png",
-    "Personal/Maryam/04-brothers-wedding.png",
     "Personal/Maryam/Memories.md",
     "Personal/Maryam/Maryam's Things.md",
-    "Personal/Maryam/07-zarlish-engagement-2.png",
-    "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/AI Patient Cosultant.md",
     "conflict-files-obsidian-git.md",
     "Learning/IELTS/Writing Task 1/Writing Task 2  - Discussion Essay.md",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/6-kmeans-choosing-k.html",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/3-lewis-diagrams-scn-formal-charge.html",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Drawing 2026-09-29 22.11.26.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/kmeans-image-compression-lab.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/1-clustering-intro.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/kmeans-image-compression-lab (1).html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/C3_W1_KMeans_Assignment.ipynb",
-    "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/1-lewis-diagrams-no3-resonance.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home/jovyan/work",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/home/jovyan",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/K-Means-practice/data/ex7_X.npy",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
     "Learning/Research/Resources.md",
     "Learning/IELTS/Writing Task 1/Writing practice task 1 Part 2.md",
@@ -227,10 +223,6 @@
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Commands.md",
     "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027-Question-Bank.md",
     "Learning/AI&ML Engineering/Roadmap/Resources.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/2-Stress test K6/6-Redis Heartbeat with Coroutines.md",
-    "Learning/AI&ML Engineering/Roadmap/START-HERE.md",
-    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027.md",
-    "Learning/Interview Practice/Coastal Research/Schema Design.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

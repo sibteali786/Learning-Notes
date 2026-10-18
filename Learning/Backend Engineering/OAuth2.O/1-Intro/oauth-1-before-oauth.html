@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OAuth 1 – Life Before OAuth</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--card:#171a23;--card2:#1d212c;--line:#2a2f3d;--text:#e6e8ee;--mute:#9aa1b2;
+--blue:#4d9fff;--orange:#ff9d4d;--green:#4ddb8f;--purple:#b48cff;--red:#ff5d6c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6;padding:40px 20px 80px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:Syne,sans-serif}
+h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px}
+h1 span{color:var(--blue)}
+.sub{color:var(--mute);margin:8px 0 28px}
+.label{display:flex;align-items:center;gap:10px;font-family:Syne,sans-serif;font-weight:700;font-size:1.15rem;margin:44px 0 16px}
+.label::before{content:"";width:5px;height:24px;border-radius:3px;background:var(--c,var(--blue))}
+.label small{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.7rem;color:var(--mute);margin-left:auto;text-transform:uppercase;letter-spacing:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card h3{font-size:1rem;margin-bottom:8px}
+.card p,.card li{color:#c9cdd8;font-size:.93rem}
+.card ul{padding-left:18px;margin-top:6px}
+.pill{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.7rem;padding:2px 10px;border-radius:99px;border:1px solid;margin:0 6px 8px 0}
+.p-blue{color:var(--blue);border-color:var(--blue);background:#4d9fff14}
+.p-orange{color:var(--orange);border-color:var(--orange);background:#ff9d4d14}
+.p-green{color:var(--green);border-color:var(--green);background:#4ddb8f14}
+.p-purple{color:var(--purple);border-color:var(--purple);background:#b48cff14}
+.p-red{color:var(--red);border-color:var(--red);background:#ff5d6c14}
+code{font-family:'IBM Plex Mono',monospace;font-size:.82rem;background:#0b0d13;border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--orange)}
+pre{font-family:'IBM Plex Mono',monospace;font-size:.8rem;background:#0b0d13;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.7;margin-top:10px}
+.k{color:var(--purple)}.s{color:var(--green)}.c{color:#6b7385}.u{color:var(--blue)}.o{color:var(--orange)}
+.callout{border-left:4px solid var(--c,var(--orange));background:var(--card2);padding:14px 18px;border-radius:0 12px 12px 0;margin-top:16px;font-size:.93rem;color:#d4d8e2}
+.callout b{color:var(--c,var(--orange))}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cmp>div{padding:16px 20px;border-bottom:1px solid var(--line);font-size:.9rem;color:#c9cdd8}
+.cmp>div:nth-last-child(-n+2){border-bottom:none}
+.cmp .h{font-family:Syne,sans-serif;font-weight:700;background:var(--card2)}
+.cmp .h.bad{color:var(--red)}.cmp .h.good{color:var(--green)}
+.cmp>div:nth-child(odd){border-right:1px solid var(--line)}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:Inter,sans-serif}
+.mono{font-family:'IBM Plex Mono',monospace}
+.tl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;counter-reset:s}
+.tl .card{counter-increment:s;position:relative;padding-top:34px}
+.tl .card::before{content:counter(s);position:absolute;top:-12px;left:16px;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#0f1117;font-weight:700;display:grid;place-items:center;font-size:.8rem}
+@media(max-width:600px){.cmp{grid-template-columns:1fr}.cmp>div:nth-child(odd){border-right:none}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="pill p-blue">OAuth · Lesson 1</span><span class="pill p-orange">Fundamentals</span>
+<h1>Life <span>Before</span> OAuth</h1>
+<p class="sub">How apps used to handle authentication, why handing passwords to apps is risky, and the problem OAuth was built to solve.</p>
+
+<!-- 1 PROBLEM -->
+<div class="label" style="--c:var(--red)">The Problem Statement<small>why this lesson matters</small></div>
+<div class="card">
+<p>The most common pre-OAuth approach: the app shows a <b>username + password form</b>, the user types credentials, and the app exchanges them for something like a <b>session cookie</b>.</p>
+<p style="margin-top:10px">For a <b>simple, self-contained web app</b> with its own built-in auth, this works fine (assuming you hash passwords properly and never log them accidentally). It breaks down when you need:</p>
+<ul>
+<li>a <b>mobile app</b> alongside the web app</li>
+<li><b>multiple apps</b> sharing one user database (Single Sign-On)</li>
+<li><b>apps from different companies</b> sharing the same user base — e.g. <i>Sign in with Apple</i>, or a third-party app that manages files in your Google Drive</li>
+</ul>
+<div class="callout" style="--c:var(--red)"><b>Core issue:</b> without OAuth, every one of those apps must <b>collect the user's password and forward it to the API</b>. That's bad for third-party apps (user trust) — and still a bad idea for first-party apps (API control).</div>
+</div>
+
+<!-- 2 DIAGRAM OLD WORLD -->
+<div class="label" style="--c:var(--orange)">How It Worked (Password in the App)<small>the old flow</small></div>
+<div class="card">
+<svg viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff9d4d"/></marker>
+<marker id="r" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff5d6c"/></marker></defs>
+<rect x="20" y="75" width="150" height="80" rx="12" fill="#1d212c" stroke="#4d9fff"/>
+<text x="95" y="108" fill="#4d9fff" text-anchor="middle" font-weight="700">User</text>
+<text x="95" y="130" fill="#9aa1b2" text-anchor="middle" font-size="12">types password</text>
+<rect x="330" y="75" width="160" height="80" rx="12" fill="#1d212c" stroke="#ff9d4d"/>
+<text x="410" y="108" fill="#ff9d4d" text-anchor="middle" font-weight="700">Application</text>
+<text x="410" y="130" fill="#9aa1b2" text-anchor="middle" font-size="12">sees the raw password</text>
+<rect x="650" y="75" width="150" height="80" rx="12" fill="#1d212c" stroke="#4ddb8f"/>
+<text x="725" y="108" fill="#4ddb8f" text-anchor="middle" font-weight="700">API / Server</text>
+<text x="725" y="130" fill="#9aa1b2" text-anchor="middle" font-size="12">returns session / token</text>
+<line x1="170" y1="105" x2="328" y2="105" stroke="#ff9d4d" stroke-width="2" marker-end="url(#a)"/>
+<text x="250" y="96" fill="#ff9d4d" text-anchor="middle" font-size="12" class="mono">username + password</text>
+<line x1="490" y1="105" x2="648" y2="105" stroke="#ff9d4d" stroke-width="2" marker-end="url(#a)"/>
+<text x="570" y="96" fill="#ff9d4d" text-anchor="middle" font-size="12" class="mono">username + password</text>
+<line x1="648" y1="135" x2="492" y2="135" stroke="#4ddb8f" stroke-width="2" marker-end="url(#a)" opacity=".8"/>
+<text x="570" y="152" fill="#4ddb8f" text-anchor="middle" font-size="12" class="mono">session cookie</text>
+<path d="M410 160 Q410 205 410 200" stroke="#ff5d6c" stroke-width="2" fill="none" stroke-dasharray="4 4" marker-end="url(#r)"/>
+<text x="410" y="222" fill="#ff5d6c" text-anchor="middle" font-size="12">⚠ might log it, store it, or misuse it</text>
+</svg>
+</div>
+
+<!-- 3 USER SIDE -->
+<div class="label" style="--c:var(--purple)">Problems the <u style="text-decoration-color:var(--purple)">User</u> Cares About<small>trust &amp; control</small></div>
+<div class="grid g3">
+<div class="card"><span class="pill p-purple">Trust</span><h3>Can I trust this app?</h3>
+<p>You can never really be sure what an app does with your password. You <i>hope</i> it swaps it for a session cookie and forgets it — but it could accidentally log it, or intentionally store it.</p>
+<p style="margin-top:8px"><b>Note:</b> legitimate apps never ask for your Google password — not even Google's own apps (revisited in the mobile apps lesson).</p></div>
+<div class="card"><span class="pill p-red">Over-privilege</span><h3>Password = keys to the kingdom</h3>
+<p>A photo-editor only wants to <b>upload a photo</b> to Dropbox. But with your password it can also <b>read any file</b> and even <b>change your password</b>.</p>
+<p style="margin-top:8px">The app gets <i>far more power</i> than the task needs.</p></div>
+<div class="card"><span class="pill p-orange">Revocation</span><h3>No clean way to revoke</h3>
+<p>Want to cut one app off? The only option is <b>changing your password</b> — which also kills access for <i>every other app</i> and forces you to log in everywhere again.</p></div>
+</div>
+
+<div class="callout" style="--c:var(--purple)"><b>Real-world scenario:</b> You use "PixelPro" to edit a photo and it asks for your Dropbox password so it can save the result. Handing it over means PixelPro can now browse your tax documents, download everything, or lock you out. Later, to remove PixelPro's access, you must reset your Dropbox password — and re-login on your phone, laptop, and every other connected app.</div>
+
+<!-- 4 API SIDE -->
+<div class="label" style="--c:var(--blue)">Problems the <u style="text-decoration-color:var(--blue)">API</u> Cares About<small>"but my apps are first-party!"</small></div>
+<div class="card">
+<p>True: with first-party apps the user-trust issue mostly disappears (the Twitter app asking for your Twitter password isn't suspicious). But look from the <b>API owner's</b> side — you must ensure the API is accessed only by <b>real users</b> and <b>real applications</b>.</p>
+</div>
+<div class="grid g3" style="margin-top:16px">
+<div class="card"><span class="pill p-blue">Identity</span><h3>Can't tell apps apart</h3>
+<p>If the API takes username + password and returns a session/token, the request <b>looks identical from every app</b>. You can't distinguish which app is calling.</p></div>
+<div class="card"><span class="pill p-red">Attacks</span><h3>Is it even your app?</h3>
+<p>An attacker can take a <b>password dump from another service</b> and start trying those credentials directly against your API (credential stuffing). You can't be sure the caller is the real user — or your app.</p></div>
+<div class="card"><span class="pill p-orange">Scaling MFA</span><h3>MFA rollout is painful</h3>
+<p>Add MFA (email, SMS, push, hardware key…) and <b>every app team</b> must update their login UI. Each new MFA type = repeat the whole process. It <b>slows the dev lifecycle</b> and doesn't scale.</p></div>
+</div>
+
+<div class="callout" style="--c:var(--blue)"><b>Real-world scenario:</b> A company has a web app, an iOS app, an Android app and an admin portal — each built by a different team. Security wants to add a hardware-key MFA step. Without OAuth: 4 teams, 4 releases, 4 sets of bugs, and any team that lags leaves a weaker door open.</div>
+
+<!-- 5 OAUTH FIX -->
+<div class="label" style="--c:var(--green)">How OAuth Solves It<small>high-level preview</small></div>
+<div class="card">
+<p>OAuth requires every application to <b>send the user out to the OAuth server</b> to log in, then <b>redirect them back</b> to the app so the app can receive <b>tokens</b>. The key is the <b>redirect</b>: the user <i>leaves</i> the app and types their password at the OAuth server — <b>the app never sees it</b>.</p>
+</div>
+
+<div class="card" style="margin-top:16px">
+<svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="g" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ddb8f"/></marker>
+<marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4d9fff"/></marker></defs>
+<rect x="20" y="110" width="150" height="80" rx="12" fill="#1d212c" stroke="#4d9fff"/>
+<text x="95" y="145" fill="#4d9fff" text-anchor="middle" font-weight="700">User</text>
+<text x="95" y="167" fill="#9aa1b2" text-anchor="middle" font-size="12">(browser)</text>
+<rect x="330" y="20" width="160" height="70" rx="12" fill="#1d212c" stroke="#ff9d4d"/>
+<text x="410" y="52" fill="#ff9d4d" text-anchor="middle" font-weight="700">Application</text>
+<text x="410" y="72" fill="#9aa1b2" text-anchor="middle" font-size="12">never sees password</text>
+<rect x="330" y="210" width="160" height="70" rx="12" fill="#1d212c" stroke="#b48cff"/>
+<text x="410" y="242" fill="#b48cff" text-anchor="middle" font-weight="700">OAuth Server</text>
+<text x="410" y="262" fill="#9aa1b2" text-anchor="middle" font-size="12">password + MFA live here</text>
+<rect x="650" y="110" width="150" height="80" rx="12" fill="#1d212c" stroke="#4ddb8f"/>
+<text x="725" y="145" fill="#4ddb8f" text-anchor="middle" font-weight="700">API</text>
+<text x="725" y="167" fill="#9aa1b2" text-anchor="middle" font-size="12">accepts tokens</text>
+<line x1="170" y1="130" x2="330" y2="70" stroke="#4d9fff" stroke-width="2" marker-end="url(#b)"/>
+<text x="210" y="88" fill="#4d9fff" font-size="11">① click "Log in"</text>
+<line x1="330" y1="82" x2="172" y2="148" stroke="#ff9d4d" stroke-width="2" marker-end="url(#b)"/>
+<text x="228" y="132" fill="#ff9d4d" font-size="11" transform="rotate(-23 228 132)" >② redirect out</text>
+<line x1="170" y1="170" x2="330" y2="235" stroke="#4d9fff" stroke-width="2" marker-end="url(#b)"/>
+<text x="166" y="226" fill="#4d9fff" font-size="11">③ types password</text>
+<line x1="490" y1="232" x2="490" y2="232" stroke="#4ddb8f"/>
+<path d="M490 225 L560 190 L560 90 L492 60" stroke="#4ddb8f" stroke-width="2" fill="none" marker-end="url(#g)"/>
+<text x="568" y="150" fill="#4ddb8f" font-size="11">④ redirect back</text>
+<text x="568" y="164" fill="#4ddb8f" font-size="11">+ tokens to app</text>
+<line x1="490" y1="50" x2="650" y2="135" stroke="#4ddb8f" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#g)"/>
+<text x="560" y="62" fill="#4ddb8f" font-size="11">⑤ call API with token</text>
+</svg>
+</div>
+
+<div class="tl" style="margin-top:24px">
+<div class="card"><h3>User clicks Log in</h3><p>App doesn't show a password form.</p></div>
+<div class="card"><h3>Redirect out</h3><p>Browser is sent to the OAuth server.</p></div>
+<div class="card"><h3>Authenticate there</h3><p>Password / MFA entered at the OAuth server only.</p></div>
+<div class="card"><h3>Redirect back</h3><p>App receives tokens, not a password.</p></div>
+</div>
+
+<pre><span class="c">// Illustrative only — details come in later lessons</span>
+<span class="k">GET</span> <span class="u">https://oauth-server.example/authorize</span>
+    ?<span class="o">client_id</span>=photo-app
+    &amp;<span class="o">redirect_uri</span>=<span class="s">https://photo-app.example/callback</span>
+    &amp;<span class="o">response_type</span>=code
+
+<span class="c">// After login, user is sent back to the app:</span>
+<span class="s">https://photo-app.example/callback</span>?<span class="o">code</span>=abc123   <span class="c">← not a password</span></pre>
+
+<!-- 6 BEFORE/AFTER -->
+<div class="label" style="--c:var(--orange)">Before vs After<small>compare grid</small></div>
+<div class="cmp">
+<div class="h bad">❌ Password in the app</div><div class="h good">✅ OAuth redirect</div>
+<div>App sees &amp; handles the raw password</div><div>Password only ever typed at the OAuth server</div>
+<div>Third-party apps get full account power</div><div>Apps get limited tokens (scoped — covered later)</div>
+<div>Revoke = change password, breaking all apps</div><div>Revoke a single app's access without touching others</div>
+<div>API can't tell which app is calling</div><div>Each app is identified to the OAuth server</div>
+<div>Adding MFA = update every app team</div><div>Enable MFA once on the OAuth server → all apps get it instantly</div>
+<div>Hard to do SSO across mobile / multiple apps / companies</div><div>Built for SSO and cross-company sharing</div>
+</div>
+
+<!-- 7 KEY TAKEAWAYS -->
+<div class="label" style="--c:var(--green)">Key Distinctions &amp; Practical Tips<small>remember these</small></div>
+<div class="grid g2">
+<div class="card"><h3>Third-party vs first-party</h3>
+<p><span class="pill p-red">3rd party</span> Main issue = <b>user trust</b> &amp; over-privilege.</p>
+<p><span class="pill p-blue">1st party</span> Main issue = <b>API control</b>, app identity, and MFA flexibility.</p>
+<p style="margin-top:6px">OAuth helps <b>both</b>.</p></div>
+<div class="card"><h3>Mental model</h3>
+<p>Giving an app your password = <b>giving it your house keys</b>.</p>
+<p>OAuth = <b>a valet key</b>: limited, revocable, and issued by the owner without handing over the master key.</p></div>
+<div class="card"><h3>Practical tips</h3>
+<ul>
+<li>Never ask users for a password for <i>another</i> service.</li>
+<li>Centralise login (and MFA) in one place.</li>
+<li>Treat "which app is calling?" as a first-class API question.</li>
+</ul></div>
+<div class="card"><h3>Interview one-liner</h3>
+<p>"OAuth removes the need for apps to ever see user passwords by redirecting users to a central authorization server, which then issues tokens back to the app — improving security, revocability, and letting MFA be changed in one place."</p></div>
+</div>
+
+<div class="callout" style="--c:var(--blue)"><b>Coming up:</b> these ideas (redirects, tokens, the OAuth server) are expanded in later lessons — including why mobile apps are a special case.</div>
+
+</div>
+</body>
+</html>

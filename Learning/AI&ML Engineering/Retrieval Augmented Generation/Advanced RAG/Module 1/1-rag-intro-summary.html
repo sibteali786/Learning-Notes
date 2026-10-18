@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG: Introduction — Visual Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  h3{font-size:.95rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fn{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini .t{font-family:'Syne',sans-serif;font-weight:700;color:#fff;margin-bottom:4px;}
+  .mini p{margin:4px 0 0;font-size:.82rem;color:var(--dim);}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  p{font-size:.88rem;margin:8px 0;}
+  ul{margin:6px 0;padding-left:20px;font-size:.85rem;}
+  li{margin:4px 0;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+  .good{color:var(--green)} .bad{color:var(--red)}
+</style>
+</head>
+<body>
+
+<h1>🔎 RAG: Introduction</h1>
+<div class="sub">DeepLearning.AI · Retrieval Augmented Generation · Module 1 · Intro video (Zain Hasan) · "Introduction to RAG"</div>
+
+<!-- PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem</h2></div>
+  <p>LLMs are remarkable: they answer questions, summarize and rewrite text, give feedback on documents, generate code and more. Tasks that seemed out of reach a few years ago. But an LLM only knows what was in its <b>training data</b>.</p>
+  <p><span class="pill red">Unseen info → weaker answers</span> When the prompt needs information the model never saw, quality drops.</p>
+  <div class="note">💡 <b>RAG</b> = an approach that improves LLM performance by giving it access to information it doesn't know from training.</div>
+</div>
+
+<!-- TWO STEPS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>1. Two Steps for Answering Any Question</h2></div>
+  <p>Humans answer questions in two phases. RAG copies that exact structure.</p>
+  <svg viewBox="0 0 760 120" width="100%" style="margin:10px 0">
+    <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="60" y="30" width="260" height="60" rx="12" fill="rgba(255,157,77,.15)" stroke="#ff9d4d"/>
+    <text x="190" y="55" fill="#ff9d4d" text-anchor="middle" font-size="13" font-weight="600">"Retrieval"</text>
+    <text x="190" y="75" fill="#e6e8ef" text-anchor="middle" font-size="12">Collect information</text>
+    <line x1="325" y1="60" x2="435" y2="60" stroke="#8a90a6" stroke-width="2" marker-end="url(#a1)"/>
+    <rect x="440" y="30" width="260" height="60" rx="12" fill="rgba(77,157,255,.15)" stroke="#4d9dff"/>
+    <text x="570" y="55" fill="#4d9dff" text-anchor="middle" font-size="13" font-weight="600">"Generation"</text>
+    <text x="570" y="75" fill="#e6e8ef" text-anchor="middle" font-size="12">Reason &amp; respond</text>
+  </svg>
+  <table>
+    <tr><th>Question</th><th>Retrieval (collect)</th><th>Generation (reason)</th></tr>
+    <tr><td>Why are hotels expensive on the weekend?</td><td><span class="pill green">None needed</span></td><td>Respond from your own knowledge: more people travel on weekends → more competition for rooms</td></tr>
+    <tr><td>Why are hotels in Vancouver super expensive <i>this coming weekend</i>?</td><td><span class="pill orange">A little</span> Search online → Taylor Swift is in town for a two-night residency</td><td>Combine found fact + general knowledge → answer</td></tr>
+    <tr><td>Why doesn't Vancouver have more hotel capacity close to downtown?</td><td><span class="pill red">A lot</span> Extensive research: Vancouver's development history, urban planning, etc.</td><td>Synthesize the research into an answer</td></tr>
+  </table>
+  <div class="note"><b>Key idea:</b> sometimes you need zero info, sometimes a little, sometimes a lot. <b>Retrieval</b> = collecting useful info. <b>Generation</b> = reasoning over it and responding.</div>
+</div>
+
+<!-- TRADITIONAL USAGE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>2. Traditional LLM Usage</h2></div>
+  <p>Think of an LLM as a person with broad general knowledge from reading huge chunks of the internet (but not someone who spends time on Wikipedia — it's a <b>mathematical model</b> trained on massive internet datasets).</p>
+  <svg viewBox="0 0 760 250" width="100%" style="margin:10px 0">
+    <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="290" y="5" width="110" height="46" rx="10" fill="rgba(77,157,255,.15)" stroke="#4d9dff"/>
+    <text x="345" y="33" fill="#4d9dff" text-anchor="middle" font-size="12">Internet data</text>
+    <line x1="345" y1="52" x2="345" y2="100" stroke="#8a90a6" stroke-width="2" marker-end="url(#a2)"/>
+    <rect x="20" y="105" width="110" height="50" rx="10" fill="#0b0d14" stroke="#262b3a"/>
+    <text x="75" y="135" fill="#e6e8ef" text-anchor="middle" font-size="12">Prompt</text>
+    <line x1="135" y1="130" x2="285" y2="130" stroke="#8a90a6" stroke-width="2" marker-end="url(#a2)"/>
+    <rect x="290" y="105" width="110" height="50" rx="10" fill="rgba(181,140,255,.15)" stroke="#b58cff"/>
+    <text x="345" y="135" fill="#b58cff" text-anchor="middle" font-size="12" font-weight="600">LLM</text>
+    <line x1="405" y1="130" x2="470" y2="130" stroke="#8a90a6" stroke-width="2" marker-end="url(#a2)"/>
+    <rect x="475" y="75" width="130" height="50" rx="10" fill="rgba(77,217,146,.15)" stroke="#4d9dff" stroke-opacity="0"/>
+    <rect x="475" y="75" width="130" height="50" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/>
+    <text x="540" y="105" fill="#4dd992" text-anchor="middle" font-size="12">✓ Great answer</text>
+    <rect x="475" y="145" width="130" height="50" rx="10" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/>
+    <text x="540" y="175" fill="#ff6b6b" text-anchor="middle" font-size="12">✗ Not so great</text>
+    <text x="640" y="160" fill="#8a90a6" font-size="11">← very recent info</text>
+    <text x="640" y="180" fill="#8a90a6" font-size="11">← specialized knowledge</text>
+  </svg>
+  <p>During training the model learns whatever is in the data. When you prompt it, you're <i>hoping</i> relevant info was in training — ideally many times.</p>
+  <div class="grid2">
+    <div class="mini"><div class="t good">✓ Great answer when…</div><p>The relevant knowledge was in the training data (e.g., "why are hotels expensive on weekends").</p></div>
+    <div class="mini"><div class="t bad">✗ Not-so-great answer when…</div><p>The prompt is about a very recent event or specialized info the model hasn't seen.</p></div>
+  </div>
+  <div class="note"><b>Training data sources (slide):</b> Web pages · Books · Forums · Code. Example: for "Why doesn't Vancouver have more hotel capacity close to downtown?", training data might contain a book on <i>Urban Development in Vancouver</i> (zoning laws and city planning since the early 1900s limited downtown hotel growth) and a <i>forum comment</i> ("probably because land costs are super high near downtown"). The LLM only has what happened to be there.</div>
+</div>
+
+<!-- WHAT LLMs DON'T KNOW -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>3. What LLMs Don't Know</h2></div>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--red)">🔒 Private databases</div><p>LLMs can't access confidential info. Companies keep private databases.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">🕳️ Hard-to-access info</div><p>Some information isn't widely available online, so it's inaccessible to LLMs.</p></div>
+    <div class="mini"><div class="t" style="color:var(--blue)">⏱️ Real-time data</div><p>LLMs are trained on past data and don't update automatically. News is published every minute.</p></div>
+  </div>
+  <div class="note">Just as it's unreasonable to expect <i>you</i> to be an expert on every topic, it's unreasonable to expect an LLM to be. Both give much better responses with better information.</div>
+</div>
+
+<!-- JUST PUT IT IN THE PROMPT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>4. The Core Idea: "Just put it in the prompt!"</h2></div>
+  <p>How do you make sure the LLM knows the useful information? <b>Modify the prompt before sending it.</b> Add information that helps the LLM respond, alongside the user's original question.</p>
+  <svg viewBox="0 0 760 190" width="100%" style="margin:10px 0">
+    <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="20" y="20" width="560" height="150" rx="14" fill="#0b0d14" stroke="#262b3a" stroke-dasharray="5 4"/>
+    <text x="35" y="42" fill="#8a90a6" font-size="11">AUGMENTED PROMPT</text>
+    <rect x="40" y="55" width="250" height="95" rx="10" fill="rgba(77,157,255,.12)" stroke="#4d9dff"/>
+    <text x="165" y="78" fill="#4d9dff" text-anchor="middle" font-size="11" font-weight="600">User prompt</text>
+    <text x="165" y="100" fill="#e6e8ef" text-anchor="middle" font-size="11">Why are hotels in Vancouver</text>
+    <text x="165" y="116" fill="#e6e8ef" text-anchor="middle" font-size="11">super expensive this coming</text>
+    <text x="165" y="132" fill="#e6e8ef" text-anchor="middle" font-size="11">weekend?</text>
+    <text x="310" y="108" fill="#e6e8ef" font-size="22">+</text>
+    <rect x="340" y="55" width="220" height="40" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/>
+    <text x="450" y="80" fill="#4dd992" text-anchor="middle" font-size="12">News reports</text>
+    <rect x="340" y="110" width="220" height="40" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/>
+    <text x="450" y="135" fill="#4dd992" text-anchor="middle" font-size="12">Forum posts</text>
+    <line x1="590" y1="95" x2="660" y2="95" stroke="#8a90a6" stroke-width="2" marker-end="url(#a3)"/>
+    <rect x="665" y="65" width="80" height="60" rx="12" fill="rgba(181,140,255,.15)" stroke="#b58cff"/>
+    <text x="705" y="100" fill="#b58cff" text-anchor="middle" font-size="13" font-weight="600">LLM</text>
+  </svg>
+  <div class="note">Now the LLM has the information it needs to respond accurately (e.g., the Taylor Swift residency).</div>
+</div>
+
+<!-- RETRIEVER -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>5. The Retriever</h2></div>
+  <p>The info has to come from somewhere. The component of a RAG system that handles this is the <b>retriever</b>.</p>
+  <div class="grid2">
+    <div>
+      <ul>
+        <li>Manages a <b>knowledge base</b> of trusted, relevant, and possibly private information</li>
+        <li>When a prompt arrives, finds the <b>most relevant</b> information and shares it with the LLM</li>
+        <li>Improves generation: the model uses the retrieved info when it responds</li>
+      </ul>
+    </div>
+    <svg viewBox="0 0 300 170" width="100%">
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+      <rect x="90" y="10" width="120" height="50" rx="12" fill="rgba(181,140,255,.15)" stroke="#b58cff"/>
+      <text x="150" y="40" fill="#b58cff" text-anchor="middle" font-size="13" font-weight="600">Retriever</text>
+      <line x1="130" y1="65" x2="130" y2="105" stroke="#8a90a6" stroke-width="2" marker-end="url(#a4)"/>
+      <line x1="170" y1="105" x2="170" y2="65" stroke="#8a90a6" stroke-width="2" marker-end="url(#a4)"/>
+      <rect x="70" y="110" width="160" height="50" rx="12" fill="rgba(77,217,146,.15)" stroke="#4dd992"/>
+      <text x="150" y="140" fill="#4dd992" text-anchor="middle" font-size="13" font-weight="600">Knowledge Base</text>
+    </svg>
+  </div>
+</div>
+
+<!-- FULL FLOW -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>6. Full RAG Flow (Putting It Together)</h2></div>
+  <svg viewBox="0 0 780 230" width="100%" style="margin:10px 0">
+    <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="10" y="85" width="110" height="55" rx="10" fill="rgba(77,157,255,.15)" stroke="#4d9dff"/>
+    <text x="65" y="110" fill="#4d9dff" text-anchor="middle" font-size="12" font-weight="600">① User</text>
+    <text x="65" y="126" fill="#e6e8ef" text-anchor="middle" font-size="11">question</text>
+    <line x1="125" y1="112" x2="175" y2="112" stroke="#8a90a6" stroke-width="2" marker-end="url(#a5)"/>
+    <rect x="180" y="85" width="120" height="55" rx="10" fill="rgba(181,140,255,.15)" stroke="#b58cff"/>
+    <text x="240" y="110" fill="#b58cff" text-anchor="middle" font-size="12" font-weight="600">② Retriever</text>
+    <text x="240" y="126" fill="#e6e8ef" text-anchor="middle" font-size="11">finds relevant info</text>
+    <line x1="240" y1="85" x2="240" y2="50" stroke="#8a90a6" stroke-width="2" marker-end="url(#a5)"/>
+    <line x1="260" y1="50" x2="260" y2="83" stroke="#8a90a6" stroke-width="2" marker-end="url(#a5)"/>
+    <rect x="170" y="5" width="140" height="42" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/>
+    <text x="240" y="31" fill="#4dd992" text-anchor="middle" font-size="12">Knowledge base</text>
+    <line x1="305" y1="112" x2="355" y2="112" stroke="#8a90a6" stroke-width="2" marker-end="url(#a5)"/>
+    <rect x="360" y="85" width="140" height="55" rx="10" fill="rgba(255,157,77,.15)" stroke="#ff9d4d"/>
+    <text x="430" y="108" fill="#ff9d4d" text-anchor="middle" font-size="12" font-weight="600">③ Augmented</text>
+    <text x="430" y="124" fill="#e6e8ef" text-anchor="middle" font-size="11">prompt = Q + info</text>
+    <line x1="505" y1="112" x2="555" y2="112" stroke="#8a90a6" stroke-width="2" marker-end="url(#a5)"/>
+    <rect x="560" y="85" width="90" height="55" rx="10" fill="rgba(181,140,255,.15)" stroke="#b58cff"/>
+    <text x="605" y="118" fill="#b58cff" text-anchor="middle" font-size="12" font-weight="600">④ LLM</text>
+    <line x1="655" y1="112" x2="695" y2="112" stroke="#8a90a6" stroke-width="2" marker-end="url(#a5)"/>
+    <rect x="700" y="85" width="70" height="55" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/>
+    <text x="735" y="118" fill="#4dd992" text-anchor="middle" font-size="12">⑤ Answer</text>
+    <text x="180" y="180" fill="#ff9d4d" font-size="12" font-weight="600">RETRIEVAL ← ① ②</text>
+    <text x="440" y="180" fill="#4d9dff" font-size="12" font-weight="600">AUGMENTED GENERATION ← ③ ④ ⑤</text>
+  </svg>
+  <div class="note"><b>Name decoded:</b> <span class="pill orange">Retrieval</span> <span class="pill green">Augmented</span> <span class="pill blue">Generation</span> — you're improving ("augmenting") the way an LLM generates text by first retrieving relevant info from a knowledge base. Admittedly a mouthful.</div>
+</div>
+
+<!-- COMPARE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>7. Plain LLM vs RAG</h2></div>
+  <table>
+    <tr><th></th><th>Plain LLM</th><th>RAG system</th></tr>
+    <tr><td>Knowledge source</td><td>Only training data</td><td>Training data + knowledge base via retriever</td></tr>
+    <tr><td>Recent events</td><td class="bad">Unaware (trained on past data)</td><td class="good">Info retrieved from the knowledge base</td></tr>
+    <tr><td>Private / confidential data</td><td class="bad">Can't access</td><td class="good">Retriever manages private info</td></tr>
+    <tr><td>What goes to the model</td><td>User's prompt</td><td>User's prompt + retrieved info (augmented prompt)</td></tr>
+  </table>
+</div>
+
+<!-- TIPS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>11. Interview / Practical Tips</h2></div>
+  <ul>
+    <li>Explain RAG in one line: <b>retrieve relevant info first, then have the LLM generate using it</b>.</li>
+    <li>Name the three gaps RAG fills: <b>private data, hard-to-access data, real-time data</b>.</li>
+    <li>Distinguish the two components: <b>retriever</b> (finds info from the knowledge base) vs <b>LLM</b> (generates the answer).</li>
+    <li>Key mechanism: the prompt is <b>modified before it reaches the LLM</b>. The model itself isn't changed.</li>
+    <li>Retrieval need varies: none, a little, or a lot, depending on the question.</li>
+  </ul>
+</div>
+
+<!-- MAP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>12. Module 1 Map (What's Next)</h2></div>
+  <span class="pill blue">Applications of RAG (next video)</span>
+  <span class="pill blue">RAG architecture overview</span>
+  <span class="pill blue">Introduction to LLMs</span>
+  <span class="pill green">Lab: LLM calls &amp; simple augmented prompts</span>
+  <span class="pill purple">Intro to information retrieval</span>
+  <span class="pill orange">Module 1 quiz</span>
+  <span class="pill orange">Assignment: Introduction to RAG systems</span>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaway</h2></div>
+  <div class="note"><b>LLMs are only as good as the information they have access to.</b> RAG = Retrieval (collect info via the retriever from a knowledge base) + Augmented Generation (add it to the prompt so the LLM reasons over it).</div>
+</div>
+
+</body>
+</html>
