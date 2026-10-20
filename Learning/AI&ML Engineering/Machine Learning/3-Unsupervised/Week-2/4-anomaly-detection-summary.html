@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anomaly Detection — Intro & Density Estimation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;margin:0 auto;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fn{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:150px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🛰️ Anomaly Detection — Intro &amp; Density Estimation</h1>
+<div class="sub">Unsupervised Learning · 2nd unsupervised algorithm (after clustering) · Learn from "normal", flag the unusual</div>
+
+<!-- PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Problem</h2></div>
+  <p>Given an <b>unlabeled dataset of normal events</b>, the algorithm learns what "normal" looks like, then <b>raises a red flag</b> when a new event is unusual (an <i>anomaly</i>).</p>
+  <span class="pill blue">Unlabeled data</span><span class="pill green">Mostly normal examples</span><span class="pill orange">Flags, doesn't decide</span>
+  <div class="note"><b>Why this setup?</b> Aircraft-engine makers rarely produce bad engines, so the easy data to collect is <i>m</i> engines that are almost all fine. You can't gather a big labeled pile of defects — so you model "normal" and detect deviations.</div>
+</div>
+
+<!-- RUNNING EXAMPLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Running Example: Aircraft Engines</h2></div>
+  <p>An engine rolls off the assembly line. Compute features of it:</p>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--orange)">x₁ = heat</h3><ul><li>Heat generated by the engine</li></ul></div>
+    <div class="mini"><h3 style="color:var(--blue)">x₂ = vibration</h3><ul><li>Vibration intensity</li></ul></div>
+    <div class="mini"><h3 style="color:var(--purple)">… more features</h3><ul><li>Slide uses just 2 to keep it plottable</li></ul></div>
+  </div>
+  <pre>Dataset:   { x⁽¹⁾, x⁽²⁾, …, x⁽ᵐ⁾ }     <span class="cm"># m engines already manufactured, each a feature vector</span>
+New engine: x_test                         <span class="cm"># "does this look like the ones we've built before?"</span></pre>
+  <div class="grid2">
+    <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">x_test lands inside the cluster</b> → looks like prior engines → probably OK.</div>
+    <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">x_test lands far away</b> (e.g. bottom-right) → unlike anything seen → <b>anomaly</b> → inspect more carefully before it's installed on an airplane.</div>
+  </div>
+  <div class="note">Stakes: an aircraft engine failure has very negative consequences, so extra inspection of suspicious units is worth it.</div>
+</div>
+
+<!-- DIAGRAM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Density Estimation — Model p(x)</h2></div>
+  <p>Most common approach: <b>density estimation</b>. From the training set, build a model of <b>p(x)</b> = "probability of x being seen in the dataset". It learns which feature values are likely (high p) and which are unlikely (low p).</p>
+  <svg id="plot" viewBox="0 0 600 340" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;">
+    <!-- axes -->
+    <line x1="50" y1="300" x2="580" y2="300" stroke="#8a90a6" stroke-width="1.5"/>
+    <line x1="50" y1="300" x2="50" y2="15" stroke="#8a90a6" stroke-width="1.5"/>
+    <text x="520" y="325" fill="#8a90a6" font-size="12">x₁ (heat)</text>
+    <text x="8" y="22" fill="#8a90a6" font-size="12">x₂ (vibration)</text>
+    <!-- ellipses centered (300,150) -->
+    <ellipse cx="300" cy="150" rx="165" ry="108" fill="none" stroke="#b58cff" stroke-width="2"/>
+    <ellipse cx="300" cy="150" rx="105" ry="70" fill="none" stroke="#8a90a6" stroke-width="2"/>
+    <ellipse cx="300" cy="150" rx="48" ry="32" fill="rgba(77,157,255,.12)" stroke="#4d9dff" stroke-width="2"/>
+    <g id="pts" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"></g>
+    <!-- test points -->
+    <g stroke="#4d9dff" stroke-width="3" stroke-linecap="round"><line x1="322" y1="156" x2="332" y2="166"/><line x1="332" y1="156" x2="322" y2="166"/></g>
+    <g stroke="#b58cff" stroke-width="3" stroke-linecap="round"><line x1="500" y1="262" x2="512" y2="274"/><line x1="512" y1="262" x2="500" y2="274"/></g>
+    <!-- labels -->
+    <text x="355" y="198" fill="#4d9dff" font-size="11">x_test: OK</text>
+    <text x="440" y="252" fill="#b58cff" font-size="12" font-weight="600">anomaly</text>
+    <text x="215" y="60" fill="#4d9dff" font-size="11">▪ innermost: HIGH p(x)</text>
+    <text x="420" y="60" fill="#b58cff" font-size="11">outer rings: LOW p(x)</text>
+  </svg>
+  <div style="margin-top:10px">
+    <span class="pill blue">Inner ellipse = highest probability</span>
+    <span class="pill orange">Next ring = lower</span>
+    <span class="pill purple">Outer ring = lower still</span>
+    <span class="pill red">Beyond = very unlikely → anomaly</span>
+  </div>
+  <div class="note">How the training set is turned into these probability regions (via a <b>Gaussian distribution</b>) is covered in the next videos.</div>
+</div>
+
+<!-- DECISION RULE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Decision Rule with ε (epsilon)</h2></div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Train on <b>m</b> examples → learn <code>p(x)</code></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>New engine arrives → compute <code>p(x_test)</code></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Compare to <b>ε</b> (small threshold)</div>
+  </div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(255,107,107,.5)"><h3 style="color:var(--red)">p(x_test) &lt; ε</h3><ul><li>This x was very unlikely vs. everything seen before</li><li><b>Raise flag → possible anomaly</b></li></ul></div>
+    <div class="mini" style="border-color:rgba(77,217,146,.5)"><h3 style="color:var(--green)">p(x_test) ≥ ε</h3><ul><li>Near the high-probability middle</li><li><b>OK (normal)</b> — not an anomaly</li></ul></div>
+  </div>
+  <pre><span class="kw">def</span> <span class="fn">is_anomaly</span>(x_test, p, epsilon):
+    <span class="kw">return</span> p(x_test) &lt; epsilon     <span class="cm"># True → flag for inspection</span></pre>
+  <div class="note"><b>ε is a small number</b> you choose. Bigger ε → more things flagged (more false alarms). Smaller ε → fewer flags (risk of missing real anomalies).</div>
+</div>
+
+<!-- APPLICATIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Where It's Used</h2></div>
+  <div class="grid3">
+    <div class="mini">
+      <h3 style="color:var(--red)">🕵️ Fraud detection</h3>
+      <p style="font-size:.78rem;color:var(--dim);margin:0">x⁽ⁱ⁾ = features of user i's activity. Model p(x) of typical behavior; flag users with p(x) &lt; ε.</p>
+      <ul><li>How often do they log in?</li><li>How many web pages visited?</li><li>Number of transactions?</li><li>Forum posts?</li><li>Typing speed (chars/sec)?</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--blue)">🏭 Manufacturing</h3>
+      <p style="font-size:.78rem;color:var(--dim);margin:0">x⁽ⁱ⁾ = features of product i. Check whether the unit just built behaves strangely before shipping.</p>
+      <ul><li>Airplane engine</li><li>Printed circuit board</li><li>Smartphone</li><li>Motor, and many more</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--green)">🖥️ Data-center monitoring</h3>
+      <p style="font-size:.78rem;color:var(--dim);margin:0">x⁽ⁱ⁾ = features of machine i.</p>
+      <ul><li>x₁ = memory use</li><li>x₂ = disk accesses/sec</li><li>x₃ = CPU load</li><li>x₄ = CPU load / network traffic <span class="pill purple">ratio feature</span></li></ul>
+    </div>
+  </div>
+  <div class="note"><b>Tip:</b> features can be <b>ratios</b> (e.g. CPU load ÷ network traffic), which can expose oddities a raw feature alone would miss. A machine behaving very differently from the rest → check for hard-disk failure, network-card failure, or a hack.</div>
+</div>
+
+<!-- FRAUD WORKFLOW -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Real-World Workflow: Flag ≠ Punish</h2></div>
+  <p>In fraud detection you <b>don't automatically disable an account</b> just because it looks anomalous. The flag triggers a <b>follow-up</b>:</p>
+  <div class="flow">
+    <div class="step">User activity looks unusual<br><code>p(x) &lt; ε</code></div><div class="arrow">→</div>
+    <div class="step">Security team takes a closer look</div><div class="arrow">→</div>
+    <div class="step">Extra checks: verify identity via phone number, or pass a CAPTCHA</div><div class="arrow">→</div>
+    <div class="step">Separate <b>real fraud</b> from <b>false alarms</b></div>
+  </div>
+  <div class="note">Used to find <b>fake accounts</b> and <b>financial fraud</b> (e.g. a very unusual pattern of purchases worth a security team's closer look).</div>
+</div>
+
+<!-- DISTINCTIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Key Distinctions</h2></div>
+  <table>
+    <tr><th></th><th>Anomaly detection (density estimation)</th><th>Supervised classification</th></tr>
+    <tr><td>Training data</td><td>Unlabeled, almost all <b>normal</b> examples</td><td>Labeled examples of <b>both</b> classes</td></tr>
+    <tr><td>What it learns</td><td>p(x): what normal looks like</td><td>Boundary between classes</td></tr>
+    <tr><td>Output</td><td>Flag if p(x_test) &lt; ε</td><td>Class prediction</td></tr>
+    <tr><td>Good when</td><td>Defects are rare / new failure types may appear</td><td>Plenty of examples of every class</td></tr>
+  </table>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Beyond the lecture (my addition):</b> the table's right column is the usual contrast when deciding between approaches; it isn't spelled out in this video.</div>
+</div>
+
+<!-- ANECDOTES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Andrew's Real Experiences</h2></div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li><b>Telco company:</b> anomaly detection on cell towers — an oddly-behaving tower probably meant something was wrong, so a technician was sent → better phone coverage for more people.</li>
+    <li><b>Financial transactions:</b> finding fraudulent ones.</li>
+    <li><b>Manufacturing today:</b> finding anomalous parts that deserve more inspection.</li>
+  </ul>
+  <div class="note">Widely used in many factories across multiple continents, even though people rarely talk about it. "A very useful tool to have in your tool chest."</div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">Model p(x) from normal data</span>
+  <span class="pill red">p(x_test) &lt; ε → flag</span>
+  <span class="pill green">Flag → investigate, not auto-reject</span>
+  <span class="pill orange">Ratios make good features</span>
+  <span class="pill purple">Next: Gaussian distribution</span>
+  <div class="note">To actually build p(x), we need the <b>Gaussian (normal) distribution</b> — that's the next video.</div>
+</div>
+
+<script>
+  // training points (dx, dy) relative to center (300,150), drawn as red crosses
+  const P=[[0,0],[15,-10],[-20,8],[30,12],[-35,-15],[10,25],[-10,-28],[45,-5],[-50,10],[5,5],[25,-30],[-25,30],
+           [60,20],[-65,-25],[70,-35],[-80,30],[90,10],[-95,-5],[50,50],[-40,60],[110,-20],[-110,25],[20,-70],[-30,-65],[120,40],[-125,-30]];
+  const g=document.getElementById('pts');
+  P.forEach(([dx,dy])=>{
+    const x=300+dx,y=150+dy,s=5;
+    g.insertAdjacentHTML('beforeend',`<line x1="${x-s}" y1="${y-s}" x2="${x+s}" y2="${y+s}"/><line x1="${x+s}" y1="${y-s}" x2="${x-s}" y2="${y+s}"/>`);
+  });
+</script>
+</body>
+</html>

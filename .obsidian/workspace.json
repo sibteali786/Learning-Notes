@@ -11,12 +11,12 @@
             "id": "e8617e74971bdab5",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md"
+                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/8-collaborative-filtering-summary.html"
               },
-              "icon": "excalidraw-icon",
-              "title": "Why Oauth"
+              "icon": "code-glyph",
+              "title": "8-collaborative-filtering-summary"
             }
           }
         ]
@@ -142,7 +142,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Books/Designing Data Intensive Applications by Martin Kleppmann.pdf",
+                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/8-collaborative-filtering-summary.html",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -156,8 +156,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125,
-    "collapsed": true
+    "width": 328.8203125
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -175,30 +174,31 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "e8617e74971bdab5",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Backend Engineering/OAuth2.O/1-Intro/oauth-1-before-oauth.html",
-    "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-5-user-consent-and-password-grant.html",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-4-client-types.html",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-3-roles-and-authorization-server.html",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security",
-    "Untitled",
-    "Learning/Backend Engineering/OAuth2.O/1-Intro/oauth-2-oauth-vs-openid-connect.html",
-    "Learning/Backend Engineering/Books/Oauth 2.0 Simplified (Aaron Parecki) (z-library.sk, 1lib.sk, z-lib.sk).pdf",
-    "Learning/Backend Engineering/OAuth2.O/1-Intro",
-    "Learning/Backend Engineering/OAuth2.O/untitled folder",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/movie_camera.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_strip_vertical.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_reel.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_rating.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_movie_camera.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_man_action.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_filter.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/film_award.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/distmatrix.PNG",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Notebooks/Collaborative Filtering Lab/images/RecSysNN.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-anomaly-detection-features-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/anomaly-detection-features-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/6-collaborative-filtering-binary-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/4-anomaly-detection-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/2-anomaly-detection-evaluation-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/1-anomaly-detection-algorithm-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/1-clustering-intro.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/9-gaussian-distribution-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/5-anomaly-vs-supervised-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/11-recommender-systems-intro-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/8-collaborative-filtering-summary.html",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/movie_camera.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_strip_vertical.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_reel.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_rating.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_movie_camera.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_man_action.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_filter.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_award.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/distmatrix.PNG",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/RecSysNN.png",
     "Learning/System Design/Technologies/Cassandra/Drawing 2026-10-12 20.07.50.excalidraw.md",
     "Personal/Me/Journal.md",
     "Learning/System Design/Technologies/Cassandra/Untitled.md",
@@ -209,7 +209,7 @@
     "conflict-files-obsidian-git.md",
     "Learning/IELTS/Writing Task 1/Writing Task 2  - Discussion Essay.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Drawing 2026-09-29 22.11.26.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Drawing 2026-09-29 22.11.26.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
     "Learning/Research/Resources.md",
     "Learning/IELTS/Writing Task 1/Writing practice task 1 Part 2.md",

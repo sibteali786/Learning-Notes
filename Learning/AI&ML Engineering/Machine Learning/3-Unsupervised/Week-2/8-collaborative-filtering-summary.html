@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collaborative Filtering — Learning the Features</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.92rem;margin:10px 0;overflow-x:auto;}
+  .mu{color:var(--blue)} .sg{color:var(--orange)} .xx{color:var(--green)}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:140px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .slider b{min-width:120px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .btns button.act{border-color:var(--green);color:var(--green);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  .cellp{color:#b58cff;background:rgba(181,140,255,.12);}
+  .rated{color:#e6e8ef;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🤝 Collaborative Filtering — Learning the Features</h1>
+<div class="sub">What if we don't have x₁, x₂? · Learn the movie features from user ratings · The cost J(w, b, x) · Gradient descent on w, b <u>and</u> x</div>
+
+<!-- PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Problem</h2></div>
+  <p>Last video: with movie features x₁ (romance), x₂ (action) we could use linear regression to predict ratings. <b>But what if we don't have those features?</b> Replace the feature columns with <b>?</b> and learn them from the data.</p>
+  <table id="rt"></table>
+  <div class="note">The ratings are the same 4 users × 5 movies as before. Only the feature columns are now unknown.</div>
+</div>
+
+<!-- GUESSING FEATURES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Step 1: If You Already Had the User Parameters…</h2></div>
+  <p>Just for illustration, assume the user parameters were already learned (and all b = 0, so b is ignored in this example). The prediction is still <code>w⁽ʲ⁾ · x⁽ⁱ⁾ + b⁽ʲ⁾</code>.</p>
+  <div class="grid2">
+    <div class="mini">
+      <h3 style="color:var(--blue)">Assumed parameters</h3>
+      <ul><li>w⁽¹⁾ = [5, 0] (Alice)</li><li>w⁽²⁾ = [5, 0] (Bob)</li><li>w⁽³⁾ = [0, 5] (Carol)</li><li>w⁽⁴⁾ = [0, 5] (Dave)</li><li>all b⁽ʲ⁾ = 0</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--green)">What x⁽¹⁾ (Love at last) must be</h3>
+      <ul><li>Alice rated 5 → <code>w⁽¹⁾·x⁽¹⁾ ≈ 5</code></li><li>Bob rated 5 → <code>w⁽²⁾·x⁽¹⁾ ≈ 5</code></li><li>Carol rated 0 → <code>w⁽³⁾·x⁽¹⁾ ≈ 0</code></li><li>Dave rated 0 → <code>w⁽⁴⁾·x⁽¹⁾ ≈ 0</code></li></ul>
+    </div>
+  </div>
+  <div class="formula">A reasonable guess: <span class="xx"><b>x⁽¹⁾ = [1, 0]</b></span> → [5,0]·[1,0] = 5 ✓ &nbsp; [5,0]·[1,0] = 5 ✓ &nbsp; [0,5]·[1,0] = 0 ✓ &nbsp; [0,5]·[1,0] = 0 ✓</div>
+  <div class="note">Same trick for x⁽²⁾, x⁽³⁾ … x⁽ⁿᵐ⁾: choose each movie's feature vector so the predictions match the ratings that exist. (The lab below does this by optimization.)</div>
+  <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">Why this only works with several users:</b> a single user's ratings can't pin down the features (that's why in Course 1 linear regression you can't invent x₁, x₂ from scratch). In collaborative filtering <b>several users rated the same movie</b>, which is what makes it possible to guess the features.</div>
+</div>
+
+<!-- COST FOR X -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Step 2: Cost Function for Learning the Features</h2></div>
+  <p>Given w⁽¹⁾,b⁽¹⁾ … w⁽ⁿᵘ⁾,b⁽ⁿᵘ⁾, to learn the features of <b>one movie i</b>:</p>
+  <div class="formula">J(<span class="xx">x⁽ⁱ⁾</span>) = ½ Σ<sub>j : r(i,j)=1</sub> ( w⁽ʲ⁾·<span class="xx">x⁽ⁱ⁾</span> + b⁽ʲ⁾ − y⁽ⁱ'ʲ⁾ )² &nbsp;+&nbsp; <span style="color:var(--orange)">λ/2 · Σ<sub>k=1..n</sub> (x<sub>k</sub>⁽ⁱ⁾)²</span></div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li>Sum over <b>all users j who rated movie i</b> (r(i,j) = 1).</li>
+    <li>Squared difference between what your x⁽ⁱ⁾ predicts and the actual rating.</li>
+    <li>λ term regularizes the feature values.</li>
+  </ul>
+  <p style="margin-top:10px">To learn <b>all movies' features</b> x⁽¹⁾ … x⁽ⁿᵐ⁾, sum over movies:</p>
+  <div class="formula">J(x⁽¹⁾…x⁽ⁿᵐ⁾) = ½ Σ<sub>i=1..n_m</sub> Σ<sub>j : r(i,j)=1</sub> ( w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾ − y⁽ⁱ'ʲ⁾ )² &nbsp;+&nbsp; <span style="color:var(--orange)">λ/2 · Σ<sub>i=1..n_m</sub> Σ<sub>k=1..n</sub> (x<sub>k</sub>⁽ⁱ⁾)²</span></div>
+  <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">Remarkable:</b> in most ML applications the features must be given externally. Here you can <b>learn the features of a movie</b> by minimizing this cost with gradient descent (or another optimizer).</div>
+</div>
+
+<!-- PUT TOGETHER -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Step 3: Put Them Together → Collaborative Filtering</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(77,157,255,.5)"><h3 style="color:var(--blue)">Last video</h3><ul><li>Features x known → learn <b>w, b</b></li></ul></div>
+    <div class="mini" style="border-color:rgba(77,217,146,.5)"><h3 style="color:var(--green)">This video</h3><ul><li>w, b known → learn <b>x</b></li></ul></div>
+  </div>
+  <p style="margin-top:10px">Both squared-error terms are <b>exactly the same sum</b>: over all (user, movie) pairs that have a rating. Merge them and keep both regularization terms:</p>
+  <div class="formula">
+    J(<span class="mu">w</span>, <span class="sg">b</span>, <span class="xx">x</span>) = ½ Σ<sub>(i,j) : r(i,j)=1</sub> ( <span class="mu">w⁽ʲ⁾</span>·<span class="xx">x⁽ⁱ⁾</span> + <span class="sg">b⁽ʲ⁾</span> − y⁽ⁱ'ʲ⁾ )²
+    &nbsp;+&nbsp; <span style="color:var(--orange)">λ/2 Σ<sub>j=1..n_u</sub> Σ<sub>k=1..n</sub> (w<sub>k</sub>⁽ʲ⁾)²</span>
+    &nbsp;+&nbsp; <span style="color:var(--orange)">λ/2 Σ<sub>i=1..n_m</sub> Σ<sub>k=1..n</sub> (x<sub>k</sub>⁽ⁱ⁾)²</span>
+  </div>
+  <div class="note"><b>Minimize over w, b <u>and</u> x together</b> and the algorithm works.</div>
+
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">Two equivalent ways to sum over rated pairs</h3>
+  <div class="grid2">
+    <div>
+      <table>
+        <tr><th></th><th>Alice j=1</th><th>Bob j=2</th><th>Carol j=3</th></tr>
+        <tr><td>Movie 1 (i=1)</td><td style="background:rgba(77,217,146,.18)"><b>5</b></td><td style="background:rgba(77,217,146,.18)"><b>5</b></td><td>?</td></tr>
+        <tr><td>Movie 2 (i=2)</td><td>?</td><td style="background:rgba(77,217,146,.18)"><b>2</b></td><td style="background:rgba(77,217,146,.18)"><b>3</b></td></tr>
+      </table>
+    </div>
+    <div class="mini">
+      <ul><li><b>Users first:</b> one term per rated movie for user 1, then user 2, then user 3.</li><li><b>Movies first:</b> all users who rated movie 1, then movie 2.</li><li>Either way: the same <b>4 rated cells</b> (green).</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- GRADIENT DESCENT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Gradient Descent: x Is Also a Parameter</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(255,107,107,.4)">
+      <h3 style="color:var(--red)">Linear regression (Course 1)</h3>
+      <pre style="margin:0"><span class="cm">repeat {</span>
+  w = w − α ∂J(w,b)/∂w
+  b = b − α ∂J(w,b)/∂b
+<span class="cm">}</span></pre>
+    </div>
+    <div class="mini" style="border-color:rgba(77,217,146,.4)">
+      <h3 style="color:var(--green)">Collaborative filtering</h3>
+      <pre style="margin:0"><span class="cm">repeat {</span>
+  w⁽ʲ⁾ᵢ = w⁽ʲ⁾ᵢ − α ∂J(w,b,x)/∂w⁽ʲ⁾ᵢ
+  b⁽ʲ⁾  = b⁽ʲ⁾  − α ∂J(w,b,x)/∂b⁽ʲ⁾
+  x⁽ⁱ⁾ₖ = x⁽ⁱ⁾ₖ − α ∂J(w,b,x)/∂x⁽ⁱ⁾ₖ
+<span class="cm">}</span></pre>
+    </div>
+  </div>
+  <div class="note"><b>Key takeaway:</b> the model's parameters are <b>w, b</b> and also <b>x</b>, so the cost is minimized as a function of all three.</div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># X: (n_m, n)  W: (n_u, n)  b: (1, n_u)  Y, R: (n_m, n_u)   (R = 1 where rated, Y can hold 0 for '?')</span>
+<span class="kw">def</span> <span class="fnc">step</span>(X, W, b, Y, R, lam, alpha):
+    err = (X @ W.T + b - Y) * R                 <span class="cm"># errors only on rated entries</span>
+    dX  = err @ W   + lam * X                   <span class="cm"># ∂J/∂x</span>
+    dW  = err.T @ X + lam * W                   <span class="cm"># ∂J/∂w</span>
+    db  = err.sum(axis=0, keepdims=True)        <span class="cm"># ∂J/∂b</span>
+    <span class="kw">return</span> X - alpha*dX, W - alpha*dW, b - alpha*db</pre>
+</div>
+
+<!-- LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Interactive Lab: Let the Algorithm Learn the Features</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Uses the lecture's 4×5 ratings and n = 2 features. Mode A fixes w to the lecture's values and learns only x. Mode B learns w, b and x together from random starts.</p>
+  <div class="btns" id="modes">
+    <button data-m="x" class="on">Mode A: w fixed (lecture), learn x</button>
+    <button data-m="joint">Mode B: learn w, b, x jointly</button>
+  </div>
+  <div class="slider"><b style="color:var(--purple)">λ = <span id="lV"></span></b><input id="lam" type="range" min="0" max="3" step="0.05" value="0"></div>
+  <div class="btns"><button class="act" id="fit">▶ Run gradient descent</button><button id="rnd">🎲 New random start</button></div>
+  <div class="grid2">
+    <svg id="feat" viewBox="0 0 400 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+    <svg id="curve" viewBox="0 0 400 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  </div>
+  <table id="out"></table>
+  <div id="metrics" style="margin-top:8px"></div>
+  <div class="note" id="labNote"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> learning rate (0.02), iterations and the random starts are my demo choices, not the lecture's. In Mode B the learned "features" can be rotated/scaled versions of romance/action, so don't expect x₁ to literally mean romance.</div>
+</div>
+
+<!-- WHY THE NAME -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Why "Collaborative" Filtering?</h2></div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Several users rate the <b>same movie</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Together their ratings reveal what the movie is like → <b>guess its features</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Use features to <b>predict ratings of users who haven't rated it yet</b></div>
+  </div>
+  <div class="note">Gathering data from multiple users, i.e. <b>collaboration between users</b>, helps predict ratings for <i>other</i> users in the future.</div>
+  <div class="note" style="border-color:var(--green)">Real-life scenario: three viewers who all rated a new film 5 stars while also loving the same two thrillers tell the system the film is "thriller-like" even though nobody tagged it. A fourth viewer who loves those thrillers then gets it recommended.</div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill blue">Given x → learn w, b</span>
+  <span class="pill green">Given w, b → learn x</span>
+  <span class="pill purple">Collaborative filtering learns both</span>
+  <span class="pill orange">Sum only over r(i,j) = 1</span>
+  <span class="pill red">x is also a parameter</span>
+  <div class="note"><b>Next video:</b> generalizing the model from star ratings to <b>binary labels</b> (the user favorited, liked or interacted with an item), a very common use case.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons (beyond the lecture):</b> no hand-made features are needed and every user's ratings help every other user. But it needs enough overlapping ratings, can't recommend brand-new items or serve brand-new users (cold start), and the learned features are hard to interpret.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const users=['Alice','Bob','Carol','Dave'];
+const movies=['Love at last','Romance forever','Cute puppies of love','Nonstop car chases','Swords vs. karate'];
+const Y=[[5,5,0,0],[5,null,null,0],[null,4,0,null],[0,0,5,4],[0,0,5,null]];
+const nm=5,nu=4,n=2;
+// top ratings table
+(function(){let h='<tr><th>Movie</th>'+users.map((u,j)=>`<th>${u}(${j+1})</th>`).join('')+'<th>x₁ (romance)</th><th>x₂ (action)</th></tr>';
+  movies.forEach((m,i)=>{h+=`<tr><td>${m}</td>`+Y[i].map(v=>`<td>${v===null?'<span style="color:#8a90a6">?</span>':v}</td>`).join('')+'<td style="color:#ff9d4d"><b>?</b></td><td style="color:#ff9d4d"><b>?</b></td></tr>';});
+  document.getElementById('rt').innerHTML=h;})();
+
+// ---- lab ----
+const FIXW=[[5,0],[5,0],[0,5],[0,5]];
+let mode='x',seed=3,X=null,W=null,B=null,hist=[];
+const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const lam=document.getElementById('lam');
+function init(){
+  X=Array.from({length:nm},()=>[rnd()*0.6+0.1,rnd()*0.6+0.1]);
+  if(mode==='x'){W=FIXW.map(r=>r.slice());B=new Array(nu).fill(0);}
+  else{W=Array.from({length:nu},()=>[rnd()*0.6+0.1,rnd()*0.6+0.1]);B=new Array(nu).fill(0);}
+  hist=[];
+}
+function cost(L){
+  let s=0;for(let i=0;i<nm;i++)for(let j=0;j<nu;j++){const y=Y[i][j];if(y===null)continue;const e=X[i][0]*W[j][0]+X[i][1]*W[j][1]+B[j]-y;s+=e*e;}
+  let r=0;X.forEach(v=>v.forEach(a=>r+=a*a));if(mode==='joint')W.forEach(v=>v.forEach(a=>r+=a*a));
+  return 0.5*s+L/2*r;
+}
+function run(){
+  const L=+lam.value,a=0.02;init();
+  for(let it=0;it<=6000;it++){
+    if(it%60===0)hist.push(cost(L));
+    const dX=X.map(()=>[0,0]),dW=W.map(()=>[0,0]),dB=new Array(nu).fill(0);
+    for(let i=0;i<nm;i++)for(let j=0;j<nu;j++){const y=Y[i][j];if(y===null)continue;
+      const e=X[i][0]*W[j][0]+X[i][1]*W[j][1]+B[j]-y;
+      dX[i][0]+=e*W[j][0];dX[i][1]+=e*W[j][1];dW[j][0]+=e*X[i][0];dW[j][1]+=e*X[i][1];dB[j]+=e;}
+    for(let i=0;i<nm;i++){X[i][0]-=a*(dX[i][0]+L*X[i][0]);X[i][1]-=a*(dX[i][1]+L*X[i][1]);}
+    if(mode==='joint'){for(let j=0;j<nu;j++){W[j][0]-=a*(dW[j][0]+L*W[j][0]);W[j][1]-=a*(dW[j][1]+L*W[j][1]);B[j]-=a*dB[j];}}
+  }
+  render(L);
+}
+function render(L){
+  document.getElementById('lV').textContent=(+lam.value).toFixed(2);
+  if(!X)return;
+  // table
+  let h='<tr><th>Movie</th><th>learned x⁽ⁱ⁾</th>'+users.map(u=>`<th>${u}</th>`).join('')+'</tr>';
+  let se=0,cnt=0;
+  for(let i=0;i<nm;i++){h+=`<tr><td>${movies[i]}</td><td>[${X[i][0].toFixed(2)}, ${X[i][1].toFixed(2)}]</td>`;
+    for(let j=0;j<nu;j++){const p=X[i][0]*W[j][0]+X[i][1]*W[j][1]+B[j],y=Y[i][j];
+      if(y===null)h+=`<td class="cellp"><b>${p.toFixed(1)}</b> <small>(?)</small></td>`;else{h+=`<td>${p.toFixed(1)} <small style="color:#8a90a6">(${y})</small></td>`;se+=(p-y)**2;cnt++;}}
+    h+='</tr>';}
+  document.getElementById('out').innerHTML=h;
+  document.getElementById('metrics').innerHTML=`<span class="metric">J(final) = <b>${cost(L).toFixed(3)}</b></span><span class="metric">RMSE on rated = <b>${Math.sqrt(se/cnt).toFixed(3)}</b></span>`;
+  document.getElementById('labNote').innerHTML=mode==='x'
+   ?'Cells show <b>prediction (actual)</b>; purple cells are predictions for movies the user never rated. With the lecture\'s w, the optimizer recovers features like <b>Love at last ≈ [1, 0]</b> (romance) and <b>Nonstop car chases ≈ [0, 0.9]</b> (action). Raising λ shrinks the features toward 0.'
+   :'Everything is learned from scratch. Predictions for rated cells get close to the actual ratings, and the purple cells are the model\'s guesses for the "?" entries. Try <b>New random start</b>: the learned features change, but the predictions stay similar.';
+  // feature scatter
+  const svg=document.getElementById('feat');svg.innerHTML='';
+  const xs=X.map(v=>v[0]),ys=X.map(v=>v[1]);
+  const lo=Math.min(0,...xs,...ys)-0.2,hi=Math.max(1,...xs,...ys)+0.3;
+  const S=v=>40+(v-lo)/(hi-lo)*320,T=v=>260-(v-lo)/(hi-lo)*220;
+  el('line',{x1:40,y1:T(0),x2:370,y2:T(0),stroke:'#8a90a6'},svg);el('line',{x1:S(0),y1:270,x2:S(0),y2:20,stroke:'#8a90a6'},svg);
+  el('text',{x:370,y:T(0)-6,fill:'#8a90a6','font-size':11,'text-anchor':'end'},svg).textContent='x₁';el('text',{x:S(0)+6,y:28,fill:'#8a90a6','font-size':11},svg).textContent='x₂';
+  el('text',{x:200,y:14,fill:'#4dd992','font-size':12,'font-weight':700,'text-anchor':'middle'},svg).textContent='learned movie features';
+  X.forEach((v,i)=>{el('circle',{cx:S(v[0]),cy:T(v[1]),r:7,fill:'#4dd992'},svg);
+    el('text',{x:S(v[0])+10,y:T(v[1])+4,fill:'#e6e8ef','font-size':10},svg).textContent=movies[i];});
+  // cost curve
+  const c=document.getElementById('curve');c.innerHTML='';
+  el('text',{x:200,y:14,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},c).textContent='cost J vs iterations';
+  el('line',{x1:40,y1:270,x2:380,y2:270,stroke:'#8a90a6'},c);el('line',{x1:40,y1:270,x2:40,y2:24,stroke:'#8a90a6'},c);
+  if(hist.length){const mx=Math.max(...hist);let d='';hist.forEach((v,k)=>{d+=(k?'L':'M')+(40+k/(hist.length-1)*340).toFixed(1)+','+(270-v/mx*240).toFixed(1);});
+    el('path',{d,fill:'none',stroke:'#ff9d4d','stroke-width':2.5},c);
+    el('text',{x:46,y:38,fill:'#8a90a6','font-size':10},c).textContent=mx.toFixed(1);}
+}
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll('#modes button').forEach(x=>x.classList.toggle('on',x===b));run();});
+document.getElementById('fit').onclick=run;
+document.getElementById('rnd').onclick=()=>{seed=Math.floor(Math.random()*1e6)+1;run();};
+lam.oninput=()=>{document.getElementById('lV').textContent=(+lam.value).toFixed(2);};
+run();
+</script>
+</body>
+</html>

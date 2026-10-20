@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab: Collaborative Filtering RecSys — Walkthrough &amp; Q&amp;A</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.92rem;margin:10px 0;overflow-x:auto;}
+  .flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:110px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:.76rem;text-align:center;}
+  .step .n{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:4px;font-size:.75rem;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.1rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .slider b{min-width:130px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:5px 11px;font-family:inherit;font-size:.74rem;cursor:pointer;margin:3px 5px 3px 0;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  .qtag{display:inline-block;background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);border-radius:6px;padding:1px 8px;font-size:.72rem;font-weight:700;margin-right:8px;}
+  .mat{display:inline-block;vertical-align:top;margin:6px 10px 6px 0;}
+  .mat .t{font-size:.7rem;color:var(--dim);margin-bottom:2px;}
+  .mat table{width:auto;margin:0;border:1px solid var(--border);border-radius:6px;}
+  .mat td{padding:4px 9px;border-bottom:none;text-align:center;}
+  .ok{color:#4dd992}.bad{color:#ff6b6b}.dimc{color:#8a90a6}
+  svg text{font-family:'JetBrains Mono',monospace;}
+  .toc a{color:var(--blue);text-decoration:none;margin-right:12px;font-size:.78rem;}
+</style>
+</head>
+<body>
+
+<h1>🎬 Lab: Collaborative Filtering Recommender Systems</h1>
+<div class="sub">C3 W2 practice lab · cost function (loops &amp; vectorized) · custom TensorFlow training loop · mean normalization · movie recommendations · with answers to four questions</div>
+<div class="toc">
+  <a href="#overview">Overview</a><a href="#q1">Q1 shared vectors</a><a href="#q2">Q2 average rating</a><a href="#q3">Q3 vectorized cost</a><a href="#q4">Q4 GradientTape</a><a href="#results">Results</a><a href="#learned">Learned</a><a href="#more">More to learn</a>
+</div>
+<br>
+
+<!-- OVERVIEW -->
+<div class="card" id="overview">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Lab in One Picture</h2></div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Load <b>Y, R</b> (+ pre-computed X, W, b)</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Write <b>cofi_cost_func</b> with for-loops (Exercise 1)</div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Check <b>vectorized</b> cost gives the same numbers</div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br>Add <b>your own ratings</b> as a new user</div><div class="arrow">→</div>
+    <div class="step"><div class="n">5</div><br><b>Mean-normalize</b> Y</div><div class="arrow">→</div>
+    <div class="step"><div class="n">6</div><br><b>Train</b> X, W, b (Adam, 200 its)</div><div class="arrow">→</div>
+    <div class="step"><div class="n">7</div><br><b>Predict</b>, restore the mean, recommend</div>
+  </div>
+  <h3 style="color:var(--orange);font-size:.95rem;margin-top:12px">Data &amp; shapes (numbers from the notebook's output)</h3>
+  <table>
+    <tr><th>Object</th><th>Meaning</th><th>Shape in cost-function tests</th><th>Shape when training</th></tr>
+    <tr><td><code>Y</code></td><td>ratings 0.5–5, <b>0 if not rated</b></td><td>(4778, 443)</td><td>(4778, <b>444</b>) after adding you as column 0</td></tr>
+    <tr><td><code>R</code></td><td>1 where rated, else 0</td><td>(4778, 443)</td><td>(4778, 444)</td></tr>
+    <tr><td><code>X</code></td><td>movie features, one row per movie</td><td>(4778, 10)</td><td>(4778, <b>100</b>)</td></tr>
+    <tr><td><code>W</code></td><td>user parameters, one row per user</td><td>(443, 10)</td><td>(444, 100)</td></tr>
+    <tr><td><code>b</code></td><td>one bias per user</td><td>(1, 443)</td><td>(1, 444)</td></tr>
+  </table>
+  <div class="note"><b>Scale check (my arithmetic):</b> training learns 4778·100 + 444·100 + 444 = <b>522,644</b> parameters. The data was reduced to movies since 2000: 443 users × 4,778 movies. Your own 13 ratings are the new user's only data, so mean normalization and regularization matter a lot.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Convention difference from the lectures:</b> in the lectures a rating of 0 was a valid star rating. In this lab ratings run 0.5–5, so <b>0 means "not rated"</b>, and R is what tells the code which entries are real.</div>
+</div>
+
+<!-- Q1 -->
+<div class="card" id="q1">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2><span class="qtag">Q1</span>"x_movie must satisfy all the users while w_user must satisfy all the movies"</h2></div>
+  <p><b>In plain words:</b> a movie's feature vector <code>x⁽ⁱ⁾</code> is <b>one single vector</b>, but it appears in the prediction for <b>every user who rated that movie</b>. A user's vector <code>w⁽ʲ⁾</code> is likewise <b>one single vector</b> used for <b>every movie that user rated</b>. Each rating gives one requirement:</p>
+  <div class="formula">w⁽ʲ⁾ · x⁽ⁱ⁾ + b⁽ʲ⁾ ≈ y⁽ⁱ'ʲ⁾ &nbsp;&nbsp; (one equation per rating, where r(i,j) = 1)</div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li>Movie i rated by 4 users ⇒ x⁽ⁱ⁾ has to produce <b>4 good predictions at once</b> (one against each user's w).</li>
+    <li>User j rated 50 movies ⇒ w⁽ʲ⁾ has to produce <b>50 good predictions at once</b> (one against each movie's x).</li>
+    <li>Each unknown is shared between many equations, and the unknowns are <b>learned simultaneously</b>, so none can be set in isolation. Everything is a compromise that minimizes the total squared error.</li>
+  </ul>
+  <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">Why that gives the name:</b> all the users "collaborate": your ratings help pin down movie vectors, which in turn help predict other users' ratings. A single user couldn't determine the features alone (the lecture's point).</div>
+
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">Explore it: click a movie or a user</h3>
+  <p style="font-size:.78rem;color:var(--dim)">Uses the lecture's 5-movie × 4-user example. Each line is one rating = one equation.</p>
+  <div class="btns" id="b1"></div>
+  <svg id="bip" viewBox="0 0 640 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div id="eqs" class="note"></div>
+</div>
+
+<!-- Q2 -->
+<div class="card" id="q2">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2><span class="qtag">Q2</span>What does <code>np.mean(Y[0, R[0, :].astype(bool)])</code> do?</h2></div>
+  <pre>tsmean = np.mean(Y[<span class="num">0</span>, R[<span class="num">0</span>, :].astype(bool)])
+print(f<span class="str">"Average rating for movie 1 : {tsmean:0.3f} / 5"</span>)   <span class="cm"># → 3.400 / 5</span></pre>
+  <div class="flow">
+    <div class="step"><code>Y[0, :]</code><br>the whole <b>row 0</b> = ratings of the first movie (index 0) from all users; 0 where unrated</div><div class="arrow">+</div>
+    <div class="step"><code>R[0, :]</code><br>row 0 of the 0/1 mask: 1 where that user rated the movie</div><div class="arrow">→</div>
+    <div class="step"><code>.astype(bool)</code><br>turns 1/0 into True/False so it can be used as a <b>boolean mask</b></div><div class="arrow">→</div>
+    <div class="step"><code>Y[0, mask]</code><br>keeps <b>only the rated</b> entries</div><div class="arrow">→</div>
+    <div class="step"><code>np.mean(...)</code><br>average of just those ratings</div>
+  </div>
+  <p style="margin-top:10px"><b>Why the mask?</b> Unrated entries are stored as 0 in Y. Averaging the whole row would count all those fake zeros and drag the average down.</p>
+  <div id="meanDemo"></div>
+  <div class="note"><b>Why it matters:</b> this is exactly the per-movie mean μᵢ used in mean normalization later (the lab's <code>normalizeRatings(Y, R)</code> does this for every movie). The lab prints it just as a sanity check on the data structures. "Movie 1" in the text is row index 0 in Python.</div>
+</div>
+
+<!-- Q3 -->
+<div class="card" id="q3">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2><span class="qtag">Q3</span>How does <code>cofi_cost_func_v</code> work?</h2></div>
+  <pre><span class="kw">def</span> <span class="fnc">cofi_cost_func_v</span>(X, W, b, Y, R, lambda_):
+    j = (tf.linalg.matmul(X, tf.transpose(W)) + b - Y) * R
+    J = <span class="num">0.5</span> * tf.reduce_sum(j**<span class="num">2</span>) + (lambda_/<span class="num">2</span>) * (tf.reduce_sum(X**<span class="num">2</span>) + tf.reduce_sum(W**<span class="num">2</span>))
+    <span class="kw">return</span> J</pre>
+  <div class="grid2">
+    <div class="mini">
+      <h3 style="color:var(--blue)">tf.linalg &amp; matmul</h3>
+      <ul><li><code>tf.linalg</code> = TensorFlow's <b>linear-algebra module</b> (matrix multiply, inverse, etc.).</li><li><code>tf.linalg.matmul(A, B)</code> is <b>matrix multiplication</b> (same as <code>tf.matmul</code> or <code>A @ B</code>): rows of A dotted with columns of B.</li><li>Not the same as <code>*</code>, which multiplies <b>element by element</b>.</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--orange)">Why transpose W?</h3>
+      <ul><li>X is <b>(movies, features)</b>, W is <b>(users, features)</b>. Matrix multiply needs inner sizes to match: (m×n)·(n×u).</li><li><code>tf.transpose(W)</code> is (features, users), so <b>X @ Wᵀ</b> is <b>(movies, users)</b>.</li><li>Entry (i, j) = row i of X · row j of W = <b>x⁽ⁱ⁾·w⁽ʲ⁾</b>, the prediction for <i>every</i> movie/user pair at once.</li></ul>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="mini">
+      <h3 style="color:var(--green)">tf.reduce_sum</h3>
+      <ul><li>"Reduces" a tensor by <b>adding its elements</b>. With no axis given it adds <b>everything</b> into one scalar.</li><li><code>x = [[1,2],[3,4]]</code> → <code>reduce_sum(x) = 10</code></li><li><code>axis=0</code> → [4, 6] (down each column); <code>axis=1</code> → [3, 7] (across each row)</li><li>Here it turns the error matrix into the single cost number.</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--purple)">The other pieces</h3>
+      <ul><li><code>+ b</code>: b is (1, users); it <b>broadcasts</b> down the rows, adding b⁽ʲ⁾ to every entry of column j.</li><li><code>− Y</code>: element-wise prediction − actual.</li><li><code>* R</code>: element-wise mask: <b>zeroes the errors of unrated pairs</b> (Y holds fake 0s there).</li><li><code>j**2</code>: square every error; <code>0.5 *</code> the sum = the squared-error term.</li><li><code>(lambda_/2)(ΣX² + ΣW²)</code>: regularization. <b>b is not regularized.</b></li></ul>
+    </div>
+  </div>
+  <div class="formula">J = ½ Σ<sub>i,j</sub> R<sub>ij</sub>·( x⁽ⁱ⁾·w⁽ʲ⁾ + b⁽ʲ⁾ − Y<sub>ij</sub> )² + λ/2 ( ΣX² + ΣW² )</div>
+  <div class="note"><b>With the lab's training shapes:</b> X (4778, 100) @ Wᵀ (100, 444) → (4778, 444), one prediction for each of the 2,121,432 movie/user cells, all computed in one matrix multiply instead of three nested loops. Why TensorFlow ops (not NumPy)? So <code>GradientTape</code> can record them (Q4).</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Spot the quirks:</b> the docstring says "content-based filtering", but this is the <b>collaborative</b> filtering cost (a docstring slip). The local variable <code>j</code> is the error matrix, unrelated to the user index j in the loop version. During training, <code>Y</code> is passed as <b>Ynorm</b>.</div>
+
+  <h3 style="color:var(--green);font-size:.95rem;margin-top:14px">Step through it on a tiny example (my own numbers)</h3>
+  <div class="slider"><b style="color:var(--purple)">λ = <span id="lamV"></span></b><input id="lam" type="range" min="0" max="3" step="0.1" value="0"></div>
+  <div class="btns" id="maskBtns"><button data-m="1" class="on">apply * R (correct)</button><button data-m="0">forget the mask</button></div>
+  <div id="costSteps"></div>
+  <div id="costRes" class="note"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Why the mask matters here:</b> the (movie 1, user 2) cell has Y = 5 in the table, but R says nobody rated it. Without <code>* R</code> its error of −5 contributes 12.5 to the cost.</div>
+</div>
+
+<!-- Q4 -->
+<div class="card" id="q4">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2><span class="qtag">Q4</span>What does GradientTape do behind the scenes?</h2></div>
+  <div class="grid3">
+    <div class="mini" style="border-color:rgba(255,157,77,.5)"><h3 style="color:var(--orange)">Course 1 (by hand)</h3><ul><li>You derived <code>∂J/∂w = (1/m) Σ (f−y)·x</code> and <code>∂J/∂b = (1/m) Σ (f−y)</code> and coded loops</li></ul></div>
+    <div class="mini" style="border-color:rgba(77,157,255,.5)"><h3 style="color:var(--blue)">Course 2 (neural nets)</h3><ul><li>Backprop on a <b>computation graph</b> (if you did the optional derivative / backprop labs)</li><li><code>model.fit</code> hides it; internally Keras uses a GradientTape too</li></ul></div>
+    <div class="mini" style="border-color:rgba(77,217,146,.5)"><h3 style="color:var(--green)">This lab</h3><ul><li>You write only the <b>cost</b>; the tape produces <b>∂J/∂X, ∂J/∂W, ∂J/∂b</b></li></ul></div>
+  </div>
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">What happens, step by step</h3>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br><b>Record.</b> Inside <code>with tf.GradientTape()</code>, every op applied to tracked <code>tf.Variable</code>s (matmul, +, −, ×, **2, reduce_sum…) is logged as a node in a graph, and the intermediate values needed later are kept</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br><b>Forward result:</b> <code>cost_value</code> is an ordinary number computed along the way</div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br><b>Replay backwards.</b> <code>tape.gradient(cost, [X,W,b])</code> starts at ∂J/∂J = 1 and walks the graph in reverse, applying each op's known local derivative with the <b>chain rule</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br><b>Return</b> one gradient tensor per variable, with the same shape as the variable</div><div class="arrow">→</div>
+    <div class="step"><div class="n">5</div><br><b>Update.</b> <code>optimizer.apply_gradients(zip(grads, vars))</code> takes the Adam step</div>
+  </div>
+  <svg id="graph" viewBox="0 0 760 210" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Diagram note:</b> a simplified picture of the graph for this cost. TensorFlow's real graph has more fine-grained nodes, and the reverse pass is conceptually backpropagation applied to <i>any</i> computation.</div>
+
+  <h3 style="color:var(--green);font-size:.95rem;margin-top:14px">The gradients you would have derived by hand for this cost</h3>
+  <p style="font-size:.82rem;color:var(--dim)">Let <b>E = (X·Wᵀ + b − Y) ⊙ R</b> (the masked error matrix). Since R is 0/1, ∂/∂(prediction) of ½ΣE² is just E. Then, by the chain rule:</p>
+  <div class="formula">
+    ∂J/∂X = <b>E · W</b> + λX &nbsp;&nbsp;|&nbsp;&nbsp; ∂J/∂W = <b>Eᵀ · X</b> + λW &nbsp;&nbsp;|&nbsp;&nbsp; ∂J/∂b = <b>column sums of E</b>
+  </div>
+  <pre><span class="cm"># what tape.gradient(cost_value, [X, W, b]) returns, written out by hand (shapes in comments)</span>
+E  = (X @ W.T + b - Y) * R            <span class="cm"># (n_m, n_u)</span>
+dX = E @ W   + lambda_ * X            <span class="cm"># (n_m, n)</span>
+dW = E.T @ X + lambda_ * W            <span class="cm"># (n_u, n)</span>
+db = E.sum(axis=0, keepdims=True)     <span class="cm"># (1, n_u)</span></pre>
+  <div class="note">Same idea as Course 1's loop-written gradient, just for matrices. The tape gets the <b>same numbers</b> without anyone deriving or coding these formulas.</div>
+
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">Proof by gradient check (live)</h3>
+  <p style="font-size:.78rem;color:var(--dim)">On the tiny example above (λ from the slider), compare the hand formulas with a <b>numerical</b> estimate (nudge each parameter by ±1e-5 and see how J changes). Autodiff would agree with these to floating-point precision.</p>
+  <div id="gcheck"></div>
+
+  <h3 style="color:var(--orange);font-size:.95rem;margin-top:14px">Four ways to get a derivative</h3>
+  <table>
+    <tr><th>Method</th><th>How</th><th>Pros</th><th>Cons</th></tr>
+    <tr><td>By hand</td><td>derive and code formulas</td><td>full understanding; fast code</td><td>error-prone; redo for every new cost</td></tr>
+    <tr><td>Numerical (finite differences)</td><td>(J(w+h) − J(w−h)) / 2h</td><td>trivial to write; great for <b>checking</b></td><td>one or two cost evaluations <b>per parameter</b>, hopeless for 522,644 parameters; approximate</td></tr>
+    <tr><td>Symbolic</td><td>manipulate the formula as an expression</td><td>exact formula out</td><td>expression blow-up on big programs</td></tr>
+    <tr><td><b>Autodiff (GradientTape)</b></td><td>record ops, apply chain rule on numbers in reverse</td><td><b>exact, about the cost of a few forward passes for <i>all</i> parameters</b></td><td>stores intermediates (memory); you must use TF ops inside the tape</td></tr>
+  </table>
+  <div class="grid2" style="margin-top:12px">
+    <div class="note"><b>Details worth knowing:</b> trainable <code>tf.Variable</code>s are watched automatically. A plain tensor needs <code>tape.watch(t)</code>. After one <code>tape.gradient()</code> call the tape's resources are released unless you create it with <code>persistent=True</code> (that's why a fresh tape is built every iteration).</div>
+    <div class="note"><b>Adam step (after the gradients):</b> for each variable it keeps running averages of the gradient and of the squared gradient, then moves by <code>lr · m̂ / (√v̂ + ε)</code>, giving each parameter its own step size. Here <code>lr = 0.1</code>, 200 iterations, λ = 1.</div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="card" id="results">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>What the Lab Printed</h2></div>
+  <h3 style="color:var(--blue);font-size:.95rem">1) Cost function checks (they matched)</h3>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--green)">λ = 0</h3><ul><li>loop version: <b>13.67</b></li><li>vectorized: <b>13.67</b></li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">λ = 1.5</h3><ul><li>loop version: <b>28.09</b></li><li>vectorized: <b>28.09</b></li></ul></div>
+    <div class="mini"><h3 style="color:var(--blue)">Tested on a small slice</h3><ul><li>4 users, 5 movies, 3 features: the loop version is far too slow for the full data</li></ul></div>
+  </div>
+  <h3 style="color:var(--blue);font-size:.95rem;margin-top:14px">2) Training loss (log scale) from the output</h3>
+  <svg id="loss" viewBox="0 0 640 250" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="note">Loss fell from about <b>2.3 million</b> to about <b>2,900</b> in 180 iterations (a ~800× drop), still decreasing. The huge start comes from random N(0,1) initialization of 522k parameters.</div>
+  <h3 style="color:var(--blue);font-size:.95rem;margin-top:14px">3) Original vs predicted ratings for your 13 rated movies</h3>
+  <svg id="pv" viewBox="0 0 640 330" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div id="pvM"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Read this carefully:</b> these are <b>training-set</b> ratings, so a close match shows the optimizer fit your data, not that the model will generalize. Notice the pull toward the middle: 5s come back slightly under 5 and the 1s come back at 1.26 and 1.41. That is regularization (and the mean-normalized targets) shrinking predictions.</div>
+  <h3 style="color:var(--blue);font-size:.95rem;margin-top:14px">4) Recommendations: raw top predictions vs filtered</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h3 style="color:var(--orange)">Raw top predicted (unrated by you)</h3>
+      <ul><li>My Sassy Girl (2001): 4.49</li><li>Martin Lawrence Live: Runteldat (2002): 4.48</li><li>Memento (2000): 4.48</li><li>Delirium (2014): 4.47</li><li>Laggies (2014): 4.47</li><li>The One I Love (2014): 4.47</li><li>Particle Fever (2013): 4.46</li><li>Eichmann (2007): 4.45</li><li>Battle Royale 2 (2003): 4.45</li><li>Into the Abyss (2011): 4.45</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--green)">After filtering (&gt; 20 ratings, top-300 predictions, sorted by mean rating)</h3>
+      <table style="font-size:.72rem" id="ft"></table>
+    </div>
+  </div>
+  <div class="note"><b>Observations:</b> the raw list is dominated by lesser-known titles with very similar scores (4.45–4.49), a sign that few ratings can yield confident-looking predictions. The filter keeps popular, well-rated films. <b>Also note:</b> the filtered table still contains movies you already rated (marked ★), so it isn't a pure "recommend to me" list; exclude your rated movies before showing recommendations.</div>
+</div>
+
+<!-- LEARNED -->
+<div class="card" id="learned">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 What We Learned</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--blue)">Concepts</h3><ul>
+      <li>Ratings live in a <b>sparse matrix Y</b> with a mask <b>R</b>; only R = 1 cells count.</li>
+      <li>Prediction = <b>X·Wᵀ + b</b> for every movie/user pair.</li>
+      <li>Movie vectors and user vectors are <b>learned together</b> and constrain each other (Q1).</li>
+      <li><b>Mean normalization</b>: train on Y − μ, add μ back for predictions, so a new user starts at the movie averages.</li>
+      <li>The cost = masked squared error + λ/2 on X and W (not on b).</li>
+    </ul></div>
+    <div class="mini"><h3 style="color:var(--green)">Skills</h3><ul>
+      <li>Loop version vs <b>vectorized</b> cost, verified against the same expected values.</li>
+      <li>Boolean masking in NumPy (Q2) and broadcasting / reduce_sum in TensorFlow (Q3).</li>
+      <li>A <b>custom training loop</b>: GradientTape → gradients → Adam (Q4), because the cost doesn't fit Dense layers + <code>model.fit</code>.</li>
+      <li>Turning raw predictions into usable recommendations by filtering on popularity.</li>
+    </ul></div>
+  </div>
+  <span class="pill blue">Y, R, X, W, b shapes</span><span class="pill orange">mask with R</span><span class="pill green">X @ Wᵀ + b</span><span class="pill purple">Ynorm + Ymean</span><span class="pill red">GradientTape + Adam</span>
+</div>
+
+<!-- MORE -->
+<div class="card" id="more">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>🚀 What More Can Be Learned From This Lab</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--blue)">1. Honest evaluation</h3><ul><li>Hide ~10% of known ratings, train on the rest, report <b>RMSE</b> on the hidden ones</li><li>Tune λ, number of features (10 vs 100) and learning rate on that validation set</li><li>Watch for over-fitting: training loss falls forever, validation loss does not</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">2. Related movies (last lecture)</h3><ul><li>Use the learned <b>X</b> to find movies similar to one you like</li><li>Check whether neighbours "make sense" (sequels, genre)</li></ul></div>
+    <div class="mini"><h3 style="color:var(--purple)">3. Cold-start experiments</h3><ul><li>Keep only 1, 3, 5 of your 13 ratings and see how the recommendations change</li><li>Run once <b>without</b> mean normalization and compare</li></ul></div>
+    <div class="mini"><h3 style="color:var(--orange)">4. Engineering</h3><ul><li>Wrap the training step in <code>tf.function</code> for speed</li><li>Try plain gradient descent vs Adam, other learning rates</li><li>float32 instead of float64 to halve memory</li></ul></div>
+    <div class="mini"><h3 style="color:var(--red)">5. Better recommendation logic</h3><ul><li>Exclude movies already rated, require a minimum rating count, blend with popularity</li><li>Evaluate lists with <b>precision@k</b> / NDCG, not just rating error</li></ul></div>
+    <div class="mini"><h3 style="color:var(--blue)">6. Variations of the model</h3><ul><li>Binary labels with sigmoid + cross-entropy</li><li>Side information → content-based filtering (next topic)</li></ul></div>
+  </div>
+  <pre><span class="cm"># (a) related movies from the learned features  (X is a tf.Variable → .numpy())</span>
+Xn   = X.numpy()
+dist = np.sum((Xn - Xn[i])**<span class="num">2</span>, axis=<span class="num">1</span>)       <span class="cm"># squared distance to movie i</span>
+dist[i] = np.inf
+related = np.argsort(dist)[:<span class="num">10</span>]
+<span class="kw">for</span> k <span class="kw">in</span> related: print(movieList[k])
+
+<span class="cm"># (b) hold out ratings for validation (sketch)</span>
+rows, cols = np.nonzero(R)                              <span class="cm"># all rated (movie, user) pairs</span>
+rng  = np.random.default_rng(<span class="num">0</span>)
+hold = rng.random(len(rows)) &lt; <span class="num">0.1</span>                  <span class="cm"># ~10% of ratings held out</span>
+R_train = R.copy(); R_train[rows[hold], cols[hold]] = <span class="num">0</span>   <span class="cm"># train with R_train; compute Ymean from it too</span>
+<span class="cm"># after training: rmse = sqrt(mean((pred - Y)[held-out cells]**2))</span></pre>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> the snippets are my sketches to try after you've passed the autograder (the notebook asks you not to edit non-graded cells beforehand). Recompute the mean-normalization statistics from the training mask only, so the held-out ratings don't leak into μ.</div>
+  <div class="note"><b>Alternatives to this lab's approach (pros/cons):</b> <b>Keras Embedding layers</b> + <code>model.fit</code> give batching, callbacks and early stopping, but need extra work for the masked, regularized cost. <b>Closed-form methods (SVD / ALS)</b> are fast and robust on big sparse data, but less flexible for custom losses. <b>Content-based filtering</b> handles cold start better, but needs good item and user features.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+
+/* ---------- Q1 bipartite ---------- */
+const mv=['Love at last','Romance forever','Cute puppies of love','Nonstop car chases','Swords vs. karate'];
+const us=['Alice','Bob','Carol','Dave'];
+const Yb=[[5,5,0,0],[5,null,null,0],[null,4,0,null],[0,0,5,4],[0,0,5,null]];
+let sel={t:'m',i:0};
+const b1=document.getElementById('b1');
+mv.forEach((m,i)=>{const b=document.createElement('button');b.textContent='movie: '+m;b.onclick=()=>{sel={t:'m',i};drawBip();};b1.appendChild(b);});
+us.forEach((u,i)=>{const b=document.createElement('button');b.textContent='user: '+u;b.onclick=()=>{sel={t:'u',i};drawBip();};b1.appendChild(b);});
+function drawBip(){
+  b1.querySelectorAll('button').forEach((b,k)=>b.classList.toggle('on',(sel.t==='m'&&k===sel.i)||(sel.t==='u'&&k===5+sel.i)));
+  const s=document.getElementById('bip');s.innerHTML='';
+  const my=i=>40+i*55, uy=j=>55+j*65;
+  el('text',{x:150,y:20,fill:'#4d9dff','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='movies (rows of X)';
+  el('text',{x:490,y:20,fill:'#4dd992','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='users (rows of W)';
+  Yb.forEach((r,i)=>r.forEach((v,j)=>{if(v===null)return;
+    const hot=(sel.t==='m'&&sel.i===i)||(sel.t==='u'&&sel.i===j);
+    el('line',{x1:230,y1:my(i),x2:430,y2:uy(j),stroke:hot?'#ff9d4d':'#262b3a','stroke-width':hot?2.5:1.2},s);
+    if(hot)el('text',{x:330+(j%2?8:-8),y:(my(i)+uy(j))/2-4,fill:'#ff9d4d','font-size':11,'text-anchor':'middle'},s).textContent=v;}));
+  mv.forEach((m,i)=>{const hot=sel.t==='m'&&sel.i===i;el('rect',{x:30,y:my(i)-16,width:200,height:32,rx:8,fill:'#161923',stroke:hot?'#ff9d4d':'#4d9dff','stroke-width':hot?3:1.5},s);
+    el('text',{x:130,y:my(i)+4,fill:'#e6e8ef','font-size':11,'text-anchor':'middle'},s).textContent='x⁽'+(i+1)+'⁾ '+m.slice(0,18);});
+  us.forEach((u,j)=>{const hot=sel.t==='u'&&sel.i===j;el('rect',{x:430,y:uy(j)-16,width:180,height:32,rx:8,fill:'#161923',stroke:hot?'#ff9d4d':'#4dd992','stroke-width':hot?3:1.5},s);
+    el('text',{x:520,y:uy(j)+4,fill:'#e6e8ef','font-size':11,'text-anchor':'middle'},s).textContent='w⁽'+(j+1)+'⁾ '+u;});
+  // equations
+  let eq=[],name='';
+  if(sel.t==='m'){name=mv[sel.i];Yb[sel.i].forEach((v,j)=>{if(v!==null)eq.push(`w⁽${j+1}⁾·x⁽${sel.i+1}⁾ + b⁽${j+1}⁾ ≈ ${v} <span class="dimc">(${us[j]})</span>`);});
+    document.getElementById('eqs').innerHTML=`<b>x⁽${sel.i+1}⁾ (${name})</b> must satisfy <b>${eq.length} equations at once</b>:<br>${eq.join('<br>')}<br><br>The same vector appears in every line, so it can't be tuned for one user alone.`;}
+  else{name=us[sel.i];Yb.forEach((r,i)=>{if(r[sel.i]!==null)eq.push(`w⁽${sel.i+1}⁾·x⁽${i+1}⁾ + b⁽${sel.i+1}⁾ ≈ ${r[sel.i]} <span class="dimc">(${mv[i]})</span>`);});
+    document.getElementById('eqs').innerHTML=`<b>w⁽${sel.i+1}⁾ (${name})</b> must satisfy <b>${eq.length} equations at once</b>:<br>${eq.join('<br>')}<br><br>One taste vector must fit every movie ${name} rated.`;}
+}
+drawBip();
+
+/* ---------- Q2 mean demo ---------- */
+(function(){
+  const Y=[5,0,3,0,4,0],R=[1,0,1,0,1,0];
+  const naive=Y.reduce((a,b)=>a+b,0)/Y.length;
+  const kept=Y.filter((v,k)=>R[k]===1),masked=kept.reduce((a,b)=>a+b,0)/kept.length;
+  const cell=(v,c)=>`<td style="color:${c}">${v}</td>`;
+  document.getElementById('meanDemo').innerHTML=
+   `<p style="font-size:.8rem;color:#8a90a6">Tiny stand-in for one row of Y (6 users; my numbers, not the lab's):</p>
+    <table style="max-width:560px"><tr><th></th>${Y.map((_,k)=>`<th>user ${k}</th>`).join('')}</tr>
+    <tr><td>Y[0, :]</td>${Y.map(v=>`<td>${v}</td>`).join('')}</tr>
+    <tr><td>R[0, :]</td>${R.map(v=>`<td>${v}</td>`).join('')}</tr>
+    <tr><td>.astype(bool)</td>${R.map(v=>cell(v?'True':'False',v?'#4dd992':'#ff6b6b')).join('')}</tr>
+    <tr><td>Y[0, mask]</td><td colspan="6" style="text-align:left">[${kept.join(', ')}] <span class="dimc">(only the rated entries)</span></td></tr></table>
+    <span class="metric">np.mean(Y[0]) = <b style="color:#ff6b6b">${naive.toFixed(2)}</b> (zeros counted, wrong)</span>
+    <span class="metric">np.mean(Y[0, mask]) = <b style="color:#4dd992">${masked.toFixed(2)}</b> (correct)</span>`;
+})();
+
+/* ---------- Q3 toy cost ---------- */
+const X0=[[1,0],[0,1]],W0=[[2,0],[0,3]],B0=[0,0],Y0=[[2,5],[0,1]],R0=[[1,0],[1,1]];
+const dot=(a,b)=>a.reduce((s,v,k)=>s+v*b[k],0);
+const lam=document.getElementById('lam');let useMask=1;
+document.querySelectorAll('#maskBtns button').forEach(b=>b.onclick=()=>{useMask=+b.dataset.m;document.querySelectorAll('#maskBtns button').forEach(x=>x.classList.toggle('on',x===b));drawCost();});
+const fm=v=>Number.isInteger(v)?v:+v.toFixed(3);
+function matHTML(title,M){return `<div class="mat"><div class="t">${title}</div><table>${M.map(r=>'<tr>'+r.map(v=>`<td>${fm(v)}</td>`).join('')+'</tr>').join('')}</table></div>`;}
+function drawCost(){
+  const L=+lam.value;document.getElementById('lamV').textContent=L.toFixed(1);
+  const P=X0.map(x=>W0.map(w=>dot(x,w)));            // X @ W^T
+  const Pb=P.map(r=>r.map((v,j)=>v+B0[j]));
+  const D=Pb.map((r,i)=>r.map((v,j)=>v-Y0[i][j]));
+  const E=D.map((r,i)=>r.map((v,j)=>useMask?v*R0[i][j]:v));
+  const sq=E.map(r=>r.map(v=>v*v)),ss=sq.flat().reduce((a,b)=>a+b,0);
+  const sx=X0.flat().reduce((a,v)=>a+v*v,0),sw=W0.flat().reduce((a,v)=>a+v*v,0);
+  const J=0.5*ss+L/2*(sx+sw);
+  document.getElementById('costSteps').innerHTML=
+   matHTML('X  (2 movies × 2 features)',X0)+matHTML('W  (2 users × 2 features)',W0)+matHTML('tf.transpose(W)',[[W0[0][0],W0[1][0]],[W0[0][1],W0[1][1]]])+
+   matHTML('matmul(X, Wᵀ)  → x⁽ⁱ⁾·w⁽ʲ⁾',P)+matHTML('b = [0, 0] (broadcast)',[B0])+matHTML('Y (ratings)',Y0)+matHTML('R (mask)',R0)+
+   matHTML('(X·Wᵀ + b − Y)'+(useMask?' * R':' (no mask!)'),E)+matHTML('squared',sq);
+  document.getElementById('costRes').innerHTML=
+   `reduce_sum(squared) = <b>${fm(ss)}</b> → 0.5 × = <b>${fm(0.5*ss)}</b><br>regularization = λ/2 × (ΣX² + ΣW²) = ${L.toFixed(1)}/2 × (${sx} + ${sw}) = <b>${fm(L/2*(sx+sw))}</b><br><b>J = ${fm(J)}</b>`;
+}
+lam.oninput=()=>{drawCost();gcheck();};drawCost();
+
+/* ---------- Q4 gradient check ---------- */
+function Jc(X,W,b,L){let s=0;for(let i=0;i<2;i++)for(let j=0;j<2;j++){const e=(dot(X[i],W[j])+b[j]-Y0[i][j])*R0[i][j];s+=e*e;}
+  return 0.5*s+L/2*(X.flat().reduce((a,v)=>a+v*v,0)+W.flat().reduce((a,v)=>a+v*v,0));}
+function gcheck(){
+  const L=+lam.value,h=1e-5;
+  const E=X0.map((x,i)=>W0.map((w,j)=>(dot(x,w)+B0[j]-Y0[i][j])*R0[i][j]));
+  const rows=[];
+  const num=(get,set)=>{const X=X0.map(r=>r.slice()),W=W0.map(r=>r.slice()),b=B0.slice();const o=get(X,W,b);set(X,W,b,o+h);const jp=Jc(X,W,b,L);set(X,W,b,o-h);const jm=Jc(X,W,b,L);return (jp-jm)/(2*h);};
+  for(let i=0;i<2;i++)for(let k=0;k<2;k++){const an=E[i].reduce((s,e,j)=>s+e*W0[j][k],0)+L*X0[i][k];
+    rows.push([`∂J/∂X[${i},${k}]`,an,num((X)=>X[i][k],(X,W,b,v)=>{X[i][k]=v;})]);}
+  for(let j=0;j<2;j++)for(let k=0;k<2;k++){const an=E.reduce((s,r,i)=>s+r[j]*X0[i][k],0)+L*W0[j][k];
+    rows.push([`∂J/∂W[${j},${k}]`,an,num((X,W)=>W[j][k],(X,W,b,v)=>{W[j][k]=v;})]);}
+  for(let j=0;j<2;j++){const an=E.reduce((s,r)=>s+r[j],0);rows.push([`∂J/∂b[${j}]`,an,num((X,W,b)=>b[j],(X,W,b,v)=>{b[j]=v;})]);}
+  const mxd=Math.max(...rows.map(r=>Math.abs(r[1]-r[2])));
+  document.getElementById('gcheck').innerHTML=`<table><tr><th>parameter</th><th>hand formula (what the tape gives)</th><th>numerical estimate</th><th>|difference|</th></tr>`+
+   rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1].toFixed(6)}</td><td>${r[2].toFixed(6)}</td><td class="${Math.abs(r[1]-r[2])<1e-6?'ok':'bad'}">${Math.abs(r[1]-r[2]).toExponential(1)}</td></tr>`).join('')+`</table><span class="metric">max difference: <b>${mxd.toExponential(1)}</b></span>`;
+}
+gcheck();
+
+/* ---------- computation graph ---------- */
+(function(){
+  const s=document.getElementById('graph');
+  const nodes=['X, W','X·Wᵀ','+ b','− Y','⊙ R','( · )²','Σ','× ½','+ reg','J'];
+  const w=64,gap=14,x0=14,y=60;
+  nodes.forEach((n,i)=>{const x=x0+i*(w+gap);
+    el('rect',{x,y,width:w,height:42,rx:8,fill:'#161923',stroke:i===9?'#4dd992':'#4d9dff','stroke-width':2},s);
+    el('text',{x:x+w/2,y:y+25,fill:'#e6e8ef','font-size':11,'text-anchor':'middle'},s).textContent=n;
+    if(i<9){el('line',{x1:x+w,y1:y+21,x2:x+w+gap-2,y2:y+21,stroke:'#4d9dff','stroke-width':2},s);el('path',{d:`M${x+w+gap-1},${y+21} l-6,-4 l0,8 z`,fill:'#4d9dff'},s);}
+  });
+  el('text',{x:380,y:24,fill:'#4d9dff','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='forward pass: recorded by the tape';
+  el('text',{x:380,y:44,fill:'#8a90a6','font-size':10,'text-anchor':'middle'},s).textContent='(X², W² → Σ → × λ/2 feeds the "+ reg" node)';
+  // backward
+  const lab=[['',0],['E·W, Eᵀ·X',1],['col-sums → db',2],['pass E',3],['× R',4],['× 2E',5],['× ½',6],['',7],['',8],['∂J/∂J = 1',9]];
+  el('line',{x1:740,y1:140,x2:30,y2:140,stroke:'#ff9d4d','stroke-width':2},s);el('path',{d:'M28,140 l8,-5 l0,10 z',fill:'#ff9d4d'},s);
+  el('text',{x:380,y:168,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='tape.gradient(): replay in reverse, multiplying local derivatives (chain rule)';
+  lab.forEach(([t,i])=>{if(!t)return;el('text',{x:x0+i*(w+gap)+w/2,y:122,fill:'#ff9d4d','font-size':9,'text-anchor':'middle'},s).textContent=t;});
+  el('text',{x:380,y:196,fill:'#8a90a6','font-size':10,'text-anchor':'middle'},s).textContent='result: dX, dW, db (same shapes as X, W, b)';
+})();
+
+/* ---------- loss chart ---------- */
+(function(){
+  const its=[0,20,40,60,80,100,120,140,160,180],ls=[2321191.3,136168.7,51863.3,24598.8,13630.4,8487.6,5807.7,4311.6,3435.2,2902.1];
+  const s=document.getElementById('loss'),W=640,H=250,p=50;
+  const X=i=>p+i/180*(W-2*p-10),lo=Math.log10(2000),hi=Math.log10(3e6),Y=v=>H-35-(Math.log10(v)-lo)/(hi-lo)*(H-75);
+  el('line',{x1:p,y1:H-35,x2:W-10,y2:H-35,stroke:'#8a90a6'},s);el('line',{x1:p,y1:H-35,x2:p,y2:25,stroke:'#8a90a6'},s);
+  [1e3,1e4,1e5,1e6].forEach(v=>{if(v<2000)return;el('line',{x1:p,y1:Y(v),x2:W-10,y2:Y(v),stroke:'#262b3a'},s);el('text',{x:p-6,y:Y(v)+3,fill:'#8a90a6','font-size':9,'text-anchor':'end'},s).textContent=v.toExponential(0).replace('e+','e');});
+  el('path',{d:'M'+its.map((i,k)=>X(i).toFixed(1)+','+Y(ls[k]).toFixed(1)).join('L'),fill:'none',stroke:'#ff9d4d','stroke-width':2.5},s);
+  its.forEach((i,k)=>{el('circle',{cx:X(i),cy:Y(ls[k]),r:4,fill:'#ff9d4d'},s);el('text',{x:X(i)+(k===0?8:0),y:Y(ls[k])-9,fill:'#e6e8ef','font-size':9,'text-anchor':k===0?'start':'middle'},s).textContent=Math.round(ls[k]).toLocaleString();el('text',{x:X(i),y:H-20,fill:'#8a90a6','font-size':9,'text-anchor':'middle'},s).textContent=i;});
+  el('text',{x:W/2,y:16,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='training loss by iteration (values printed by the notebook)';
+})();
+
+/* ---------- original vs predicted ---------- */
+(function(){
+  const d=[['Shrek',5,4.90],['HP Sorcerer\'s Stone',5,4.84],['Amelie',2,2.13],['HP Chamber of Secrets',5,4.88],['Pirates: Black Pearl',5,4.87],['LOTR: Return of the King',5,4.89],['Eternal Sunshine',3,3.00],['The Incredibles',5,4.90],['Persuasion',2,2.11],['Toy Story 3',5,4.80],['Inception',3,3.00],['Louis Theroux: Law & Disorder',1,1.41],['Nothing to Declare',1,1.26]];
+  const s=document.getElementById('pv');const x0=210,sc=70;
+  el('text',{x:320,y:16,fill:'#4dd992','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='original (blue) vs predicted (green), 0–5 stars';
+  d.forEach((r,k)=>{const y=34+k*22;
+    el('text',{x:x0-8,y:y+12,fill:'#e6e8ef','font-size':10,'text-anchor':'end'},s).textContent=r[0];
+    el('rect',{x:x0,y:y,width:r[1]*sc*0.8,height:8,fill:'#4d9dff'},s);
+    el('rect',{x:x0,y:y+9,width:r[2]*sc*0.8,height:8,fill:'#4dd992'},s);
+    el('text',{x:x0+Math.max(r[1],r[2])*sc*0.8+6,y:y+14,fill:'#8a90a6','font-size':9},s).textContent=r[1].toFixed(1)+' → '+r[2].toFixed(2);});
+  const mae=d.reduce((a,r)=>a+Math.abs(r[1]-r[2]),0)/d.length,mx=Math.max(...d.map(r=>Math.abs(r[1]-r[2])));
+  document.getElementById('pvM').innerHTML=`<span class="metric">mean absolute error (my arithmetic): <b>${mae.toFixed(2)}</b></span><span class="metric">largest error: <b>${mx.toFixed(2)}</b></span>`;
+})();
+
+/* ---------- filtered table ---------- */
+(function(){
+  const rows=[['Departed, The (2006)',4.03,4.25,107,0],['Dark Knight, The (2008)',3.99,4.24,149,0],['Memento (2000)',4.48,4.12,159,0],['LOTR: Return of the King (2003)',4.89,4.12,185,1],['Toy Story 3 (2010)',4.80,4.11,55,1],['LOTR: The Two Towers (2002)',4.36,4.02,188,0],['Shaun of the Dead (2004)',4.00,4.01,77,0],['Hot Fuzz (2007)',3.98,4.00,61,0],['Dark Knight Rises, The (2012)',4.08,3.99,76,0],['HP: Deathly Hallows Pt 1',4.43,3.99,47,0],['Finding Nemo (2003)',4.29,3.96,141,0],['Casino Royale (2006)',4.34,3.94,81,0]];
+  document.getElementById('ft').innerHTML='<tr><th>title</th><th>pred</th><th>mean</th><th>#</th></tr>'+rows.map(r=>`<tr><td>${r[0]}${r[4]?' <span style="color:#ff9d4d">★</span>':''}</td><td>${r[1].toFixed(2)}</td><td>${r[2].toFixed(2)}</td><td>${r[3]}</td></tr>`).join('')+'<tr><td colspan="4" style="color:#8a90a6;text-align:left">★ = a movie you already rated; first 12 of 24 rows shown</td></tr>';
+})();
+</script>
+</body>
+</html>

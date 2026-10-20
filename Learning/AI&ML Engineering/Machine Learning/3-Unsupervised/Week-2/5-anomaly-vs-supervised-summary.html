@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anomaly Detection vs Supervised Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .col{border-radius:10px;padding:14px 16px;font-size:.82rem;}
+  .col.ad{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.4);}
+  .col.sl{background:rgba(77,157,255,.07);border:1px solid rgba(77,157,255,.4);}
+  .col h3{margin-bottom:6px;}
+  .col ul{margin:6px 0 0;padding-left:18px;color:var(--dim);}
+  .col li{margin:4px 0;}
+  .col li b{color:var(--text);}
+  @media(max-width:800px){.vs{grid-template-columns:1fr;}}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:150px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:160px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer;margin-right:6px;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .verdict{padding:12px 14px;border-radius:8px;font-weight:600;margin-top:10px;font-size:.88rem;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>⚖️ Anomaly Detection vs Supervised Learning</h1>
+<div class="sub">Few positives (y = 1), many negatives (y = 0): which algorithm should you pick?</div>
+
+<!-- QUESTION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Question</h2></div>
+  <p>You have <b>a few positive examples (y = 1)</b> and <b>a large number of negative examples (y = 0)</b>. Should you use <b>anomaly detection</b> or <b>supervised learning</b>? In some applications the decision is subtle.</p>
+  <div class="note">The previous video showed you can use a few labeled anomalies to tune an anomaly detector. That raises this question: if you have those labels, why not just train a supervised classifier?</div>
+</div>
+
+<!-- SIDE BY SIDE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Side-by-Side</h2></div>
+  <div class="vs">
+    <div class="col ad">
+      <h3 style="color:var(--red)">🔍 Anomaly detection</h3>
+      <ul>
+        <li><b>Very small number of positives</b> (0–20 is common)</li>
+        <li><b>Large number of negatives</b>, used to model <code>p(x)</code></li>
+        <li>Parameters of p(x) are learned <b>only from negatives</b></li>
+        <li>Positives only appear in the <b>CV and test sets</b> (tuning and evaluation)</li>
+        <li><b>Many different "types" of anomalies</b>; hard for any algorithm to learn what anomalies look like from a few positives</li>
+        <li>Future anomalies may look <b>nothing like any seen so far</b></li>
+        <li>Example: <b>fraud</b></li>
+      </ul>
+    </div>
+    <div class="col sl">
+      <h3 style="color:var(--blue)">🏷️ Supervised learning</h3>
+      <ul>
+        <li><b>Large number of positives and negatives</b></li>
+        <li>Enough positives for the algorithm to get a <b>sense of what positives look like</b></li>
+        <li>Assumes <b>future positives are likely similar</b> to those in the training set</li>
+        <li>Learns a mapping from x to y using <b>both classes</b></li>
+        <li>Example: <b>email spam</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Nuance:</b> even with only ~20 positives it <i>might</i> be okay to apply supervised learning. The real difference is how each approach looks at the data, covered next.</div>
+</div>
+
+<!-- DIAGRAM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Core Difference: How Each One Sees a Brand-New Failure</h2></div>
+  <svg id="cmp" viewBox="0 0 700 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="grid2" style="margin-top:10px">
+    <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">Anomaly detection:</b> models what <i>normal</i> looks like and flags anything that deviates a lot, <b>including a brand-new failure mode</b> never seen in the data.</div>
+    <div class="note" style="border-color:var(--blue)"><b style="color:var(--blue)">Supervised learning:</b> learns what the <i>known</i> positives look like. A new type of failure that resembles none of them can land on the "normal" side and be missed.</div>
+  </div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Diagram note:</b> an illustration of the idea (positions are made up), not lecture data.</div>
+</div>
+
+<!-- WHY IT MATTERS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Deciding Question: Will Future Positives Look Like Past Ones?</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(255,107,107,.5)">
+      <h3 style="color:var(--red)">"No, new types keep appearing" → anomaly detection</h3>
+      <ul><li>Aircraft engines: many ways to go wrong; tomorrow there may be a <b>brand-new</b> way, and your ~20 positives can't cover them all</li><li>Financial fraud: new kinds of attempts show up every few months or every year</li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(77,157,255,.5)">
+      <h3 style="color:var(--blue)">"Yes, they're similar" → supervised learning</h3>
+      <ul><li>Spam: many types, but even over years it keeps selling similar things and pointing to similar sites, so next week's spam resembles past spam</li><li>Same labels recur, so the training positives are representative</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- EXAMPLES TABLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Application Map</h2></div>
+  <table>
+    <tr><th>Application</th><th>Better fit</th><th>Why</th></tr>
+    <tr><td>Fraud detection (new schemes)</td><td style="color:var(--red)"><b>Anomaly detection</b></td><td>Look for anything different from past transactions. (Supervised is used for <i>previously observed</i> forms of fraud.)</td></tr>
+    <tr><td>Email spam classification</td><td style="color:var(--blue)"><b>Supervised</b></td><td>Future spam resembles the spam you've already seen</td></tr>
+    <tr><td>Manufacturing: new, unseen defects (e.g. aircraft engines)</td><td style="color:var(--red)"><b>Anomaly detection</b></td><td>Catch brand-new failures even with no such positive in the training set</td></tr>
+    <tr><td>Manufacturing: known, seen defects (e.g. phone scratches)</td><td style="color:var(--blue)"><b>Supervised</b></td><td>The same defect (y = 1) repeats, so enough labeled examples can be collected</td></tr>
+    <tr><td>Monitoring machines in a data center</td><td style="color:var(--red)"><b>Anomaly detection</b></td><td>A hacked machine can behave in a brand-new way unlike any past behavior</td></tr>
+    <tr><td>Security applications in general</td><td style="color:var(--red)"><b>Anomaly detection</b></td><td>Hackers keep finding new ways into systems</td></tr>
+    <tr><td>Weather prediction (sunny/rainy/snow)</td><td style="color:var(--blue)"><b>Supervised</b></td><td>Only a handful of types, same output labels seen over and over</td></tr>
+    <tr><td>Disease classification (known disease from symptoms)</td><td style="color:var(--blue)"><b>Supervised</b></td><td>A specific, previously seen disease with labeled cases</td></tr>
+  </table>
+  <div class="note">Real-life scenario: a phone maker knows its case machine sometimes scratches covers. With plenty of scratched phones labeled y = 1, a supervised classifier works well. If they instead worry about unknown future problems, they'd add an anomaly detector.</div>
+</div>
+
+<!-- DECISION HELPER -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Interactive: Rule-of-Thumb Picker</h2></div>
+  <div class="slider"><b style="color:var(--orange);min-width:190px">Positive examples: <span id="nV">20</span></b><input id="n" type="range" min="0" max="500" step="1" value="20"></div>
+  <div class="slider"><b style="min-width:190px">Future positives will…</b>
+    <span class="btns" id="sim">
+      <button data-v="new">look NEW / different</button>
+      <button data-v="same">look like past ones</button>
+      <button data-v="unsure" class="on">not sure</button>
+    </span></div>
+  <div id="verdict" class="verdict"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> the lecture gives guidance (0–20 positives common for anomaly detection; larger counts favor supervised), not exact cutoffs. The thresholds here are my own simplification of that rule of thumb.</div>
+</div>
+
+<!-- WORKFLOW CODE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>What Each One Trains On</h2></div>
+  <pre><span class="cm"># Anomaly detection: labels never touch the fit</span>
+mu, var = estimate_gaussian(X_normal)             <span class="cm"># negatives only (y = 0)</span>
+eps, F1 = select_threshold(y_cv, p(X_cv, mu, var)) <span class="cm"># the few y = 1 are used HERE, for tuning/eval</span>
+
+<span class="cm"># Supervised learning: both classes shape the model</span>
+model.fit(X_train, y_train)                        <span class="cm"># needs enough y = 1 to learn from</span></pre>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill red">Anomaly detection → find brand-new positives unlike past ones</span>
+  <span class="pill blue">Supervised → decide if x resembles known positives</span>
+  <span class="pill orange">Few positives + varied failures → anomaly detection</span>
+  <span class="pill green">Many positives + repeating pattern → supervised</span>
+  <div class="note"><b>Next video:</b> feature choice matters a lot for anomaly detection systems, so the lecture shares practical tips for <b>tuning the features</b> you feed the algorithm.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons of combining them (beyond the lecture):</b> running both, or feeding the anomaly score into a supervised model as a feature, can catch known <i>and</i> novel problems. It also doubles the maintenance, and you must handle disagreements between the two systems.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const cross=(svg,x,y,c,s=5)=>{[[-s,-s,s,s],[s,-s,-s,s]].forEach(a=>el('line',{x1:x+a[0],y1:y+a[1],x2:x+a[2],y2:y+a[3],stroke:c,'stroke-width':2,'stroke-linecap':'round'},svg));};
+(function(){
+  const svg=document.getElementById('cmp');
+  const normal=[[0,0],[15,-10],[-20,8],[30,12],[-35,-15],[10,25],[-10,-28],[45,-5],[-50,10],[5,5],[25,-30],[-25,30],[55,20],[-60,-20]];
+  [{ox:0,title:'Anomaly detection (models normal)',c:'#ff6b6b'},{ox:350,title:'Supervised (learns known positives)',c:'#4d9dff'}].forEach(P=>{
+    const cx=P.ox+170,cy=150;
+    el('rect',{x:P.ox+8,y:30,width:334,height:262,fill:'none',stroke:'#262b3a',rx:8},svg);
+    el('text',{x:P.ox+175,y:22,fill:P.c,'font-size':13,'font-weight':700,'text-anchor':'middle'},svg).textContent=P.title;
+    normal.forEach(([dx,dy])=>cross(svg,cx+dx,cy+dy,'#4dd992',4));
+    // seen anomaly type A (top-left)
+    [[-100,-85],[-115,-70],[-90,-100],[-110,-95]].forEach(([dx,dy])=>cross(svg,cx+dx,cy+dy,'#ff9d4d',4));
+    // new types B (top-right), C (bottom-right)
+    cross(svg,cx+110,cy-85,'#b58cff',6);cross(svg,cx+105,cy+100,'#b58cff',6);
+  });
+  // left: epsilon boundary
+  el('ellipse',{cx:170,cy:150,rx:100,ry:68,fill:'rgba(77,217,146,.06)',stroke:'#4dd992','stroke-width':2,'stroke-dasharray':'6 4'},svg);
+  el('text',{x:170,y:158,fill:'#4dd992','font-size':10,'text-anchor':'middle'},svg).textContent='p(x) ≥ ε : normal';
+  el('text',{x:60,y:48,fill:'#ff9d4d','font-size':10},svg).textContent='seen type A → flagged';
+  el('text',{x:222,y:56,fill:'#b58cff','font-size':10},svg).textContent='NEW B → flagged ✓';
+  el('text',{x:232,y:272,fill:'#b58cff','font-size':10},svg).textContent='NEW C → flagged ✓';
+  // right: learned boundary only around type A
+  el('path',{d:'M358,170 L520,38',stroke:'#4d9dff','stroke-width':2.5,fill:'none'},svg);
+  el('path',{d:'M358,170 L520,38 L358,38 Z',fill:'rgba(255,157,77,.08)'},svg);
+  el('text',{x:372,y:50,fill:'#ff9d4d','font-size':10},svg).textContent='learned "positive" side';
+  el('text',{x:572,y:56,fill:'#b58cff','font-size':10,'text-anchor':'middle'},svg).textContent='NEW B → "normal" ✗';
+  el('text',{x:575,y:272,fill:'#b58cff','font-size':10,'text-anchor':'middle'},svg).textContent='NEW C → "normal" ✗';
+  // legend
+  cross(svg,24,284,'#4dd992',4);el('text',{x:34,y:288,fill:'#8a90a6','font-size':10},svg).textContent='normal';
+  cross(svg,92,284,'#ff9d4d',4);el('text',{x:102,y:288,fill:'#8a90a6','font-size':10},svg).textContent='seen anomaly';
+  cross(svg,190,284,'#b58cff',5);el('text',{x:200,y:288,fill:'#8a90a6','font-size':10},svg).textContent='new, unseen anomaly';
+})();
+// decision helper
+let sim='unsure';
+const n=document.getElementById('n'),v=document.getElementById('verdict');
+document.querySelectorAll('#sim button').forEach(b=>b.onclick=()=>{sim=b.dataset.v;document.querySelectorAll('#sim button').forEach(x=>x.classList.toggle('on',x===b));upd();});
+function upd(){
+  const k=+n.value;document.getElementById('nV').textContent=k;
+  let t,c,bg,bd;
+  if(sim==='new'){t=k>100?'Lean ANOMALY DETECTION (or both): new failure types will escape a classifier trained on past positives, even with many examples.':'ANOMALY DETECTION: few positives, and future anomalies will look different.';c='#ff6b6b';bg='rgba(255,107,107,.12)';bd='rgba(255,107,107,.4)';}
+  else if(sim==='same'){t=k<=5?'Lean SUPERVISED if you can collect more positives; with almost none, anomaly detection is the fallback.':'SUPERVISED LEARNING: future positives resemble training positives, so a classifier can learn them.';c='#4d9dff';bg='rgba(77,157,255,.12)';bd='rgba(77,157,255,.4)';}
+  else{ if(k<=20){t='Lean ANOMALY DETECTION: very few positives (0–20 is the common range). Think about whether new failure types will appear.';c='#ff6b6b';bg='rgba(255,107,107,.12)';bd='rgba(255,107,107,.4)';}
+        else if(k>=100){t='Lean SUPERVISED LEARNING: plenty of positives. Add anomaly detection only if brand-new failure types are a concern.';c='#4d9dff';bg='rgba(77,157,255,.12)';bd='rgba(77,157,255,.4)';}
+        else{t='GRAY ZONE: even ~20–100 positives could work with supervised learning. Decide by whether future positives will resemble past ones.';c='#ff9d4d';bg='rgba(255,157,77,.12)';bd='rgba(255,157,77,.4)';}}
+  v.textContent=t;v.style.color=c;v.style.background=bg;v.style.border='1px solid '+bd;
+}
+n.oninput=upd;upd();
+</script>
+</body>
+</html>

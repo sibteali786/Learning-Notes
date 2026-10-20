@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finding Related Items &amp; Limitations of Collaborative Filtering</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media(max-width:800px){.grid2,.grid3,.grid4{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.95rem;margin:10px 0;overflow-x:auto;}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:130px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.76rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  .hl{background:rgba(255,157,77,.16);}
+  .good{background:rgba(77,217,146,.14);}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🔗 Finding Related Items &amp; Limitations of Collaborative Filtering</h1>
+<div class="sub">"Similar to this one" · Squared distance between learned feature vectors · Cold start · Side information · Lead-in to content-based filtering</div>
+
+<!-- PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>The Problem</h2></div>
+  <p>You're looking at a book or movie and the site says <b>"Here are some other books/movies similar to this one."</b> How does it pick them? Collaborative filtering gives a nice way to do it, using the features it already learned.</p>
+  <div class="note">Real-life scenario: on a bookstore page for one novel, a "Customers also viewed / Similar books" strip appears. Under the hood, each book has a learned feature vector, and the strip shows the books whose vectors are closest.</div>
+</div>
+
+<!-- LEARNED FEATURES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Learned Features: Hard to Read, Still Useful</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(255,157,77,.5)">
+      <h3 style="color:var(--orange)">Earlier hypothetical example</h3>
+      <ul><li>x₁ = how romantic, x₂ = how much action: neat and interpretable</li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(77,157,255,.5)">
+      <h3 style="color:var(--blue)">In practice (learned automatically)</h3>
+      <ul><li>Individual features x₁, x₂, x₃… are <b>quite hard to interpret</b> ("x₁ = action movie, x₂ = foreign film" doesn't happen)</li><li><b>Collectively</b> they still convey what the movie is like</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- METHOD -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Method: Nearest Neighbours in Feature Space</h2></div>
+  <p>To find items related to item <b>i</b>, find items <b>k</b> whose feature vector x⁽ᵏ⁾ is similar to x⁽ⁱ⁾, i.e. with the <b>smallest distance</b>:</p>
+  <div class="formula">distance(k, i) = Σ<sub>l=1..n</sub> ( x<sub>l</sub>⁽ᵏ⁾ − x<sub>l</sub>⁽ⁱ⁾ )² &nbsp;=&nbsp; ‖ x⁽ᵏ⁾ − x⁽ⁱ⁾ ‖²</div>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--blue)">i</h3><ul><li>The item the user is currently viewing</li></ul></div>
+    <div class="mini"><h3 style="color:var(--orange)">k</h3><ul><li>Each other item you test as a possible "related item"</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">n</h3><ul><li>Number of features per item (the sum runs over l = 1…n)</li></ul></div>
+  </div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Take x⁽ⁱ⁾ of the item being viewed</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Compute ‖x⁽ᵏ⁾ − x⁽ⁱ⁾‖² for every other item k</div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Sort ascending, take the <b>5 or 10 smallest</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br>Show them as <b>related items</b></div>
+  </div>
+  <div class="note">Why it works: features x⁽ⁱ⁾ give a sense of what item i is about, so items with <b>similar features turn out to be similar</b>. The lecture says this idea of finding related items becomes a <b>small building block</b> for an even more powerful recommender later this week.</div>
+</div>
+
+<!-- WORKED EXAMPLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Worked Example (the lecture gave none, so this one is illustrative)</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Made-up 3-feature vectors for five movies. Pick the movie being viewed (item i); every other movie is a candidate k.</p>
+  <div class="btns" id="pick"></div>
+  <div class="slider"><b style="min-width:150px">show top K = <span id="kV"></span></b><input id="kk" type="range" min="1" max="4" step="1" value="2"></div>
+  <table id="feat"></table>
+  <div class="grid2" style="margin-top:10px">
+    <svg id="sc" viewBox="0 0 400 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+    <svg id="bars" viewBox="0 0 400 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  </div>
+  <div id="work" class="note"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Plot note:</b> the scatter shows only x₁ and x₂ so it fits on a page; the distances use all three features, so a neighbour can look farther or closer in the plot than its true distance.</div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fnc">related_items</span>(X, i, top_k=<span class="num">10</span>):
+    dist = np.sum((X - X[i])**<span class="num">2</span>, axis=<span class="num">1</span>)   <span class="cm"># ‖x⁽ᵏ⁾ − x⁽ⁱ⁾‖² for every item k</span>
+    dist[i] = np.inf                              <span class="cm"># exclude the item itself (distance 0)</span>
+    <span class="kw">return</span> np.argsort(dist)[:top_k]                <span class="cm"># indices of the closest items</span></pre>
+</div>
+
+<!-- LIMITATIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Limitations of Collaborative Filtering</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(255,107,107,.5)">
+      <h3 style="color:var(--red)">1. Cold start problem</h3>
+      <ul><li><b>New item</b> (e.g. a just-published movie nobody has rated): how do you rank it?</li><li><b>New user</b> who has rated only a few items: how do you show them something reasonable?</li><li>With few ratings, results for that item or user <b>may not be very accurate</b></li><li>Mean normalization (earlier video) <b>helps a lot</b>, but there may be even better ways to show interesting items to such users</li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(255,157,77,.5)">
+      <h3 style="color:var(--orange)">2. No natural way to use side information</h3>
+      <ul><li>Only ratings are used, though you often know much more about items and users (below)</li></ul>
+    </div>
+  </div>
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">Cold start, visualized</h3>
+  <svg id="cold" viewBox="0 0 640 230" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Diagram note:</b> illustrative rating matrix, not lecture data. Most cells of the new item's row and the new user's column are unknown, so there is little for the algorithm to learn from.</div>
+
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">Side information you might have</h3>
+  <div class="grid2">
+    <div class="mini">
+      <h3 style="color:var(--blue)">About items</h3>
+      <ul><li>Genre</li><li>Movie stars</li><li>Studio</li><li>Budget</li><li>… and more</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--green)">About users</h3>
+      <ul><li><b>Demographics:</b> age, gender, location</li><li><b>Expressed preferences:</b> e.g. likes some genres, not others</li><li><b>IP address</b> → location, which may hint at interests</li><li><b>Device:</b> mobile vs desktop</li><li><b>Web browser:</b> Chrome vs Firefox vs Safari vs Edge users behave differently</li></ul>
+    </div>
+  </div>
+  <div class="note">All of these cues can be <b>surprisingly correlated with a user's preferences</b>. Once you've collected enough data, even the browser can hint at what a user may like.</div>
+</div>
+
+<!-- NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Where This Leads: Content-Based Filtering</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--blue)">Collaborative filtering</h3><ul><li>Recommends using <b>ratings from users who rated similar items</b></li><li>Strong, but suffers from cold start and ignores side information</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">Content-based filtering (next)</h3><ul><li>Can address many of these limitations</li><li>Described as a <b>state-of-the-art technique used in many commercial applications today</b></li></ul></div>
+  </div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">Related items = nearest feature vectors</span>
+  <span class="pill orange">dist = Σ (xₗ⁽ᵏ⁾ − xₗ⁽ⁱ⁾)² = ‖x⁽ᵏ⁾ − x⁽ⁱ⁾‖²</span>
+  <span class="pill green">Take the 5–10 smallest</span>
+  <span class="pill red">Cold start: new items/users</span>
+  <span class="pill purple">Side info is ignored → content-based filtering</span>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Practical tips (beyond the lecture):</b> for a large catalog, precompute each item's top-K neighbours offline instead of scanning every item per page view. Squared Euclidean distance is sensitive to feature scale, so cosine similarity or approximate nearest-neighbour search are common alternatives. Not covered in the video.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const M=[{n:'Love at last',x:[0.9,0.1,0.5]},{n:'Romance forever',x:[0.8,0.2,0.4]},{n:'Cute puppies of love',x:[0.85,0.0,0.6]},{n:'Nonstop car chases',x:[0.1,0.9,0.3]},{n:'Swords vs. karate',x:[0.0,1.0,0.2]}];
+let cur=0;
+const kk=document.getElementById('kk');
+const dist=(a,b)=>a.x.reduce((s,v,l)=>s+(v-b.x[l])**2,0);
+const pick=document.getElementById('pick');
+M.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.n;b.onclick=()=>{cur=i;draw();};pick.appendChild(b);});
+function draw(){
+  const K=+kk.value;document.getElementById('kV').textContent=K;
+  pick.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i===cur));
+  const ds=M.map((m,k)=>({k,d:k===cur?Infinity:dist(m,M[cur])}));
+  const order=ds.filter(o=>o.k!==cur).sort((a,b)=>a.d-b.d),top=new Set(order.slice(0,K).map(o=>o.k));
+  // table
+  let h='<tr><th>Movie</th><th>x₁</th><th>x₂</th><th>x₃</th><th>‖x⁽ᵏ⁾ − x⁽ⁱ⁾‖²</th><th>Result</th></tr>';
+  M.forEach((m,k)=>{const isI=k===cur,d=ds[k].d,t=top.has(k);
+    h+=`<tr class="${isI?'hl':t?'good':''}"><td>${m.n}${isI?' <b style="color:#ff9d4d">(item i)</b>':''}</td>`+m.x.map(v=>`<td>${v}</td>`).join('')+`<td>${isI?'—':d.toFixed(4)}</td><td>${isI?'viewing':t?'✅ related':'not shown'}</td></tr>`;});
+  document.getElementById('feat').innerHTML=h;
+  // scatter x1 vs x2
+  const s=document.getElementById('sc');s.innerHTML='';
+  const X=v=>40+v/1.1*320,Y=v=>260-v/1.1*220;
+  el('line',{x1:40,y1:260,x2:380,y2:260,stroke:'#8a90a6'},s);el('line',{x1:40,y1:260,x2:40,y2:30,stroke:'#8a90a6'},s);
+  el('text',{x:376,y:278,fill:'#8a90a6','font-size':10,'text-anchor':'end'},s).textContent='x₁';el('text',{x:46,y:34,fill:'#8a90a6','font-size':10},s).textContent='x₂';
+  el('text',{x:200,y:16,fill:'#4dd992','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='feature space (x₁ vs x₂ only)';
+  M.forEach((m,k)=>{if(top.has(k))el('line',{x1:X(M[cur].x[0]),y1:Y(M[cur].x[1]),x2:X(m.x[0]),y2:Y(m.x[1]),stroke:'#4dd992','stroke-dasharray':'4 3','stroke-width':2},s);});
+  M.forEach((m,k)=>{const c=k===cur?'#ff9d4d':top.has(k)?'#4dd992':'#8a90a6';
+    el('circle',{cx:X(m.x[0]),cy:Y(m.x[1]),r:k===cur?9:7,fill:c},s);
+    const rightSide=m.x[0]<0.6;el('text',{x:X(m.x[0])+(rightSide?12:-12),y:Y(m.x[1])+4,fill:'#e6e8ef','font-size':10,'text-anchor':rightSide?'start':'end'},s).textContent=m.n;});
+  // bars
+  const b=document.getElementById('bars');b.innerHTML='';
+  el('text',{x:200,y:16,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},b).textContent='squared distance to the viewed item';
+  const mx=Math.max(...order.map(o=>o.d))*1.1;
+  order.forEach((o,r)=>{const y=40+r*58,w=o.d/mx*230;
+    el('text',{x:10,y:y+14,fill:'#e6e8ef','font-size':10},b).textContent=M[o.k].n;
+    el('rect',{x:10,y:y+20,width:Math.max(w,2),height:20,rx:4,fill:top.has(o.k)?'#4dd992':'#8a90a6'},b);
+    el('text',{x:10+Math.max(w,2)+8,y:y+35,fill:'#e6e8ef','font-size':11},b).textContent=o.d.toFixed(4);});
+  // workings
+  const lines=order.map(o=>{const parts=M[o.k].x.map((v,l)=>`(${M[cur].x[l]}−${v})²`).join(' + ');return `<b>${M[o.k].n}:</b> ${parts} = ${o.d.toFixed(4)}`;}).join('<br>');
+  document.getElementById('work').innerHTML=`<b>Workings for ${M[cur].n}:</b><br>${lines}<br><br><b>Top ${K} related:</b> ${order.slice(0,K).map(o=>M[o.k].n).join(', ')}`;
+}
+kk.oninput=draw;draw();
+
+// cold start matrix
+(function(){
+  const s=document.getElementById('cold');
+  const users=['Alice','Bob','Carol','Dave','New user'];
+  const movies=['Love at last','Romance forever','Cute puppies of love','Nonstop car chases','Swords vs. karate','New movie'];
+  const R=[[5,5,0,0,null],[5,null,null,0,null],[null,4,0,null,null],[0,0,5,4,null],[0,0,5,null,3],[null,5,null,null,null]];
+  const cw=84,ch=28,x0=150,y0=40;
+  el('text',{x:320,y:16,fill:'#ff6b6b','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='ratings matrix with a new movie (row) and a new user (column)';
+  users.forEach((u,j)=>el('text',{x:x0+j*cw+cw/2,y:y0-6,fill:j===4?'#ff9d4d':'#8a90a6','font-size':10,'text-anchor':'middle'},s).textContent=u);
+  movies.forEach((m,i)=>{
+    el('text',{x:x0-8,y:y0+i*ch+19,fill:i===5?'#ff9d4d':'#8a90a6','font-size':10,'text-anchor':'end'},s).textContent=m.length>20?m.slice(0,19)+'…':m;
+    users.forEach((u,j)=>{const v=R[i][j],isNew=i===5||j===4;
+      el('rect',{x:x0+j*cw+2,y:y0+i*ch+2,width:cw-4,height:ch-4,rx:5,fill:isNew?'rgba(255,157,77,.14)':'#161923',stroke:isNew?'#ff9d4d':'#262b3a'},s);
+      el('text',{x:x0+j*cw+cw/2,y:y0+i*ch+19,fill:v===null?'#8a90a6':'#e6e8ef','font-size':12,'text-anchor':'middle'},s).textContent=v===null?'?':v;});});
+})();
+</script>
+</body>
+</html>

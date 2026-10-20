@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recommender Systems — Ratings, Notation &amp; Learning with Item Features</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.95rem;margin:10px 0;overflow-x:auto;}
+  .mu{color:var(--blue)} .sg{color:var(--orange)}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:140px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .rt td.q{color:var(--dim);}
+  .rt td.sel,.rt th.sel{background:rgba(181,140,255,.12);}
+  .cell5{color:#4dd992;font-weight:700}.cell0{color:#ff6b6b;font-weight:700}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .slider b{min-width:120px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .btns button.act{border-color:var(--green);color:var(--green);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🎬 Recommender Systems — Ratings, Notation &amp; Per-User Linear Regression</h1>
+<div class="sub">Week 2 intro · Predicting movie ratings · What if we have item features? · Second-to-last week of the specialization</div>
+
+<!-- WHY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Recommender Systems?</h2></div>
+  <p>Shopping sites (Amazon), streaming sites (Netflix), food-delivery apps: they recommend things you may want to buy, watch or try. Academia gives the topic <i>some</i> attention, but its <b>commercial impact and practical use cases are vastly greater</b>.</p>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--orange)">🛒 Products</h3><ul><li>"You may want to buy…"</li></ul></div>
+    <div class="mini"><h3 style="color:var(--blue)">🎞️ Movies</h3><ul><li>"You may want to watch…"</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">🍜 Restaurants</h3><ul><li>"You may want to try…"</li></ul></div>
+  </div>
+  <div class="note">For many companies a <b>large fraction of sales is driven by their recommender system</b>, so the economic value is very large. The same logic works for items like products, websites, restaurants, or which social-media articles to show.</div>
+</div>
+
+<!-- SETUP / NOTATION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Running Example: Predicting Movie Ratings</h2></div>
+  <p>Users rate movies <b>0 to 5 stars</b> (the lecture changes "1 to 5" to "zero to five" to make examples easier). <b>?</b> = not yet rated.</p>
+  <table class="rt" id="ratings"></table>
+  <div class="grid2" style="margin-top:12px">
+    <div class="mini">
+      <h3 style="color:var(--blue)">Notation</h3>
+      <ul>
+        <li><code>n_u</code> = number of users (<b>4</b>)</li>
+        <li><code>n_m</code> = number of movies/items (<b>5</b>)</li>
+        <li><code>r(i,j) = 1</code> if user j has rated movie i, else 0</li>
+        <li><code>y(i,j)</code> = rating by user j on movie i (<b>defined only if r(i,j) = 1</b>)</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--green)">Examples from the slide</h3>
+      <ul>
+        <li><code>r(1,1) = 1</code>: Alice rated Love at last</li>
+        <li><code>r(3,1) = 0</code>: Alice has not rated Cute puppies of love</li>
+        <li><code>y(3,2) = 4</code>: Bob gave Cute puppies of love 4 stars</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Why r(i,j) matters:</b> not every user rates every movie, so the system must know <i>which</i> ratings exist. The goal: <b>predict the "?" entries</b>, then recommend movies a user is likely to rate 5 stars.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Temporary assumption:</b> we first assume we have <b>features of each movie</b> (romance? action?). Later in the week: what if we don't?</div>
+</div>
+
+<!-- FEATURES + MODEL -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Adding Movie Features</h2></div>
+  <p>Two features per movie: <b>x₁ = how romantic</b>, <b>x₂ = how much action</b>. So <code>n = 2</code> (number of features).</p>
+  <svg id="scatter" viewBox="0 0 640 300" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="legend" style="font-size:.72rem;color:var(--dim);margin-top:4px">Dot colour = selected user's rating (red 0 → green 5, hollow = unrated). Use the user tabs in the lab below.</div>
+  <div class="grid3" style="margin-top:10px">
+    <div class="mini"><h3 style="color:var(--orange)">x⁽¹⁾ = [0.9, 0]</h3><ul><li>Love at last: very romantic, no action</li></ul></div>
+    <div class="mini"><h3 style="color:var(--blue)">x⁽³⁾ = [0.99, 0]</h3><ul><li>Cute puppies of love</li></ul></div>
+    <div class="mini"><h3 style="color:var(--red)">x⁽⁴⁾ = [0.1, 1.0]</h3><ul><li>Nonstop car chases: a bit of romance, tons of action</li></ul></div>
+  </div>
+</div>
+
+<!-- PREDICTION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>The Model: One Linear Regression per User</h2></div>
+  <div class="formula">predicted rating of user <b>j</b> for movie <b>i</b> = <span class="mu">w⁽ʲ⁾</span> · x⁽ⁱ⁾ + <span class="sg">b⁽ʲ⁾</span></div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li>Each user gets <b>their own parameters</b> w⁽ʲ⁾ (a vector with n numbers) and b⁽ʲ⁾.</li>
+    <li>x⁽ⁱ⁾ is the <b>feature vector of movie i</b>, shared by all users.</li>
+    <li>It's just linear regression, <b>fit separately for each of the n_u = 4 users</b>.</li>
+  </ul>
+  <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">Worked example (Alice):</b> w⁽¹⁾ = [5, 0], b⁽¹⁾ = 0, x⁽³⁾ = [0.99, 0] → <code>5 × 0.99 + 0 × 0 + 0 = 4.95</code>. Plausible: Alice loves the two romance movies and gave 0 to the two action movies, so she'd likely love Cute puppies of love (high romance, no action).</div>
+  <div class="note">Intuition: w⁽ʲ⁾ encodes <b>how much user j likes each kind of movie</b> (weight on romance, weight on action).</div>
+</div>
+
+<!-- COST -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Cost Function</h2></div>
+  <p>Let <code>m⁽ʲ⁾</code> = number of movies rated by user j. For <b>one user j</b>:</p>
+  <div class="formula">
+    J(<span class="mu">w⁽ʲ⁾</span>, <span class="sg">b⁽ʲ⁾</span>) = <span style="color:var(--dim)">1/(2m⁽ʲ⁾)</span> · Σ<sub>i : r(i,j)=1</sub> ( w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾ − y⁽ⁱ'ʲ⁾ )² &nbsp;+&nbsp; <span style="color:var(--orange)">λ/(2m⁽ʲ⁾) · Σ<sub>k=1..n</sub> (w<sub>k</sub>⁽ʲ⁾)²</span>
+  </div>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--blue)">Squared error</h3><ul><li>Prediction vs actual rating</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">Only rated movies</h3><ul><li>Sum only over i where <b>r(i,j) = 1</b>; unrated entries have no y</li></ul></div>
+    <div class="mini"><h3 style="color:var(--orange)">Regularization</h3><ul><li>λ term over the n weights prevents overfitting</li></ul></div>
+  </div>
+  <div class="note"><b>Simplification for recommenders:</b> drop the <code>1/m⁽ʲ⁾</code> factor. It's a constant for user j, so <b>the minimizing w and b are the same</b>.</div>
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">All users together</h3>
+  <div class="formula">
+    J(w⁽¹⁾…w⁽ⁿᵘ⁾, b⁽¹⁾…b⁽ⁿᵘ⁾) = ½ Σ<sub>j=1..n_u</sub> Σ<sub>i : r(i,j)=1</sub> ( w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾ − y⁽ⁱ'ʲ⁾ )² &nbsp;+&nbsp; <span style="color:var(--orange)">λ/2 · Σ<sub>j=1..n_u</sub> Σ<sub>k=1..n</sub> (w<sub>k</sub>⁽ʲ⁾)²</span>
+  </div>
+  <div class="note">Minimize with <b>gradient descent</b> (or any optimizer) over all w⁽¹⁾,b⁽¹⁾ … w⁽ⁿᵘ⁾,b⁽ⁿᵘ⁾ at once. The term <code>w·x + b</code> plays the role of f(x) in linear regression.</div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fnc">cost_all_users</span>(W, b, X, Y, R, lam):
+    <span class="cm"># X: (n_m, n)   W: (n_u, n)   b: (1, n_u)   Y, R: (n_m, n_u)</span>
+    pred = X @ W.T + b                       <span class="cm"># (n_m, n_u): every user's prediction for every movie</span>
+    err  = (pred - Y) * R                    <span class="cm"># R masks out unrated entries (r(i,j) = 0)</span>
+    <span class="kw">return</span> 0.5 * np.sum(err**2) + (lam/2) * np.sum(W**2)</pre>
+</div>
+
+<!-- LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Interactive Lab: Fit a User's Model</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Pick a user, tweak w₁ (romance weight), w₂ (action weight), b and λ, or press <b>Fit with gradient descent</b>. Predictions for unrated movies are highlighted.</p>
+  <div class="btns" id="utabs"></div>
+  <div class="slider"><b style="color:var(--blue)">w₁ (romance) = <span id="w1V"></span></b><input id="w1" type="range" min="-2" max="8" step="0.05" value="5"></div>
+  <div class="slider"><b style="color:var(--orange)">w₂ (action) = <span id="w2V"></span></b><input id="w2" type="range" min="-2" max="8" step="0.05" value="0"></div>
+  <div class="slider"><b style="color:var(--green)">b = <span id="bV"></span></b><input id="b" type="range" min="-3" max="3" step="0.05" value="0"></div>
+  <div class="slider"><b style="color:var(--purple)">λ = <span id="lV"></span></b><input id="lam" type="range" min="0" max="10" step="0.1" value="0"></div>
+  <div class="btns"><button class="act" id="fit">▶ Fit with gradient descent</button><button id="reset">↺ Reset (Alice: w=[5,0], b=0)</button></div>
+  <table id="pred"></table>
+  <div id="metrics" style="margin-top:8px"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> the fit uses the slide's ratings and features, but the optimizer settings (learning rate, iterations) are my own choices for the demo. Bigger λ shrinks the weights toward 0, so predictions drift toward the average rating for that user.</div>
+</div>
+
+<!-- PROS/CONS & NEXT -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill blue">n_u users, n_m movies</span>
+  <span class="pill orange">r(i,j) says who rated what</span>
+  <span class="pill green">pred = w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾</span>
+  <span class="pill red">Sum only where r(i,j) = 1</span>
+  <span class="pill purple">One regression per user</span>
+  <div class="note"><b>Open question for the next video:</b> where do the features x₁, x₂ come from? What if you don't have features that describe the items in enough detail? The next video modifies the algorithm so you can still make recommendations.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons of this per-user approach (beyond the lecture):</b> it's simple, interpretable (w⁽ʲ⁾ says what a user likes) and works when good item features exist. But it needs hand-made features, can't learn from other users' behaviour, and a brand-new user with zero ratings has nothing to fit (the cold-start problem).</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const users=['Alice','Bob','Carol','Dave'];
+const movies=[{n:'Love at last',x:[0.9,0]},{n:'Romance forever',x:[1.0,0.01]},{n:'Cute puppies of love',x:[0.99,0]},{n:'Nonstop car chases',x:[0.1,1.0]},{n:'Swords vs. karate',x:[0,0.9]}];
+const Y=[[5,5,0,0],[5,null,null,0],[null,4,0,null],[0,0,5,4],[0,0,5,null]]; // Y[i][j]
+let u=0;const P=users.map(()=>({w:[0,0],b:0}));P[0]={w:[5,0],b:0};
+
+// ratings table
+function drawRatings(){
+  const t=document.getElementById('ratings');
+  let h='<tr><th>Movie</th>'+users.map((n,j)=>`<th class="${j===u?'sel':''}">${n}(${j+1})</th>`).join('')+'<th>x₁ romance</th><th>x₂ action</th></tr>';
+  movies.forEach((m,i)=>{h+=`<tr><td>${m.n}</td>`+Y[i].map((v,j)=>`<td class="${v===null?'q':''} ${j===u?'sel':''}">${v===null?'?':`<span class="${v>=4?'cell5':v===0?'cell0':''}">${v}</span>`}</td>`).join('')+`<td>${m.x[0]}</td><td>${m.x[1]}</td></tr>`;});
+  t.innerHTML=h;
+}
+// scatter
+function drawScatter(){
+  const svg=document.getElementById('scatter');svg.innerHTML='';
+  const W=640,H=300,pad=44,X=v=>pad+v/1.15*(W-2*pad-70),Y_=v=>H-pad-v/1.15*(H-2*pad);
+  el('line',{x1:pad,y1:H-pad,x2:W-30,y2:H-pad,stroke:'#8a90a6'},svg);el('line',{x1:pad,y1:H-pad,x2:pad,y2:pad-10,stroke:'#8a90a6'},svg);
+  el('text',{x:W-34,y:H-14,fill:'#8a90a6','font-size':12,'text-anchor':'end'},svg).textContent='x₁ (romance)';
+  el('text',{x:10,y:pad-14,fill:'#8a90a6','font-size':12},svg).textContent='x₂ (action)';
+  movies.forEach((m,i)=>{
+    const v=Y[i][u],cx=X(m.x[0]),cy=Y_(m.x[1]);
+    if(v===null){el('circle',{cx,cy,r:9,fill:'none',stroke:'#8a90a6','stroke-width':2,'stroke-dasharray':'3 2'},svg);}
+    else{const t=v/5,r=Math.round(255-t*(255-77)),g=Math.round(107+t*(217-107)),b=Math.round(107+t*(146-107));el('circle',{cx,cy,r:9,fill:`rgb(${r},${g},${b})`},svg);}
+    const right=m.x[0]<0.5;
+    el('text',{x:cx+(right?14:-14),y:cy+(i===1?-12:4),fill:'#e6e8ef','font-size':11,'text-anchor':right?'start':'end'},svg).textContent=`${m.n} (${v===null?'?':v})`;
+  });
+  el('text',{x:W/2,y:20,fill:'#b58cff','font-size':12,'text-anchor':'middle'},svg).textContent=`Ratings by ${users[u]}`;
+}
+// lab
+const w1=document.getElementById('w1'),w2=document.getElementById('w2'),bb=document.getElementById('b'),lam=document.getElementById('lam');
+function ratedList(){return movies.map((m,i)=>({i,y:Y[i][u]})).filter(o=>o.y!==null);}
+function lab(){
+  const w=[+w1.value,+w2.value],b=+bb.value,L=+lam.value;P[u]={w:w.slice(),b};
+  document.getElementById('w1V').textContent=w[0].toFixed(2);document.getElementById('w2V').textContent=w[1].toFixed(2);
+  document.getElementById('bV').textContent=b.toFixed(2);document.getElementById('lV').textContent=L.toFixed(1);
+  let sq=0,rows='<tr><th>Movie</th><th>x⁽ⁱ⁾</th><th>r(i,j)</th><th>y</th><th>w·x + b</th><th>sq. error</th></tr>';
+  movies.forEach((m,i)=>{
+    const p=w[0]*m.x[0]+w[1]*m.x[1]+b,y=Y[i][u];let e='—',yy='?',cls='';
+    if(y!==null){const d=p-y;sq+=d*d;e=(d*d).toFixed(2);yy=y;}else cls='style="background:rgba(181,140,255,.15);color:#b58cff"';
+    rows+=`<tr><td>${m.n}</td><td>[${m.x[0]}, ${m.x[1]}]</td><td>${y===null?0:1}</td><td>${yy}</td><td ${cls}><b>${p.toFixed(2)}</b></td><td>${e}</td></tr>`;});
+  document.getElementById('pred').innerHTML=rows;
+  const mj=ratedList().length,reg=w[0]*w[0]+w[1]*w[1];
+  const J=sq/(2*mj)+L*reg/(2*mj),Jn=0.5*sq+L*reg/2;
+  document.getElementById('metrics').innerHTML=
+   `<span class="metric">m⁽ʲ⁾ = <b>${mj}</b> rated</span><span class="metric">J (with 1/2m⁽ʲ⁾) = <b>${J.toFixed(3)}</b></span><span class="metric">J (1/m⁽ʲ⁾ dropped) = <b>${Jn.toFixed(3)}</b></span>`;
+}
+[w1,w2,bb,lam].forEach(s=>s.oninput=lab);
+function loadUser(){const p=P[u];w1.value=p.w[0];w2.value=p.w[1];bb.value=p.b;lab();drawRatings();drawScatter();
+  document.querySelectorAll('#utabs button').forEach((x,j)=>x.classList.toggle('on',j===u));}
+const tabs=document.getElementById('utabs');
+users.forEach((n,j)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{u=j;loadUser();};tabs.appendChild(b);});
+document.getElementById('fit').onclick=()=>{
+  const r=ratedList(),m=r.length,L=+lam.value;let w=[0,0],b=0;
+  for(let it=0;it<8000;it++){let gw=[0,0],gb=0;
+    r.forEach(o=>{const x=movies[o.i].x,e=w[0]*x[0]+w[1]*x[1]+b-o.y;gw[0]+=e*x[0];gw[1]+=e*x[1];gb+=e;});
+    w[0]-=0.3*(gw[0]/m+L*w[0]/m);w[1]-=0.3*(gw[1]/m+L*w[1]/m);b-=0.3*gb/m;}
+  w1.value=Math.max(-2,Math.min(8,w[0]));w2.value=Math.max(-2,Math.min(8,w[1]));bb.value=Math.max(-3,Math.min(3,b));lab();};
+document.getElementById('reset').onclick=()=>{u=0;P[0]={w:[5,0],b:0};lam.value=0;loadUser();};
+loadUser();
+</script>
+</body>
+</html>

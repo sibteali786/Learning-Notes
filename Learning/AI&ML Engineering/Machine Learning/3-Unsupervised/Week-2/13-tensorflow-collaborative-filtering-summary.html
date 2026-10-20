@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TensorFlow: Auto Diff &amp; Collaborative Filtering</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.92rem;margin:10px 0;overflow-x:auto;}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:130px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .slider b{min-width:170px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.act{border-color:var(--green);color:var(--green);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🧮 TensorFlow: Auto Diff &amp; Collaborative Filtering</h1>
+<div class="sub">Custom training loop · tf.Variable · tf.GradientTape · Adam optimizer · Why not Dense + model.fit?</div>
+
+<!-- WHY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Big Idea: TensorFlow Isn't Only for Neural Networks</h2></div>
+  <p>It's a great tool for neural networks, but it can also implement <b>other learning algorithms</b>, like collaborative filtering. The key feature: <b>automatic differentiation</b>.</p>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(255,107,107,.5)"><h3 style="color:var(--red)">Without autodiff</h3><ul><li>Derive ∂J/∂w, ∂J/∂b, ∂J/∂x by hand</li><li>Needs calculus, easy to get wrong</li></ul></div>
+    <div class="mini" style="border-color:rgba(77,217,146,.5)"><h3 style="color:var(--green)">With autodiff</h3><ul><li><b>Implement only the cost function J</b></li><li>TensorFlow computes the derivatives, with a few lines of code</li></ul></div>
+  </div>
+</div>
+
+<!-- RECAP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Recap: Gradient Descent (Course 1)</h2></div>
+  <div class="formula">w = w − α · ∂J(w,b)/∂w &nbsp;&nbsp;&nbsp; b = b − α · ∂J(w,b)/∂b</div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li><b>α</b> = learning rate; <b>∂J/∂w</b> = the derivative (slope of J(w)).</li>
+    <li>In the slide's example b = 0, so f(x) = w·x and you skip the b update.</li>
+    <li>Repeat until convergence. Computing the derivative is the part that can be hard, and TensorFlow can do it for you.</li>
+  </ul>
+</div>
+
+<!-- TOY EXAMPLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Toy Example: A Custom Training Loop</h2></div>
+  <p>Simplest cost: <b>J = (w·x − 1)²</b>, with f(x) = w·x, target y = 1, x = 1. The best w is <b>1</b>.</p>
+  <pre><span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+
+w = tf.Variable(<span class="num">3.0</span>)          <span class="cm"># tf.Variable = a parameter we want to OPTIMIZE</span>
+x = <span class="num">1.0</span>
+y = <span class="num">1.0</span>                         <span class="cm"># target value</span>
+alpha = <span class="num">0.01</span>
+
+iterations = <span class="num">30</span>
+<span class="kw">for</span> iter <span class="kw">in</span> range(iterations):
+    <span class="cm"># GradientTape records the steps used to compute the cost J → enables auto differentiation</span>
+    <span class="kw">with</span> tf.GradientTape() <span class="kw">as</span> tape:
+        fwb   = w * x                  <span class="cm"># f(x)</span>
+        costJ = (fwb - y) ** <span class="num">2</span>
+
+    <span class="cm"># replay the tape to get ∂J/∂w (w is in the list because we declared it a Variable)</span>
+    [dJdw] = tape.gradient(costJ, [w])
+
+    <span class="cm"># one gradient descent step; tf.Variables need a special function to modify</span>
+    w.assign_add(-alpha * dJdw)</pre>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--blue)">tf.Variable</h3><ul><li>Tells TF "this is a parameter to optimize"</li></ul></div>
+    <div class="mini"><h3 style="color:var(--orange)">tf.GradientTape()</h3><ul><li>Records the sequence of operations used to compute J</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">tape.gradient(J, [w])</h3><ul><li>Derivative of J w.r.t. each listed variable</li></ul></div>
+  </div>
+  <div class="note"><b>Why assign_add?</b> A tf.Variable needs a special function to modify, so instead of <code>w = w − α·dJdw</code> you write <code>w.assign_add(−alpha * dJdw)</code>. (The lecture says not to worry about this; the practice lab gives you the syntax.)</div>
+  <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">What you do:</b> tell TensorFlow how to compute the cost J. The rest of the syntax makes it figure out the derivative. This is <b>Auto Diff</b>.</div>
+</div>
+
+<!-- TAPE DIAGRAM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>What the Tape Does (Under the Hood)</h2></div>
+  <svg id="tape" viewBox="0 0 700 210" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="grid2" style="margin-top:10px">
+    <div class="note" style="border-color:var(--blue)"><b style="color:var(--blue)">Forward pass (recorded):</b> w → <code>fwb = w·x</code> → <code>costJ = (fwb − y)²</code>.</div>
+    <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Backward pass (tape.gradient):</b> chain rule: ∂J/∂w = 2(fwb − y) · x. At w = 3, x = 1, y = 1 → 2·2·1 = <b>4</b>.</div>
+  </div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Chain-rule detail:</b> the backward formulas are my illustration of what autodiff computes; the lecture only says TensorFlow records the operations and derives the gradient.</div>
+  <div class="note"><b>Terminology:</b> <b>Auto Diff</b> is the technically correct term. <b>Auto Grad</b> is actually the name of one specific software package, but people use it for the same concept. PyTorch also supports autodiff.</div>
+</div>
+
+<!-- TOY LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Interactive: Run the Toy Gradient Descent</h2></div>
+  <div class="slider"><b style="color:var(--blue)">starting w = <span id="w0V"></span></b><input id="w0" type="range" min="-2" max="4" step="0.1" value="3"></div>
+  <div class="slider"><b style="color:var(--orange)">α (learning rate) = <span id="aV"></span></b><input id="al" type="range" min="0.005" max="1.05" step="0.005" value="0.01"></div>
+  <div class="slider"><b style="color:var(--purple)">iterations = <span id="itV"></span></b><input id="it" type="range" min="1" max="200" step="1" value="30"></div>
+  <svg id="toy" viewBox="0 0 640 260" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div id="toyM" style="margin-top:8px"></div>
+  <div class="note" id="toyNote"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up (my own check of the math):</b> with the slide's settings (w₀ = 3, α = 0.01, 30 iterations) each step shrinks (w − 1) by a factor of 0.98, so after 30 steps w ≈ <b>2.09</b>, not yet 1. The lecture says it gets there "eventually": run more iterations or raise α. At α = 1 the update overshoots by exactly the same amount each time (w bounces between two values), and above that it diverges.</div>
+</div>
+
+<!-- CF IN TF -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Collaborative Filtering in TensorFlow</h2></div>
+  <p>Same loop, now the variables are <b>X (movie features), W and b (user parameters)</b>, and the optimizer is <b>Adam</b>:</p>
+  <pre>optimizer = keras.optimizers.Adam(learning_rate=<span class="num">1e-1</span>)
+
+iterations = <span class="num">200</span>
+<span class="kw">for</span> iter <span class="kw">in</span> range(iterations):
+    <span class="kw">with</span> tf.GradientTape() <span class="kw">as</span> tape:
+        <span class="cm"># forward pass is included in the cost; Ynorm = mean-normalized ratings</span>
+        cost_value = cofiCostFuncV(X, W, b, Ynorm, R, num_users, num_movies, lambda_)
+
+    <span class="cm"># derivatives of the cost w.r.t. ALL three sets of parameters, automatically</span>
+    grads = tape.gradient(cost_value, [X, W, b])
+
+    <span class="cm"># one optimizer step on all variables</span>
+    optimizer.apply_gradients(zip(grads, [X, W, b]))</pre>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Compute <b>cost J(X, W, b)</b> inside the tape</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br><b>tape.gradient</b> gives ∂J/∂X, ∂J/∂W, ∂J/∂b</div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br><b>optimizer.apply_gradients(zip(grads, vars))</b> updates them</div><div class="arrow">↺</div>
+    <div class="step">Repeat for 200 iterations</div>
+  </div>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--blue)">Plain gradient descent</h3><ul><li>w = w − α ∂J/∂w</li><li>b = b − α ∂J/∂b</li><li>x = x − α ∂J/∂x</li><li>(repeat until convergence)</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">With autodiff you can swap in Adam</h3><ul><li>Once derivatives are automatic you're <b>not limited to gradient descent</b></li><li>Use a more powerful optimizer, e.g. <b>Adam</b></li></ul></div>
+  </div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Notes (my additions):</b> (1) <code>lambda</code> is a reserved word in Python, so real code names it <code>lambda_</code>. (2) X, W, b must be <code>tf.Variable</code>s for the tape to track them. (3) Exact API details can differ across TensorFlow/Keras versions, so use the syntax given in the practice lab.</div>
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:12px">A vectorized cost function you could pass in (sketch)</h3>
+  <pre><span class="kw">def</span> <span class="fnc">cofi_cost_func_v</span>(X, W, b, Ynorm, R, lambda_):
+    <span class="cm"># X: (n_m, n)  W: (n_u, n)  b: (1, n_u)  Ynorm, R: (n_m, n_u)</span>
+    err = (tf.linalg.matmul(X, tf.transpose(W)) + b - Ynorm) * R     <span class="cm"># R masks unrated entries</span>
+    <span class="kw">return</span> <span class="num">0.5</span> * tf.reduce_sum(err**<span class="num">2</span>) + (lambda_/<span class="num">2</span>) * (tf.reduce_sum(X**<span class="num">2</span>) + tf.reduce_sum(W**<span class="num">2</span>))
+
+<span class="cm"># the slide's version also takes num_users and num_movies; a vectorized version doesn't need them</span></pre>
+</div>
+
+<!-- ADAM LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Interactive: Adam vs Plain Gradient Descent on the Recommender</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Same cost J(w, b, x) on the 5-user, 5-movie mean-normalized ratings from the previous lecture (n = 2 features), same random start, 200 iterations. I wrote the gradients by hand in JavaScript for this demo (TensorFlow would give you them for free).</p>
+  <div class="slider"><b style="color:var(--blue)">Adam lr = <span id="alrV"></span></b><input id="alr" type="range" min="0.01" max="0.5" step="0.01" value="0.1"></div>
+  <div class="slider"><b style="color:var(--orange)">GD α = <span id="glrV"></span></b><input id="glr" type="range" min="0.002" max="0.05" step="0.002" value="0.02"></div>
+  <div class="slider"><b style="color:var(--purple)">λ = <span id="lmV"></span></b><input id="lm" type="range" min="0" max="3" step="0.1" value="1"></div>
+  <div class="btns"><button class="act" id="go">▶ Train both</button><button id="rs">🎲 New random start</button></div>
+  <svg id="cmp" viewBox="0 0 640 260" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div id="cmpM" style="margin-top:8px"></div>
+  <div class="note" id="cmpNote"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> the rates, λ and the data are demo choices, and Adam uses its standard defaults (β₁ = 0.9, β₂ = 0.999). Results vary with the random start, and a high Adam learning rate can be noisy.</div>
+</div>
+
+<!-- WHY NOT DENSE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Why Not Dense Layers + model.compile / model.fit?</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(77,157,255,.5)">
+      <h3 style="color:var(--blue)">Standard recipe (works when…)</h3>
+      <ul><li>Your model is a sequence of <b>Dense (or other supported) layers</b></li><li><code>model.compile()</code> → <code>model.fit()</code></li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(255,157,77,.5)">
+      <h3 style="color:var(--orange)">Collaborative filtering</h3>
+      <ul><li>Its <b>cost function doesn't neatly fit</b> Dense or other standard layer types</li><li>So: <b>write the cost yourself</b>, then use TensorFlow's <b>Auto Diff</b> and <b>Adam</b> to optimize it</li></ul>
+    </div>
+  </div>
+  <div class="note">Even when the standard recipe doesn't apply, these tools give you an effective way to implement <b>other learning algorithms</b> as well.</div>
+</div>
+
+<!-- DATA / LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Practice Lab &amp; What's Next</h2></div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li>The lab uses a <b>real dataset</b>: actual movies rated by actual people, the <b>MovieLens</b> dataset (Harper and Konstan, 2015, <i>The MovieLens Datasets: History and Context</i>).</li>
+    <li>A lot of code and syntax appears; the lab provides what you need to finish the exercise.</li>
+  </ul>
+  <div class="note"><b>Next video:</b> more nuances of collaborative filtering, especially <b>finding related items</b>: given one movie, which other movies are similar?</div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaways</h2></div>
+  <span class="pill blue">tf.Variable = parameters to learn</span>
+  <span class="pill orange">GradientTape records the cost computation</span>
+  <span class="pill green">tape.gradient → derivatives for free</span>
+  <span class="pill purple">apply_gradients(zip(grads, vars))</span>
+  <span class="pill red">Adam instead of plain GD</span>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons of the custom-loop approach (beyond the lecture):</b> it's flexible, with no hand-derived gradients and any optimizer. But you write and debug the loop, shapes and masking yourself, and a hand-written loop is slower than <code>model.fit</code> unless you wrap the step in <code>tf.function</code>. Frameworks like PyTorch use the same idea with a different API.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+// ---- tape diagram ----
+(function(){
+  const s=document.getElementById('tape');
+  const box=(x,y,w,t,c)=>{el('rect',{x,y,width:w,height:44,rx:8,fill:'#161923',stroke:c,'stroke-width':2},s);el('text',{x:x+w/2,y:y+27,fill:'#e6e8ef','font-size':12,'text-anchor':'middle'},s).textContent=t;};
+  const arr=(x1,x2,y,c)=>{el('line',{x1,y1:y,x2,y2:y,stroke:c,'stroke-width':2},s);el('path',{d:`M${x2},${y} l-8,-5 l0,10 z`,fill:c},s);};
+  el('text',{x:350,y:18,fill:'#8a90a6','font-size':11,'text-anchor':'middle'},s).textContent='inside  with tf.GradientTape() as tape:';
+  box(30,40,100,'w  (Variable)','#4d9dff');box(200,40,120,'fwb = w·x','#4d9dff');box(390,40,150,'costJ = (fwb−y)²','#4d9dff');
+  arr(130,198,62,'#4d9dff');arr(320,388,62,'#4d9dff');
+  el('text',{x:164,y:36,fill:'#4d9dff','font-size':10,'text-anchor':'middle'},s).textContent='record';el('text',{x:354,y:36,fill:'#4d9dff','font-size':10,'text-anchor':'middle'},s).textContent='record';
+  // backward
+  el('text',{x:350,y:128,fill:'#8a90a6','font-size':11,'text-anchor':'middle'},s).textContent='tape.gradient(costJ, [w])  replays the tape backwards';
+  el('rect',{x:30,y:140,width:100,height:44,rx:8,fill:'#161923',stroke:'#ff9d4d','stroke-width':2},s);el('text',{x:80,y:167,fill:'#ff9d4d','font-size':12,'text-anchor':'middle'},s).textContent='dJ/dw';
+  el('rect',{x:200,y:140,width:120,height:44,rx:8,fill:'#161923',stroke:'#ff9d4d','stroke-width':2},s);el('text',{x:260,y:167,fill:'#ff9d4d','font-size':12,'text-anchor':'middle'},s).textContent='dfwb/dw = x';
+  el('rect',{x:390,y:140,width:150,height:44,rx:8,fill:'#161923',stroke:'#ff9d4d','stroke-width':2},s);el('text',{x:465,y:167,fill:'#ff9d4d','font-size':12,'text-anchor':'middle'},s).textContent='dJ/dfwb = 2(fwb−y)';
+  [[198,132],[388,322]].forEach(([a,b])=>{el('line',{x1:a,y1:162,x2:b,y2:162,stroke:'#ff9d4d','stroke-width':2},s);el('path',{d:`M${b},162 l8,-5 l0,10 z`,fill:'#ff9d4d'},s);});
+  el('text',{x:600,y:60,fill:'#4dd992','font-size':12,'text-anchor':'middle'},s).textContent='J';
+  el('text',{x:80,y:204,fill:'#4dd992','font-size':11,'text-anchor':'middle'},s).textContent='→ w.assign_add(−α·dJdw)';
+})();
+// ---- toy lab ----
+const w0=document.getElementById('w0'),al=document.getElementById('al'),it=document.getElementById('it');
+function toy(){
+  const a=+al.value,n=+it.value,s0=+w0.value;
+  document.getElementById('w0V').textContent=s0.toFixed(1);document.getElementById('aV').textContent=a.toFixed(3);document.getElementById('itV').textContent=n;
+  const path=[s0];let w=s0;for(let k=0;k<n;k++){w=w-a*2*(w-1);path.push(w);}
+  const svg=document.getElementById('toy');svg.innerHTML='';
+  const lo=Math.min(-2,...path)-0.3,hi=Math.max(4,...path)+0.3,X=v=>40+(v-lo)/(hi-lo)*560;
+  const J=v=>(v-1)**2,jm=Math.min(Math.max(...path.map(J),9),60),Y=v=>230-Math.min(v,jm)/jm*200;
+  el('line',{x1:40,y1:230,x2:610,y2:230,stroke:'#8a90a6'},svg);
+  let d='';for(let i=0;i<=200;i++){const v=lo+(hi-lo)*i/200;d+=(i?'L':'M')+X(v).toFixed(1)+','+Y(J(v)).toFixed(1);}
+  el('path',{d,fill:'none',stroke:'#4d9dff','stroke-width':2.5},svg);
+  el('line',{x1:X(1),y1:230,x2:X(1),y2:36,stroke:'#4dd992','stroke-dasharray':'4 3'},svg);el('text',{x:X(1)+6,y:46,fill:'#4dd992','font-size':11},svg).textContent='optimum w = 1';
+  const step=Math.max(1,Math.floor(path.length/40));
+  path.forEach((v,k)=>{if(k%step===0||k===path.length-1){el('circle',{cx:X(v),cy:Y(J(v)),r:k===0?6:k===path.length-1?6:3,fill:k===0?'#ff9d4d':k===path.length-1?'#b58cff':'rgba(255,157,77,.6)'},svg);}});
+  el('text',{x:320,y:16,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},svg).textContent='J(w) = (w·1 − 1)²   (orange = start, purple = end)';
+  const fin=path[path.length-1],diverge=Math.abs(fin)>50;
+  document.getElementById('toyM').innerHTML=`<span class="metric">dJ/dw at start: <b>${(2*(s0-1)).toFixed(2)}</b></span><span class="metric">final w: <b>${diverge?'diverged':fin.toFixed(4)}</b></span><span class="metric">final J: <b>${diverge?'∞':J(fin).toExponential(2)}</b></span>`;
+  document.getElementById('toyNote').innerHTML=diverge?'The learning rate is too large: each step overshoots further than the last, so w <b>diverges</b>.':a>=0.95&&a<=1.05?'α ≈ 1 makes each step jump to the mirror image of w across the optimum: w bounces without converging.':fin&&Math.abs(fin-1)<0.01?'Converged: w is within 0.01 of the optimum 1.':'Not converged yet: increase the iterations or the learning rate.';
+}
+[w0,al,it].forEach(s=>s.oninput=toy);toy();
+
+// ---- Adam vs GD ----
+const Y0=[[5,5,0,0,null],[5,null,null,0,null],[null,4,0,null,null],[0,0,5,4,null],[0,0,5,0,null]];
+const mu=Y0.map(r=>{const v=r.filter(x=>x!==null);return v.reduce((a,b)=>a+b,0)/v.length;});
+const T=Y0.map((r,i)=>r.map(v=>v===null?null:v-mu[i]));
+const nm=5,nu=5,NP=nm*2+nu*2+nu;
+const xi=(i,k)=>i*2+k,wi=(j,k)=>10+j*2+k,bi=j=>20+j;
+function costGrad(P,L){
+  const g=new Array(NP).fill(0);let J=0;
+  for(let i=0;i<nm;i++)for(let j=0;j<nu;j++){const y=T[i][j];if(y===null)continue;
+    const e=P[xi(i,0)]*P[wi(j,0)]+P[xi(i,1)]*P[wi(j,1)]+P[bi(j)]-y;J+=0.5*e*e;
+    g[xi(i,0)]+=e*P[wi(j,0)];g[xi(i,1)]+=e*P[wi(j,1)];g[wi(j,0)]+=e*P[xi(i,0)];g[wi(j,1)]+=e*P[xi(i,1)];g[bi(j)]+=e;}
+  for(let k=0;k<20;k++){J+=L/2*P[k]*P[k];g[k]+=L*P[k];}
+  return [J,g];
+}
+let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+function run(){
+  const ar=+document.getElementById('alr').value,gr=+document.getElementById('glr').value,L=+document.getElementById('lm').value;
+  document.getElementById('alrV').textContent=ar.toFixed(2);document.getElementById('glrV').textContent=gr.toFixed(3);document.getElementById('lmV').textContent=L.toFixed(1);
+  let r=seed;const mk=()=>{r=(r*16807)%2147483647;return r/2147483647;};
+  const init=Array.from({length:NP},(_,k)=>k>=20?0:mk()*1.0-0.5);
+  let Pg=init.slice(),Pa=init.slice(),m=new Array(NP).fill(0),v=new Array(NP).fill(0);
+  const cg=[],ca=[];
+  for(let t=1;t<=200;t++){
+    const [Jg,gg]=costGrad(Pg,L);cg.push(Jg);for(let k=0;k<NP;k++)Pg[k]-=gr*gg[k];
+    const [Ja,ga]=costGrad(Pa,L);ca.push(Ja);
+    for(let k=0;k<NP;k++){m[k]=0.9*m[k]+0.1*ga[k];v[k]=0.999*v[k]+0.001*ga[k]*ga[k];const mh=m[k]/(1-Math.pow(0.9,t)),vh=v[k]/(1-Math.pow(0.999,t));Pa[k]-=ar*mh/(Math.sqrt(vh)+1e-7);}
+  }
+  const fg=costGrad(Pg,L)[0],fa=costGrad(Pa,L)[0];
+  const svg=document.getElementById('cmp');svg.innerHTML='';
+  const mx=Math.max(cg[0],ca[0]);const X=k=>45+k/199*570,Yy=v=>225-Math.min(v,mx)/mx*190;
+  el('line',{x1:45,y1:225,x2:620,y2:225,stroke:'#8a90a6'},svg);el('line',{x1:45,y1:225,x2:45,y2:30,stroke:'#8a90a6'},svg);
+  [[cg,'#ff9d4d'],[ca,'#4dd992']].forEach(([c,col])=>{el('path',{d:'M'+c.map((v,k)=>X(k).toFixed(1)+','+Yy(v).toFixed(1)).join('L'),fill:'none',stroke:col,'stroke-width':2.5},svg);});
+  el('text',{x:320,y:16,fill:'#e6e8ef','font-size':12,'font-weight':700,'text-anchor':'middle'},svg).textContent='cost J vs iteration';
+  el('rect',{x:420,y:36,width:10,height:10,fill:'#ff9d4d'},svg);el('text',{x:436,y:45,fill:'#8a90a6','font-size':10},svg).textContent='plain gradient descent';
+  el('rect',{x:420,y:52,width:10,height:10,fill:'#4dd992'},svg);el('text',{x:436,y:61,fill:'#8a90a6','font-size':10},svg).textContent='Adam';
+  el('text',{x:620,y:242,fill:'#8a90a6','font-size':10,'text-anchor':'end'},svg).textContent='iterations (200)';el('text',{x:50,y:42,fill:'#8a90a6','font-size':10},svg).textContent=mx.toFixed(1);
+  document.getElementById('cmpM').innerHTML=`<span class="metric">GD final J: <b>${fg.toFixed(3)}</b></span><span class="metric">Adam final J: <b>${fa.toFixed(3)}</b></span><span class="metric">winner after 200 its: <b>${fa<fg?'Adam':'plain GD'}</b></span>`;
+  document.getElementById('cmpNote').innerHTML=fa<fg?'Adam adapts a step size for each parameter, so it typically drops the cost faster here, which is why the lecture uses it with a learning rate of 0.1.':'Plain GD is ahead with these settings. Try lowering Adam\'s lr or re-randomizing: Adam is usually (not always) faster in the first couple of hundred steps.';
+}
+document.getElementById('go').onclick=run;
+document.getElementById('rs').onclick=()=>{seed=Math.floor(Math.random()*1e6)+1;run();};
+['alr','glr','lm'].forEach(id=>document.getElementById(id).oninput=()=>{document.getElementById('alrV').textContent=(+document.getElementById('alr').value).toFixed(2);document.getElementById('glrV').textContent=(+document.getElementById('glr').value).toFixed(3);document.getElementById('lmV').textContent=(+document.getElementById('lm').value).toFixed(1);});
+run();
+</script>
+</body>
+</html>
