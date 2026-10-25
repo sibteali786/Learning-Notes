@@ -11,12 +11,24 @@
             "id": "e8617e74971bdab5",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/8-collaborative-filtering-summary.html"
+                "file": "Personal/Me/Journal.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
-              "icon": "code-glyph",
-              "title": "8-collaborative-filtering-summary"
+              "icon": "lucide-file",
+              "title": "Journal"
             }
           }
         ]
@@ -142,7 +154,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/8-collaborative-filtering-summary.html",
+                "file": "Personal/Me/Journal.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -156,7 +168,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125
+    "width": 328.8203125,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -174,21 +187,24 @@
       "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "aa4a4c8a17a22b51",
+  "active": "e8617e74971bdab5",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-anomaly-detection-features-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/anomaly-detection-features-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/6-collaborative-filtering-binary-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/4-anomaly-detection-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/2-anomaly-detection-evaluation-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/1-anomaly-detection-algorithm-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/1-clustering-intro.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/9-gaussian-distribution-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/5-anomaly-vs-supervised-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/11-recommender-systems-intro-summary.html",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/8-collaborative-filtering-summary.html",
-    "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/3-rag-architecture-summary.html",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/RAG_M5.pdf",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/RAG_M4.pdf",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/RAG_M3.pdf",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/RAG_M2.pdf",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/Notebooks/C1M1_Assignment.ipynb",
+    "Personal/Me/Journal.md",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/Notebooks",
+    "Learning/Portfolio/Coastal Research Work.md",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/Notebooks/C1M1_Ungraded_Lab_2.ipynb",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 1/RAG_M1.pdf",
+    "Learning/Backend Engineering/Books/20190307-EB-Making_Sense_of_Stream_Processing_Confluent.pdf",
+    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-5-user-consent-and-password-grant.html",
     "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md",
+    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
+    "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/movie_camera.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_strip_vertical.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_reel.png",
@@ -200,7 +216,6 @@
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/distmatrix.PNG",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/RecSysNN.png",
     "Learning/System Design/Technologies/Cassandra/Drawing 2026-10-12 20.07.50.excalidraw.md",
-    "Personal/Me/Journal.md",
     "Learning/System Design/Technologies/Cassandra/Untitled.md",
     "Personal/Maryam's Things.md",
     "Personal/Maryam/Memories.md",
@@ -220,8 +235,6 @@
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Redis Pub-Sub Flow.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Drawing 2026-09-27 14.28.26.excalidraw.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/1-Analysis Database/Analysis 1.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Commands.md",
-    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027-Question-Bank.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

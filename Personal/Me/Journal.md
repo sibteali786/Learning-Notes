@@ -1,3 +1,29 @@
+Hey buddy. If you’re reading this, you got through it. In 2026 you lost an interview, felt humiliated, and still landed a job. That’s who you are.
+
+You gave your love sincerely. That was never the mistake. The mistake was staying where care came only in words, or not at all. It says nothing about your worth.
+
+What you need next time:
+
+- Someone who reaches out without being asked
+- Someone who stays during your hard seasons, not just the good ones
+
+Trust slowly, based on what people do, not what they say. Don’t let this make you stop loving.
+
+Forgive her, not because she earned it, but because you deserve peace. Tatakae, buddy. Trust Allah. You’re good.
+
+
+## 25 Oct, 2026
+- Sitting alone in my room at 1'O i sudddenly saw Ghamidi's post about forgiving and not taking revenge.
+- I realised, i was this cold and un-forgiving, this worse and idiotic, angry and vengeful.
+- I was not like this ever, i always tried to be best for i was mostly never tread better but i was by some people why cannot i learn from their examples.
+- But over the years i think i changed, not for good but for worse, i became bitter, envious and angry.
+- I know what maryam did, what guru, ateeb, ahmad and others did but were they always bad ? or were they the better ones while i only focused on the bad in it.
+- I cannot change time and move back what i lost is lost it cannot come back, but one thing i can do is become who i wanted to i.e Forgiving, Forgetful and Kind ? it is the version i remember for myself not what i have become nowadays.
+- Betrayal is part of life, i cannot always get revenge but its always a choice, A choice that i can eigther be good or bad while i cannot live with being the bad one.
+- Maryam did what she thought was right, i promised myself always i ll be a good partner, forgiving, not the like the ones before me, but the path i have chosen will make me similar to ones i always hated.
+- Its time I leave the hatred, fill my heart with betterment, goodness and kindness the one thing i always expected from others. 
+- I cannot change them but i can control how i react, the goodness in me should not be diminished by what they others do but what/ how i react.
+- BE BETTER Buddy You are More than this.
 ## 1.Aug 6, 2026 
 Sitting alone in baithak thinking i might make it to AIO and join it. but they declined at last moment, it hurt me offcourse
 nowadays preparing through alot of stff
@@ -30,7 +56,6 @@ If you read it in future remember Memoona and Ami were the only people who praye
 - becoming better at DSA and System Design essentials.
 - Have started Behavioural Round prep today as well.
 - I am once again at lowest of my life but i am bouncing back, i will eventually land on my feet and i am gratefull for Allah that he showed me true colors of people around me.
-- Remember them, do not forget buddy you will get out of it eventually, its only matter of time it will pass but remember who did what and said what, its important to recognize it, not forget, Tatakae buddy you can do it.  
 ## Sep 6
 - Again i have an interview on monday, it will be first round for this so a little nervous honestly.....
 - As for maryam ( my Life ) well my life did not even try to reach out which shows me what kind of life i have hahahaha..... funnily enough i now laugh at my situation.
@@ -51,3 +76,16 @@ If you read it in future remember Memoona and Ami were the only people who praye
 - Had deleted maryam's pictures but recovered them again, i just miss her.... i do not know how people move on so easily... i cannot stop thinking about her, but the way she humiliated me ? what more humiliation i can carry
 - I destroyed my self esteem before, I have started praying that if love is something not in my destiny then God at least shall take away my desire for being loved as i always gaev myself away for finding love only to be slapped back in my face.
 - Maybe one day i ll stop giving it and then for sure they will say i was always like this.
+
+## Sunday 18th October, 2026
+- For the latest, i got a Job and Alhamdulilah, it was a tough but worth it ride
+- I learned alot this time and offcourse it exposed many of my weaknesses and also weak relations.
+- Ami and Api as usual stood by me, i have a grievances to junaid as he have his own fair share of problems but one thing stood out that he is becoming a family man for sure and that his priorities are changing which is natural ( for me alteast )
+- Although i never care much for birthday and stuff like these but she made it important for me and now when i cared she did not even wished me ?
+- At first i tried to ignore it, but emotional burden took over and i lost it completely, i think its not the act that hurts its the fact they knew everything, they understood everything and yet chose to ignore. 
+
+
+
+
+
+

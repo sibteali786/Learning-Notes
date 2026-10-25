@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Content-Based Filtering: Learning to Match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2133; --muted:#566079; --line:#d9deea;
+  --user:#0f7b8a; --user-bg:#dff3f5; --movie:#b4540a; --movie-bg:#fdebd8;
+  --accent:#4b3fbf; --accent-bg:#e8e6fb; --good:#1f7a4d; --good-bg:#def3e8; --bad:#a8323e; --bad-bg:#fbe3e6;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+    --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+    --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+  --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+  --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700}
+h2{font-size:25px;margin:44px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+.lede{color:var(--muted);margin:10px 0 0;max-width:62ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:66ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px}
+.t-user{background:var(--user-bg);color:var(--user)}
+.t-movie{background:var(--movie-bg);color:var(--movie)}
+.t-acc{background:var(--accent-bg);color:var(--accent)}
+.t-good{background:var(--good-bg);color:var(--good)}
+.t-bad{background:var(--bad-bg);color:var(--bad)}
+code,.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.eq{font-family:Literata,Georgia,serif;font-size:21px;text-align:center;padding:14px 8px;background:var(--accent-bg);border-radius:10px;margin:12px 0;overflow-x:auto}
+.eq s{color:var(--bad);text-decoration-thickness:2px}
+.scroll{overflow-x:auto}
+ul{padding-left:20px;margin:8px 0}
+li{margin:4px 0}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:3px 10px;margin:3px 4px 3px 0;font-size:15px;background:var(--bg)}
+.callout{border-left:4px solid var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--movie);background:var(--movie-bg)}
+.callout.ok{border-color:var(--good);background:var(--good-bg)}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:10px}
+@media(max-width:700px){.sliders{grid-template-columns:1fr}}
+.row{display:grid;grid-template-columns:76px 1fr 44px;gap:8px;align-items:center;margin:6px 0}
+.row input{width:100%}
+.row output{text-align:right}
+.result{margin-top:16px;padding:14px;border-radius:10px;background:var(--accent-bg);text-align:center}
+.result b{font-size:30px;font-family:Literata,Georgia,serif}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;font-size:16px}
+th{background:var(--bg)}
+a{color:var(--accent)}
+footer{margin-top:40px;color:var(--muted);font-size:15px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg text{font-family:"Source Sans 3",system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <span class="tag t-acc">Recommender systems · Andrew Ng, ML Specialization</span>
+  <h1 style="margin-top:12px">Content-based filtering: learning to match users and items</h1>
+  <p class="lede">A second way to build a recommender. Instead of leaning only on who rated what, it uses descriptions of the user and descriptions of the item, and learns whether they fit.</p>
+</header>
+
+<!-- 1 -->
+<h2>1. Collaborative vs content-based</h2>
+<p class="sub">Slide: “Collaborative filtering vs Content-based filtering”.</p>
+<div class="grid2">
+  <div class="panel" style="border-top:5px solid var(--user)">
+    <h3>Collaborative filtering</h3>
+    <p style="margin:0 0 8px">Recommends items based on <b>ratings of users who gave similar ratings as you</b>.</p>
+    <svg viewBox="0 0 300 120" width="100%" role="img" aria-label="You and a similar user both rate movies A and B; movie C is recommended from the similar user">
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="40" cy="30" r="16" stroke="var(--user)"/><circle cx="40" cy="90" r="16" stroke="var(--user)"/>
+        <rect x="140" y="12" width="40" height="28" rx="6"/><rect x="140" y="76" width="40" height="28" rx="6"/><rect x="230" y="44" width="40" height="28" rx="6" stroke="var(--movie)" stroke-dasharray="4 3"/>
+        <path d="M56 30H140M56 90H140M56 36L140 84M56 84L140 20" stroke="var(--muted)"/>
+        <path d="M180 26L230 54M180 90L230 62" stroke="var(--movie)" stroke-dasharray="4 3"/>
+      </g>
+      <g fill="currentColor" font-size="12" text-anchor="middle">
+        <text x="40" y="34">You</text><text x="40" y="94">Twin</text>
+        <text x="160" y="31">A</text><text x="160" y="95">B</text><text x="250" y="63">C?</text>
+      </g>
+    </svg>
+    <p style="margin:6px 0 0;color:var(--muted)">Input: the rating table only.</p>
+  </div>
+  <div class="panel" style="border-top:5px solid var(--movie)">
+    <h3>Content-based filtering</h3>
+    <p style="margin:0 0 8px">Recommends items based on <b>features of the user and features of the item</b> to find a good match.</p>
+    <svg viewBox="0 0 300 120" width="100%" role="img" aria-label="User features and movie features are compared to find a match">
+      <g stroke-width="1.5" fill="none">
+        <rect x="14" y="28" width="100" height="64" rx="8" stroke="var(--user)"/>
+        <rect x="186" y="28" width="100" height="64" rx="8" stroke="var(--movie)"/>
+        <path d="M114 60H186" stroke="var(--accent)" stroke-width="2.5"/>
+      </g>
+      <g fill="currentColor" font-size="12" text-anchor="middle">
+        <text x="64" y="52">User features</text><text x="64" y="72">age, country…</text>
+        <text x="236" y="52">Movie features</text><text x="236" y="72">genre, year…</text>
+        <text x="150" y="50" fill="var(--accent)">match?</text>
+      </g>
+    </svg>
+    <p style="margin:6px 0 0;color:var(--muted)">Input: user descriptors + item descriptors (still uses the ratings as training labels).</p>
+  </div>
+</div>
+<div class="callout">
+  <b>Notation is unchanged.</b>
+  <ul>
+    <li><span class="m">r(i,j) = 1</span> if user <i>j</i> has rated item <i>i</i></li>
+    <li><span class="m">y(i,j)</span> is the rating user <i>j</i> gave item <i>i</i> (only if defined)</li>
+  </ul>
+  The key idea: using features of both sides can find better matches than pure collaborative filtering might.
+</div>
+
+<!-- 2 -->
+<h2>2. Features you can build</h2>
+<p class="sub">Slide: “Examples of user and item features”. Each side gets squeezed into one feature vector.</p>
+<div class="grid2">
+  <div class="panel" style="border-top:5px solid var(--user)">
+    <h3>User features → <span class="m">x<sub>u</sub><sup>(j)</sup></span> for user j</h3>
+    <span class="chip"><b>Age</b></span>
+    <span class="chip"><b>Gender</b> · one-hot (male / female / unknown)</span>
+    <span class="chip"><b>Country</b> · one-hot, about 200 values</span>
+    <span class="chip"><b>Movies watched</b> · ~1000 features, one per top-1000 catalog movie (watched or not)</span>
+    <span class="chip"><b>Average rating per genre</b> · e.g. mean of all romance ratings, mean of all action ratings, …</span>
+    <span class="chip">…</span>
+  </div>
+  <div class="panel" style="border-top:5px solid var(--movie)">
+    <h3>Movie features → <span class="m">x<sub>m</sub><sup>(i)</sup></span> for movie i</h3>
+    <span class="chip"><b>Year</b></span>
+    <span class="chip"><b>Genre / genres</b></span>
+    <span class="chip"><b>Reviews</b> · one or several features summarising what critics say</span>
+    <span class="chip"><b>Average rating</b> of the movie</span>
+    <span class="chip"><b>Average rating per country</b> or per user demographic</span>
+    <span class="chip">…</span>
+  </div>
+</div>
+<div class="callout ok">
+  <b>Features may be built from ratings.</b> “Average rating per genre” (user) and “average rating” (movie) both depend on ratings, and that is completely fine.
+</div>
+<div class="callout warn">
+  <b>The two vectors can be very different in size.</b> For example, <span class="m">x<sub>u</sub></span> could have 1500 numbers while <span class="m">x<sub>m</sub></span> has only 50. That is okay, because the next step maps both to a common size.
+</div>
+
+<!-- 3 -->
+<h2>3. The prediction: from w·x + b to v<sub>u</sub>·v<sub>m</sub></h2>
+<p class="sub">Slide: “Learning to match”.</p>
+<div class="panel">
+  <p style="margin:0">Before (collaborative filtering): predict user j’s rating of movie i as</p>
+  <div class="eq">w<sup>(j)</sup> · x<sup>(i)</sup> + b<sup>(j)</sup></div>
+  <p style="margin:0">Now (content-based): drop <i>b</i> (it does not hurt performance), and replace <i>w</i> and <i>x</i> with two computed vectors</p>
+  <div class="eq">v<sub>u</sub><sup>(j)</sup> · v<sub>m</sub><sup>(i)</sup></div>
+  <ul>
+    <li><b>v<sub>u</sub><sup>(j)</sup></b> is a list of numbers computed from the user’s features <span class="m">x<sub>u</sub><sup>(j)</sup></span>. It summarises the user’s preferences compactly.</li>
+    <li><b>v<sub>m</sub><sup>(i)</sup></b> is a list of numbers computed from the movie’s features <span class="m">x<sub>m</sub><sup>(i)</sup></span>.</li>
+    <li>Hope: if both vectors are chosen well, their <b>dot product predicts the rating</b> user j gives movie i.</li>
+  </ul>
+</div>
+
+<h3 style="margin-top:22px">Pipeline</h3>
+<div class="panel scroll">
+<svg viewBox="0 0 780 250" width="100%" style="min-width:640px" role="img" aria-label="Pipeline: user features of size 1500 are turned into a 32 number vector v_u, movie features of size 50 into a 32 number vector v_m, and their dot product gives the predicted rating">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <g stroke-width="2" fill="none">
+    <rect x="10" y="30" width="170" height="70" rx="10" stroke="var(--user)" fill="var(--user-bg)"/>
+    <rect x="10" y="150" width="170" height="70" rx="10" stroke="var(--movie)" fill="var(--movie-bg)"/>
+    <rect x="290" y="30" width="150" height="70" rx="10" stroke="var(--user)" fill="var(--user-bg)"/>
+    <rect x="290" y="150" width="150" height="70" rx="10" stroke="var(--movie)" fill="var(--movie-bg)"/>
+    <circle cx="540" cy="125" r="34" stroke="var(--accent)" fill="var(--accent-bg)"/>
+    <rect x="640" y="95" width="130" height="60" rx="10" stroke="var(--good)" fill="var(--good-bg)"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" fill="none" marker-end="url(#ar)">
+    <path d="M180 65H288"/><path d="M180 185H288"/>
+    <path d="M440 65L512 108"/><path d="M440 185L512 142"/>
+    <path d="M574 125H638"/>
+  </g>
+  <g fill="currentColor" text-anchor="middle" font-size="15">
+    <text x="95" y="58" font-weight="600">x_u (user)</text><text x="95" y="80">e.g. 1500 numbers</text>
+    <text x="95" y="178" font-weight="600">x_m (movie)</text><text x="95" y="200">e.g. 50 numbers</text>
+    <text x="365" y="58" font-weight="600">v_u</text><text x="365" y="80">32 numbers</text>
+    <text x="365" y="178" font-weight="600">v_m</text><text x="365" y="200">32 numbers</text>
+    <text x="540" y="131" font-size="20" font-weight="700">·</text>
+    <text x="540" y="176" font-size="13">dot product</text>
+    <text x="705" y="122" font-weight="600">predicted</text><text x="705" y="142" font-weight="600">rating</text>
+    <text x="234" y="52" font-size="12" fill="var(--muted)">compute</text>
+    <text x="234" y="172" font-size="12" fill="var(--muted)">compute</text>
+  </g>
+</svg>
+<p style="margin:6px 0 0;color:var(--muted)">The “compute” step is the open question, answered in the next video. Different input sizes in, one shared size out.</p>
+</div>
+
+<div class="callout warn">
+  <b>Hard rule:</b> <span class="m">v<sub>u</sub></span> and <span class="m">v<sub>m</sub></span> must have the <b>same dimension</b> (say, both 32 numbers), otherwise the dot product is undefined, even though <span class="m">x<sub>u</sub></span> and <span class="m">x<sub>m</sub></span> can differ.
+</div>
+
+<!-- 4 -->
+<h2>4. What the numbers mean, interactive</h2>
+<p class="sub">Slide example: <span class="m">v<sub>u</sub> = [4.9, 0.1, …, 3.0]</span> (how much the user likes romance, action, …) and <span class="m">v<sub>m</sub> = [4.5, 0.2, …, 3.5]</span> (how romantic, how action-heavy the movie is, …). Multiply element-wise, then sum. Drag the sliders. The three dimensions here (romance, action, comedy) and the 0 to 2 range are my own small illustration.</p>
+<div class="panel">
+  <div class="sliders">
+    <div>
+      <span class="tag t-user">User vector v_u</span>
+      <div class="row"><label for="u0">romance</label><input id="u0" type="range" min="0" max="2" step="0.1" value="1.5"><output id="u0o"></output></div>
+      <div class="row"><label for="u1">action</label><input id="u1" type="range" min="0" max="2" step="0.1" value="0.1"><output id="u1o"></output></div>
+      <div class="row"><label for="u2">comedy</label><input id="u2" type="range" min="0" max="2" step="0.1" value="0.8"><output id="u2o"></output></div>
+    </div>
+    <div>
+      <span class="tag t-movie">Movie vector v_m</span>
+      <div class="row"><label for="m0">romance</label><input id="m0" type="range" min="0" max="2" step="0.1" value="1.2"><output id="m0o"></output></div>
+      <div class="row"><label for="m1">action</label><input id="m1" type="range" min="0" max="2" step="0.1" value="0.2"><output id="m1o"></output></div>
+      <div class="row"><label for="m2">comedy</label><input id="m2" type="range" min="0" max="2" step="0.1" value="0.9"><output id="m2o"></output></div>
+    </div>
+  </div>
+  <div class="result" aria-live="polite">
+    <div id="calc" class="m"></div>
+    <div>Dot product = <b id="dot"></b></div>
+    <div id="verdict" style="color:var(--muted)"></div>
+  </div>
+</div>
+
+<!-- 5 -->
+<h2>5. Real-life scenarios</h2>
+<div class="grid2">
+  <div class="panel">
+    <h3>Romance fan, rom-com release</h3>
+    <p style="margin:0">A user whose rated romances average 4.8 has a high romance entry in <span class="m">v<sub>u</sub></span>. A new rom-com gets a high romance entry in <span class="m">v<sub>m</sub></span>. Their dot product is large, so it is recommended, even though nobody has rated that movie yet.</p>
+  </div>
+  <div class="panel">
+    <h3>Music or shopping app</h3>
+    <p style="margin:0">Same recipe outside movies: user features (age, country, past plays) and item features (genre, release year, average rating) are each mapped to vectors, and the dot product scores the match for songs, products, or articles.</p>
+  </div>
+</div>
+
+<!-- 6 -->
+<h2>6. Approaches compared</h2>
+<p class="sub">The lecture contrasts the first two. The pros, cons, and the hybrid row are my own additions for your “alternatives” notes.</p>
+<div class="panel scroll">
+<table>
+  <tr><th></th><th>Collaborative filtering</th><th>Content-based filtering</th><th>Hybrid (not in this video)</th></tr>
+  <tr><th>Uses</th><td>Ratings from many users</td><td>User features + item features</td><td>Both</td></tr>
+  <tr><th>Pros</th><td>Needs no hand-built features; can surface surprising picks</td><td>Can score an item or user with few or no ratings if their features are known (cold start); works with ratings turned into features</td><td>Covers each side’s weak spots</td></tr>
+  <tr><th>Cons</th><td>Weak for new users or new items with no ratings</td><td>Quality depends on the features you engineer; needs user data such as age and country</td><td>More moving parts to build and tune</td></tr>
+</table>
+</div>
+
+<!-- 7 -->
+<h2>Key takeaways</h2>
+<div class="panel">
+  <ul>
+    <li>Collaborative filtering matches you to <b>similar raters</b>; content-based matches <b>user features to item features</b>.</li>
+    <li>Still use <span class="m">r(i,j)</span> and <span class="m">y(i,j)</span> as the training signal.</li>
+    <li>Build <span class="m">x<sub>u</sub><sup>(j)</sup></span> and <span class="m">x<sub>m</sub><sup>(i)</sup></span> from demographics, behaviour, content, and rating-derived stats. They may differ in length.</li>
+    <li>Predict the rating as <span class="m">v<sub>u</sub><sup>(j)</sup> · v<sub>m</sub><sup>(i)</sup></span> (no bias term).</li>
+    <li><span class="m">v<sub>u</sub></span> and <span class="m">v<sub>m</sub></span> must share one size.</li>
+    <li><b>Next video:</b> how to actually compute <span class="m">v<sub>u</sub></span> and <span class="m">v<sub>m</sub></span> from the features.</li>
+  </ul>
+</div>
+
+<footer>Source: Andrew Ng, DeepLearning.AI / Stanford Online, content-based filtering lecture (transcript and three slides).</footer>
+</main>
+
+<script>
+(function(){
+  var ids=["u0","u1","u2","m0","m1","m2"];
+  function el(i){return document.getElementById(i);}
+  function update(){
+    var v=ids.map(function(i){return parseFloat(el(i).value);});
+    ids.forEach(function(i,k){el(i+"o").textContent=v[k].toFixed(1);});
+    var p=[v[0]*v[3],v[1]*v[4],v[2]*v[5]];
+    var s=p[0]+p[1]+p[2];
+    el("calc").textContent=v[0].toFixed(1)+"×"+v[3].toFixed(1)+" + "+v[1].toFixed(1)+"×"+v[4].toFixed(1)+" + "+v[2].toFixed(1)+"×"+v[5].toFixed(1);
+    el("dot").textContent=s.toFixed(2);
+    el("verdict").textContent=s>=3?"Strong match: recommend.":(s>=1.5?"Moderate match.":"Weak match: probably skip.");
+  }
+  ids.forEach(function(i){el(i).addEventListener("input",update);});
+  update();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OAuth: Front Channel vs Back Channel</title>
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#53666f; --line:#d3dcd9;
+  --back:#0b6e5b; --back-bg:#dff3ee; --front:#b4540a; --front-bg:#fbe9d6;
+  --bad:#b3261e; --bad-bg:#fbe3e1; --note:#e9eef0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+    --back:#5fd3b8; --back-bg:#12332d; --front:#f3a566; --front-bg:#3a2815;
+    --bad:#ff9087; --bad-bg:#3b1c1a; --note:#1d2e36;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+  --back:#5fd3b8; --back-bg:#12332d; --front:#f3a566; --front-bg:#3a2815;
+  --bad:#ff9087; --bad-bg:#3b1c1a; --note:#1d2e36;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);margin-bottom:10px}
+h2{font-size:26px;margin:56px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:18px;max-width:62ch}
+.sub{color:var(--muted);margin:0 0 18px;max-width:64ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.box.back{border-left:6px solid var(--back)}
+.box.front{border-left:6px solid var(--front)}
+.box.bad{border-left:6px solid var(--bad);background:var(--bad-bg)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px}
+.tag.back{background:var(--back-bg);color:var(--back)}
+.tag.front{background:var(--front-bg);color:var(--front)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+ul{margin:8px 0;padding-left:20px}
+li{margin:4px 0}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.s-back{stroke:var(--back);fill:none;stroke-width:3}
+.s-front{stroke:var(--front);fill:none;stroke-width:3;stroke-dasharray:7 5}
+.s-bad{stroke:var(--bad);fill:none;stroke-width:3;stroke-dasharray:3 5}
+.t-back{fill:var(--back)!important;font-weight:600}
+.t-front{fill:var(--front)!important;font-weight:600}
+.t-bad{fill:var(--bad)!important;font-weight:600}
+.t-muted{fill:var(--muted)!important}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{background:var(--note)}
+tr:last-child td{border-bottom:0}
+.flow{display:flex;flex-direction:column;gap:0;margin:14px 0}
+.step{display:grid;grid-template-columns:42px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.step:not(:last-child)::before{content:"";position:absolute;left:20px;top:40px;bottom:0;width:2px;background:var(--line)}
+.dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff}
+.dot.f{background:var(--front)}.dot.b{background:var(--back)}.dot.x{background:var(--bad)}
+.dot{color:#fff}
+.callout{background:var(--note);border-radius:10px;padding:14px 18px;margin:16px 0}
+.callout b{font-family:Charter,Georgia,serif}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.ex .lbl{font-weight:700;color:var(--muted);font-size:14px}
+code{background:var(--note);padding:1px 6px;border-radius:4px;font-size:14px}
+pre{background:var(--note);padding:12px 14px;border-radius:8px;overflow-x:auto;font-size:13.5px;margin:10px 0}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){.timeline{grid-template-columns:1fr}}
+.recap li{margin:8px 0}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Front channel vs back channel in OAuth</h1>
+<p class="lead">Two ways data moves between systems. Understanding their security properties is the key to judging every OAuth flow, and it explains why the Implicit flow is being retired.</p>
+
+<!-- ============ 1. THE TWO CHANNELS ============ -->
+<h2>1. The two channels at a glance</h2>
+<p class="sub">Same goal (move data from A to B), very different trust properties.</p>
+
+<div class="scroll">
+<svg viewBox="0 0 860 330" role="img" aria-label="Back channel is a direct HTTPS connection; front channel passes through the browser address bar">
+  <text x="20" y="28" font-size="18" font-weight="700" class="t-back">Back channel: hand delivery</text>
+  <rect class="s-box" x="30" y="48" width="170" height="64" rx="10"/>
+  <text x="115" y="76" text-anchor="middle" font-size="15">Client</text>
+  <text x="115" y="96" text-anchor="middle" font-size="12" class="t-muted">app / JavaScript</text>
+  <rect class="s-box" x="660" y="48" width="170" height="64" rx="10"/>
+  <text x="745" y="76" text-anchor="middle" font-size="15">Server</text>
+  <text x="745" y="96" text-anchor="middle" font-size="12" class="t-muted">OAuth server</text>
+  <line class="s-back" x1="205" y1="80" x2="655" y2="80"/>
+  <text x="430" y="68" text-anchor="middle" font-size="13" class="t-back">direct HTTPS · certificate checked · encrypted</text>
+  <text x="430" y="102" text-anchor="middle" font-size="13" class="t-muted">you see who they are, they see who you are</text>
+
+  <text x="20" y="178" font-size="18" font-weight="700" class="t-front">Front channel: courier service</text>
+  <rect class="s-box" x="30" y="198" width="170" height="64" rx="10"/>
+  <text x="115" y="226" text-anchor="middle" font-size="15">Application</text>
+  <rect class="s-box" x="345" y="198" width="170" height="64" rx="10"/>
+  <text x="430" y="224" text-anchor="middle" font-size="15">Browser</text>
+  <text x="430" y="244" text-anchor="middle" font-size="12" class="t-muted">address bar = courier</text>
+  <rect class="s-box" x="660" y="198" width="170" height="64" rx="10"/>
+  <text x="745" y="226" text-anchor="middle" font-size="15">OAuth server</text>
+  <line class="s-front" x1="205" y1="230" x2="340" y2="230"/>
+  <line class="s-front" x1="520" y1="230" x2="655" y2="230"/>
+  <text x="430" y="296" text-anchor="middle" font-size="13" class="t-front">no direct link between sender and recipient</text>
+  <text x="430" y="316" text-anchor="middle" font-size="13" class="t-muted">delivery unconfirmed · contents could be copied · sender unverifiable</text>
+</svg>
+</div>
+
+<div class="grid2" style="margin-top:16px">
+  <div class="box back">
+    <span class="tag back">Back channel</span>
+    <h3 style="margin-top:8px">The "normal" secure way</h3>
+    <ul>
+      <li>A client-to-server connection.</li>
+      <li>Over HTTPS, so you can validate the server's certificate and know who you are talking to.</li>
+      <li>Data is encrypted in transit, so nobody can modify it.</li>
+      <li>The response is trustworthy: you know where it came from and that it was not tampered with.</li>
+      <li>Use it whenever you can.</li>
+    </ul>
+  </div>
+  <div class="box front">
+    <span class="tag front">Front channel</span>
+    <h3 style="margin-top:8px">Using the browser's address bar</h3>
+    <ul>
+      <li>Literally moves data between two systems via URLs in the user's browser.</li>
+      <li>No direct link between the application and the OAuth server.</li>
+      <li>Like handing a package to a delivery company instead of delivering it yourself.</li>
+      <li>More opportunities for things to fail or be intercepted.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ 2. PROBLEMS ============ -->
+<h2>2. Why the front channel is risky</h2>
+<p class="sub">The package analogy makes the problems obvious, on both the sending and receiving end.</p>
+
+<div class="grid2">
+  <div class="box bad">
+    <span class="tag bad">Sender's problems</span>
+    <ul>
+      <li>You trust the courier because it is their job, but you never really know the package arrived. Tracking only shows what the courier <em>claims</em>.</li>
+      <li>Even if it arrives, it may have been opened in transit and the contents copied or stolen.</li>
+      <li>In OAuth terms: you can never be sure about the browser.</li>
+    </ul>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">Receiver's problems</span>
+    <ul>
+      <li>A return address on the package can be faked too easily.</li>
+      <li>So you cannot be sure the sender is who the label says.</li>
+      <li>Therefore you cannot be sure the thing you received is legitimate.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>You order a new phone and the courier leaves it on your porch. You cannot tell if the box was swapped or opened on the way, and a scammer could just as easily have mailed you a fake box with a convincing return label. A hand delivery with ID checked at the door has neither problem. The back channel is that hand delivery.</p>
+</div>
+
+<!-- ============ 3. WHY USE FRONT CHANNEL ============ -->
+<h2>3. Then why use the front channel at all?</h2>
+<p class="sub">The end goal is the application receiving an access token. The most secure delivery would be the back channel, but there is a catch.</p>
+
+<div class="box">
+  <p><b>Consent.</b> The authorization server must be sure the <em>user</em> is present and has given permission for a token to be issued to the app.</p>
+  <ul>
+    <li>The <b>password grant</b> uses the back channel, but cannot confirm the user consented to that request. So it is not an option.</li>
+    <li>The front channel is the way to <b>insert the user into the negotiation</b> between client and authorization server.</li>
+    <li>Bonus: it makes <b>multi-factor authentication</b> easy, since only the authorization server needs to handle it.</li>
+  </ul>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A photo-printing app wants access to your Google Photos. With the password grant you would type your Google password into the printing app, and Google has no proof you agreed to anything. With the front channel, the app sends you to Google, you log in there (including your 2FA prompt) and click "Allow". Google now knows you personally consented.</p>
+</div>
+
+<!-- ============ 4. BUILDING A FLOW ============ -->
+<h2>4. Building a flow with the front channel</h2>
+<p class="sub">Step through what happens if we try to use the front channel for everything.</p>
+
+<div class="flow">
+  <div class="step">
+    <div class="dot f">1</div>
+    <div class="box front">
+      <b>App tells the authorization server what it wants (front channel, first "package")</b>
+      <p>The app redirects the user to the authorization server, with details in the URL query string: the application's identifier, the requested scope, and similar info.</p>
+      <p><span class="tag back">Fine</span> Nothing in this request is particularly sensitive, so the front channel is acceptable here.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="dot b">2</div>
+    <div class="box back">
+      <b>User logs in and approves the request</b>
+      <p>The authorization server now knows the user is present and consented.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="dot x">3</div>
+    <div class="box bad">
+      <b>Authorization server wants to send the access token back</b>
+      <p>If it sends the token in the redirect, that is like <b>mailing an access token</b>:</p>
+      <ul>
+        <li>The authorization server has no guarantee it was delivered to the application.</li>
+        <li>The application has no guarantee the token really came from the authorization server.</li>
+      </ul>
+      <p><span class="tag bad">Not a good option</span></p>
+    </div>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>Think of a bank sending your new debit card PIN on a postcard. The bank cannot confirm you got it, you cannot confirm the bank sent it, and anyone handling the postcard can read it. The sensitive part (the token) should never travel that way.</p>
+</div>
+
+<!-- ============ 5. IMPLICIT ============ -->
+<h2>5. The Implicit flow: the cautionary tale</h2>
+
+<div class="scroll">
+<svg viewBox="0 0 860 250" role="img" aria-label="Implicit flow uses the front channel for both the request and the access token delivery">
+  <rect class="s-box" x="30" y="30" width="170" height="60" rx="10"/>
+  <text x="115" y="66" text-anchor="middle" font-size="15">Application</text>
+  <rect class="s-box" x="345" y="30" width="170" height="60" rx="10"/>
+  <text x="430" y="66" text-anchor="middle" font-size="15">Browser</text>
+  <rect class="s-box" x="660" y="30" width="170" height="60" rx="10"/>
+  <text x="745" y="58" text-anchor="middle" font-size="15">Authorization</text>
+  <text x="745" y="76" text-anchor="middle" font-size="15">server</text>
+
+  <line class="s-front" x1="205" y1="50" x2="340" y2="50"/>
+  <line class="s-front" x1="520" y1="50" x2="655" y2="50"/>
+  <text x="430" y="20" text-anchor="middle" font-size="13" class="t-front">① request (front channel)</text>
+
+  <line class="s-bad" x1="655" y1="75" x2="520" y2="75"/>
+  <line class="s-bad" x1="340" y1="75" x2="205" y2="75"/>
+  <text x="430" y="112" text-anchor="middle" font-size="13" class="t-bad">② ACCESS TOKEN returned in the redirect (front channel)</text>
+
+  <text x="430" y="170" text-anchor="middle" font-size="15" class="t-bad">No back channel anywhere in this flow</text>
+  <text x="430" y="196" text-anchor="middle" font-size="13" class="t-muted">Described in the core OAuth spec, but no longer recommended</text>
+  <text x="430" y="218" text-anchor="middle" font-size="13" class="t-muted">Phased out by the Security BCP; a future spec update will leave it out entirely</text>
+</svg>
+</div>
+
+<div class="grid2" style="margin-top:14px">
+  <div class="box">
+    <h3>What it is</h3>
+    <p>The Implicit flow uses the front channel for <b>both</b> the app's request and the delivery of the access token. There is no back channel.</p>
+  </div>
+  <div class="box">
+    <h3>Current status</h3>
+    <ul>
+      <li>Latest OAuth working group guidance: <b>do not use it</b>.</li>
+      <li>The latest <b>Security BCP</b> (Best Current Practice) says so explicitly.</li>
+      <li>A future update of the OAuth spec will remove it.</li>
+    </ul>
+  </div>
+</div>
+
+<h3 style="margin-top:28px">Why was it ever included?</h3>
+<div class="timeline" style="margin-top:10px">
+  <div class="box front">
+    <span class="tag front">Then</span>
+    <p>Browsers had no other option. Pure JavaScript apps could not make cross-origin requests.</p>
+  </div>
+  <div class="box">
+    <span class="tag back">Change</span>
+    <p>Browsers added <b>CORS</b> (Cross Origin Resource Sharing). JavaScript can now POST to the OAuth server.</p>
+  </div>
+  <div class="box back">
+    <span class="tag back">Now</span>
+    <p>CORS is everyday life. A more secure flow that keeps tokens out of the front channel is perfectly practical.</p>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>Old single-page apps (circa the early 2010s) had to use the Implicit flow because the browser would block a call from <code>myapp.com</code> to <code>auth.example.com</code>. Today the same app can simply <code>fetch()</code> the token endpoint over HTTPS, as shown in the snippet below, so the old workaround is no longer needed.</p>
+<pre>// Back channel from JavaScript: a plain HTTPS request
+const res = await fetch("https://auth.example.com/token", {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams({ /* grant parameters */ })
+});</pre>
+  <p style="color:var(--muted);font-size:14px">Illustrative only: the lecture does not detail the parameters. They are covered in the later flows.</p>
+</div>
+
+<!-- ============ 6. MYTH ============ -->
+<h2>6. Common misconception</h2>
+<div class="box back">
+  <b>"Back channel" does not mean "back end server".</b>
+  <p>It means a <b>client-to-server connection</b>. A JavaScript app can absolutely use the back channel by making an AJAX or Fetch request from its own code.</p>
+  <ul>
+    <li>A back channel request from JavaScript has the <b>same security properties</b> as one from a backend server.</li>
+    <li>You still get <b>certificate verification</b> and an <b>encrypted connection</b>.</li>
+    <li>That is very different from the front channel, which moves data via the address bar with more chances to fail or be intercepted.</li>
+  </ul>
+</div>
+
+<div class="scroll" style="margin-top:14px">
+<table>
+  <tr><th></th><th>Back channel</th><th>Front channel</th></tr>
+  <tr><td><b>Mechanism</b></td><td>Direct HTTPS client-to-server request (backend server or JavaScript fetch/AJAX)</td><td>URLs and redirects via the browser's address bar</td></tr>
+  <tr><td><b>Server identity</b></td><td>Certificate validated</td><td>No direct link, sender cannot be verified</td></tr>
+  <tr><td><b>Tampering / eavesdropping</b></td><td>Encrypted in transit</td><td>Could be intercepted or copied</td></tr>
+  <tr><td><b>Delivery confirmation</b></td><td>Direct response from the server</td><td>Sender never really knows it arrived</td></tr>
+  <tr><td><b>Analogy</b></td><td>Hand delivering a package</td><td>Using a courier</td></tr>
+  <tr><td><b>Used in OAuth for</b></td><td>The sensitive part: delivering the access token (later flows)</td><td>Getting the user involved: login, consent, MFA, plus the non-sensitive request</td></tr>
+  <tr><td><b>Verdict</b></td><td>Use whenever you can</td><td>Use only where the user must be in the loop</td></tr>
+</table>
+</div>
+
+<!-- ============ 7. RECAP ============ -->
+<h2>7. Key takeaways</h2>
+<div class="box">
+<ul class="recap">
+  <li><b>Back channel</b> = direct, HTTPS, verified, encrypted. Trustworthy. Does not require a backend server.</li>
+  <li><b>Front channel</b> = browser address bar. Convenient for involving the user, but neither side can fully trust it.</li>
+  <li>The front channel exists in OAuth so the <b>user can consent</b> (and use MFA). The password grant fails this need.</li>
+  <li>Non-sensitive requests (client ID, scope) are OK in the front channel. <b>Access tokens are not.</b></li>
+  <li>The <b>Implicit flow</b> sends the token via the front channel. It existed only because browsers lacked CORS. It is now discouraged by the Security BCP and will be dropped from the spec.</li>
+  <li>The secure approach (next sections of the course): <b>front channel to get the user's consent, back channel to deliver the token.</b></li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>
