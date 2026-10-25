@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keyword search and TF-IDF: visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6; --cell:#e6ebf8;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a; --cell:#232c3e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a; --cell:#232c3e;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:62ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:68ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout.green{border-color:var(--green);background:var(--green-soft);}
+.callout p:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.prompt{background:var(--coral);color:#fff;border-radius:12px;padding:12px 18px;font-weight:600;font-size:18px;text-align:center;}
+:root[data-theme="dark"] .prompt, :root:not([data-theme="light"]) .prompt{color:#10151f;}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .prompt{color:#fff;}}
+.bag{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;}
+.bag .w{background:var(--slate-soft);border-radius:12px;padding:8px 14px;text-align:center;min-width:76px;}
+.bag .w b{display:block;font-weight:600;}
+.bag .w .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--coral);color:#fff;font-weight:600;font-size:13px;margin-top:4px;}
+:root[data-theme="dark"] .bag .w .n{color:#10151f;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bag .w .n{color:#10151f;}}
+.vocab{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;margin:12px 0;}
+.vocab .v{border-radius:10px;padding:6px 8px;text-align:center;font-size:13px;background:var(--cell);color:var(--muted);}
+.vocab .v b{display:block;font-weight:600;font-size:14px;}
+.vocab .v.on{background:var(--coral);color:#fff;}
+:root[data-theme="dark"] .vocab .v.on{color:#10151f;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .vocab .v.on{color:#10151f;}}
+/* matrix */
+.mx{display:grid;gap:6px;min-width:440px;}
+.mx .h{font-size:13px;font-weight:600;text-align:center;color:var(--slate);}
+.mx .rw{font-size:14px;font-weight:600;display:flex;align-items:center;}
+.mx .c{height:40px;border-radius:10px;background:var(--cell);display:grid;place-items:center;font-size:13px;font-weight:600;color:#fff;}
+.mx .c.on{background:var(--coral);}
+:root[data-theme="dark"] .mx .c.on{color:#10151f;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mx .c.on{color:#10151f;}}
+.mx .tot{font-size:14px;font-weight:600;text-align:center;color:var(--ink);padding-top:4px;}
+.mx .tot.best{color:var(--green);}
+/* ladder */
+.ladder{display:grid;gap:14px;}
+.rung{display:grid;grid-template-columns:44px 1fr;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;}
+.rung .n{width:40px;height:40px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:600;}
+:root[data-theme="dark"] .rung .n{color:#10151f;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rung .n{color:#10151f;}}
+.rung h3{margin-bottom:4px;}
+.rung .fix{font-size:14.5px;}
+.rung .prob{font-size:14px;color:var(--muted);}
+.docpair{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:10px 0;}
+.docbox{background:var(--slate-soft);border-radius:12px;padding:12px 14px;font-size:14px;}
+.docbox b{display:block;margin-bottom:2px;}
+.sc{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.sc span{font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);}
+.sc span.win{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:600;}
+mark{border-radius:4px;padding:0 3px;color:#1b2333;}
+mark.m1{background:#f6c9d0;} mark.m2{background:#c9def8;}
+/* idf steps */
+.idf{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+.idf .card{border-top:5px solid var(--teal);}
+.idf .card.the{border-top-color:var(--slate);}
+.st{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--slate-soft);margin:8px 0;font-size:14.5px;}
+.st .val{margin-left:auto;font-weight:700;font-size:17px;}
+.st .lab{font-size:12.5px;color:var(--muted);display:block;}
+.val.hi{color:var(--green);} .val.lo{color:var(--muted);}
+/* demo */
+.controls{display:grid;gap:14px;margin-bottom:12px;}
+input[type=text]{font:inherit;font-size:15px;width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);}
+input[type=text]:focus-visible{outline:3px solid var(--teal);}
+.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface);}
+.seg button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:7px 14px;cursor:pointer;}
+.seg button[aria-pressed="true"]{background:var(--coral);color:#fff;font-weight:600;}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#10151f;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#10151f;}}
+.seg button:focus-visible{outline:3px solid var(--teal);outline-offset:-3px;}
+.modeinfo{background:var(--slate-soft);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:14px;}
+.res{display:grid;gap:8px;}
+.rr{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--surface);}
+.rr .top{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;font-weight:600;margin-bottom:4px;}
+.rr .txt{font-size:14px;margin-bottom:6px;}
+.bar{height:8px;border-radius:6px;background:var(--cell);overflow:hidden;}
+.bar i{display:block;height:100%;background:var(--coral);border-radius:6px;transition:width .25s;}
+.rr.first{border-color:var(--green);}
+.rr.first .bar i{background:var(--green);}
+table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px;}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);}
+th{font-weight:600;color:var(--slate);}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+.formula{background:var(--slate);color:#fff;border-radius:12px;padding:12px 16px;font-size:15px;margin:10px 0;text-align:center;overflow-x:auto;}
+:root[data-theme="dark"] .formula{color:#10151f;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .formula{color:#10151f;}}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro-t{color:var(--green);font-weight:600;font-size:13.5px;}
+.con-t{color:var(--coral);font-weight:600;font-size:13.5px;}
+.take{display:grid;gap:10px;padding:0;margin:0;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+.sw{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Information retrieval foundations</span>
+    <span class="chip teal">Lesson: keyword search with TF-IDF</span>
+  </div>
+  <h1>Keyword search: counting words, then counting them smarter</h1>
+  <p class="lede">A decades-old technique that’s still a key part of modern RAG retrievers. The idea: documents that contain many of the prompt’s words are more likely to be relevant. The lesson builds the scoring up in four steps, ending at TF-IDF.</p>
+</header>
+
+<!-- 1 BAG OF WORDS -->
+<section>
+  <h2>Step 0: turn text into a bag of words</h2>
+  <p class="sub">Both the prompt and every document are treated as a <strong>bag of words</strong>: word order is ignored and only which words appear, and how often, matters.</p>
+  <div class="card">
+    <div class="prompt">“Making pizza without a pizza oven”</div>
+    <div class="bag">
+      <div class="w"><b>pizza</b><span class="n">2</span></div>
+      <div class="w"><b>making</b><span class="n">1</span></div>
+      <div class="w"><b>without</b><span class="n">1</span></div>
+      <div class="w"><b>a</b><span class="n">1</span></div>
+      <div class="w"><b>oven</b><span class="n">1</span></div>
+    </div>
+    <p style="margin:0;color:var(--muted);font-size:14.5px">These counts are stored in a vector with <strong>one spot per word in the system’s vocabulary</strong>, easily tens of thousands of spots. Each number counts how often that word appears in the text.</p>
+  </div>
+</section>
+
+<!-- 2 SPARSE VECTORS -->
+<section>
+  <h2>Sparse vectors and the inverted index</h2>
+  <p class="sub">Most spots in the vector hold zeros, so these are called <strong>sparse vectors</strong>. A sparse vector is generated for every document to prepare the knowledge base.</p>
+  <div class="card">
+    <h3>Sparse vector for the prompt (tiny vocabulary shown)</h3>
+    <div class="vocab" id="vocab"></div>
+    <p style="margin:0;font-size:14px;color:var(--muted)">Few non-zero entries: that’s what “sparse” means.</p>
+  </div>
+
+  <div class="two" style="margin-top:16px">
+    <div class="card">
+      <h3>Term-document matrix = inverted index</h3>
+      <p>Arrange all document vectors in a grid: <strong>each column is a document, each row is a word</strong>. It’s “inverted” because you usually start from a document and ask which words it has; here you start from a word and find every document containing it.</p>
+      <div class="callout teal" style="margin-bottom:0"><p>The index is built <strong>once</strong>, before any search. At query time only the prompt’s sparse vector is generated, which is quick.</p></div>
+    </div>
+    <div class="card scroll-x">
+      <h3>Example index (5 documents)</h3>
+      <p style="font-size:13.5px;color:var(--muted)">Filled cell: the document contains the word.</p>
+      <div id="idxGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 LADDER -->
+<section>
+  <h2>Scoring: four steps, each fixing the last problem</h2>
+  <p class="sub">Each prompt word is a <strong>keyword</strong>. For each keyword, find its row in the index and go across it, awarding points to documents.</p>
+  <div class="ladder">
+    <div class="rung">
+      <div class="n">1</div>
+      <div>
+        <h3>Simple scoring: one point per keyword present</h3>
+        <p class="fix">For each keyword, award one point to every document that contains at least one copy. The prompt has five keywords, so the highest possible score is five. Rank by total.</p>
+        <div class="scroll-x"><div id="simpleGrid"></div></div>
+        <p class="prob"><strong>Problem:</strong> it ignores how many times a keyword appears, which likely signals greater relevance.</p>
+      </div>
+    </div>
+    <div class="rung">
+      <div class="n">2</div>
+      <div>
+        <h3>Term frequency (TF): a point every time it appears</h3>
+        <p class="fix">Award each document the number of points in its column, not just one per keyword. Example query: <em>pizza oven</em>.</p>
+        <div class="docpair">
+          <div class="docbox"><b>Document 1</b>Homemade <mark class="m1">pizza</mark> in <mark class="m2">oven</mark> is better than frozen <mark class="m1">pizza</mark><div class="sc"><span>pizza ×2, oven ×1</span><span>Simple: 2</span><span>TF: 3</span></div></div>
+          <div class="docbox"><b>Document 2</b>Wood-fired <mark class="m2">oven</mark> is a better <mark class="m2">oven</mark> than a stone <mark class="m2">oven</mark> for cooking <mark class="m1">pizza</mark><div class="sc"><span>pizza ×1, oven ×3</span><span>Simple: 2</span><span class="win">TF: 4</span></div></div>
+        </div>
+        <p class="prob"><strong>Problem:</strong> longer documents contain keywords many times simply because they’re longer.</p>
+      </div>
+    </div>
+    <div class="rung">
+      <div class="n">3</div>
+      <div>
+        <h3>Normalized TF: divide by document length</h3>
+        <div class="formula">Score = (keyword occurrences) / (total words in document)</div>
+        <p class="fix">Levels the playing field. It rewards documents where keywords are a bigger <em>share</em> of the text and de-emphasizes long documents that hit keywords only because they’re long.</p>
+        <p class="prob"><strong>Problem:</strong> every keyword counts equally, whether it’s a filler word like “the” or a telling word like “pizza”.</p>
+      </div>
+    </div>
+    <div class="rung">
+      <div class="n">4</div>
+      <div>
+        <h3>TF-IDF: weight words by how rare they are</h3>
+        <div class="formula">Score = TF(word, doc) × log(total docs / docs containing word)</div>
+        <p class="fix">Weighting by <strong>inverse document frequency (IDF)</strong> makes rare words count more. Details in the next section.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 IDF -->
+<section>
+  <h2>Computing IDF, step by step</h2>
+  <p class="sub">Say the knowledge base has <strong>100 documents</strong>. “pizza” appears in 5 of them; “the” appears in all 100.</p>
+  <div class="idf">
+    <div class="card">
+      <h3>🍕 pizza (rare)</h3>
+      <div class="st"><span>1. Document frequency<span class="lab">docs containing word ÷ total docs</span></span><span class="val">5/100 = 0.05</span></div>
+      <div class="st"><span>2. Flip it to reward rare words<span class="lab">1 ÷ DF</span></span><span class="val hi">20</span></div>
+      <div class="st"><span>3. Apply log (base 10)<span class="lab">tames the exaggeration</span></span><span class="val hi">1.30</span></div>
+    </div>
+    <div class="card the">
+      <h3>the (common)</h3>
+      <div class="st"><span>1. Document frequency<span class="lab">docs containing word ÷ total docs</span></span><span class="val">100/100 = 1.0</span></div>
+      <div class="st"><span>2. Flip it<span class="lab">1 ÷ DF</span></span><span class="val lo">1</span></div>
+      <div class="st"><span>3. Apply log (base 10)<span class="lab">too common, no weight</span></span><span class="val lo">0</span></div>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>Why log?</strong> Without it, rare words are overly rewarded (20 vs 1). With it, rare words still weigh more but far less exaggerated. The slide writes this as log(1/20); the value 1.30 is log10(20).</p>
+  </div>
+
+  <h3 style="margin-top:26px">From index to TF-IDF matrix</h3>
+  <p class="sub" style="margin-bottom:12px">Multiply each row of the inverted index by that word’s IDF, giving the TF-IDF matrix. Then score exactly as before: for each prompt keyword, go across its row and award each document the value in that cell. Values below are the slide’s illustrative numbers.</p>
+  <div class="card scroll-x"><div id="tfidfGrid"></div></div>
+  <div class="two" style="margin-top:16px">
+    <div class="card" style="border-top:5px solid var(--green)">
+      <h3>High-scoring document</h3>
+      <p style="margin-bottom:6px">Contains rare words: <strong>pizza 1.3</strong>, <strong>oven 1.1</strong></p>
+    </div>
+    <div class="card" style="border-top:5px solid var(--slate)">
+      <h3>Low-scoring document</h3>
+      <p style="margin-bottom:6px">Contains common words: <strong>a 0</strong>, <strong>without 0.1</strong></p>
+    </div>
+  </div>
+  <div class="callout green">
+    <p>Top-scoring documents use keywords often and, especially, use keywords that are <strong>rare across the whole knowledge base</strong>. TF-IDF is the standard baseline for keyword retrieval. Modern systems use a slightly refined version called <strong>BM25</strong> (next lesson).</p>
+  </div>
+</section>
+
+<!-- 5 DEMO -->
+<section>
+  <h2>Try it: score a tiny knowledge base live</h2>
+  <p class="sub">Real calculations on six invented documents. Edit the prompt and switch the scoring step to see how rankings change. Words are lowercased and split on non-letters; there is no stemming or stop-word removal, just like the lesson’s “a” and “without”.</p>
+  <div class="card">
+    <div class="controls">
+      <div><label class="lbl" for="q">Prompt</label><input type="text" id="q" value="making pizza without a pizza oven" autocomplete="off"></div>
+      <div><span class="lbl">Scoring method</span>
+        <span class="seg" id="modeSeg">
+          <button type="button" data-v="simple" aria-pressed="false">1 Simple</button>
+          <button type="button" data-v="tf" aria-pressed="false">2 TF</button>
+          <button type="button" data-v="ntf" aria-pressed="false">3 Normalized TF</button>
+          <button type="button" data-v="tfidf" aria-pressed="true">4 TF-IDF</button>
+        </span>
+      </div>
+    </div>
+    <div class="modeinfo" id="modeInfo"></div>
+    <div class="res" id="results"></div>
+    <h3 style="margin-top:18px">IDF of your keywords (6 documents)</h3>
+    <div class="scroll-x"><table id="idfTable"></table></div>
+    <p style="font-size:13.5px;color:var(--muted);margin:10px 0 0">With only six documents, a word in every document gets IDF 0, like “the” in the lesson. Try “a” and “without”, which are in several documents.</p>
+  </div>
+</section>
+
+<!-- 6 CODE -->
+<section>
+  <h2>The same thing in a few lines of Python</h2>
+  <p class="sub">From-scratch sketch matching the lesson’s formulas (normalized TF × log10 IDF). It skips punctuation handling and is meant for learning, not production.</p>
+<pre><code>import math
+from collections import Counter
+
+corpus = ["making pizza without a pizza oven", "..."]
+docs = [d.lower().split() for d in corpus]           # bag of words
+N = len(docs)
+
+df  = Counter(w for d in docs for w in set(d))       # docs containing each word
+idf = {w: math.log10(N / n) for w, n in df.items()}  # inverse document frequency
+
+def tfidf_score(prompt, doc):
+    counts = Counter(doc)
+    return sum(
+        (counts[w] / len(doc)) * idf.get(w, 0)       # normalized TF x IDF
+        for w in prompt.lower().split()
+    )
+
+ranked = sorted(docs, key=lambda d: tfidf_score("pizza oven", d), reverse=True)</code></pre>
+  <div class="callout amber">
+    <p><strong>Library note:</strong> scikit-learn’s <code>TfidfVectorizer</code> uses a smoothed natural-log IDF and L2 normalization by default, so its numbers won’t match the lesson’s exactly. The ranking idea is the same. Check the current scikit-learn docs for its exact formula before comparing values.</p>
+  </div>
+</section>
+
+<!-- 7 ALTERNATIVES -->
+<section>
+  <h2>Alternatives and trade-offs</h2>
+  <div class="cmp">
+    <div class="card">
+      <h3>Simple presence counting</h3>
+      <div class="pro-t">Pros</div><ul><li>Trivial to build and explain</li></ul>
+      <div class="con-t">Cons</div><ul><li>Ignores repetition, length and word rarity</li></ul>
+    </div>
+    <div class="card">
+      <h3>Normalized TF</h3>
+      <div class="pro-t">Pros</div><ul><li>Fair to short and long documents</li></ul>
+      <div class="con-t">Cons</div><ul><li>Filler words still count as much as rare ones</li></ul>
+    </div>
+    <div class="card" style="border:2px solid var(--green)">
+      <h3>TF-IDF (this lesson)</h3>
+      <div class="pro-t">Pros</div><ul><li>Rewards rare, meaningful words</li><li>Standard baseline; index built once; fast queries</li></ul>
+      <div class="con-t">Cons</div><ul><li>Matches exact words only (no synonyms, no meaning)</li><li>Repeated words keep raising the score without limit</li></ul>
+    </div>
+    <div class="card">
+      <h3>Remove stop words up front</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:6px">Not covered in the lesson. IDF already shrinks the weight of very common words.</p>
+      <div class="pro-t">Pros</div><ul><li>Smaller index</li></ul>
+      <div class="con-t">Cons</div><ul><li>Can break phrases or queries where small words matter</li></ul>
+    </div>
+    <div class="card">
+      <h3>BM25 (next lesson)</h3>
+      <div class="pro-t">Pros</div><ul><li>Refines TF-IDF and is the common production choice</li></ul>
+      <div class="con-t">Cons</div><ul><li>Adds tunable parameters to understand</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8 TAKEAWAYS -->
+<section>
+  <h2>Key takeaways</h2>
+  <ul class="take">
+    <li>Keyword search retrieves documents that <strong>share words with the prompt</strong>; more shared words means more likely relevant.</li>
+    <li>Text becomes a <strong>bag of words</strong> stored as a <strong>sparse vector</strong>; all document vectors form a <strong>term-document matrix (inverted index)</strong> built once before searching.</li>
+    <li>Scoring evolves: <strong>simple presence → term frequency → length-normalized TF → TF-IDF</strong>, each fixing the previous flaw.</li>
+    <li><strong>IDF</strong> = log(total docs / docs containing the word): rare words (pizza, 1.30) weigh more than common ones (the, 0).</li>
+    <li>TF-IDF is the standard keyword baseline; production systems use the refined <strong>BM25</strong>.</li>
+    <li>Up next: <strong>BM25</strong> and the strengths of keyword search in a RAG system.</li>
+  </ul>
+  <footer>Based on the Module 2 lesson transcript and slides (DeepLearning.AI, Zain Hasan). Demo documents are invented; matrix values in the TF-IDF grid are the slide’s illustrative numbers.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+
+  /* sparse vocab */
+  var vocab=["making","pizza","cake","pan","without","drink","pasta","a","oven","burger","taco","with","salad","blend","tea","the"];
+  var counts={making:1,pizza:2,without:1,a:1,oven:1};
+  var vb=document.getElementById("vocab");
+  vocab.forEach(function(w){
+    var n=counts[w]||0;
+    var d=el("div","v"+(n?" on":""));
+    d.appendChild(el("span",null,w));
+    d.appendChild(el("b",null,String(n)));
+    vb.appendChild(d);
+  });
+
+  /* grids */
+  var rows=["making","pizza","without","a","oven"];
+  var present={making:[1,0,0,1,1],pizza:[1,0,1,0,0],without:[1,1,0,1,1],a:[1,1,0,1,1],oven:[1,1,0,1,1]};
+  var tf={making:[0.4,0,0,0.4,0.4],pizza:[0.7,0,0.7,0,0],without:[0.2,0.2,0,0.2,0.2],a:[0.1,0.1,0,0.1,0.1],oven:[0.2,0.2,0,0.2,0.2]};
+  function grid(targetId,data,fmt,showTotals,totalFmt){
+    var t=document.getElementById(targetId);
+    var g=el("div","mx");
+    g.style.gridTemplateColumns="90px repeat(5,1fr)";
+    g.appendChild(el("div"));
+    for(var i=1;i<=5;i++) g.appendChild(el("div","h","Doc "+i));
+    rows.forEach(function(r){
+      g.appendChild(el("div","rw",r));
+      data[r].forEach(function(v){
+        var c=el("div","c"+(v?" on":""),v?fmt(v):"");
+        g.appendChild(c);
+      });
+    });
+    if(showTotals){
+      var tots=[0,0,0,0,0];
+      rows.forEach(function(r){data[r].forEach(function(v,i){tots[i]+=v;});});
+      var mx=Math.max.apply(null,tots);
+      g.appendChild(el("div","rw","Score"));
+      tots.forEach(function(v){g.appendChild(el("div","tot"+(v===mx?" best":""),totalFmt(v)));});
+    }
+    t.appendChild(g);
+  }
+  grid("idxGrid",present,function(){return "";},false);
+  grid("simpleGrid",present,function(){return "+1";},true,function(v){return v+"/5";});
+  grid("tfidfGrid",tf,function(v){return String(v);},true,function(v){return (Math.round(v*10)/10).toFixed(1);});
+
+  /* demo */
+  var corpus=[
+    "Making pizza without a pizza oven is easy: use a hot skillet and a lid.",
+    "A guide to buying a new oven without breaking the bank.",
+    "Pizza dough basics: flour, water, yeast and patience.",
+    "Making bread without a kneading machine takes a little extra time and a lot of patience.",
+    "Without a doubt, a wood-fired oven makes a great pizza, but a cheap oven can work too, and a stone helps a lot with a crispy crust in a home kitchen.",
+    "Making tea without a kettle."
+  ];
+  function tok(s){return (s.toLowerCase().match(/[a-z0-9]+/g)||[]);}
+  var docs=corpus.map(tok);
+  var N=docs.length;
+  var df={};
+  docs.forEach(function(d){var seen={};d.forEach(function(w){if(!seen[w]){seen[w]=1;df[w]=(df[w]||0)+1;}});});
+  function idf(w){return df[w]?Math.log10(N/df[w]):0;}
+  var mode="tfidf";
+  var info={
+    simple:"One point per prompt keyword that appears at least once in the document. Max score = number of keywords.",
+    tf:"A point for every occurrence of every prompt keyword. Long documents get an edge.",
+    ntf:"TF divided by document length: rewards documents where keywords are a larger share of the text.",
+    tfidf:"Normalized TF multiplied by log10(N / docs containing word): rare words count more, words in every document count zero."
+  };
+  function score(d,q){
+    var c={};d.forEach(function(w){c[w]=(c[w]||0)+1;});
+    var s=0;
+    q.forEach(function(w){
+      var f=c[w]||0;
+      if(mode==="simple") s+=f>0?1:0;
+      else if(mode==="tf") s+=f;
+      else if(mode==="ntf") s+=f/d.length;
+      else s+=(f/d.length)*idf(w);
+    });
+    return s;
+  }
+  function hilite(parent,text,qset){
+    text.split(/([A-Za-z0-9]+)/).forEach(function(part){
+      if(qset[part.toLowerCase()]){var m=el("mark","m1",part);parent.appendChild(m);}
+      else parent.appendChild(document.createTextNode(part));
+    });
+  }
+  function render(){
+    var q=tok(document.getElementById("q").value);
+    var qset={};q.forEach(function(w){qset[w]=1;});
+    document.getElementById("modeInfo").textContent=info[mode];
+    var sc=docs.map(function(d,i){return {i:i,s:score(d,q),len:d.length};});
+    sc.sort(function(a,b){return b.s-a.s;});
+    var max=Math.max(sc[0]?sc[0].s:0,1e-9);
+    var res=document.getElementById("results");
+    res.innerHTML="";
+    sc.forEach(function(r,rank){
+      var box=el("div","rr"+(rank===0&&r.s>0?" first":""));
+      var top=el("div","top");
+      top.appendChild(el("span",null,"#"+(rank+1)+"  Doc "+(r.i+1)+" ("+r.len+" words)"));
+      top.appendChild(el("span",null,(mode==="simple"||mode==="tf")?String(r.s):r.s.toFixed(4)));
+      box.appendChild(top);
+      var tx=el("div","txt");hilite(tx,corpus[r.i],qset);box.appendChild(tx);
+      var bar=el("div","bar");var fill=el("i");fill.style.width=Math.max(0,r.s/max*100)+"%";bar.appendChild(fill);box.appendChild(bar);
+      res.appendChild(box);
+    });
+    var t=document.getElementById("idfTable");
+    t.innerHTML="";
+    var hr=el("tr");["Keyword","Docs containing it","IDF = log10(6 / df)"].forEach(function(h){hr.appendChild(el("th",null,h));});
+    t.appendChild(hr);
+    var seen={};
+    q.forEach(function(w){
+      if(seen[w])return;seen[w]=1;
+      var r=el("tr");
+      r.appendChild(el("td",null,w));
+      r.appendChild(el("td",null,String(df[w]||0)));
+      r.appendChild(el("td",null,df[w]?idf(w).toFixed(2):"not in any document"));
+      t.appendChild(r);
+    });
+  }
+  document.getElementById("q").addEventListener("input",render);
+  var seg=document.getElementById("modeSeg");
+  seg.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    Array.prototype.forEach.call(seg.children,function(x){x.setAttribute("aria-pressed","false");});
+    b.setAttribute("aria-pressed","true");
+    mode=b.getAttribute("data-v");
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>

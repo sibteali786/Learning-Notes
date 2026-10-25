@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Metadata filtering: visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:62ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:68ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout.green{border-color:var(--green);background:var(--green-soft);}
+.callout p:last-child{margin-bottom:0}
+svg text{font-family:'Poppins',system-ui,sans-serif;}
+.node{fill:var(--slate-soft);stroke:var(--line);stroke-width:1.5;}
+.node.hot{fill:var(--amber);stroke:var(--amber);}
+.node.user{fill:var(--teal-soft);stroke:var(--teal);}
+.t-ink{fill:var(--ink);font-size:14px;font-weight:600;}
+.t-dark{fill:#10151f;font-size:14px;font-weight:600;}
+.t-muted{fill:var(--muted);font-size:12px;}
+.arrow{stroke:var(--slate);stroke-width:2;fill:none;}
+.arrowhead{fill:var(--slate);}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0;}
+.meta{background:var(--slate-soft);border-radius:10px;padding:10px 12px;font-size:14px;}
+.meta b{display:block;font-size:12.5px;color:var(--muted);font-weight:500;}
+.meta i{font-style:normal;display:block;font-weight:500;}
+.art{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;}
+.art h3{display:flex;gap:8px;align-items:center;}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+.kw{color:#f28ba8;}
+.cond{display:grid;gap:8px;margin:10px 0;}
+.cond div{background:var(--slate-soft);border-radius:10px;padding:8px 12px;font-size:14px;}
+.cond b{color:var(--slate);}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.pair .card{border-top:5px solid var(--teal);}
+.rule{display:flex;gap:10px;align-items:center;background:var(--slate-soft);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14.5px;}
+.rule .x{color:var(--coral);font-weight:700;}
+.rule .ok{color:var(--green);font-weight:700;}
+.proscons{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.proscons .card.pro{border-top:5px solid var(--green);}
+.proscons .card.con{border-top:5px solid var(--coral);}
+.proscons ol{margin:8px 0 0;padding-left:20px;}
+.proscons li{margin-bottom:8px;}
+/* demo */
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 20px;margin-bottom:16px;}
+.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface);}
+.seg button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer;}
+.seg button[aria-pressed="true"]{background:var(--amber);color:#10151f;font-weight:600;}
+.seg button:focus-visible{outline:3px solid var(--teal);outline-offset:-3px;}
+.query{background:#1b2333;color:#e8edf7;border-radius:12px;padding:12px 16px;font-size:13.5px;line-height:1.6;margin-bottom:14px;overflow-x:auto;}
+.query .kw{color:#f28ba8;}
+.rows{display:grid;gap:8px;}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;transition:opacity .2s;}
+.row .t{font-weight:600;font-size:14.5px;}
+.row .m{font-size:12.5px;color:var(--muted);grid-column:1 / -1;}
+.row .badge{font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;}
+.row.pass{border-color:var(--green);background:var(--green-soft);}
+.row.pass .badge{background:var(--green);color:#fff;}
+.row.fail{opacity:.5;}
+.row.fail .t{text-decoration:line-through;}
+.row.fail .badge{background:var(--slate-soft);color:var(--slate);}
+.count{font-weight:600;margin:12px 0 6px;}
+.take{display:grid;gap:10px;padding:0;margin:0;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro-t{color:var(--green);font-weight:600;font-size:13.5px;}
+.con-t{color:var(--coral);font-weight:600;font-size:13.5px;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Information retrieval foundations</span>
+    <span class="chip teal">Lesson: metadata filtering</span>
+  </div>
+  <h1>Metadata filtering: the strict gatekeeper</h1>
+  <p class="lede">The simplest and most familiar technique in a retriever. It uses rigid criteria on a document’s metadata to narrow down results. It doesn’t find relevant documents; it decides which documents are allowed through.</p>
+</header>
+
+<!-- 1 WHAT IT IS -->
+<section>
+  <h2>What it is</h2>
+  <p class="sub">Metadata is information <em>about</em> a document rather than its text: title, author, creation date, access privileges, and so forth. A metadata filter keeps only the documents that satisfy rigid conditions on those fields.</p>
+
+  <div class="card">
+    <h3>Newspaper example</h3>
+    <p>You work at a newspaper and want a retriever for articles from the paper’s whole history. The knowledge base holds thousands of articles. The full text lives in the knowledge base, but this index can only be searched through each article’s metadata.</p>
+    <div class="art">
+      <h3>The Daily Maple article</h3>
+      <div class="meta-grid">
+        <div class="meta"><b>Title</b><i>Why local transit needs a rethink</i></div>
+        <div class="meta"><b>Publication date</b><i>2024-06-12</i></div>
+        <div class="meta"><b>Author</b><i>Michael Chen</i></div>
+        <div class="meta"><b>Section</b><i>Opinion</i></div>
+        <div class="meta"><b>Tags</b><i>transit, city</i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 QUERYING -->
+<section>
+  <h2>How querying looks: like a SQL query</h2>
+  <p class="sub">Filter on one field, or combine several. Only documents that meet <strong>every</strong> condition come back; everything else is filtered out.</p>
+  <div class="two">
+    <div class="card">
+      <h3>Single condition</h3>
+      <p>Every article published on a given day (or by a particular author):</p>
+<pre><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> articles
+<span class="kw">WHERE</span> publication_date = '2023-10-01';</code></pre>
+    </div>
+    <div class="card">
+      <h3>Multiple conditions</h3>
+      <p>Opinion pieces by your favorite journalist between June and July 2024:</p>
+      <div class="cond">
+        <div><b>section</b> = “Opinion”</div>
+        <div><b>author</b> = “Michael Chen”</div>
+        <div><b>date</b> = June to July 2024</div>
+      </div>
+      <p style="margin:0;font-size:14px;color:var(--muted)">All three must be true for an article to be returned.</p>
+    </div>
+  </div>
+  <div class="callout teal">
+    <p><strong>Analogy:</strong> if you’ve ever filtered a table in a spreadsheet, you’ve already done metadata filtering. You apply a strict set of criteria to pick which members of a larger collection you want to use.</p>
+  </div>
+</section>
+
+<!-- 3 IN RAG -->
+<section>
+  <h2>How it’s used inside a RAG system</h2>
+  <p class="sub">In a typical RAG system you don’t use metadata filtering to <em>perform</em> retrieval. You use it to narrow down results returned by other retrieval techniques (keyword and semantic search). And the filters usually aren’t decided by what the user said in the prompt, but by <strong>other attributes of the user</strong> making the request.</p>
+
+  <div class="card scroll-x">
+    <svg viewBox="0 0 900 260" style="min-width:760px;width:100%;height:auto" role="img" aria-label="The prompt feeds keyword and semantic search; user attributes feed the metadata filter, which narrows the search results.">
+      <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="arrowhead"/></marker></defs>
+      <rect class="node" x="10" y="40" width="120" height="70" rx="14"/>
+      <text class="t-ink" x="70" y="80" text-anchor="middle">Prompt</text>
+
+      <rect class="node" x="190" y="40" width="190" height="70" rx="14"/>
+      <text class="t-ink" x="285" y="72" text-anchor="middle">Keyword search</text>
+      <text class="t-ink" x="285" y="92" text-anchor="middle">+ semantic search</text>
+
+      <rect class="node hot" x="450" y="40" width="160" height="70" rx="14"/>
+      <text class="t-dark" x="530" y="80" text-anchor="middle">Metadata filter</text>
+
+      <rect class="node" x="680" y="40" width="200" height="70" rx="14"/>
+      <text class="t-ink" x="780" y="72" text-anchor="middle">Narrowed results</text>
+      <text class="t-muted" x="780" y="92" text-anchor="middle">fewer, allowed documents</text>
+
+      <path class="arrow" d="M132 75 L186 75" marker-end="url(#ah)"/>
+      <path class="arrow" d="M382 75 L446 75" marker-end="url(#ah)"/>
+      <path class="arrow" d="M612 75 L676 75" marker-end="url(#ah)"/>
+
+      <rect class="node user" x="440" y="170" width="180" height="70" rx="14"/>
+      <text class="t-ink" x="530" y="200" text-anchor="middle">User attributes</text>
+      <text class="t-muted" x="530" y="220" text-anchor="middle">subscriber? region?</text>
+      <path class="arrow" d="M530 168 L530 114" marker-end="url(#ah)"/>
+      <text class="t-muted" x="640" y="212">filters come from the user,</text>
+      <text class="t-muted" x="640" y="228">not from the prompt text</text>
+    </svg>
+  </div>
+
+  <div class="pair" style="margin-top:16px">
+    <div class="card">
+      <h3>Subscription filtering</h3>
+      <p>Some articles are free on the open internet; others are for paid subscribers only. Each article stores a free/paid flag.</p>
+      <div class="rule"><span class="x">×</span><span>User not signed in as a paid subscriber: exclude <code>subscription = paid</code></span></div>
+    </div>
+    <div class="card">
+      <h3>Geographic filtering</h3>
+      <p>The paper prints in many regions. Each article stores the region where it was published. The system detects where the reader is.</p>
+      <div class="rule"><span class="ok">✓</span><span>Include only <code>region = North America</code> for a reader in North America</span></div>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>Real-world mapping:</strong> in a company assistant the same pattern enforces access privileges: an Engineering user never gets HR-only documents, even if they’d match the question perfectly.</p>
+  </div>
+</section>
+
+<!-- 4 DEMO -->
+<section>
+  <h2>Try it: a metadata filter on newspaper articles</h2>
+  <p class="sub">Invented articles for illustration. Choose conditions and watch the SQL-like query and the survivors change. Only articles that meet every condition pass.</p>
+  <div class="card">
+    <div class="controls" id="controls"></div>
+    <div class="query" id="query"></div>
+    <div class="count" id="count"></div>
+    <div class="rows" id="rows"></div>
+    <p style="font-size:13.5px;color:var(--muted);margin:14px 0 0">Notice what’s missing: nothing here reads the prompt, and the survivors have no relevance order. That’s why another technique has to rank them.</p>
+  </div>
+</section>
+
+<!-- 5 PROS CONS -->
+<section>
+  <h2>Advantages and limitations</h2>
+  <div class="proscons">
+    <div class="card pro">
+      <h3 style="color:var(--green)">Advantages</h3>
+      <ol>
+        <li><strong>Conceptually simple.</strong> Easy to understand how the system works and to debug problems.</li>
+        <li><strong>Fast, mature, well-optimized.</strong> A reliable approach with years of engineering behind it.</li>
+        <li><strong>The only way to enforce rigid criteria.</strong> If you must strictly define which documents can or can’t be retrieved, metadata filtering is the only approach that gives you that behavior. Most important of the three.</li>
+      </ol>
+    </div>
+    <div class="card con">
+      <h3 style="color:var(--coral)">Limitations</h3>
+      <ol>
+        <li><strong>Not really a search technique.</strong> It’s a tool for refining results from the other two techniques in this module.</li>
+        <li><strong>Overly rigid, ignores content.</strong> It never looks at what a document says.</li>
+        <li><strong>No ranking.</strong> Once documents pass the filter there’s no way to order them.</li>
+        <li><strong>Useless alone.</strong> A retriever relying only on metadata filtering would be essentially useless.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="callout amber">
+    <p><strong>Bottom line:</strong> RAG systems you build will very likely include metadata filters, but they need pairing with other techniques that can tell whether a document’s <em>contents</em> are relevant to the prompt.</p>
+  </div>
+</section>
+
+<!-- 6 ALTERNATIVES -->
+<section>
+  <h2>Alternative approaches and trade-offs</h2>
+  <div class="cmp">
+    <div class="card">
+      <h3>Filters from user attributes (this lesson)</h3>
+      <div class="pro-t">Pros</div>
+      <ul><li>Predictable and easy to debug</li><li>Enforces access rules reliably</li></ul>
+      <div class="con-t">Cons</div>
+      <ul><li>Can’t react to what the prompt asks for</li></ul>
+    </div>
+    <div class="card">
+      <h3>Filters extracted from the prompt</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:6px">For example, an LLM turns “opinion pieces from last summer” into section and date conditions. Not covered in this lesson.</p>
+      <div class="pro-t">Pros</div>
+      <ul><li>Lets users narrow results in natural language</li></ul>
+      <div class="con-t">Cons</div>
+      <ul><li>Mistakes silently drop good documents</li><li>Not safe for access control</li></ul>
+    </div>
+    <div class="card">
+      <h3>Filter before vs after search</h3>
+      <div class="pro-t">Pros of filtering search results afterward</div>
+      <ul><li>Simple to add to any retriever</li></ul>
+      <div class="con-t">Cons</div>
+      <ul><li>Lists shrink (e.g. 50 to 35); filtering first can avoid that if your database supports it</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 7 TAKEAWAYS -->
+<section>
+  <h2>Key takeaways</h2>
+  <ul class="take">
+    <li>Metadata filtering applies <strong>rigid criteria</strong> to fields like title, author, date, section, and access privileges. Only documents meeting <em>every</em> condition survive.</li>
+    <li>It looks like a <strong>SQL query</strong> or a spreadsheet filter.</li>
+    <li>In RAG it <strong>narrows results from other techniques</strong>; the filters come from <strong>user attributes</strong> (subscription, region), not the prompt.</li>
+    <li>Strengths: <strong>simple, fast, mature</strong>, and the <strong>only way to enforce strict rules</strong>.</li>
+    <li>Limits: not true search, ignores content, no ranking, useless on its own.</li>
+    <li>Up next: <strong>keyword search</strong>, which adds the ability to judge whether a document’s contents match the prompt.</li>
+  </ul>
+  <footer>Based on the Module 2 lesson transcript and slides (DeepLearning.AI, Zain Hasan). The demo’s articles are invented for illustration.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var A=[
+    {t:"Why local transit needs a rethink",au:"Michael Chen",se:"Opinion",d:"2024-06-12",sub:"free",rg:"North America"},
+    {t:"The case for four-day weeks",au:"Michael Chen",se:"Opinion",d:"2024-07-09",sub:"paid",rg:"North America"},
+    {t:"City budget passes after long debate",au:"Sara Lopez",se:"News",d:"2024-06-28",sub:"free",rg:"North America"},
+    {t:"Election reform: what Europe can teach us",au:"Michael Chen",se:"Opinion",d:"2024-06-28",sub:"free",rg:"Europe"},
+    {t:"Playoff preview: underdogs to watch",au:"Amir Khan",se:"Sports",d:"2024-07-09",sub:"free",rg:"North America"},
+    {t:"Inside the housing crunch",au:"Sara Lopez",se:"News",d:"2024-08-02",sub:"paid",rg:"North America"},
+    {t:"Schools need more funding",au:"Sara Lopez",se:"Opinion",d:"2024-06-12",sub:"paid",rg:"Europe"},
+    {t:"Markets wobble before rate decision",au:"Amir Khan",se:"News",d:"2024-05-20",sub:"free",rg:"Asia"},
+    {t:"A farewell to the old stadium",au:"Michael Chen",se:"Sports",d:"2023-10-01",sub:"free",rg:"North America"},
+    {t:"Tech tariffs, explained",au:"Michael Chen",se:"Opinion",d:"2024-07-09",sub:"paid",rg:"North America"}
+  ];
+  var cfg=[
+    {k:"se",label:"Section",opts:["Any","Opinion","News","Sports"],sql:function(v){return "section = \u201C"+v+"\u201D";},test:function(a,v){return a.se===v;}},
+    {k:"au",label:"Author",opts:["Any","Michael Chen","Sara Lopez","Amir Khan"],sql:function(v){return "author = \u201C"+v+"\u201D";},test:function(a,v){return a.au===v;}},
+    {k:"dt",label:"Date",opts:["Any","June to July 2024"],sql:function(v){return "date BETWEEN '2024-06-01' AND '2024-07-31'";},test:function(a){return a.d>="2024-06-01"&&a.d<="2024-07-31";}},
+    {k:"us",label:"Reader (user attribute)",opts:["Any","Not a paid subscriber"],sql:function(){return "subscription != 'paid'";},test:function(a){return a.sub!=="paid";}},
+    {k:"rg",label:"Region (user attribute)",opts:["Any","North America","Europe"],sql:function(v){return "region = '"+v+"'";},test:function(a,v){return a.rg===v;}}
+  ];
+  var state={};
+  cfg.forEach(function(c){state[c.k]="Any";});
+  var controls=document.getElementById("controls");
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  cfg.forEach(function(c){
+    var wrap=el("div");
+    wrap.appendChild(el("span","lbl",c.label));
+    var seg=el("span","seg");
+    c.opts.forEach(function(o){
+      var b=el("button",null,o);
+      b.type="button";
+      b.setAttribute("aria-pressed",o==="Any"?"true":"false");
+      b.addEventListener("click",function(){
+        state[c.k]=o;
+        Array.prototype.forEach.call(seg.children,function(x){x.setAttribute("aria-pressed","false");});
+        b.setAttribute("aria-pressed","true");
+        render();
+      });
+      seg.appendChild(b);
+    });
+    wrap.appendChild(seg);
+    controls.appendChild(wrap);
+  });
+  function render(){
+    var active=cfg.filter(function(c){return state[c.k]!=="Any";});
+    var q=document.getElementById("query");
+    q.innerHTML="";
+    var line1=el("div"); var s=el("span","kw","SELECT"); line1.appendChild(s); line1.appendChild(document.createTextNode(" * ")); line1.appendChild(el("span","kw","FROM")); line1.appendChild(document.createTextNode(" articles"));
+    q.appendChild(line1);
+    if(active.length){
+      active.forEach(function(c,i){
+        var l=el("div");
+        l.appendChild(el("span","kw",i===0?"WHERE ":"  AND "));
+        l.appendChild(document.createTextNode(c.sql(state[c.k])));
+        q.appendChild(l);
+      });
+    } else {
+      q.appendChild(el("div",null,"-- no conditions: every article is returned"));
+    }
+    var rows=document.getElementById("rows");
+    rows.innerHTML="";
+    var pass=0;
+    A.forEach(function(a){
+      var ok=active.every(function(c){return c.test(a,state[c.k]);});
+      if(ok) pass++;
+      var r=el("div","row "+(ok?"pass":"fail"));
+      r.appendChild(el("span","t",a.t));
+      r.appendChild(el("span","badge",ok?"returned":"filtered out"));
+      r.appendChild(el("span","m",a.se+" | "+a.au+" | "+a.d+" | "+a.sub+" | "+a.rg));
+      rows.appendChild(r);
+    });
+    document.getElementById("count").textContent=pass+" of "+A.length+" articles pass every condition";
+  }
+  render();
+})();
+</script>
+</body>
+</html>

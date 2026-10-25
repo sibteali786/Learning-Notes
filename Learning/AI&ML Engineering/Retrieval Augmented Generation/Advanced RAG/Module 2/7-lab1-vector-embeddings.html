@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab 1: Vector embeddings in RAG, visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6; --violet:#7a5bbf; --violet-soft:#ebe4f8; --cell:#e6ebf8; --on:#fff;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a; --violet:#b39af0; --violet-soft:#2b2445; --cell:#232c3e; --on:#10151f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a; --violet:#b39af0; --violet-soft:#2b2445; --cell:#232c3e; --on:#10151f;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:64ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:70ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout.green{border-color:var(--green);background:var(--green-soft);}
+.callout p:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.answer{border:2px solid var(--coral);}
+.answer .big{font-size:19px;font-weight:600;line-height:1.45;margin-bottom:10px;}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;margin-right:6px;}
+.tag.bad{background:var(--coral-soft);color:var(--coral);}
+.tag.ok{background:var(--green-soft);color:var(--green);}
+.tag.neu{background:var(--slate-soft);color:var(--slate);}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+pre .hl{background:#5b2a33;border-radius:4px;padding:0 2px;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code,td code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface);margin-bottom:14px;}
+.seg button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:7px 14px;cursor:pointer;}
+.seg button[aria-pressed="true"]{background:var(--coral);color:var(--on);font-weight:600;}
+.seg button:focus-visible{outline:3px solid var(--teal);outline-offset:-3px;}
+.scen{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.scen .col{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);}
+.scen .col h3{font-size:15px;}
+.scen .out{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:var(--slate-soft);border-radius:8px;padding:8px 10px;margin:8px 0;word-break:break-word;}
+.scen .why{font-size:13.5px;color:var(--muted);margin:0;}
+/* flow */
+.flow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+.flow .s{flex:1;min-width:150px;border-radius:12px;padding:12px 14px;background:var(--slate-soft);font-size:14px;}
+.flow .s b{display:block;font-size:15px;margin-bottom:2px;}
+.flow .s.hot{background:var(--coral);color:var(--on);}
+.flow .ar{align-self:center;color:var(--slate);width:20px;height:20px;flex:0 0 20px;}
+.formula{background:var(--slate-soft);border-radius:12px;padding:12px 16px;font-size:15px;text-align:center;margin:8px 0;overflow-x:auto;}
+.metric{border-top:5px solid var(--teal);}
+.metric.e{border-top-color:var(--coral);}
+/* plot */
+.plot svg{width:100%;height:auto;display:block;background:var(--surface);border-radius:12px;border:1px solid var(--line);}
+.plot .ax{stroke:var(--line);stroke-width:1.5;} .plot .gr{stroke:var(--line);stroke-width:1;opacity:.5;}
+.plot .tx{fill:var(--ink);font-size:11px;font-family:'Poppins',system-ui,sans-serif;font-weight:500;}
+.plot .mut{fill:var(--muted);font-size:10.5px;font-family:'Poppins',system-ui,sans-serif;}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:2px;}
+.ctl output{color:var(--teal);}
+input[type=range]{width:100%;accent-color:var(--teal);}
+input[type=range]:focus-visible{outline:3px solid var(--amber);outline-offset:3px;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);}
+th{font-weight:600;color:var(--slate);}
+td.win{color:var(--green);font-weight:700;}
+.bars{display:grid;gap:7px;}
+.bars .b{display:grid;grid-template-columns:100px 1fr 60px;gap:10px;align-items:center;font-size:14px;}
+.bars .t{height:14px;background:var(--cell);border-radius:8px;overflow:hidden;}
+.bars .t i{display:block;height:100%;border-radius:8px;}
+.bars .coralf{background:var(--coral);} .bars .tealf{background:var(--teal);}
+.note{font-size:13.5px;color:var(--muted);margin-top:10px;}
+.dims{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.dims .big{font-size:34px;font-weight:700;color:var(--teal);line-height:1;}
+.trunc{display:flex;height:34px;border-radius:10px;overflow:hidden;font-size:12.5px;font-weight:600;margin:10px 0;}
+.trunc div{display:grid;place-items:center;}
+.trunc .kept{background:var(--green);color:var(--on);flex:512;}
+.trunc .lost{background:var(--coral-soft);color:var(--coral);flex:0 0 22%;border-left:3px dashed var(--coral);}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro-t{color:var(--green);font-weight:600;font-size:13.5px;}
+.con-t{color:var(--coral);font-weight:600;font-size:13.5px;}
+.take{display:grid;gap:10px;padding:0;margin:0;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev" viewBox="0 0 16 16"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Ungraded lab: vector embeddings in RAG</span>
+    <span class="chip teal">Notebook C1M2_Ungraded_Lab_1</span>
+  </div>
+  <h1>Lab summary, plus: why check shapes in Euclidean but not cosine?</h1>
+  <p class="lede">Your question first, then the whole lab in order: the two distance functions, the embedding model, ranking real sentences, and the 512-token truncation trap.</p>
+</header>
+
+<!-- ANSWER -->
+<section style="margin-top:36px">
+  <h2>Your question</h2>
+  <p class="sub">In <code>euclidean_distance</code> the lab raises an error if <code>v1.shape != v2.shape</code>, but <code>cosine_similarity</code> has no such check. Why?</p>
+  <div class="card answer">
+    <div class="big">Short answer: Euclidean uses subtraction, which NumPy lets “broadcast” silently, so mismatched shapes can produce a wrong number with no error. Cosine uses <code>np.dot</code>, which already raises an error when the lengths don’t line up, so the check would be redundant.</div>
+    <p style="margin:0;font-size:14.5px;color:var(--muted)">The notebook doesn’t state its reason; this is my reading of the code, and I ran the cases below in NumPy to confirm the behavior.</p>
+  </div>
+
+  <div class="two" style="margin-top:16px">
+    <div class="card metric e">
+      <h3>Euclidean: <code>v1 - v2</code></h3>
+      <pre><code>dist = np.sqrt(np.sum((v1 - v2) ** 2))</code></pre>
+      <p style="font-size:14.5px;margin:0">Element-wise subtraction follows NumPy broadcasting rules: a length-1 array is silently stretched to match, and a <code>(2,1)</code> array against a <code>(2,)</code> array becomes a <code>(2,2)</code> matrix. Either way you get a number back, just not the distance you meant.</p>
+    </div>
+    <div class="card metric">
+      <h3>Cosine: <code>np.dot(v1, v2)</code></h3>
+      <pre><code>dot_product = np.dot(v1, v2)
+similarity  = dot_product / (norm_v1 * norm_v2)</code></pre>
+      <p style="font-size:14.5px;margin:0">For 1-D vectors, <code>np.dot</code> needs equal lengths and raises <code>ValueError: shapes ... not aligned</code> otherwise. The safety net is built in.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:22px">See it: same inputs, three behaviors</h3>
+  <div class="seg" id="scSeg" role="group" aria-label="Choose a scenario">
+    <button type="button" data-s="same" aria-pressed="false">A: same shape</button>
+    <button type="button" data-s="len1" aria-pressed="true">B: length-1 vs length-2</button>
+    <button type="button" data-s="col" aria-pressed="false">C: (2,) vs (2,1)</button>
+    <button type="button" data-s="len3" aria-pressed="false">D: length 3 vs 2</button>
+  </div>
+  <div class="scen" id="scen"></div>
+  <p class="note">Outputs come from running the lab’s formulas in NumPy with <code>v1 = [1, 2]</code>. “Without check” is the Euclidean formula with the shape check removed.</p>
+
+  <div class="callout amber">
+    <p><strong>Why it matters in RAG:</strong> a silent broadcast bug (for example a stray <code>(1, 768)</code> query against <code>(768,)</code> document vectors) would quietly corrupt rankings, which is much harder to notice than a crash. The explicit check turns it into a clear message that prints both shapes.</p>
+  </div>
+  <div class="callout teal">
+    <p><strong>Side notes:</strong> (1) <code>np.dot</code> is not bulletproof either: with a scalar it just scales the vector, and the later <code>float()</code> conversion is what would break. (2) Neither function guards against a zero vector, where cosine divides by zero. (3) A check in cosine too would give a friendlier error message, so the asymmetry is a style choice more than a necessity.</p>
+  </div>
+</section>
+
+<!-- LAB SUMMARY -->
+<section>
+  <h2>1. What the lab teaches</h2>
+  <p class="sub">Embeddings act like a map for text: words and sentences become positions in vector space that capture meaning.</p>
+  <div class="two">
+    <div class="card"><h3>Powering search</h3><p style="margin:0;font-size:14.5px"><strong>Capturing meaning:</strong> vectors locate information matching a query. <strong>Comparing similarity:</strong> the prompt becomes a vector too, and is compared against the stored vectors to find the closest texts.</p></div>
+    <div class="card"><h3>Understanding context</h3><p style="margin:0;font-size:14.5px"><strong>Context matters:</strong> helps the best-matched information be found. <strong>Flexibility:</strong> contextual embeddings adapt to different meanings and catch details otherwise overlooked.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>The three-step framework</h3>
+    <div class="flow">
+      <div class="s"><b>1. Create the embedding</b>Convert the query and documents into vectors.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s"><b>2. Measure</b>Use a similarity metric to see how close each document is to the query.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s hot"><b>3. Sort</b>Take the top few. Careful: for cosine <em>higher</em> is better, for Euclidean <em>lower</em> is better.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>2. The two distance functions</h2>
+  <div class="two">
+    <div class="card metric">
+      <h3>Cosine similarity</h3>
+      <div class="formula">cos(q, d) = (q · d) / (‖q‖ ‖d‖)</div>
+      <p style="font-size:14.5px;margin:0">Based on the <strong>angle</strong>. A value close to 1 means very similar. Higher = closer.</p>
+    </div>
+    <div class="card metric e">
+      <h3>Euclidean distance</h3>
+      <div class="formula">dist(q, d) = √( Σ (qⱼ − dⱼ)² )</div>
+      <p style="font-size:14.5px;margin:0">The “straight-line” distance. Smaller = closer.</p>
+    </div>
+  </div>
+  <p class="note">Both functions accept a vector and an array of vectors (or a single vector) and always return a <strong>list</strong> of floats.</p>
+
+  <h3 style="margin-top:24px">Lab example: the two metrics disagree</h3>
+  <div class="two">
+    <div class="card scroll-x">
+      <p style="font-size:14px;margin-bottom:8px"><code>v1 = [1, 2]</code>, compared with <code>[1, 1]</code>, <code>[3, 2]</code>, <code>[5, 6]</code></p>
+      <table>
+        <tr><th>Vector</th><th>Cosine</th><th>Euclidean</th></tr>
+        <tr><td>[1, 1]</td><td>0.9487</td><td>1.0</td></tr>
+        <tr><td>[3, 2]</td><td>0.8682</td><td class="win">2.0</td></tr>
+        <tr><td>[5, 6]</td><td class="win">0.9734</td><td>5.657</td></tr>
+      </table>
+      <p class="note" style="margin-bottom:0">Among the array, cosine picks <strong>[5, 6]</strong> (same-ish direction) while Euclidean picks <strong>[3, 2]</strong> (physically nearer).</p>
+    </div>
+    <div class="card plot">
+      <svg id="vecPlot" viewBox="0 0 360 340" role="img" aria-label="Vectors v1, [1,1], [3,2] and [5,6] drawn from the origin"></svg>
+      <div class="ctl" style="margin-top:10px"><label for="kk">Stretch [5, 6] by <output id="kko"></output></label><input type="range" id="kk" min="0.2" max="1.6" step="0.05" value="1"></div>
+      <div id="kRead" style="font-size:14px"></div>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>Try the slider:</strong> shrinking or stretching [5, 6] along its own direction never changes its cosine similarity (the angle is the same), but its Euclidean distance changes a lot, and at around 0.5 it overtakes [3, 2]. Cosine ignores length; Euclidean doesn’t.</p>
+  </div>
+</section>
+
+<section>
+  <h2>3. The embedding model</h2>
+  <div class="two">
+    <div class="card">
+      <h3>BAAI/bge-base-en-v1.5</h3>
+      <div class="dims"><div class="big">768</div><div style="font-size:14.5px">dimensions per vector. A transformer-based model that embeds whole sentences into a fixed-size vector, trained on millions of samples to group semantically related text.</div></div>
+    </div>
+    <div class="card">
+<pre><code>from sentence_transformers import SentenceTransformer
+model = SentenceTransformer(path_to_model)
+
+model.encode("RAG is awesome").shape     # (768,)
+model.encode(['apple', 'car'])           # shape (2, 768)</code></pre>
+      <p class="note" style="margin:0">One string gives one vector; a list of strings gives one row per string.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>4. Meaning in action: words compared to “apple”</h2>
+  <p class="sub">Six words embedded, then compared with “apple” using both metrics.</p>
+  <div class="two">
+    <div class="card"><h3 style="color:var(--teal)">Cosine similarity (higher = closer)</h3><div class="bars" id="barsCos"></div></div>
+    <div class="card"><h3 style="color:var(--coral)">Euclidean distance (lower = closer)</h3><div class="bars" id="barsEuc"></div></div>
+  </div>
+  <p class="note">“fruit” is closest to “apple” on both metrics, and “automobile” sits nearer than “car” does here, which shows embeddings are statistical, not dictionary-like.</p>
+
+  <div class="card" style="margin-top:16px">
+    <h3>A pattern hiding in the numbers</h3>
+    <p style="font-size:14.5px">The two columns above are not independent. If vectors are scaled to unit length, then <strong>distance² = 2 − 2 × cosine</strong>. The lab’s outputs match that formula exactly:</p>
+    <div class="scroll-x"><table id="normTbl" style="min-width:460px"></table></div>
+    <p class="note" style="margin-bottom:0">So for this model, cosine and Euclidean always give the <strong>same ranking</strong> (just reversed in direction). That’s why the travel example below sorts identically under both. (The model’s outputs appear normalized, judging by this match; I’m inferring that from the numbers rather than from the notebook text.)</p>
+  </div>
+</section>
+
+<section>
+  <h2>5. Retrieval in practice: <code>retrieve_relevant</code></h2>
+  <div class="card">
+    <div class="flow">
+      <div class="s"><b>Encode</b>Embed the query and all documents.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s"><b>Score</b>Cosine or Euclidean for each document.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s hot"><b>Sort</b>Descending for cosine, ascending for Euclidean.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:22px">Travel example: “Suggest to me great places to visit in Asia.”</h3>
+  <div class="two">
+    <div class="card scroll-x">
+      <table style="min-width:420px">
+        <tr><th>#</th><th>Document</th><th>Cosine</th><th>Euclid.</th></tr>
+        <tr><td>1</td><td>Great Wall of China (winter)</td><td>0.608</td><td>0.885</td></tr>
+        <tr><td>2</td><td>Mt. Fuji (autumn)</td><td>0.582</td><td>0.914</td></tr>
+        <tr><td>3</td><td>The Maldives (summer)</td><td>0.560</td><td>0.938</td></tr>
+        <tr><td>4</td><td>Santorini (spring)</td><td>0.551</td><td>0.947</td></tr>
+        <tr><td>5</td><td>Banff National Park (summer)</td><td>0.522</td><td>0.978</td></tr>
+        <tr><td>6</td><td>Kyoto’s cherry blossoms (spring)</td><td>0.515</td><td>0.985</td></tr>
+      </table>
+      <p class="note" style="margin-bottom:0">The notebook output shows the rest of the list truncated; only these six rows are visible. Both metrics give the same order.</p>
+    </div>
+    <div class="card">
+      <h3>Surprise: Kyoto ranks only 6th</h3>
+      <p style="font-size:14.5px">Kyoto is clearly in Asia, yet Santorini and Banff outrank it. The lab’s explanation: embedding models capture similarity from <strong>contexts where words co-occur in training data</strong>, so generic “places to visit” sentences can be strongly associated with other famous destinations. The model matches the <em>shape of the sentence</em> as well as the place name.</p>
+      <div class="callout teal" style="margin-bottom:0"><p><strong>Takeaway:</strong> semantic search is powerful but fuzzy. For a precise requirement like “only Asia”, pair it with keyword search or metadata filtering (hybrid search).</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>6. Visualizing 768 dimensions with PCA</h2>
+  <div class="card">
+    <p style="margin:0">A 768-dimensional vector can’t be drawn, so the lab uses <strong>PCA (Principal Component Analysis)</strong> to squash vectors down to <strong>two dimensions</strong> and plot them. An interactive widget (<code>display_widget(model)</code>) lets you type words or sentences and see where they land. Because PCA throws information away, treat the picture as a rough guide to which items cluster, not an exact copy of the 768-D distances.</p>
+  </div>
+</section>
+
+<section>
+  <h2>7. The input-size trap</h2>
+  <div class="card">
+    <p>Embedding models can only read a limited amount of text. Anything beyond the limit is <strong>truncated and completely ignored</strong>, so meaning in the cut-off part never reaches the vector.</p>
+    <div class="trunc" aria-label="Diagram: the first 512 tokens are embedded, the rest is lost"><div class="kept">first 512 tokens: embedded</div><div class="lost">the rest: ignored</div></div>
+    <ul style="margin:0 0 0 18px;font-size:14.5px">
+      <li>The lab loads a text of <strong>3,955 characters</strong> and embeds it twice: the whole text, and only its first 3,000 characters.</li>
+      <li>Per the notebook, the two vectors are <strong>identical</strong>, not a single element different. This model’s context window is <strong>512 tokens</strong>.</li>
+      <li>The fix comes in later modules (handling large texts, for example by splitting them into chunks).</li>
+    </ul>
+  </div>
+  <div class="callout">
+    <p><strong>Real-life scenario:</strong> a 40-page policy PDF embedded as one block. A rule on page 30 never influences its vector, so a prompt about that rule can’t find the document. Chunking the PDF so each piece fits the limit avoids this.</p>
+  </div>
+</section>
+
+<!-- CODE -->
+<section>
+  <h2>Making the shape handling consistent</h2>
+  <p class="sub">An optional improvement: share one validation helper so both metrics fail the same friendly way.</p>
+<pre><code>def _as_matrix(v1, vectors):
+    v1 = np.asarray(v1, dtype=float)
+    M = np.atleast_2d(np.asarray(vectors, dtype=float))   # one vector or many
+    if M.shape[1] != v1.shape[0]:
+        raise ValueError(f"Shapes don't match: v1 {v1.shape}, vectors {M.shape}")
+    return v1, M
+
+def cosine_similarity(v1, vectors):
+    v1, M = _as_matrix(v1, vectors)
+    return (M @ v1 / (np.linalg.norm(M, axis=1) * np.linalg.norm(v1))).tolist()
+
+def euclidean_distance(v1, vectors):
+    v1, M = _as_matrix(v1, vectors)
+    return np.linalg.norm(M - v1, axis=1).tolist()</code></pre>
+  <p class="note">Not part of the lab. It rejects the silent-broadcast cases above for both metrics and avoids the Python loop.</p>
+</section>
+
+<section>
+  <h2>Alternatives and trade-offs</h2>
+  <div class="cmp">
+    <div class="card">
+      <h3>Explicit shape check (lab’s Euclidean)</h3>
+      <div class="pro-t">Pros</div><ul><li>Catches silent broadcasting bugs</li><li>Clear error message with both shapes</li></ul>
+      <div class="con-t">Cons</div><ul><li>Extra code to maintain</li><li>Applied to only one function, so behavior is inconsistent</li></ul>
+    </div>
+    <div class="card">
+      <h3>Rely on NumPy errors (lab’s cosine)</h3>
+      <div class="pro-t">Pros</div><ul><li>Minimal code</li><li><code>np.dot</code> already rejects mismatched 1-D vectors</li></ul>
+      <div class="con-t">Cons</div><ul><li>Less friendly message</li><li>Edge cases (scalars, higher dimensions) slip through</li></ul>
+    </div>
+    <div class="card" style="border:2px solid var(--green)">
+      <h3>Shared validation helper</h3>
+      <div class="pro-t">Pros</div><ul><li>Same protection for every metric</li><li>Easy to vectorize</li></ul>
+      <div class="con-t">Cons</div><ul><li>Slightly more setup</li></ul>
+    </div>
+    <div class="card">
+      <h3>Library functions (SciPy, scikit-learn)</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:6px">The lab says later assignments import from specialized libraries.</p>
+      <div class="pro-t">Pros</div><ul><li>Tested, optimized, handles batches</li></ul>
+      <div class="con-t">Cons</div><ul><li>Conventions differ (some return cosine <em>distance</em>, not similarity), so check the docs before ranking</li></ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Key takeaways</h2>
+  <ul class="take">
+    <li><strong>Your question:</strong> Euclidean needs an explicit shape check because <code>v1 - v2</code> broadcasts silently; cosine is guarded by <code>np.dot</code>, which errors on mismatched lengths.</li>
+    <li>Cosine = angle (higher is closer). Euclidean = straight-line distance (lower is closer). They can disagree on raw vectors, but on unit-length embeddings they rank identically.</li>
+    <li>The model <code>BAAI/bge-base-en-v1.5</code> maps text to <strong>768-dim</strong> vectors; <code>encode</code> takes one string or a list.</li>
+    <li>Semantic search captures contextual similarity but can surprise you (Kyoto ranked 6th), which is why hybrid search exists.</li>
+    <li>PCA reduces 768 dimensions to 2 for visualization, at the cost of some distortion.</li>
+    <li>The model reads only <strong>512 tokens</strong>; anything beyond is ignored, so long documents need chunking.</li>
+  </ul>
+  <footer>Based on C1M2_Ungraded_Lab_1.ipynb (DeepLearning.AI RAG course). Behavior examples were run in NumPy to verify them. The widget’s PCA output isn’t included in the notebook file, so its description comes from the notebook’s text.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  var NS="http://www.w3.org/2000/svg";
+  function se(tag,attrs,cls){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(cls)e.setAttribute("class",cls);return e;}
+
+  /* scenarios */
+  var SC={
+    same:{title:"v1 = [1, 2], v2 = [1, 1]",
+      eu_no:["1.0","tag ok","correct"],eu_ck:["1.0","tag ok","check passes"],cos:["0.9487","tag ok","np.dot works"],
+      why_no:"Shapes match, so nothing special happens.",why_ck:"Check passes silently.",why_cos:"Length-2 dot length-2."},
+    len1:{title:"v1 = [1, 2], v2 = [1]",
+      eu_no:["1.0","tag bad","silently wrong"],eu_ck:["ValueError: Shapes don't match: v1 shape: (2,), v2 shape: (1,)","tag ok","caught clearly"],cos:["ValueError: shapes (2,) and (1,) not aligned","tag ok","caught by NumPy"],
+      why_no:"[1] is broadcast to [1, 1], giving a result without any warning.",why_ck:"The explicit check stops it and reports both shapes.",why_cos:"np.dot refuses mismatched lengths on its own."},
+    col:{title:"Raw NumPy operations on v1 = [1, 2] (shape (2,)) and a column array of shape (2, 1)",
+      eu_no:["subtraction gives a (2, 2) matrix; the sum becomes a meaningless scalar","tag bad","silently wrong"],eu_ck:["ValueError (shapes (2,) vs (2, 1))","tag ok","caught clearly"],cos:["np.dot of (2,) and (2, 1) runs and returns a 1-element array; float() conversion then needs care","tag neu","edge case"],
+      why_no:"Broadcasting expands both arrays into a grid.",why_ck:"Shapes differ, so the check raises.",why_cos:"Different kind of mismatch: it may not error, so the lab’s cosine isn’t fully protected for odd shapes."},
+    len3:{title:"v1 = [1, 2], v2 = [1, 2, 3]",
+      eu_no:["Error (cannot broadcast length 2 with 3)","tag ok","caught by NumPy"],eu_ck:["ValueError: Shapes don't match: v1 shape: (2,), v2 shape: (3,)","tag ok","caught clearly"],cos:["ValueError: shapes (2,) and (3,) not aligned","tag ok","caught by NumPy"],
+      why_no:"Lengths 2 and 3 can’t be broadcast, so NumPy raises anyway.",why_ck:"Friendlier, more explicit message.",why_cos:"Same: NumPy raises."}
+  };
+  function showScen(key){
+    var s=SC[key];var box=$("scen");box.innerHTML="";
+    var cols=[
+      ["Euclidean, without check",s.eu_no,s.why_no],
+      ["Euclidean, with the lab’s check",s.eu_ck,s.why_ck],
+      ["Cosine (np.dot)",s.cos,s.why_cos]
+    ];
+    var head=el("div","col");head.style.gridColumn="1 / -1";head.appendChild(el("h3",null,s.title));box.appendChild(head);
+    cols.forEach(function(c){
+      var d=el("div","col");
+      d.appendChild(el("h3",null,c[0]));
+      d.appendChild(el("div","out",c[1][0]));
+      var t=el("span",c[1][1]);t.className=c[1][1];t.textContent=c[1][2];d.appendChild(t);
+      d.appendChild(el("p","why",c[2]));
+      box.appendChild(d);
+    });
+  }
+  var seg=$("scSeg");
+  seg.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+    Array.prototype.forEach.call(seg.children,function(x){x.setAttribute("aria-pressed","false");});
+    b.setAttribute("aria-pressed","true");showScen(b.getAttribute("data-s"));});
+  showScen("len1");
+
+  /* vector plot */
+  function cosv(a,b){return (a[0]*b[0]+a[1]*b[1])/(Math.hypot(a[0],a[1])*Math.hypot(b[0],b[1]));}
+  function eucv(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+  function plot(){
+    var k=parseFloat($("kk").value);$("kko").textContent=k.toFixed(2)+"x";
+    var v1=[1,2],c=[1,1],a=[3,2],b=[5*k,6*k];
+    var svg=$("vecPlot");svg.innerHTML="";
+    var ox=40,oy=300,s=40;
+    function X(x){return ox+x*s;} function Y(y){return oy-y*s;}
+    for(var g=0;g<=7;g++){
+      svg.appendChild(se("line",{x1:X(g),x2:X(g),y1:oy,y2:20},"gr"));
+      svg.appendChild(se("line",{x1:ox,x2:X(7.5),y1:Y(g),y2:Y(g)},"gr"));
+      var t=se("text",{x:X(g),y:oy+16,"text-anchor":"middle"},"mut");t.textContent=g;svg.appendChild(t);
+      var t2=se("text",{x:ox-8,y:Y(g)+4,"text-anchor":"end"},"mut");t2.textContent=g;svg.appendChild(t2);
+    }
+    svg.appendChild(se("line",{x1:ox,x2:X(7.5),y1:oy,y2:oy},"ax"));svg.appendChild(se("line",{x1:ox,x2:ox,y1:oy,y2:20},"ax"));
+    var items=[[v1,"var(--teal)","v1"],[c,"var(--slate)","[1,1]"],[a,"var(--coral)","[3,2]"],[b,"var(--violet)","[5,6]"]];
+    items.forEach(function(it){
+      var p=it[0];
+      svg.appendChild(se("line",{x1:X(0),y1:Y(0),x2:X(p[0]),y2:Y(p[1]),stroke:it[1],"stroke-width":it[2]==="v1"?4:2.5}));
+      svg.appendChild(se("circle",{cx:X(p[0]),cy:Y(p[1]),r:5,fill:it[1]}));
+      var t=se("text",{x:X(p[0])+8,y:Y(p[1])-6},"tx");t.textContent=it[2];svg.appendChild(t);
+    });
+    var rows=[["[1, 1]",c],["[3, 2]",a],["[5, 6] stretched",b]];
+    var bestC=-9,bestE=1e9,iC=0,iE=0;
+    rows.forEach(function(r,i){var cs=cosv(v1,r[1]),ed=eucv(v1,r[1]);if(cs>bestC){bestC=cs;iC=i;}if(ed<bestE){bestE=ed;iE=i;}r.push(cs,ed);});
+    var h="<table><tr><th>Vector</th><th>Cosine</th><th>Euclidean</th></tr>";
+    rows.forEach(function(r,i){h+="<tr><td>"+r[0]+"</td><td"+(i===iC?" class=\"win\"":"")+">"+r[2].toFixed(4)+"</td><td"+(i===iE?" class=\"win\"":"")+">"+r[3].toFixed(3)+"</td></tr>";});
+    h+="</table><p class=\"note\" style=\"margin-bottom:0\">Green = closest to v1 by that metric.</p>";
+    $("kRead").innerHTML=h;
+  }
+  $("kk").addEventListener("input",plot);plot();
+
+  /* word bars */
+  var words=["apple","car","fruit","automobile","love","sentiment"];
+  var cs=[1.0,0.5749,0.7461,0.6485,0.5540,0.5020];
+  var ed=[0.0,0.9221,0.7126,0.8384,0.9445,0.9980];
+  function bars(id,vals,cls,fmt,max){
+    var box=$(id);
+    words.forEach(function(w,i){
+      var r=el("div","b");r.appendChild(el("span",null,w));
+      var t=el("span","t");var f=el("i",cls);f.style.width=(vals[i]/max*100)+"%";t.appendChild(f);r.appendChild(t);
+      r.appendChild(el("span",null,fmt(vals[i])));box.appendChild(r);
+    });
+  }
+  bars("barsCos",cs,"tealf",function(v){return v.toFixed(4);},1);
+  bars("barsEuc",ed,"coralf",function(v){return v.toFixed(4);},1);
+
+  /* norm table */
+  var tb=$("normTbl");
+  var hr=document.createElement("tr");["Word vs apple","Cosine (lab)","Euclidean (lab)","√(2 − 2 × cosine)"].forEach(function(h){hr.appendChild(el("th",null,h));});tb.appendChild(hr);
+  words.forEach(function(w,i){
+    var tr=document.createElement("tr");
+    tr.appendChild(el("td",null,w));tr.appendChild(el("td",null,cs[i].toFixed(4)));tr.appendChild(el("td",null,ed[i].toFixed(4)));
+    tr.appendChild(el("td",null,Math.sqrt(Math.max(0,2-2*cs[i])).toFixed(4)));tb.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

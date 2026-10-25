@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Embedding model deep dive: visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6; --violet:#7a5bbf; --violet-soft:#ebe4f8; --cell:#e6ebf8; --on:#fff;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a; --violet:#b39af0; --violet-soft:#2b2445; --cell:#232c3e; --on:#10151f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a; --violet:#b39af0; --violet-soft:#2b2445; --cell:#232c3e; --on:#10151f;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:62ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:68ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout.green{border-color:var(--green);background:var(--green-soft);}
+.callout p:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+/* pairs */
+.pair{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:12px 0;}
+.pair .b{background:var(--slate-soft);border-radius:12px;padding:12px 14px;text-align:center;font-weight:600;font-size:15px;}
+.pair .mv{font-size:22px;font-weight:700;white-space:nowrap;}
+.pos{border-top:5px solid var(--green);} .neg{border-top:5px solid var(--coral);}
+.pos .mv{color:var(--green);} .neg .mv{color:var(--coral);}
+@media (max-width:560px){.pair{grid-template-columns:1fr;}.pair .mv{text-align:center;}}
+/* loop */
+.loop{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.loop .s{background:var(--coral);color:var(--on);border-radius:12px;padding:10px 20px;font-weight:600;}
+.loop svg{width:20px;height:20px;color:var(--slate);}
+.loop .rep{flex-basis:100%;text-align:center;color:var(--muted);font-size:14px;margin-top:6px;}
+/* steps */
+.timeline{display:grid;gap:12px;}
+.tl{display:grid;grid-template-columns:44px 1fr;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.tl .n{width:40px;height:40px;border-radius:50%;background:var(--coral);color:var(--on);display:grid;place-items:center;font-weight:600;}
+.tl p{margin:0;color:var(--muted);font-size:14.5px;}
+.tl strong{color:var(--ink);}
+/* anchor panels */
+.anch{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.anch svg{width:100%;height:auto;display:block;background:var(--surface);border-radius:12px;border:1px solid var(--line);}
+.anch h3{font-size:15px;}
+.anch p{font-size:13.5px;color:var(--muted);margin:6px 0 0;}
+.keyrow{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;margin:10px 0 0;}
+.keyrow span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c);}
+/* plot */
+.plot svg{width:100%;height:auto;display:block;background:var(--surface);border-radius:12px;border:1px solid var(--line);}
+.plot .ax{stroke:var(--line);stroke-width:1.5;}
+.plot .gr{stroke:var(--line);stroke-width:1;opacity:.5;}
+.plot .tx{fill:var(--ink);font-size:10.5px;text-anchor:middle;font-family:'Poppins',system-ui,sans-serif;font-weight:500;}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface);}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;}
+.btns button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 16px;border-radius:999px;cursor:pointer;}
+.btns button.pri{background:var(--coral);border-color:var(--coral);color:var(--on);font-weight:600;}
+.btns button:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+.read{display:grid;gap:8px;}
+.read .r{display:flex;justify-content:space-between;gap:10px;background:var(--slate-soft);border-radius:10px;padding:8px 14px;font-size:14.5px;}
+.read .r b{color:var(--ink);}
+.meter{height:10px;border-radius:6px;background:var(--cell);overflow:hidden;margin-top:6px;}
+.meter i{display:block;height:100%;background:var(--green);border-radius:6px;transition:width .2s;}
+.note{font-size:13.5px;color:var(--muted);margin-top:10px;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+th{font-weight:600;color:var(--slate);}
+td.bad{color:var(--coral);font-weight:600;} td.ok{color:var(--green);font-weight:600;}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro-t{color:var(--green);font-weight:600;font-size:13.5px;}
+.con-t{color:var(--coral);font-weight:600;font-size:13.5px;}
+.take{display:grid;gap:10px;padding:0;margin:0;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev" viewBox="0 0 16 16"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Information retrieval foundations</span>
+    <span class="chip teal">Lesson: embedding model deep dive</span>
+  </div>
+  <h1>How embedding models learn meaning</h1>
+  <p class="lede">An embedding model must put similar text at nearby vectors and dissimilar text far apart. It learns this by being pushed and pulled, over and over, using pairs of texts that are labelled similar or dissimilar.</p>
+</header>
+
+<!-- 1 -->
+<section>
+  <h2>The job, in terms of pairs</h2>
+  <p class="sub">How could a computer possibly understand the meaning of a piece of text? The model never “understands” directly. It’s judged on whether it places pairs correctly.</p>
+  <div class="two">
+    <div class="card pos">
+      <h3>Positive pair</h3>
+      <p style="font-size:14.5px">Two pieces of similar text. They should be embedded <strong>close together</strong>.</p>
+      <div class="pair"><div class="b">Good morning</div><div class="mv">→ ←</div><div class="b">Hello</div></div>
+    </div>
+    <div class="card neg">
+      <h3>Negative pair</h3>
+      <p style="font-size:14.5px">Two pieces of dissimilar meaning. They should be embedded <strong>farther apart</strong>.</p>
+      <div class="pair"><div class="b">Good morning</div><div class="mv">← →</div><div class="b">That’s a noisy trombone</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>Training, step by step</h2>
+  <div class="timeline">
+    <div class="tl"><div class="n">1</div><div><strong>Compile a huge set of positive and negative pairs (“examples”).</strong><p>Often multi-millions of pairs. Each word or text appears in many examples, to capture its relationship to a wide variety of texts and concepts.</p></div></div>
+    <div class="tl"><div class="n">2</div><div><strong>Start from random vectors.</strong><p>At the beginning, every text is embedded to a random vector: nonsense with no relation to meaning. Used for retrieval, an untrained model gives gibberish.</p></div></div>
+    <div class="tl"><div class="n">3</div><div><strong>Score the placements.</strong><p>The model checks all the pairs: how well did I place positives together and negatives apart? Because it uses the <em>contrast</em> between positive and negative examples to evaluate itself, this is called <strong>contrastive training</strong>.</p></div></div>
+    <div class="tl"><div class="n">4</div><div><strong>Update internal parameters.</strong><p>An algorithm adjusts the parameters to move positive pairs closer and negative pairs farther apart.</p></div></div>
+    <div class="tl"><div class="n">5</div><div><strong>Repeat many times.</strong><p>Re-embed with the updated parameters, evaluate again, update again. After many rounds positives are pulled close and negatives pushed far apart.</p></div></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="loop">
+      <span class="s">Embed</span><svg><use href="#chev"/></svg><span class="s">Score with pairs</span><svg><use href="#chev"/></svg><span class="s">Update parameters</span><svg><use href="#chev"/></svg><span class="s">Evaluate</span>
+      <div class="rep">repeat many times, improving the model each round</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>One piece of text’s point of view</h2>
+  <p class="sub">The anchor <em>“He could smell the roses”</em> has a positive partner <em>“A field of fragrant flowers”</em> and a negative partner <em>“The lion roared majestically”</em>.</p>
+  <div class="card">
+    <div class="anch" id="anch"></div>
+    <div class="keyrow"><span style="--c:var(--teal)">anchor: “He could smell the roses”</span><span style="--c:var(--coral)">positive: “A field of fragrant flowers”</span><span style="--c:var(--violet)">negative: “The lion roared majestically”</span></div>
+    <p class="note">Dashed arrows: green pulls toward the anchor, violet pushes away. Positions are illustrative.</p>
+  </div>
+  <div class="callout">
+    <p><strong>At real scale it gets messy.</strong> You’d never train on just two pairs. With millions of anchors, positives and negatives, every vector is pushed and pulled in many directions at once. That’s why models use <strong>hundreds or thousands of dimensions</strong>: more room to satisfy nuanced relationships.</p>
+  </div>
+</section>
+
+<!-- 4 TRAIN SIM -->
+<section>
+  <h2>Try it: train a toy embedding model</h2>
+  <p class="sub">Nine phrases start at random 2D positions. Pairs from the same topic are positives (pulled together); pairs from different topics are negatives (pushed apart). This is a drastically simplified stand-in for real training, but it shows the same push and pull.</p>
+  <div class="card">
+    <div class="btns">
+      <button type="button" class="pri" id="bStep">Train 1 round</button>
+      <button type="button" id="b10">Train 10 rounds</button>
+      <button type="button" id="b50">Train 50 rounds</button>
+      <button type="button" id="bPlay" aria-pressed="false">Play</button>
+      <button type="button" id="bReset">Reset same start</button>
+      <button type="button" id="bNew">New random start</button>
+    </div>
+    <div class="two">
+      <div class="plot"><svg id="trainSvg" viewBox="0 0 480 400" role="img" aria-label="Toy embedding space with nine phrases being pulled into topic clusters"></svg>
+        <div class="keyrow"><span style="--c:var(--coral)">flowers</span><span style="--c:var(--violet)">lions</span><span style="--c:var(--teal)">music</span></div>
+      </div>
+      <div>
+        <div class="read">
+          <div class="r"><span>Training rounds</span><b id="mRounds">0</b></div>
+          <div class="r"><span>Avg distance, positive pairs</span><b id="mPos"></b></div>
+          <div class="r"><span>Avg distance, negative pairs</span><b id="mNeg"></b></div>
+          <div class="r"><span>Positives closer than negatives</span><b id="mOrd"></b></div>
+        </div>
+        <div class="meter" aria-hidden="true"><i id="mBar" style="width:0%"></i></div>
+        <p class="note" id="trainNote"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout teal">
+    <p><strong>Same clusters, different places.</strong> Press “New random start” and train again. The three topic clusters form every time, but they land in different locations. A spot in the space only means something because a cluster of similar concepts formed there.</p>
+  </div>
+</section>
+
+<!-- 5 CROSS MODEL -->
+<section>
+  <h2>Why you never mix vectors from different models</h2>
+  <p class="sub">Each model has different training data, a different number of dimensions, and different random starting values. Comparing vectors from two models is nonsense. Here’s a toy proof: train “Model A” in the lab above, then train a second model on the same data from a different random start.</p>
+  <div class="card">
+    <div class="btns"><button type="button" class="pri" id="bCross">Train Model B and compare</button></div>
+    <div class="scroll-x"><table id="crossTbl" style="min-width:480px"></table></div>
+    <p class="note" id="crossNote">Train Model A in the lab first (50+ rounds), then press the button.</p>
+  </div>
+  <div class="callout amber">
+    <p><strong>Practical consequence (my addition):</strong> if you ever switch embedding models, you must re-embed your whole knowledge base with the new model, and embed prompts with that same model, or the distances are meaningless.</p>
+  </div>
+</section>
+
+<!-- 6 TAKEAWAYS -->
+<section>
+  <h2>Key takeaways from the lesson</h2>
+  <div class="three">
+    <div class="card"><h3>Abstract and somewhat random</h3><p style="margin:0;font-size:14.5px">Semantic vectors don’t have human-readable axes. Before training, locations in space have no meaning.</p></div>
+    <div class="card"><h3>Meaning comes from clusters</h3><p style="margin:0;font-size:14.5px">After training, a location is meaningful only because a cluster of similar concepts formed there (a lion cluster, a trombone cluster).</p></div>
+    <div class="card"><h3>Only compare within one model</h3><p style="margin:0;font-size:14.5px">Different training data, dimensions and random initial values make cross-model comparisons nonsense.</p></div>
+  </div>
+  <div class="callout green">
+    <p><strong>In practice:</strong> you don’t need to train an embedding model to build a RAG system. You’ll likely use off-the-shelf models, which do a remarkably good job placing similar words, sentences or documents together, and you probably won’t implement the distance measures yourself. Understanding the training just helps you reason about how to use them.</p>
+  </div>
+</section>
+
+<!-- 7 CODE -->
+<section>
+  <h2>The toy trainer in plain Python</h2>
+  <p class="sub">The same push and pull used in the lab, for intuition only. Real models adjust neural-network parameters, not the vectors directly.</p>
+<pre><code>import math, random
+
+def train_round(vecs, positives, negatives, lr=0.08, margin=5.0):
+    move = [[0.0, 0.0] for _ in vecs]
+    for i, j in positives:                      # pull similar pairs together
+        for k in range(2):
+            d = vecs[j][k] - vecs[i][k]
+            move[i][k] += lr * d
+            move[j][k] -= lr * d
+    for i, j in negatives:                      # push dissimilar pairs apart
+        dx, dy = vecs[j][0] - vecs[i][0], vecs[j][1] - vecs[i][1]
+        dist = math.hypot(dx, dy) or 1e-6
+        if dist &lt; margin:
+            push = (margin - dist) * lr * 0.5
+            move[i][0] -= dx / dist * push; move[i][1] -= dy / dist * push
+            move[j][0] += dx / dist * push; move[j][1] += dy / dist * push
+    for v, m in zip(vecs, move):
+        v[0] += m[0]; v[1] += m[1]
+
+vecs = [[random.uniform(-5, 5), random.uniform(-5, 5)] for _ in range(9)]  # random start
+for _ in range(100):
+    train_round(vecs, positives, negatives)</code></pre>
+  <div class="callout amber">
+    <p><strong>For real projects:</strong> use an existing embedding model rather than training one. If you do want to fine-tune on your own pairs, check the current documentation of the library you choose, since training APIs change quickly. I haven’t verified any specific library’s current API here.</p>
+  </div>
+</section>
+
+<!-- 8 ALTERNATIVES -->
+<section>
+  <h2>Alternatives and trade-offs</h2>
+  <p class="sub">The lesson’s advice is to use off-the-shelf models. Here’s how the options compare (the last two go beyond the lesson).</p>
+  <div class="cmp">
+    <div class="card" style="border:2px solid var(--green)">
+      <h3>Off-the-shelf embedding model</h3>
+      <div class="pro-t">Pros</div><ul><li>No training data or compute needed</li><li>Works remarkably well for general text</li></ul>
+      <div class="con-t">Cons</div><ul><li>May miss niche jargon in your domain</li></ul>
+    </div>
+    <div class="card">
+      <h3>Fine-tune on your own pairs</h3>
+      <div class="pro-t">Pros</div><ul><li>Adapts to domain vocabulary (for example your product terms)</li></ul>
+      <div class="con-t">Cons</div><ul><li>Needs good positive and negative pairs and evaluation; must re-embed everything afterwards</li></ul>
+    </div>
+    <div class="card">
+      <h3>Train from scratch</h3>
+      <div class="pro-t">Pros</div><ul><li>Full control over data and dimensions</li></ul>
+      <div class="con-t">Cons</div><ul><li>Multi-million example datasets and serious compute: rarely worth it for a RAG system</li></ul>
+    </div>
+    <div class="card">
+      <h3>Hybrid search around it</h3>
+      <div class="pro-t">Pros</div><ul><li>Keyword search covers exact terms the model blurs</li></ul>
+      <div class="con-t">Cons</div><ul><li>More components to tune (next lessons)</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section>
+  <h2>Summary in six lines</h2>
+  <ul class="take">
+    <li>An embedding model’s job: similar text to nearby vectors, dissimilar text to distant vectors.</li>
+    <li>It learns from massive collections of <strong>positive and negative pairs</strong>.</li>
+    <li>Training starts from <strong>random vectors</strong>, then loops: embed, score with the pairs, update parameters. This is <strong>contrastive training</strong>.</li>
+    <li>Each vector is pushed and pulled by many pairs at once, which is why models use hundreds or thousands of dimensions.</li>
+    <li>Afterwards, locations have meaning only because <strong>clusters of similar concepts</strong> formed there; rerunning training puts the same clusters in different places.</li>
+    <li>Only compare vectors from the <strong>same embedding model</strong>. Next: using these dense vectors in your retriever.</li>
+  </ul>
+  <footer>Based on the Module 2 lesson transcript and slides (DeepLearning.AI, Zain Hasan). The transcript was pasted several times; it was used once. The toy trainer is an illustration, not how production models are implemented.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  var $=function(id){return document.getElementById(id);};
+  function se(tag,attrs,cls){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(cls)e.setAttribute("class",cls);return e;}
+  function tx(p,x,y,t,cls){var e=se("text",{x:x,y:y},cls||"tx");e.textContent=t;p.appendChild(e);return e;}
+
+  /* anchor panels */
+  (function(){
+    var box=$("anch");
+    var panels=[
+      {h:"Beginning of training",p:"Random positions, no reflection of meaning.",a:[110,90],pos:[60,170],neg:[170,150],arr:false},
+      {h:"Training",p:"Pull the positive in, push the negative away.",a:[110,100],pos:[85,140],neg:[190,160],arr:true},
+      {h:"After training",p:"Meaningful embeddings: positive close, negative far.",a:[80,110],pos:[96,118],neg:[200,50],arr:false}
+    ];
+    panels.forEach(function(P){
+      var d=document.createElement("div");
+      var h=document.createElement("h3");h.textContent=P.h;d.appendChild(h);
+      var svg=se("svg",{viewBox:"0 0 240 200",role:"img","aria-label":P.h});
+      var defs=se("defs",{});
+      [["g","var(--green)"],["v","var(--violet)"]].forEach(function(m){
+        var mk=se("marker",{id:"m"+m[0]+P.h.length,markerWidth:8,markerHeight:8,refX:6,refY:4,orient:"auto"});
+        mk.appendChild(se("path",{d:"M0,0 L8,4 L0,8 z",fill:m[1]}));defs.appendChild(mk);
+      });
+      svg.appendChild(defs);
+      svg.appendChild(se("line",{x1:10,x2:230,y1:100,y2:100,stroke:"var(--line)"}));
+      svg.appendChild(se("line",{x1:120,x2:120,y1:10,y2:190,stroke:"var(--line)"}));
+      if(P.arr){
+        svg.appendChild(se("line",{x1:P.pos[0],y1:P.pos[1],x2:P.a[0]-6,y2:P.a[1]+10,stroke:"var(--green)","stroke-width":2.5,"stroke-dasharray":"5 4","marker-end":"url(#mg"+P.h.length+")"}));
+        svg.appendChild(se("line",{x1:P.neg[0],y1:P.neg[1],x2:P.neg[0]+34,y2:P.neg[1]+22,stroke:"var(--violet)","stroke-width":2.5,"stroke-dasharray":"5 4","marker-end":"url(#mv"+P.h.length+")"}));
+      }
+      svg.appendChild(se("circle",{cx:P.a[0],cy:P.a[1],r:10,fill:"var(--teal)"}));
+      svg.appendChild(se("circle",{cx:P.pos[0],cy:P.pos[1],r:9,fill:"var(--coral)"}));
+      svg.appendChild(se("circle",{cx:P.neg[0],cy:P.neg[1],r:9,fill:"var(--violet)"}));
+      d.appendChild(svg);
+      var p=document.createElement("p");p.textContent=P.p;d.appendChild(p);
+      box.appendChild(d);
+    });
+  })();
+
+  /* toy trainer */
+  function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  var items=[
+    {s:"roses",g:0},{s:"flowers",g:0},{s:"tulips",g:0},
+    {s:"lion",g:1},{s:"tiger",g:1},{s:"lioness",g:1},
+    {s:"trombone",g:2},{s:"brass band",g:2},{s:"jazz horn",g:2}
+  ];
+  var gcol=["var(--coral)","var(--violet)","var(--teal)"];
+  var pos=[],neg=[];
+  for(var i=0;i<items.length;i++)for(var j=i+1;j<items.length;j++){(items[i].g===items[j].g?pos:neg).push([i,j]);}
+  function init(seed){var r=rng(seed);return items.map(function(){return [(r()*2-1)*5,(r()*2-1)*5];});}
+  function round(V){
+    var lr=0.08,margin=5,mv=V.map(function(){return [0,0];});
+    pos.forEach(function(p){var i=p[0],j=p[1];for(var k=0;k<2;k++){var d=V[j][k]-V[i][k];mv[i][k]+=lr*d;mv[j][k]-=lr*d;}});
+    neg.forEach(function(p){
+      var i=p[0],j=p[1],dx=V[j][0]-V[i][0],dy=V[j][1]-V[i][1],dist=Math.sqrt(dx*dx+dy*dy)||1e-6;
+      if(dist<margin){var push=(margin-dist)*lr*0.5,ux=dx/dist,uy=dy/dist;
+        mv[i][0]-=ux*push;mv[i][1]-=uy*push;mv[j][0]+=ux*push;mv[j][1]+=uy*push;}
+    });
+    V.forEach(function(v,i){v[0]+=mv[i][0];v[1]+=mv[i][1];});
+  }
+  function dist(a,b){var dx=a[0]-b[0],dy=a[1]-b[1];return Math.sqrt(dx*dx+dy*dy);}
+  function metrics(V){
+    var sp=0,sn=0;pos.forEach(function(p){sp+=dist(V[p[0]],V[p[1]]);});neg.forEach(function(p){sn+=dist(V[p[0]],V[p[1]]);});
+    var ok=0,tot=0;
+    for(var a=0;a<items.length;a++)for(var b=0;b<items.length;b++){
+      if(b===a||items[b].g!==items[a].g)continue;
+      for(var c=0;c<items.length;c++){
+        if(items[c].g===items[a].g)continue;
+        tot++;if(dist(V[a],V[b])<dist(V[a],V[c]))ok++;
+      }
+    }
+    return {p:sp/pos.length,n:sn/neg.length,o:ok/tot};
+  }
+  var seed=7,V=init(seed),rounds=0,timer=null;
+  function draw(){
+    var svg=$("trainSvg");svg.innerHTML="";
+    var cx=240,cy=200,k=22;
+    for(var g=-8;g<=8;g+=4){svg.appendChild(se("line",{x1:cx+g*k,x2:cx+g*k,y1:10,y2:390},"gr"));svg.appendChild(se("line",{x1:20,x2:460,y1:cy-g*k,y2:cy-g*k},"gr"));}
+    svg.appendChild(se("line",{x1:20,x2:460,y1:cy,y2:cy},"ax"));svg.appendChild(se("line",{x1:cx,x2:cx,y1:10,y2:390},"ax"));
+    function P(v){return [cx+Math.max(-9,Math.min(9,v[0]))*k,cy-Math.max(-8.5,Math.min(8.5,v[1]))*k];}
+    var a=P(V[0]),p=P(V[1]),n=P(V[3]);
+    svg.appendChild(se("line",{x1:a[0],y1:a[1],x2:p[0],y2:p[1],stroke:"var(--green)","stroke-width":2,"stroke-dasharray":"5 4"}));
+    svg.appendChild(se("line",{x1:a[0],y1:a[1],x2:n[0],y2:n[1],stroke:"var(--violet)","stroke-width":2,"stroke-dasharray":"5 4",opacity:.6}));
+    items.forEach(function(it,i){
+      var q=P(V[i]);
+      svg.appendChild(se("circle",{cx:q[0],cy:q[1],r:i===0?11:9,fill:gcol[it.g],stroke:i===0?"var(--ink)":"none","stroke-width":2.5}));
+      tx(svg,q[0],q[1]-15,it.s);
+    });
+    var m=metrics(V);
+    $("mRounds").textContent=rounds;
+    $("mPos").textContent=m.p.toFixed(2);
+    $("mNeg").textContent=m.n.toFixed(2);
+    $("mOrd").textContent=Math.round(m.o*100)+"%";
+    $("mBar").style.width=Math.round(m.o*100)+"%";
+    $("trainNote").textContent=rounds===0?"Random start: nonsense. Topics are mixed together and positives aren’t reliably closer than negatives. The anchor “roses” (outlined) has green dashed line to its positive “flowers” and violet dashed line to a negative, “lion”."
+      :m.o>0.98?"Trained: positive pairs sit close and negatives far. The topic clusters have formed."
+      :"Training in progress: pairs are being pulled together and pushed apart.";
+  }
+  function go(n){for(var i=0;i<n;i++){round(V);rounds++;}draw();}
+  function stop(){if(timer){clearInterval(timer);timer=null;$("bPlay").textContent="Play";$("bPlay").setAttribute("aria-pressed","false");}}
+  $("bStep").addEventListener("click",function(){stop();go(1);});
+  $("b10").addEventListener("click",function(){stop();go(10);});
+  $("b50").addEventListener("click",function(){stop();go(50);});
+  $("bReset").addEventListener("click",function(){stop();V=init(seed);rounds=0;draw();});
+  $("bNew").addEventListener("click",function(){stop();seed=Math.floor(Math.random()*100000)+1;V=init(seed);rounds=0;draw();});
+  $("bPlay").addEventListener("click",function(){
+    if(timer){stop();return;}
+    $("bPlay").textContent="Pause";$("bPlay").setAttribute("aria-pressed","true");
+    timer=setInterval(function(){go(1);if(rounds>=300)stop();},60);
+  });
+  draw();
+
+  /* cross-model */
+  $("bCross").addEventListener("click",function(){
+    stop();
+    var B=init(seed+9973);for(var i=0;i<300;i++)round(B);
+    var tbl=$("crossTbl");tbl.innerHTML="";
+    function row(cells,cls){var tr=document.createElement("tr");cells.forEach(function(c,i){var td=document.createElement(i===0&&!cls?"td":(cls==="h"?"th":"td"));td.textContent=c.t!==undefined?c.t:c;if(c.c)td.className=c.c;tr.appendChild(td);});tbl.appendChild(tr);}
+    row(["Distance between…","Value","Meaningful?"],"h");
+    var a=V,b=B;
+    row(["roses and flowers, inside Model A",dist(a[0],a[1]).toFixed(2),{t:"yes (same model)",c:"ok"}]);
+    row(["roses and lion, inside Model A",dist(a[0],a[3]).toFixed(2),{t:"yes (same model)",c:"ok"}]);
+    row(["roses and flowers, inside Model B",dist(b[0],b[1]).toFixed(2),{t:"yes (same model)",c:"ok"}]);
+    row(["roses and lion, inside Model B",dist(b[0],b[3]).toFixed(2),{t:"yes (same model)",c:"ok"}]);
+    row(["roses (A) and roses (B)",dist(a[0],b[0]).toFixed(2),{t:"no: arbitrary",c:"bad"}]);
+    row(["roses (A) and flowers (B)",dist(a[0],b[1]).toFixed(2),{t:"no: arbitrary",c:"bad"}]);
+    row(["roses (A) and lion (B)",dist(a[0],b[3]).toFixed(2),{t:"no: arbitrary",c:"bad"}]);
+    $("crossNote").textContent=(rounds<50?"Model A is barely trained, so its own numbers are weak too. Train it for 50+ rounds and try again. ":"")+
+      "The same text (“roses”) sits at unrelated places in the two models. Cross-model distances don’t reflect meaning at all; only distances inside one model do.";
+  });
+})();
+</script>
+</body>
+</html>
