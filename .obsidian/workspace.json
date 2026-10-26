@@ -4,31 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "d313d57be8388b12",
+        "id": "f4f30307d48c5aea",
         "type": "tabs",
         "children": [
           {
-            "id": "e8617e74971bdab5",
+            "id": "9f5f92c537d8fab5",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Personal/Me/Journal.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/1-Clustering/1-clustering-intro.html"
               },
-              "icon": "lucide-file",
-              "title": "Journal"
+              "icon": "code-glyph",
+              "title": "1-clustering-intro"
             }
           }
         ]
@@ -154,7 +142,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Personal/Me/Journal.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -189,18 +176,18 @@
   },
   "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/7-lab1-vector-embeddings.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/6-embedding-model-deepdive.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/5-semantic-search-intro.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/4-keyword-search-bm25.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/3-keyword-search-tfidf.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/3-keyword-search-bm25.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/2-metadata-filtering.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/1-retriever-architecture-overview.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/rag-m2-semantic-search-intro.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/rag-m2-retriever-architecture-overview.html",
-    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/rag-m2-metadata-filtering.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/2-Reccomender Sys Impl Details/10-mean-normalization-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/1-Clustering",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/1-Collaborative Filtering/6-collaborative-filtering-binary-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/2-Reccomender Sys Impl Details",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/2-Anamloy Detection/1-anomaly-detection-algorithm-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/1-Collaborative Filtering",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/2-Anamloy Detection/5-anomaly-vs-supervised-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/1-content-based-filtering-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/2-Anamloy Detection",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/2-deep-learning.html",
     "Personal/Me/Journal.md",
+    "Learning/AI&ML Engineering/Retrieval Augmented Generation/Advanced RAG/Module 2/7-lab1-vector-embeddings.html",
     "Learning/Portfolio/Coastal Research Work.md",
     "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md",
     "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
