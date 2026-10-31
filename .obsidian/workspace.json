@@ -11,10 +11,24 @@
             "id": "adbcd4eedc1427bc",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Learning/Robotics/Resoucres.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Resoucres"
             }
           }
         ]
@@ -182,8 +196,9 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "957dbb181bb46970",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
+    "Learning/System Design/Resources.md",
     "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/AI Patient Cosultant.md",
     "conflict-files-obsidian-git.md",
@@ -229,7 +244,6 @@
     "Learning/Interview Practice/Coastal Research/Schema Design.excalidraw.md",
     "Learning/Backend Engineering/Case Studies From Own Work/Chat App/Presence Heartbeat/architecture.md",
     "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/5-index vs Index Only.md",
-    "Learning/Database/Fundamentals of Database Engineering/2-Database-Indexing/4-keyvsNonKeyColumnIndex.excalidraw.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
