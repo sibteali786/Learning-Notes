@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OAuth 3 – Roles &amp; the Authorization Server</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--card:#171a23;--card2:#1d212c;--line:#2a2f3d;--text:#e6e8ee;--mute:#9aa1b2;
+--blue:#4d9fff;--orange:#ff9d4d;--green:#4ddb8f;--purple:#b48cff;--red:#ff5d6c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6;padding:40px 20px 80px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:Syne,sans-serif}
+h1{font-size:2.4rem;font-weight:800;letter-spacing:-.5px}
+h1 span{color:var(--purple)}
+.sub{color:var(--mute);margin:8px 0 28px}
+.label{display:flex;align-items:center;gap:10px;font-family:Syne,sans-serif;font-weight:700;font-size:1.15rem;margin:44px 0 16px}
+.label::before{content:"";width:5px;height:24px;border-radius:3px;background:var(--c,var(--blue))}
+.label small{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.7rem;color:var(--mute);margin-left:auto;text-transform:uppercase;letter-spacing:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.card h3{font-size:1rem;margin-bottom:8px}
+.card p,.card li{color:#c9cdd8;font-size:.93rem}
+.card ul{padding-left:18px;margin-top:6px}
+.pill{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.7rem;padding:2px 10px;border-radius:99px;border:1px solid;margin:0 6px 8px 0}
+.p-blue{color:var(--blue);border-color:var(--blue);background:#4d9fff14}
+.p-orange{color:var(--orange);border-color:var(--orange);background:#ff9d4d14}
+.p-green{color:var(--green);border-color:var(--green);background:#4ddb8f14}
+.p-purple{color:var(--purple);border-color:var(--purple);background:#b48cff14}
+.p-red{color:var(--red);border-color:var(--red);background:#ff5d6c14}
+code{font-family:'IBM Plex Mono',monospace;font-size:.82rem;background:#0b0d13;border:1px solid var(--line);padding:1px 6px;border-radius:5px;color:var(--orange)}
+pre{font-family:'IBM Plex Mono',monospace;font-size:.8rem;background:#0b0d13;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.7;margin-top:10px}
+.k{color:var(--purple)}.s{color:var(--green)}.c{color:#6b7385}.u{color:var(--blue)}.o{color:var(--orange)}
+.callout{border-left:4px solid var(--c,var(--orange));background:var(--card2);padding:14px 18px;border-radius:0 12px 12px 0;margin-top:16px;font-size:.93rem;color:#d4d8e2}
+.callout b{color:var(--c,var(--orange))}
+.cmp{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cmp>div{padding:14px 20px;border-bottom:1px solid var(--line);font-size:.9rem;color:#c9cdd8}
+.cmp>div:nth-last-child(-n+2){border-bottom:none}
+.cmp .h{font-family:Syne,sans-serif;font-weight:700;background:var(--card2)}
+.cmp>div:nth-child(odd){border-right:1px solid var(--line)}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:Inter,sans-serif}
+table{width:100%;border-collapse:collapse;font-size:.88rem;border:1px solid var(--line)}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);color:#c9cdd8;vertical-align:top}
+th{font-family:Syne,sans-serif;color:var(--text);background:var(--card2)}
+@media(max-width:600px){.cmp{grid-template-columns:1fr}.cmp>div:nth-child(odd){border-right:none}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="pill p-blue">OAuth · Lesson 3</span><span class="pill p-purple">Core Concepts</span>
+<h1>Roles &amp; the <span>Authorization Server</span></h1>
+<p class="sub">Recap: earlier lessons covered pre-OAuth API authentication. Now we introduce the role that makes OAuth work — the authorization server — and the vocabulary used throughout the spec.</p>
+
+<!-- 1 FOUR ROLES -->
+<div class="label" style="--c:var(--blue)">The Four Original Roles<small>in a typical "user accesses data" scenario</small></div>
+<div class="grid g4">
+<div class="card"><span class="pill p-blue">1</span><h3>User</h3><p>The person with the account.</p></div>
+<div class="card"><span class="pill p-orange">2</span><h3>Device</h3><p>Phone or browser the user is using. It either <b>runs</b> the app (mobile) or <b>accesses</b> it over the internet (browser).</p></div>
+<div class="card"><span class="pill p-green">3</span><h3>Application</h3><p>The software the user interacts with, making requests to the API.</p></div>
+<div class="card"><span class="pill p-purple">4</span><h3>API</h3><p>Where the <b>data lives</b>; the thing the application makes requests to.</p></div>
+</div>
+
+<!-- 2 SPEC TERMS -->
+<div class="label" style="--c:var(--orange)">Everyday Words → OAuth Spec Terms<small>technically more precise</small></div>
+<table>
+<tr><th>Everyday term</th><th>OAuth spec term</th></tr>
+<tr><td>User</td><td><span class="pill p-blue">Resource Owner</span></td></tr>
+<tr><td>Device (browser / phone)</td><td><span class="pill p-orange">User Agent</span></td></tr>
+<tr><td>Application</td><td><span class="pill p-green">OAuth Client</span></td></tr>
+<tr><td>API</td><td><span class="pill p-purple">Resource Server</span></td></tr>
+<tr><td><i>(new role)</i></td><td><span class="pill p-red">Authorization Server</span></td></tr>
+</table>
+<div class="callout" style="--c:var(--orange)"><b>Don't stress:</b> it's fine to use the casual and spec terms interchangeably in conversation.<br>
+<b>Watch out for "application":</b> people call mobile apps <i>and</i> APIs "applications". In the OAuth spec, "application" means <b>only the client</b> — the thing in the middle that accesses data at the API.</div>
+
+<!-- 3 OLD WAY -->
+<div class="label" style="--c:var(--red)">Previous Methods: Data Moves Directly Between Roles<small>the limitation</small></div>
+<div class="card">
+<p><b>Cookie-based authentication example:</b> the user types the password into their device → the device sends it to the web application → the application returns a <b>session cookie</b> → the device holds the cookie and sends it on future requests.</p>
+<p style="margin-top:8px">That's better than the application keeping the password and sending it on every request — <b>but we can do even better.</b></p>
+<div class="callout" style="--c:var(--red)"><b>The goal:</b> OAuth was meant to let <b>third-party apps</b> access a user's data. We don't want to hand passwords to random apps, so we need a way for the app to get "something like a session cookie" <b>without ever receiving the password</b>.</div>
+</div>
+
+<!-- 4 AUTH SERVER -->
+<div class="label" style="--c:var(--purple)">Enter the Authorization Server<small>the fifth role</small></div>
+<div class="card">
+<p><b>Job:</b> manage access to the API it protects. It does this by:</p>
+<ul>
+<li>getting the user to <b>log in at the authorization server</b></li>
+<li>creating an <b>access token</b></li>
+<li>giving that access token to the app</li>
+</ul>
+<p style="margin-top:8px">The app uses the access token to make API requests, so the API needs a way to <b>validate the token</b> — far better than APIs validating passwords directly.</p>
+</div>
+
+<div class="card" style="margin-top:16px">
+<svg viewBox="0 0 820 400" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4d9fff"/></marker>
+<marker id="o" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ff9d4d"/></marker>
+<marker id="p" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b48cff"/></marker>
+<marker id="g" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4ddb8f"/></marker>
+</defs>
+<!-- user -->
+<rect x="20" y="150" width="140" height="70" rx="12" fill="#1d212c" stroke="#4d9fff"/>
+<text x="90" y="180" fill="#4d9fff" text-anchor="middle" font-weight="700">User</text>
+<text x="90" y="200" fill="#9aa1b2" text-anchor="middle" font-size="11">Resource Owner</text>
+<!-- device -->
+<rect x="20" y="40" width="140" height="70" rx="12" fill="#1d212c" stroke="#ff9d4d"/>
+<text x="90" y="70" fill="#ff9d4d" text-anchor="middle" font-weight="700">Device</text>
+<text x="90" y="90" fill="#9aa1b2" text-anchor="middle" font-size="11">User Agent</text>
+<!-- client -->
+<rect x="330" y="40" width="160" height="70" rx="12" fill="#1d212c" stroke="#4ddb8f"/>
+<text x="410" y="70" fill="#4ddb8f" text-anchor="middle" font-weight="700">Application</text>
+<text x="410" y="90" fill="#9aa1b2" text-anchor="middle" font-size="11">OAuth Client</text>
+<!-- auth server -->
+<rect x="330" y="290" width="160" height="80" rx="12" fill="#1d212c" stroke="#ff5d6c" stroke-width="2"/>
+<text x="410" y="322" fill="#ff5d6c" text-anchor="middle" font-weight="700">Authorization</text>
+<text x="410" y="340" fill="#ff5d6c" text-anchor="middle" font-weight="700">Server</text>
+<text x="410" y="358" fill="#9aa1b2" text-anchor="middle" font-size="11">password lives here</text>
+<!-- resource server -->
+<rect x="650" y="40" width="150" height="70" rx="12" fill="#1d212c" stroke="#b48cff"/>
+<text x="725" y="70" fill="#b48cff" text-anchor="middle" font-weight="700">API</text>
+<text x="725" y="90" fill="#9aa1b2" text-anchor="middle" font-size="11">Resource Server</text>
+<!-- arrows -->
+<line x1="90" y1="150" x2="90" y2="112" stroke="#4d9fff" stroke-width="2" marker-end="url(#b)"/>
+<text x="98" y="136" fill="#4d9fff" font-size="11">uses</text>
+<line x1="160" y1="75" x2="328" y2="75" stroke="#ff9d4d" stroke-width="2" marker-end="url(#o)"/>
+<text x="195" y="66" fill="#ff9d4d" font-size="11">accesses / runs ①</text>
+<path d="M90 222 L90 330 L328 330" stroke="#ff5d6c" stroke-width="2" fill="none" marker-end="url(#o)"/>
+<text x="100" y="322" fill="#ff5d6c" font-size="11">② client redirects user to log in</text>
+<text x="100" y="352" fill="#ff5d6c" font-size="11">(password typed ONLY here)</text>
+<path d="M492 315 L560 315 L560 100 L492 90" stroke="#4ddb8f" stroke-width="2" fill="none" marker-end="url(#g)"/>
+<text x="568" y="220" fill="#4ddb8f" font-size="11">③ access token</text>
+<text x="568" y="234" fill="#4ddb8f" font-size="11">back to client</text>
+<line x1="490" y1="70" x2="648" y2="70" stroke="#b48cff" stroke-width="2" marker-end="url(#p)"/>
+<text x="520" y="60" fill="#b48cff" font-size="11">④ API call + token</text>
+<path d="M725 112 L725 290 L492 330" stroke="#b48cff" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#p)" opacity=".7"/>
+<text x="640" y="260" fill="#b48cff" font-size="11" opacity=".9">⑤ API validates token</text>
+</svg>
+</div>
+
+<div class="callout" style="--c:var(--green)"><b>The key rule:</b> the user types their password <b>only at the authorization server</b>. The application never sees it — it sends the user over to log in and gets back an access token to use at the resource server.</div>
+
+<!-- 5 ROLES NOT COMPONENTS -->
+<div class="label" style="--c:var(--green)">Roles ≠ Components<small>architecture varies</small></div>
+<div class="card"><p>In OAuth these are <b>roles</b>, not necessarily distinct deployed pieces. Your real architecture may look different from the diagram.</p></div>
+<div class="grid g3" style="margin-top:16px">
+<div class="card"><span class="pill p-green">Small system</span><h3>All-in-one</h3>
+<p>An API with a <b>built-in OAuth server</b>: one codebase, one server. Still two roles — it plays <b>both Authorization Server and Resource Server</b>.</p></div>
+<div class="card"><span class="pill p-blue">Microservices</span><h3>External auth server</h3>
+<p>A separate authorization server plus many microservices. <b>All the microservices together</b> make up the Resource Server role.</p></div>
+<div class="card"><span class="pill p-purple">API Gateway</span><h3>Gateway in front</h3>
+<p>Easier to picture: with a gateway out front, <b>everything behind the gateway</b> is clearly a Resource Server.</p></div>
+</div>
+
+<pre><span class="c">// Mapping real components → OAuth roles</span>
+<span class="k">Small app</span>      : [ monolith API + auth module ]  →  Authorization Server + Resource Server
+<span class="k">Microservices</span>  : [ Auth0 / Keycloak ]             →  Authorization Server
+                 [ orders-svc, users-svc, ... ]   →  Resource Server (all of them)
+<span class="k">Mobile app</span>     : [ the app on the phone ]        →  OAuth Client (+ phone = User Agent)</pre>
+
+<div class="callout" style="--c:var(--blue)"><b>Debugging tip:</b> if you're unsure how a token should move, or whether "this thing" may do "that thing", <b>reframe the question in terms of OAuth roles</b> — the answer usually becomes much clearer.</div>
+
+<!-- 6 COMPLETE PICTURE -->
+<div class="label" style="--c:var(--purple)">The Complete Picture<small>five roles</small></div>
+<div class="cmp">
+<div class="h" style="color:var(--blue)">Role</div><div class="h" style="color:var(--green)">What it does</div>
+<div><span class="pill p-blue">Resource Owner</span> (user)</div><div>Owns the account and the data; logs in at the authorization server</div>
+<div><span class="pill p-orange">User Agent</span> (device)</div><div>Browser/phone used to reach the client and get redirected to log in</div>
+<div><span class="pill p-green">OAuth Client</span> (app)</div><div>Sends the user to log in; receives the access token; calls the API</div>
+<div><span class="pill p-red">Authorization Server</span></div><div>Authenticates the user, issues access tokens</div>
+<div><span class="pill p-purple">Resource Server</span> (API)</div><div>Holds the data; validates the access token on each request</div>
+</div>
+
+<div class="callout" style="--c:var(--orange)"><b>Real-world scenario:</b> You open "PixelPro" (the client) on your phone (user agent) to save a photo to your Dropbox (resource server). PixelPro redirects you to Dropbox's login page (authorization server) where you type your password. Dropbox hands PixelPro an access token; PixelPro uploads the photo to the Dropbox API with that token — never having seen your password.</div>
+
+<div class="label" style="--c:var(--green)">Key Takeaways<small>interview-ready</small></div>
+<div class="grid g2">
+<div class="card"><h3>Remember</h3>
+<ul>
+<li>Five roles: <b>Resource Owner, User Agent, Client, Authorization Server, Resource Server</b>.</li>
+<li>Password only ever goes to the <b>authorization server</b>.</li>
+<li>Client gets an <b>access token</b>; the API <b>validates the token</b> rather than a password.</li>
+<li>Roles are <b>logical</b>; one piece of software can play several.</li>
+<li>In OAuth, "application" = the <b>client</b> only.</li>
+</ul></div>
+<div class="card"><h3>Interview one-liner</h3>
+<p>"The authorization server authenticates the user and issues access tokens to the client, so the client can call the resource server without ever seeing the user's password. These are logical roles — one deployment can play more than one."</p></div>
+</div>
+<div class="callout" style="--c:var(--blue)"><b>Next lesson:</b> the different types of applications (clients).</div>
+
+</div>
+</body>
+</html>

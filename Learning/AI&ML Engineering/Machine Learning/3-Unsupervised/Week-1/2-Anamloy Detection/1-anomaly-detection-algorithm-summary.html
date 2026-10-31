@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anomaly Detection Algorithm — Multiple Features</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fn{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;font-size:1rem;margin:10px 0;}
+  .mu{color:var(--blue)} .sg{color:var(--orange)}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:150px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:.8rem;}
+  .slider input{flex:1;accent-color:#4d9dff;}
+  .slider b{min-width:90px;}
+  .verdict{padding:10px 14px;border-radius:8px;font-weight:600;margin-top:8px;font-size:.9rem;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🧮 Anomaly Detection Algorithm — Multiple Features</h1>
+<div class="sub">Density estimation with n features · Product of Gaussians · Flag if p(x) &lt; ε</div>
+
+<!-- SETUP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Setup</h2></div>
+  <p>Training set <code>x⁽¹⁾ … x⁽ᵐ⁾</code>, where each example is a <b>vector with n features</b>: <code>x = [x₁, x₂, …, xₙ]</code>.</p>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--orange)">Engine example</h3><ul><li>x₁ = heat, x₂ = vibration</li><li>Each x⁽ⁱ⁾ is 2-D, so <b>n = 2</b></li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">Real applications</h3><ul><li>n can be dozens or even hundreds of features</li></ul></div>
+  </div>
+  <div class="note">Goal: <b>density estimation</b>, i.e. build a model for <code>p(x)</code>, the probability of any given feature vector.</div>
+</div>
+
+<!-- MODEL -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>The Model: Multiply Per-Feature Gaussians</h2></div>
+  <div class="formula">
+    p(x) = p(x₁; <span class="mu">μ₁</span>, <span class="sg">σ₁²</span>) · p(x₂; <span class="mu">μ₂</span>, <span class="sg">σ₂²</span>) · … · p(xₙ; <span class="mu">μₙ</span>, <span class="sg">σₙ²</span>)
+    <br><br>= ∏<sub>j=1..n</sub> p(x<sub>j</sub>; <span class="mu">μ<sub>j</sub></span>, <span class="sg">σ<sub>j</sub>²</span>)
+  </div>
+  <div class="grid3">
+    <div class="mini"><h3 style="color:var(--blue)">Each feature gets its own Gaussian</h3><ul><li>x₁ (heat) → μ₁, σ₁²</li><li>x₂ (vibration) → μ₂, σ₂²</li><li>… up to μₙ, σₙ²</li></ul></div>
+    <div class="mini"><h3 style="color:var(--purple)">∏ symbol</h3><ul><li>Like Σ, but <b>multiplies</b> the terms for j = 1…n instead of adding</li></ul></div>
+    <div class="mini"><h3 style="color:var(--green)">Independence</h3><ul><li>Multiplying probabilities assumes features are <b>statistically independent</b></li><li>Works fine in practice even when they aren't</li><li>Not required to complete the course</li></ul></div>
+  </div>
+  <div class="note" style="border-color:var(--orange)">
+    <b style="color:var(--orange)">Why multiply? (intuition)</b> Suppose an engine has a <b>1/10</b> chance of running unusually hot and a <b>1/20</b> chance of vibrating really hard. The chance of <i>both</i> is 1/10 × 1/20 = <b>1/200</b>: very unlikely.
+  </div>
+</div>
+
+<!-- ALGORITHM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>The Algorithm (3 Steps)</h2></div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br><b>Choose features</b> xⱼ you think are indicative of anomalies</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br><b>Fit parameters</b> μ₁…μₙ, σ₁²…σₙ² on the unlabeled training set</div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br><b>Compute p(x)</b> for a new example; anomaly if <b>p(x) &lt; ε</b></div>
+  </div>
+
+  <h3 style="color:var(--blue);margin-top:14px">Step 2: parameter fitting</h3>
+  <div class="grid2">
+    <div class="formula"><span class="mu">μⱼ</span> = (1/m) Σᵢ xⱼ⁽ⁱ⁾<br><span style="color:var(--dim);font-size:.75rem">average of feature j over all examples</span></div>
+    <div class="formula"><span class="sg">σⱼ²</span> = (1/m) Σᵢ (xⱼ⁽ⁱ⁾ − <span class="mu">μⱼ</span>)²<br><span style="color:var(--dim);font-size:.75rem">average squared difference from μⱼ</span></div>
+  </div>
+  <div class="note"><b>Vectorized:</b> <code>μ = (1/m) Σᵢ x⁽ⁱ⁾</code> where x and μ are vectors, so this computes μ₁…μₙ all at once.</div>
+
+  <h3 style="color:var(--blue);margin-top:14px">Step 3: compute p(x)</h3>
+  <div class="formula">p(x) = ∏ⱼ [ 1 / (√(2π) <span class="sg">σⱼ</span>) · exp( −(xⱼ − <span class="mu">μⱼ</span>)² / (2<span class="sg">σⱼ²</span>) ) ]</div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">estimate_gaussian</span>(X):                 <span class="cm"># X: (m, n)</span>
+    mu  = X.mean(axis=0)                      <span class="cm"># shape (n,)  vectorized μ₁…μₙ</span>
+    var = X.var(axis=0)                       <span class="cm"># shape (n,)  1/m by default (ddof=0)</span>
+    <span class="kw">return</span> mu, var
+
+<span class="kw">def</span> <span class="fn">p_of_x</span>(x, mu, var):
+    per_feature = np.exp(-(x - mu)**2 / (2*var)) / np.sqrt(2*np.pi*var)
+    <span class="kw">return</span> np.prod(per_feature)               <span class="cm"># ∏ over j</span>
+
+mu, var = estimate_gaussian(X_train)
+is_anomaly = p_of_x(x_test, mu, var) &lt; epsilon</pre>
+</div>
+
+<!-- INTUITION -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Intuition: One Weird Feature Is Enough</h2></div>
+  <p>The algorithm tends to flag an example as anomalous if <b>one or more features are either very large or very small</b> relative to the training set.</p>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li>Each feature has its own bell curve. If even <b>one</b> feature of the new example sits far out in a tail, that p(xⱼ) is tiny.</li>
+    <li>One tiny term in the product drags the <b>whole product</b> down, so p(x) is small.</li>
+    <li>That is a systematic way of quantifying whether x has any features that are unusually large or unusually small.</li>
+  </ul>
+  <div class="note">Real-life example: a server with normal memory use and CPU load but a disk-access rate 10× higher than any other machine gets flagged, because that single feature's p(xⱼ) is near zero.</div>
+</div>
+
+<!-- WORKED EXAMPLE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Worked Example from the Lecture</h2></div>
+  <p>Features x₁ and x₂, where <b>x₁ spans a much larger range than x₂</b>:</p>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--blue)">x₁</h3><ul><li><b>μ₁ = 5</b>, <b>σ₁ = 2</b></li><li>Wide, flat Gaussian</li></ul></div>
+    <div class="mini"><h3 style="color:var(--orange)">x₂</h3><ul><li><b>μ₂ = 3</b>, <b>σ₂ = 1</b></li><li>Narrow, tall Gaussian</li></ul></div>
+  </div>
+  <p style="margin-top:10px">Multiplying p(x₁)·p(x₂) gives a 3-D surface: a hill, highest in the middle (likely) and falling off far out (unlikely). Heatmap of that surface (brighter = higher p(x)):</p>
+  <svg id="heat" viewBox="0 0 640 380" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heatmap note:</b> training points are illustrative placements around (5, 3), not the exact lecture data. The test-point positions are chosen to reproduce the lecture's p values.</div>
+
+  <h3 style="color:var(--green);margin-top:14px">Results with ε = 0.02</h3>
+  <table>
+    <tr><th>Example</th><th>p(x)</th><th>vs ε = 0.02</th><th>Verdict</th></tr>
+    <tr><td>x_test⁽¹⁾ (near the middle, ≈ (4, 4))</td><td>0.0426</td><td>much bigger than ε</td><td style="color:var(--green)"><b>OK</b></td></tr>
+    <tr><td>x_test⁽²⁾ (far right and low, ≈ (8, 0.5))</td><td>0.0021</td><td>much smaller than ε</td><td style="color:var(--red)"><b>Likely anomaly</b></td></tr>
+  </table>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Transcript vs slide:</b> the spoken transcript says p(x_test⁽¹⁾) is "about 0.4", but the slide shows <b>0.0426</b>. I used the slide value, which also matches the formula (check it in the calculator below).</div>
+</div>
+
+<!-- CALCULATOR -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Interactive: Compute p(x) Yourself</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Fixed parameters: μ₁=5, σ₁=2, μ₂=3, σ₂=1. Move the test point and change ε.</p>
+  <div class="slider"><b style="color:var(--blue)">x₁ = <span id="x1V">4.0</span></b><input id="x1" type="range" min="-2" max="12" step="0.1" value="4"></div>
+  <div class="slider"><b style="color:var(--orange)">x₂ = <span id="x2V">4.0</span></b><input id="x2" type="range" min="-2" max="8" step="0.1" value="4"></div>
+  <div class="slider"><b style="color:var(--purple)">ε = <span id="epV">0.020</span></b><input id="ep" type="range" min="0.001" max="0.08" step="0.001" value="0.02"></div>
+  <pre id="calc"></pre>
+  <div id="verdict" class="verdict"></div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill blue">p(x) = ∏ p(xⱼ; μⱼ, σⱼ²)</span>
+  <span class="pill green">Fit μⱼ, σⱼ² per feature</span>
+  <span class="pill red">p(x) &lt; ε → anomaly</span>
+  <span class="pill orange">One extreme feature → small product</span>
+  <span class="pill purple">Independence assumption is forgiving</span>
+  <div class="note"><b>Open question:</b> how do you choose ε, and how do you know the system is working well? <b>Next video:</b> developing and evaluating an anomaly detection system.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons of this approach:</b> simple, fast and needs only unlabeled data; but it assumes roughly bell-shaped features, and because it ignores correlations between features it can miss anomalies that are only unusual in <i>combination</i> (e.g. high heat with low vibration, if the two normally move together). Engineered ratio features (like CPU load ÷ network traffic) help with that.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const MU=[5,3],SG=[2,1];
+const g=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s))/(Math.sqrt(2*Math.PI)*s);
+const P=(a,b)=>g(a,MU[0],SG[0])*g(b,MU[1],SG[1]);
+// heatmap
+(function(){
+  const svg=document.getElementById('heat'),W=640,H=380,pad=40,x0=-2,x1=12,y0=-2,y1=8;
+  const X=x=>pad+(x-x0)/(x1-x0)*(W-2*pad), Y=y=>H-pad-(y-y0)/(y1-y0)*(H-2*pad);
+  const nx=56,ny=40,cw=(W-2*pad)/nx,ch=(H-2*pad)/ny,max=P(5,3);
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){
+    const x=x0+(i+.5)/nx*(x1-x0),y=y0+(j+.5)/ny*(y1-y0),t=Math.sqrt(P(x,y)/max);
+    const r=Math.round(15+t*70),gc=Math.round(20+t*140),b=Math.round(40+t*215);
+    el('rect',{x:pad+i*cw,y:H-pad-(j+1)*ch,width:cw+.5,height:ch+.5,fill:`rgb(${r},${gc},${b})`},svg);
+  }
+  // epsilon contour (p = 0.02)
+  const pts=[];for(let a=0;a<=360;a+=3){const th=a*Math.PI/180;
+    // solve radius where P = 0.02 along direction (2cosθ,1sinθ) in standardized space: P=max*exp(-r²/2)
+    const r=Math.sqrt(2*Math.log(max/0.02));pts.push([X(5+SG[0]*r*Math.cos(th)),Y(3+SG[1]*r*Math.sin(th))]);}
+  el('path',{d:'M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L')+'Z',fill:'none',stroke:'#ff9d4d','stroke-width':2,'stroke-dasharray':'6 4'},svg);
+  el('text',{x:X(8.6),y:Y(5.6),fill:'#ff9d4d','font-size':11},svg).textContent='p(x) = ε = 0.02';
+  // axes
+  el('line',{x1:pad,y1:H-pad,x2:W-pad,y2:H-pad,stroke:'#8a90a6'},svg);el('line',{x1:pad,y1:H-pad,x2:pad,y2:pad,stroke:'#8a90a6'},svg);
+  el('text',{x:W-pad-30,y:H-12,fill:'#8a90a6','font-size':12},svg).textContent='x₁';el('text',{x:10,y:pad+4,fill:'#8a90a6','font-size':12},svg).textContent='x₂';
+  for(let t=0;t<=12;t+=2)el('text',{x:X(t),y:H-pad+14,fill:'#8a90a6','font-size':10,'text-anchor':'middle'},svg).textContent=t;
+  for(let t=0;t<=8;t+=2)el('text',{x:pad-8,y:Y(t)+3,fill:'#8a90a6','font-size':10,'text-anchor':'end'},svg).textContent=t;
+  // training points (illustrative)
+  [[3.2,3.5],[4,2.5],[4.5,3.8],[5,3],[5.2,3.6],[5.8,2.8],[6,3.4],[6.5,2.2],[3.6,4],[4.8,2.2],[2.1,2.8],[7.4,3.3],[10,2.7],[5.5,3.9],[4.2,3.1],[6.9,3.7],[2.9,2.2],[5.6,1.9]]
+   .forEach(([x,y])=>{const cx=X(x),cy=Y(y);[[-4,-4,4,4],[4,-4,-4,4]].forEach(a=>el('line',{x1:cx+a[0],y1:cy+a[1],x2:cx+a[2],y2:cy+a[3],stroke:'#ff6b6b','stroke-width':2},svg));});
+  // test points
+  [[4,4,'x_test¹ (OK)','#4dd992'],[7.8,0.7,'x_test² (anomaly)','#b58cff']].forEach(([x,y,l,c])=>{
+    el('circle',{cx:X(x),cy:Y(y),r:7,fill:'none',stroke:c,'stroke-width':3},svg);
+    el('text',{x:X(x)+11,y:Y(y)+4,fill:c,'font-size':11,'font-weight':600},svg).textContent=l;});
+})();
+// calculator
+const x1=document.getElementById('x1'),x2=document.getElementById('x2'),ep=document.getElementById('ep');
+function calc(){
+  const a=+x1.value,b=+x2.value,e=+ep.value,p1=g(a,5,2),p2=g(b,3,1),p=p1*p2;
+  x1V.textContent=a.toFixed(1);x2V.textContent=b.toFixed(1);epV.textContent=e.toFixed(3);
+  document.getElementById('calc').innerHTML=
+`p(x₁; 5, 2²)  = <span class="num">${p1.toFixed(4)}</span>
+p(x₂; 3, 1²)  = <span class="num">${p2.toFixed(4)}</span>
+p(x)          = p(x₁) · p(x₂) = <span class="num">${p.toFixed(4)}</span>
+ε             = <span class="num">${e.toFixed(3)}</span>`;
+  const v=document.getElementById('verdict');
+  if(p<e){v.textContent='p(x) < ε  →  ANOMALY (flag it)';v.style.background='rgba(255,107,107,.15)';v.style.color='#ff6b6b';v.style.border='1px solid rgba(255,107,107,.4)';}
+  else{v.textContent='p(x) ≥ ε  →  OK (normal)';v.style.background='rgba(77,217,146,.15)';v.style.color='#4dd992';v.style.border='1px solid rgba(77,217,146,.4)';}
+}
+x1.oninput=x2.oninput=ep.oninput=calc;calc();
+</script>
+</body>
+</html>

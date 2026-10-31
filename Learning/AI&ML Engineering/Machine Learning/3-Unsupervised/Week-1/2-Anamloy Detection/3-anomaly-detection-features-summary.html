@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choosing Features for Anomaly Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:140px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:160px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.76rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;font-size:.9rem;margin:8px 0;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>🧰 Choosing Features for Anomaly Detection</h1>
+<div class="sub">Make features more Gaussian · Error analysis · Inventing new features · (end of the Week 1 unsupervised learning material)</div>
+
+<!-- WHY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Features Matter Even More Here</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(77,157,255,.5)">
+      <h3 style="color:var(--blue)">Supervised learning</h3>
+      <ul><li>Extra or poorly scaled features are often <b>okay</b></li><li>The labels give a supervised signal, so the algorithm can <b>work out which features to ignore</b> and how to rescale them</li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(255,107,107,.5)">
+      <h3 style="color:var(--red)">Anomaly detection</h3>
+      <ul><li>Learns from <b>unlabeled data</b></li><li>Much <b>harder for the algorithm to know which features to ignore</b></li><li>So <b>careful feature choice matters even more</b></li></ul>
+    </div>
+  </div>
+  <div class="note">Two practical tools in this lecture: <b>(1) make features more Gaussian</b>, and <b>(2) error analysis on the CV set to invent new features</b>.</div>
+</div>
+
+<!-- GAUSSIAN FEATURES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Tool 1: Make Features More Gaussian</h2></div>
+  <p>The model fits a Gaussian <code>p(xⱼ; μⱼ, σⱼ²)</code> to each feature, so it fits best when the feature is <b>roughly bell-shaped</b>.</p>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Plot a histogram: <code>plt.hist(x)</code></div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Symmetric bell? <b>Good candidate</b> as-is</div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Skewed? Try a <b>transformation</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br>Re-plot, keep what looks most Gaussian</div>
+  </div>
+  <table>
+    <tr><th>Transformation</th><th>Lecture notation</th><th>Notes</th></tr>
+    <tr><td><code>x₁ ← log(x₁)</code></td><td>log</td><td>Right-skewed feature becomes symmetric (slide example)</td></tr>
+    <tr><td><code>x₂ ← log(x₂ + c)</code></td><td>e.g. log(x₂ + 1)</td><td><b>Larger c transforms the distribution less.</b> Try several values of c</td></tr>
+    <tr><td><code>x₃ ← √x₃ = x₃^(1/2)</code></td><td>square root</td><td>Milder than log</td></tr>
+    <tr><td><code>x₄ ← x₄^(1/3)</code></td><td>cube root / any power</td><td>Tune the exponent (the lab uses <b>x^0.4</b>)</td></tr>
+  </table>
+  <div class="note"><b>Automatic measures exist</b> in the ML literature for how close a distribution is to Gaussian, but in practice <b>trying a few values and picking what looks right</b> works well enough.</div>
+</div>
+
+<!-- LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Interactive: The Notebook Experiment</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">The lecture's notebook makes a right-skewed dataset (10,000 values, rescaled to 0–100) and tries transformations. Here is a similar synthetic dataset (not the exact lab data). Red curve = Gaussian fitted to the transformed values.</p>
+  <div class="btns" id="presets">
+    <button data-m="none" data-v="1" class="on">x (original)</button>
+    <button data-m="pow" data-v="0.5">x^0.5</button>
+    <button data-m="pow" data-v="0.4">x^0.4</button>
+    <button data-m="log" data-v="-3">log(x + 0.001)</button>
+    <button data-m="log" data-v="1">log(x + 10)</button>
+  </div>
+  <div class="slider"><b id="pLabel" style="color:var(--orange);min-width:210px"></b><input id="par" type="range" min="0.1" max="1.5" step="0.05" value="1"></div>
+  <svg id="hist" viewBox="0 0 640 260" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="grid2" style="margin-top:10px">
+    <div class="note" id="skewTxt"></div>
+    <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">log(0) trap:</b> the lab data contains values of exactly 0, so <code>np.log(x)</code> errors (log 0 is negative infinity, undefined). The fix is to <b>add a small constant</b>: <code>np.log(x + 0.001)</code>, or a larger c if you want less distortion.</div>
+  </div>
+</div>
+
+<!-- CODE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>In Code (plus the Important Reminder)</h2></div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np, matplotlib.pyplot <span class="kw">as</span> plt
+
+plt.hist(x, bins=<span class="num">50</span>, color=<span class="str">'r'</span>)             <span class="cm"># look at the raw feature</span>
+plt.hist(x**<span class="num">0.4</span>, bins=<span class="num">50</span>)                   <span class="cm"># try a power transform</span>
+plt.hist(np.log(x + <span class="num">10</span>), bins=<span class="num">50</span>)            <span class="cm"># try log(x + c); x has zeros, so c &gt; 0</span>
+
+<span class="cm"># once you pick one, fit it on TRAIN and use the SAME transform everywhere</span>
+c = <span class="num">10</span>
+X_train_t = np.log(X_train + c)
+X_cv_t    = np.log(X_cv    + c)      <span class="cm"># same c, same function</span>
+X_test_t  = np.log(X_test  + c)
+mu, var   = estimate_gaussian(X_train_t)</pre>
+  <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">Reminder from the lecture:</b> whatever transformation you apply to the training set, apply the <b>same transformation</b> to the cross-validation and test sets (and to production data).</div>
+</div>
+
+<!-- ERROR ANALYSIS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Tool 2: Error Analysis</h2></div>
+  <p>Goal: <code>p(x) ≥ ε</code> (large) for normal examples and <code>p(x) &lt; ε</code> (small) for anomalous ones. The <b>most common problem</b>: <b>p(x) is comparable, i.e. large, for both normal and anomalous examples</b>, so the anomaly isn't flagged.</p>
+  <svg id="ea" viewBox="0 0 700 270" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="grid2" style="margin-top:10px">
+    <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">One feature (x₁ = number of transactions):</b> the anomalous user makes about as many transactions as everyone else → high p(x) → <b>missed</b>.</div>
+    <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">Add x₂ = typing speed:</b> this user has an insanely fast typing speed, far from the normal cluster → low p(x) → <b>flagged</b>.</div>
+  </div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Diagram note:</b> positions are illustrative, not the lecture's exact data.</div>
+
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">The development loop</h3>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Train the model</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Find CV-set anomalies the algorithm <b>fails to detect</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Study them: what makes them anomalous?</div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br>Create a feature that takes <b>unusually large/small values</b> for them</div><div class="arrow">↺</div>
+  </div>
+</div>
+
+<!-- DATA CENTER -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Example: Monitoring Computers in a Data Center</h2></div>
+  <p>Choose features that might take on <b>unusually large or small values</b> in the event of an anomaly (hardware failure, a hacked machine…).</p>
+  <div class="grid2">
+    <div class="mini">
+      <h3 style="color:var(--blue)">Starting features</h3>
+      <ul><li><b>x₁</b> = memory use</li><li><b>x₂</b> = disk accesses/sec</li><li><b>x₃</b> = CPU load</li><li><b>x₄</b> = network traffic</li></ul>
+    </div>
+    <div class="mini">
+      <h3 style="color:var(--green)">Combined features</h3>
+      <ul><li><b>x₅ = CPU load / network traffic</b></li><li><b>x₆ = (CPU load)² / network traffic</b></li><li>Play with different choices; keep p(x) large for normal and small for CV anomalies</li></ul>
+    </div>
+  </div>
+  <svg id="dc" viewBox="0 0 640 280" width="100%" style="margin-top:12px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="note"><b>The story:</b> one machine behaves very strangely, yet <b>neither its CPU load nor its network traffic is individually unusual</b>. What <i>is</i> unusual is a <b>very high CPU load with very low network traffic</b>. In a video-streaming data center, machines normally have high CPU <i>and</i> high traffic, or low CPU and no traffic. A ratio feature exposes the odd combination.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Why this works:</b> the algorithm multiplies independent per-feature Gaussians, so it can't see that two features are individually normal but weird <i>together</i>. A combined feature puts that relationship into a single axis.</div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Practical Checklist</h2></div>
+  <ul style="font-size:.85rem;margin:0;padding-left:18px">
+    <li>Histogram every feature before trusting it.</li>
+    <li>Skewed? Try log(x + c), x^power; pick by eye.</li>
+    <li>Apply the <b>same</b> transform to train, CV, test (and live data).</li>
+    <li>After training, list the CV anomalies you <b>missed</b>; ask "what made me think this was anomalous?"</li>
+    <li>Turn that answer into a feature (often a ratio or combination of existing ones).</li>
+    <li>Re-check on CV: normal examples should keep p(x) ≥ ε, anomalies should drop below ε.</li>
+  </ul>
+  <div class="note">Real-life scenario (fraud): normal-looking transaction counts, but each account is created and used within seconds. A new feature "time between signup and first purchase" separates it from normal users even though the old features looked fine.</div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill blue">Features matter more without labels</span>
+  <span class="pill orange">Make features bell-shaped</span>
+  <span class="pill green">log(x+c), x^p: try values, eyeball</span>
+  <span class="pill red">Same transform on CV/test</span>
+  <span class="pill purple">Error analysis → new features</span>
+  <div class="note"><b>Next week:</b> <b>recommender systems</b>: how websites recommend products or movies, one of the most commercially important (and rarely discussed) ML algorithms. This closes out clustering and anomaly detection.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons of manual feature work:</b> eyeballing histograms is quick and interpretable, but doesn't scale to hundreds of features. A formal skewness or normality check (beyond the lecture) lets you screen many features at once, at the cost of an extra step and less intuition about why a feature helps.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const cross=(svg,x,y,c,s=4,w=2)=>{[[-s,-s,s,s],[s,-s,-s,s]].forEach(a=>el('line',{x1:x+a[0],y1:y+a[1],x2:x+a[2],y2:y+a[3],stroke:c,'stroke-width':w,'stroke-linecap':'round'},svg));};
+let seed=5;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const gauss=()=>Math.sqrt(-2*Math.log(rnd()))*Math.cos(2*Math.PI*rnd());
+
+/* ---------- transform lab ---------- */
+const N=10000;let base=Array.from({length:N},()=>-Math.log(rnd())-Math.log(rnd())-Math.log(rnd()));
+const mn=Math.min(...base);base=base.map(v=>v-mn);const mx=Math.max(...base);base=base.map(v=>v/mx*100);
+let mode='none',val=1;
+const par=document.getElementById('par');
+function setParRange(){
+  if(mode==='log'){par.min=-3;par.max=1.7;par.step=0.05;}
+  else if(mode==='pow'){par.min=0.1;par.max=1.5;par.step=0.05;}
+  else{par.min=0.1;par.max=1.5;par.step=0.05;}
+  par.disabled=(mode==='none');
+}
+function transform(){
+  if(mode==='none')return base.slice();
+  if(mode==='pow')return base.map(v=>Math.pow(v,val));
+  const c=Math.pow(10,val);return base.map(v=>Math.log(v+c));
+}
+function drawHist(){
+  const v=transform(),n=v.length,m=v.reduce((a,b)=>a+b,0)/n,va=v.reduce((a,b)=>a+(b-m)**2,0)/n,sd=Math.sqrt(va);
+  const sk=v.reduce((a,b)=>a+((b-m)/sd)**3,0)/n;
+  const lo=Math.min(...v),hi=Math.max(...v),B=50,bw=(hi-lo)/B,cnt=new Array(B).fill(0);
+  v.forEach(x=>{let b=Math.floor((x-lo)/bw);if(b>=B)b=B-1;cnt[b]++;});
+  const svg=document.getElementById('hist');svg.innerHTML='';
+  const W=640,H=260,pad=30,mxc=Math.max(...cnt)*1.1,X=x=>pad+(x-lo)/(hi-lo)*(W-2*pad),Y=c=>H-pad-c/mxc*(H-2*pad);
+  cnt.forEach((c,i)=>el('rect',{x:X(lo+i*bw),y:Y(c),width:(W-2*pad)/B-1,height:H-pad-Y(c),fill:'rgba(77,157,255,.45)'},svg));
+  let d='';for(let i=0;i<=200;i++){const x=lo+(hi-lo)*i/200;const y=n*bw*Math.exp(-((x-m)**2)/(2*va))/(Math.sqrt(2*Math.PI)*sd);d+=(i?'L':'M')+X(x).toFixed(1)+','+Y(y).toFixed(1);}
+  el('path',{d,fill:'none',stroke:'#ff6b6b','stroke-width':2.5},svg);
+  el('line',{x1:pad,y1:H-pad,x2:W-pad,y2:H-pad,stroke:'#8a90a6'},svg);
+  el('text',{x:pad,y:H-10,fill:'#8a90a6','font-size':10},svg).textContent=lo.toFixed(2);
+  el('text',{x:W-pad,y:H-10,fill:'#8a90a6','font-size':10,'text-anchor':'end'},svg).textContent=hi.toFixed(2);
+  const lab=mode==='none'?'x (no transform)':mode==='pow'?`x^${val.toFixed(2)}`:`log(x + ${Math.pow(10,val).toPrecision(2)})`;
+  document.getElementById('pLabel').textContent=lab;
+  const a=Math.abs(sk);
+  const verdict=a<0.15?'<b style="color:#4dd992">close to symmetric: good Gaussian candidate</b>':a<0.5?'<b style="color:#ff9d4d">mildly skewed</b>':'<b style="color:#ff6b6b">clearly skewed: try a transform</b>';
+  document.getElementById('skewTxt').innerHTML=`Skewness of the plotted feature: <b>${sk.toFixed(2)}</b> → ${verdict}. (Skewness is my extra number for judging this; the lecture just eyeballs the histogram.)`;
+}
+document.querySelectorAll('#presets button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#presets button').forEach(x=>x.classList.toggle('on',x===b));
+  mode=b.dataset.m;val=+b.dataset.v;setParRange();par.value=val;drawHist();});
+par.oninput=()=>{val=+par.value;document.querySelectorAll('#presets button').forEach(x=>x.classList.remove('on'));drawHist();};
+setParRange();par.value=1;drawHist();
+
+/* ---------- error analysis diagram ---------- */
+(function(){
+  const svg=document.getElementById('ea');
+  // left: 1D
+  el('text',{x:170,y:20,fill:'#ff6b6b','font-size':12,'font-weight':700,'text-anchor':'middle'},svg).textContent='x₁ only (number of transactions)';
+  let d='';for(let i=0;i<=100;i++){const x=40+i*2.6,t=(i-45)/16;d+=(i?'L':'M')+x.toFixed(1)+','+(210-130*Math.exp(-t*t/2)).toFixed(1);}
+  el('path',{d,fill:'none',stroke:'#ff6b6b','stroke-width':2.5},svg);
+  el('line',{x1:30,y1:225,x2:320,y2:225,stroke:'#8a90a6'},svg);
+  [60,80,95,105,118,130,140,150,160,172,185,200,215,230].forEach(x=>cross(svg,x,225,'#ff6b6b',4));
+  cross(svg,232,225,'#4d9dff',6,3);
+  el('line',{x1:232,y1:225,x2:232,y2:176,stroke:'#4d9dff','stroke-dasharray':'4 3'},svg);
+  el('text',{x:236,y:168,fill:'#4d9dff','font-size':11},svg).textContent='anomaly, but p(x) high';
+  el('text',{x:170,y:250,fill:'#8a90a6','font-size':10,'text-anchor':'middle'},svg).textContent='x₁';
+  // right: 2D
+  el('text',{x:520,y:20,fill:'#4dd992','font-size':12,'font-weight':700,'text-anchor':'middle'},svg).textContent='add x₂ (typing speed)';
+  el('line',{x1:380,y1:225,x2:670,y2:225,stroke:'#8a90a6'},svg);el('line',{x1:380,y1:225,x2:380,y2:34,stroke:'#8a90a6'},svg);
+  [[1,0.82],[1.8,0.75],[0.4,0.7],[0.9,1.1],[1.6,1.2],[2.2,0.8],[2.6,1.0],[1.2,0.5],[2.0,1.5],[0.2,1.3],[1.4,0.95]].forEach(([a,b])=>cross(svg,420+a*55,210-b*50,'#ff6b6b',4));
+  [[75,50],[125,80],[165,100]].forEach(([rx,ry],i)=>el('ellipse',{cx:520,cy:158,rx:rx*.9,ry:ry*.75,fill:'none',stroke:'#4dd3ff','stroke-opacity':.55-i*.1,'stroke-width':2},svg));
+  cross(svg,572,55,'#4d9dff',7,3);
+  el('line',{x1:572,y1:55,x2:572,y2:225,stroke:'#4d9dff','stroke-dasharray':'4 3'},svg);
+  el('text',{x:582,y:52,fill:'#4d9dff','font-size':11},svg).textContent='anomaly now stands out';
+  el('text',{x:660,y:244,fill:'#8a90a6','font-size':10,'text-anchor':'end'},svg).textContent='x₁';el('text',{x:366,y:40,fill:'#8a90a6','font-size':10,'text-anchor':'end'},svg).textContent='x₂';
+})();
+
+/* ---------- data center ratio diagram ---------- */
+(function(){
+  const svg=document.getElementById('dc');
+  el('line',{x1:60,y1:240,x2:620,y2:240,stroke:'#8a90a6'},svg);el('line',{x1:60,y1:240,x2:60,y2:20,stroke:'#8a90a6'},svg);
+  el('text',{x:620,y:262,fill:'#8a90a6','font-size':11,'text-anchor':'end'},svg).textContent='network traffic';
+  el('text',{x:12,y:30,fill:'#8a90a6','font-size':11},svg).textContent='CPU load';
+  // normal machines along diagonal
+  for(let i=0;i<40;i++){const t=rnd();const x=90+t*480,y=240-(30+t*170)-gauss()*14;cross(svg,x,Math.max(30,Math.min(232,y)),'#4dd992',3.5);}
+  // anomaly: high CPU, low traffic
+  cross(svg,115,52,'#b58cff',7,3);
+  el('line',{x1:115,y1:52,x2:115,y2:240,stroke:'#b58cff','stroke-dasharray':'3 3',opacity:.6},svg);
+  el('line',{x1:60,y1:52,x2:115,y2:52,stroke:'#b58cff','stroke-dasharray':'3 3',opacity:.6},svg);
+  el('text',{x:128,y:48,fill:'#b58cff','font-size':11},svg).textContent='high CPU + low traffic (x₅ = CPU / traffic is huge)';
+  el('text',{x:130,y:231,fill:'#8a90a6','font-size':10},svg).textContent='its traffic alone is a normal value';
+  el('text',{x:68,y:44,fill:'#8a90a6','font-size':10,'text-anchor':'start'},svg).textContent='';
+  el('text',{x:500,y:80,fill:'#4dd992','font-size':11,'text-anchor':'middle'},svg).textContent='normal machines: CPU rises with traffic';
+})();
+</script>
+</body>
+</html>

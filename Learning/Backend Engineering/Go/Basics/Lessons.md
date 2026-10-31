@@ -3806,3 +3806,180 @@ func maxMessages(thresh int) int {
 }
 
 ```
+
+# There Is No While Loop in Go
+
+Most programming languages have a concept of a `while` loop. Because Go allows for the omission of sections of a `for` loop, a `while` loop is just a `for` loop that only has a CONDITION.
+
+```go
+for CONDITION {
+  // do some stuff while CONDITION is true
+}
+```
+
+For example:
+
+```go
+plantHeight := 1
+for plantHeight < 5 {
+  fmt.Println("still growing! current height:", plantHeight)
+  plantHeight++
+}
+fmt.Println("plant has grown to ", plantHeight, "inches")
+```
+
+Which prints:
+
+```text
+still growing! current height: 1
+still growing! current height: 2
+still growing! current height: 3
+still growing! current height: 4
+plant has grown to 5 inches
+```
+
+Go also allows you to omit the condition entirely to create an infinite loop:
+
+```go
+for {
+  // do some stuff forever
+}
+```
+
+## Assignment
+
+We have an interesting new cost structure from our SMS vendor. They charge exponentially more money for each consecutive text we send! Let's write a function that calculates how many messages we can send in a given batch given a `costMultiplier` and a `budgetInPennies`.
+
+In a nutshell, the first message costs a penny, and each message after that costs the same as the previous message multiplied by the `costMultiplier`.
+
+There is a bug in the code! Add a condition to the `for` loop to fix the bug. The loop should stop when `balance` is equal to or less than 0. So what condition should the `for` loop evaluate?
+
+
+```go
+package main
+func getMaxMessagesToSend(costMultiplier float64, budgetInPennies int) int {
+	actualCostInPennies := 1.0
+	maxMessagesToSend := 1
+	balance := float64(budgetInPennies) - actualCostInPennies
+	for balance > 0 {
+		actualCostInPennies *= costMultiplier
+		balance -= actualCostInPennies
+		maxMessagesToSend++
+	}
+	if balance < 0 {
+		maxMessagesToSend--
+	}
+	return maxMessagesToSend
+}
+
+```
+
+# Fizzbuzz
+
+Go supports the standard [modulo operator](https://www.youtube.com/watch?v=fVNaZntwYPw):
+
+```go
+7 % 3 // 1
+```
+
+The AND [logical operator](https://go.dev/ref/spec#Logical_operators):
+
+```go
+true && false // false
+true && true // true
+```
+
+As well as the OR operator:
+
+```go
+true || false // true
+false || false // false
+```
+
+## Assignment
+
+We're hiring engineers at Textio, so time to brush up on the classic "Fizzbuzz" game, a coding exercise that has been dramatically overused in coding interviews across the world.
+
+Complete the `fizzbuzz` function that prints the numbers 1 to 100 inclusive each on their own line, but replace multiples of 3 with the text `fizz` and multiples of 5 with `buzz`. Print `fizzbuzz` for multiples of 3 AND 5.
+
+This lesson is graded based on the output of your program, so don't leave any debugging print statements in your code.
+
+## Tip
+
+Example output:
+
+```text
+1
+2
+fizz
+4
+buzz
+fizz
+7
+8
+fizz
+buzz
+11
+fizz
+13
+14
+fizzbuzz
+```
+
+```go
+package main
+
+import "fmt"
+
+func fizzbuzz() {
+	for i := 1; i <= 100 ; i++ {
+		if i % 3 == 0 && i % 5 == 0 {
+			fmt.Println("fizzbuzz")
+		}else if i % 3 == 0 {
+			fmt.Println("fizz")
+		}else if i % 5 == 0 {
+			fmt.Println("buzz")
+		}else {
+			fmt.Println(i)
+		}
+	}
+}
+
+// don't touch below this line
+
+func main() {
+	fizzbuzz()
+}
+
+```
+
+
+
+# Connections
+
+Textio has group chats that make communicating with multiple people much more efficient--if the chat doesn't descend into chaos. Instead of sending the message multiple times to individual people, you send one message to all of them at once.
+
+## Assignment
+
+Complete the `countConnections` function that takes an integer `groupSize` representing the number of people in the group chat and returns an integer representing the number of connections between them. For each additional person in the group, the number of new connections continues to grow. Use a `for` loop to accumulate the number of connections instead of directly using a mathematical formula.
+
+To make sure you're picturing it right:
+
+- If there are two people, how many possible connections exist between them?
+- If you add a third person, how many new connections are created with the rest?
+
+![connections](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/77xUnR9-622x633.png)
+
+```go
+package main
+
+func countConnections(groupSize int) int {
+	total := 0
+	for i := 1 ; i <= groupSize ;i++ {
+		total += i - 1
+	}
+
+	return total
+}
+
+```

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG: Applications — Visual Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fn{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini .t{font-family:'Syne',sans-serif;font-weight:700;color:#fff;margin-bottom:4px;}
+  .mini p{margin:4px 0 0;font-size:.82rem;color:var(--dim);}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  p{font-size:.88rem;margin:8px 0;}
+  ul{margin:6px 0;padding-left:20px;font-size:.85rem;}
+  li{margin:4px 0;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+  .good{color:var(--green)} .bad{color:var(--red)}
+</style>
+</head>
+<body>
+
+<h1>🧭 RAG: Applications</h1>
+<div class="sub">DeepLearning.AI · Retrieval Augmented Generation · Module 1 · "Applications of RAG" (Zain Hasan)</div>
+
+<!-- RECAP + MAP -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Recap &amp; The Big Picture</h2></div>
+  <p>Core idea: pair an <b>off-the-shelf LLM</b> with a <b>knowledge base</b> of information it might not have had access to during training. Many LLM-powered systems already work this way. The lecture walks through five.</p>
+  <svg viewBox="0 0 780 190" width="100%" style="margin:10px 0">
+    <rect x="270" y="10" width="240" height="46" rx="12" fill="rgba(181,140,255,.15)" stroke="#b58cff"/>
+    <text x="390" y="38" fill="#b58cff" text-anchor="middle" font-size="13" font-weight="600">LLM + Knowledge Base</text>
+    <g font-size="11" text-anchor="middle">
+      <line x1="390" y1="56" x2="80" y2="115" stroke="#262b3a" stroke-width="2"/>
+      <line x1="390" y1="56" x2="235" y2="115" stroke="#262b3a" stroke-width="2"/>
+      <line x1="390" y1="56" x2="390" y2="115" stroke="#262b3a" stroke-width="2"/>
+      <line x1="390" y1="56" x2="545" y2="115" stroke="#262b3a" stroke-width="2"/>
+      <line x1="390" y1="56" x2="700" y2="115" stroke="#262b3a" stroke-width="2"/>
+      <rect x="10" y="115" width="140" height="55" rx="10" fill="rgba(77,157,255,.15)" stroke="#4d9dff"/><text x="80" y="138" fill="#4d9dff">1. Code</text><text x="80" y="154" fill="#e6e8ef">generation</text>
+      <rect x="165" y="115" width="140" height="55" rx="10" fill="rgba(255,157,77,.15)" stroke="#ff9d4d"/><text x="235" y="138" fill="#ff9d4d">2. Company</text><text x="235" y="154" fill="#e6e8ef">chatbots</text>
+      <rect x="320" y="115" width="140" height="55" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/><text x="390" y="138" fill="#4dd992">3. Specialized</text><text x="390" y="154" fill="#e6e8ef">knowledge</text>
+      <rect x="475" y="115" width="140" height="55" rx="10" fill="rgba(181,140,255,.15)" stroke="#b58cff"/><text x="545" y="138" fill="#b58cff">4. AI web</text><text x="545" y="154" fill="#e6e8ef">search</text>
+      <rect x="630" y="115" width="140" height="55" rx="10" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/><text x="700" y="138" fill="#ff6b6b">5. Personalized</text><text x="700" y="154" fill="#e6e8ef">assistants</text>
+    </g>
+  </svg>
+</div>
+
+<!-- 1 CODE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>1. Code Generation</h2></div>
+  <p><b>Problem:</b> LLMs have been trained on lots of code (conceivably every public Git repo), but generating <i>correct code for a specific project</i> requires specialized information that isn't in public training data.</p>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--blue)">LLM needs your project's context</div><p>Classes, functions, definitions, and the overall coding style.</p></div>
+    <div class="mini"><div class="t" style="color:var(--green)">Codebase = knowledge base</div><p>RAG retrieves project-specific content (relevant classes, definitions, files) for the LLM.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">Better code generation &amp; Q&amp;A</div><p>Answers tailored to your actual repository.</p></div>
+  </div>
+  <p>Slide example — "Your Project Repository" contains project-specific code the LLM could never have seen:</p>
+  <pre><span class="kw">class</span> <span class="fn">DatabaseManager</span>:
+    <span class="kw">def</span> <span class="fn">connect_to_db</span>(self):
+        <span class="cm"># Custom connection logic</span>
+        <span class="kw">return</span> self.connection
+
+<span class="kw">def</span> <span class="fn">process_user_data</span>(user_input):
+    <span class="cm"># Project-specific validation</span>
+    validator = CustomValidator()
+    <span class="kw">return</span> validator.validate(user_input)
+
+<span class="cm"># More project-specific classes and functions...</span></pre>
+</div>
+
+<!-- 2 CHATBOTS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>2. Company Chatbots</h2></div>
+  <p>Every company has its own <b>products, policies, and communication guidelines</b>. Treat enterprise documents as the knowledge base.</p>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--orange)">Tailored to your company</div><p>Every business has its own products, policies, and communication style.</p></div>
+    <div class="mini"><div class="t" style="color:var(--blue)">Uses internal documents</div><p>Manuals, support guides, FAQs.</p></div>
+    <div class="mini"><div class="t" style="color:var(--green)">Grounds answers in real context</div><p>Reduces generic or incorrect/misleading answers.</p></div>
+  </div>
+  <table>
+    <tr><th>Deployment</th><th>What it knows</th></tr>
+    <tr><td><span class="pill orange">Customer service chatbot</span></td><td>Company product info, current inventory, common troubleshooting steps</td></tr>
+    <tr><td><span class="pill blue">Internal chatbot</span></td><td>Accurately answers company-policy questions or directs you to useful documentation</td></tr>
+  </table>
+  <div class="note"><b>Slide example:</b> an H&amp;M chatbot ("I can give you quick answers to frequently asked questions"). The knowledge base helps <b>ground</b> responses in company-specific products/policies and minimizes generic or misleading answers.</div>
+</div>
+
+<!-- 3 SPECIALIZED -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>3. Specialized Knowledge (Healthcare &amp; Legal)</h2></div>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--green)">High-impact domains</div><p>Legal and medical use cases.</p></div>
+    <div class="mini"><div class="t" style="color:var(--blue)">Specialized documents</div><p>Case files, recently published journals, private data.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">Accurate, secure use</div><p>Supports precision and privacy needs.</p></div>
+  </div>
+  <p><b>Why RAG matters most here:</b> precision is imperative, and the amount of niche and potentially <b>private</b> information is vast. The lecture says a RAG-based approach <i>might be the only way</i> to deploy an LLM product that is accurate enough and can use private information.</p>
+  <div class="note"><b>Slide example (legal):</b> the query "Identify which of these third-party contracts do not contain our standard assignment language" run over a project of <b>827 files</b> (e.g., supply and license agreement PDFs).</div>
+</div>
+
+<!-- 4 WEB SEARCH -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>4. AI-Assisted Web Search</h2></div>
+  <svg viewBox="0 0 780 120" width="100%" style="margin:6px 0">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <g font-size="11" text-anchor="middle">
+      <rect x="10" y="30" width="110" height="55" rx="10" fill="#0b0d14" stroke="#262b3a"/><text x="65" y="62" fill="#e6e8ef">Search query</text>
+      <line x1="125" y1="57" x2="175" y2="57" stroke="#8a90a6" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="180" y="30" width="150" height="55" rx="10" fill="rgba(181,140,255,.15)" stroke="#b58cff"/><text x="255" y="53" fill="#b58cff">Search engine</text><text x="255" y="70" fill="#e6e8ef">= retriever</text>
+      <line x1="335" y1="57" x2="385" y2="57" stroke="#8a90a6" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="390" y="30" width="150" height="55" rx="10" fill="rgba(77,217,146,.15)" stroke="#4dd992"/><text x="465" y="53" fill="#4dd992">Relevant</text><text x="465" y="70" fill="#e6e8ef">websites</text>
+      <line x1="545" y1="57" x2="595" y2="57" stroke="#8a90a6" stroke-width="2" marker-end="url(#ar)"/>
+      <rect x="600" y="30" width="170" height="55" rx="10" fill="rgba(255,157,77,.15)" stroke="#ff9d4d"/><text x="685" y="53" fill="#ff9d4d">LLM</text><text x="685" y="70" fill="#e6e8ef">AI summary</text>
+    </g>
+  </svg>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--purple)">Search engines as retrievers</div><p>Historically: given a query, return relevant websites.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">AI summarizes results</div><p>Key info in a quick, skimmable format.</p></div>
+    <div class="mini"><div class="t" style="color:var(--green)">Internet as knowledge base</div><p>Summaries powered by real-time retrieval.</p></div>
+  </div>
+  <div class="note"><b>Slide example:</b> a Google AI summary for "what is the most common element on the periodic table" (hydrogen), shown above the regular website results. AI web summaries are basically a RAG system whose knowledge base is the entire internet.</div>
+</div>
+
+<!-- 5 PERSONALIZED -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>5. Personalized RAG</h2></div>
+  <p>Large-scale RAG is powerful; so are <b>highly personalized</b> ones. Assistants now live in text messages, email, word processors, calendars and help you send messages, organize your schedule, draft documents, and finish projects big and small.</p>
+  <svg viewBox="0 0 780 190" width="100%" style="margin:6px 0">
+    <circle cx="390" cy="95" r="85" fill="#0b0d14" stroke="#262b3a"/>
+    <circle cx="390" cy="78" r="16" fill="#e6e8ef"/>
+    <path d="M360 125 Q360 100 390 100 Q420 100 420 125 Z" fill="#e6e8ef"/>
+    <text x="390" y="150" fill="#8a90a6" text-anchor="middle" font-size="12">Your Data</text>
+    <g font-size="11" text-anchor="middle">
+      <rect x="170" y="25" width="120" height="32" rx="8" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/><text x="230" y="46" fill="#ff6b6b">Calendar events</text>
+      <rect x="490" y="25" width="100" height="32" rx="8" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/><text x="540" y="46" fill="#ff6b6b">Emails</text>
+      <rect x="160" y="110" width="120" height="32" rx="8" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/><text x="220" y="131" fill="#ff6b6b">Text messages</text>
+      <rect x="500" y="110" width="100" height="32" rx="8" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/><text x="550" y="131" fill="#ff6b6b">Contacts</text>
+    </g>
+  </svg>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--red)">Assistants everywhere</div><p>Messaging apps, email clients, etc.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">They need context</div><p>More context leads to better results.</p></div>
+    <div class="mini"><div class="t" style="color:var(--green)">Your data = knowledge base</div><p>Small-scale (texts, contacts, emails, a folder of docs) but dense with important context.</p></div>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Interview / Practical Tips</h2></div>
+  <ul>
+    <li>Be ready to name 3+ applications and what the <b>knowledge base</b> is in each (repo, company docs, case files/journals, the internet, personal data).</li>
+    <li>"Grounding" = anchoring responses in your specific documents to cut generic or misleading output.</li>
+    <li>High-stakes domains (legal, medical): <b>precision + privacy</b> are the justification for RAG.</li>
+    <li>Search engines were already retrievers; AI summaries add the generation step.</li>
+    <li>Knowledge bases can be tiny (your inbox) or huge (the web). The architecture is the same.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Next Up</h2></div>
+  <span class="pill blue">RAG architecture overview (next video)</span>
+  <span class="pill blue">Introduction to LLMs</span>
+  <span class="pill green">Lab: LLM calls &amp; simple augmented prompts</span>
+  <span class="pill purple">Intro to information retrieval</span>
+  <div class="note"><b>Closing idea (lecture):</b> whenever you have access to information that likely wasn't used to train an LLM, there is potential for a useful RAG application. It might even allow LLMs to be used in contexts that were otherwise impossible. The lecture ends by inviting you to spot RAG opportunities in your own work and life, then dives into the architecture of a RAG system.</div>
+</div>
+
+</body>
+</html>

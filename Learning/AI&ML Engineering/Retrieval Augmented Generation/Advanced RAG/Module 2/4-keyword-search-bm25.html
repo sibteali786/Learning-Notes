@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keyword search with BM25: visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6; --cell:#e6ebf8; --on:#fff;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a; --cell:#232c3e; --on:#10151f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a; --cell:#232c3e; --on:#10151f;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:62ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:68ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout.green{border-color:var(--green);background:var(--green-soft);}
+.callout p:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+/* evolution */
+.evo{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin:6px 0 0;}
+.evo .nd{border-radius:14px;padding:16px 26px;font-weight:600;font-size:18px;}
+.evo .a{background:var(--slate);color:var(--on);}
+.evo .b{background:var(--coral);color:var(--on);}
+.evo .lab{color:var(--muted);font-size:14px;}
+.evo svg{width:60px;height:20px;color:var(--slate);}
+/* formula */
+.formula{background:var(--slate-soft);border-radius:14px;padding:18px;overflow-x:auto;}
+.fx{display:flex;align-items:center;gap:12px;font-size:17px;min-width:520px;justify-content:center;}
+.frac{display:inline-flex;flex-direction:column;align-items:stretch;text-align:center;}
+.frac .num{border-bottom:2px solid var(--slate);padding:0 8px 6px;}
+.frac .den{padding:6px 8px 0;}
+.t-idf{background:var(--teal-soft);color:var(--teal);border-radius:6px;padding:1px 8px;font-weight:600;}
+.t-sat{background:var(--coral-soft);color:var(--coral);border-radius:6px;padding:1px 8px;font-weight:600;}
+.t-len{background:var(--amber-soft);color:var(--amber);border-radius:6px;padding:1px 8px;font-weight:600;}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:14px;font-size:14px;}
+/* improvement cards */
+.imp{border-top:5px solid var(--coral);}
+.imp.len{border-top-color:var(--amber);}
+.imp.par{border-top-color:var(--teal);}
+.cmpbar{margin:8px 0;font-size:14px;}
+.cmpbar .row{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;margin:6px 0;}
+.cmpbar .track{height:18px;background:var(--cell);border-radius:8px;overflow:hidden;}
+.cmpbar .track i{display:block;height:100%;border-radius:8px;}
+.cmpbar .coralf{background:var(--coral);} .cmpbar .tealf{background:var(--teal);}
+.x{color:var(--coral);font-weight:700;} .ok{color:var(--green);font-weight:700;}
+/* params */
+.range{font-size:13.5px;background:var(--slate-soft);border-radius:10px;padding:8px 12px;margin:6px 0;}
+.range b{color:var(--ink);}
+/* playground */
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px 24px;margin-bottom:16px;}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:4px;}
+.ctl output{color:var(--teal);}
+.ctl small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4;}
+input[type=range]{width:100%;accent-color:var(--teal);}
+input[type=range]:focus-visible{outline:3px solid var(--amber);outline-offset:3px;}
+input[type=text]{font:inherit;font-size:15px;width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);}
+input[type=text]:focus-visible{outline:3px solid var(--teal);}
+.chart svg{width:100%;height:auto;display:block;}
+.chart .ax{stroke:var(--line);stroke-width:1;}
+.chart .gr{stroke:var(--line);stroke-width:1;opacity:.5;}
+.chart .tx{fill:var(--muted);font-size:11px;font-family:'Poppins',system-ui,sans-serif;}
+.chart .l1{stroke:var(--coral);stroke-width:2.5;fill:none;stroke-dasharray:6 4;}
+.chart .l2{stroke:var(--teal);stroke-width:3;fill:none;}
+.chart .dot1{fill:var(--coral);} .chart .dot2{fill:var(--teal);}
+.chart .ref{stroke:var(--slate);stroke-width:1;stroke-dasharray:3 3;}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:13.5px;margin:6px 0;}
+.key span::before{content:"";display:inline-block;width:22px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle;}
+.key .k1::before{border-color:var(--coral);border-top-style:dashed;}
+.key .k2::before{border-color:var(--teal);}
+.read{background:var(--slate-soft);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:8px;}
+.read b{color:var(--ink);}
+.res{display:grid;gap:8px;}
+.rr{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface);font-size:13.5px;}
+.rr .top{display:flex;justify-content:space-between;gap:8px;font-weight:600;}
+.rr .txt{color:var(--muted);font-size:12.5px;margin:2px 0 4px;}
+.bar{height:7px;border-radius:6px;background:var(--cell);overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:6px;}
+.col h4{margin:0 0 8px;font-size:15px;font-weight:600;}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+/* flow */
+.flow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 14px;}
+.flow .s{background:var(--coral);color:var(--on);border-radius:12px;padding:10px 18px;font-weight:600;}
+.flow svg{width:22px;height:22px;color:var(--slate);}
+.strength{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.strength .card{border-top:5px solid var(--green);}
+.weak{border-top:5px solid var(--coral);}
+.miss{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:12px 0;}
+.miss .b{background:var(--slate-soft);border-radius:12px;padding:12px 14px;font-size:14.5px;}
+.miss .nx{color:var(--coral);font-weight:700;font-size:26px;}
+@media (max-width:620px){.miss{grid-template-columns:1fr;}.miss .nx{text-align:center;}}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro-t{color:var(--green);font-weight:600;font-size:13.5px;}
+.con-t{color:var(--coral);font-weight:600;font-size:13.5px;}
+.take{display:grid;gap:10px;padding:0;margin:0;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev" viewBox="0 0 16 16"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="long" viewBox="0 0 60 20"><path d="M2 10 H52 M44 3 L53 10 L44 17" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Information retrieval foundations</span>
+    <span class="chip teal">Lesson: keyword search with BM25</span>
+  </div>
+  <h1>BM25: TF-IDF, with diminishing returns</h1>
+  <p class="lede">TF-IDF is the classic, but most production retrievers use BM25. It keeps TF-IDF’s ideas and adds term frequency saturation, gentler length normalization, and two tunable knobs.</p>
+</header>
+
+<!-- 1 -->
+<section>
+  <h2>Where BM25 comes from</h2>
+  <p class="sub">“Best Matching 25” was the 25th variant in a series of scoring functions proposed by its creators. It works very similarly to TF-IDF, with a few key additions.</p>
+  <div class="card">
+    <div class="evo">
+      <div class="nd a">TF-IDF</div>
+      <svg><use href="#long"/></svg>
+      <span class="lab">refined into</span>
+      <svg><use href="#long"/></svg>
+      <div class="nd b">BM25</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:26px">The formula (score for one keyword in one document)</h3>
+  <div class="formula">
+    <div class="fx">
+      <span class="t-idf">IDF</span><span>×</span>
+      <span class="frac">
+        <span class="num"><span class="t-sat">TF × (k₁ + 1)</span></span>
+        <span class="den"><span class="t-sat">TF</span> + <span class="t-sat">k₁</span> × (1 − <span class="t-len">b</span> + <span class="t-len">b</span> × <span class="t-len">document length / average document length</span>)</span>
+      </span>
+    </div>
+    <div class="legend">
+      <div><span class="t-idf">IDF</span> same idea as before: rare words weigh more.</div>
+      <div><span class="t-sat">TF and k₁</span> control term frequency saturation.</div>
+      <div><span class="t-len">b and length ratio</span> control document length normalization.</div>
+    </div>
+  </div>
+  <div class="callout teal">
+    <p><strong>Same recipe as TF-IDF:</strong> compute this score for each prompt keyword, then <strong>sum across all keywords</strong> to get the document’s total relevance score. Rank by that total.</p>
+  </div>
+</section>
+
+<!-- 2 IMPROVEMENTS -->
+<section>
+  <h2>Two improvements over TF-IDF, plus tunable knobs</h2>
+  <div class="three">
+    <div class="card imp">
+      <h3>1. Term frequency saturation</h3>
+      <p>Extra occurrences of a keyword earn <strong>diminishing returns</strong>. A document with “pizza” 20 times isn’t really twice as relevant as one with it 10 times.</p>
+      <div class="cmpbar">
+        <div class="row"><span>TF-IDF</span><span class="track"><i class="coralf" style="width:100%"></i></span><span>20× = score 2X <span class="x">✗</span></span></div>
+        <div class="row"><span>BM25</span><span class="track"><i class="tealf" style="width:65%"></i></span><span>20× = score 1.3X <span class="ok">✓</span></span></div>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);margin:0">Slide values are illustrative (10 times = score X). The exact ratio depends on k₁; try the playground below.</p>
+    </div>
+    <div class="card imp len">
+      <h3>2. Document length normalization</h3>
+      <p>Long documents are still penalized, but with <strong>diminishing additional penalties</strong> as they grow. TF-IDF can penalize too aggressively and overly discount longer documents.</p>
+      <div class="cmpbar">
+        <div class="row"><span>TF-IDF</span><span class="track"><i class="coralf" style="width:100%"></i></span><span>heavy penalty</span></div>
+        <div class="row"><span>BM25</span><span class="track"><i class="tealf" style="width:45%"></i></span><span>smaller penalty</span></div>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);margin:0">Result: a long document still scores highly if its keyword frequency is fairly high.</p>
+    </div>
+    <div class="card imp par">
+      <h3>3. Two tunable hyperparameters</h3>
+      <p>They control how fast documents stop being rewarded for repeated keywords and stop being penalized for extra length.</p>
+      <div class="range"><b>k₁</b> term frequency saturation. Typically 1.2 to 2.0. Higher: term frequency matters more. Lower: it matters less.</div>
+      <div class="range"><b>b</b> length normalization, 0 to 1. 0 = no normalization, 1 = full. Balances favoring shorter vs longer documents.</div>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>In production</strong> you tune k₁ and b to land on the scoring system that best fits the data in your knowledge base.</p>
+  </div>
+</section>
+
+<!-- 3 PLAYGROUND -->
+<section>
+  <h2>Playground: feel k₁ and b</h2>
+  <p class="sub">Real formulas, one shared set of sliders. Charts hold IDF fixed so you only see the TF and length effects. The lesson’s typical k₁ range is 1.2 to 2.0; the sliders go wider so you can see the extremes.</p>
+  <div class="card">
+    <div class="controls">
+      <div class="ctl"><label for="k1">k₁ <output id="k1o"></output></label><input type="range" id="k1" min="0" max="3" step="0.1" value="1.2"><small>Term frequency saturation</small></div>
+      <div class="ctl"><label for="bb">b <output id="bo"></output></label><input type="range" id="bb" min="0" max="1" step="0.05" value="0.75"><small>Length normalization (0 none, 1 full)</small></div>
+      <div class="ctl"><label for="tfs">Keyword count in length chart <output id="tfo"></output></label><input type="range" id="tfs" min="1" max="20" step="1" value="5"><small>Occurrences of the keyword in the document</small></div>
+    </div>
+
+    <div class="two">
+      <div class="chart">
+        <h3>Saturation: score vs keyword count</h3>
+        <div class="key"><span class="k1">TF-IDF style (linear in TF)</span><span class="k2">BM25</span></div>
+        <svg id="ch1" viewBox="0 0 520 280" role="img" aria-label="Chart of relative score against keyword count for TF-IDF and BM25"></svg>
+        <div class="read" id="read1"></div>
+      </div>
+      <div class="chart">
+        <h3>Length: score vs document length</h3>
+        <div class="key"><span class="k1">TF-IDF style (divide by length)</span><span class="k2">BM25</span></div>
+        <svg id="ch2" viewBox="0 0 520 280" role="img" aria-label="Chart of relative score against document length ratio for TF-IDF and BM25"></svg>
+        <div class="read" id="read2"></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px">Ranking: TF-IDF vs BM25 on six invented documents</h3>
+    <div class="ctl" style="margin-bottom:10px"><label for="q" style="font-weight:600">Prompt</label><input type="text" id="q" value="making pizza without a pizza oven" autocomplete="off"></div>
+    <div class="two">
+      <div class="col"><h4 style="color:var(--coral)">TF-IDF (normalized TF × log10 IDF)</h4><div class="res" id="rTfidf"></div></div>
+      <div class="col"><h4 style="color:var(--teal)">BM25 (same IDF, current k₁ and b)</h4><div class="res" id="rBm25"></div></div>
+    </div>
+    <p style="font-size:13.5px;color:var(--muted);margin:12px 0 0">Doc 5 is the long one. Slide b toward 1 and the long document loses ground; slide it toward 0 and it recovers. Same IDF is used on both sides, so only the TF and length handling differ. Real BM25 implementations often use a different IDF variant, so exact numbers vary between libraries.</p>
+  </div>
+</section>
+
+<!-- 4 TFIDF vs BM25 -->
+<section>
+  <h2>TF-IDF vs BM25 in production</h2>
+  <div class="card">
+    <div class="three">
+      <div><h3 style="color:var(--green)">Better performance</h3><p style="margin:0;font-size:14.5px">Tends to find relevant documents significantly better than TF-IDF.</p></div>
+      <div><h3 style="color:var(--teal)">Same cost</h3><p style="margin:0;font-size:14.5px">Roughly equivalent computational resources.</p></div>
+      <div><h3 style="color:var(--amber)">More flexible</h3><p style="margin:0;font-size:14.5px">Hyperparameters let you tune it to your dataset.</p></div>
+    </div>
+    <p style="margin:14px 0 0"><strong>BM25 is the standard keyword search algorithm in production retrievers.</strong></p>
+  </div>
+</section>
+
+<!-- 5 REVIEW -->
+<section>
+  <h2>Keyword search, in review</h2>
+  <div class="card">
+    <div class="flow">
+      <span class="s">Sparse vectors</span><svg><use href="#chev"/></svg><span class="s">Scored</span><svg><use href="#chev"/></svg><span class="s">Ranked</span>
+    </div>
+    <p>Match documents to prompts by <strong>how frequently the prompt’s keywords appear in each document</strong>. Prompts and documents become sparse vectors counting each vocabulary word. TF-IDF and BM25 are two ways of processing those vectors into scores, accounting for keyword rarity, how often a document contains a keyword, and document length.</p>
+  </div>
+
+  <h3 style="margin-top:24px">Strengths</h3>
+  <div class="strength">
+    <div class="card"><h3>Simplicity</h3><p style="margin:0;font-size:14.5px">Straightforward and works well in practice; often performs quite well on its own and sets a competitive benchmark that advanced techniques struggle to beat.</p></div>
+    <div class="card"><h3>Proven</h3><p style="margin:0;font-size:14.5px">BM25 has withstood decades since its invention and balances complexity and performance in real-world applications.</p></div>
+    <div class="card"><h3>Guaranteed keywords</h3><p style="margin:0;font-size:14.5px">Retrieved documents will contain the prompt’s keywords. Vital when users use <strong>technical terminology or exact product names</strong>.</p></div>
+  </div>
+
+  <h3 style="margin-top:24px">Weakness</h3>
+  <div class="card weak">
+    <p>It depends on the prompt containing words that <strong>exactly match</strong> the document’s words. A prompt with the same meaning but different words finds nothing.</p>
+    <div class="miss">
+      <div class="b"><b>Prompt</b><br>“How many vacation days do new hires get?”</div>
+      <div class="nx">≠</div>
+      <div class="b"><b>Document</b><br>“Paid time off: employees accrue leave from day one.”</div>
+    </div>
+    <p style="margin:0;font-size:14px;color:var(--muted)">No shared keywords, so keyword search misses it. The slides add the reverse problem: the same word can have different meanings (“python” the language vs the snake). Semantic search addresses this, and it’s next.</p>
+  </div>
+</section>
+
+<!-- 6 CODE -->
+<section>
+  <h2>BM25 in a few lines</h2>
+  <p class="sub">Sketch of the lesson’s formula; for learning, not production.</p>
+<pre><code>def bm25_term(tf, doc_len, avg_len, idf, k1=1.2, b=0.75):
+    # score of ONE keyword in ONE document
+    norm = k1 * (1 - b + b * doc_len / avg_len)   # length normalization
+    return idf * (tf * (k1 + 1)) / (tf + norm)    # saturating TF
+
+def bm25_score(prompt_words, counts, doc_len, avg_len, idf, k1=1.2, b=0.75):
+    # sum the per-keyword scores for a document's total
+    return sum(
+        bm25_term(counts.get(w, 0), doc_len, avg_len, idf.get(w, 0), k1, b)
+        for w in prompt_words
+    )</code></pre>
+  <div class="callout amber">
+    <p><strong>Library route:</strong> for real projects, use an established implementation (for example the <code>rank_bm25</code> package, or the BM25 scoring built into search engines like Elasticsearch/OpenSearch) instead of rolling your own. Defaults for k₁ and b and the exact IDF formula differ by library, so check the docs of the one you use. I haven’t verified current versions or defaults.</p>
+  </div>
+</section>
+
+<!-- 7 ALTERNATIVES -->
+<section>
+  <h2>Alternatives and trade-offs</h2>
+  <div class="cmp">
+    <div class="card">
+      <h3>TF-IDF</h3>
+      <div class="pro-t">Pros</div><ul><li>Simplest to explain and implement</li></ul>
+      <div class="con-t">Cons</div><ul><li>Unbounded TF reward; aggressive length penalty; no knobs</li></ul>
+    </div>
+    <div class="card" style="border:2px solid var(--green)">
+      <h3>BM25 with library defaults</h3>
+      <div class="pro-t">Pros</div><ul><li>Strong out of the box, standard in production</li><li>Zero tuning effort</li></ul>
+      <div class="con-t">Cons</div><ul><li>Defaults may not suit unusual data (very long or very short documents)</li></ul>
+    </div>
+    <div class="card">
+      <h3>BM25 with tuned k₁ and b</h3>
+      <div class="pro-t">Pros</div><ul><li>Fits your knowledge base</li></ul>
+      <div class="con-t">Cons</div><ul><li>Needs labelled queries and evaluation metrics to tune safely (covered later in this module)</li></ul>
+    </div>
+    <div class="card">
+      <h3>Keyword search only</h3>
+      <div class="pro-t">Pros</div><ul><li>Fast, exact, great for product names and technical terms</li></ul>
+      <div class="con-t">Cons</div><ul><li>Blind to synonyms and paraphrases, so pair it with semantic search</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8 TAKEAWAYS -->
+<section>
+  <h2>Key takeaways</h2>
+  <ul class="take">
+    <li>BM25 = IDF × a saturating TF term with length normalization, computed per keyword and <strong>summed across keywords</strong>.</li>
+    <li><strong>Term frequency saturation:</strong> repeated keywords earn diminishing returns (pizza ×20 isn’t 2× pizza ×10).</li>
+    <li><strong>Length normalization:</strong> long documents are penalized, but with diminishing additional penalties, so TF-IDF’s over-penalizing is avoided.</li>
+    <li><strong>k₁</strong> (typically 1.2 to 2.0) and <strong>b</strong> (0 to 1) let you tune it to your data.</li>
+    <li>Better than TF-IDF, roughly the same compute, more flexible: the production standard.</li>
+    <li>Strength: simple, benchmark-setting, guarantees exact keywords. Weakness: needs exact word matches. Next: <strong>semantic search</strong>.</li>
+  </ul>
+  <footer>Based on the Module 2 lesson transcript and slides (DeepLearning.AI, Zain Hasan). Playground documents are invented; chart values are computed from the formulas shown.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  function se(tag,attrs,cls){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(cls)e.setAttribute("class",cls);return e;}
+  var $=function(id){return document.getElementById(id);};
+
+  function f(tf,k1,b,r){ // BM25 TF component
+    if(tf<=0) return 0;
+    return tf*(k1+1)/(tf+k1*(1-b+b*r));
+  }
+
+  /* chart helper */
+  function chart(svg,opt){
+    svg.innerHTML="";
+    var W=520,H=280,L=46,R=14,T=14,B=40;
+    var pw=W-L-R, ph=H-T-B;
+    function X(x){return L+(x-opt.x0)/(opt.x1-opt.x0)*pw;}
+    function Y(y){return T+ph-(Math.min(y,opt.y1)/opt.y1)*ph;}
+    var i;
+    for(i=0;i<=4;i++){
+      var yv=opt.y1*i/4;
+      svg.appendChild(se("line",{x1:L,x2:W-R,y1:Y(yv),y2:Y(yv)},"gr"));
+      var t=se("text",{x:L-6,y:Y(yv)+4,"text-anchor":"end"},"tx");t.textContent=(Math.round(yv*10)/10)+"x";svg.appendChild(t);
+    }
+    opt.xticks.forEach(function(xv){
+      var t=se("text",{x:X(xv),y:H-B+16,"text-anchor":"middle"},"tx");t.textContent=xv;svg.appendChild(t);
+      svg.appendChild(se("line",{x1:X(xv),x2:X(xv),y1:T+ph,y2:T+ph+4},"ax"));
+    });
+    svg.appendChild(se("line",{x1:L,x2:L,y1:T,y2:T+ph},"ax"));
+    svg.appendChild(se("line",{x1:L,x2:W-R,y1:T+ph,y2:T+ph},"ax"));
+    var xl=se("text",{x:L+pw/2,y:H-6,"text-anchor":"middle"},"tx");xl.textContent=opt.xlabel;svg.appendChild(xl);
+    if(opt.refx!=null){svg.appendChild(se("line",{x1:X(opt.refx),x2:X(opt.refx),y1:T,y2:T+ph},"ref"));}
+    opt.series.forEach(function(s){
+      var pts=[];
+      for(var x=opt.x0;x<=opt.x1+1e-9;x+=opt.step){pts.push(X(x).toFixed(1)+","+Y(s.fn(x)).toFixed(1));}
+      svg.appendChild(se("polyline",{points:pts.join(" ")},s.cls));
+    });
+    (opt.marks||[]).forEach(function(m){
+      svg.appendChild(se("circle",{cx:X(m.x),cy:Y(m.y),r:5},m.cls));
+    });
+  }
+
+  /* corpus */
+  var corpus=[
+    "Making pizza without a pizza oven is easy: use a hot skillet and a lid.",
+    "A guide to buying a new oven without breaking the bank.",
+    "Pizza dough basics: flour, water, yeast and patience.",
+    "Making bread without a kneading machine takes a little extra time and a lot of patience.",
+    "Without a doubt, a wood-fired oven makes a great pizza, but a cheap oven can work too, and a stone helps a lot with a crispy crust in a home kitchen.",
+    "Making tea without a kettle."
+  ];
+  function tok(s){return (s.toLowerCase().match(/[a-z0-9]+/g)||[]);}
+  var docs=corpus.map(tok), N=docs.length;
+  var df={};
+  docs.forEach(function(d){var seen={};d.forEach(function(w){if(!seen[w]){seen[w]=1;df[w]=(df[w]||0)+1;}});});
+  function idf(w){return df[w]?Math.log10(N/df[w]):0;}
+  var avg=docs.reduce(function(a,d){return a+d.length;},0)/N;
+  var counts=docs.map(function(d){var c={};d.forEach(function(w){c[w]=(c[w]||0)+1;});return c;});
+
+  function rankList(box,items,cls){
+    box.innerHTML="";
+    var max=Math.max(items[0]?items[0].s:0,1e-9);
+    items.forEach(function(r,i){
+      var row=el("div","rr");
+      var top=el("div","top");
+      top.appendChild(el("span",null,"#"+(i+1)+"  Doc "+(r.i+1)+" ("+docs[r.i].length+" words)"));
+      top.appendChild(el("span",null,r.s.toFixed(3)));
+      row.appendChild(top);
+      var t=corpus[r.i];row.appendChild(el("div","txt",t.length>70?t.slice(0,68)+"...":t));
+      var bar=el("div","bar");var fill=el("i");fill.style.width=Math.max(0,r.s/max*100)+"%";fill.style.background=cls;bar.appendChild(fill);row.appendChild(bar);
+      box.appendChild(row);
+    });
+  }
+
+  function render(){
+    var k1=parseFloat($("k1").value), b=parseFloat($("bb").value), tfs=parseInt($("tfs").value,10);
+    $("k1o").textContent=k1.toFixed(1);
+    $("bo").textContent=b.toFixed(2);
+    $("tfo").textContent=String(tfs);
+
+    var ref=f(10,k1,b,1);
+    chart($("ch1"),{
+      x0:0,x1:40,step:1,y1:4,xticks:[0,10,20,30,40],xlabel:"keyword occurrences in document (relative to 10 occurrences = 1x)",refx:10,
+      series:[{cls:"l1",fn:function(x){return x/10;}},{cls:"l2",fn:function(x){return ref>0?f(x,k1,b,1)/ref:0;}}],
+      marks:[{x:20,y:2,cls:"dot1"},{x:20,y:ref>0?f(20,k1,b,1)/ref:0,cls:"dot2"}]
+    });
+    var r20=ref>0?f(20,k1,b,1)/ref:0;
+    $("read1").innerHTML="20 occurrences vs 10: TF-IDF style <b>2.00x</b>, BM25 <b>"+r20.toFixed(2)+"x</b>. Ceiling of the TF term: <b>"+(k1+1).toFixed(1)+"</b> (times IDF), reached only as counts grow very large.";
+
+    var base=f(tfs,k1,b,1);
+    chart($("ch2"),{
+      x0:0.25,x1:4,step:0.05,y1:4,xticks:[0.5,1,2,3,4],xlabel:"document length / average length (1 = average = 1x)",refx:1,
+      series:[{cls:"l1",fn:function(x){return 1/x;}},{cls:"l2",fn:function(x){return base>0?f(tfs,k1,b,x)/base:0;}}],
+      marks:[{x:3,y:1/3,cls:"dot1"},{x:3,y:base>0?f(tfs,k1,b,3)/base:0,cls:"dot2"}]
+    });
+    var r3=base>0?f(tfs,k1,b,3)/base:0;
+    $("read2").innerHTML="A document <b>3x the average length</b> with the same keyword count keeps TF-IDF style <b>0.33x</b> of its score, BM25 <b>"+r3.toFixed(2)+"x</b> (b = "+b.toFixed(2)+").";
+
+    var q=tok($("q").value);
+    var a=[],c=[];
+    docs.forEach(function(d,i){
+      var s1=0,s2=0;
+      q.forEach(function(w){
+        var tf=counts[i][w]||0;
+        s1+=(tf/d.length)*idf(w);
+        s2+=idf(w)*f(tf,k1,b,d.length/avg);
+      });
+      a.push({i:i,s:s1});c.push({i:i,s:s2});
+    });
+    a.sort(function(x,y){return y.s-x.s;});
+    c.sort(function(x,y){return y.s-x.s;});
+    cls=getComputedStyle(document.documentElement).getPropertyValue("--coral").trim()||"#e8434f";
+    rankList($("rTfidf"),a,cls);
+    cls=getComputedStyle(document.documentElement).getPropertyValue("--teal").trim()||"#0a8fab";
+    rankList($("rBm25"),c,cls);
+  }
+  var cls="";
+  ["k1","bb","tfs","q"].forEach(function(id){$(id).addEventListener("input",render);});
+  if(window.matchMedia){var mq=window.matchMedia("(prefers-color-scheme: dark)");if(mq.addEventListener)mq.addEventListener("change",render);}
+  render();
+})();
+</script>
+</body>
+</html>

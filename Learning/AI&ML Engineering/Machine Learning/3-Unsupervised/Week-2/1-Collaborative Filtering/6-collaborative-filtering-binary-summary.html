@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collaborative Filtering with Binary Labels</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:800px){.grid2,.grid3,.grid4{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.92rem;margin:10px 0;overflow-x:auto;}
+  .mu{color:var(--blue)} .sg{color:var(--orange)} .xx{color:var(--green)}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:140px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .slider b{min-width:150px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.act{border-color:var(--green);color:var(--green);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  .q{color:#8a90a6}
+  .cellp{background:rgba(181,140,255,.14);}
+  .one{color:#4dd992;font-weight:700}.zero{color:#ff6b6b;font-weight:700}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>👍 Collaborative Filtering with Binary Labels</h1>
+<div class="sub">From star ratings to like / engage · Linear regression → logistic regression, again · Binary cross-entropy loss · J(w, b, x)</div>
+
+<!-- WHY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Binary Labels?</h2></div>
+  <p>Many important recommender applications don't get a 0–5 star rating. The user just somehow signals <b>"liked / engaged with this item"</b> or <b>"didn't"</b>. The generalization is <b>very reminiscent of going from linear regression to logistic regression</b> in Course 1: from predicting numbers to predicting a binary label.</p>
+  <div class="flow">
+    <div class="step">Linear regression<br><code>w·x + b</code></div><div class="arrow">→ logistic →</div>
+    <div class="step">Logistic regression<br><code>g(w·x + b)</code></div>
+    <div class="arrow">⇄ same idea ⇄</div>
+    <div class="step">CF with ratings<br><code>w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾</code></div><div class="arrow">→</div>
+    <div class="step">CF with binary labels<br><code>g(w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾)</code></div>
+  </div>
+</div>
+
+<!-- LABEL MEANING -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>What 1, 0 and ? Mean</h2></div>
+  <div class="grid3">
+    <div class="mini" style="border-color:rgba(77,217,146,.5)"><h3 style="color:var(--green)">1 = engaged</h3><ul><li><b>Engaged after being shown</b> the item</li></ul></div>
+    <div class="mini" style="border-color:rgba(255,107,107,.5)"><h3 style="color:var(--red)">0 = did not engage</h3><ul><li>Was shown the item but <b>did not engage</b></li></ul></div>
+    <div class="mini" style="border-color:rgba(138,144,166,.6)"><h3 style="color:var(--dim)">? = not yet shown</h3><ul><li>The user hasn't seen it, so they couldn't decide</li></ul></div>
+  </div>
+  <p style="margin-top:12px"><b>Example dataset.</b> Alice's row follows the lecture's description (1, 1, ?, 0, 0); the other rows are my illustrative conversion of the earlier ratings table (rating ≥ 4 → 1, rating 0 → 0, ? stays ?):</p>
+  <table id="bt"></table>
+  <div class="note">Alice's story from the lecture: label 1 could mean she <b>watched Love at last and Romance forever to the end</b>, or hit <b>like/favorite</b>. A 0 means she stopped Nonstop car chases after a few minutes, or didn't hit like.</div>
+  <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">The goal:</b> predict <b>how likely each user is to like the items they haven't seen</b>, then decide how strongly to recommend them.</div>
+</div>
+
+<!-- APPLICATIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Ways to Define the Labels</h2></div>
+  <table>
+    <tr><th>Application</th><th>1</th><th>0</th><th>?</th></tr>
+    <tr><td>🛒 Online shopping: did user j <b>purchase</b> after being shown the item?</td><td class="one">purchased</td><td class="zero">didn't purchase</td><td class="q">never shown</td></tr>
+    <tr><td>📱 Social media: did user j <b>favorite / like</b> the item?</td><td class="one">liked / favorited</td><td class="zero">shown, no like</td><td class="q">not yet shown</td></tr>
+    <tr><td>⏱️ Implicit behaviour: did user j <b>spend ≥ 30 seconds</b> with it?</td><td class="one">≥ 30 s</td><td class="zero">shown, &lt; 30 s</td><td class="q">not shown</td></tr>
+    <tr><td>📢 Online ads: did user j <b>click</b> on the item?</td><td class="one">clicked</td><td class="zero">shown, no click</td><td class="q">ad never shown</td></tr>
+  </table>
+  <div class="note">Many sites skip explicit ratings and <b>infer engagement from behaviour</b> (dwell time, clicks). The definition of "engaged" is your design choice.</div>
+</div>
+
+<!-- MODEL -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Step 1: The Model — Wrap It in a Sigmoid</h2></div>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--blue)">Previously (ratings)</h3><div class="formula" style="margin:6px 0">predict y⁽ⁱ'ʲ⁾ as <span class="mu">w⁽ʲ⁾</span>·<span class="xx">x⁽ⁱ⁾</span> + <span class="sg">b⁽ʲ⁾</span></div></div>
+    <div class="mini"><h3 style="color:var(--green)">Now (binary labels)</h3><div class="formula" style="margin:6px 0">P( y⁽ⁱ'ʲ⁾ = 1 ) = g( <span class="mu">w⁽ʲ⁾</span>·<span class="xx">x⁽ⁱ⁾</span> + <span class="sg">b⁽ʲ⁾</span> )</div></div>
+  </div>
+  <div class="formula">g(z) = 1 / (1 + e<sup>−z</sup>) &nbsp;(the logistic function)</div>
+  <div class="note">Output is now a <b>probability that user j engaged with / liked item i</b>, always between 0 and 1.</div>
+
+  <h3 style="color:var(--purple);font-size:.95rem;margin-top:14px">Explorer: sigmoid and the loss</h3>
+  <div class="slider"><b style="color:var(--blue)">z = w·x + b = <span id="zV"></span></b><input id="z" type="range" min="-8" max="8" step="0.1" value="1.5"></div>
+  <div class="grid2">
+    <svg id="sig" viewBox="0 0 400 260" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+    <svg id="loss" viewBox="0 0 400 260" width="100%" style="background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  </div>
+  <div id="lossTxt" class="note"></div>
+</div>
+
+<!-- COST -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>Step 2: The Cost Function — Binary Cross-Entropy</h2></div>
+  <p>Previous cost (squared error), where <code>w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾</code> plays the role of f(x):</p>
+  <div class="formula">½ Σ<sub>(i,j):r(i,j)=1</sub> ( w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾ − y⁽ⁱ'ʲ⁾ )² + <span style="color:var(--orange)">λ/2 Σ Σ (x<sub>k</sub>⁽ⁱ⁾)² + λ/2 Σ Σ (w<sub>k</sub>⁽ʲ⁾)²</span></div>
+  <p>For binary labels, the prediction becomes <b>f<sub>(w,b,x)</sub>(x) = g(w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾)</b> and the loss for a single example is the one from logistic regression:</p>
+  <div class="formula">L( f, y⁽ⁱ'ʲ⁾ ) = <span style="color:var(--red)">− y⁽ⁱ'ʲ⁾ · log( f )</span> &nbsp;−&nbsp; <span style="color:var(--blue)">( 1 − y⁽ⁱ'ʲ⁾ ) · log( 1 − f )</span></div>
+  <div class="note">Also called the <b>binary cross-entropy</b> cost. It's the standard loss for logistic regression, binary classification and training neural networks.</div>
+  <p style="margin-top:10px">Summed over every (user, item) pair that has a label:</p>
+  <div class="formula">J( <span class="mu">w</span>, <span class="sg">b</span>, <span class="xx">x</span> ) = Σ<sub>(i,j) : r(i,j)=1</sub> L( f<sub>(w,b,x)</sub>(x), y⁽ⁱ'ʲ⁾ )</div>
+  <div class="grid2">
+    <div class="note" style="border-color:var(--green)"><b style="color:var(--green)">Only labeled pairs count:</b> r(i,j) = 1 now means "item was shown and we have a 0/1 outcome". The "?" entries are excluded, same as before.</div>
+    <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Regularization note (my addition):</b> the slide writes J as just the sum of losses. In practice you typically keep the same λ terms on w and x as before, the same idea as in the previous version.</div>
+  </div>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fnc">cost_binary</span>(X, W, b, Y, R, lam):
+    <span class="cm"># X: (n_m, n)  W: (n_u, n)  b: (1, n_u)  Y, R: (n_m, n_u)   R = 1 where a 0/1 label exists</span>
+    f = 1 / (1 + np.exp(-(X @ W.T + b)))                  <span class="cm"># g(w·x + b) for every user/item pair</span>
+    eps = 1e-12
+    L = -(Y*np.log(f + eps) + (1 - Y)*np.log(1 - f + eps)) * R   <span class="cm"># mask out '?' entries</span>
+    <span class="kw">return</span> L.sum() + lam/2 * (np.sum(X**2) + np.sum(W**2))
+
+<span class="cm"># gradient has the SAME form as before, with f replacing the linear prediction:</span>
+<span class="cm"># err = (f - Y) * R ;  dX = err @ W + lam*X ;  dW = err.T @ X + lam*W ;  db = err.sum(0)</span></pre>
+</div>
+
+<!-- LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Interactive Lab: Predict Who Will Like What</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Trains w, b and x jointly (n = 2 features) on the binary table above with the cross-entropy cost. Purple cells are the model's probability for items the user has <b>not yet been shown</b>.</p>
+  <div class="slider"><b style="color:var(--purple)">λ = <span id="lV"></span></b><input id="lam" type="range" min="0" max="2" step="0.05" value="0.1"></div>
+  <div class="btns"><button class="act" id="fit">▶ Run gradient descent</button><button id="rnd">🎲 New random start</button></div>
+  <table id="out"></table>
+  <div id="metrics" style="margin-top:8px"></div>
+  <svg id="curve" viewBox="0 0 640 200" width="100%" style="margin-top:8px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <div class="note" id="labNote"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> the dataset (except Alice's row), learning rate (0.1), iteration count and random starts are my demo choices. With λ = 0 and so little data the weights drift toward ±∞, so a small λ keeps the demo well behaved.</div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill green">1 engaged · 0 didn't · ? not shown</span>
+  <span class="pill blue">P(y=1) = g(w·x + b)</span>
+  <span class="pill red">Binary cross-entropy loss</span>
+  <span class="pill orange">Sum only where r(i,j) = 1</span>
+  <span class="pill purple">Same structure, opens many more applications</span>
+  <div class="note"><b>Next video:</b> implementation tips and small modifications that make the algorithm work much better and run much faster.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Pros/cons (beyond the lecture):</b> binary engagement data is plentiful and cheap to collect, and the probabilities let you rank items. But a "0" is ambiguous (not interested vs. just didn't notice), clicks can be biased by what was shown, and with all-positive data you need to sample negatives or treat the problem carefully.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const users=['Alice','Bob','Carol','Dave'];
+const movies=['Love at last','Romance forever','Cute puppies of love','Nonstop car chases','Swords vs. karate'];
+const Y=[[1,1,0,0],[1,null,null,0],[null,1,0,null],[0,0,1,1],[0,0,1,null]];
+const nm=5,nu=4;
+const sg=z=>1/(1+Math.exp(-z));
+// data table
+(function(){let h='<tr><th>Movie</th>'+users.map((u,j)=>`<th>${u}(${j+1})</th>`).join('')+'</tr>';
+  movies.forEach((m,i)=>{h+=`<tr><td>${m}</td>`+Y[i].map(v=>`<td>${v===null?'<span class="q">?</span>':v===1?'<span class="one">1</span>':'<span class="zero">0</span>'}</td>`).join('')+'</tr>';});
+  document.getElementById('bt').innerHTML=h;})();
+
+// sigmoid + loss explorer
+const zs=document.getElementById('z');
+function drawExplorer(){
+  const z=+zs.value,f=sg(z);document.getElementById('zV').textContent=z.toFixed(1)+`  →  g(z) = ${f.toFixed(3)}`;
+  let s=document.getElementById('sig');s.innerHTML='';
+  const X=v=>30+(v+8)/16*340,Y_=v=>220-v*190;
+  el('line',{x1:30,y1:220,x2:380,y2:220,stroke:'#8a90a6'},s);el('line',{x1:X(0),y1:226,x2:X(0),y2:24,stroke:'#262b3a'},s);
+  el('line',{x1:30,y1:Y_(0.5),x2:380,y2:Y_(0.5),stroke:'#262b3a','stroke-dasharray':'4 3'},s);
+  let d='';for(let i=0;i<=160;i++){const v=-8+i*0.1;d+=(i?'L':'M')+X(v).toFixed(1)+','+Y_(sg(v)).toFixed(1);}
+  el('path',{d,fill:'none',stroke:'#4d9dff','stroke-width':2.5},s);
+  el('line',{x1:X(z),y1:220,x2:X(z),y2:Y_(f),stroke:'#b58cff','stroke-dasharray':'4 3'},s);el('circle',{cx:X(z),cy:Y_(f),r:6,fill:'#b58cff'},s);
+  el('text',{x:200,y:16,fill:'#4d9dff','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent='g(z) = 1/(1+e^−z)';
+  el('text',{x:34,y:Y_(1)+12,fill:'#8a90a6','font-size':10},s).textContent='1';el('text',{x:34,y:Y_(0.5)-4,fill:'#8a90a6','font-size':10},s).textContent='0.5';
+  el('text',{x:376,y:236,fill:'#8a90a6','font-size':10,'text-anchor':'end'},s).textContent='z';
+  // loss
+  let l=document.getElementById('loss');l.innerHTML='';
+  const FX=v=>30+v*340,LY=v=>220-Math.min(v,5)/5*190;
+  el('line',{x1:30,y1:220,x2:380,y2:220,stroke:'#8a90a6'},l);el('line',{x1:30,y1:220,x2:30,y2:24,stroke:'#8a90a6'},l);
+  let d1='',d0='';for(let i=1;i<100;i++){const v=i/100;d1+=(i>1?'L':'M')+FX(v).toFixed(1)+','+LY(-Math.log(v)).toFixed(1);d0+=(i>1?'L':'M')+FX(v).toFixed(1)+','+LY(-Math.log(1-v)).toFixed(1);}
+  el('path',{d:d1,fill:'none',stroke:'#ff6b6b','stroke-width':2.5},l);el('path',{d:d0,fill:'none',stroke:'#4d9dff','stroke-width':2.5},l);
+  el('line',{x1:FX(f),y1:220,x2:FX(f),y2:30,stroke:'#b58cff','stroke-dasharray':'4 3'},l);
+  el('text',{x:200,y:16,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},l).textContent='loss vs prediction f';
+  el('text',{x:376,y:236,fill:'#8a90a6','font-size':10,'text-anchor':'end'},l).textContent='f';
+  el('text',{x:44,y:44,fill:'#ff6b6b','font-size':10},l).textContent='y = 1: −log f';el('text',{x:250,y:44,fill:'#4d9dff','font-size':10},l).textContent='y = 0: −log(1−f)';
+  const L1=-Math.log(Math.max(f,1e-12)),L0=-Math.log(Math.max(1-f,1e-12));
+  document.getElementById('lossTxt').innerHTML=`With predicted probability <b>f = ${f.toFixed(3)}</b>: if the true label is <b style="color:#ff6b6b">y = 1</b> the loss is <b>${L1.toFixed(3)}</b>; if it's <b style="color:#4d9dff">y = 0</b> the loss is <b>${L0.toFixed(3)}</b>. Confidently wrong predictions (f near 1 when y = 0, or near 0 when y = 1) are punished heavily.`;
+}
+zs.oninput=drawExplorer;drawExplorer();
+
+// lab
+let seed=7,Xf,Wf,Bf,hist=[];const lam=document.getElementById('lam');
+const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+function cost(L){let s=0;for(let i=0;i<nm;i++)for(let j=0;j<nu;j++){const y=Y[i][j];if(y===null)continue;const f=sg(Xf[i][0]*Wf[j][0]+Xf[i][1]*Wf[j][1]+Bf[j]);s+=-(y*Math.log(f+1e-12)+(1-y)*Math.log(1-f+1e-12));}
+  let r=0;Xf.forEach(v=>v.forEach(a=>r+=a*a));Wf.forEach(v=>v.forEach(a=>r+=a*a));return s+L/2*r;}
+function run(){
+  const L=+lam.value,a=0.1;seed=seed||1;
+  Xf=Array.from({length:nm},()=>[rnd()*0.8-0.4,rnd()*0.8-0.4]);Wf=Array.from({length:nu},()=>[rnd()*0.8-0.4,rnd()*0.8-0.4]);Bf=new Array(nu).fill(0);hist=[];
+  for(let it=0;it<=5000;it++){
+    if(it%50===0)hist.push(cost(L));
+    const dX=Xf.map(()=>[0,0]),dW=Wf.map(()=>[0,0]),dB=new Array(nu).fill(0);
+    for(let i=0;i<nm;i++)for(let j=0;j<nu;j++){const y=Y[i][j];if(y===null)continue;
+      const e=sg(Xf[i][0]*Wf[j][0]+Xf[i][1]*Wf[j][1]+Bf[j])-y;
+      dX[i][0]+=e*Wf[j][0];dX[i][1]+=e*Wf[j][1];dW[j][0]+=e*Xf[i][0];dW[j][1]+=e*Xf[i][1];dB[j]+=e;}
+    for(let i=0;i<nm;i++){Xf[i][0]-=a*(dX[i][0]+L*Xf[i][0]);Xf[i][1]-=a*(dX[i][1]+L*Xf[i][1]);}
+    for(let j=0;j<nu;j++){Wf[j][0]-=a*(dW[j][0]+L*Wf[j][0]);Wf[j][1]-=a*(dW[j][1]+L*Wf[j][1]);Bf[j]-=a*dB[j];}
+  }
+  render(L);
+}
+function render(L){
+  document.getElementById('lV').textContent=(+lam.value).toFixed(2);if(!Xf)return;
+  let h='<tr><th>Movie</th>'+users.map(u=>`<th>${u}</th>`).join('')+'</tr>',acc=0,cnt=0;
+  for(let i=0;i<nm;i++){h+=`<tr><td>${movies[i]}</td>`;for(let j=0;j<nu;j++){
+    const p=sg(Xf[i][0]*Wf[j][0]+Xf[i][1]*Wf[j][1]+Bf[j]),y=Y[i][j];
+    if(y===null)h+=`<td class="cellp"><b>${(p*100).toFixed(0)}%</b> ${p>0.5?'👍':''}<br><small class="q">not shown</small></td>`;
+    else{h+=`<td>${(p*100).toFixed(0)}% <small class="q">(actual ${y})</small></td>`;cnt++;if((p>0.5)===(y===1))acc++;}}
+    h+='</tr>';}
+  document.getElementById('out').innerHTML=h;
+  document.getElementById('metrics').innerHTML=`<span class="metric">J(final) = <b>${cost(L).toFixed(3)}</b></span><span class="metric">accuracy on labeled cells = <b>${acc}/${cnt}</b></span>`;
+  document.getElementById('labNote').innerHTML='Each cell is the predicted <b>probability of engagement</b> g(w·x + b). 👍 marks unseen items with probability above 50%, i.e. candidates to recommend. Rank by probability to decide how strongly to recommend.';
+  const c=document.getElementById('curve');c.innerHTML='';
+  el('text',{x:320,y:14,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},c).textContent='cost J vs iterations';
+  el('line',{x1:40,y1:170,x2:620,y2:170,stroke:'#8a90a6'},c);el('line',{x1:40,y1:170,x2:40,y2:24,stroke:'#8a90a6'},c);
+  if(hist.length){const mx=Math.max(...hist);let d='';hist.forEach((v,k)=>{d+=(k?'L':'M')+(40+k/(hist.length-1)*580).toFixed(1)+','+(170-v/mx*140).toFixed(1);});
+    el('path',{d,fill:'none',stroke:'#ff9d4d','stroke-width':2.5},c);el('text',{x:46,y:36,fill:'#8a90a6','font-size':10},c).textContent=mx.toFixed(1);}
+}
+document.getElementById('fit').onclick=run;
+document.getElementById('rnd').onclick=()=>{seed=Math.floor(Math.random()*1e6)+1;run();};
+lam.oninput=()=>{document.getElementById('lV').textContent=(+lam.value).toFixed(2);};
+run();
+</script>
+</body>
+</html>

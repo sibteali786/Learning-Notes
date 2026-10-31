@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG: Introduction to LLMs — Visual Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--orange);font-weight:600;}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini .t{font-family:'Syne',sans-serif;font-weight:700;color:#fff;margin-bottom:4px;}
+  .mini p{margin:4px 0 0;font-size:.82rem;color:var(--dim);}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  p{font-size:.88rem;margin:8px 0;}
+  ul{margin:6px 0;padding-left:20px;font-size:.85rem;}
+  li{margin:4px 0;}
+  svg text{font-family:'JetBrains Mono',monospace;}
+  .tok{display:inline-block;padding:2px 8px;border-radius:4px;color:#0f1117;font-weight:600;font-size:.85rem;margin:2px 1px;}
+  .t1{background:#f3c08a}.t2{background:#f6e08a}.t3{background:#a9d99b}.t4{background:#e58a98}.t5{background:#a99ad6}.t6{background:#8ab8e6}.t7{background:#8fb7b7}.t8{background:#d9766a}
+</style>
+</head>
+<body>
+
+<h1>🧠 RAG: Introduction to LLMs</h1>
+<div class="sub">DeepLearning.AI · Retrieval Augmented Generation · Module 1 · "Introduction to LLMs" (Zain Hasan)</div>
+
+<!-- WHY -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Start With the LLM</h2></div>
+  <p>Now that you've seen the high-level architecture of a RAG system, this lecture looks at each component, starting with the LLM itself. Understanding how LLMs operate, their strengths and limitations, explains why the other components in a RAG system are designed the way they are, to improve an LLM's performance.</p>
+</div>
+
+<!-- AUTOCOMPLETE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>1. LLMs = "Fancy Autocomplete"</h2></div>
+  <p>Jokingly called fancy autocomplete, but a fair description: <b>all LLMs do is predict the next word that should appear in a piece of text.</b></p>
+  <div class="mini" style="margin:10px 0">
+    <div class="t" style="color:var(--blue)">Prompt</div>
+    <p style="color:var(--text);font-size:.95rem">What a beautiful day, the sun is <span style="border:1px dashed #8a90a6;padding:0 30px;border-radius:6px">&nbsp;</span></p>
+    <div class="t" style="color:var(--green);margin-top:12px">Completions</div>
+    <p style="color:var(--text);font-size:.9rem">What a beautiful day the sun is <span class="tok t1">shining</span></p>
+    <p style="color:var(--text);font-size:.9rem">What a beautiful day the sun is <span class="tok t4">rising</span></p>
+    <p style="color:var(--text);font-size:.9rem">What a beautiful day the sun is <span class="tok t6">out</span></p>
+  </div>
+  <div class="grid2">
+    <div class="mini"><div class="t" style="color:var(--green)">Probable</div><p>"Shining" makes the most sense; "rising" or "out" could also work.</p></div>
+    <div class="mini"><div class="t" style="color:var(--red)">Improbable ("the sun is exploding")</div><p>Not a grammar problem: it's valid English. It's incorrect only because the phrase is <b>improbable</b>. The sun usually doesn't explode, certainly not on a beautiful day.</p></div>
+  </div>
+  <div class="note">You have an intuitive sense for how words are used, and in a way, so do language models.</div>
+</div>
+
+<!-- NEURAL NETWORK -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>2. Under the Hood: A Neural Network</h2></div>
+  <p>An enormous and complex <b>mathematical model of language</b>. It stores:</p>
+  <ul>
+    <li>which words are commonly used with each other (<i>slide:</i> which words frequently appear together)</li>
+    <li>in which order they typically appear</li>
+    <li>on a higher level, what these words mean <b>in context</b> (contextual meaning)</li>
+  </ul>
+  <svg viewBox="0 0 700 90" width="100%" style="margin:6px 0">
+    <defs><marker id="n1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="20" y="20" width="230" height="45" rx="10" fill="#0b0d14" stroke="#262b3a"/><text x="135" y="48" fill="#e6e8ef" text-anchor="middle" font-size="12">What a beautiful day, the sun is __</text>
+    <line x1="255" y1="42" x2="325" y2="42" stroke="#8a90a6" stroke-width="2" marker-end="url(#n1)"/>
+    <rect x="330" y="20" width="130" height="45" rx="10" fill="rgba(181,140,255,.15)" stroke="#b58cff"/><text x="395" y="48" fill="#b58cff" text-anchor="middle" font-size="12" font-weight="600">Neural network</text>
+    <line x1="465" y1="42" x2="535" y2="42" stroke="#8a90a6" stroke-width="2" marker-end="url(#n1)"/>
+    <rect x="540" y="20" width="110" height="45" rx="10" fill="#f3c08a"/><text x="595" y="48" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">shining</text>
+  </svg>
+  <div class="note">This mathematical representation of language is what the model ultimately uses to generate new text. (Slide shows "sun" → "shining".)</div>
+</div>
+
+<!-- TOKENS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>3. Generating Text: One Token at a Time</h2></div>
+  <p>When an LLM generates a completion, it just adds new words to the end of the prompt, <b>one at a time</b>. For the running example it would likely add <span class="tok t1">shining</span>, then <span class="tok t2">in</span><span class="tok t3">the</span><span class="tok t4">sky</span> one at a time, before signaling the completion is done and returning it to the user.</p>
+  <p>Technically an LLM doesn't generate words but <b>tokens</b>, a more generic term for pieces of words.</p>
+  <div class="grid2">
+    <div>
+      <h3 style="color:var(--green)">Token (slide)</h3>
+      <ul>
+        <li>a piece of a word</li>
+        <li>some words get single tokens</li>
+        <li>compound words use multiple tokens</li>
+        <li>punctuation marks</li>
+        <li>~10,000 – 100,000 tokens in an LLM's vocabulary, allowing models to represent any possible word with fewer tokens</li>
+      </ul>
+    </div>
+    <div class="mini">
+      <div class="t">Slide examples</div>
+      <p style="margin-top:8px"><b style="color:var(--text)">Single tokens:</b> <span class="tok t8">London</span> <span class="tok t7">door</span></p>
+      <p><b style="color:var(--text)">Compound (multiple tokens):</b> <span class="tok t4">un</span><span class="tok t1">happy</span> &nbsp; <span class="tok t3">programm</span><span class="tok t2">a</span><span class="tok t5">tically</span></p>
+      <p><b style="color:var(--text)">Punctuation:</b> <span class="tok t5">Completely</span><span class="tok t3">,</span><span class="tok t4"> I</span><span class="tok t6"> agree</span><span class="tok t5">!</span></p>
+    </div>
+  </div>
+  <div class="note"><b>Lecture:</b> period, comma and question mark could also get their own tokens. Most LLMs have a total vocabulary of anywhere from 10 to more than 100,000 tokens (as stated in the lecture audio). Building compound words out of smaller word pieces lets the model build any possible word without assigning a token to each one.</div>
+</div>
+
+<!-- PROCESS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>4. The 3-Step Loop Before Every New Token</h2></div>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--blue)">① Process current state</div><p>Generate a deep understanding of the relationships between each word and the overall meaning of the text.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">② Calculate probabilities</div><p>Go through <b>every token in the vocabulary</b> (usually tens to hundreds of thousands) and calculate the probability it should appear next.</p></div>
+    <div class="mini"><div class="t" style="color:var(--green)">③ Select next token</div><p>Randomly choose the next token from that probability distribution.</p></div>
+  </div>
+  <p style="margin-top:14px"><b>Round 1</b> — prompt: "What a beautiful day, the sun is" (vocabulary ~10,000 – 100,000 tokens)</p>
+  <svg viewBox="0 0 760 230" width="100%" style="margin:6px 0">
+    <g font-size="11" text-anchor="middle">
+      <rect x="60" y="30" width="45" height="150" rx="4" fill="rgba(255,157,77,.6)"/><text x="82" y="22" fill="#e6e8ef">80%</text><text x="82" y="200" fill="#8a90a6">shining</text>
+      <rect x="125" y="156" width="45" height="24" rx="4" fill="rgba(255,157,77,.6)"/><text x="147" y="148" fill="#e6e8ef">5%</text><text x="147" y="200" fill="#8a90a6">rising</text>
+      <rect x="190" y="162" width="45" height="18" rx="4" fill="rgba(255,157,77,.6)"/><text x="212" y="154" fill="#e6e8ef">4%</text><text x="212" y="200" fill="#8a90a6">out</text>
+      <rect x="255" y="174" width="45" height="6" rx="3" fill="rgba(255,157,77,.6)"/><text x="277" y="166" fill="#e6e8ef">1%</text><text x="277" y="200" fill="#8a90a6">bright</text>
+      <text x="400" y="170" fill="#8a90a6">· · ·</text>
+      <rect x="500" y="178" width="45" height="2" fill="rgba(255,157,77,.6)"/><text x="522" y="166" fill="#e6e8ef">.00002%</text><text x="522" y="200" fill="#8a90a6">exploding</text>
+      <rect x="610" y="178" width="45" height="2" fill="rgba(255,157,77,.6)"/><text x="632" y="166" fill="#e6e8ef">.00001%</text><text x="632" y="200" fill="#8a90a6">snoring</text>
+    </g>
+  </svg>
+  <div class="note"><b>Selected:</b> <span class="tok t1">shining</span> — 80 times out of a hundred it'll choose "shining", but it's still possible it could choose "rising" or, yes, even "exploding". Even improbable words like exploding or snoring have a tiny chance.</div>
+  <p style="margin-top:14px"><b>Round 2</b> — the loop repeats with "shining" now part of the text ("new tokens make sense in context of old ones"):</p>
+  <svg viewBox="0 0 760 200" width="100%" style="margin:6px 0">
+    <g font-size="11" text-anchor="middle">
+      <rect x="60" y="60" width="45" height="100" rx="4" fill="rgba(255,157,77,.6)"/><text x="82" y="52" fill="#e6e8ef">35%</text><text x="82" y="180" fill="#8a90a6">on</text>
+      <rect x="125" y="85" width="45" height="75" rx="4" fill="rgba(255,157,77,.6)"/><text x="147" y="77" fill="#e6e8ef">25%</text><text x="147" y="180" fill="#8a90a6">,</text>
+      <rect x="190" y="100" width="45" height="60" rx="4" fill="rgba(255,157,77,.6)"/><text x="212" y="92" fill="#e6e8ef">20%</text><text x="212" y="180" fill="#8a90a6">through</text>
+      <rect x="255" y="130" width="45" height="30" rx="4" fill="rgba(255,157,77,.6)"/><text x="277" y="122" fill="#e6e8ef">10%</text><text x="277" y="180" fill="#8a90a6">in</text>
+    </g>
+  </svg>
+  <div class="note"><b>Selected:</b> <span class="tok t2">in</span> (only 10%, but chosen). When the LLM adds another token, it repeats this entire process. Most words are from the original prompt, but one of them is "shining", which it just generated. So token choices made earlier <b>impact selections made later</b>. This is desirable: new tokens make sense in the context of tokens already chosen.</div>
+</div>
+
+<!-- AUTOREGRESSIVE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>5. Autoregressive = "Self-Influencing"</h2></div>
+  <p>Once an LLM randomly chooses one direction, it follows that path where it leads.</p>
+  <svg viewBox="0 0 760 170" width="100%" style="margin:6px 0">
+    <defs><marker id="au" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="10" y="60" width="250" height="45" rx="10" fill="#0b0d14" stroke="#262b3a"/><text x="135" y="88" fill="#e6e8ef" text-anchor="middle" font-size="12">What a beautiful day, the sun is</text>
+    <path d="M265 75 C310 75, 310 35, 355 35" fill="none" stroke="#8a90a6" stroke-width="2" marker-end="url(#au)"/>
+    <path d="M265 90 C310 90, 310 130, 355 130" fill="none" stroke="#8a90a6" stroke-width="2" marker-end="url(#au)"/>
+    <rect x="360" y="15" width="90" height="38" fill="#f3c08a"/><text x="405" y="39" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">shining</text>
+    <rect x="450" y="15" width="40" height="38" fill="#f6e08a"/><text x="470" y="39" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">in</text>
+    <rect x="490" y="15" width="55" height="38" fill="#a9d99b"/><text x="517" y="39" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">the</text>
+    <rect x="545" y="15" width="55" height="38" fill="#e58a98"/><text x="572" y="39" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">sky</text>
+    <rect x="360" y="110" width="100" height="38" fill="#a99ad6"/><text x="410" y="134" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">warming</text>
+    <rect x="460" y="110" width="60" height="38" fill="#e58a98"/><text x="490" y="134" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">our</text>
+    <rect x="520" y="110" width="80" height="38" fill="#8ab8e6"/><text x="560" y="134" fill="#0f1117" text-anchor="middle" font-size="12" font-weight="700">faces</text>
+  </svg>
+  <ul>
+    <li>"Self-influencing"</li>
+    <li>New tokens make sense in context of old ones</li>
+    <li>Running the same prompt leads to different completions</li>
+  </ul>
+  <div class="note"><b>Lecture:</b> after choosing "shining", the LLM might choose "in", "the", "sky" since those make sense given what came before. If the first generated token had been "warming", it might then choose "our faces". Thanks to the randomness and the autoregressive nature, running the same prompt multiple times through the same LLM will usually lead to different completions.</div>
+</div>
+
+<!-- TRAINING -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>6. How LLMs Learn (Training)</h2></div>
+  <p>An LLM understands prompts and makes reasonable predictions because it was trained on large collections of text. The model has <b>billions of individual parameters</b> (numerical weights).</p>
+  <svg viewBox="0 0 780 190" width="100%" style="margin:6px 0">
+    <defs><marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="10" y="70" width="90" height="55" rx="12" fill="rgba(181,140,255,.15)" stroke="#b58cff"/><text x="55" y="103" fill="#b58cff" text-anchor="middle" font-size="13" font-weight="600">LLM</text>
+    <line x1="105" y1="97" x2="150" y2="97" stroke="#8a90a6" stroke-width="2" marker-end="url(#tr)"/>
+    <rect x="155" y="40" width="400" height="120" rx="12" fill="none" stroke="#8a90a6" stroke-dasharray="6 5"/>
+    <text x="215" y="110" fill="#e6e8ef" text-anchor="middle" font-size="11">Billions of</text><text x="215" y="125" fill="#e6e8ef" text-anchor="middle" font-size="11">parameters</text>
+    <text x="395" y="85" fill="#e6e8ef" text-anchor="middle" font-size="11">"What a beautiful day is, the sun ____"</text>
+    <text x="395" y="115" fill="#e6e8ef" text-anchor="middle" font-size="11">"Roses are red, violets are ___"</text>
+    <text x="355" y="178" fill="#e6e8ef" text-anchor="middle" font-size="12" font-weight="700">Training</text>
+    <line x1="560" y1="97" x2="605" y2="97" stroke="#8a90a6" stroke-width="2" marker-end="url(#tr)"/>
+    <rect x="610" y="75" width="110" height="45" rx="10" fill="rgba(255,107,107,.15)" stroke="#ff6b6b"/><text x="665" y="103" fill="#ff6b6b" text-anchor="middle" font-size="12" font-weight="600">Predictions</text>
+    <path d="M665 72 L665 22 L355 22 L355 38" fill="none" stroke="#8a90a6" stroke-width="2" marker-end="url(#tr)"/>
+    <text x="500" y="16" fill="#8a90a6" text-anchor="middle" font-size="11">Update parameters</text>
+    <text x="730" y="60" fill="#8a90a6" font-size="11">Accurate?</text>
+  </svg>
+  <table>
+    <tr><th>Stage</th><th>What happens</th></tr>
+    <tr><td><span class="pill red">Before training</span></td><td>The model would just produce gibberish.</td></tr>
+    <tr><td><span class="pill orange">During training</span></td><td>The LLM is shown incomplete pieces of text from the training data and tries to predict which word comes next.</td></tr>
+    <tr><td><span class="pill blue">Update</span></td><td>Based on the accuracy of its predictions, it updates its internal parameters.</td></tr>
+    <tr><td><span class="pill green">Result</span></td><td>The model learns to produce both the factual information and the linguistic styles in the training data.</td></tr>
+  </table>
+  <div class="note">Many large language models today are trained on <b>trillions of tokens</b> of text, largely from the open internet. The resulting models can generate text in a wide variety of styles on a wide variety of topics, because examples of those styles and information on those topics were in the training data. Understanding how LLMs work and are trained also explains many of their behaviors.</div>
+</div>
+
+<!-- HALLUCINATIONS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>7. Why LLMs Hallucinate</h2></div>
+  <div class="grid3">
+    <div class="mini"><div class="t" style="color:var(--red)">Generate probable word sequences</div><p>LLMs just reproduce statistical patterns from their training data.</p></div>
+    <div class="mini"><div class="t" style="color:var(--orange)">Knowledge gaps cause inaccurate responses</div><p>Responses can "sound right" but aren't true.</p></div>
+    <div class="mini"><div class="t" style="color:var(--purple)">Truthful ≠ probable</div><p>LLMs are designed to generate "probable" text, not truthful text.</p></div>
+  </div>
+  <div class="note"><b>Lecture:</b> if you ask an LLM about your company's private internal data or today's news, the model almost certainly wasn't trained on it, so it isn't in a good position to respond. Sometimes it gives responses that sound right but aren't true. Even though these are called hallucinations, the LLM isn't having a psychological episode or even really malfunctioning. Truth, as far as an LLM is concerned, is just that a sequence of words is probabilistically likely based on its training data.</div>
+</div>
+
+<!-- RAG SOLVES -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>8. How RAG Solves the Problem</h2></div>
+  <p>With high-quality training data, our intuitive understanding of truth and an LLM's mathematical understanding of probable word sequences can be kept in alignment. The challenge is to ensure the LLM has access to <b>as much relevant information as possible</b>.</p>
+  <svg viewBox="0 0 760 150" width="100%" style="margin:6px 0">
+    <defs><marker id="rg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a90a6"/></marker></defs>
+    <rect x="20" y="45" width="110" height="60" rx="12" fill="rgba(181,140,255,.15)" stroke="#b58cff"/><text x="75" y="80" fill="#b58cff" text-anchor="middle" font-size="13" font-weight="600">LLM</text>
+    <line x1="400" y1="75" x2="140" y2="75" stroke="#8a90a6" stroke-width="2" marker-end="url(#rg)"/>
+    <rect x="165" y="8" width="230" height="45" rx="10" fill="#0b0d14" stroke="#262b3a"/><text x="280" y="27" fill="#e6e8ef" text-anchor="middle" font-size="11">relevant context "grounds"</text><text x="280" y="43" fill="#e6e8ef" text-anchor="middle" font-size="11">the LLM's responses</text>
+    <rect x="410" y="45" width="130" height="60" rx="12" fill="rgba(255,157,77,.15)" stroke="#ff9d4d"/><text x="475" y="80" fill="#ff9d4d" text-anchor="middle" font-size="13" font-weight="600">Retriever</text>
+    <text x="560" y="82" fill="#e6e8ef" font-size="20">+</text>
+    <rect x="590" y="45" width="150" height="60" rx="12" fill="rgba(77,217,146,.15)" stroke="#4dd992"/><text x="665" y="80" fill="#4dd992" text-anchor="middle" font-size="13" font-weight="600">Knowledge Base</text>
+  </svg>
+  <div class="note">RAG takes advantage of how well LLMs understand context. If your RAG system adds relevant information to the prompt, the LLM can understand and incorporate it into its responses, <b>even though that information wasn't part of its training data</b>. Typically you'd say this information <b>grounds</b> the LLM's responses.</div>
+</div>
+
+<!-- WHY NOT EVERYTHING -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>9. Why Not Add Everything to the Prompt?</h2></div>
+  <p>You might want to add as much relevant information as you can find. In practice, you can't:</p>
+  <div class="grid2">
+    <div class="mini"><div class="t" style="color:var(--orange)">① Higher computational cost</div>
+      <ul>
+        <li>Longer prompts take more computation to run</li>
+        <li>Before generating each new token, the model performs a computationally complex scan of every token already in the completion, including the original prompt</li>
+        <li>The scan happens before generating each new token</li>
+      </ul></div>
+    <div class="mini"><div class="t" style="color:var(--red)">② Context window limit</div>
+      <ul>
+        <li>Eventually you hit the limit of the LLM's context window: the longest sequence it can process at once</li>
+        <li>Smaller/older models: only a few thousand tokens</li>
+        <li>Largest/newer models: millions</li>
+      </ul></div>
+  </div>
+  <div class="note">As the retriever adds more information to the augmented prompt, at first you'll just make prompts more costly, and eventually you'll entirely use up the model's context window.</div>
+</div>
+
+<!-- COURSE NOTE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>In This Course</h2></div>
+  <p>There's a wide array of LLM providers, but in this course you'll use <b>Together AI</b>, which hosts many popular open-source models. Open-source models make it easier to look under the hood of LLMs and explore many of the concepts you'll learn.</p>
+  <div class="note"><b>Main takeaway:</b> an LLM's design allows it to incorporate information in the prompt into its response, even if that information wasn't included in the training data. Next up: the retriever, and how it provides that information.</div>
+</div>
+
+<!-- TIPS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>Interview / Practical Tips</h2></div>
+  <ul>
+    <li>One-liner: an LLM is a neural network that <b>predicts the next token</b> from a probability distribution over its whole vocabulary.</li>
+    <li>Know tokens vs words: tokens are pieces of words; compound words split into multiple tokens; punctuation gets tokens too.</li>
+    <li>The per-token loop: <b>process state → calculate probabilities → select (randomly) next token</b>.</li>
+    <li>"Autoregressive" = self-influencing. Randomness + autoregression is why the same prompt gives different completions.</li>
+    <li>Hallucination in one line: <b>LLMs generate probable text, not truthful text</b>; knowledge gaps make it "sound right but not be true".</li>
+    <li>Explain why RAG can't just stuff everything in the prompt: <b>computational cost</b> (scan of every token before each new token) and the <b>context window limit</b>.</li>
+    <li>RAG works because LLMs understand context: retrieved info in the prompt <b>grounds</b> the response without retraining.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Next Up</h2></div>
+  <span class="pill green">Lab: LLM calls &amp; simple augmented prompts</span>
+  <span class="pill purple">Intro to information retrieval (the retriever)</span>
+  <span class="pill orange">Module 1 quiz</span>
+</div>
+
+</body>
+</html>

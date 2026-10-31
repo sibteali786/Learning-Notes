@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mean Normalization for Recommender Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --panel:#161923; --border:#262b3a;
+    --blue:#4d9dff; --orange:#ff9d4d; --green:#4dd992; --purple:#b58cff; --red:#ff6b6b;
+    --text:#e6e8ef; --dim:#8a90a6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0 auto;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;padding:32px;line-height:1.6;max-width:1100px;}
+  h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 8px;}
+  h1{font-size:1.9rem;color:#fff;}
+  .sub{color:var(--dim);margin-bottom:28px;font-size:.85rem;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .bar{width:5px;height:22px;border-radius:3px;}
+  .label h2{font-size:1.1rem;color:#fff;}
+  .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:600;margin:2px 4px 2px 0;}
+  .pill.blue{background:rgba(77,157,255,.15);color:var(--blue);border:1px solid rgba(77,157,255,.4);}
+  .pill.orange{background:rgba(255,157,77,.15);color:var(--orange);border:1px solid rgba(255,157,77,.4);}
+  .pill.green{background:rgba(77,217,146,.15);color:var(--green);border:1px solid rgba(77,217,146,.4);}
+  .pill.purple{background:rgba(181,140,255,.15);color:var(--purple);border:1px solid rgba(181,140,255,.4);}
+  .pill.red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.4);}
+  pre{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.8rem;margin:8px 0;}
+  .kw{color:#b58cff}.fnc{color:#4d9dff}.cm{color:#8a90a6}.num{color:#ff9d4d}.str{color:#4dd992}
+  .note{background:#0b0d14;border-left:3px solid var(--purple);padding:10px 14px;border-radius:6px;font-size:.85rem;color:var(--dim);margin-top:10px;}
+  .note b{color:var(--text);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr;} body{padding:16px;}}
+  .mini{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .mini h3{font-size:.95rem;margin-bottom:6px;}
+  .mini ul{margin:6px 0 0;padding-left:18px;font-size:.8rem;color:var(--dim);}
+  .mini li{margin:3px 0;}
+  code{font-family:'JetBrains Mono',monospace;background:#0b0d14;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--green);font-size:.85rem;}
+  table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
+  th,td{padding:6px 7px;text-align:center;border-bottom:1px solid var(--border);}
+  th{color:var(--orange);font-weight:600;}
+  td:first-child,th:first-child{text-align:left;}
+  .formula{background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;font-size:.92rem;margin:10px 0;overflow-x:auto;}
+  .mu{color:var(--blue)} .sg{color:var(--orange)} .xx{color:var(--green)}
+  .flow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:10px 0;}
+  .step{flex:1;min-width:130px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;text-align:center;}
+  .step .n{display:inline-block;width:24px;height:24px;line-height:24px;border-radius:50%;background:var(--blue);color:#0b0d14;font-weight:700;margin-bottom:6px;}
+  .arrow{align-self:center;color:var(--dim);font-size:1.2rem;}
+  .slider{display:flex;align-items:center;gap:12px;margin:6px 0;font-size:.8rem;flex-wrap:wrap;}
+  .slider input{flex:1;accent-color:#b58cff;min-width:140px;}
+  .slider b{min-width:150px;}
+  .btns button{background:#0b0d14;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:.78rem;cursor:pointer;margin:3px 6px 3px 0;}
+  .btns button.on{border-color:var(--purple);color:var(--purple);background:rgba(181,140,255,.12);}
+  .btns button.act{border-color:var(--green);color:var(--green);}
+  .metric{background:#0b0d14;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.78rem;color:var(--dim);display:inline-block;margin:4px 8px 4px 0;}
+  .metric b{color:#fff;font-size:1rem;}
+  .q{color:#8a90a6}
+  .eve{background:rgba(255,157,77,.12);}
+  .muc{background:rgba(77,157,255,.12);color:#4d9dff;font-weight:700;}
+  .neg{color:#ff6b6b}.pos{color:#4dd992}
+  svg text{font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<h1>⚖️ Mean Normalization for Recommender Systems</h1>
+<div class="sub">Implementation tip · Better predictions for users with few or no ratings · Slightly faster optimization</div>
+
+<!-- INTRO -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--blue)"></div><h2>Why Bother?</h2></div>
+  <p>In Course 1, feature normalization helped linear regression run faster. For recommender systems with numeric ratings (1–5 or 0–5 stars), <b>mean normalization</b> makes the algorithm <b>run more efficiently and perform a bit better</b>, most of all for <b>users with no (or very few) ratings</b>.</p>
+  <div class="grid2">
+    <div class="mini"><h3 style="color:var(--green)">Benefit 1: better predictions</h3><ul><li>Sensible guesses for a brand-new user</li></ul></div>
+    <div class="mini"><h3 style="color:var(--blue)">Benefit 2: faster optimization</h3><ul><li>Each movie's ratings now average to zero, so gradient descent runs "just a little bit faster"</li></ul></div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--red)"></div><h2>The Problem: Eve Has Rated Nothing</h2></div>
+  <p>Add a fifth user, <b>Eve (5)</b>, who hasn't rated any movies. Look at the cost:</p>
+  <div class="formula">½ Σ<sub>(i,j):r(i,j)=1</sub> ( w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾ − y⁽ⁱ'ʲ⁾ )² + <span style="color:var(--orange)">λ/2 Σ Σ (w<sub>k</sub>⁽ʲ⁾)² + λ/2 Σ Σ (x<sub>k</sub>⁽ⁱ⁾)²</span></div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Eve has <b>no r(i,5) = 1</b>, so none of her parameters appear in the squared-error term</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Only the <b>regularization term</b> touches w⁽⁵⁾, so minimizing pushes it to <b>[0, 0]</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>b⁽⁵⁾ isn't regularized, but initialized at 0 it stays <b>0</b></div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br>Prediction <code>w⁽⁵⁾·x⁽ⁱ⁾ + b⁽⁵⁾ = 0</code> for every movie</div>
+  </div>
+  <div class="note" style="border-color:var(--red)"><b style="color:var(--red)">Result:</b> the algorithm says a new user will rate <b>every movie 0 stars</b>. Not helpful.</div>
+</div>
+
+<!-- MATRIX -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>The Fix: Subtract Each Movie's Average Rating</h2></div>
+  <div class="btns" id="mtabs">
+    <button data-v="raw" class="on">Original ratings Y</button>
+    <button data-v="norm">Normalized Y (Y − μ)</button>
+  </div>
+  <table id="mat"></table>
+  <ul style="font-size:.85rem;margin:10px 0 0;padding-left:18px">
+    <li><b>μᵢ</b> = average rating of movie i, <b>averaged only over the users who rated it</b> (the ? entries are ignored).</li>
+    <li>Every <b>rated</b> entry becomes <code>y⁽ⁱ'ʲ⁾ − μᵢ</code> (e.g. 5 − 2.5 = 2.5; 0 − 2.25 = −2.25). The ? entries stay ?.</li>
+    <li>These new values are the y⁽ⁱ'ʲ⁾ you train on, so each movie's ratings now have <b>zero mean</b>.</li>
+  </ul>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Data note:</b> this lecture's matrix shows Dave's rating of Swords vs. karate as <b>0</b> (earlier lectures had it as ?). That's what makes μ₅ = 1.25 = (0+0+5+0)/4.</div>
+</div>
+
+<!-- PIPELINE -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>How Training and Prediction Change</h2></div>
+  <div class="flow">
+    <div class="step"><div class="n">1</div><br>Compute μᵢ per movie (rated entries only)</div><div class="arrow">→</div>
+    <div class="step"><div class="n">2</div><br>Subtract: <code>y ← y − μᵢ</code></div><div class="arrow">→</div>
+    <div class="step"><div class="n">3</div><br>Learn <b>w, b, x</b> exactly as before on the new y</div><div class="arrow">→</div>
+    <div class="step"><div class="n">4</div><br>Predict <code>w⁽ʲ⁾·x⁽ⁱ⁾ + b⁽ʲ⁾ <span style="color:#4d9dff">+ μᵢ</span></code></div>
+  </div>
+  <div class="note"><b>Why add μᵢ back?</b> The model now predicts the <i>deviation from the movie's average</i>. Adding μᵢ converts it to a real star rating, so you can't get an impossible negative star rating.</div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="mini" style="border-color:rgba(255,107,107,.5)">
+      <h3 style="color:var(--red)">Eve, without normalization</h3>
+      <ul><li>w⁽⁵⁾ = [0,0], b⁽⁵⁾ = 0</li><li>Predicts <b>0</b> for every movie</li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(77,217,146,.5)">
+      <h3 style="color:var(--green)">Eve, with normalization</h3>
+      <ul><li>w⁽⁵⁾ = [0,0], b⁽⁵⁾ = 0 still</li><li>Movie 1: <code>0 + μ₁ = 2.5</code></li><li>Her first guesses = <b>the average rating other users gave each movie</b></li></ul>
+    </div>
+  </div>
+  <svg id="evebars" viewBox="0 0 640 230" width="100%" style="margin-top:12px;background:#0b0d14;border:1px solid var(--border);border-radius:10px;"></svg>
+  <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fnc">normalize_ratings</span>(Y, R):                       <span class="cm"># Y, R: (n_m, n_u)   R = 1 where rated</span>
+    mu = (Y * R).sum(axis=1, keepdims=True) / np.maximum(R.sum(axis=1, keepdims=True), 1)
+    Ynorm = (Y - mu) * R                             <span class="cm"># unrated entries stay 0 and are masked by R anyway</span>
+    <span class="kw">return</span> Ynorm, mu                                 <span class="cm"># mu: (n_m, 1), one average per movie</span>
+
+Ynorm, mu = normalize_ratings(Y, R)
+<span class="cm"># ... train W, b, X on Ynorm ...</span>
+pred = X @ W.T + b + mu                              <span class="cm"># add the mean back for real star ratings</span></pre>
+</div>
+
+<!-- ROWS VS COLUMNS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--purple)"></div><h2>Normalize Rows or Columns?</h2></div>
+  <div class="grid2">
+    <div class="mini" style="border-color:rgba(77,217,146,.5)">
+      <h3 style="color:var(--green)">Per-movie mean (used here)</h3>
+      <ul><li>Each movie's ratings get zero mean (the "rows" of the matrix)</li><li>Helps a <b>new user</b> who has rated few or no movies</li><li>The lecture sees this as <b>more important</b></li><li>Recommended for this week's practice lab</li></ul>
+    </div>
+    <div class="mini" style="border-color:rgba(77,157,255,.5)">
+      <h3 style="color:var(--blue)">Per-user mean (the alternative)</h3>
+      <ul><li>Each user's ratings get zero mean (the "columns")</li><li>Would help a <b>brand-new movie</b> nobody has rated</li><li>Judged less important: you probably <b>shouldn't show a movie with no ratings to many users</b> anyway, since you know little about it</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- LAB -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--green)"></div><h2>Interactive Lab: With vs Without Mean Normalization</h2></div>
+  <p style="font-size:.8rem;color:var(--dim)">Trains the full collaborative filtering model (n = 2 features, w, b and x learned together) twice on the 5-user matrix: once on raw ratings, once on mean-normalized ratings. Compare <b style="color:#ff9d4d">Eve's column</b>.</p>
+  <div class="btns" id="eveopt">
+    <button data-v="none" class="on">Eve has rated nothing</button>
+    <button data-v="one">Eve rated Nonstop car chases = 5 (one rating)</button>
+  </div>
+  <div class="slider"><b style="color:var(--purple)">λ = <span id="lV"></span></b><input id="lam" type="range" min="0.1" max="3" step="0.05" value="0.5"></div>
+  <div class="btns"><button class="act" id="fit">▶ Train both models</button><button id="rnd">🎲 New random start</button></div>
+  <div class="grid2">
+    <div><h3 style="color:var(--red);font-size:.95rem">Without mean normalization</h3><table id="t0"></table></div>
+    <div><h3 style="color:var(--green);font-size:.95rem">With mean normalization</h3><table id="t1"></table></div>
+  </div>
+  <div id="metrics" style="margin-top:8px"></div>
+  <div class="note" id="labNote"></div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Heads-up:</b> the optimizer settings (learning rate 0.02, 6,000 iterations), random starts and the "one rating" variant are my demo choices. Exact numbers vary by start; the pattern for Eve's column is what matters.</div>
+</div>
+
+<!-- TAKEAWAYS -->
+<div class="card">
+  <div class="label"><div class="bar" style="background:var(--orange)"></div><h2>💡 Key Takeaways &amp; What's Next</h2></div>
+  <span class="pill blue">μᵢ = movie i's mean over raters</span>
+  <span class="pill orange">Train on y − μᵢ</span>
+  <span class="pill green">Predict w·x + b + μᵢ</span>
+  <span class="pill red">Without it, a new user ⇒ all zeros</span>
+  <span class="pill purple">Normalize per movie (rows)</span>
+  <div class="note"><b>Next video:</b> implementing collaborative filtering <b>in TensorFlow</b>.</div>
+  <div class="note" style="border-color:var(--orange)"><b style="color:var(--orange)">Practical tips (beyond the lecture):</b> guard against a movie with zero ratings when computing μ (division by zero). Mean normalization gives a <b>popularity baseline</b> for cold-start users, but it can't personalize until they rate something. For a stronger cold-start, combine it with content features (genre, demographics) or ask new users to rate a few items on sign-up.</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;};
+const users=['Alice','Bob','Carol','Dave','Eve'];
+const movies=['Love at last','Romance forever','Cute puppies of love','Nonstop car chases','Swords vs. karate'];
+const Y0=[[5,5,0,0,null],[5,null,null,0,null],[null,4,0,null,null],[0,0,5,4,null],[0,0,5,0,null]];
+const meanRows=M=>M.map(r=>{const v=r.filter(x=>x!==null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;});
+const MU=meanRows(Y0);
+const fmt=v=>Number.isInteger(v)?String(v):(+v.toFixed(2)).toString();
+
+// matrix view
+let view='raw';
+function drawMat(){
+  let h='<tr><th>Movie</th>'+users.map((u,j)=>`<th class="${j===4?'eve':''}">${u}(${j+1})</th>`).join('')+'<th>μᵢ</th></tr>';
+  Y0.forEach((r,i)=>{h+=`<tr><td>${movies[i]}</td>`+r.map((v,j)=>{
+    if(v===null)return `<td class="q ${j===4?'eve':''}">?</td>`;
+    const x=view==='raw'?v:v-MU[i];return `<td class="${x<0?'neg':''} ${view==='norm'&&x>0?'pos':''}">${fmt(x)}</td>`;}).join('')+`<td class="muc">${fmt(MU[i])}</td></tr>`;});
+  document.getElementById('mat').innerHTML=h;
+}
+document.querySelectorAll('#mtabs button').forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll('#mtabs button').forEach(x=>x.classList.toggle('on',x===b));drawMat();});
+drawMat();
+
+// Eve bars (static): without = 0, with = mu
+(function(){
+  const s=document.getElementById('evebars');
+  const W=640,H=230,pad=36,bw=34,gap=(W-2*pad)/5,Yy=v=>180-v/5*140;
+  el('line',{x1:pad,y1:180,x2:W-pad+10,y2:180,stroke:'#8a90a6'},s);
+  el('text',{x:W/2,y:16,fill:'#ff9d4d','font-size':12,'font-weight':700,'text-anchor':'middle'},s).textContent="Eve's predicted rating per movie (lecture example: w⁽⁵⁾ = [0,0], b⁽⁵⁾ = 0)";
+  movies.forEach((m,i)=>{
+    const cx=pad+gap*i+gap/2;
+    el('rect',{x:cx-bw-3,y:Yy(0)-2,width:bw,height:2,fill:'#ff6b6b'},s);
+    el('rect',{x:cx+3,y:Yy(MU[i]),width:bw,height:180-Yy(MU[i]),fill:'#4dd992'},s);
+    el('text',{x:cx+3+bw/2,y:Yy(MU[i])-5,fill:'#4dd992','font-size':11,'text-anchor':'middle'},s).textContent=fmt(MU[i]);
+    el('text',{x:cx-bw/2-3,y:Yy(0)-8,fill:'#ff6b6b','font-size':11,'text-anchor':'middle'},s).textContent='0';
+    el('text',{x:cx,y:198,fill:'#8a90a6','font-size':9,'text-anchor':'middle'},s).textContent=m.length>14?m.slice(0,13)+'…':m;
+  });
+  el('rect',{x:W-200,y:206,width:10,height:10,fill:'#ff6b6b'},s);el('text',{x:W-186,y:215,fill:'#8a90a6','font-size':10},s).textContent='no normalization';
+  el('rect',{x:W-96,y:206,width:10,height:10,fill:'#4dd992'},s);el('text',{x:W-82,y:215,fill:'#8a90a6','font-size':10},s).textContent='with μᵢ';
+})();
+
+// ---- lab ----
+const sgn=1;let seed=5,eveOpt='none';
+const lam=document.getElementById('lam');
+function mkRand(s){let x=s;return()=>{x=(x*16807)%2147483647;return x/2147483647;};}
+function train(norm,Ymat,mu,L,seed0){
+  const r=mkRand(seed0),nm=5,nu=5;
+  const X=Array.from({length:nm},()=>[r()*0.8-0.4,r()*0.8-0.4]),W=Array.from({length:nu},()=>[r()*0.8-0.4,r()*0.8-0.4]),B=new Array(nu).fill(0);
+  const T=Ymat.map((row,i)=>row.map(v=>v===null?null:v-(norm?mu[i]:0)));
+  const a=0.02;
+  for(let it=0;it<6000;it++){
+    const dX=X.map(()=>[0,0]),dW=W.map(()=>[0,0]),dB=new Array(nu).fill(0);
+    for(let i=0;i<nm;i++)for(let j=0;j<nu;j++){const y=T[i][j];if(y===null)continue;
+      const e=X[i][0]*W[j][0]+X[i][1]*W[j][1]+B[j]-y;
+      dX[i][0]+=e*W[j][0];dX[i][1]+=e*W[j][1];dW[j][0]+=e*X[i][0];dW[j][1]+=e*X[i][1];dB[j]+=e;}
+    for(let i=0;i<nm;i++){X[i][0]-=a*(dX[i][0]+L*X[i][0]);X[i][1]-=a*(dX[i][1]+L*X[i][1]);}
+    for(let j=0;j<nu;j++){W[j][0]-=a*(dW[j][0]+L*W[j][0]);W[j][1]-=a*(dW[j][1]+L*W[j][1]);B[j]-=a*dB[j];}
+  }
+  return Array.from({length:nm},(_,i)=>Array.from({length:nu},(_,j)=>X[i][0]*W[j][0]+X[i][1]*W[j][1]+B[j]+(norm?mu[i]:0)));
+}
+function fillTable(id,P,Ymat){
+  let h='<tr><th>Movie</th>'+users.map((u,j)=>`<th class="${j===4?'eve':''}">${u}</th>`).join('')+'</tr>';
+  P.forEach((row,i)=>{h+=`<tr><td>${movies[i].length>16?movies[i].slice(0,15)+'…':movies[i]}</td>`+row.map((p,j)=>{
+    const y=Ymat[i][j];const unseen=y===null;
+    return `<td class="${j===4?'eve':''}" style="${unseen?'color:#b58cff':''}">${p.toFixed(1)}${unseen?'':`<small class="q"> (${y})</small>`}</td>`;}).join('')+'</tr>';});
+  document.getElementById(id).innerHTML=h;
+}
+function run(){
+  const L=+lam.value;document.getElementById('lV').textContent=L.toFixed(2);
+  const Ym=Y0.map(r=>r.slice());if(eveOpt==='one')Ym[3][4]=5;
+  const mu=meanRows(Ym);
+  const s0=seed;
+  const P0=train(false,Ym,mu,L,s0),P1=train(true,Ym,mu,L,s0);
+  fillTable('t0',P0,Ym);fillTable('t1',P1,Ym);
+  const eve0=P0.map(r=>r[4]),eve1=P1.map(r=>r[4]);
+  const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  document.getElementById('metrics').innerHTML=
+   `<span class="metric">Eve's avg prediction, no norm: <b>${avg(eve0).toFixed(2)}</b></span><span class="metric">with mean norm: <b>${avg(eve1).toFixed(2)}</b></span><span class="metric">avg of movie means μ: <b>${avg(mu).toFixed(2)}</b></span>`;
+  document.getElementById('labNote').innerHTML=eveOpt==='none'
+   ?'Purple = predictions for unrated cells; grey = actual rating in brackets. Eve has no ratings, so <b>without normalization her column collapses toward 0</b>; <b>with it her column lands near each movie\'s average rating μᵢ</b>.'
+   :'With a single rating, Eve\'s parameters can move a little, but <b>without normalization the rest of her column is still dragged toward 0</b>, while with normalization predictions stay anchored near the movie averages and shift only modestly where her one rating is informative.';
+}
+document.querySelectorAll('#eveopt button').forEach(b=>b.onclick=()=>{eveOpt=b.dataset.v;document.querySelectorAll('#eveopt button').forEach(x=>x.classList.toggle('on',x===b));run();});
+document.getElementById('fit').onclick=run;
+document.getElementById('rnd').onclick=()=>{seed=Math.floor(Math.random()*1e6)+1;run();};
+lam.oninput=()=>{document.getElementById('lV').textContent=(+lam.value).toFixed(2);};
+run();
+</script>
+</body>
+</html>

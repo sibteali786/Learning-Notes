@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Retriever architecture overview: visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:62ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:66ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.chip.green{background:var(--green-soft);color:var(--green);}
+.chip.amber{background:var(--amber-soft);color:var(--amber);}
+
+/* hero */
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout p:last-child{margin-bottom:0}
+
+/* pipeline svg */
+svg text{font-family:'Poppins',system-ui,sans-serif;}
+.node{fill:var(--slate-soft);stroke:var(--line);stroke-width:1.5;}
+.node.hot{fill:var(--coral);stroke:var(--coral);}
+.node.kb{fill:var(--teal-soft);stroke:var(--teal);}
+.t-ink{fill:var(--ink);font-size:14px;font-weight:600;}
+.t-white{fill:#fff;font-size:14px;font-weight:600;}
+.t-muted{fill:var(--muted);font-size:12px;}
+.arrow{stroke:var(--slate);stroke-width:2;fill:none;}
+.arrowhead{fill:var(--slate);}
+
+/* steps */
+.steps{display:grid;gap:12px;}
+.step{display:grid;grid-template-columns:38px 1fr;gap:14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.step .n{width:34px;height:34px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:600;font-size:15px;}
+.step p{margin:0;color:var(--muted);}
+.step strong{color:var(--ink);}
+
+/* lanes */
+.lanes{display:grid;gap:16px;}
+.lane{display:flex;align-items:stretch;gap:8px;}
+.lane .cell{flex:1;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--surface);}
+.lane .cell small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;line-height:1.4;margin-top:2px;}
+.lane.kw .cell:first-child{background:var(--coral-soft);border-color:var(--coral);}
+.lane.sem .cell:first-child{background:var(--teal-soft);border-color:var(--teal);}
+.lane .cell.filter{background:var(--amber-soft);border-color:var(--amber);}
+.arr{flex:0 0 18px;display:grid;place-items:center;color:var(--slate);}
+.arr svg{width:16px;height:16px;}
+.merge{display:grid;gap:8px;margin-top:6px;}
+.merge .bar{border-radius:12px;padding:12px 16px;font-weight:600;font-size:15px;text-align:center;}
+.merge .bar small{display:block;font-weight:400;font-size:13px;opacity:.85;}
+.bar.combine{background:var(--slate);color:#fff;}
+.bar.topk{background:var(--green-soft);color:var(--green);border:1px solid var(--green);}
+@media (max-width:680px){
+  .lane{flex-direction:column;}
+  .arr{flex:0 0 14px;transform:rotate(90deg);}
+}
+
+/* overlap */
+.overlap{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;}
+.rankrow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px;}
+.rk{min-width:62px;text-align:center;border-radius:8px;padding:2px 8px;font-size:13px;font-weight:600;}
+.rk.k{background:var(--coral-soft);color:var(--coral);}
+.rk.s{background:var(--teal-soft);color:var(--teal);}
+
+/* two col */
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.two .card.kw{border-top:5px solid var(--coral);}
+.two .card.sem{border-top:5px solid var(--teal);}
+.q{font-weight:600;background:var(--slate-soft);border-radius:10px;padding:10px 14px;margin:10px 0;}
+.doc{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px dashed var(--line);font-size:14.5px;}
+.doc:first-of-type{border-top:0;}
+.doc b{min-width:48px;color:var(--muted);font-weight:500;}
+mark{border-radius:4px;padding:0 3px;color:var(--ink);}
+mark.m1{background:#f6c9d0;} mark.m2{background:#c9def8;} mark.m3{background:#fbe6a2;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) mark{color:#10151f;}}
+:root[data-theme="dark"] mark{color:#10151f;}
+.verdict{margin-top:10px;font-size:14px;color:var(--muted);}
+
+/* filter */
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0;}
+.meta{background:var(--slate-soft);border-radius:10px;padding:10px 12px;font-size:14px;}
+.meta b{display:block;font-size:12.5px;color:var(--muted);font-weight:500;}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code,td code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+
+/* hybrid */
+.tri{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+.tri .card h3{display:flex;align-items:center;gap:8px;}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+
+/* sim */
+.sim .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin:14px 0 18px;}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface);}
+.seg button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--ink);padding:8px 16px;cursor:pointer;}
+.seg button[aria-pressed="true"]{background:var(--coral);color:#fff;}
+.seg button:focus-visible{outline:3px solid var(--teal);outline-offset:-3px;}
+.lbl{font-size:13.5px;color:var(--muted);margin-right:8px;}
+.simgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.col h4{margin:0 0 8px;font-size:15px;font-weight:600;}
+.item{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:13.5px;transition:opacity .2s;}
+.item .r{min-width:24px;font-weight:600;color:var(--muted);}
+.item .tag{margin-left:auto;font-size:11.5px;padding:1px 8px;border-radius:999px;background:var(--slate-soft);color:var(--slate);white-space:nowrap;}
+.item.out{opacity:.45;text-decoration:line-through;}
+.item.win{border-color:var(--green);background:var(--green-soft);}
+.item.cut{opacity:.55;}
+.score{font-size:12px;color:var(--muted);margin-left:6px;white-space:nowrap;}
+.note{font-size:13.5px;color:var(--muted);margin-top:10px;}
+
+/* compare */
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+.cmp .card h3{margin-bottom:8px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro{color:var(--green);font-weight:600;font-size:13.5px;}
+.con{color:var(--coral);font-weight:600;font-size:13.5px;}
+.take{display:grid;gap:10px;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+.take{padding:0;margin:0;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev" viewBox="0 0 16 16"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Information retrieval foundations</span>
+    <span class="chip teal">Lesson: retriever architecture overview</span>
+  </div>
+  <h1>How a retriever finds the right documents</h1>
+  <p class="lede">Before diving into each search technique, hold one mental model: a prompt goes in, two different searches run side by side, a metadata filter trims both lists, and the survivors are merged into one ranking.</p>
+</header>
+
+<!-- 1. BIG PICTURE -->
+<section>
+  <h2>The big picture: where the retriever sits</h2>
+  <p class="sub">When a RAG system receives your prompt, it goes to the retriever first. The retriever has access to the knowledge base, which you can think of as a bunch of text files sitting in a database. Its job is to quickly decide which documents are most relevant to the prompt and return them so they can be passed to the LLM.</p>
+
+  <div class="card scroll-x">
+    <svg viewBox="0 0 900 270" style="min-width:760px;width:100%;height:auto" role="img" aria-label="RAG pipeline: prompt goes to retriever, which consults the knowledge base and returns relevant documents; these form an augmented prompt for the LLM, which produces the response.">
+      <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="arrowhead"/></marker></defs>
+      <!-- row of nodes -->
+      <rect class="node" x="10" y="50" width="120" height="70" rx="14"/>
+      <text class="t-ink" x="70" y="90" text-anchor="middle">Prompt</text>
+
+      <rect class="node hot" x="180" y="50" width="130" height="70" rx="14"/>
+      <text class="t-white" x="245" y="90" text-anchor="middle">Retriever</text>
+
+      <rect class="node" x="360" y="50" width="130" height="70" rx="14"/>
+      <text class="t-ink" x="425" y="82" text-anchor="middle">Relevant</text>
+      <text class="t-ink" x="425" y="100" text-anchor="middle">documents</text>
+
+      <rect class="node" x="540" y="50" width="130" height="70" rx="14"/>
+      <text class="t-ink" x="605" y="82" text-anchor="middle">Augmented</text>
+      <text class="t-ink" x="605" y="100" text-anchor="middle">prompt</text>
+
+      <rect class="node" x="720" y="50" width="70" height="70" rx="14"/>
+      <text class="t-ink" x="755" y="90" text-anchor="middle">LLM</text>
+
+      <rect class="node" x="810" y="50" width="80" height="70" rx="14" style="display:none"/>
+
+      <!-- arrows -->
+      <path class="arrow" d="M132 85 L176 85" marker-end="url(#ah)"/>
+      <path class="arrow" d="M312 85 L356 85" marker-end="url(#ah)"/>
+      <path class="arrow" d="M492 85 L536 85" marker-end="url(#ah)"/>
+      <path class="arrow" d="M672 85 L716 85" marker-end="url(#ah)"/>
+
+      <!-- response below LLM -->
+      <rect class="node" x="700" y="170" width="110" height="60" rx="14"/>
+      <text class="t-ink" x="755" y="205" text-anchor="middle">Response</text>
+      <path class="arrow" d="M755 122 L755 164" marker-end="url(#ah)"/>
+
+      <!-- KB -->
+      <rect class="node kb" x="180" y="170" width="130" height="70" rx="14"/>
+      <text class="t-ink" x="245" y="200" text-anchor="middle">Knowledge</text>
+      <text class="t-ink" x="245" y="218" text-anchor="middle">base</text>
+      <path class="arrow" d="M225 122 L225 166" marker-end="url(#ah)"/>
+      <path class="arrow" d="M265 168 L265 124" marker-end="url(#ah)"/>
+      <text class="t-muted" x="325" y="198">text files in a database</text>
+
+      <text class="t-muted" x="245" y="28" text-anchor="middle">this lesson zooms into this box</text>
+    </svg>
+  </div>
+</section>
+
+<!-- 2. TWO SEARCH APPROACHES -->
+<section>
+  <h2>Two ways to search, used together</h2>
+  <p class="sub">Most modern retrievers use two different search techniques as part of the process.</p>
+
+  <div class="two">
+    <div class="card kw">
+      <h3>Keyword search</h3>
+      <p>Looks for documents that contain the <strong>exact words</strong> found in the prompt. Time-tested; it has powered information retrieval systems for decades.</p>
+      <div class="q">“How can I make New York style pizza at home?”</div>
+      <div class="doc"><b>Doc 1</b><span>Use bread flour for <mark class="m1">New York</mark> <mark class="m2">pizza</mark> dough.</span></div>
+      <div class="doc"><b>Doc 2</b><span><mark class="m1">New York</mark> pizzerias stay open late for <mark class="m3">home</mark> delivery.</span></div>
+      <div class="doc"><b>Doc 3</b><span>At <mark class="m1">New York</mark> Pizza Mexico, they serve <mark class="m2">pizza</mark> with jalapeño.</span></div>
+      <p class="verdict">Strength: sensitive to the exact words the user typed. Weakness: Doc 2 and Doc 3 match words but not the intent.</p>
+    </div>
+    <div class="card sem">
+      <h3>Semantic search</h3>
+      <p>Looks for documents with a <strong>similar meaning</strong> to the prompt. More flexible: it can find relevant documents even if they don’t contain the user’s exact words.</p>
+      <div class="q">“How many vacation days do new hires get?”</div>
+      <div class="doc"><b>Match</b><span>“Paid time off overview: employees accrue leave from day one.” No shared keywords, same meaning.</span></div>
+      <div class="doc"><b>Match</b><span>“Annual leave entitlement for first-year staff.”</span></div>
+      <p class="verdict">Strength: finds meaning without matching words. Weakness: it doesn’t guarantee that specific words (a product code, a name) appear.</p>
+    </div>
+  </div>
+  <div class="callout teal" style="margin-top:16px">
+    <p><strong>Two lists, not one.</strong> Each search returns its own collection of roughly <strong>20 to 50 documents</strong>. The scoring style differs, so the same document may be ranked high in one list and low in the other.</p>
+  </div>
+</section>
+
+<!-- 3. INSIDE THE RETRIEVER -->
+<section>
+  <h2>Inside the retriever, step by step</h2>
+  <p class="sub">The order matters: search in parallel, filter each list, then combine.</p>
+
+  <div class="card">
+    <div class="lanes">
+      <div class="lane kw">
+        <div class="cell">Keyword search<small>exact words from the prompt</small></div>
+        <span class="arr"><svg><use href="#chev"/></svg></span>
+        <div class="cell">Ranked list<small>20 to 50 documents</small></div>
+        <span class="arr"><svg><use href="#chev"/></svg></span>
+        <div class="cell filter">Metadata filter<small>e.g. user’s department</small></div>
+        <span class="arr"><svg><use href="#chev"/></svg></span>
+        <div class="cell">Filtered list<small>e.g. 50 becomes 35</small></div>
+      </div>
+      <div class="lane sem">
+        <div class="cell">Semantic search<small>similar meaning</small></div>
+        <span class="arr"><svg><use href="#chev"/></svg></span>
+        <div class="cell">Ranked list<small>20 to 50 documents</small></div>
+        <span class="arr"><svg><use href="#chev"/></svg></span>
+        <div class="cell filter">Metadata filter<small>same rules applied</small></div>
+        <span class="arr"><svg><use href="#chev"/></svg></span>
+        <div class="cell">Filtered list<small>e.g. 50 becomes 30</small></div>
+      </div>
+    </div>
+    <div class="merge">
+      <div class="bar combine">Combine both filtered lists into one final ranking<small>Documents are rewarded for ranking well on either list</small></div>
+      <div class="bar topk">Return the top-ranked documents (top_k)<small>These are added to the augmented prompt and sent to the LLM</small></div>
+    </div>
+  </div>
+
+  <div class="steps" style="margin-top:18px">
+    <div class="step"><div class="n">1</div><div><strong>Prompt arrives.</strong><p>The retriever receives the user’s prompt and has access to the knowledge base.</p></div></div>
+    <div class="step"><div class="n">2</div><div><strong>Run both searches.</strong><p>Keyword search and semantic search each return their own list of about 20 to 50 documents. Many documents show up in both lists, but at different ranks.</p></div></div>
+    <div class="step"><div class="n">3</div><div><strong>Filter each list on metadata.</strong><p>Documents the user shouldn’t see (or that aren’t relevant to their team) are dropped from both lists.</p></div></div>
+    <div class="step"><div class="n">4</div><div><strong>Merge into one ranking.</strong><p>The two filtered lists are combined into a single ranked list of the most relevant documents.</p></div></div>
+    <div class="step"><div class="n">5</div><div><strong>Return the top documents.</strong><p>The retriever returns the top-ranked documents. Retrieval is complete and the documents go into the augmented prompt.</p></div></div>
+  </div>
+
+  <h3 style="margin-top:28px">Same document, different rank</h3>
+  <p class="sub" style="margin-bottom:12px">From the slide example: a document can sit high in one list and lower in the other, and the merge step has to reconcile that.</p>
+  <div class="overlap">
+    <div class="card">
+      <b>Document B</b>
+      <div class="rankrow"><span class="rk k">Keyword #2</span><span class="rk s">Semantic #2</span></div>
+      <p style="font-size:13.5px;color:var(--muted);margin:6px 0 0">Appears in both lists at the same position: a strong signal.</p>
+    </div>
+    <div class="card">
+      <b>Document C</b>
+      <div class="rankrow"><span class="rk k">Keyword #3</span><span class="rk s">Semantic #1</span></div>
+      <p style="font-size:13.5px;color:var(--muted);margin:6px 0 0">Ranked higher by meaning than by exact words.</p>
+    </div>
+    <div class="card">
+      <b>Document A vs Document X</b>
+      <div class="rankrow"><span class="rk k">A: Keyword #1</span><span class="rk">not in semantic</span></div>
+      <div class="rankrow"><span class="rk">not in keyword</span><span class="rk s">X: Semantic #3</span></div>
+      <p style="font-size:13.5px;color:var(--muted);margin:6px 0 0">Each technique can surface documents the other misses.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. METADATA FILTER -->
+<section>
+  <h2>The metadata filter: a rigid yes/no gate</h2>
+  <p class="sub">Some documents in your knowledge base are relevant to engineers, others to people in HR. The system knows which team the user belongs to and applies a metadata filter, so only documents relevant to that department move forward.</p>
+
+  <div class="card">
+    <div class="two" style="gap:20px">
+      <div>
+        <h3>Real-life scenario: internal company assistant</h3>
+        <p>Priya works in <strong>Engineering</strong> and asks the company assistant a question. Her profile says <code>department = Engineering</code>, so HR-only documents (leave approval playbooks, for example) are removed from <em>both</em> the keyword list and the semantic list before merging.</p>
+        <p style="margin-bottom:0">The filter never reads the prompt. It narrows results using attributes of the user and the document, not the query content.</p>
+      </div>
+      <div>
+        <h3>What metadata can look like</h3>
+        <div class="meta-grid">
+          <div class="meta"><b>Title</b>Leave policy</div>
+          <div class="meta"><b>Publication date</b>2026-01-15</div>
+          <div class="meta"><b>Author</b>People team</div>
+          <div class="meta"><b>Section</b>Benefits</div>
+          <div class="meta"><b>Tags</b>HR, policy</div>
+          <div class="meta"><b>Access</b>All staff</div>
+        </div>
+        <p style="font-size:13.5px;color:var(--muted);margin:0">Slide examples: exclude articles with <code>subscription = paid</code>, or include only <code>region = North America</code>.</p>
+      </div>
+    </div>
+  </div>
+  <div class="callout amber">
+    <p><strong>Heads-up from the slides:</strong> metadata filtering isn’t true search. It’s rigid, ignores content, can’t rank anything, and is useless alone. Its value is enforcing strict rules that neither search technique can enforce. Next lesson covers it in depth.</p>
+  </div>
+</section>
+
+<!-- 5. HYBRID SEARCH -->
+<section>
+  <h2>Why it’s called hybrid search</h2>
+  <p class="sub">The final ranking relies on multiple techniques, and each one contributes something the others can’t.</p>
+  <div class="tri">
+    <div class="card" style="border-top:5px solid var(--coral)">
+      <h3><span class="dot" style="background:var(--coral)"></span>Keyword search</h3>
+      <p>Keeps the system sensitive to the <strong>exact words</strong> the user included in the prompt.</p>
+    </div>
+    <div class="card" style="border-top:5px solid var(--teal)">
+      <h3><span class="dot" style="background:var(--teal)"></span>Semantic search</h3>
+      <p>Gives flexibility to find documents with <strong>similar meaning</strong>, even without the same words.</p>
+    </div>
+    <div class="card" style="border-top:5px solid var(--amber)">
+      <h3><span class="dot" style="background:var(--amber)"></span>Metadata filtering</h3>
+      <p>Excludes documents by <strong>rigid criteria</strong> in a way neither of the other approaches allows.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>The design job:</strong> a high-performing retriever means understanding each technique’s relative strengths, then tuning the balance between them to fit your project’s needs. This whole module builds toward that tuning.</p>
+  </div>
+</section>
+
+<!-- 6. SIMULATOR -->
+<section class="sim">
+  <h2>Try it: filter, merge, return</h2>
+  <p class="sub">Illustrative data, not real model output. Prompt: <strong>“How many vacation days do new hires get?”</strong> Switch the user’s department and watch the filter change what survives. The merge uses a simple reciprocal-rank score (1 / (50 + rank)), previewing the fusion idea from the slides.</p>
+  <div class="card">
+    <div class="controls">
+      <div><span class="lbl">User’s department</span>
+        <span class="seg" id="deptSeg">
+          <button data-v="Engineering" aria-pressed="true">Engineering</button>
+          <button data-v="HR" aria-pressed="false">HR</button>
+          <button data-v="None" aria-pressed="false">No filter</button>
+        </span>
+      </div>
+      <div><span class="lbl">top_k</span>
+        <span class="seg" id="kSeg">
+          <button data-v="2" aria-pressed="false">2</button>
+          <button data-v="3" aria-pressed="true">3</button>
+          <button data-v="5" aria-pressed="false">5</button>
+        </span>
+      </div>
+    </div>
+    <div class="simgrid">
+      <div class="col"><h4 style="color:var(--coral)">Keyword list</h4><div id="kwList"></div></div>
+      <div class="col"><h4 style="color:var(--teal)">Semantic list</h4><div id="semList"></div></div>
+      <div class="col"><h4 style="color:var(--green)">Final ranking</h4><div id="finalList"></div></div>
+    </div>
+    <p class="note" id="simNote"></p>
+  </div>
+</section>
+
+<!-- 7. PSEUDOCODE -->
+<section>
+  <h2>The whole flow in a few lines</h2>
+  <p class="sub">Conceptual pseudocode, not a specific library API. The real scoring methods (BM25, embeddings) and the merge step come in later lessons.</p>
+<pre><code>def hybrid_retrieve(prompt, user, top_k=5, n=50):
+    kw  = keyword_search(prompt, limit=n)    # exact-word matches
+    sem = semantic_search(prompt, limit=n)   # similar-meaning matches
+
+    kw  = [d for d in kw  if allowed(d.metadata, user)]   # filter list 1
+    sem = [d for d in sem if allowed(d.metadata, user)]   # filter list 2
+
+    return merge_rankings(kw, sem)[:top_k]   # one final ranking, top_k out</code></pre>
+</section>
+
+<!-- 8. ALTERNATIVES -->
+<section>
+  <h2>Alternative designs and their trade-offs</h2>
+  <p class="sub">Hybrid with post-filtering is the setup described in this lesson. Here’s how it compares.</p>
+  <div class="cmp">
+    <div class="card">
+      <h3>Keyword search only</h3>
+      <div class="pro">Pros</div>
+      <ul><li>Simple and fast</li><li>Guaranteed exact-word matching</li></ul>
+      <div class="con">Cons</div>
+      <ul><li>Misses synonyms (“vacation” vs “time off”)</li><li>Can match the wrong meaning</li></ul>
+    </div>
+    <div class="card">
+      <h3>Semantic search only</h3>
+      <div class="pro">Pros</div>
+      <ul><li>Finds relevant text without shared words</li><li>Flexible with messy, conversational prompts</li></ul>
+      <div class="con">Cons</div>
+      <ul><li>Slower and more computationally expensive</li><li>Can miss exact terms like names or codes</li></ul>
+    </div>
+    <div class="card" style="border:2px solid var(--green)">
+      <h3>Hybrid + post-filter (this lesson)</h3>
+      <div class="pro">Pros</div>
+      <ul><li>Covers both exact words and meaning</li><li>Filter enforces strict rules on both lists</li><li>Balance can be tuned per project</li></ul>
+      <div class="con">Cons</div>
+      <ul><li>More moving parts to tune and evaluate</li><li>Filtering after search can leave fewer documents (50 becomes 30)</li></ul>
+    </div>
+    <div class="card">
+      <h3>Pre-filtering before search</h3>
+      <div class="pro">Pros</div>
+      <ul><li>Search runs only over allowed documents</li><li>Still returns a full list of results</li></ul>
+      <div class="con">Cons</div>
+      <ul><li>Depends on your database supporting filtered search</li><li>Not the flow shown in this lesson, so check your tooling</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 9. TAKEAWAYS -->
+<section>
+  <h2>Key takeaways</h2>
+  <ul class="take">
+    <li>The retriever’s job: quickly pick the documents most relevant to the prompt from the knowledge base and hand them to the LLM.</li>
+    <li>Two searches run in parallel: <strong>keyword</strong> (exact words) and <strong>semantic</strong> (similar meaning), each returning about 20 to 50 documents.</li>
+    <li>Each list is then <strong>filtered on metadata</strong>, such as the user’s team, before anything is merged.</li>
+    <li>The filtered lists are <strong>combined into one ranking</strong>, and the top-ranked documents go to the augmented prompt.</li>
+    <li>This multi-technique setup is <strong>hybrid search</strong>. Good retrievers balance all three techniques for the project’s needs.</li>
+    <li>Up next: <strong>metadata filtering</strong>, the simplest of the three.</li>
+  </ul>
+  <footer>Based on the Module 2 lesson transcript and slides (DeepLearning.AI, Zain Hasan). The simulator’s documents are invented for illustration.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var K=[
+    {t:"New-Hire Vacation Days Policy",a:"All"},
+    {t:"HR Leave Approval Playbook",a:"HR"},
+    {t:"Engineering On-call Comp Days",a:"Engineering"},
+    {t:"Holiday Calendar 2026",a:"All"},
+    {t:"Engineering Onboarding Checklist",a:"Engineering"}
+  ];
+  var S=[
+    {t:"Paid Time Off Overview",a:"All"},
+    {t:"New-Hire Vacation Days Policy",a:"All"},
+    {t:"Engineering Sabbatical Program",a:"Engineering"},
+    {t:"HR Leave Approval Playbook",a:"HR"},
+    {t:"Holiday Calendar 2026",a:"All"}
+  ];
+  var dept="Engineering", topk=3, KC=50;
+  function ok(d){ return dept==="None" || d.a==="All" || d.a===dept; }
+  function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function renderList(box,list){
+    box.innerHTML="";
+    var kept=0;
+    list.forEach(function(d,i){
+      var pass=ok(d);
+      var row=el("div","item"+(pass?"":" out"));
+      row.appendChild(el("span","r", pass ? String(++kept) : "x"));
+      row.appendChild(el("span",null,d.t));
+      row.appendChild(el("span","tag",d.a));
+      box.appendChild(row);
+    });
+  }
+  function render(){
+    renderList(document.getElementById("kwList"),K);
+    renderList(document.getElementById("semList"),S);
+    var scores={};
+    [K,S].forEach(function(list){
+      var r=0;
+      list.forEach(function(d){
+        if(!ok(d)) return;
+        r++;
+        scores[d.t]=(scores[d.t]||0)+1/(KC+r);
+      });
+    });
+    var arr=Object.keys(scores).map(function(t){return {t:t,s:scores[t]};});
+    arr.sort(function(a,b){return b.s-a.s;});
+    var box=document.getElementById("finalList");
+    box.innerHTML="";
+    arr.forEach(function(d,i){
+      var win=i<topk;
+      var row=el("div","item "+(win?"win":"cut"));
+      row.appendChild(el("span","r",String(i+1)));
+      row.appendChild(el("span",null,d.t));
+      row.appendChild(el("span","score",d.s.toFixed(4)));
+      box.appendChild(row);
+    });
+    var removed=K.filter(function(d){return !ok(d);}).length+S.filter(function(d){return !ok(d);}).length;
+    document.getElementById("simNote").textContent =
+      (dept==="None" ? "No filter applied: every document stays in play. " :
+        "Filter removed "+removed+" list entries for the "+dept+" user. ") +
+      "Highlighted rows are the top "+topk+" returned to the augmented prompt. A document appearing in both lists collects points from each, so it rises.";
+  }
+  function bind(id,fn){
+    var seg=document.getElementById(id);
+    seg.addEventListener("click",function(e){
+      var b=e.target.closest("button"); if(!b) return;
+      Array.prototype.forEach.call(seg.querySelectorAll("button"),function(x){x.setAttribute("aria-pressed","false");});
+      b.setAttribute("aria-pressed","true");
+      fn(b.getAttribute("data-v"));
+      render();
+    });
+  }
+  bind("deptSeg",function(v){dept=v;});
+  bind("kSeg",function(v){topk=parseInt(v,10);});
+  render();
+})();
+</script>
+</body>
+</html>

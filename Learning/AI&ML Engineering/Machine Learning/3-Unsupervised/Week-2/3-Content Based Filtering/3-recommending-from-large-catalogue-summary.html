@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recommending from a Large Catalogue: Retrieval and Ranking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2133; --muted:#566079; --line:#d9deea;
+  --user:#0f7b8a; --user-bg:#dff3f5; --movie:#b4540a; --movie-bg:#fdebd8;
+  --accent:#4b3fbf; --accent-bg:#e8e6fb; --good:#1f7a4d; --good-bg:#def3e8; --bad:#a8323e; --bad-bg:#fbe3e6;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+    --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+    --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+  --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+  --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700}
+h2{font-size:25px;margin:44px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+.lede{color:var(--muted);margin:10px 0 0;max-width:64ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+.tag{display:inline-block;font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px}
+.t-user{background:var(--user-bg);color:var(--user)}
+.t-movie{background:var(--movie-bg);color:var(--movie)}
+.t-acc{background:var(--accent-bg);color:var(--accent)}
+.t-good{background:var(--good-bg);color:var(--good)}
+.t-bad{background:var(--bad-bg);color:var(--bad)}
+code,.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.eq{font-family:Literata,Georgia,serif;font-size:20px;text-align:center;padding:14px 8px;background:var(--accent-bg);border-radius:10px;margin:12px 0;overflow-x:auto}
+.scroll{overflow-x:auto}
+ul{padding-left:20px;margin:8px 0}
+li{margin:4px 0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--movie);background:var(--movie-bg)}
+.callout.ok{border-color:var(--good);background:var(--good-bg)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;font-size:16px}
+th{background:var(--bg)}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;font-size:14px;line-height:1.5;margin:10px 0 0}
+.ctrl{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin:8px 0 14px}
+.ctrl label{font-weight:600}
+.ctrl select,.ctrl input[type=range]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.ctrl input[type=range]{padding:0}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.cmp{grid-template-columns:1fr}}
+.cmp .box{border-radius:12px;padding:14px}
+.cmp .box b.big{display:block;font-family:Literata,Georgia,serif;font-size:28px}
+.stage{border-top:5px solid var(--accent)}
+footer{margin-top:40px;color:var(--muted);font-size:15px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg text{font-family:"Source Sans 3",system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <span class="tag t-acc">Recommender systems · Andrew Ng, ML Specialization</span>
+  <h1 style="margin-top:12px">Recommending from a large catalogue</h1>
+  <p class="lede">The two-network model from last time scores one user-item pair well. But real sites must pick a handful of items out of thousands, millions, or tens of millions. The lecture’s answer: a two-step pipeline, <b>retrieval</b> then <b>ranking</b>.</p>
+</header>
+
+<!-- 1 -->
+<h2>1. The scale problem</h2>
+<p class="sub">Slide: “How to efficiently find recommendation from a large set of items?”</p>
+<div class="grid2">
+  <div class="panel">
+    <h3>Catalog sizes (slide)</h3>
+    <svg viewBox="0 0 340 150" width="100%" role="img" aria-label="Movies 1000 plus, ads 1 million plus, songs 10 million plus, products 10 million plus">
+      <g font-size="15" fill="currentColor">
+        <text x="0" y="24">Movies</text><text x="0" y="62">Ads</text><text x="0" y="100">Songs</text><text x="0" y="138">Products</text>
+      </g>
+      <g>
+        <rect x="90" y="8" width="6" height="22" rx="3" fill="var(--user)"/>
+        <rect x="90" y="46" width="110" height="22" rx="3" fill="var(--movie)"/>
+        <rect x="90" y="84" width="230" height="22" rx="3" fill="var(--accent)"/>
+        <rect x="90" y="122" width="230" height="22" rx="3" fill="var(--accent)"/>
+      </g>
+      <g font-size="14" fill="currentColor" font-weight="600">
+        <text x="104" y="24">1000+</text><text x="208" y="62">1m+</text><text x="260" y="100" fill="#fff">10m+</text><text x="260" y="138" fill="#fff">10m+</text>
+      </g>
+    </svg>
+    <p style="margin:6px 0 0;color:var(--muted)">Bars are not to scale (the movie bar is made visible on purpose).</p>
+  </div>
+  <div class="panel">
+    <h3>Why the naive way fails</h3>
+    <p style="margin:0">When a user shows up with features <span class="m">x<sub>u</sub></span>, scoring every item means running the neural network <b>thousands to millions of times, every visit</b>. That is computationally infeasible.</p>
+    <div class="callout warn" style="margin-bottom:0"><b>Real-life case:</b> a music site with tens of millions of songs cannot run 10M+ network inferences each time someone opens the app.</div>
+  </div>
+</div>
+
+<!-- 2 -->
+<h2>2. The two steps</h2>
+<div class="panel scroll">
+<svg viewBox="0 0 820 190" width="100%" style="min-width:640px" role="img" aria-label="Whole catalogue narrows to hundreds of candidates by retrieval, then to a ranked list by ranking">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <g stroke-width="2">
+    <path d="M10 20L230 55V135L10 170Z" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <path d="M300 55L520 70V120L300 135Z" fill="var(--movie-bg)" stroke="var(--movie)"/>
+    <path d="M590 70L810 80V110L590 120Z" fill="var(--good-bg)" stroke="var(--good)"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" fill="none" marker-end="url(#ar)"><path d="M232 95H296"/><path d="M522 95H586"/></g>
+  <g fill="currentColor" text-anchor="middle" font-size="15">
+    <text x="105" y="90" font-weight="600">Whole catalogue</text><text x="105" y="110">thousands to 10M+ items</text>
+    <text x="410" y="92" font-weight="600">Retrieval</text><text x="410" y="110">~100s candidates</text>
+    <text x="700" y="92" font-weight="600">Ranking</text><text x="700" y="110">ordered list shown</text>
+    <text x="264" y="85" font-size="12" fill="var(--muted)">fast + broad</text><text x="554" y="85" font-size="12" fill="var(--muted)">accurate</text>
+  </g>
+</svg>
+</div>
+<div class="grid2" style="margin-top:14px">
+  <div class="panel stage" style="border-top-color:var(--movie)">
+    <h3>Retrieval</h3>
+    <p style="margin:0">Generate a <b>large list of plausible candidates</b>. Goal: <b>broad coverage</b>. It is fine if the list contains items the user will not like, as long as it has many good ones.</p>
+  </div>
+  <div class="panel stage" style="border-top-color:var(--good)">
+    <h3>Ranking</h3>
+    <p style="margin:0">Take that shorter list and <b>fine-tune</b> using the learned model. Pick and order the best items to show.</p>
+  </div>
+</div>
+
+<!-- 3 -->
+<h2>3. Retrieval: where candidates come from</h2>
+<p class="sub">Slide: “Two steps: Retrieval &amp; Ranking”. Retrieval should be very fast and ends with about 100s of items.</p>
+<div class="grid3">
+  <div class="panel">
+    <span class="tag t-movie">Source 1</span>
+    <h3 style="margin-top:8px">Similar to what they watched</h3>
+    <p style="margin:0">For each of the <b>last 10 movies watched</b>, find the <b>10 most similar movies</b> using <span class="m">‖v<sub>m</sub><sup>(k)</sup> − v<sub>m</sub><sup>(i)</sup>‖<sup>2</sup></span>. This is pre-computed, so it is just a <b>look-up table</b>.</p>
+  </div>
+  <div class="panel">
+    <span class="tag t-user">Source 2</span>
+    <h3 style="margin-top:8px">Favourite genres</h3>
+    <p style="margin:0">For the user’s <b>3 most-viewed genres</b>, add the <b>top 10 movies</b> of each. Example: lots of romance, comedy, and historical dramas watched, so top 10 of each.</p>
+  </div>
+  <div class="panel">
+    <span class="tag t-acc">Source 3</span>
+    <h3 style="margin-top:8px">Local popularity</h3>
+    <p style="margin:0">Add the <b>top 20 movies in the user’s country</b>.</p>
+  </div>
+</div>
+<div class="callout ok">
+  <b>Then clean up:</b> combine everything into one list, <b>remove duplicates</b>, and <b>remove items already watched or purchased</b> that you may not want to recommend again.
+</div>
+
+<!-- 4 -->
+<h2>4. Ranking: score only the candidates</h2>
+<p class="sub">Slide: “Two steps: Retrieval &amp; ranking”.</p>
+<div class="panel">
+  <ol style="margin:0;padding-left:20px">
+    <li>Take the retrieved list (~100s).</li>
+    <li>Feed the user features and each movie’s features into the network and compute the <b>predicted rating</b> (or probability) for every user-movie pair.</li>
+    <li>Sort by prediction and <b>display the ranked items</b>, highest expected rating first.</li>
+  </ol>
+</div>
+<div class="callout ok">
+  <b>Extra speed-up:</b> if <span class="m">v<sub>m</sub></span> is <b>pre-computed for every movie</b>, you run only the <b>user half</b> of the network <b>once</b> to get <span class="m">v<sub>u</sub></span> for the person on the site right now. Then just take the inner product <span class="m">v<sub>u</sub> · v<sub>m</sub></span> with each retrieved movie’s stored vector.
+</div>
+
+<h3 style="margin-top:22px">Compare the work (interactive)</h3>
+<p class="sub">Counts follow the lecture’s logic. Naive = score every item in the catalogue with the full model. Two-step = one user-network pass plus one inner product per retrieved item.</p>
+<div class="panel">
+  <div class="ctrl">
+    <div><label for="cat">Catalogue size</label><br>
+      <select id="cat">
+        <option value="1000">1,000 movies</option>
+        <option value="1000000">1 million ads</option>
+        <option value="10000000" selected>10 million songs or products</option>
+      </select></div>
+    <div><label for="k">Items retrieved: <output id="ko"></output></label><br>
+      <input id="k" type="range" min="100" max="1000" step="100" value="500"></div>
+  </div>
+  <div class="cmp">
+    <div class="box" style="background:var(--bad-bg)">
+      <span class="tag t-bad">Naive, per visit</span>
+      <b class="big" id="naive"></b>
+      <span>pair scores, each needing network inference</span>
+    </div>
+    <div class="box" style="background:var(--good-bg)">
+      <span class="tag t-good">Retrieval + ranking, per visit</span>
+      <b class="big" id="two"></b>
+      <span>inner products + 1 user-network pass (item vectors pre-computed)</span>
+    </div>
+  </div>
+  <p style="margin:12px 0 0" id="ratio" aria-live="polite"></p>
+</div>
+
+<!-- 5 -->
+<h2>5. How many items to retrieve?</h2>
+<p class="sub">Slide: “Retrieval step”. The slide’s handwritten numbers compare 100 and 500.</p>
+<div class="grid2">
+  <div class="panel">
+    <h3>The trade-off</h3>
+    <div class="scroll"><table style="min-width:0">
+      <tr><th>Retrieve more</th><td><span class="tag t-good">better performance</span> <span class="tag t-bad">slower recommendations</span></td></tr>
+      <tr><th>Retrieve fewer</th><td><span class="tag t-good">faster</span> <span class="tag t-bad">may miss good items</span></td></tr>
+    </table></div>
+  </div>
+  <div class="panel">
+    <h3>How to decide</h3>
+    <p style="margin:0">Run <b>offline experiments</b>. Check whether the model’s estimated <span class="m">p(y<sup>(i,j)</sup> = 1)</span>, or predicted rating, for the items you would display is <b>noticeably higher</b> when you retrieve, say, 500 instead of 100. If so, retrieve more, even if it slows things a bit.</p>
+  </div>
+</div>
+<div class="callout">
+  <b>Why it works:</b> retrieval prunes away items not worth the detailed inference and inner product. Ranking then makes a careful prediction on what is left. Many recommenders today get both fast and accurate results this way.
+</div>
+
+<!-- 6 -->
+<h2>6. Ethics: the lecture’s closing note</h2>
+<div class="panel" style="border-left:5px solid var(--movie)">
+  <p style="margin:0">Recommender systems are commercially important, but they come with significant ethical issues, and some systems have <b>created harm</b>. Ng asks you to build with an ethical approach that serves <b>your users, society at large, yourself, and the company you work for</b>. The next video covers these issues in detail.</p>
+</div>
+
+<!-- 7 -->
+<h2>7. Alternatives and trade-offs</h2>
+<p class="sub">My additions, not from the lecture.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Option</th><th>Pros</th><th>Cons</th></tr>
+  <tr><th>Pre-computed similar-item look-up (lecture)</th><td>Very fast at request time; simple</td><td>Stale until the next batch run; only covers “similar to X”, not “similar to this user”</td></tr>
+  <tr><th>Approximate nearest-neighbour search on <span class="m">v<sub>u</sub></span> against stored <span class="m">v<sub>m</sub></span></th><td>Retrieves directly for this user from millions of items; no per-item look-up table</td><td>Needs an index to build and maintain; results are approximate</td></tr>
+  <tr><th>Rule-based sources (genres, country top lists)</th><td>Cheap, easy to explain, help new users</td><td>Not personalised beyond coarse buckets</td></tr>
+  <tr><th>Score the full catalogue with the model</th><td>Simplest, no candidate-miss risk</td><td>Infeasible at large scale, as shown above</td></tr>
+</table>
+</div>
+
+<h3 style="margin-top:22px">Ranking sketch in NumPy (illustrative, not from the lecture)</h3>
+<pre><code>import numpy as np
+
+# Pre-computed offline: one 32-d vector per item
+item_vecs = np.load("item_vecs.npy")        # shape (num_items, 32)
+
+def recommend(user_features, candidate_ids, user_nn, top_n=10):
+    vu = user_nn(user_features[None, :])[0]  # user network run ONCE
+    scores = item_vecs[candidate_ids] @ vu   # one inner product per candidate
+    best = np.argsort(-scores)[:top_n]
+    return [candidate_ids[i] for i in best]</code></pre>
+<p class="sub" style="margin-top:8px">Here <code>candidate_ids</code> comes from the retrieval step after de-duplicating and removing watched or purchased items. The names <code>item_vecs</code> and <code>user_nn</code> are my own placeholders.</p>
+
+<h2>Key takeaways</h2>
+<div class="panel">
+  <ul>
+    <li>Scoring every item with the network per visit is infeasible for catalogues of thousands to tens of millions.</li>
+    <li><b>Retrieval</b>: fast, broad, about 100s of candidates (similar to recent watches via look-up, top items in favourite genres, top items in the country), then remove duplicates and already watched or purchased items.</li>
+    <li><b>Ranking</b>: score the candidates with the learned model, sort, and display. Pre-compute <span class="m">v<sub>m</sub></span> and run the user network once.</li>
+    <li>More retrieved items means better quality but slower. Use <b>offline experiments</b> (100 vs 500) to choose.</li>
+    <li>Next: ethical issues with recommender systems.</li>
+  </ul>
+</div>
+
+<footer>Source: Andrew Ng, DeepLearning.AI / Stanford Online, “Recommending from a large catalogue” (transcript and four slides). The pasted transcript repeats itself; content used once. Auto-caption slips such as “influence” for “inference” were read as inference.</footer>
+</main>
+
+<script>
+(function(){
+  function el(i){return document.getElementById(i);}
+  function fmt(n){return n.toLocaleString("en-US");}
+  function update(){
+    var N=parseInt(el("cat").value,10), K=parseInt(el("k").value,10);
+    el("ko").textContent=fmt(K);
+    el("naive").textContent=fmt(N);
+    el("two").textContent=fmt(K);
+    var r=N/K;
+    el("ratio").textContent=r>=2
+      ? "About "+fmt(Math.round(r))+"× fewer pair scores per visit, and the ranking step needs no item-network inference."
+      : "With a small catalogue the saving is modest; this pipeline matters most at large scale.";
+  }
+  el("cat").addEventListener("change",update);
+  el("k").addEventListener("input",update);
+  update();
+})();
+</script>
+</body>
+</html>

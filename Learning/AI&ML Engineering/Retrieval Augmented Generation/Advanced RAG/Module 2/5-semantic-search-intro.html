@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Semantic search introduction: visual summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2333; --muted:#5a6579; --line:#dde2ec;
+  --coral:#e8434f; --coral-soft:#fde6e8; --teal:#0a8fab; --teal-soft:#d8f1f6;
+  --slate:#44556b; --slate-soft:#e6eaf1; --amber:#b9770e; --amber-soft:#fdf0d5;
+  --green:#2e8b57; --green-soft:#dcf3e6; --cell:#e6ebf8; --on:#fff;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+    --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+    --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+    --green:#5ccf93; --green-soft:#17352a; --cell:#232c3e; --on:#10151f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151f; --surface:#1a2130; --ink:#eaeef7; --muted:#9ba7bc; --line:#2b3449;
+  --coral:#ff7480; --coral-soft:#3b2228; --teal:#4cc9e4; --teal-soft:#15333b;
+  --slate:#9fb0c9; --slate-soft:#232c3e; --amber:#f0b44c; --amber-soft:#3a2f17;
+  --green:#5ccf93; --green-soft:#17352a; --cell:#232c3e; --on:#10151f;
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.65;}
+.wrap{max-width:980px;margin:0 auto;padding:40px 20px 80px;}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-0.02em;}
+h2{font-size:clamp(21px,3.2vw,28px);line-height:1.25;margin:0 0 6px;font-weight:600;letter-spacing:-0.01em;}
+h3{font-size:17px;margin:0 0 6px;font-weight:600;}
+p{margin:0 0 12px;}
+.lede{font-size:18px;color:var(--muted);max-width:62ch;}
+section{margin-top:64px;}
+.sub{color:var(--muted);margin-bottom:22px;max-width:68ch;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;background:var(--slate-soft);color:var(--slate);}
+.chip.coral{background:var(--coral-soft);color:var(--coral);}
+.chip.teal{background:var(--teal-soft);color:var(--teal);}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.callout{border-left:4px solid var(--coral);background:var(--coral-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;}
+.callout.teal{border-color:var(--teal);background:var(--teal-soft);}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft);}
+.callout.green{border-color:var(--green);background:var(--green-soft);}
+.callout p:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+/* miss */
+.miss{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:10px 0;}
+.miss .b{background:var(--slate-soft);border-radius:12px;padding:12px 14px;font-size:15px;text-align:center;font-weight:600;}
+.miss .nx{font-weight:700;font-size:24px;}
+.miss .nx.bad{color:var(--coral);}
+@media (max-width:560px){.miss{grid-template-columns:1fr;}.miss .nx{text-align:center;}}
+.weak{border-top:5px solid var(--coral);}
+.good{border-top:5px solid var(--teal);}
+/* vs table */
+.vs{display:grid;grid-template-columns:130px 1fr 1fr;gap:8px;font-size:14.5px;min-width:520px;}
+.vs div{padding:10px 12px;border-radius:10px;background:var(--slate-soft);}
+.vs .hd{background:transparent;font-weight:600;}
+.vs .k{background:var(--coral-soft);}
+.vs .s{background:var(--teal-soft);}
+.vs .same{grid-column:2 / 4;text-align:center;background:var(--green-soft);}
+/* flow */
+.flow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+.flow .s{flex:1;min-width:140px;border-radius:12px;padding:12px 14px;background:var(--slate-soft);font-size:14px;}
+.flow .s b{display:block;font-size:15px;margin-bottom:2px;}
+.flow .s.hot{background:var(--coral);color:var(--on);}
+.flow .s.teal{background:var(--teal-soft);}
+.flow .s.green{background:var(--green-soft);}
+.flow .ar{align-self:center;color:var(--slate);width:20px;height:20px;flex:0 0 20px;}
+/* dims */
+.dim .big{font-size:30px;font-weight:700;color:var(--teal);line-height:1.1;margin-bottom:4px;}
+.dim.hi{border:2px solid var(--teal);}
+.dotgrid{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;}
+.dotgrid i{width:9px;height:9px;border-radius:50%;background:var(--cell);}
+.dotgrid i.on{background:var(--teal);}
+/* models */
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.chiprow span{background:var(--slate-soft);border-radius:10px;padding:6px 12px;font-size:14px;}
+.mdl{border-top:5px solid var(--coral);}
+.mdl.s2{border-top-color:var(--teal);} .mdl.s3{border-top-color:var(--slate);}
+/* sentences */
+.sent{display:grid;gap:8px;margin:10px 0;}
+.sent div{border-radius:10px;padding:8px 14px;font-weight:500;font-size:15px;}
+.sent .a{background:var(--coral-soft);} .sent .c{background:var(--teal-soft);}
+/* metrics */
+.metric{border-top:5px solid var(--teal);}
+.scale{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.scale .pill{flex:1;min-width:90px;text-align:center;border-radius:10px;background:var(--slate-soft);padding:8px 6px;font-size:13px;}
+.scale .pill b{display:block;font-size:18px;color:var(--ink);}
+.rule{background:var(--slate-soft);border-radius:10px;padding:10px 14px;font-size:14px;margin-top:8px;}
+/* lab */
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 22px;margin-bottom:14px;}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:2px;}
+.ctl output{color:var(--teal);}
+input[type=range]{width:100%;accent-color:var(--teal);}
+input[type=range]:focus-visible{outline:3px solid var(--amber);outline-offset:3px;}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface);}
+.seg button{font:inherit;font-size:13.5px;border:0;background:transparent;color:var(--ink);padding:7px 14px;cursor:pointer;}
+.seg button[aria-pressed="true"]{background:var(--teal);color:var(--on);font-weight:600;}
+.seg button:focus-visible{outline:3px solid var(--amber);outline-offset:-3px;}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px;}
+.presets button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer;}
+.presets button:focus-visible{outline:3px solid var(--amber);}
+.lbl{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;}
+.plot svg{width:100%;height:auto;display:block;background:var(--surface);border-radius:12px;}
+.plot .ax{stroke:var(--line);stroke-width:1.5;}
+.plot .gr{stroke:var(--line);stroke-width:1;opacity:.5;}
+.plot .tx{fill:var(--muted);font-size:11px;font-family:'Poppins',system-ui,sans-serif;}
+.plot .va{stroke:var(--coral);stroke-width:3;}
+.plot .vb{stroke:var(--teal);stroke-width:3;}
+.plot .dist{stroke:var(--slate);stroke-width:2;stroke-dasharray:6 5;}
+.plot .ptA{fill:var(--coral);} .plot .ptB{fill:var(--teal);}
+.plot .doc{fill:var(--slate-soft);stroke:var(--slate);stroke-width:1.5;}
+.plot .doc.win{fill:var(--green-soft);stroke:var(--green);stroke-width:3;}
+.plot .dn{fill:var(--ink);font-size:11px;font-weight:600;text-anchor:middle;font-family:'Poppins',system-ui,sans-serif;}
+.plot .pq{fill:var(--coral);stroke:var(--coral);}
+.read{display:grid;gap:8px;margin-top:10px;}
+.read .r{display:flex;justify-content:space-between;gap:10px;background:var(--slate-soft);border-radius:10px;padding:8px 14px;font-size:14.5px;}
+.read .r b{color:var(--ink);}
+.verdict{margin-top:8px;font-size:14px;color:var(--muted);}
+.res{display:grid;gap:8px;margin-top:10px;}
+.rr{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface);font-size:13.5px;}
+.rr.top{border-color:var(--green);background:var(--green-soft);}
+.rr .h{display:flex;justify-content:space-between;gap:8px;font-weight:600;}
+.rr .m{color:var(--muted);font-size:12.5px;}
+pre{background:#1b2333;color:#e8edf7;border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:12px 0;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+p code,li code{background:var(--slate-soft);padding:1px 6px;border-radius:6px;font-size:13.5px;}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;}
+.cmp ul{margin:6px 0 10px;padding-left:20px;}
+.cmp li{margin:3px 0;font-size:14.5px;}
+.pro-t{color:var(--green);font-weight:600;font-size:13.5px;}
+.con-t{color:var(--coral);font-weight:600;font-size:13.5px;}
+.take{display:grid;gap:10px;padding:0;margin:0;}
+.take li{list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+footer{margin-top:60px;color:var(--muted);font-size:13.5px;}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chev" viewBox="0 0 16 16"><path d="M5 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="wrap">
+
+<header>
+  <div class="hero-meta">
+    <span class="chip coral">RAG, Module 2</span>
+    <span class="chip">Information retrieval foundations</span>
+    <span class="chip teal">Lesson: semantic search introduction</span>
+  </div>
+  <h1>Semantic search: matching meaning, not words</h1>
+  <p class="lede">Keyword search counts words. Semantic search places text at points in space so that similar meanings land close together, then ranks documents by how close they are to the prompt.</p>
+</header>
+
+<!-- 1 -->
+<section>
+  <h2>The problem it solves</h2>
+  <p class="sub">Semantic search matches documents to prompts based on <strong>shared meaning</strong> and captures nuances keyword search misses.</p>
+  <div class="two">
+    <div class="card weak">
+      <h3>Misses synonyms</h3>
+      <div class="miss"><div class="b">“happy”</div><div class="nx bad">≠</div><div class="b">“glad”</div></div>
+      <p style="margin:0;font-size:14px;color:var(--muted)">Different words, same meaning. Keyword search can’t connect them.</p>
+    </div>
+    <div class="card weak">
+      <h3>Confuses different meanings</h3>
+      <div class="miss"><div class="b">Python (language)</div><div class="nx bad">=</div><div class="b">Python (snake)</div></div>
+      <p style="margin:0;font-size:14px;color:var(--muted)">Same word, different meaning. Keyword search wrongly matches them.</p>
+    </div>
+  </div>
+  <div class="callout teal">
+    <p><strong>Real-life scenario:</strong> a support bot gets “my laptop won’t turn on”. The help article is titled “Device fails to power up”. No shared keywords, but a semantic search can still find it.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>Same skeleton as keyword search</h2>
+  <p class="sub">At a high level it works just like keyword search: every document and the prompt each get a vector, the vectors are compared to produce scores, and the closest matches win. The only difference is <strong>how the vectors are assigned</strong>.</p>
+  <div class="card scroll-x">
+    <div class="vs">
+      <div class="hd"></div><div class="hd">Keyword search</div><div class="hd">Semantic search</div>
+      <div class="hd">Vector assigned by</div><div class="k">Counting how often each word appears</div><div class="s">Running the text through an <strong>embedding model</strong></div>
+      <div class="hd">Both</div><div class="same">Prompt and documents each get a vector, vectors are compared to generate scores</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>Embedding models: words become locations</h2>
+  <p class="sub">An embedding model maps text to a location in space, represented by a vector. In two dimensions you can draw these as points on an x-y plane.</p>
+  <div class="two">
+    <div class="card">
+      <h3>Example from the lesson</h3>
+      <div class="chiprow"><span>“pizza” → vector [3, 1]</span><span>“bear” → vector [5, 2]</span></div>
+      <p style="font-size:14px;color:var(--muted);margin:0">These particular numbers are only illustrative.</p>
+      <div class="callout" style="margin:14px 0 0"><p><strong>The “magic” part:</strong> semantically similar words map to nearby locations. <em>food</em> and <em>cuisine</em> land close together; <em>trombone</em> and <em>cat</em> land far apart. Similar meanings lead to similar positions.</p></div>
+    </div>
+    <div class="card plot">
+      <h3>A toy 2D embedding space</h3>
+      <svg id="wordMap" viewBox="0 0 440 300" role="img" aria-label="Toy 2D map: food and cuisine close together, cat and trombone far apart"></svg>
+      <p style="font-size:13.5px;color:var(--muted);margin:8px 0 0">Hand-placed points for illustration. <strong>The axes have no simple meaning</strong>: there’s no “food axis” or “animal axis” you can easily see. Think of points floating around, with similar-meaning words clustered.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 DIMS -->
+<section>
+  <h2>More dimensions, more room</h2>
+  <p class="sub">Vectors have many complex relationships, and sensible clusters probably won’t form in just two dimensions.</p>
+  <div class="three">
+    <div class="card dim">
+      <div class="big">2</div><h3>dimensions</h3>
+      <div class="dotgrid"><i class="on"></i><i class="on"></i></div>
+      <p style="font-size:14.5px;margin:0">Easy to draw, but cramped for complex relationships.</p>
+    </div>
+    <div class="card dim">
+      <div class="big">3</div><h3>dimensions</h3>
+      <div class="dotgrid"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <p style="font-size:14.5px;margin:0">More room for clusters of related concepts to form and capture nuanced relationships.</p>
+    </div>
+    <div class="card dim hi">
+      <div class="big">100 to 1,000+</div><h3>dimensions</h3>
+      <div class="dotgrid" id="manyDots"></div>
+      <p style="font-size:14.5px;margin:0">Typical for embedding models: hundreds or even thousands of components. Impossible to graph, but <strong>all the same principles hold</strong>: vectors are coordinates, similar concepts sit close, dissimilar ones farther apart.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 MODELS -->
+<section>
+  <h2>Embedding models exist for more than words</h2>
+  <p class="sub">Different kinds of input, but in every case the output is a <strong>single vector</strong> specifying a point in space. Closer vectors mean text with more similar meaning.</p>
+  <div class="three">
+    <div class="card mdl"><h3>Word embedding model</h3><div class="chiprow"><span>cat</span><span>happy</span></div></div>
+    <div class="card mdl s2"><h3>Sentence embedding model</h3><div class="chiprow"><span>The weather is nice</span><span>What a lovely day</span></div></div>
+    <div class="card mdl s3"><h3>Document embedding model</h3><div class="chiprow"><span>Whole documents</span></div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Sentence example</h3>
+    <div class="sent">
+      <div class="a">1  He spoke softly in class</div>
+      <div class="a">2  He whispered quietly during class</div>
+      <div class="c">3  Her daughter brightened the gloomy day</div>
+    </div>
+    <p style="margin:0">Sentences 1 and 2 share meaning (speaking quietly in school), so their vectors sit <strong>close together</strong>. Sentence 3 is about something else, so it lands <strong>far away</strong> from both. The first two share almost no words, yet are neighbors.</p>
+  </div>
+</section>
+
+<!-- 6 DISTANCE -->
+<section>
+  <h2>Measuring “closeness” between vectors</h2>
+  <p class="sub">To quantify similarity of two texts, measure the distance between their vectors. There are a few ways.</p>
+  <div class="three">
+    <div class="card metric">
+      <h3>Euclidean distance</h3>
+      <p style="font-size:14.5px">Straight-line distance between two vectors: the shortest possible path. Essentially the Pythagorean theorem scaled to more dimensions.</p>
+      <div class="rule"><strong>Smaller = closer.</strong> Caveat: in very high-dimensional space every point tends to be pretty far from every other point.</div>
+    </div>
+    <div class="card metric" style="border-top-color:var(--coral)">
+      <h3>Cosine similarity</h3>
+      <p style="font-size:14.5px">Compares the <strong>direction</strong> of two vectors, even if they’re not close in space. [10, 10] and [100, 100] aren’t near each other but face the same way.</p>
+      <div class="scale"><div class="pill"><b>-1</b>opposite</div><div class="pill"><b>0</b>perpendicular</div><div class="pill"><b>1</b>same direction</div></div>
+      <div class="rule"><strong>Most commonly used measure.</strong> Higher = closer.</div>
+    </div>
+    <div class="card metric" style="border-top-color:var(--amber)">
+      <h3>Dot product</h3>
+      <p style="font-size:14.5px">Length of the projection of one vector onto another. Similar length and direction gives a larger value.</p>
+      <div class="scale"><div class="pill"><b>negative</b>opposite</div><div class="pill"><b>0</b>90 degrees</div><div class="pill"><b>positive</b>same direction</div></div>
+      <div class="rule">Range: negative to positive infinity. Higher = closer. Seen occasionally.</div>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>Not a math person? Fine.</strong> You’ll likely never implement these yourself, but know that for cosine similarity and dot product <strong>higher values mean closer vectors, hence more similar concepts</strong>. Cosine ranges from -1 to 1; dot product has no fixed bounds.</p>
+  </div>
+</section>
+
+<!-- 7 LAB -->
+<section>
+  <h2>Vector lab: see the three measures</h2>
+  <p class="sub">Move the two vectors. Try the presets: the first shows two vectors that are <em>far apart</em> by Euclidean distance yet have cosine similarity 1.</p>
+  <div class="card">
+    <div class="presets">
+      <button type="button" data-p="10,10,100,100">[10,10] vs [100,100]</button>
+      <button type="button" data-p="60,20,60,20">Identical</button>
+      <button type="button" data-p="80,0,0,80">Perpendicular</button>
+      <button type="button" data-p="60,40,-60,-40">Opposite</button>
+    </div>
+    <div class="two">
+      <div class="plot">
+        <svg id="labSvg" viewBox="0 0 440 440" role="img" aria-label="Two vectors drawn from the origin"></svg>
+      </div>
+      <div>
+        <div class="controls" style="grid-template-columns:1fr 1fr">
+          <div class="ctl"><label for="ax">A x <output id="axo"></output></label><input type="range" id="ax" min="-100" max="100" value="10"></div>
+          <div class="ctl"><label for="ay">A y <output id="ayo"></output></label><input type="range" id="ay" min="-100" max="100" value="10"></div>
+          <div class="ctl"><label for="bx">B x <output id="bxo"></output></label><input type="range" id="bx" min="-100" max="100" value="100"></div>
+          <div class="ctl"><label for="by">B y <output id="byo"></output></label><input type="range" id="by" min="-100" max="100" value="100"></div>
+        </div>
+        <div class="read">
+          <div class="r"><span>Euclidean distance (smaller = closer)</span><b id="rE"></b></div>
+          <div class="r"><span>Cosine similarity (-1 to 1)</span><b id="rC"></b></div>
+          <div class="r"><span>Dot product (higher = closer)</span><b id="rD"></b></div>
+        </div>
+        <p class="verdict" id="verdict"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 PIPELINE -->
+<section>
+  <h2>How semantic search runs</h2>
+  <div class="card">
+    <div class="flow">
+      <div class="s"><b>Embed documents</b>The embedding model projects every document into vector space. Similar meaning sits closer together.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s hot"><b>Embed the prompt</b>The prompt gets a vector of its own.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s teal"><b>Measure distance</b>Compare the prompt vector to each document vector.</div>
+      <svg class="ar"><use href="#chev"/></svg>
+      <div class="s green"><b>Rank and return</b>Sort by distance and return the closest documents.</div>
+    </div>
+    <p style="margin:14px 0 0;font-size:14.5px">Closest documents have the most similar meaning, <strong>provided the embedding model works properly</strong>. How the model learns to place similar concepts together is the next lesson.</p>
+  </div>
+</section>
+
+<!-- 9 DEMO -->
+<section>
+  <h2>Try it: a toy semantic search</h2>
+  <p class="sub">Six sentences hand-placed on a 2D plane (real embeddings come from a model and have hundreds of dimensions). Pick a prompt and a measure, and see which documents win. The “shared words” count shows what keyword search would have seen (ignoring tiny words like “a”, “in”, “the”).</p>
+  <div class="card">
+    <div class="controls" style="grid-template-columns:1fr 1fr">
+      <div><span class="lbl">Prompt</span><span class="seg" id="pSeg"></span></div>
+      <div><span class="lbl">Measure</span>
+        <span class="seg" id="mSeg">
+          <button type="button" data-v="cos" aria-pressed="true">Cosine</button>
+          <button type="button" data-v="dot" aria-pressed="false">Dot product</button>
+          <button type="button" data-v="euc" aria-pressed="false">Euclidean</button>
+        </span>
+      </div>
+    </div>
+    <div class="two">
+      <div class="plot"><svg id="docMap" viewBox="0 0 480 400" role="img" aria-label="Toy embedding map of six sentences and the prompt"></svg></div>
+      <div><div class="res" id="docRes"></div></div>
+    </div>
+    <p class="verdict" id="docNote"></p>
+  </div>
+</section>
+
+<!-- 10 CODE -->
+<section>
+  <h2>The three measures in code</h2>
+  <p class="sub">Plain NumPy, for understanding. Producing the vectors needs an embedding model (placeholder <code>embed</code> below).</p>
+<pre><code>import numpy as np
+
+def euclidean(a, b):
+    return np.linalg.norm(a - b)                       # smaller = closer
+
+def dot(a, b):
+    return np.dot(a, b)                                # higher = closer
+
+def cosine(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))   # -1 to 1
+
+# docs_vecs = [embed(d) for d in documents]            # embed() = your embedding model
+# q = embed(prompt)
+# ranked = sorted(zip(documents, docs_vecs),
+#                 key=lambda p: cosine(q, p[1]), reverse=True)
+
+print(cosine(np.array([10, 10]), np.array([100, 100])))   # 1.0 (same direction)
+print(euclidean(np.array([10, 10]), np.array([100, 100])))  # ~127.3 (far apart)</code></pre>
+  <div class="callout amber">
+    <p><strong>Extra tip (not in the lesson):</strong> if your embedding vectors are normalized to unit length, cosine similarity and dot product give the same ranking. For the actual embedding call, use your provider’s current embeddings documentation; client libraries and model names change quickly.</p>
+  </div>
+</section>
+
+<!-- 11 ALTERNATIVES -->
+<section>
+  <h2>Alternatives and trade-offs</h2>
+  <div class="cmp">
+    <div class="card" style="border:2px solid var(--green)">
+      <h3>Cosine similarity (common default)</h3>
+      <div class="pro-t">Pros</div><ul><li>Focuses on direction, so meaning rather than size</li><li>Bounded -1 to 1, easy to read</li></ul>
+      <div class="con-t">Cons</div><ul><li>Ignores vector length (rarely a problem)</li></ul>
+    </div>
+    <div class="card">
+      <h3>Dot product</h3>
+      <div class="pro-t">Pros</div><ul><li>Simple and fast to compute</li></ul>
+      <div class="con-t">Cons</div><ul><li>Unbounded, and sensitive to vector length</li></ul>
+    </div>
+    <div class="card">
+      <h3>Euclidean distance</h3>
+      <div class="pro-t">Pros</div><ul><li>Intuitive: straight-line distance</li></ul>
+      <div class="con-t">Cons</div><ul><li>Everything tends to look far apart in very high dimensions</li></ul>
+    </div>
+    <div class="card">
+      <h3>Semantic search only</h3>
+      <div class="pro-t">Pros</div><ul><li>Handles synonyms and paraphrases</li></ul>
+      <div class="con-t">Cons</div><ul><li>Slower, more computationally expensive</li><li>Exact product names or codes can be missed, so pair with keyword search (hybrid)</li></ul>
+    </div>
+    <div class="card">
+      <h3>Word vs sentence vs document embeddings</h3>
+      <div class="pro-t">Pros</div><ul><li>Pick the unit that matches what you’re searching</li></ul>
+      <div class="con-t">Cons</div><ul><li>One vector for a long document can blur its details, so chunk size matters</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section>
+  <h2>Key takeaways</h2>
+  <ul class="take">
+    <li>Semantic search matches by <strong>meaning</strong>: it handles synonyms (happy/glad) and avoids same-word confusions (Python the language vs the snake).</li>
+    <li>Same skeleton as keyword search; the difference is that vectors come from an <strong>embedding model</strong> instead of word counts.</li>
+    <li>Similar meanings map to <strong>nearby locations</strong>. Axes have no simple meaning; real vectors have <strong>100 to 1,000+ dimensions</strong>.</li>
+    <li>Embedding models exist for <strong>words, sentences and documents</strong>, each outputting one vector.</li>
+    <li>Measure closeness with <strong>cosine similarity</strong> (most common, -1 to 1), <strong>dot product</strong> (unbounded) or <strong>Euclidean distance</strong>. For cosine and dot, higher means closer.</li>
+    <li>Pipeline: embed documents, embed prompt, measure distances, rank, return closest.</li>
+    <li>Up next: how embedding models are trained to place similar text together.</li>
+  </ul>
+  <footer>Based on the Module 2 lesson transcript and slides (DeepLearning.AI, Zain Hasan). All coordinates in the maps and demo are hand-placed for illustration, not real model output.</footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  var $=function(id){return document.getElementById(id);};
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+  function se(tag,attrs,cls){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(cls)e.setAttribute("class",cls);return e;}
+  function st(parent,x,y,txt,cls,anchor){var t=se("text",{x:x,y:y,"text-anchor":anchor||"middle"},cls||"tx");t.textContent=txt;parent.appendChild(t);return t;}
+
+  /* many dots */
+  var md=$("manyDots");
+  for(var i=0;i<60;i++){var d=el("i","on");md.appendChild(d);}
+  md.appendChild(el("span",null,"..."));
+
+  /* word map */
+  (function(){
+    var svg=$("wordMap");
+    svg.appendChild(se("line",{x1:20,x2:420,y1:150,y2:150},"ax"));
+    svg.appendChild(se("line",{x1:220,x2:220,y1:15,y2:285},"ax"));
+    var pts=[["food",290,95,"coral"],["cuisine",340,70,"coral"],["cat",95,185,"teal"],["trombone",350,235,"slate"]];
+    pts.forEach(function(p){
+      var c=se("circle",{cx:p[1],cy:p[2],r:8,fill:"var(--"+p[3]+")"});
+      svg.appendChild(c);
+      st(svg,p[1],p[2]-14,p[0],"tx");
+    });
+    svg.appendChild(se("ellipse",{cx:315,cy:83,rx:50,ry:30,fill:"none",stroke:"var(--coral)","stroke-dasharray":"5 4"}));
+  })();
+
+  /* vector lab */
+  var C=220,S=2; // origin and px per unit
+  function X(v){return C+v*S;} function Y(v){return C-v*S;}
+  function lab(){
+    var ax=+$("ax").value, ay=+$("ay").value, bx=+$("bx").value, by=+$("by").value;
+    $("axo").textContent=ax;$("ayo").textContent=ay;$("bxo").textContent=bx;$("byo").textContent=by;
+    var svg=$("labSvg");svg.innerHTML="";
+    var defs=se("defs",{});
+    ["A","B"].forEach(function(n){
+      var m=se("marker",{id:"mk"+n,markerWidth:10,markerHeight:10,refX:8,refY:5,orient:"auto"});
+      m.appendChild(se("path",{d:"M0,0 L10,5 L0,10 z",fill:"var(--"+(n==="A"?"coral":"teal")+")"}));
+      defs.appendChild(m);
+    });
+    svg.appendChild(defs);
+    for(var g=-100;g<=100;g+=50){
+      svg.appendChild(se("line",{x1:X(g),x2:X(g),y1:10,y2:430},"gr"));
+      svg.appendChild(se("line",{x1:10,x2:430,y1:Y(g),y2:Y(g)},"gr"));
+      if(g!==0){st(svg,X(g),C+14,g,"tx");st(svg,C-6,Y(g)+4,g,"tx","end");}
+    }
+    svg.appendChild(se("line",{x1:10,x2:430,y1:C,y2:C},"ax"));
+    svg.appendChild(se("line",{x1:C,x2:C,y1:10,y2:430},"ax"));
+    svg.appendChild(se("line",{x1:X(ax),y1:Y(ay),x2:X(bx),y2:Y(by)},"dist"));
+    svg.appendChild(se("line",{x1:C,y1:C,x2:X(ax),y2:Y(ay),"marker-end":"url(#mkA)"},"va"));
+    svg.appendChild(se("line",{x1:C,y1:C,x2:X(bx),y2:Y(by),"marker-end":"url(#mkB)"},"vb"));
+    st(svg,X(ax)+10,Y(ay)-8,"A","tx","start");
+    st(svg,X(bx)+10,Y(by)-8,"B","tx","start");
+    var eu=Math.sqrt((ax-bx)*(ax-bx)+(ay-by)*(ay-by));
+    var dt=ax*bx+ay*by;
+    var na=Math.sqrt(ax*ax+ay*ay), nb=Math.sqrt(bx*bx+by*by);
+    var co=(na===0||nb===0)?null:dt/(na*nb);
+    $("rE").textContent=eu.toFixed(1);
+    $("rC").textContent=co===null?"undefined (zero vector)":co.toFixed(3);
+    $("rD").textContent=String(dt);
+    var v;
+    if(co===null) v="One vector has zero length, so it has no direction.";
+    else if(co>0.999) v="Same direction (cosine = 1)"+(eu>20?", yet the Euclidean distance is large: cosine ignores how far apart they are.":".");
+    else if(co<-0.999) v="Exactly opposite directions (cosine = -1, dot product negative).";
+    else if(Math.abs(co)<0.02) v="About 90 degrees apart (cosine near 0, dot product near 0).";
+    else if(co>0) v="Pointing in broadly similar directions: positive cosine and dot product.";
+    else v="Pointing in broadly opposite directions: negative cosine and dot product.";
+    $("verdict").textContent=v;
+  }
+  ["ax","ay","bx","by"].forEach(function(id){$(id).addEventListener("input",lab);});
+  document.querySelectorAll(".presets button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var p=b.getAttribute("data-p").split(",").map(Number);
+      $("ax").value=p[0];$("ay").value=p[1];$("bx").value=p[2];$("by").value=p[3];lab();
+    });
+  });
+  lab();
+
+  /* doc demo */
+  var docs=[
+    {t:"He spoke softly in class",x:-6,y:3.5},
+    {t:"He whispered quietly during class",x:-6.5,y:2.8},
+    {t:"Her daughter brightened the gloomy day",x:6.5,y:5},
+    {t:"The teacher raised her voice in the hall",x:-4.2,y:5.5},
+    {t:"A sunny morning lifted everyone’s mood",x:5.5,y:6.2},
+    {t:"The quarterback threw a long pass",x:4,y:-6.5}
+  ];
+  var prompts=[
+    {n:"A pupil murmured hushed words in lessons",x:-6.2,y:3.2},
+    {n:"A cheerful, happy day",x:6,y:5.5},
+    {n:"A football game",x:4.5,y:-6}
+  ];
+  var stop={a:1,an:1,the:1,in:1,during:1,of:1,he:1,she:1,her:1,his:1,to:1,and:1};
+  function tok(s){return (s.toLowerCase().match(/[a-z0-9]+/g)||[]).filter(function(w){return !stop[w];});}
+  var pi=0, metric="cos";
+  var pSeg=$("pSeg");
+  prompts.forEach(function(p,i){
+    var b=el("button",null,p.n);b.type="button";b.setAttribute("aria-pressed",i===0?"true":"false");
+    b.addEventListener("click",function(){
+      pi=i;Array.prototype.forEach.call(pSeg.children,function(x){x.setAttribute("aria-pressed","false");});
+      b.setAttribute("aria-pressed","true");drawDocs();
+    });
+    pSeg.appendChild(b);
+  });
+  var mSeg=$("mSeg");
+  mSeg.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;
+    Array.prototype.forEach.call(mSeg.children,function(x){x.setAttribute("aria-pressed","false");});
+    b.setAttribute("aria-pressed","true");metric=b.getAttribute("data-v");drawDocs();
+  });
+  function drawDocs(){
+    var p=prompts[pi];
+    var pw={};tok(p.n).forEach(function(w){pw[w]=1;});
+    var sc=docs.map(function(d,i){
+      var dt=d.x*p.x+d.y*p.y;
+      var nd=Math.sqrt(d.x*d.x+d.y*d.y), np=Math.sqrt(p.x*p.x+p.y*p.y);
+      var cos=dt/(nd*np), euc=Math.sqrt((d.x-p.x)*(d.x-p.x)+(d.y-p.y)*(d.y-p.y));
+      var shared=tok(d.t).filter(function(w){return pw[w];}).length;
+      return {i:i,cos:cos,dot:dt,euc:euc,shared:shared,v:metric==="cos"?cos:metric==="dot"?dt:euc};
+    });
+    sc.sort(function(a,b){return metric==="euc"?a.v-b.v:b.v-a.v;});
+    var win={};sc.slice(0,2).forEach(function(r){win[r.i]=1;});
+    var svg=$("docMap");svg.innerHTML="";
+    var cx=240,cy=200,k=19;
+    for(var g=-10;g<=10;g+=5){
+      svg.appendChild(se("line",{x1:cx+g*k,x2:cx+g*k,y1:10,y2:390},"gr"));
+      svg.appendChild(se("line",{x1:20,x2:460,y1:cy-g*k,y2:cy-g*k},"gr"));
+    }
+    svg.appendChild(se("line",{x1:20,x2:460,y1:cy,y2:cy},"ax"));
+    svg.appendChild(se("line",{x1:cx,x2:cx,y1:10,y2:390},"ax"));
+    docs.forEach(function(d,i){
+      svg.appendChild(se("circle",{cx:cx+d.x*k,cy:cy-d.y*k,r:13},"doc"+(win[i]?" win":"")));
+      st(svg,cx+d.x*k,cy-d.y*k+4,String(i+1),"dn");
+    });
+    var px=cx+p.x*k, py=cy-p.y*k;
+    svg.appendChild(se("path",{d:"M"+px+","+(py-12)+" L"+(px+10)+","+py+" L"+px+","+(py+12)+" L"+(px-10)+","+py+" Z"},"pq"));
+    st(svg,px,py-18,"prompt","tx");
+    var res=$("docRes");res.innerHTML="";
+    sc.forEach(function(r,rank){
+      var row=el("div","rr"+(rank<2?" top":""));
+      var h=el("div","h");
+      h.appendChild(el("span",null,"#"+(rank+1)+"  Doc "+(r.i+1)));
+      h.appendChild(el("span",null,metric==="cos"?r.cos.toFixed(3):metric==="dot"?r.dot.toFixed(1):r.euc.toFixed(2)));
+      row.appendChild(h);
+      row.appendChild(el("div",null,docs[r.i].t));
+      row.appendChild(el("div","m","Shared words with prompt: "+r.shared));
+      res.appendChild(row);
+    });
+    $("docNote").textContent=
+      (metric==="euc"?"Euclidean: smaller distance ranks higher.":"Higher score ranks higher.")+
+      " Green circles are the top 2. Notice how meaning-neighbors win even with few or no shared words. With dot product, vectors placed farther from the origin get a boost from their length.";
+  }
+  drawDocs();
+})();
+</script>
+</body>
+</html>
