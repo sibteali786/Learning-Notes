@@ -11,52 +11,15 @@
             "id": "adbcd4eedc1427bc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "html-view",
               "state": {
-                "file": "Learning/Robotics/Resoucres.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
+                "file": "Learning/Database/Fundamentals of Database Engineering/7-Replication/1-replication-master-backup.html"
               },
-              "icon": "lucide-file",
-              "title": "Resoucres"
-            }
-          },
-          {
-            "id": "414a3c90bc9aeca1",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "conflict-files-obsidian-git.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "conflict-files-obsidian-git"
+              "icon": "code-glyph",
+              "title": "1-replication-master-backup"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -221,11 +184,18 @@
       "audio-recorder:Start/stop recording": false
     }
   },
-  "active": "414a3c90bc9aeca1",
+  "active": "adbcd4eedc1427bc",
   "lastOpenFiles": [
+    "Learning/Database/Fundamentals of Database Engineering/7-Replication/3-sync-vs-async.html",
+    "Learning/Portfolio/Inspirations.md",
+    "Learning/Backend Engineering/Reources.md",
+    "Learning/Distributed Systems/Lecture 1/lecture1-summary.html",
+    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
+    "Learning/Networking/Networking-Basics.pdf",
+    "Learning/Portfolio/Coastal Research Work.md",
+    "Learning/Resume/Sibteali-Baqar.docx",
     "Learning/Robotics/Resoucres.md",
     "conflict-files-obsidian-git.md",
-    "Learning/Portfolio/Coastal Research Work.md",
     "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-5-user-consent-and-password-grant.html",
     "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-4-client-types.html",
     "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-3-roles-and-authorization-server.html",
@@ -234,9 +204,6 @@
     "Learning/Backend Engineering/OAuth2.O/1-Intro/oauth-1-before-oauth.html",
     "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md",
     "Learning/Backend Engineering/OAuth2.O/Oauth 2.0 Simplified (Aaron Parecki) (z-library.sk, 1lib.sk, z-lib.sk).pdf",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security",
-    "Learning/Backend Engineering/OAuth2.O/1-Intro",
-    "Learning/Backend Engineering/OAuth2.O",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/figure 3.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/figure 2.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/figure 1.png",
@@ -265,10 +232,6 @@
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Drawing 2026-09-27 14.28.26.excalidraw.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/1-Analysis Database/Analysis 1.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Commands.md",
-    "Learning/AI&ML Engineering/Roadmap/AI-Engineer-Roadmap-2027-Markdown-Edition/markdown/AI-Engineer-Roadmap-2027-Question-Bank.md",
-    "Learning/AI&ML Engineering/Roadmap/Resources.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/2-Stress test K6/6-Redis Heartbeat with Coroutines.md",
-    "Learning/AI&ML Engineering/Roadmap/START-HERE.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
