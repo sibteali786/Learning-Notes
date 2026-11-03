@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OAuth: How Mobile Apps Launch the Browser</title>
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#53666f; --line:#d3dcd9;
+  --front:#1f6fb2; --front-bg:#dcebf8; --bad:#b3261e; --bad-bg:#fbe3e1;
+  --ok:#0b6e5b; --ok-bg:#dff3ee; --note:#e9eef0; --warn:#8a5a00; --warn-bg:#fbefcf;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+    --front:#7fbaf0; --front-bg:#14304a; --bad:#ff9087; --bad-bg:#3b1c1a;
+    --ok:#5fd3b8; --ok-bg:#12332d; --note:#1d2e36; --warn:#f2c36b; --warn-bg:#3a2e12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+  --front:#7fbaf0; --front-bg:#14304a; --bad:#ff9087; --bad-bg:#3b1c1a;
+  --ok:#5fd3b8; --ok-bg:#12332d; --note:#1d2e36; --warn:#f2c36b; --warn-bg:#3a2e12;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,40px);margin-bottom:10px}
+h2{font-size:25px;margin:50px 0 6px}
+h3{font-size:18px;margin:0 0 6px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:18px;max-width:64ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:66ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:780px){.grid2,.grid3{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.box.bad{border-left:6px solid var(--bad);background:var(--bad-bg)}
+.box.ok{border-left:6px solid var(--ok)}
+.box.front{border-left:6px solid var(--front)}
+.box.warn{border-left:6px solid var(--warn);background:var(--warn-bg)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;margin-right:4px}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.front{background:var(--front-bg);color:var(--front)}
+.tag.warn{background:var(--warn-bg);color:var(--warn)}
+ul{margin:8px 0;padding-left:20px}li{margin:4px 0}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.s-bad{fill:var(--bad-bg);stroke:var(--bad);stroke-width:2}
+.s-ok{fill:var(--ok-bg);stroke:var(--ok);stroke-width:2}
+.s-warn{fill:var(--warn-bg);stroke:var(--warn);stroke-width:2}
+.a-neu{stroke:var(--muted);stroke-width:2.5;fill:none}
+.t-bad{fill:var(--bad)!important;font-weight:600}
+.t-ok{fill:var(--ok)!important;font-weight:600}
+.t-warn{fill:var(--warn)!important;font-weight:600}
+.t-muted{fill:var(--muted)!important}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{background:var(--note)}
+tr:last-child td{border-bottom:0}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:12px 18px;margin:14px 0}
+.ex .lbl{font-weight:700;color:var(--muted);font-size:14px}
+code{background:var(--note);padding:1px 6px;border-radius:4px;font-size:14px;word-break:break-word}
+.tip{background:var(--note);border-radius:10px;padding:12px 16px;margin:14px 0}
+</style>
+</head>
+<body>
+<main>
+
+<h1>How mobile apps launch the browser for OAuth</h1>
+<p class="lead">How the app opens the authorization server to start the flow is one of the most important security decisions on mobile. There are three approaches, and the lecture's verdict is that the platform's in-app secure browser is the best balance of security and user experience.</p>
+
+<!-- 1 -->
+<h2>1. The three approaches at a glance</h2>
+
+<div class="grid3">
+  <div class="box warn">
+    <span class="tag warn">1. External browser</span>
+    <p><b>Safari / Chrome</b> launched from the app.</p>
+    <p>Secure, but clunky.</p>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">2. Embedded web view</span>
+    <p>A page framed inside the app.</p>
+    <p>Convenient, but <b>insecure</b>.</p>
+  </div>
+  <div class="box ok">
+    <span class="tag ok">3. Secure in-app browser</span>
+    <p><b>SFSafariViewController</b> (iOS), <b>Chrome Custom Tabs</b> (Android).</p>
+    <p>Best balance.</p>
+  </div>
+</div>
+
+<div class="scroll" style="margin-top:14px">
+<table>
+  <tr><th></th><th>External browser</th><th>Embedded web view</th><th>Secure in-app browser</th></tr>
+  <tr><td><b>User leaves the app?</b></td><td>Yes</td><td>No</td><td>No</td></tr>
+  <tr><td><b>Real browser, address bar visible?</b></td><td>Yes</td><td>No</td><td>Real browser (system-provided)</td></tr>
+  <tr><td><b>Can the app read the page / password?</b></td><td>No</td><td><span class="tag bad">Yes</span></td><td>No</td></tr>
+  <tr><td><b>Shares cookies / existing login with system?</b></td><td>Yes</td><td>No (isolated)</td><td>Yes, per the lecture</td></tr>
+  <tr><td><b>System auth (WebAuthn, TouchID)?</b></td><td>Yes</td><td>No</td><td>Available</td></tr>
+  <tr><td><b>User experience</b></td><td>Fragile, disruptive</td><td>Seems smooth, but re-login each time</td><td>Smooth</td></tr>
+  <tr><td><b>Verdict</b></td><td>Old secure option</td><td><span class="tag bad">Avoid</span></td><td><span class="tag ok">Recommended</span></td></tr>
+</table>
+</div>
+
+<!-- 2 -->
+<h2>2. Approach 1: the native browser (the old secure way)</h2>
+<p class="sub">It used to be the most secure option, but the experience was poor.</p>
+
+<div class="scroll">
+<svg viewBox="0 0 880 150" role="img" aria-label="User taps button in app, app goes to background, Safari or Chrome opens, user logs in, switches back">
+  <rect class="s-box" x="10" y="40" width="190" height="70" rx="10"/>
+  <text x="105" y="70" text-anchor="middle" font-size="14" font-weight="700">In your app</text>
+  <text x="105" y="90" text-anchor="middle" font-size="12" class="t-muted">tap "Log in"</text>
+  <rect class="s-warn" x="260" y="40" width="190" height="70" rx="10"/>
+  <text x="355" y="68" text-anchor="middle" font-size="14" font-weight="700">App goes to</text>
+  <text x="355" y="88" text-anchor="middle" font-size="14" font-weight="700">background</text>
+  <rect class="s-box" x="510" y="40" width="170" height="70" rx="10"/>
+  <text x="595" y="68" text-anchor="middle" font-size="14" font-weight="700">Safari / Chrome</text>
+  <text x="595" y="88" text-anchor="middle" font-size="12" class="t-muted">user logs in</text>
+  <rect class="s-box" x="740" y="40" width="130" height="70" rx="10"/>
+  <text x="805" y="70" text-anchor="middle" font-size="14" font-weight="700">Switch back</text>
+  <text x="805" y="88" text-anchor="middle" font-size="12" class="t-muted">to the app</text>
+  <line class="a-neu" x1="202" y1="75" x2="256" y2="75"/>
+  <line class="a-neu" x1="452" y1="75" x2="506" y2="75"/>
+  <line class="a-neu" x1="682" y1="75" x2="736" y2="75"/>
+  <text x="440" y="140" text-anchor="middle" font-size="13" class="t-warn">The user physically leaves the app context</text>
+</svg>
+</div>
+
+<div class="grid2" style="margin-top:12px">
+  <div class="box ok"><b>Pros</b>
+    <ul><li>Real browser with address bar.</li><li>The app cannot touch the password.</li><li>Shares the existing session, so users already logged in to Safari are not asked again.</li></ul></div>
+  <div class="box bad"><b>Cons</b>
+    <ul><li>Arguably not the best experience: leaving the app.</li><li>More fragile, since the user leaves the app's context.</li></ul></div>
+</div>
+
+<!-- 3 -->
+<h2>3. Approach 2: the embedded web view (avoid)</h2>
+<p class="sub">Popular back when the native browser was the only alternative: the user never leaves the app. The lecture lists several serious problems.</p>
+
+<div class="grid2">
+  <div class="box bad">
+    <span class="tag bad">Problem 1</span><b> No address bar, no verification</b>
+    <p>It is not a real browser. The user just sees the page framed in the app and cannot check that it is really the authorization server. It could be an attacker's clone, and the user would type their password into it. There is no way to verify.</p>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">Problem 2</span><b> No shared cookies, so worse UX</b>
+    <p>Because the app fully controls the web view, platforms isolate it in its own container (otherwise data would link between apps). If you are logged in to the authorization server in Safari, you are <b>not</b> logged in inside the app's web view, so users retype their password every time.</p>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">Problem 3</span><b> The app can steal the password</b>
+    <p>Even if the real OAuth server is shown, the app has full control and can reach into the web view and <b>extract the password</b>. That is exactly what OAuth was meant to prevent: apps should never touch a user's password.</p>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">Problem 4</span><b> No modern system authentication</b>
+    <p>Mechanisms like <b>WebAuthn</b> or built-in <b>TouchID</b>, now being built into browsers, are not available in a web view because it is not a real browser. This compounds the password-exposure problem.</p>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A shopping app shows a "Sign in with Google" page in an embedded web view. It looks right, but there is no address bar, so you cannot tell if it is genuinely Google. Even if it is, the shopping app is the one drawing the window and could quietly read what you type. It is like handing your house key to a stranger to "just hold it while the lock is opened".</p>
+</div>
+
+<!-- 4 -->
+<h2>4. Approach 3: platform secure in-app browsers (best)</h2>
+<p class="sub">As OAuth matured, mobile platforms built special APIs to launch a browser securely within the app.</p>
+
+<div class="scroll">
+<svg viewBox="0 0 880 150" role="img" aria-label="User taps in app, secure browser pops over the app, user logs in, it dismisses, user still in the app">
+  <rect class="s-box" x="10" y="40" width="190" height="70" rx="10"/>
+  <text x="105" y="70" text-anchor="middle" font-size="14" font-weight="700">In your app</text>
+  <text x="105" y="90" text-anchor="middle" font-size="12" class="t-muted">tap "Log in"</text>
+  <rect class="s-ok" x="260" y="40" width="250" height="70" rx="10"/>
+  <text x="385" y="66" text-anchor="middle" font-size="14" font-weight="700">Secure browser pops up</text>
+  <text x="385" y="86" text-anchor="middle" font-size="12">in front of the app, user logs in</text>
+  <rect class="s-box" x="570" y="40" width="300" height="70" rx="10"/>
+  <text x="720" y="66" text-anchor="middle" font-size="14" font-weight="700">It goes away</text>
+  <text x="720" y="86" text-anchor="middle" font-size="12" class="t-ok">user is still inside the app</text>
+  <line class="a-neu" x1="202" y1="75" x2="256" y2="75"/>
+  <line class="a-neu" x1="512" y1="75" x2="566" y2="75"/>
+  <text x="440" y="140" text-anchor="middle" font-size="13" class="t-ok">The app cannot see or inspect the browser's contents</text>
+</svg>
+</div>
+
+<div class="grid2" style="margin-top:12px">
+  <div class="box ok">
+    <b>Why it is the best of both worlds</b>
+    <ul>
+      <li>The user <b>never leaves the app</b>.</li>
+      <li>The app <b>has no access to the browser</b> and cannot inspect its contents, so it cannot touch the password.</li>
+      <li>Because the app cannot inspect it, it is <b>safe to share cookies with the system</b>: if the user is already logged in in Safari, they are already logged in in the pop-up, so <b>no password retyping</b>.</li>
+      <li>Security benefit of the external browser plus the smoothness of a web view.</li>
+    </ul>
+  </div>
+  <div class="box front">
+    <b>The platform tools (per the lecture)</b>
+    <table style="margin-top:6px">
+      <tr><th>Platform</th><th>API</th></tr>
+      <tr><td>iOS</td><td><code>SFSafariViewController</code></td></tr>
+      <tr><td>Android</td><td>Chrome Custom Tabs</td></tr>
+    </table>
+    <p style="margin-bottom:0">"The best way to do an OAuth flow from within mobile apps": the best balance between security and user experience.</p>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>You open a food-delivery app and tap "Log in with Google". A Google sheet slides up over the app and you are already signed in, so you just confirm. The sheet closes and you are back in the app. The delivery app never saw your password or the contents of that sheet.</p>
+</div>
+
+<div class="box warn">
+  <b>My addition (not in the lecture), please verify in current Apple docs:</b>
+  <p>On iOS, Apple's more recent dedicated API for OAuth sign-in is <code>ASWebAuthenticationSession</code>, and current OAuth guidance for native apps points to it. Also, I believe newer iOS versions no longer let <code>SFSafariViewController</code> share cookies with Safari, so the single-sign-on benefit described above applies to <code>ASWebAuthenticationSession</code> rather than to <code>SFSafariViewController</code>. The lecture's principle is unchanged: use the system-provided secure browser, not a web view. Android Custom Tabs remains the recommended Android option.</p>
+</div>
+
+<!-- 5 -->
+<h2>5. Key takeaways</h2>
+<div class="box">
+<ul>
+  <li>How the app launches the browser to the OAuth server is one of the most important parts of mobile OAuth security.</li>
+  <li><b>External browser:</b> secure, but the user leaves the app and the experience is fragile.</li>
+  <li><b>Embedded web view: avoid.</b> No address bar to verify the server, no shared cookies (repeated logins), the app can extract the password, and no WebAuthn or TouchID.</li>
+  <li><b>Platform secure in-app browser</b> (iOS, Android Chrome Custom Tabs): the user stays in the app, the app cannot inspect the browser, cookies can be shared so existing logins carry over.</li>
+  <li>It gives the <b>best balance of security and user experience</b>, and it is the recommended way to start OAuth from a mobile app.</li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>

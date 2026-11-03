@@ -4,19 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "17419b86ca1e3637",
+        "id": "f4f30307d48c5aea",
         "type": "tabs",
         "children": [
           {
-            "id": "adbcd4eedc1427bc",
+            "id": "9f5f92c537d8fab5",
             "type": "leaf",
             "state": {
               "type": "html-view",
               "state": {
-                "file": "Learning/Database/Fundamentals of Database Engineering/7-Replication/4-postgres-replication-demo.html"
+                "file": "Learning/Backend Engineering/OAuth2.O/4-Oauth for Native/3-oauth-mobile-launching-the-browser.html"
               },
               "icon": "code-glyph",
-              "title": "4-postgres-replication-demo"
+              "title": "3-oauth-mobile-launching-the-browser"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Personal/Maryam's Things.md",
+                "file": "Learning/Backend Engineering/Books/Designing Data Intensive Applications by Martin Kleppmann.pdf",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Maryam's Things"
+              "title": "Backlinks"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learning/Freelance/Cargo Bussiness.md",
+                "file": "Learning/Backend Engineering/Books/Designing Data Intensive Applications by Martin Kleppmann.pdf",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cargo Bussiness"
+              "title": "Outgoing links"
             }
           },
           {
@@ -142,35 +142,24 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learning/Backend Engineering/Python/functional_programming/Notes.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Notes"
-            }
-          },
-          {
-            "id": "957dbb181bb46970",
-            "type": "leaf",
-            "state": {
-              "type": "git-view",
-              "state": {},
-              "icon": "git-pull-request",
-              "title": "Source Control"
+              "title": "Outline"
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 328.8203125
+    "width": 328.8203125,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
-      "vault-lens:Vault Lens Dev: 打开当前文件": false,
       "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
@@ -178,49 +167,53 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
+      "publish:Publish changes...": false,
+      "audio-recorder:Start/stop recording": false,
       "obsidian-excalidraw-plugin:New drawing": false,
       "obsidian-git:Open Git source control": false,
-      "publish:Publish changes...": false,
-      "audio-recorder:Start/stop recording": false
+      "vault-lens:Vault Lens Dev: 打开当前文件": false
     }
   },
-  "active": "adbcd4eedc1427bc",
+  "active": "aa4a4c8a17a22b51",
   "lastOpenFiles": [
-    "Learning/Database/Fundamentals of Database Engineering/7-Replication/1-replication-master-backup.html",
     "Learning/Database/Fundamentals of Database Engineering/7-Replication/4-postgres-replication-demo.html",
-    "Learning/Database/Fundamentals of Database Engineering/7-Replication/3-sync-vs-async.html",
-    "Learning/Portfolio/Inspirations.md",
-    "Learning/Backend Engineering/Reources.md",
-    "Learning/Distributed Systems/Lecture 1/lecture1-summary.html",
-    "Learning/Distributed Systems/Lecture 1/Papers to read.md",
-    "Learning/Networking/Networking-Basics.pdf",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/4-Principal Component Analysis/2-pca-algorithm-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/4-Principal Component Analysis/pca-reducing-number-of-features-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/C3_W2_Collaborative_RecSys_Assignment.ipynb",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/lab-deep-learning-content-based-filtering-summary.html",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/4-PCA/Untitled",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/4-Principal Component Analysis",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/Notebooks/recsysNN_utils.py",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/Notebooks/public_tests.py",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/Notebooks/data/content_y_train.csv",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-2/3-Content Based Filtering/Notebooks/data/content_user_train_header.txt",
+    "Learning/Backend Engineering/OAuth2.O/4-Oauth for Native/Assignments.md",
+    "Learning/Backend Engineering/OAuth2.O/Assignments.md",
+    "Personal/Me/Journal.md",
     "Learning/Portfolio/Coastal Research Work.md",
-    "Learning/Resume/Sibteali-Baqar.docx",
-    "Learning/Robotics/Resoucres.md",
-    "conflict-files-obsidian-git.md",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-5-user-consent-and-password-grant.html",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-4-client-types.html",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/oauth-3-roles-and-authorization-server.html",
-    "Learning/Backend Engineering/OAuth2.O/2-Api Security/6-oauth-front-vs-back-channel.html",
-    "Learning/Backend Engineering/OAuth2.O/1-Intro/oauth-2-oauth-vs-openid-connect.html",
     "Learning/Backend Engineering/OAuth2.O/1-Intro/Why Oauth.md",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/figure 3.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/figure 2.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/figure 1.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/K-Means-practice/images/bird_small.png",
+    "Learning/AI&ML Engineering/Full Stack AI Career Guide.md",
+    "Learning/Backend Engineering/Go/Basics/Lessons.md",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/movie_camera.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_strip_vertical.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_reel.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_rating.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_movie_camera.png",
     "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_man_action.png",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Drawing 2026-09-29 22.11.26.excalidraw.md",
-    "Learning/System Design/Resources.md",
-    "Learning/Backend Engineering/Go/Basics/Lessons.md",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_filter.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/film_award.png",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/distmatrix.PNG",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Notebooks/Collaborative Filtering Lab/images/RecSysNN.png",
+    "Learning/System Design/Technologies/Cassandra/Drawing 2026-10-12 20.07.50.excalidraw.md",
+    "Learning/System Design/Technologies/Cassandra/Untitled.md",
+    "Personal/Maryam's Things.md",
+    "Personal/Maryam/Memories.md",
+    "Personal/Maryam/Maryam's Things.md",
     "Learning/AI Patient Cosultant.md",
+    "conflict-files-obsidian-git.md",
     "Learning/IELTS/Writing Task 1/Writing Task 2  - Discussion Essay.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/5-Resonance-Formal-Charge/Hybrid Resonance.excalidraw.md",
-    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Drawing 2026-09-29 22.11.26.excalidraw.md",
+    "Learning/AI&ML Engineering/Machine Learning/3-Unsupervised/Week-1/Drawing 2026-09-29 22.11.26.excalidraw.md",
     "Learning/Research/Adam-DFT/Chemistry/Unit-2/4-Lewis-diagrams/CN-.md",
     "Learning/Research/Resources.md",
     "Learning/IELTS/Writing Task 1/Writing practice task 1 Part 2.md",
@@ -229,9 +222,6 @@
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/3-Redis Pub-Sub Tests/Notes.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/2-Stress test K6/First.md",
     "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Redis Pub-Sub Flow.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Drawing 2026-09-27 14.28.26.excalidraw.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/1-Analysis Database/Analysis 1.md",
-    "Learning/Backend Engineering/Python/News Aggregator/FastAPI/Commands.md",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

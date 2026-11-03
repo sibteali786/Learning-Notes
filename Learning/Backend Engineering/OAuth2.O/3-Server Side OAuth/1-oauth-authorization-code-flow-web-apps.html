@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OAuth: Authorization Code Flow for Web Apps</title>
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#53666f; --line:#d3dcd9;
+  --back:#c2336b; --back-bg:#fbe3ec; --front:#1f6fb2; --front-bg:#dcebf8;
+  --bad:#b3261e; --bad-bg:#fbe3e1; --note:#e9eef0; --ok:#0b6e5b; --ok-bg:#dff3ee; --warn:#8a5a00; --warn-bg:#fbefcf;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+    --back:#ff8fb5; --back-bg:#3b1a29; --front:#7fbaf0; --front-bg:#14304a;
+    --bad:#ff9087; --bad-bg:#3b1c1a; --note:#1d2e36; --ok:#5fd3b8; --ok-bg:#12332d; --warn:#f2c36b; --warn-bg:#3a2e12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+  --back:#ff8fb5; --back-bg:#3b1a29; --front:#7fbaf0; --front-bg:#14304a;
+  --bad:#ff9087; --bad-bg:#3b1c1a; --note:#1d2e36; --ok:#5fd3b8; --ok-bg:#12332d; --warn:#f2c36b; --warn-bg:#3a2e12;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:940px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);margin-bottom:10px}
+h2{font-size:26px;margin:54px 0 6px}
+h3{font-size:18px;margin:0 0 6px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:18px;max-width:64ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:66ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.box.back{border-left:6px solid var(--back)}
+.box.front{border-left:6px solid var(--front)}
+.box.bad{border-left:6px solid var(--bad);background:var(--bad-bg)}
+.box.ok{border-left:6px solid var(--ok)}
+.box.warn{border-left:6px solid var(--warn);background:var(--warn-bg)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;margin-right:4px}
+.tag.back{background:var(--back-bg);color:var(--back)}
+.tag.front{background:var(--front-bg);color:var(--front)}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+ul{margin:8px 0;padding-left:20px}li{margin:4px 0}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.life{stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 4}
+.a-front{stroke:var(--front);stroke-width:2.5;fill:none}
+.a-back{stroke:var(--back);stroke-width:2.5;fill:none}
+.a-int{stroke:var(--muted);stroke-width:2;fill:none}
+.t-front{fill:var(--front)!important;font-weight:600}
+.t-back{fill:var(--back)!important;font-weight:600}
+.t-muted{fill:var(--muted)!important}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{background:var(--note)}
+tr:last-child td{border-bottom:0}
+.flow{display:flex;flex-direction:column;margin:14px 0}
+.step{display:grid;grid-template-columns:42px 1fr;gap:12px;position:relative;padding-bottom:14px}
+.step:not(:last-child)::before{content:"";position:absolute;left:20px;top:40px;bottom:0;width:2px;background:var(--line)}
+.dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff}
+.dot.f{background:#1f6fb2}.dot.b{background:#c2336b}.dot.i{background:#5d6f78}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:12px 18px;margin:14px 0}
+.ex .lbl{font-weight:700;color:var(--muted);font-size:14px}
+code{background:var(--note);padding:1px 6px;border-radius:4px;font-size:14px;word-break:break-word}
+pre{background:var(--note);padding:12px 14px;border-radius:8px;overflow-x:auto;font-size:13.5px;margin:10px 0;line-height:1.5}
+.tip{background:var(--note);border-radius:10px;padding:12px 16px;margin:14px 0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin:6px 0 12px}
+.pill{display:inline-block;width:26px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Authorization Code Flow for web apps</h1>
+<p class="lead">A full walkthrough for a server-side (confidential) web app: the roles, the eight steps, the exact parameters in each request, refresh tokens, and why PKCE is now recommended even when you have a client secret.</p>
+
+<div class="legend">
+  <span><span class="pill" style="border-color:var(--front)"></span>Front channel (browser address bar)</span>
+  <span><span class="pill" style="border-color:var(--back)"></span>Back channel (server to server, HTTPS)</span>
+</div>
+
+<!-- 1 -->
+<h2>1. The big picture</h2>
+<p class="sub">The end goal is an access token delivered to the app's server through the <b>back channel</b>, so the browser never sees it. Before starting, you need an application registered with the OAuth server, giving you a <b>client ID and client secret</b>.</p>
+
+<div class="scroll">
+<svg viewBox="0 0 900 590" role="img" aria-label="Sequence diagram of the authorization code flow with PKCE">
+  <g>
+    <rect class="s-box" x="20" y="10" width="130" height="38" rx="8"/><text x="85" y="34" text-anchor="middle" font-size="14" font-weight="700">User / Browser</text>
+    <rect class="s-box" x="260" y="10" width="130" height="38" rx="8"/><text x="325" y="34" text-anchor="middle" font-size="14" font-weight="700">App (server)</text>
+    <rect class="s-box" x="500" y="10" width="150" height="38" rx="8"/><text x="575" y="34" text-anchor="middle" font-size="14" font-weight="700">Authorization server</text>
+    <rect class="s-box" x="760" y="10" width="110" height="38" rx="8"/><text x="815" y="34" text-anchor="middle" font-size="14" font-weight="700">API</text>
+  </g>
+  <line class="life" x1="85" y1="48" x2="85" y2="580"/>
+  <line class="life" x1="325" y1="48" x2="325" y2="580"/>
+  <line class="life" x1="575" y1="48" x2="575" y2="580"/>
+  <line class="life" x1="815" y1="48" x2="815" y2="580"/>
+
+  <!-- 1 click login -->
+  <line class="a-int" x1="85" y1="80" x2="320" y2="80"/>
+  <text x="200" y="72" text-anchor="middle" font-size="12">① click "Log in"</text>
+
+  <!-- 2 generate -->
+  <rect x="235" y="98" width="180" height="34" rx="6" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>
+  <text x="325" y="113" text-anchor="middle" font-size="11.5">② make code_verifier,</text>
+  <text x="325" y="127" text-anchor="middle" font-size="11.5">hash it → code_challenge</text>
+
+  <!-- 3 redirect -->
+  <line class="a-front" x1="320" y1="162" x2="90" y2="162"/>
+  <text x="205" y="154" text-anchor="middle" font-size="12" class="t-front">③ redirect to /auth?… + challenge</text>
+  <line class="a-front" x1="90" y1="192" x2="570" y2="192"/>
+  <text x="330" y="184" text-anchor="middle" font-size="12" class="t-front">browser follows redirect to auth server</text>
+
+  <!-- 4 login -->
+  <rect x="470" y="212" width="210" height="34" rx="6" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>
+  <text x="575" y="227" text-anchor="middle" font-size="11.5">④ user logs in, does MFA,</text>
+  <text x="575" y="241" text-anchor="middle" font-size="11.5">approves the request</text>
+
+  <!-- 5 code back -->
+  <line class="a-front" x1="570" y1="278" x2="90" y2="278"/>
+  <text x="330" y="270" text-anchor="middle" font-size="12" class="t-front">⑤ redirect to app's redirect URI + code + state</text>
+  <line class="a-front" x1="90" y1="308" x2="320" y2="308"/>
+  <text x="205" y="300" text-anchor="middle" font-size="12" class="t-front">browser delivers code</text>
+
+  <!-- 6 exchange -->
+  <line class="a-back" x1="330" y1="360" x2="570" y2="360"/>
+  <text x="450" y="344" text-anchor="middle" font-size="12" class="t-back">⑥ POST /token: code, code_verifier,</text>
+  <text x="450" y="358" text-anchor="middle" font-size="12" class="t-back" dy="-0">client_id, client_secret</text>
+  <rect x="470" y="372" width="210" height="34" rx="6" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>
+  <text x="575" y="387" text-anchor="middle" font-size="11.5">server hashes verifier, compares</text>
+  <text x="575" y="401" text-anchor="middle" font-size="11.5">to stored challenge</text>
+
+  <!-- 7 token -->
+  <line class="a-back" x1="570" y1="440" x2="330" y2="440"/>
+  <text x="450" y="432" text-anchor="middle" font-size="12" class="t-back">⑦ access token (+ refresh token)</text>
+
+  <!-- 8 api -->
+  <line class="a-int" x1="330" y1="500" x2="810" y2="500"/>
+  <text x="570" y="492" text-anchor="middle" font-size="12">⑧ API request with access token</text>
+  <text x="450" y="560" text-anchor="middle" font-size="12" class="t-muted">The browser never sees the access token.</text>
+</svg>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>You click "Log in with Google" on a photo-printing website. The site generates a one-off secret, sends you to Google carrying only a fingerprint of it, you log in and tap Allow, and Google sends you back with a short-lived code. The site's server then trades that code (plus the original secret and its own credentials) directly with Google for a token. You never touch the token.</p>
+</div>
+
+<!-- 2 -->
+<h2>2. Step by step (concept view)</h2>
+
+<div class="flow">
+  <div class="step"><div class="dot i">1</div>
+    <div class="box"><b>User clicks the login button</b>
+      <p>This means: "I would like to use this application."</p></div></div>
+  <div class="step"><div class="dot i">2</div>
+    <div class="box"><b>App generates a per-flow secret: the PKCE code verifier</b>
+      <p>A random string, different every time a flow starts. <b>It is not the client secret.</b> The app keeps it on its server and computes a one-way hash of it, the <b>code challenge</b>. Because a hash cannot be reversed, knowing it does not reveal the secret.</p></div></div>
+  <div class="step"><div class="dot f">3</div>
+    <div class="box front"><span class="tag front">Front channel #1</span><b>App redirects the user to the authorization server</b>
+      <p>The query string carries the hash (code challenge), client ID, redirect URI and scope. The app is really asking the server for something, but it hands the request to the user to deliver. Since the front channel can be snooped, only the <b>hash</b> is sent, never the secret.</p></div></div>
+  <div class="step"><div class="dot i">4</div>
+    <div class="box"><b>User logs in at the OAuth server</b>
+      <p>Including any multifactor auth, then confirms they really want to log in to the app.</p></div></div>
+  <div class="step"><div class="dot f">5</div>
+    <div class="box front"><span class="tag front">Front channel #2</span><b>Server redirects back with a temporary, one-time authorization code</b>
+      <p>It takes the app's redirect URI, adds the code to the query string, and sends the browser there. This is not really two steps; it is one delivery routed through the browser. The server cannot know for sure the code was received.</p>
+      <p>The code is <b>valid for one use</b> and must be redeemed within a short time, <b>typically under a minute</b>.</p></div></div>
+  <div class="step"><div class="dot b">6</div>
+    <div class="box back"><span class="tag back">Back channel</span><b>App's server exchanges the code for a token</b>
+      <p>Sent from the app's server to the OAuth server, so it never goes through the browser. It includes the code, client ID, client secret, and the <b>plaintext</b> code verifier.</p>
+      <p>The server checks: I issued this code, it is unused, it was meant for this client, the secret matches, and the hash of the verifier equals the challenge I saw at the start. If all match, the redeemer is the same thing that started the flow.</p></div></div>
+  <div class="step"><div class="dot b">7</div>
+    <div class="box back"><b>Server returns the access token</b>
+      <p>Flow done. The app can now make API requests with it.</p></div></div>
+</div>
+
+<!-- 3 -->
+<h2>3. Parameters in detail</h2>
+
+<h3>3.1 Generate the code verifier and code challenge</h3>
+<div class="grid2">
+  <div class="box ok">
+    <span class="tag ok">Code verifier (secret)</span>
+    <p>A random string, <b>43 to 128 characters</b> long.</p>
+    <p style="color:var(--muted);font-size:14px">Slide example: <code>4A6hBupTkAtgbaQs39RSELUEqtSWTDTcRzVh1PpxD5YVKl1U</code></p>
+  </div>
+  <div class="box front">
+    <span class="tag front">Code challenge (public hash)</span>
+    <p><code>base64url(sha256(code_verifier))</code></p>
+    <p style="color:var(--muted);font-size:14px">Slide example: <code>ipSBt30y48l401NGbLjo026cqwsRQzR5KI40AuLAdZ8</code></p>
+  </div>
+</div>
+<p>Base64-URL encoding is just Base64 with a slightly different character set, so any language with a base64 function can do it. Example (Node.js, illustrative; the lecture does not show code):</p>
+<pre>import crypto from "node:crypto";
+
+const codeVerifier  = crypto.randomBytes(32).toString("base64url"); // 43 chars
+const codeChallenge = crypto.createHash("sha256")
+                            .update(codeVerifier)
+                            .digest("base64url");</pre>
+
+<h3>3.2 Authorization request <span class="tag front">Front channel</span></h3>
+<p>Find the authorization endpoint in the server's docs, or programmatically via the server's <b>metadata URL</b>.</p>
+<pre>https://authorization-server.com/auth?
+  response_type=code&amp;
+  client_id=CLIENT_ID&amp;
+  redirect_uri=REDIRECT_URI&amp;
+  scope=photos&amp;
+  state=XXXXXXX&amp;
+  code_challenge=XXXXXXXXXXXXX&amp;
+  code_challenge_method=S256</pre>
+<div class="scroll">
+<table>
+  <tr><th>Parameter</th><th>Meaning</th></tr>
+  <tr><td><code>response_type=code</code></td><td>Tells the server you are doing the authorization code flow</td></tr>
+  <tr><td><code>client_id</code></td><td>Which app is making the request</td></tr>
+  <tr><td><code>redirect_uri</code></td><td>Where to send the user back. Must match one of the redirect URIs registered for the app</td></tr>
+  <tr><td><code>scope</code></td><td>Permissions you need, based on the API you will call (example: <code>photos</code>)</td></tr>
+  <tr><td><code>state</code></td><td>Originally for CSRF protection. With PKCE it can store app-specific state instead, such as which page to return to (cart, checkout)</td></tr>
+  <tr><td><code>code_challenge</code></td><td>The hash of the code verifier</td></tr>
+  <tr><td><code>code_challenge_method=S256</code></td><td>The hash method used (SHA256)</td></tr>
+</table>
+</div>
+<div class="box warn" style="margin-top:12px">
+  <b>State caveat:</b> only use <code>state</code> for app data if you are <b>sure the server supports PKCE</b>. If it does not, <code>state</code> must be a <b>random value</b> to protect against CSRF.
+</div>
+
+<h3 style="margin-top:26px">3.3 Redirect back to the app <span class="tag front">Front channel</span></h3>
+<pre>https://example-app.com/redirect?
+  code=AUTH_CODE_HERE&amp;
+  state=XXXXXXX</pre>
+<ul>
+  <li><b>Check that <code>state</code> matches</b> the value you sent (CSRF protection).</li>
+  <li>On failure, the server redirects back with an <b>error code</b> in the URL instead of a code.</li>
+  <li>Your app does not see the user again until they land on this redirect URL.</li>
+</ul>
+
+<h3 style="margin-top:26px">3.4 Exchange the code for a token <span class="tag back">Back channel</span></h3>
+<p>A backchannel HTTPS <b>POST</b> from your server to the server's <b>token endpoint</b> (a separate endpoint to look up), with a traditional <b>form-encoded body</b>.</p>
+<pre>POST https://authorization-server.com/token
+  grant_type=authorization_code&amp;
+  code=AUTH_CODE_HERE&amp;
+  redirect_uri=REDIRECT_URI&amp;
+  code_verifier=VERIFIER_STRING&amp;
+  client_id=CLIENT_ID&amp;
+  client_secret=CLIENT_SECRET</pre>
+<div class="scroll">
+<table>
+  <tr><th>Parameter</th><th>Meaning</th></tr>
+  <tr><td><code>grant_type=authorization_code</code></td><td>Tells the server you are doing the authorization code grant</td></tr>
+  <tr><td><code>code</code></td><td>The code from the query string</td></tr>
+  <tr><td><code>redirect_uri</code></td><td>Same redirect URI used in the authorization request</td></tr>
+  <tr><td><code>code_verifier</code></td><td>The <b>plaintext</b> secret the app made up at the beginning</td></tr>
+  <tr><td><code>client_id</code> + <code>client_secret</code></td><td>The app's credentials. Some servers want them in the POST body, others in a <b>Basic auth header</b>: check the docs</td></tr>
+</table>
+</div>
+
+<h3 style="margin-top:26px">3.5 Token response <span class="tag back">Back channel</span></h3>
+<pre>{
+  "token_type": "Bearer",
+  "access_token": "RsT5OjbQz0zqLgV3Ia",
+  "expires_in": 3600,
+  "scope": "photos",
+  "refresh_token": "H4HSMMV2409INW"
+}</pre>
+<p>You get the access token, its expiration time (seconds), and <b>possibly</b> a refresh token.</p>
+
+<!-- 4 -->
+<h2>4. Refresh tokens</h2>
+<p class="sub">When the access token expires, use the refresh token to get a new one without repeating the whole flow. It works like redeeming an authorization code.</p>
+
+<div class="grid2">
+  <div>
+<pre>POST https://authorization-server.com/token
+  grant_type=refresh_token&amp;
+  refresh_token=REFRESH_TOKEN&amp;
+  client_id=CLIENT_ID&amp;
+  client_secret=CLIENT_SECRET</pre>
+    <p><span class="tag back">Back channel</span> from your web server. Client credentials are still required so the server knows it is really this app.</p>
+  </div>
+  <div class="box">
+    <b>What comes back</b>
+    <ul>
+      <li>A new access token, and <b>possibly</b> a new refresh token (same JSON shape as before).</li>
+      <li>If you do not get a new refresh token, the one you have should probably keep working.</li>
+      <li>Behavior differs between OAuth servers.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="box bad" style="margin-top:12px">
+  <b>A refresh token is never guaranteed to work.</b> It can fail because the user was deleted, the user revoked permissions, an admin deleted the application, or other expiry reasons. If it fails, the only option is to <b>start a new flow from the beginning</b>.
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A web app syncing your calendar gets a one-hour access token. After an hour, instead of asking you to log in again, its server quietly trades the refresh token for a new access token. If you revoked the app from your Google account settings last week, that trade fails and the app must send you through login again.</p>
+</div>
+
+<!-- 5 -->
+<h2>5. Why PKCE for confidential clients too?</h2>
+<div class="grid2">
+  <div class="box">
+    <b>History</b>
+    <p>PKCE was originally developed for <b>mobile apps</b>. The lecture's flow is for server-side apps, yet the OAuth working group guidance is now to recommend PKCE for <b>all kinds of applications</b>, even with a client secret.</p>
+  </div>
+  <div class="box bad">
+    <b>The reason: the authorization code injection attack</b>
+    <p>Even with a client secret, a subtle attack lets someone <b>swap authorization codes</b> so you end up logged into somebody else's account in the real application. It is not the same as stealing a token, but potentially <b>worse</b>, since neither the application nor the server would know it happened. PKCE solves it.</p>
+    <p style="margin-bottom:0">The lecture does not explain the attack. See the separate file <code>oauth-pkce-code-injection-attack.html</code>.</p>
+  </div>
+</div>
+
+<div class="grid2" style="margin-top:14px">
+  <div class="box ok">
+    <b>Where this guidance lives</b>
+    <ul>
+      <li>Security Best Current Practice</li>
+      <li>OAuth 2.1</li>
+    </ul>
+  </div>
+  <div class="box warn">
+    <b>If the server does not support PKCE yet</b>
+    <ul>
+      <li>Recommend that they add it.</li>
+      <li>Meanwhile use a <b>random <code>state</code></b> to protect against CSRF.</li>
+      <li>You can <b>still send PKCE parameters</b>: servers must ignore parameters they do not recognize.</li>
+      <li>Code your clients with PKCE today; no rebuild needed when the server adds support.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 6 -->
+<h2>6. Key takeaways</h2>
+<div class="box">
+<ul>
+  <li>Two <b>front channel</b> messages (request, then code) and one <b>back channel</b> exchange (code for token). The access token never touches the browser.</li>
+  <li>The <b>code verifier</b> is a fresh per-flow secret (43 to 128 chars). The <b>code challenge</b> is <code>base64url(sha256(verifier))</code>, sent with <code>code_challenge_method=S256</code>.</li>
+  <li>The <b>authorization code</b> is single-use and short-lived (typically under a minute).</li>
+  <li>The token request proves identity two ways: <b>client secret</b> (who the app is) and <b>code verifier</b> (same flow that started it).</li>
+  <li>Always verify the <b>state</b> on return, and use only registered redirect URIs.</li>
+  <li>Responses may or may not include a <b>refresh token</b>; refresh can always fail, so be ready to restart the flow.</li>
+  <li>Use PKCE for <b>all</b> clients, including confidential ones, to stop authorization code injection.</li>
+  <li>Server quirks: credentials in body vs Basic header, whether a new refresh token is returned, PKCE support. Read the server docs.</li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>

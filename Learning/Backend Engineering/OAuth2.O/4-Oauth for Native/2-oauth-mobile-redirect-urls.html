@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OAuth: Redirect URLs in Mobile Apps</title>
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#53666f; --line:#d3dcd9;
+  --front:#1f6fb2; --front-bg:#dcebf8; --bad:#b3261e; --bad-bg:#fbe3e1;
+  --ok:#0b6e5b; --ok-bg:#dff3ee; --note:#e9eef0; --warn:#8a5a00; --warn-bg:#fbefcf;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+    --front:#7fbaf0; --front-bg:#14304a; --bad:#ff9087; --bad-bg:#3b1c1a;
+    --ok:#5fd3b8; --ok-bg:#12332d; --note:#1d2e36; --warn:#f2c36b; --warn-bg:#3a2e12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+  --front:#7fbaf0; --front-bg:#14304a; --bad:#ff9087; --bad-bg:#3b1c1a;
+  --ok:#5fd3b8; --ok-bg:#12332d; --note:#1d2e36; --warn:#f2c36b; --warn-bg:#3a2e12;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,40px);margin-bottom:10px}
+h2{font-size:25px;margin:50px 0 6px}
+h3{font-size:18px;margin:0 0 6px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:18px;max-width:64ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:66ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.box.bad{border-left:6px solid var(--bad);background:var(--bad-bg)}
+.box.ok{border-left:6px solid var(--ok)}
+.box.front{border-left:6px solid var(--front)}
+.box.warn{border-left:6px solid var(--warn);background:var(--warn-bg)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;margin-right:4px}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.front{background:var(--front-bg);color:var(--front)}
+ul{margin:8px 0;padding-left:20px}li{margin:4px 0}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.s-bad{fill:var(--bad-bg);stroke:var(--bad);stroke-width:2}
+.s-ok{fill:var(--ok-bg);stroke:var(--ok);stroke-width:2}
+.a-neu{stroke:var(--muted);stroke-width:2.5;fill:none}
+.a-bad{stroke:var(--bad);stroke-width:2.5;fill:none;stroke-dasharray:6 4}
+.a-ok{stroke:var(--ok);stroke-width:2.5;fill:none}
+.t-bad{fill:var(--bad)!important;font-weight:600}
+.t-ok{fill:var(--ok)!important;font-weight:600}
+.t-muted{fill:var(--muted)!important}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{background:var(--note)}
+tr:last-child td{border-bottom:0}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:12px 18px;margin:14px 0}
+.ex .lbl{font-weight:700;color:var(--muted);font-size:14px}
+code{background:var(--note);padding:1px 6px;border-radius:4px;font-size:14px;word-break:break-word}
+.tip{background:var(--note);border-radius:10px;padding:12px 16px;margin:14px 0}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Redirect URLs in mobile apps</h1>
+<p class="lead">One thing unique to mobile security in OAuth is how iOS and Android handle redirect URLs. The redirect is where the authorization server sends the user back after login and approval, and on mobile that handoff is much easier to attack.</p>
+
+<!-- 1 -->
+<h2>1. Web vs mobile: where the redirect happens</h2>
+
+<div class="scroll">
+<svg viewBox="0 0 880 250" role="img" aria-label="Web: everything in one browser tab. Mobile: app, in-app browser, then redirect back to app that may be intercepted">
+  <text x="10" y="24" font-size="16" font-weight="700" class="t-ok">Web app: all inside the browser</text>
+  <rect class="s-ok" x="10" y="38" width="300" height="56" rx="10"/>
+  <text x="160" y="62" text-anchor="middle" font-size="13">Same browser tab: app → auth server → back to app</text>
+  <text x="160" y="80" text-anchor="middle" font-size="12" class="t-ok">DNS checked, HTTPS validated</text>
+
+  <text x="10" y="140" font-size="16" font-weight="700" class="t-bad">Mobile app: redirect leaves the browser</text>
+  <rect class="s-box" x="10" y="156" width="150" height="56" rx="10"/><text x="85" y="189" text-anchor="middle" font-size="14" font-weight="700">Mobile app</text>
+  <rect class="s-box" x="260" y="156" width="170" height="56" rx="10"/>
+  <text x="345" y="180" text-anchor="middle" font-size="14" font-weight="700">In-app browser</text>
+  <text x="345" y="198" text-anchor="middle" font-size="12" class="t-muted">→ authorization server</text>
+  <rect class="s-bad" x="530" y="156" width="170" height="56" rx="10"/>
+  <text x="615" y="180" text-anchor="middle" font-size="14" font-weight="700">Redirect to app</text>
+  <text x="615" y="198" text-anchor="middle" font-size="12" class="t-bad">could be intercepted</text>
+  <line class="a-neu" x1="162" y1="184" x2="256" y2="184"/>
+  <line class="a-neu" x1="432" y1="184" x2="526" y2="184"/>
+  <path class="a-bad" d="M615 154 Q615 120 85 120 Q85 140 85 152"/>
+  <text x="400" y="114" text-anchor="middle" font-size="12" class="t-bad">back to the app, with the code</text>
+</svg>
+</div>
+
+<div class="grid2" style="margin-top:12px">
+  <div class="box ok">
+    <span class="tag ok">Web browser</span>
+    <p>Interaction stays in one browser tab. The browser checks DNS and validates HTTPS, so this is generally considered relatively secure.</p>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">Mobile</span>
+    <p>Many of those browser protections are lost. The app launches an in-app browser to the authorization server (fine), but then the server's redirect back to the app may be intercepted, depending on how it is handled.</p>
+  </div>
+</div>
+
+<!-- 2 -->
+<h2>2. Two ways to handle redirects on mobile</h2>
+
+<h3 style="margin-top:20px"><span class="tag bad">Older</span> A. Custom URL schemes</h3>
+<div class="grid2">
+  <div class="box">
+    <b>How it works</b>
+    <ul>
+      <li>The app defines a custom scheme (for example <code>todo://</code>, or a reverse-DNS style name).</li>
+      <li>Whenever anything on the phone launches a URL matching that scheme, <b>that app launches</b>.</li>
+      <li>It used to be much more common.</li>
+    </ul>
+  </div>
+  <div class="box bad">
+    <b>Why it is weak</b>
+    <ul>
+      <li><b>No registry.</b> Any app can claim any scheme.</li>
+      <li>If someone discovers your scheme, they can build a <b>competing app claiming the same one</b>.</li>
+      <li>The two then fight to catch the redirect, and in most cases the platforms have <b>no well-defined behavior</b> for which app wins.</li>
+      <li>A malicious app can <b>steal the authorization code</b> in the redirect step.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="scroll" style="margin-top:12px">
+<svg viewBox="0 0 880 230" role="img" aria-label="Two apps claim todo:// and the redirect with the code may go to the malicious one">
+  <rect class="s-box" x="10" y="80" width="170" height="60" rx="10"/>
+  <text x="95" y="106" text-anchor="middle" font-size="14" font-weight="700">Auth server</text>
+  <text x="95" y="124" text-anchor="middle" font-size="12" class="t-muted">redirect to todo://…?code=</text>
+  <rect class="s-box" x="290" y="80" width="150" height="60" rx="10"/>
+  <text x="365" y="115" text-anchor="middle" font-size="14" font-weight="700">Phone (OS)</text>
+  <rect class="s-ok" x="560" y="20" width="310" height="56" rx="10"/>
+  <text x="715" y="44" text-anchor="middle" font-size="14" font-weight="700">Your "To do" app</text>
+  <text x="715" y="62" text-anchor="middle" font-size="12">claims todo://</text>
+  <rect class="s-bad" x="560" y="140" width="310" height="70" rx="10"/>
+  <text x="715" y="166" text-anchor="middle" font-size="14" font-weight="700">Malicious app</text>
+  <text x="715" y="184" text-anchor="middle" font-size="12">also claims todo://</text>
+  <text x="715" y="200" text-anchor="middle" font-size="12" class="t-bad">may receive the authorization code</text>
+  <line class="a-neu" x1="184" y1="110" x2="286" y2="110"/>
+  <line class="a-ok" x1="442" y1="100" x2="556" y2="52"/>
+  <line class="a-bad" x1="442" y1="122" x2="556" y2="170"/>
+  <text x="500" y="125" text-anchor="middle" font-size="12" class="t-muted">who wins? undefined</text>
+</svg>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>Picture a street with no house numbers where anyone can paint "To Do" on their door. A courier delivering a parcel marked "To Do" just picks a door. If a scammer painted the same sign, your parcel (the authorization code) may end up on their doorstep.</p>
+</div>
+
+<h3 style="margin-top:28px"><span class="tag ok">Modern</span> B. Claimed URL patterns (deep linking)</h3>
+<div class="grid2">
+  <div class="box">
+    <b>How it works</b>
+    <ul>
+      <li>The app claims a <b>URL pattern</b>, including a full <b>domain name</b> or even a path.</li>
+      <li>Once registered, whenever such a URL is visited from another app or even a mobile browser, <b>your app launches instead</b>.</li>
+      <li>This is how a link to Amazon opens the Amazon app on that product, or an Instagram photo link drops you into the Instagram app rather than the website.</li>
+    </ul>
+  </div>
+  <div class="box ok">
+    <b>Why it is more secure</b>
+    <ul>
+      <li>To claim a URL pattern, the developer must <b>prove they control that domain name</b>.</li>
+      <li>So other apps cannot simply claim yours.</li>
+      <li>The platform can <b>verify the claim</b>, and there is much less risk of others stealing or clobbering your redirect handling.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="tip"><b>My addition (not in the lecture):</b> on Apple's platform this feature is called <b>Universal Links</b> and on Android it is <b>App Links</b>. Searching those names in the platform docs is the way to set it up.</div>
+
+<div class="scroll" style="margin-top:10px">
+<table>
+  <tr><th></th><th>Custom URL scheme</th><th>Claimed URL pattern (deep link)</th></tr>
+  <tr><td><b>Example</b></td><td><code>todo://</code></td><td>A full domain or path claimed by the app</td></tr>
+  <tr><td><b>Registry</b></td><td>None, anyone can claim any scheme</td><td>Claim requires proving domain control</td></tr>
+  <tr><td><b>Competing apps</b></td><td>Possible; platform behavior usually undefined</td><td>Much harder for others to claim yours</td></tr>
+  <tr><td><b>Code theft risk</b></td><td><span class="tag bad">Higher</span></td><td><span class="tag ok">Lower</span></td></tr>
+  <tr><td><b>Verified by platform</b></td><td>No</td><td>Yes</td></tr>
+  <tr><td><b>Recommended</b></td><td>Older approach</td><td><span class="tag ok">Usually the better choice</span></td></tr>
+</table>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>You tap a link to a product on a shopping site in a chat message. Because the shopping app proved it owns that domain, the phone opens the app on that product page. A fake app cannot register the same domain, so it cannot intercept the link.</p>
+</div>
+
+<!-- 3 -->
+<h2>3. Still not perfect: why PKCE matters</h2>
+<div class="box warn">
+  <p>Even claimed URL patterns can fail, so redirect URLs in mobile apps are <b>not trusted as much as in a browser</b>.</p>
+  <p>Imagine you are the OAuth server about to generate an authorization code and redirect to the app. You <b>do not know whether the redirect will make it back to the right app</b>. There are many ways it can fail. You "kind of just hope it does", with no real guarantees.</p>
+  <p><b>That is why PKCE is so important:</b> even if a code is intercepted, the party that did not start the flow cannot redeem it (see the PKCE and authorization code injection notes).</p>
+</div>
+
+<!-- 4 -->
+<h2>4. Key takeaways</h2>
+<div class="box">
+<ul>
+  <li>On the web, the redirect stays inside the browser, which checks DNS and HTTPS. On mobile, the redirect returns to the app from an in-app browser, losing many protections.</li>
+  <li><b>Custom URL schemes</b> have no registry: any app can claim any scheme, platform behavior on conflicts is generally undefined, and a malicious app can steal the authorization code.</li>
+  <li><b>Claimed URL patterns (deep linking)</b> require proof of domain control, so they are verified by the platform and much safer.</li>
+  <li>Even so, the server cannot be certain the redirect reaches the right app, so <b>use PKCE</b>.</li>
+  <li><b>Recommendation:</b> for a mobile app, prefer <b>app-claimed URL patterns</b> over custom schemes.</li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TensorFlow Implementation of Content-Based Filtering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2133; --muted:#566079; --line:#d9deea;
+  --user:#0f7b8a; --user-bg:#dff3f5; --movie:#b4540a; --movie-bg:#fdebd8;
+  --accent:#4b3fbf; --accent-bg:#e8e6fb; --good:#1f7a4d; --good-bg:#def3e8; --bad:#a8323e; --bad-bg:#fbe3e6;
+  --vec:#c0267e;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+    --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+    --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+    --vec:#f27fc0; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+  --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+  --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+  --vec:#f27fc0; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:940px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700}
+h2{font-size:25px;margin:44px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+.lede{color:var(--muted);margin:10px 0 0;max-width:64ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px}
+.t-user{background:var(--user-bg);color:var(--user)}
+.t-movie{background:var(--movie-bg);color:var(--movie)}
+.t-acc{background:var(--accent-bg);color:var(--accent)}
+.t-good{background:var(--good-bg);color:var(--good)}
+.t-bad{background:var(--bad-bg);color:var(--bad)}
+code,.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.eq{font-family:Literata,Georgia,serif;font-size:20px;text-align:center;padding:14px 8px;background:var(--accent-bg);border-radius:10px;margin:12px 0;overflow-x:auto}
+.scroll{overflow-x:auto}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:4px 0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--movie);background:var(--movie-bg)}
+.callout.ok{border-color:var(--good);background:var(--good-bg)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;font-size:16px}
+th{background:var(--bg)}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;font-size:14px;line-height:1.55;margin:10px 0 0}
+.qa{border-left:5px solid var(--accent)}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;margin:10px 0}
+@media(max-width:760px){.ctrl{grid-template-columns:1fr}}
+.row{display:grid;grid-template-columns:110px 1fr 56px;gap:8px;align-items:center}
+.row input{width:100%}
+.row output{text-align:right}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.res div{border-radius:10px;padding:10px 14px;text-align:center}
+.res b{display:block;font-family:Literata,Georgia,serif;font-size:26px}
+footer{margin-top:40px;color:var(--muted);font-size:15px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg text{font-family:"Source Sans 3",system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <span class="tag t-acc">Recommender systems · Andrew Ng, ML Specialization</span>
+  <h1 style="margin-top:12px">TensorFlow implementation of content-based filtering</h1>
+  <p class="lede">The last video of the recommender module. The code builds the two-tower network from earlier lessons in Keras. The full version is in Practice Lab 2, “Deep Learning for Content-Based Filtering”. This page walks the key snippets, including your two questions: what <span class="m">l2_normalize</span> does, and why <span class="m">Input</span> is used.</p>
+</header>
+
+<!-- 1 -->
+<h2>1. The pipeline in code terms</h2>
+<div class="panel scroll">
+<svg viewBox="0 0 860 260" width="100%" style="min-width:700px" role="img" aria-label="Input user, user_NN, l2 normalize, vu; input item, item_NN, l2 normalize, vm; Dot layer gives prediction">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <g stroke-width="2">
+    <rect x="8" y="30" width="120" height="56" rx="10" fill="var(--user-bg)" stroke="var(--user)"/>
+    <rect x="168" y="30" width="120" height="56" rx="10" fill="var(--user-bg)" stroke="var(--user)"/>
+    <rect x="328" y="30" width="140" height="56" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <rect x="8" y="170" width="120" height="56" rx="10" fill="var(--movie-bg)" stroke="var(--movie)"/>
+    <rect x="168" y="170" width="120" height="56" rx="10" fill="var(--movie-bg)" stroke="var(--movie)"/>
+    <rect x="328" y="170" width="140" height="56" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <circle cx="640" cy="128" r="34" fill="var(--accent-bg)" stroke="var(--vec)"/>
+    <rect x="730" y="103" width="120" height="50" rx="10" fill="var(--good-bg)" stroke="var(--good)"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" fill="none" marker-end="url(#ar)">
+    <path d="M130 58H166"/><path d="M290 58H326"/><path d="M470 58H540L610 112"/>
+    <path d="M130 198H166"/><path d="M290 198H326"/><path d="M470 198H540L610 144"/>
+    <path d="M676 128H728"/>
+  </g>
+  <g fill="currentColor" text-anchor="middle" font-size="14">
+    <text x="68" y="54" font-weight="600">Input</text><text x="68" y="73" font-size="12">num_user_features</text>
+    <text x="228" y="54" font-weight="600">user_NN</text><text x="228" y="73" font-size="12">256→128→32</text>
+    <text x="398" y="54" font-weight="600">l2_normalize</text><text x="398" y="73" font-size="12">length of v_u = 1</text>
+    <text x="68" y="194" font-weight="600">Input</text><text x="68" y="213" font-size="12">num_item_features</text>
+    <text x="228" y="194" font-weight="600">item_NN</text><text x="228" y="213" font-size="12">256→128→32</text>
+    <text x="398" y="194" font-weight="600">l2_normalize</text><text x="398" y="213" font-size="12">length of v_m = 1</text>
+    <text x="520" y="50" fill="var(--vec)" font-weight="600">vu</text><text x="520" y="210" fill="var(--vec)" font-weight="600">vm</text>
+    <text x="640" y="133" font-size="13" font-weight="600">Dot</text>
+    <text x="790" y="132" font-weight="600">Prediction</text>
+  </g>
+</svg>
+</div>
+
+<!-- 2 -->
+<h2>2. The code from the slide</h2>
+<p class="sub">Reproduced from the slide, with my numbered notes after it. The hidden sizes shown here (256, 128, 32 for both networks) differ from the earlier slide (128, 64, 32 and 256, 128, 32), because the lecture treats the sizes as free to choose.</p>
+<div class="panel">
+<pre><code>user_NN = tf.keras.models.Sequential([
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(32)
+])
+
+item_NN = tf.keras.models.Sequential([
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(32)
+])
+
+# create the user input and point to the base network
+input_user = tf.keras.layers.Input(shape=(num_user_features))
+vu = user_NN(input_user)
+vu = tf.linalg.l2_normalize(vu, axis=1)
+
+# create the item input and point to the base network
+input_item = tf.keras.layers.Input(shape=(num_item_features))
+vm = item_NN(input_item)
+vm = tf.linalg.l2_normalize(vm, axis=1)
+
+# measure the similarity of the two vector outputs
+output = tf.keras.layers.Dot(axes=1)([vu, vm])
+
+# specify the inputs and output of the model
+model = Model([input_user, input_item], output)
+
+# Specify the cost function
+cost_fn = tf.keras.losses.MeanSquaredError()</code></pre>
+</div>
+<div class="panel" style="margin-top:14px">
+  <h3>What each part does</h3>
+  <ol>
+    <li><b>Two <span class="m">Sequential</span> networks</b>: dense layers as in earlier networks. Hidden layers use <b>ReLU</b> (the default choice). The <b>last layer has 32 units and no activation</b>, so it outputs the 32 numbers of <span class="m">v<sub>u</sub></span> or <span class="m">v<sub>m</sub></span>. Lecture calls movies “items”, hence <span class="m">item_NN</span>.</li>
+    <li><b><span class="m">Input(...)</span></b> says what shape of features will enter each network (section 4).</li>
+    <li><b><span class="m">user_NN(input_user)</span></b> feeds those features through the user network to get <span class="m">v<sub>u</sub></span>. Same for the item side.</li>
+    <li><b><span class="m">l2_normalize</span></b> rescales each vector to length 1 (section 3). The lecture calls this an extra step that makes the algorithm work a bit better.</li>
+    <li><b><span class="m">Dot(axes=1)([vu, vm])</span></b>: a special Keras layer (<span class="m">layers.Dot</span>, not <span class="m">layers.Dense</span>) that takes the dot product of the two vectors. This is the prediction.</li>
+    <li><b><span class="m">Model([input_user, input_item], output)</span></b> declares the model’s two inputs and its one output.</li>
+    <li><b><span class="m">MeanSquaredError</span></b> is the cost: the same squared-error idea as J from the earlier lesson.</li>
+  </ol>
+</div>
+
+<!-- 3 -->
+<h2>3. Your question 1: what does <span class="m">l2_normalize</span> do?</h2>
+<div class="panel qa">
+  <p style="margin:0 0 8px"><b>Short answer:</b> it divides the vector by its own length (its L2 norm), so the result points in the same direction but has <b>length exactly 1</b>.</p>
+  <div class="eq">v ← v / ‖v‖ &nbsp;, &nbsp; ‖v‖ = √(v₁² + v₂² + … + v₃₂²)</div>
+  <ul>
+    <li><b><span class="m">axis=1</span></b>: the data arrives as a batch, shape (num_examples, 32). Axis 0 is the examples, axis 1 is the 32 numbers. So <b>each row (each user or movie) is normalised separately</b>.</li>
+    <li><b>Effect on the prediction:</b> the dot product of two unit-length vectors is the <b>cosine of the angle</b> between them, so the prediction depends only on the <b>direction</b> of <span class="m">v<sub>u</sub></span> and <span class="m">v<sub>m</sub></span>, not their size. Same direction gives +1, perpendicular gives 0, opposite gives −1.</li>
+    <li><b>Why the lecture does it:</b> it makes the algorithm “work a bit better”. The lecture gives no deeper reason, so treat the next bullet as my interpretation.</li>
+    <li><b>My interpretation:</b> without it, a network can raise a prediction just by making a vector longer. Normalising forces it to learn matching directions.</li>
+    <li><b>Link to similar items:</b> for unit vectors, <span class="m">‖a − b‖² = 2 − 2·(a·b)</span>. So small squared distance (the “find similar movies” test) and high dot product mean the same thing.</li>
+  </ul>
+</div>
+
+<h3 style="margin-top:22px">Try it (my illustration, in 2D)</h3>
+<p class="sub">Real vectors have 32 numbers. Change the length and angle of each vector. The raw dot product moves with length. The normalised one depends only on the angle.</p>
+<div class="panel">
+  <div class="ctrl">
+    <div>
+      <span class="tag t-user">v_u</span>
+      <div class="row"><label for="ua">angle °</label><input id="ua" type="range" min="0" max="360" step="5" value="30"><output id="uao"></output></div>
+      <div class="row"><label for="ul">length</label><input id="ul" type="range" min="0.5" max="3" step="0.1" value="2"><output id="ulo"></output></div>
+    </div>
+    <div>
+      <span class="tag t-movie">v_m</span>
+      <div class="row"><label for="ma">angle °</label><input id="ma" type="range" min="0" max="360" step="5" value="55"><output id="mao"></output></div>
+      <div class="row"><label for="ml">length</label><input id="ml" type="range" min="0.5" max="3" step="0.1" value="1.5"><output id="mlo"></output></div>
+    </div>
+  </div>
+  <svg id="vplot" viewBox="-130 -130 260 260" width="100%" style="max-width:360px;display:block;margin:0 auto" role="img" aria-label="Two vectors and their unit-length versions on a circle"></svg>
+  <div class="res">
+    <div style="background:var(--bad-bg)"><span>Raw dot product</span><b id="raw"></b></div>
+    <div style="background:var(--good-bg)"><span>After l2_normalize (= cosine)</span><b id="norm"></b></div>
+  </div>
+</div>
+
+<div class="callout warn">
+  <b>Consequence to remember (my note):</b> with unit-length vectors the prediction can only lie between −1 and +1. So the training ratings (for example 0.5 to 5) must be <b>rescaled into that range</b> to be fit. I believe Practice Lab 2 does this for the targets, but check your notebook.
+</div>
+
+<!-- 4 -->
+<h2>4. Your question 2: what does <span class="m">tf.keras.layers.Input</span> do, and why use it twice?</h2>
+<div class="panel qa">
+  <p style="margin:0 0 8px"><b>Short answer:</b> <span class="m">Input</span> creates a <b>symbolic placeholder</b> for the data that will be fed in later. It holds no data. It only tells Keras “inputs of this shape will arrive here”, so you can wire layers and networks together before any training data exists.</p>
+  <ul>
+    <li><b>Why it is needed here:</b> this model is built with Keras’s <b>functional style</b>: call a network on a tensor to get a new tensor (<span class="m">vu = user_NN(input_user)</span>). You need a starting tensor, and <span class="m">Input</span> provides it. A plain <span class="m">Sequential</span> has one input and one output, so it does not need this. Our model has <b>two separate inputs</b> that merge at the dot product.</li>
+    <li><b>Why two statements:</b> the user side and item side are different inputs with <b>different feature counts</b>: <span class="m">num_user_features</span> and <span class="m">num_item_features</span>. Recall from the first lesson that user and movie features can differ in size.</li>
+    <li><b><span class="m">shape</span></b> describes <b>one example</b>. The batch size is not included. A user with 14 features is <span class="m">shape=(14,)</span>.</li>
+    <li><b>Where they come back:</b> in <span class="m">Model([input_user, input_item], output)</span>, which declares both as the model’s inputs. At training time you pass two arrays in that same order.</li>
+  </ul>
+  <p style="margin:8px 0 0;color:var(--muted)">Detail: the slide writes <span class="m">shape=(num_user_features)</span> without a trailing comma. In Python that is just a number in brackets, not a tuple. The slide form works in the lab as written, and <span class="m">(n,)</span> is the strictly correct tuple.</p>
+</div>
+
+<h3 style="margin-top:22px">Real-life analogy</h3>
+<div class="panel">
+  <p style="margin:0">Think of a restaurant kitchen with two order slots, one for “drinks” and one for “food”. <span class="m">Input</span> builds the slots and labels what size ticket each takes. The tickets (real data) only arrive when you call <span class="m">fit</span> or <span class="m">predict</span>. The two stations (<span class="m">user_NN</span>, <span class="m">item_NN</span>) are wired to their slots first, and the <span class="m">Dot</span> layer combines what comes out.</p>
+</div>
+
+<!-- 5 -->
+<h2>5. Training it (not shown in this video)</h2>
+<p class="sub">The lecture stops at the cost function and leaves the rest to the lab. This sketch is my reconstruction of the usual next steps, so match it to your lab notebook.</p>
+<div class="panel">
+<pre><code>opt = tf.keras.optimizers.Adam(learning_rate=0.01)
+model.compile(optimizer=opt, loss=cost_fn)
+
+# two inputs, passed in the same order as Model([...])
+model.fit([user_train, item_train], y_train, epochs=30)</code></pre>
+<p class="sub" style="margin:8px 0 0">The names <code>user_train</code>, <code>item_train</code>, <code>y_train</code> and the optimizer settings are placeholders. <code>y_train</code> should be rescaled to match the −1 to 1 output range (section 3).</p>
+</div>
+
+<!-- 6 -->
+<h2>6. Alternatives and trade-offs</h2>
+<p class="sub">My additions, not from the lecture.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Choice</th><th>Pros</th><th>Cons</th></tr>
+  <tr><th><span class="m">tf.linalg.l2_normalize</span> directly (slide)</th><td>One line, matches the lecture</td><td>In newer Keras (3.x) a raw TensorFlow function applied to a symbolic Keras tensor can raise an error. I have not tested your environment, so check your versions</td></tr>
+  <tr><th>Keras <span class="m">UnitNormalization(axis=1)</span> layer</th><td>A proper Keras layer, so it works in the functional graph and in saved models</td><td>Slightly different from the lecture code; confirm your Keras version has it</td></tr>
+  <tr><th><span class="m">Lambda</span> layer wrapping the TF call</th><td>Keeps the lecture’s function</td><td>Lambda layers are harder to save and load reliably</td></tr>
+  <tr><th>No normalisation</th><td>Predictions are not capped to −1…1, so ratings need no rescaling</td><td>Lecture says normalising works a bit better</td></tr>
+  <tr><th>Sigmoid on the dot product (binary labels)</th><td>Gives a probability for like or click (see the earlier lesson)</td><td>Needs a matching loss and 0/1 labels</td></tr>
+</table>
+</div>
+
+<h3 style="margin-top:22px">Variant with the Keras layer (illustrative)</h3>
+<pre><code>vu = user_NN(input_user)
+vu = tf.keras.layers.UnitNormalization(axis=1)(vu)   # replaces tf.linalg.l2_normalize
+
+vm = item_NN(input_item)
+vm = tf.keras.layers.UnitNormalization(axis=1)(vm)</code></pre>
+<p class="sub" style="margin-top:8px">Swap these in only if the slide’s version errors in your setup.</p>
+
+<h2>Key takeaways</h2>
+<div class="panel">
+  <ul>
+    <li>Two <span class="m">Sequential</span> networks, each ending in a <b>32-unit layer with no activation</b>. Hidden layers use ReLU.</li>
+    <li><span class="m">Input(shape=...)</span> makes a <b>placeholder</b> per input (user features, item features, which may differ in size) so the functional model can be wired up.</li>
+    <li><span class="m">l2_normalize(axis=1)</span> scales each vector to <b>length 1</b>. The dot product becomes a <b>cosine similarity</b> in [−1, 1], and the lecture says this works a bit better.</li>
+    <li><span class="m">layers.Dot(axes=1)([vu, vm])</span> gives the prediction. <span class="m">Model([input_user, input_item], output)</span> ties it together.</li>
+    <li>Cost: <span class="m">MeanSquaredError</span>. One loss trains both networks.</li>
+    <li>Next: week on <b>reinforcement learning</b>. Do the quizzes and Practice Lab 2 first.</li>
+  </ul>
+</div>
+
+<footer>Source: Andrew Ng, DeepLearning.AI / Stanford Online, “TensorFlow implementation of content-based filtering” (transcript and code slide). The pasted transcript repeats itself; content used once. Material marked “my” is not from the lecture.</footer>
+</main>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  function el(i){return document.getElementById(i);}
+  var plot=el("vplot"), S=40;
+  function mk(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+  function arrow(x,y,color,dash,w){
+    var g=mk("line",{x1:0,y1:0,x2:x,y2:-y,stroke:color,"stroke-width":w||3,"stroke-linecap":"round"});
+    if(dash)g.setAttribute("stroke-dasharray","5 4");
+    plot.appendChild(g);
+    plot.appendChild(mk("circle",{cx:x,cy:-y,r:dash?3.5:4.5,fill:color}));
+  }
+  function update(){
+    var ua=+el("ua").value, ul=+el("ul").value, ma=+el("ma").value, ml=+el("ml").value;
+    el("uao").textContent=ua+"°"; el("ulo").textContent=ul.toFixed(1);
+    el("mao").textContent=ma+"°"; el("mlo").textContent=ml.toFixed(1);
+    var ur=ua*Math.PI/180, mr=ma*Math.PI/180;
+    var ux=Math.cos(ur), uy=Math.sin(ur), mx=Math.cos(mr), my=Math.sin(mr);
+    var raw=ul*ml*(ux*mx+uy*my), nrm=ux*mx+uy*my;
+    el("raw").textContent=raw.toFixed(2); el("norm").textContent=nrm.toFixed(2);
+    plot.innerHTML="";
+    plot.appendChild(mk("circle",{cx:0,cy:0,r:S,fill:"none",stroke:"var(--line)","stroke-width":2}));
+    plot.appendChild(mk("line",{x1:-120,y1:0,x2:120,y2:0,stroke:"var(--line)"}));
+    plot.appendChild(mk("line",{x1:0,y1:-120,x2:0,y2:120,stroke:"var(--line)"}));
+    arrow(ux*ul*S,uy*ul*S,"var(--user)",false,3);
+    arrow(mx*ml*S,my*ml*S,"var(--movie)",false,3);
+    arrow(ux*S,uy*S,"var(--user)",true,2);
+    arrow(mx*S,my*S,"var(--movie)",true,2);
+    var t=mk("text",{x:-124,y:-112,"font-size":11,fill:"var(--muted)"});
+    t.textContent="solid = raw, dashed = after l2_normalize (circle radius 1)";
+    plot.appendChild(t);
+  }
+  ["ua","ul","ma","ml"].forEach(function(i){el(i).addEventListener("input",update);});
+  update();
+})();
+</script>
+</body>
+</html>

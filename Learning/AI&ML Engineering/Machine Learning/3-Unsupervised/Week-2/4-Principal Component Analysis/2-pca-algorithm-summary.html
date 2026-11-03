@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The PCA Algorithm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2133; --muted:#566079; --line:#d9deea;
+  --user:#0f7b8a; --user-bg:#dff3f5; --movie:#b4540a; --movie-bg:#fdebd8;
+  --accent:#4b3fbf; --accent-bg:#e8e6fb; --good:#1f7a4d; --good-bg:#def3e8; --bad:#a8323e; --bad-bg:#fbe3e6;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+    --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+    --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+  --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+  --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:940px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700}
+h2{font-size:25px;margin:44px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+.lede{color:var(--muted);margin:10px 0 0;max-width:66ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+.tag{display:inline-block;font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px}
+.t-acc{background:var(--accent-bg);color:var(--accent)}
+.t-good{background:var(--good-bg);color:var(--good)}
+.t-bad{background:var(--bad-bg);color:var(--bad)}
+.t-warn{background:var(--movie-bg);color:var(--movie)}
+code,.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.eq{font-family:Literata,Georgia,serif;font-size:20px;text-align:center;padding:14px 8px;background:var(--accent-bg);border-radius:10px;margin:12px 0;overflow-x:auto}
+.scroll{overflow-x:auto}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:4px 0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--movie);background:var(--movie-bg)}
+.callout.ok{border-color:var(--good);background:var(--good-bg)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;font-size:16px}
+th{background:var(--bg)}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;font-size:14px;line-height:1.55;margin:10px 0 0}
+.row{display:grid;grid-template-columns:120px 1fr 70px;gap:8px;align-items:center;margin:6px 0}
+@media(max-width:560px){.row{grid-template-columns:90px 1fr 60px}}
+.row input{width:100%}
+.row output{text-align:right;font-family:ui-monospace,Menlo,Consolas,monospace}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.btns button{font:inherit;font-size:15px;padding:5px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.btns button:hover{border-color:var(--accent)}
+.meter{height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.meter>div{height:100%;background:var(--good);width:0}
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+@media(max-width:760px){.res{grid-template-columns:1fr}}
+.res>div{border-radius:10px;padding:10px 12px;text-align:center}
+.res b{display:block;font-family:Literata,Georgia,serif;font-size:22px}
+footer{margin-top:40px;color:var(--muted);font-size:15px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg text{font-family:"Source Sans 3",system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <span class="tag t-acc">Unsupervised learning · optional video · Andrew Ng, ML Specialization</span>
+  <h1 style="margin-top:12px">The PCA algorithm</h1>
+  <p class="lede">Last video: PCA finds new axes so you can use fewer features. This video shows <b>how it chooses them</b>: preprocess, project examples onto a candidate axis, and prefer the axis where the projections are most spread out. It also covers the math for one example, extra axes, why PCA is not linear regression, and reconstruction.</p>
+</header>
+
+<h2>1. Setup and preprocessing</h2>
+<p class="sub">Slide: “PCA algorithm”.</p>
+<div class="grid2">
+  <div class="panel">
+    <h3>The data</h3>
+    <ul style="margin:0">
+      <li>Five training examples with two features, <b>x<sub>1</sub> and x<sub>2</sub></b>. One example has coordinates <b>x<sub>1</sub> = 10, x<sub>2</sub> = 8</b>.</li>
+      <li><b>Unsupervised</b>: only x<sub>1</sub> and x<sub>2</sub>, <b>no label y</b>.</li>
+      <li>Goal: replace the two features with <b>one new axis z</b> that still represents the data well.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3>Preprocess first</h3>
+    <ol style="margin:0">
+      <li><b>Normalise to zero mean</b>: subtract each feature’s mean (already done in the video’s plots).</li>
+      <li><b>Feature scaling</b> if the features have very different ranges. Example from Course 1, Week 2: x<sub>1</sub> = house size (1,000 to a couple of thousand sq ft) vs x<sub>2</sub> = number of bedrooms (a small number).</li>
+    </ol>
+    <p style="margin:6px 0 0;color:var(--muted)">After this, the origin (0, 0) is the centre of the data.</p>
+  </div>
+</div>
+
+<h2>2. Choose an axis by projecting onto it</h2>
+<p class="sub">Slides: “Choose an axis” (three versions).</p>
+<div class="panel">
+  <h3>What “project” means</h3>
+  <p style="margin:0">Take an example and drop a line segment <b>at 90° to the z-axis</b> down to the axis. The foot of that segment is the <b>projection</b>, and its position along z is the <b>one number</b> that now represents the example (instead of two).</p>
+</div>
+<div class="grid3" style="margin-top:14px">
+  <div class="panel">
+    <span class="tag t-warn">Not bad</span>
+    <h3 style="margin-top:8px">Axis = the x<sub>1</sub> axis</h3>
+    <p style="margin:0">For this dataset the x<sub>1</sub> axis already keeps the five projected points <b>pretty spread apart</b>, so quite a lot of the variation is still captured.</p>
+  </div>
+  <div class="panel">
+    <span class="tag t-bad">Not a good axis</span>
+    <h3 style="margin-top:8px">Projections squished together</h3>
+    <p style="margin:0">A tilted axis makes the five projected points <b>bunch up</b>. Their variance is much smaller, so you capture much less of the original information.</p>
+  </div>
+  <div class="panel">
+    <span class="tag t-good">Best: principal component</span>
+    <h3 style="margin-top:8px">Projections far apart</h3>
+    <p style="margin:0">The axis along the data’s long direction. Projected dots are <b>far apart</b>, capturing the most information. It is called the <b>principal component</b>: the axis with <b>maximum variance</b>.</p>
+  </div>
+</div>
+<div class="callout ok">
+  <b>Rule:</b> if you want <b>one</b> feature, PCA picks the principal component, the axis where the projected data has the <b>largest possible variance</b>.
+</div>
+
+<h3 style="margin-top:22px">Try it: rotate the axis (my illustration of the lecture’s slider demo)</h3>
+<p class="sub">The video shows a slider “angle” with 10 examples (left: projections via 90° segments; right: the resulting 1D z-values). This version uses 10 fictional points. The 1D strip below is the right-hand panel.</p>
+<div class="panel">
+  <div class="row"><label for="ang">angle</label><input id="ang" type="range" min="0" max="179" step="1" value="150"><output id="ango"></output></div>
+  <div class="btns">
+    <button type="button" id="best">Snap to principal component</button>
+    <button type="button" id="worst">Show the worst angle</button>
+  </div>
+  <svg id="demo" viewBox="0 0 440 300" width="100%" style="max-width:640px;display:block;margin:0 auto" role="img" aria-label="Ten points with a rotatable axis and their projections"></svg>
+  <p style="margin:8px 0 2px"><b>Projected values (z) on a 1D line:</b></p>
+  <svg id="strip" viewBox="0 0 440 50" width="100%" style="max-width:640px;display:block;margin:0 auto" role="img" aria-label="One-dimensional strip showing the spread of projected values"></svg>
+  <p style="margin:10px 0 4px">Variance of z: <b id="vz"></b> of the total <b id="vt"></b> (<b id="kept"></b> kept)</p>
+  <div class="meter" aria-hidden="true"><div id="meterbar"></div></div>
+  <p style="margin:10px 0 0;color:var(--muted)" id="demoNote"></p>
+</div>
+<div class="callout">
+  <b>Lecture’s link between the two views:</b> maximising the spread of the projections corresponds to <b>minimising the distances</b> each point has to move to be projected onto z (the short 90° segments). They are two ways of saying the same thing.
+</div>
+
+<h2>3. The math for one example</h2>
+<p class="sub">Slide: “Coordinate on the new axis”. Suppose PCA gave the z-axis a direction, described by a <b>length-1 vector</b>. Here it is [0.71, 0.71] (really [0.707…, 0.707…], rounded).</p>
+<div class="panel">
+  <div class="eq">z = x · v = [2, 3] · [0.71, 0.71] = 2×0.71 + 3×0.71 = <b>3.55</b></div>
+  <ul style="margin:0">
+    <li><b>Projection formula:</b> the dot product of the example’s coordinates with the unit vector along z.</li>
+    <li>3.55 is the <b>distance from the origin</b> to the projected point along z. This <b>one number</b> now represents the example (it had two: 2 and 3).</li>
+  </ul>
+  <div class="callout warn" style="margin:12px 0 0">
+    <b>Rounding detail (my check):</b> with the exact 0.7071…, z = 5 × 0.7071 = <b>3.5355</b>, which the lecture shows as 3.55 because it used the rounded 0.71. The idea is unchanged.
+  </div>
+</div>
+
+<h3 style="margin-top:22px">Try it: project and reconstruct any point (my illustration)</h3>
+<div class="panel">
+  <div class="row"><label for="px">x₁</label><input id="px" type="range" min="-5" max="5" step="0.5" value="2"><output id="pxo"></output></div>
+  <div class="row"><label for="py">x₂</label><input id="py" type="range" min="-5" max="5" step="0.5" value="3"><output id="pyo"></output></div>
+  <div class="row"><label for="pa">axis angle</label><input id="pa" type="range" min="0" max="179" step="1" value="45"><output id="pao"></output></div>
+  <svg id="proj" viewBox="-130 -130 260 260" width="100%" style="max-width:360px;display:block;margin:8px auto" role="img" aria-label="A point, its projection on the z axis, and the reconstruction"></svg>
+  <div class="res">
+    <div style="background:var(--accent-bg)">projection z<b id="zv"></b></div>
+    <div style="background:var(--good-bg)">reconstruction (x̂₁, x̂₂)<b id="rv"></b></div>
+    <div style="background:var(--bad-bg)">distance moved<b id="ev"></b></div>
+  </div>
+  <p style="margin:10px 0 0;color:var(--muted)">At 45° with the point (2, 3) you get z ≈ 3.54, reconstruction ≈ (2.5, 2.5), error ≈ 0.71 (the lecture’s rounded numbers: 3.55 and 2.52).</p>
+</div>
+
+<h2>4. Reconstruction: going back from one number</h2>
+<p class="sub">Slide: “Approximation to the original data”.</p>
+<div class="panel">
+  <ul style="margin:0 0 6px">
+    <li>Given only <b>z = 3.55</b>, can you recover the original (x<sub>1</sub>, x<sub>2</sub>)? <b>Not exactly</b>, because one number holds less information than two. You can <b>approximate</b> it. This step is called <b>reconstruction</b>.</li>
+  </ul>
+  <div class="eq">(x̂₁, x̂₂) = z × [0.71, 0.71] = 3.55 × [0.71, 0.71] = <b>[2.52, 2.52]</b></div>
+  <ul style="margin:0">
+    <li>The original was (2, 3); the approximation (2.52, 2.52) is “not that far”. The gap is the <b>little line segment</b> between them (the lost part).</li>
+    <li>So <b>one number gives a reasonable approximation</b> of the two original coordinates.</li>
+  </ul>
+</div>
+
+<h2>5. More principal components</h2>
+<p class="sub">Slide: “More principal components”.</p>
+<div class="panel scroll">
+<svg viewBox="0 0 760 240" width="100%" style="min-width:600px" role="img" aria-label="Left: 2D with first and second principal components at 90 degrees. Right: 3D with three mutually perpendicular components">
+  <defs>
+    <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--good)"/></marker>
+    <marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--movie)"/></marker>
+  </defs>
+  <g stroke-width="2.5" fill="none">
+    <path d="M70 190L250 70" stroke="var(--accent)" marker-end="url(#ab)"/>
+    <path d="M110 80L210 180" stroke="var(--good)" marker-end="url(#ag)"/>
+    <path d="M520 200L650 120" stroke="var(--accent)" marker-end="url(#ab)"/>
+    <path d="M520 200L450 100" stroke="var(--good)" marker-end="url(#ag)"/>
+    <path d="M520 200L520 50" stroke="var(--movie)" marker-end="url(#ao)"/>
+  </g>
+  <g fill="currentColor" font-size="14">
+    <text x="255" y="68" fill="var(--accent)" font-weight="600">z₁ (1st PC)</text>
+    <text x="215" y="190" fill="var(--good)" font-weight="600">z₂ (2nd PC)</text>
+    <text x="655" y="118" fill="var(--accent)" font-weight="600">z₁</text>
+    <text x="428" y="96" fill="var(--good)" font-weight="600">z₂</text>
+    <text x="526" y="48" fill="var(--movie)" font-weight="600">z₃</text>
+    <text x="40" y="225" fill="var(--muted)">2 features: z₂ at 90° to z₁</text>
+    <text x="470" y="225" fill="var(--muted)">50 features → 3 PCs: all at 90°</text>
+  </g>
+</svg>
+</div>
+<ul>
+  <li>The <b>second axis is always at 90° (perpendicular)</b> to the first. A <b>third</b> is at 90° to both the first and second, and so on for every extra axis.</li>
+  <li>“Perpendicular” is just the mathematician’s word for 90°.</li>
+  <li>Example: <b>50 features, 3 principal components</b>. The data is then described by three numbers (z<sub>1</sub>, z<sub>2</sub>, z<sub>3</sub>) per example.</li>
+</ul>
+
+<h2>6. PCA is not linear regression</h2>
+<p class="sub">Slides: “PCA is not linear regression” (two slides). A very common question, and the lecture’s answer is: totally different algorithm.</p>
+<div class="panel scroll">
+<table>
+  <tr><th></th><th>Linear regression</th><th>PCA</th></tr>
+  <tr><th>Type</th><td>Supervised</td><td>Unsupervised</td></tr>
+  <tr><th>Data</th><td>Features x <b>and a label y</b></td><td>Features x<sub>1</sub>…x<sub>n</sub> only (up to x<sub>50</sub> or more)</td></tr>
+  <tr><th>Special feature?</th><td>Yes: <b>y</b> is treated specially</td><td>No: <b>all features are treated equally</b></td></tr>
+  <tr><th>Goal</th><td>Fit a line so predictions are close to the true y</td><td>Find an axis z that <b>retains as much variance (information)</b> as possible</td></tr>
+  <tr><th>Distance minimised</th><td><b>Vertical</b>, along the y-axis (prediction vs true label)</td><td><b>Perpendicular</b> to the axis z (the projection segments)</td></tr>
+  <tr><th>Use it to…</th><td>Predict the value of y</td><td>Reduce the number of features, e.g. to visualise</td></tr>
+</table>
+</div>
+<div class="grid2" style="margin-top:14px">
+  <div class="panel">
+    <h3>Symmetric four-point example (slide 2)</h3>
+    <svg viewBox="0 0 400 190" width="100%" role="img" aria-label="Four points at the corners of a tall rectangle. Linear regression fits a horizontal flat line; PCA picks the vertical axis">
+      <g stroke="var(--muted)" stroke-width="1.5" fill="none"><path d="M10 95H190M100 10V180"/><path d="M210 95H390M300 10V180"/></g>
+      <g stroke-width="3" fill="none"><path d="M10 95H190" stroke="var(--accent)"/><path d="M300 10V180" stroke="var(--good)"/></g>
+      <g fill="var(--bad)">
+        <circle cx="70" cy="35" r="5"/><circle cx="130" cy="35" r="5"/><circle cx="70" cy="155" r="5"/><circle cx="130" cy="155" r="5"/>
+        <circle cx="270" cy="35" r="5"/><circle cx="330" cy="35" r="5"/><circle cx="270" cy="155" r="5"/><circle cx="330" cy="155" r="5"/>
+      </g>
+      <g fill="currentColor" font-size="13" text-anchor="middle">
+        <text x="100" y="186">regression: f(x) = 0</text><text x="300" y="186">PCA: 1st PC is vertical</text>
+      </g>
+    </svg>
+    <p style="margin:6px 0 0">Regression can only fit a flat line here (<span class="m">f(x) = 0</span>). PCA picks the vertical direction, where the points are most spread out.</p>
+  </div>
+  <div class="panel">
+    <h3>Why the two look alike in 2D</h3>
+    <p style="margin:0">With only two features drawn on a flat screen, a fitted line and a principal axis can look similar. With more than two features, <b>which is most cases</b>, the difference is very large, and the algorithms are used for <b>totally different purposes</b> and give <b>very different answers</b>.</p>
+  </div>
+</div>
+
+<h2>The whole algorithm in one picture</h2>
+<div class="panel scroll">
+<svg viewBox="0 0 880 130" width="100%" style="min-width:760px" role="img" aria-label="Flow: normalise and scale, choose axes with max variance, project to get z, optionally reconstruct">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <g stroke-width="2">
+    <rect x="4" y="30" width="190" height="70" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <rect x="228" y="30" width="190" height="70" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <rect x="452" y="30" width="190" height="70" rx="10" fill="var(--good-bg)" stroke="var(--good)"/>
+    <rect x="676" y="30" width="200" height="70" rx="10" fill="var(--movie-bg)" stroke="var(--movie)"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" fill="none" marker-end="url(#ar)"><path d="M196 65H226"/><path d="M420 65H450"/><path d="M644 65H674"/></g>
+  <g fill="currentColor" text-anchor="middle" font-size="14">
+    <text x="99" y="60" font-weight="600">1. Preprocess</text><text x="99" y="80" font-size="12">zero mean (+ scaling)</text>
+    <text x="323" y="60" font-weight="600">2. Choose axes</text><text x="323" y="80" font-size="12">max variance, 90° apart</text>
+    <text x="547" y="60" font-weight="600">3. Project</text><text x="547" y="80" font-size="12">z = x · v (dot product)</text>
+    <text x="776" y="60" font-weight="600">4. Reconstruct (optional)</text><text x="776" y="80" font-size="12">x̂ = z × v</text>
+  </g>
+</svg>
+</div>
+
+<h2>Alternatives and trade-offs</h2>
+<p class="sub">My additions, not from the lecture. The scikit-learn video is next.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Choice</th><th>Pros</th><th>Cons</th></tr>
+  <tr><th>Preprocess with mean-centering only</th><td>Simplest; fine when features are on similar scales</td><td>With very different scales (square feet vs bedrooms) the large-range feature can dominate the variance. The lecture says to scale first in that case</td></tr>
+  <tr><th>Mean-centre and scale features</th><td>No feature wins just because of its units</td><td>An extra step, and you lose the original units when interpreting axes</td></tr>
+  <tr><th>Keep more principal components (2 or 3 vs 1)</th><td>Reconstruction is closer to the original; 2 to 3 can be plotted</td><td>Less compression. The lecture does not say here how to choose how many</td></tr>
+  <tr><th>Predicting y after PCA</th><td>Fewer inputs for a supervised model (a common use, not covered here)</td><td>The axes are chosen <b>without</b> looking at y, so a high-variance axis is not guaranteed to be useful for predicting y</td></tr>
+</table>
+</div>
+
+<h3 style="margin-top:22px">Project and reconstruct in NumPy (illustrative, not from the lecture)</h3>
+<pre><code>import numpy as np
+
+x = np.array([2.0, 3.0])
+v = np.array([1.0, 1.0]) / np.sqrt(2)     # unit vector for the z-axis (0.7071, 0.7071)
+
+z     = x @ v                             # projection: 3.5355
+x_hat = z * v                             # reconstruction: [2.5, 2.5]
+error = x - x_hat                         # what was lost: [-0.5, 0.5]</code></pre>
+<p class="sub" style="margin-top:8px">With the lecture’s rounded 0.71 you get 3.55 and [2.52, 2.52]. The exact vector gives 3.5355 and [2.5, 2.5]. In practice scikit-learn finds <code>v</code> for you (next video).</p>
+
+<h2>Key takeaways</h2>
+<div class="panel">
+  <ul>
+    <li>PCA is <b>unsupervised</b>. <b>Preprocess</b> with zero mean, and feature scaling if ranges differ a lot.</li>
+    <li>It chooses an axis, <b>projects</b> each example onto it at 90°, and prefers the axis whose projections have the <b>largest variance</b> (most information kept). That axis is the <b>principal component</b>.</li>
+    <li>Projection formula: <b>z = x · v</b>, with v a length-1 vector. Lecture: [2, 3] · [0.71, 0.71] = 3.55.</li>
+    <li><b>Reconstruction</b> gives an approximation: z × v = [2.52, 2.52], close to the original (2, 3), from one number.</li>
+    <li>Extra axes (z<sub>2</sub>, z<sub>3</sub>…) are always <b>perpendicular</b> to the earlier ones. 50 features can be reduced to 3 principal components.</li>
+    <li><b>PCA ≠ linear regression</b>: no label y, all features treated equally, perpendicular rather than vertical distances. Regression predicts y; PCA reduces the number of features.</li>
+    <li><b>Next:</b> using PCA in code with scikit-learn.</li>
+  </ul>
+</div>
+
+<footer>Source: Andrew Ng, DeepLearning.AI / Stanford Online, “PCA algorithm (optional)” (transcript and ten slides). The pasted transcript repeats itself; content used once. Auto-caption slips (“PCLS”, “automation of the original data”) were read as PCA and “information”. Material marked “my” is not from the lecture.</footer>
+</main>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  function el(i){return document.getElementById(i);}
+  function mk(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+
+  /* ---------- rotating axis demo ---------- */
+  var raw=[[-4,-3.0],[-3.2,-2.0],[-2.5,-2.9],[-1.6,-0.8],[-0.8,-1.5],[0.5,0.2],[1.2,1.1],[2.2,0.9],[3.1,2.7],[4.5,3.3]];
+  var mx=0,my=0;raw.forEach(function(p){mx+=p[0];my+=p[1];});mx/=raw.length;my/=raw.length;
+  var pts=raw.map(function(p){return [p[0]-mx,p[1]-my];});
+  var vx=0,vy=0,cxy=0;pts.forEach(function(p){vx+=p[0]*p[0];vy+=p[1]*p[1];cxy+=p[0]*p[1];});
+  vx/=pts.length;vy/=pts.length;cxy/=pts.length;
+  var total=vx+vy;
+  var bestRad=0.5*Math.atan2(2*cxy,vx-vy); if(bestRad<0)bestRad+=Math.PI;
+  var bestDeg=Math.round(bestRad*180/Math.PI), worstDeg=(bestDeg+90)%180;
+  function varAt(deg){var t=deg*Math.PI/180,c=Math.cos(t),s=Math.sin(t),v=0;pts.forEach(function(p){var z=p[0]*c+p[1]*s;v+=z*z;});return v/pts.length;}
+  var S=38,CX=220,CY=150,svg=el("demo"),strip=el("strip");
+  function drawDemo(){
+    var deg=parseFloat(el("ang").value);
+    el("ango").textContent=deg+"°";
+    var t=deg*Math.PI/180,c=Math.cos(t),s=Math.sin(t);
+    svg.innerHTML="";
+    svg.appendChild(mk("line",{x1:20,y1:CY,x2:420,y2:CY,stroke:"var(--line)"}));
+    svg.appendChild(mk("line",{x1:CX,y1:10,x2:CX,y2:290,stroke:"var(--line)"}));
+    var bt=bestDeg*Math.PI/180;
+    svg.appendChild(mk("line",{x1:CX-Math.cos(bt)*200,y1:CY+Math.sin(bt)*200,x2:CX+Math.cos(bt)*200,y2:CY-Math.sin(bt)*200,stroke:"var(--muted)","stroke-width":2,"stroke-dasharray":"2 5"}));
+    var L=190;
+    svg.appendChild(mk("line",{x1:CX-c*L,y1:CY+s*L,x2:CX+c*L,y2:CY-s*L,stroke:"var(--accent)","stroke-width":3}));
+    pts.forEach(function(p){
+      var z=p[0]*c+p[1]*s, px=CX+p[0]*S, py=CY-p[1]*S, qx=CX+z*c*S, qy=CY-z*s*S;
+      svg.appendChild(mk("line",{x1:px,y1:py,x2:qx,y2:qy,stroke:"var(--movie)","stroke-width":1.5}));
+      svg.appendChild(mk("circle",{cx:qx,cy:qy,r:4,fill:"var(--accent)"}));
+    });
+    pts.forEach(function(p){
+      var x=CX+p[0]*S,y=CY-p[1]*S;
+      svg.appendChild(mk("path",{d:"M"+(x-5)+" "+(y-5)+"L"+(x+5)+" "+(y+5)+"M"+(x+5)+" "+(y-5)+"L"+(x-5)+" "+(y+5),stroke:"var(--bad)","stroke-width":2.5}));
+    });
+    var l=mk("text",{x:416,y:20,"text-anchor":"end","font-size":12,fill:"var(--muted)"});l.textContent="dotted = principal component";svg.appendChild(l);
+    strip.innerHTML="";
+    strip.appendChild(mk("line",{x1:10,y1:25,x2:430,y2:25,stroke:"var(--accent)","stroke-width":2}));
+    pts.forEach(function(p){var z=p[0]*c+p[1]*s;strip.appendChild(mk("circle",{cx:220+z*38,cy:25,r:5,fill:"var(--movie)"}));});
+    var v=varAt(deg),k=v/total;
+    el("vz").textContent=v.toFixed(2);el("vt").textContent=total.toFixed(2);
+    el("kept").textContent=Math.round(k*100)+"%";el("meterbar").style.width=Math.round(k*100)+"%";
+    var note;
+    if(Math.abs(deg-bestDeg)<=2) note="Principal component: the projected points are as spread out as they can be, so this axis keeps the most information.";
+    else if(Math.abs(deg-worstDeg)<=2) note="Worst axis for one number: the projections are squished together (smallest variance).";
+    else note="Move toward the dotted line to spread the points out. Spread = variance = information kept.";
+    el("demoNote").textContent=note;
+  }
+  el("ang").addEventListener("input",drawDemo);
+  el("best").addEventListener("click",function(){el("ang").value=bestDeg;drawDemo();});
+  el("worst").addEventListener("click",function(){el("ang").value=worstDeg;drawDemo();});
+  drawDemo();
+
+  /* ---------- project & reconstruct ---------- */
+  var ps=el("proj"),Q=22;
+  function drawProj(){
+    var x=parseFloat(el("px").value),y=parseFloat(el("py").value),deg=parseFloat(el("pa").value);
+    el("pxo").textContent=x.toFixed(1);el("pyo").textContent=y.toFixed(1);el("pao").textContent=deg+"°";
+    var t=deg*Math.PI/180,c=Math.cos(t),s=Math.sin(t),z=x*c+y*s,rx=z*c,ry=z*s,err=Math.hypot(x-rx,y-ry);
+    el("zv").textContent=z.toFixed(2);el("rv").textContent="("+rx.toFixed(2)+", "+ry.toFixed(2)+")";el("ev").textContent=err.toFixed(2);
+    ps.innerHTML="";
+    ps.appendChild(mk("line",{x1:-125,y1:0,x2:125,y2:0,stroke:"var(--line)"}));
+    ps.appendChild(mk("line",{x1:0,y1:-125,x2:0,y2:125,stroke:"var(--line)"}));
+    ps.appendChild(mk("line",{x1:-c*125,y1:s*125,x2:c*125,y2:-s*125,stroke:"var(--accent)","stroke-width":3}));
+    ps.appendChild(mk("line",{x1:x*Q,y1:-y*Q,x2:rx*Q,y2:-ry*Q,stroke:"var(--movie)","stroke-width":2,"stroke-dasharray":"4 3"}));
+    ps.appendChild(mk("circle",{cx:rx*Q,cy:-ry*Q,r:5,fill:"var(--good)"}));
+    ps.appendChild(mk("circle",{cx:x*Q,cy:-y*Q,r:6,fill:"var(--bad)"}));
+    var a=mk("text",{x:x*Q+8,y:-y*Q-8,"font-size":12,fill:"var(--bad)"});a.textContent="x";ps.appendChild(a);
+    var b=mk("text",{x:rx*Q+8,y:-ry*Q+14,"font-size":12,fill:"var(--good)"});b.textContent="x̂";ps.appendChild(b);
+  }
+  ["px","py","pa"].forEach(function(i){el(i).addEventListener("input",drawProj);});
+  drawProj();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OAuth: Application Identity</title>
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#53666f; --line:#d3dcd9;
+  --back:#0b6e5b; --back-bg:#dff3ee; --front:#b4540a; --front-bg:#fbe9d6;
+  --bad:#b3261e; --bad-bg:#fbe3e1; --note:#e9eef0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+    --back:#5fd3b8; --back-bg:#12332d; --front:#f3a566; --front-bg:#3a2815;
+    --bad:#ff9087; --bad-bg:#3b1c1a; --note:#1d2e36;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+  --back:#5fd3b8; --back-bg:#12332d; --front:#f3a566; --front-bg:#3a2815;
+  --bad:#ff9087; --bad-bg:#3b1c1a; --note:#1d2e36;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);margin-bottom:10px}
+h2{font-size:26px;margin:56px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:18px;max-width:62ch}
+.sub{color:var(--muted);margin:0 0 18px;max-width:64ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.box.back{border-left:6px solid var(--back)}
+.box.front{border-left:6px solid var(--front)}
+.box.bad{border-left:6px solid var(--bad);background:var(--bad-bg)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px}
+.tag.back{background:var(--back-bg);color:var(--back)}
+.tag.front{background:var(--front-bg);color:var(--front)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+ul{margin:8px 0;padding-left:20px}
+li{margin:4px 0}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.s-back{stroke:var(--back);fill:none;stroke-width:3}
+.s-front{stroke:var(--front);fill:none;stroke-width:3;stroke-dasharray:7 5}
+.s-bad{stroke:var(--bad);fill:none;stroke-width:3;stroke-dasharray:3 5}
+.t-back{fill:var(--back)!important;font-weight:600}
+.t-front{fill:var(--front)!important;font-weight:600}
+.t-bad{fill:var(--bad)!important;font-weight:600}
+.t-muted{fill:var(--muted)!important}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{background:var(--note)}
+tr:last-child td{border-bottom:0}
+.flow{display:flex;flex-direction:column;margin:14px 0}
+.step{display:grid;grid-template-columns:42px 1fr;gap:12px;position:relative;padding-bottom:16px}
+.step:not(:last-child)::before{content:"";position:absolute;left:20px;top:40px;bottom:0;width:2px;background:var(--line)}
+.dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff}
+.dot.f{background:var(--front)}.dot.b{background:var(--back)}.dot.x{background:var(--bad)}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:14px 18px;margin:14px 0}
+.ex .lbl{font-weight:700;color:var(--muted);font-size:14px}
+.callout{background:var(--note);border-radius:10px;padding:14px 18px;margin:16px 0}
+code{background:var(--note);padding:1px 6px;border-radius:4px;font-size:14px;word-break:break-all}
+.recap li{margin:8px 0}
+.meter{display:grid;grid-template-columns:150px 1fr 120px;gap:10px;align-items:center;margin:10px 0;font-size:15px}
+.bar{height:16px;border-radius:8px;background:var(--note);overflow:hidden}
+.bar i{display:block;height:100%}
+@media(max-width:600px){.meter{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Application identity in OAuth</h1>
+<p class="lead">How an authorization server knows <em>which app</em> is asking, how far it can trust that claim, and what each piece (client ID, client secret, PKCE, redirect URI) actually proves.</p>
+
+<!-- 1 -->
+<h2>1. Applications are their own entity</h2>
+<p class="sub">In OAuth terms, applications are called <b>clients</b>.</p>
+<div class="grid2">
+  <div class="box">
+    <h3>What you see as a user</h3>
+    <p>The authorization screen: "<em>this application</em> would like to access your account." Which application? <em>This</em> one.</p>
+    <p>You might grant one application different access than another.</p>
+  </div>
+  <div class="box">
+    <h3>What the system uses</h3>
+    <p>Each application has an identifier called a <b>client ID</b>, used to identify itself throughout the OAuth flow.</p>
+    <p>The <b>client secret</b> is just another name for the application's <b>password</b>. Without it, nothing assures that whoever uses the client ID really is that application.</p>
+  </div>
+</div>
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A calendar app and a photo-printing app both ask to connect to your Google account. Google shows each one separately, and you may let the calendar read events while the printer only gets photo access. That separation only works because each has its own client ID.</p>
+</div>
+
+<!-- 2 -->
+<h2>2. Authorization Code flow, summarized</h2>
+<p class="sub">An improvement over the Implicit flow because the access token is delivered in the <b>back channel</b>.</p>
+
+<div class="flow">
+  <div class="step"><div class="dot f">1</div>
+    <div class="box front"><b>App builds a URL and redirects the browser to the authorization server (front channel)</b>
+      <p>Parameters describe the request: <b>scope</b>, <b>redirect URI</b> (where to send the user back), and <b>client ID</b> (which app is asking).</p></div></div>
+  <div class="step"><div class="dot b">2</div>
+    <div class="box back"><b>User logs in and approves the request at the authorization server</b></div></div>
+  <div class="step"><div class="dot f">3</div>
+    <div class="box front"><b>Server redirects back to the app with an authorization code (front channel)</b>
+      <p>Redirects are front channel, so ideally it should not matter if something intercepts or modifies them. Sending the access token here would be like <b>mailing it</b>, which opens it up to many attacks.</p>
+      <p>Instead the server sends a <b>one-time-use coupon with a short expiration</b>: the <b>authorization code</b>.</p></div></div>
+  <div class="step"><div class="dot b">4</div>
+    <div class="box back"><b>App redeems the code over the back channel, authenticating with its client secret</b>
+      <p>The code can be exchanged for an access token only <b>once</b> and only <b>within a short time</b>. Authenticating with the secret proves the redeemer is the real app and the code was not stolen.</p></div></div>
+</div>
+
+<div class="scroll">
+<svg viewBox="0 0 860 190" role="img" aria-label="Authorization code flow: front channel for request and code, back channel for token">
+  <rect class="s-box" x="20" y="60" width="150" height="56" rx="10"/><text x="95" y="93" text-anchor="middle" font-size="15">App</text>
+  <rect class="s-box" x="355" y="60" width="150" height="56" rx="10"/><text x="430" y="93" text-anchor="middle" font-size="15">Browser</text>
+  <rect class="s-box" x="690" y="60" width="150" height="56" rx="10"/><text x="765" y="93" text-anchor="middle" font-size="15">Auth server</text>
+  <line class="s-front" x1="175" y1="75" x2="350" y2="75"/><line class="s-front" x1="510" y1="75" x2="685" y2="75"/>
+  <text x="430" y="40" text-anchor="middle" font-size="13" class="t-front">① request: client ID, scope, redirect URI</text>
+  <line class="s-front" x1="685" y1="100" x2="510" y2="100"/><line class="s-front" x1="350" y1="100" x2="175" y2="100"/>
+  <text x="430" y="138" text-anchor="middle" font-size="13" class="t-front">② authorization code (the coupon)</text>
+  <path class="s-back" d="M95 120 Q95 175 430 175 Q765 175 765 120"/>
+  <text x="430" y="166" text-anchor="middle" font-size="13" class="t-back">③ redeem code + client secret, receive access token (back channel)</text>
+</svg>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>Think of a coat-check ticket that works once and expires in a few minutes. Someone could see the ticket, but to collect the coat they must also show the staff your membership card (the client secret). Without the card, the ticket is useless to a thief.</p>
+</div>
+
+<!-- 3 -->
+<h2>3. The problem: apps without a client secret</h2>
+<div class="box bad">
+  <span class="tag bad">Gap</span>
+  <p><b>Mobile apps and single page apps</b> cannot be deployed with a client secret (they are public clients). If they used the plain authorization code flow, the OAuth server would effectively let <b>any application that steals the code</b> get an access token.</p>
+</div>
+
+<h3 style="margin-top:24px">The fix: PKCE (Proof Key for Code Exchange)</h3>
+<p class="sub">Details come in the next sections. High-level idea:</p>
+<div class="grid2">
+  <div class="box back">
+    <ul>
+      <li>Before the first request, the app makes up a <b>unique secret for each request</b>.</li>
+      <li>It uses that secret to <b>start the flow</b>, and again when it <b>redeems the code</b>.</li>
+      <li>The server learns that the redeemer is <b>the same thing that started the flow</b>, so a stolen code cannot be used.</li>
+    </ul>
+  </div>
+  <div class="box bad">
+    <span class="tag bad">What PKCE does NOT do</span>
+    <ul>
+      <li>It does <b>not prove the app's identity</b> or authenticate the app.</li>
+      <li>It only ensures the code is used by the same app that started the flow.</li>
+      <li>The flow runs on entirely public information. An attacker can start a flow using another app's public client ID, and if they then steal the code, they can get a token.</li>
+    </ul>
+  </div>
+</div>
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>PKCE is like writing a random number inside your own sealed envelope when you place an order, and quoting it again at pickup. It proves the person collecting is the one who ordered. It does <em>not</em> prove you are who you say you are, so a scammer can place their own order pretending to be your company.</p>
+</div>
+
+<!-- 4 -->
+<h2>4. Redirect URI as part of identity</h2>
+<p class="sub">The location where the authorization server sends the user back, and where the code is delivered in the front channel.</p>
+
+<div class="scroll">
+<table>
+  <tr><th></th><th>HTTPS URL</th><th>Custom URL scheme</th></tr>
+  <tr><td><b>Used by</b></td><td>Web apps and single page apps (e.g. <code>https://example-app.com</code>); also mobile apps that claim URL patterns</td><td>Native, mobile and desktop apps (e.g. <code>myapp://redirect</code>)</td></tr>
+  <tr><td><b>Globally unique?</b></td><td>Yes. Whoever owns the domain and its DNS entry controls the address.</td><td>No. There is no global registration, so another app can claim the same scheme.</td></tr>
+  <tr><td><b>Collisions</b></td><td>Not possible without owning the domain</td><td>Platforms differ in how they handle two apps claiming one scheme</td></tr>
+  <tr><td><b>Usable as identity?</b></td><td><span class="tag back">Partly</span> Apple and Google require developers to prove domain control before an app can handle those URLs</td><td><span class="tag bad">No</span> cannot be used as any form of application identity</td></tr>
+</table>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A custom scheme is like a nickname: two people can both call themselves "Sam" and the post office cannot tell them apart. An HTTPS domain is like a registered street address: only the owner can receive mail there, and the app stores check you own it.</p>
+</div>
+
+<h3 style="margin-top:28px">How much can we rely on each proof?</h3>
+<div style="margin-top:12px">
+  <div class="meter"><span>Client secret</span><div class="bar"><i style="width:90%;background:var(--back)"></i></div><span>Strong</span></div>
+  <div class="meter"><span>HTTPS redirect URI</span><div class="bar"><i style="width:45%;background:var(--front)"></i></div><span>Better than nothing</span></div>
+  <div class="meter"><span>Custom scheme</span><div class="bar"><i style="width:8%;background:var(--bad)"></i></div><span>None</span></div>
+</div>
+<p style="color:var(--muted);font-size:14px">Bars are a qualitative illustration of the lecture's ranking, not measured values.</p>
+
+<div class="box front" style="margin-top:14px">
+  <b>Honest limitation</b>
+  <ul>
+    <li>For mobile apps and single page apps without a secret, the HTTPS redirect URI is the <b>only</b> part of identity we can rely on.</li>
+    <li>It is nowhere near as reliable as a client secret: "better than nothing, but still potentially problematic."</li>
+    <li>There is <b>no proper solution today</b>. This may change if mobile platforms add APIs to authenticate apps from their app stores.</li>
+  </ul>
+</div>
+
+<!-- 5 -->
+<h2>5. What this means in practice</h2>
+<div class="grid2">
+  <div class="box">
+    <h3>If you build a public client</h3>
+    <p>Be aware of the identity limitation when setting policies such as:</p>
+    <ul>
+      <li><b>Token lifetimes</b></li>
+      <li>Whether to <b>skip the consent screen</b></li>
+    </ul>
+  </div>
+  <div class="box back">
+    <h3>Register redirect URIs</h3>
+    <p>Because the redirect URI is the only hint of identity without a secret, redirect URIs must be <b>registered at the server</b>. Then the server only redirects to registered URLs for a given client ID. (Registration is covered in the next section.)</p>
+  </div>
+</div>
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A mobile banking-style app cannot prove who it is, so you might issue it short-lived tokens and always show the consent screen. A server-side web app with a client secret could reasonably get longer-lived tokens, and a trusted first-party app might skip consent.</p>
+  <p style="color:var(--muted);font-size:14px">The lecture names these policy areas without prescribing values; the examples above are illustrative.</p>
+</div>
+
+<!-- 6 -->
+<h2>6. Key takeaways</h2>
+<div class="box">
+<ul class="recap">
+  <li>Each <b>client</b> has its own <b>client ID</b>, used throughout the flow. The client ID alone proves nothing.</li>
+  <li>The <b>client secret</b> is the app's password and is the strongest proof of identity, but only confidential clients can hold one.</li>
+  <li>In the <b>authorization code flow</b>, a short-lived, one-time <b>code</b> travels via the front channel and is redeemed over the back channel for the token.</li>
+  <li><b>PKCE</b> ties code redemption to the app that started the flow. It does <b>not</b> authenticate the app.</li>
+  <li><b>HTTPS redirect URIs</b> are globally unique and are a partial identity signal. <b>Custom schemes</b> are not an identity at all.</li>
+  <li>Public clients have no proper identity solution today, so set token and consent policies carefully and <b>register redirect URIs</b>.</li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>

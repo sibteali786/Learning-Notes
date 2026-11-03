@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Practice Lab: Deep Learning for Content-Based Filtering, Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2133; --muted:#566079; --line:#d9deea;
+  --user:#0f7b8a; --user-bg:#dff3f5; --movie:#b4540a; --movie-bg:#fdebd8;
+  --accent:#4b3fbf; --accent-bg:#e8e6fb; --good:#1f7a4d; --good-bg:#def3e8; --bad:#a8323e; --bad-bg:#fbe3e6;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+    --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+    --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+  --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+  --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:960px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700}
+h2{font-size:25px;margin:46px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+.lede{color:var(--muted);margin:10px 0 0;max-width:66ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px}
+.t-user{background:var(--user-bg);color:var(--user)}
+.t-movie{background:var(--movie-bg);color:var(--movie)}
+.t-acc{background:var(--accent-bg);color:var(--accent)}
+.t-good{background:var(--good-bg);color:var(--good)}
+.t-bad{background:var(--bad-bg);color:var(--bad)}
+code,.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.eq{font-family:Literata,Georgia,serif;font-size:20px;text-align:center;padding:14px 8px;background:var(--accent-bg);border-radius:10px;margin:12px 0;overflow-x:auto}
+.scroll{overflow-x:auto}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:4px 0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--movie);background:var(--movie-bg)}
+.callout.ok{border-color:var(--good);background:var(--good-bg)}
+.callout.bad{border-color:var(--bad);background:var(--bad-bg)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;font-size:15.5px}
+th{background:var(--bg)}
+td.c,th.c{text-align:center}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;font-size:14px;line-height:1.55;margin:10px 0 0}
+.qa{border-left:5px solid var(--accent)}
+.qa h3{font-size:18px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.btns button{font:inherit;font-size:15px;padding:5px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.btns button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.row{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center;margin:6px 0}
+@media(max-width:560px){.row{grid-template-columns:100px 1fr 60px}}
+.row input{width:100%}
+.row output{text-align:right;font-family:ui-monospace,Menlo,Consolas,monospace}
+.box3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0}
+@media(max-width:760px){.box3{grid-template-columns:1fr}}
+.box3>div{border-radius:10px;padding:10px 12px}
+footer{margin-top:40px;color:var(--muted);font-size:15px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg text{font-family:"Source Sans 3",system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <span class="tag t-acc">Course 3, Week 2 · Practice lab · C3_W2_RecSysNN_Assignment</span>
+  <h1 style="margin-top:12px">Deep learning for content-based filtering: the lab, explained</h1>
+  <p class="lede">The lab builds the two-tower network from the lectures on real MovieLens data, trains it, and uses it three ways: recommend for a new user, compare predictions for an existing user, and find similar movies. This page walks the whole notebook, decodes the snippets that are easy to trip on, and answers your four questions first.</p>
+</header>
+
+<!-- Q&A -->
+<h2>Your questions, answered</h2>
+<div class="panel qa">
+  <h3>1. “Is the author saying the per-genre average rating per user is derived/engineered?”</h3>
+  <p style="margin:0"><b>Yes.</b> MovieLens only gives raw ratings (user, movie, stars). It has almost no user information. So the lab <b>computes</b> the user content from those ratings: for each user and each of 14 genres, the <b>average rating that user gave to movies of that genre</b>. That is feature engineering (the lab points back to Course 1, Week 2, Lab 4).</p>
+  <ul>
+    <li><b>User content = entirely engineered:</b> 14 per-genre averages. Three more columns (<span class="m">user id</span>, <span class="m">rating count</span>, <span class="m">rating ave</span>) are carried only for interpreting the data and are <b>not</b> fed to the network.</li>
+    <li><b>Movie content = original + one engineered:</b> original = release <span class="m">year</span> and the 14-genre one-hot vector; engineered = <span class="m">ave rating</span>, derived from all users’ ratings of that movie. <span class="m">movie id</span> is not used in training.</li>
+    <li>A genre the user never rated shows <b>0.0</b>, which means “no data”, not “dislikes”.</li>
+  </ul>
+</div>
+<div class="panel qa" style="margin-top:14px">
+  <h3>2. “The author says user 2 rates action as 3.9, but the table shows 4.0”</h3>
+  <p style="margin:0"><b>You read it correctly.</b> In your screenshot the columns after <span class="m">[rating ave]</span> are Action 4.0, Adventure 4.2, Animation 0.0, Children 0.0, Comedy 4.0, Crime 4.1, Documentary 4.0, Drama 4.0, Fantasy 0.0, Horror 3.0, Mystery 4.0, Romance 0.0, <b>Sci-Fi 3.9, Thriller 3.9</b>. The 3.9 values are under Sci-Fi and Thriller. So the notebook sentence does not match the table it sits under.</p>
+  <ul>
+    <li><b>Likely cause (my guess, not confirmed):</b> the explanation text was not updated to match the data. A second possibility is display rounding: the notebook sets <span class="m">pd.set_option("display.precision", 1)</span>, so a stored value like 3.95 would print as 4.0.</li>
+    <li><b>The movie part is consistent:</b> movie 6874’s <span class="m">ave rating</span> shows 4.0, matching “average rating of 4”.</li>
+    <li><b>To check the exact number</b> (in a scratch notebook, since the lab asks you not to add cells to the graded one):
+<pre><code>np.set_printoptions(precision=4, suppress=True)
+print(user_train_unscaled[0, 3:])   # 14 genre averages; index 0 here = Action</code></pre></li>
+  </ul>
+</div>
+<div class="panel qa" style="margin-top:14px">
+  <h3>3. “Where does <span class="m">'y' is 4 … user 2 rated movie 6874 as a 4</span> come from?”</h3>
+  <p style="margin:0">It is not computed anywhere. It comes from <b>row alignment</b>. The three arrays have the same number of rows, and <b>row k of each is one training example</b>:</p>
+  <ul>
+    <li><span class="m">user_train[0]</span> is user <b>2</b> (first row of your user table).</li>
+    <li><span class="m">item_train[0]</span> is movie <b>6874</b> (first row of your movie table).</li>
+    <li><span class="m">y_train[0]</span> is <b>4.0</b> (the first value in <span class="m">y_train[:5]: [4. 3.5 4. 4. 4.5]</span>).</li>
+  </ul>
+  <p style="margin:6px 0 0">The lab states this in section 3.1: the training set is split into a user array and an item array “with the same number of entries”, and a single example is a row from both plus a rating from <span class="m">y_train</span>. Try the row picker in section 2 below. Do not confuse it with the movie’s <b>average rating</b> column. That is a different number that just happens to also be 4.0 here.</p>
+</div>
+<div class="panel qa" style="margin-top:14px">
+  <h3>4. “How does the scaling snippet work, step by step?”</h3>
+  <p style="margin:0">See section 3. In one line: <b>StandardScaler</b> turns each input column into “how many standard deviations from its mean”, and <b>MinMaxScaler(−1, 1)</b> squeezes the ratings into −1…1 to match the network’s output range. Each scaler <b>learns from the data once (<span class="m">fit</span>)</b> and is then <b>reused (<span class="m">transform</span>)</b> for new data and for undoing (<span class="m">inverse_transform</span>).</p>
+</div>
+
+<!-- Overview -->
+<h2>Lab at a glance</h2>
+<div class="panel scroll">
+<svg viewBox="0 0 900 150" width="100%" style="min-width:820px" role="img" aria-label="Lab flow: dataset, training data, scaling and split, build network, train and evaluate, predict for new user, predict for existing user, find similar items">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+  <g stroke-width="2">
+    <rect x="4" y="40" width="96" height="70" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <rect x="118" y="40" width="96" height="70" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <rect x="232" y="40" width="96" height="70" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+    <rect x="346" y="40" width="96" height="70" rx="10" fill="var(--user-bg)" stroke="var(--user)"/>
+    <rect x="460" y="40" width="96" height="70" rx="10" fill="var(--user-bg)" stroke="var(--user)"/>
+    <rect x="574" y="40" width="96" height="70" rx="10" fill="var(--good-bg)" stroke="var(--good)"/>
+    <rect x="688" y="40" width="96" height="70" rx="10" fill="var(--good-bg)" stroke="var(--good)"/>
+    <rect x="802" y="40" width="94" height="70" rx="10" fill="var(--good-bg)" stroke="var(--good)"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.6" fill="none" marker-end="url(#ar)">
+    <path d="M101 75H116"/><path d="M215 75H230"/><path d="M329 75H344"/><path d="M443 75H458"/><path d="M557 75H572"/><path d="M671 75H686"/><path d="M785 75H800"/>
+  </g>
+  <g fill="currentColor" text-anchor="middle" font-size="13">
+    <text x="52" y="72" font-weight="600">§2 Data</text><text x="52" y="90" font-size="11">MovieLens</text>
+    <text x="166" y="72" font-weight="600">§3.1 Rows</text><text x="166" y="90" font-size="11">user, item, y</text>
+    <text x="280" y="72" font-weight="600">§3.2 Scale</text><text x="280" y="90" font-size="11">+ 80/20 split</text>
+    <text x="394" y="72" font-weight="600">§4 Network</text><text x="394" y="90" font-size="11">Exercise 1</text>
+    <text x="508" y="72" font-weight="600">Train</text><text x="508" y="90" font-size="11">MSE, Adam</text>
+    <text x="622" y="72" font-weight="600">§5.1 New user</text><text x="622" y="90" font-size="11">top movies</text>
+    <text x="736" y="72" font-weight="600">§5.2 User 2</text><text x="736" y="90" font-size="11">pred vs actual</text>
+    <text x="849" y="72" font-weight="600">§5.3 Similar</text><text x="849" y="90" font-size="11">Exercise 2</text>
+  </g>
+</svg>
+</div>
+
+<!-- 1 -->
+<h2>1. The dataset</h2>
+<div class="grid2">
+  <div class="panel">
+    <h3>MovieLens “ml-latest-small”, reduced</h3>
+    <ul style="margin:0">
+      <li>Original: roughly 9000 movies, 600 users, ratings 0.5 to 5.0 in 0.5 steps.</li>
+      <li>Reduced to <b>movies since 2000</b> and popular genres: <b>397 users, 847 movies, 25,521 ratings</b>.</li>
+      <li>Per movie: title, release date, one or more genres (for example Toy Story 3: Adventure, Animation, Children, Comedy, Fantasy).</li>
+      <li>Almost nothing about users beyond their ratings, which is why user features are engineered.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3>Why 50,884 training rows from 25,521 ratings?</h3>
+    <p style="margin:0">The lab says <b>some ratings are repeated</b> to boost examples of under-represented genres. That is why there are <span class="m">50884</span> training vectors. Genre counts show why: Action has 10,377 ratings, but Documentary only 280.</p>
+  </div>
+</div>
+<div class="callout warn">
+  <b>Side effect to be aware of (my observation):</b> if a duplicated row is shuffled into both train and test, the test set contains “twins” of training rows. That can make test loss look a little better than real generalisation.
+</div>
+
+<!-- 2 -->
+<h2>2. What one training example looks like (§3.1)</h2>
+<p class="sub">Three arrays, same number of rows. The 14 genres: Action, Adventure, Animation, Children, Comedy, Crime, Documentary, Drama, Fantasy, Horror, Mystery, Romance, Sci-Fi, Thriller.</p>
+<div class="grid2">
+  <div class="panel" style="border-top:5px solid var(--user)">
+    <h3>user_train: 17 columns</h3>
+    <div class="box3" style="grid-template-columns:1fr 1fr">
+      <div style="background:var(--bad-bg)"><b>Not used in training (3)</b><br><span class="m">user id</span>, <span class="m">rating count</span>, <span class="m">rating ave</span></div>
+      <div style="background:var(--good-bg)"><b>Used (14)</b><br>per-genre average rating for this user</div>
+    </div>
+    <p style="margin:0">The user’s vector is <b>identical on every row that belongs to that user</b> (user 2 repeats on all 5 rows, with 22 ratings).</p>
+  </div>
+  <div class="panel" style="border-top:5px solid var(--movie)">
+    <h3>item_train: 17 columns</h3>
+    <div class="box3" style="grid-template-columns:1fr 1fr">
+      <div style="background:var(--bad-bg)"><b>Not used (1)</b><br><span class="m">movie id</span></div>
+      <div style="background:var(--good-bg)"><b>Used (16)</b><br><span class="m">year</span>, <span class="m">ave rating</span>, 14 genre 1/0 flags</div>
+    </div>
+    <p style="margin:0">So the network sees <b>14 user inputs</b> and <b>16 movie inputs</b>. That matches <span class="m">num_user_features = shape[1] − 3</span> and <span class="m">num_item_features = shape[1] − 1</span>, and the 14 and 16 in the model summary.</p>
+  </div>
+</div>
+<div class="panel" style="margin-top:14px">
+  <h3>y_train</h3>
+  <p style="margin:0">The target: the rating this user gave this movie. First five: <span class="m">[4. 3.5 4. 4. 4.5]</span>.</p>
+</div>
+
+<h3 style="margin-top:22px">Row picker: how row k lines up across the three arrays</h3>
+<p class="sub">Uses the five rows from your screenshots. Pick a row.</p>
+<div class="panel">
+  <div class="btns" id="rowbtns" role="group" aria-label="Pick a training row"></div>
+  <div class="box3">
+    <div style="background:var(--user-bg)"><b>user_train[k]</b><div id="rU"></div></div>
+    <div style="background:var(--movie-bg)"><b>item_train[k]</b><div id="rI"></div></div>
+    <div style="background:var(--good-bg)"><b>y_train[k]</b><div id="rY"></div></div>
+  </div>
+  <p style="margin:6px 0 0" id="rNote"></p>
+</div>
+
+<!-- 3 -->
+<h2>3. Preparing the data (§3.2): the scaling snippet, step by step</h2>
+<div class="panel">
+<pre><code># 1. keep untouched copies
+item_train_unscaled = item_train
+user_train_unscaled = user_train
+y_train_unscaled    = y_train
+
+# 2. scale movie inputs
+scalerItem = StandardScaler()
+scalerItem.fit(item_train)
+item_train = scalerItem.transform(item_train)
+
+# 3. scale user inputs
+scalerUser = StandardScaler()
+scalerUser.fit(user_train)
+user_train = scalerUser.transform(user_train)
+
+# 4. scale the target to -1..1
+scalerTarget = MinMaxScaler((-1, 1))
+scalerTarget.fit(y_train.reshape(-1, 1))
+y_train = scalerTarget.transform(y_train.reshape(-1, 1))
+
+# 5. prove nothing was lost
+print(np.allclose(item_train_unscaled, scalerItem.inverse_transform(item_train)))
+print(np.allclose(user_train_unscaled, scalerUser.inverse_transform(user_train)))</code></pre>
+</div>
+<div class="panel" style="margin-top:14px">
+  <ol style="margin:0">
+    <li><b>Keep the originals.</b> You need the unscaled arrays later to display readable results (section 5 prints unscaled movies).</li>
+    <li><b>StandardScaler on movies.</b> <span class="m">fit</span> measures, <b>per column</b>, the mean μ and standard deviation σ. <span class="m">transform</span> then replaces each value with <span class="m">(x − μ) / σ</span>. Every column ends with mean 0 and spread 1, so a column in the thousands (<span class="m">year</span>) cannot swamp a 0/1 flag. This speeds up training (as in Course 1, Week 2).</li>
+    <li><b>StandardScaler on users.</b> Same, with its own μ and σ. The two scalers are separate because user and movie columns are different.</li>
+    <li><b>MinMaxScaler((−1, 1)) on ratings.</b> <span class="m">reshape(−1, 1)</span> turns the 1-D list into a column, because scikit-learn expects 2-D input (rows × features). It learns the min and max rating, then maps:
+      <div class="eq">y′ = −1 + 2 · (y − min) / (max − min)</div>
+      With min 0.5 and max 5.0 (the lab’s rating scale, assuming the data spans it): 0.5 → −1, 5.0 → +1, 4.0 → 0.556. <b>Why −1…1?</b> The network’s output is a dot product of two unit-length vectors, which can only be between −1 and 1, so the targets must live in that range. (This confirms what I flagged earlier about the TensorFlow lecture video.)</li>
+    <li><b>Check reversibility.</b> <span class="m">inverse_transform</span> undoes the scaling, and <span class="m">np.allclose</span> tests “equal up to tiny float error”. <span class="m">True</span> means no information was lost.</li>
+  </ol>
+</div>
+<div class="grid2" style="margin-top:14px">
+  <div class="panel">
+    <h3>Toy StandardScaler example</h3>
+    <p style="margin:0 0 6px;color:var(--muted)">Only the five years from your screenshot (the real scaler uses all 50,884 rows, so real numbers differ).</p>
+    <div class="scroll"><table style="min-width:0">
+      <tr><th>year</th><td class="c">2003</td><td class="c">2004</td><td class="c">2006</td><td class="c">2006</td><td class="c">2008</td></tr>
+      <tr><th>scaled</th><td class="c">−1.376</td><td class="c">−0.803</td><td class="c">0.344</td><td class="c">0.344</td><td class="c">1.491</td></tr>
+    </table></div>
+    <p style="margin:6px 0 0">Here μ = 2005.4 and σ = 1.744.</p>
+  </div>
+  <div class="panel">
+    <h3>Rating ↔ scaled value (interactive)</h3>
+    <div class="row"><label for="rr">rating (stars)</label><input id="rr" type="range" min="0.5" max="5" step="0.5" value="4"><output id="rro"></output></div>
+    <p style="margin:4px 0 10px">scaled target: <b id="rrs"></b></p>
+    <div class="row"><label for="ss">network output</label><input id="ss" type="range" min="-1" max="1" step="0.05" value="0.5"><output id="sso"></output></div>
+    <p style="margin:4px 0 0">converted back to stars: <b id="ssr"></b></p>
+  </div>
+</div>
+<div class="callout ok">
+  <b>Reuse the same scaler later, never fit again.</b> Sections 5.1 to 5.3 call <span class="m">scalerUser.transform</span>, <span class="m">scalerItem.transform</span>, and <span class="m">scalerTarget.inverse_transform</span> on new data. If you re-fitted on new data, the numbers would no longer mean what the trained network expects.
+</div>
+
+<h3 style="margin-top:22px">Train/test split</h3>
+<div class="panel">
+<pre><code>item_train, item_test = train_test_split(item_train, train_size=0.80, shuffle=True, random_state=1)
+user_train, user_test = train_test_split(user_train, train_size=0.80, shuffle=True, random_state=1)
+y_train,    y_test    = train_test_split(y_train,    train_size=0.80, shuffle=True, random_state=1)</code></pre>
+<ul>
+  <li>80% / 20% of 50,884 rows gives <b>40,707 train</b> and <b>10,177 test</b> (the printed shapes).</li>
+  <li><b>Same <span class="m">random_state=1</span> three times</b> means the same shuffle each time, so row k of user, item, and y still belong together. That is what keeps the alignment from the row picker.</li>
+  <li>After scaling, printed values have mean zero, which is why the table in cell 23 looks different.</li>
+</ul>
+</div>
+
+<!-- 4 -->
+<h2>4. The network (Exercise 1)</h2>
+<p class="sub">Same architecture as the lecture. Only the three Dense layers per tower are yours to write. Everything else is provided.</p>
+<div class="panel">
+<pre><code>num_outputs = 32
+tf.random.set_seed(1)
+user_NN = tf.keras.models.Sequential([
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(num_outputs)
+])
+item_NN = tf.keras.models.Sequential([
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(num_outputs)
+])
+# provided: Input -> tower -> l2_normalize -> Dot -> Model   (see my TensorFlow lecture summary)</code></pre>
+<ul>
+  <li><b>Why the last layer has no activation:</b> it outputs the raw 32-number vector, which is then L2-normalised.</li>
+  <li><b>Parameter counts:</b> the notebook prints <b>41,376</b> for <span class="m">item_NN</span>. By the same arithmetic (inputs × units + units per layer) <span class="m">user_NN</span> has <b>40,864</b>. Example: 16·256+256 + 256·128+128 + 128·32+32 = 41,376. The towers differ only in input width (14 vs 16).</li>
+  <li>“The networks do not need to be the same.” If user content were much bigger than movie content, you could give the user tower more capacity.</li>
+</ul>
+</div>
+<div class="grid2" style="margin-top:14px">
+  <div class="panel">
+    <h3>Training</h3>
+<pre><code>cost_fn = tf.keras.losses.MeanSquaredError()
+opt = keras.optimizers.Adam(learning_rate=0.01)
+model.compile(optimizer=opt, loss=cost_fn)
+
+model.fit([user_train[:, u_s:], item_train[:, i_s:]],
+          y_train, epochs=30)</code></pre>
+    <p style="margin:8px 0 0"><span class="m">[:, u_s:]</span> means “all rows, columns from index 3 onward”. That is how the 3 ID columns are dropped for users (<span class="m">u_s = 3</span>), and 1 for items (<span class="m">i_s = 1</span>).</p>
+  </div>
+  <div class="panel">
+    <h3>Results</h3>
+    <ul style="margin:0">
+      <li>Loss falls from <b>0.1232</b> (epoch 1) to <b>0.0973</b> (epoch 6), and keeps going for 30 epochs.</li>
+      <li><b>Test loss: 0.0815</b>, comparable to training loss, so the lab concludes no substantial overfitting.</li>
+      <li><b>In stars (my conversion):</b> loss is in scaled units. √0.0815 ≈ 0.285, times 2.25 (= 4.5/2) ≈ <b>0.64 stars</b> typical error, assuming the 0.5 to 5.0 range. That fits the lab’s “generally within 1 of the actual rating”.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 5 -->
+<h2>5. Predictions (§5)</h2>
+<h3>5.1 A new user</h3>
+<div class="panel">
+  <p style="margin:0 0 6px">You type a user’s taste in the same 17-column layout as the training data. The example: <b>Adventure 5.0, Fantasy 5.0</b>, every other genre 0.0, <span class="m">rating count = 3</span>, <span class="m">user id = 5000</span>. Zeros mean “not rated”, the same convention as the training table.</p>
+<pre><code>user_vecs  = gen_user_vecs(user_vec, len(item_vecs))   # same user row repeated for all 847 movies
+suser_vecs = scalerUser.transform(user_vecs)           # scale with the TRAINED scalers
+sitem_vecs = scalerItem.transform(item_vecs)
+y_p  = model.predict([suser_vecs[:, u_s:], sitem_vecs[:, i_s:]])   # one score per movie
+y_pu = scalerTarget.inverse_transform(y_p)             # back to stars
+sorted_index = np.argsort(-y_pu, axis=0).reshape(-1).tolist()      # best first
+sorted_items = item_vecs[sorted_index]                 # unscaled, for display</code></pre>
+</div>
+<div class="panel" style="margin-top:14px">
+  <h3>Step by step</h3>
+  <ol style="margin:0">
+    <li><b>Repeat the one user</b> 847 times, so each movie gets paired with this user.</li>
+    <li><b>Scale</b> user and item arrays with the trained scalers (<span class="m">transform</span> only).</li>
+    <li><b>Slice off the ID columns</b> with <span class="m">[:, 3:]</span> and <span class="m">[:, 1:]</span> and call <span class="m">predict</span>.</li>
+    <li><b>Inverse-scale</b> predictions back to the 0.5 to 5 star range.</li>
+    <li><b>Sort high to low.</b> <span class="m">argsort</span> returns positions that would sort ascending. Negating the scores (<span class="m">-y_pu</span>) flips that to descending. <span class="m">.reshape(-1).tolist()</span> turns the column into a flat Python list. Using it as <span class="m">item_vecs[sorted_index]</span> reorders the movies in that order.</li>
+  </ol>
+<pre><code># verified toy example
+yp = np.array([[3.2],[4.6],[2.1],[4.9]])
+idx = np.argsort(-yp, axis=0).reshape(-1).tolist()   # [3, 1, 0, 2]
+yp[idx].ravel()                                      # [4.9, 4.6, 3.2, 2.1]</code></pre>
+  <p style="margin:8px 0 0"><b>Real-life case:</b> a brand-new user on a streaming site who ticks “adventure” and “fantasy” in onboarding gets sensible suggestions immediately, with no rating history. That is the cold-start strength of content-based filtering.</p>
+</div>
+
+<h3 style="margin-top:22px">5.2 An existing user (user 2)</h3>
+<div class="panel">
+  <p style="margin:0">Same pipeline, but the user vector comes from the dataset (<span class="m">get_user_vecs(uid, user_train_unscaled, item_vecs, user_to_genre)</span>), and the lab compares predicted vs actual ratings for movies user 2 rated. Takeaway: <b>generally within 1 of the real rating, but not very accurate per movie</b>, especially when the user’s rating differs a lot from their genre average. The model only “sees” genre averages, not the specific film.</p>
+  <div class="callout bad" style="margin-bottom:0">
+    <b>In your uploaded copy:</b> the saved output of this cell reads <span class="m">error in get_user_vecs, did not find uid in user_train</span>. The notebook text says not all user ids appear in the training set. User 2 does appear in your screenshot, so I cannot explain this from the notebook alone (the helper code in <span class="m">recsysNN_utils</span> was not included). Try another <span class="m">uid</span>, or rerun the cells in order.
+  </div>
+</div>
+
+<h3 style="margin-top:22px">5.3 Finding similar items (Exercise 2)</h3>
+<div class="panel">
+  <div class="eq">‖ v<sub>m</sub><sup>(k)</sup> − v<sub>m</sub><sup>(i)</sup> ‖<sup>2</sup> = Σ<sub>l</sub> ( v<sub>m,l</sub><sup>(k)</sup> − v<sub>m,l</sub><sup>(i)</sup> )<sup>2</sup></div>
+<pre><code>def sq_dist(a, b):
+    d = 0
+    rng = a.shape[0]
+    print(rng)                                   # (in the solution as uploaded)
+    for i in range(rng):
+        d += np.sum(np.square(a[i] - b[i]))
+    return d</code></pre>
+  <ol>
+    <li><b>Reuse the trained movie tower.</b> Build a small model <span class="m">Input → item_NN → l2_normalize</span> (<span class="m">model_m</span>) so the vectors are produced <b>exactly as in training</b>, including normalisation.</li>
+    <li><b>Run all 847 movies</b> (scaled) through it: <span class="m">vms.shape = (847, 32)</span>, one 32-number vector per movie.</li>
+    <li><b>Build an 847×847 distance table</b> with two nested loops calling <span class="m">sq_dist</span>.</li>
+    <li><b>Mask the diagonal</b> with <span class="m">ma.masked_array(dist, mask=np.identity(...))</span>. A movie’s distance to itself is 0, so without masking it would always be its own nearest match.</li>
+    <li><b>Nearest neighbour:</b> <span class="m">np.argmin(m_dist[i])</span> is the column with the smallest distance in row i. The lab prints 50 movies next to their nearest match. Result: the model “will generally suggest a movie with similar genres”.</li>
+  </ol>
+<pre><code># verified toy example: 3 movies
+d = [[0,2,1],[2,0,3],[1,3,0]]
+np.argmin(d[i]) per row         -> [0, 1, 2]   (each is its own nearest!)
+with diagonal masked            -> [2, 0, 0]   (true nearest neighbours)</code></pre>
+  <p style="margin:8px 0 0"><b>Real-life case:</b> “because you watched X” rows on a streaming homepage. The lecture’s tip applies: compute this table once after training and reuse it, with no retraining.</p>
+</div>
+<div class="grid2" style="margin-top:14px">
+  <div class="callout warn" style="margin:0">
+    <b>Why your notebook output is a wall of “32”s:</b> the solution cell has <span class="m">print(rng)</span> inside <span class="m">sq_dist</span>, and the distance table calls it 847 × 847 ≈ 717,000 times. It is only a debug print. Remove it once you have passed the assignment (the lab locks graded cells until then).
+  </div>
+  <div class="callout warn" style="margin:0">
+    <b>Display bug in the comparison table:</b> the code appends <span class="m">movie_dict[movie1_id]['genres']</span> for <b>both</b> “genres” columns, so the second one shows movie 1’s genres, not movie 2’s. The matching itself is not affected, only what is printed.
+  </div>
+</div>
+
+<!-- Decoder -->
+<h2>Snippet decoder</h2>
+<p class="sub">Lines that are easy to read past. Numpy outputs below were checked by running them.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Snippet</th><th>What it does</th><th>Why it is there</th></tr>
+  <tr><td><span class="m">item_train, user_train, y_train, item_features, user_features, item_vecs, movie_dict, user_to_genre = load_data()</span></td><td>Unpacks 8 results from the helper file: the three aligned training arrays, two lists of column names, the matrix of all 847 movies (<span class="m">item_vecs</span>), a movie-id lookup, and a user-to-genre lookup.</td><td>All data loading is hidden in <span class="m">recsysNN_utils</span>.</td></tr>
+  <tr><td><span class="m">user_train.shape[1] - 3</span></td><td>Number of columns minus the 3 not-used ones = 14.</td><td>Tells <span class="m">Input(shape=…)</span> how many features enter the network.</td></tr>
+  <tr><td><span class="m">uvs = 3; ivs = 3; u_s = 3; i_s = 1</span></td><td>Column positions: where genre columns start (<span class="m">uvs</span>, <span class="m">ivs</span>, used for display) and where training columns start (<span class="m">u_s</span>, <span class="m">i_s</span>).</td><td>Used for slicing and for bracketing unused columns in tables.</td></tr>
+  <tr><td><span class="m">a[:, 3:]</span></td><td>“All rows, columns from index 3 to the end.” For a 2×10 array it keeps 7 columns.</td><td>Drops the ID columns before training and predicting.</td></tr>
+  <tr><td><span class="m">y_train.reshape(-1, 1)</span></td><td>Turns a flat list into one column (n rows × 1). The <span class="m">-1</span> means “work out this dimension yourself”.</td><td>scikit-learn scalers want 2-D input.</td></tr>
+  <tr><td><span class="m">scaler.fit(...)</span> / <span class="m">.transform(...)</span> / <span class="m">.inverse_transform(...)</span></td><td>Learn the statistics / apply them / undo them.</td><td>Same scaler must be used for training and for new data.</td></tr>
+  <tr><td><span class="m">np.allclose(a, b)</span></td><td>True if all values match within a tiny tolerance.</td><td>Proves scaling is reversible. Do not use <span class="m">==</span> on floats.</td></tr>
+  <tr><td><span class="m">np.argsort(-y_pu, axis=0).reshape(-1).tolist()</span></td><td>Row positions ordered from highest to lowest score, as a flat list.</td><td>Ranks movies for the user.</td></tr>
+  <tr><td><span class="m">item_vecs[sorted_index]</span></td><td>Picks rows in that order (“fancy indexing”).</td><td>Shows movies best-first, using unscaled values so they are readable.</td></tr>
+  <tr><td><span class="m">ma.masked_array(dist, mask=np.identity(n))</span></td><td>Marks the diagonal entries as ignored.</td><td>Stops a movie matching itself.</td></tr>
+</table>
+</div>
+
+<!-- Alternatives -->
+<h2>Alternatives and trade-offs</h2>
+<p class="sub">My additions, not from the lab. Most are only worth trying after you have passed the graded cells.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Choice in the lab</th><th>Alternative</th><th>Pros / cons</th></tr>
+  <tr><td>Scale all data, then split</td><td>Split first, <span class="m">fit</span> scalers on the training part only</td><td><b>Pro:</b> no test-set information leaks into the scaling (cleaner evaluation). <b>Con:</b> a few more lines. The effect with 40k+ rows is probably small.</td></tr>
+  <tr><td>Three separate <span class="m">train_test_split</span> calls with one seed</td><td>One call: <span class="m">train_test_split(user, item, y, …)</span></td><td><b>Pro:</b> impossible to misalign the arrays. <b>Con:</b> returns six arrays in a fixed order, which is easy to unpack wrongly.</td></tr>
+  <tr><td>Double loop of <span class="m">sq_dist</span></td><td>Vectorised: <span class="m">np.sum(np.square(a - b))</span>, or all at once with <span class="m">scipy.spatial.distance.cdist(vms, vms, 'sqeuclidean')</span></td><td><b>Pro:</b> orders of magnitude faster. <b>Con:</b> the graded function must still pass the lab’s tests as written. The lab’s own hint suggests the vectorised form.</td></tr>
+  <tr><td>Squared distance table</td><td>Since <span class="m">vms</span> rows are unit length: <span class="m">dist = 2 − 2·(vms @ vms.T)</span></td><td><b>Pro:</b> one matrix multiply (identity verified numerically on random unit vectors). <b>Con:</b> only valid because of the L2 normalisation, and tiny float differences near 0.</td></tr>
+  <tr><td>Repeat ratings of rare genres</td><td>Class/sample weights instead of duplicating rows</td><td><b>Pro:</b> no duplicate rows crossing the train/test split. <b>Con:</b> needs a weighting scheme and changes the loss.</td></tr>
+  <tr><td>Zeros for “not rated” genres</td><td>Add a “rated this genre?” flag, or fill with the user’s overall average</td><td><b>Pro:</b> the model can tell “no data” from “rates it 0”. <b>Con:</b> more features or an extra assumption.</td></tr>
+</table>
+</div>
+
+<h2>Key takeaways</h2>
+<div class="panel">
+  <ul>
+    <li>User content is <b>engineered from ratings</b> (per-genre averages). Movie content is year + genre flags + average rating.</li>
+    <li>Row k of <span class="m">user_train</span>, <span class="m">item_train</span>, <span class="m">y_train</span> is one example. That alignment is where “user 2 rated movie 6874 as 4” comes from, and splitting with one shared seed preserves it.</li>
+    <li>Scale inputs with <b>StandardScaler</b> and the target to <b>−1…1</b> to match the cosine-style output. Fit once, reuse for everything, invert to read predictions.</li>
+    <li>Drop ID columns with <span class="m">[:, u_s:]</span> and <span class="m">[:, i_s:]</span>. The network sees 14 user and 16 movie features.</li>
+    <li>Two towers (256→128→32), L2-normalised, dot product, MSE, Adam (lr 0.01), 30 epochs. Test loss 0.0815, about 0.64 stars typical error by my conversion.</li>
+    <li>New-user predictions need no history. Similar movies come from small squared distance between movie vectors, with the diagonal masked.</li>
+    <li>Two quirks in your copy: the stray <span class="m">print(rng)</span> and the movie-1-genres-twice display bug. The “3.9 vs 4.0” sentence also does not match the table.</li>
+  </ul>
+</div>
+
+<footer>Source: your uploaded notebook C3_W2_RecSysNN_Assignment.ipynb (including saved outputs), your screenshot of the training tables, and the pasted text of section 3.1. Items marked “my” are not from the lab. Nothing here was run against the lab’s data files, which were not provided.</footer>
+</main>
+
+<script>
+(function(){
+  function el(i){return document.getElementById(i);}
+  /* Row picker */
+  var gn=["Action","Adventure","Animation","Children","Comedy","Crime","Documentary","Drama","Fantasy","Horror","Mystery","Romance","Sci-Fi","Thriller"];
+  var uav={"Action":4.0,"Adventure":4.2,"Animation":0.0,"Children":0.0,"Comedy":4.0,"Crime":4.1,"Documentary":4.0,"Drama":4.0,"Fantasy":0.0,"Horror":3.0,"Mystery":4.0,"Romance":0.0,"Sci-Fi":3.9,"Thriller":3.9};
+  var rows=[
+    {id:6874,yr:2003,avg:4.0,g:["Action","Crime","Thriller"],y:4.0},
+    {id:8798,yr:2004,avg:3.8,g:["Action","Crime","Drama","Thriller"],y:3.5},
+    {id:46970,yr:2006,avg:3.2,g:["Action","Comedy"],y:4.0},
+    {id:48516,yr:2006,avg:4.3,g:["Crime","Drama","Thriller"],y:4.0},
+    {id:58559,yr:2008,avg:4.2,g:["Action","Crime","Drama"],y:4.5}
+  ];
+  var sel=0, rb=el("rowbtns");
+  function drawRow(){
+    var r=rows[sel];
+    el("rU").innerHTML="user id <b>2</b><br>rating count 22, rating ave 4.0<br>(same user vector on every row)";
+    el("rI").innerHTML="movie id <b>"+r.id+"</b><br>year "+r.yr+", ave rating "+r.avg.toFixed(1)+"<br>genres: "+r.g.join(", ");
+    el("rY").innerHTML="<b>"+r.y.toFixed(1)+"</b> stars<br>(user 2’s rating of movie "+r.id+")";
+    el("rNote").textContent="User 2’s genre averages for this movie’s genres: "+r.g.map(function(x){return x+" "+uav[x].toFixed(1);}).join(", ")+". These are the user inputs the network pairs with this movie’s inputs to predict "+r.y.toFixed(1)+".";
+    Array.prototype.forEach.call(rb.children,function(b,i){b.setAttribute("aria-pressed",i===sel?"true":"false");});
+  }
+  rows.forEach(function(r,i){
+    var b=document.createElement("button");b.type="button";b.textContent="row "+i;
+    b.addEventListener("click",function(){sel=i;drawRow();});rb.appendChild(b);
+  });
+  drawRow();
+  /* Scaling demo (assumes min 0.5, max 5.0) */
+  function upd(){
+    var r=parseFloat(el("rr").value), s=parseFloat(el("ss").value);
+    el("rro").textContent=r.toFixed(1);
+    el("rrs").textContent=(-1+2*(r-0.5)/4.5).toFixed(3);
+    el("sso").textContent=s.toFixed(2);
+    el("ssr").textContent=(0.5+(s+1)*4.5/2).toFixed(2)+" stars";
+  }
+  el("rr").addEventListener("input",upd);el("ss").addEventListener("input",upd);upd();
+})();
+</script>
+</body>
+</html>

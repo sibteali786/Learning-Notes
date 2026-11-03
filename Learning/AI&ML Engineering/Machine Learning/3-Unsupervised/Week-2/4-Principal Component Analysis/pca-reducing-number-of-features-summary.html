@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PCA: Reducing the Number of Features</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#1b2133; --muted:#566079; --line:#d9deea;
+  --user:#0f7b8a; --user-bg:#dff3f5; --movie:#b4540a; --movie-bg:#fdebd8;
+  --accent:#4b3fbf; --accent-bg:#e8e6fb; --good:#1f7a4d; --good-bg:#def3e8; --bad:#a8323e; --bad-bg:#fbe3e6;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+    --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+    --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151f; --surface:#1b2030; --ink:#e9ecf5; --muted:#a2abc4; --line:#2e3550;
+  --user:#5fd0de; --user-bg:#143a41; --movie:#f2a65e; --movie-bg:#432a12;
+  --accent:#a79bff; --accent-bg:#2a2650; --good:#6fd6a3; --good-bg:#15382a; --bad:#f08a95; --bad-bg:#42191f;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:940px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Literata,Georgia,"Times New Roman",serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);font-weight:700}
+h2{font-size:25px;margin:44px 0 6px}
+h3{font-size:19px;margin-bottom:6px}
+.lede{color:var(--muted);margin:10px 0 0;max-width:66ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+.tag{display:inline-block;font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px}
+.t-user{background:var(--user-bg);color:var(--user)}
+.t-movie{background:var(--movie-bg);color:var(--movie)}
+.t-acc{background:var(--accent-bg);color:var(--accent)}
+.t-good{background:var(--good-bg);color:var(--good)}
+.t-bad{background:var(--bad-bg);color:var(--bad)}
+code,.m{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+.scroll{overflow-x:auto}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:4px 0}
+.callout{border-left:4px solid var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.warn{border-color:var(--movie);background:var(--movie-bg)}
+.callout.ok{border-color:var(--good);background:var(--good-bg)}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top;font-size:16px}
+th{background:var(--bg)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:110px 1fr 60px;gap:8px;align-items:center;margin:6px 0}
+.row input{width:100%}
+.row output{text-align:right;font-family:ui-monospace,Menlo,Consolas,monospace}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.btns button{font:inherit;font-size:15px;padding:5px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.btns button:hover{border-color:var(--accent)}
+.meter{height:14px;border-radius:7px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.meter>div{height:100%;background:var(--good);width:0}
+footer{margin-top:40px;color:var(--muted);font-size:15px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+svg text{font-family:"Source Sans 3",system-ui,sans-serif}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <span class="tag t-acc">Unsupervised learning · optional video · Andrew Ng, ML Specialization</span>
+  <h1 style="margin-top:12px">PCA: reducing the number of features</h1>
+  <p class="lede">After the recommender videos, Ng introduces <b>principal components analysis (PCA)</b>: an unsupervised algorithm, commonly used for <b>visualisation</b>, that takes data with many features (10, 50, even thousands) and compresses it to two or three so you can plot it. This video gives the intuition with cars and countries. The next video covers how the algorithm actually works.</p>
+</header>
+
+<h2>1. The problem: you cannot plot 50 dimensions</h2>
+<div class="grid2">
+  <div class="panel">
+    <h3>Dimensions = features</h3>
+    <p style="margin:0">“50-dimensional data” just means <b>50 features</b>. A screen shows two (or, rotated, three). PCA takes the many features and reduces them to 2 or 3, called <span class="m">z<sub>1</sub>, z<sub>2</sub>, z<sub>3</sub></span>, which you can plot.</p>
+  </div>
+  <div class="panel">
+    <h3>Why bother</h3>
+    <ul style="margin:0">
+      <li>Visualising a new dataset helps you <b>understand what it looks like</b>.</li>
+      <li>It can reveal that <b>something funny or unexpected</b> is going on in the data.</li>
+      <li>Commonly used by data scientists for exactly this.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>2. Three car examples: when can you just drop a feature?</h2>
+<p class="sub">Slide: “Car measurements”. Running example: passenger cars (length, width, wheel diameter, height, and more). The sketches below are my own simple scatterplots of each case.</p>
+<div class="grid3">
+  <div class="panel">
+    <span class="tag t-good">Case 1</span>
+    <h3 style="margin-top:8px">Length + width</h3>
+    <svg id="m1" viewBox="0 0 220 130" width="100%" role="img" aria-label="Points spread widely in length but nearly constant in width"></svg>
+    <p style="margin:0">Width must fit a road lane, so it barely varies (in the US about 1.8 m, just under six feet). Length varies a lot. <b>Just take x<sub>1</sub> (length).</b></p>
+  </div>
+  <div class="panel">
+    <span class="tag t-good">Case 2</span>
+    <h3 style="margin-top:8px">Length + wheel diameter</h3>
+    <svg id="m2" viewBox="0 0 220 130" width="100%" role="img" aria-label="Points spread widely in length but only slightly in wheel diameter"></svg>
+    <p style="margin:0">Wheel diameter varies a little, but length dominates. Again <b>just take x<sub>1</sub></b> (the slide says exactly this). PCA would more or less decide this automatically.</p>
+  </div>
+  <div class="panel">
+    <span class="tag t-bad">Case 3</span>
+    <h3 style="margin-top:8px">Length + height</h3>
+    <svg id="m3" viewBox="0 0 220 130" width="100%" role="img" aria-label="Points spread along a diagonal: longer cars are also taller"></svg>
+    <p style="margin:0">Both vary a lot, and bigger cars tend to be <b>longer and taller</b>. Dropping either loses useful information. This is where PCA does more than pick a feature.</p>
+  </div>
+</div>
+
+<h2>3. The idea: find a new axis (slide “Size”)</h2>
+<div class="panel">
+  <ul style="margin:0">
+    <li>Instead of choosing the x<sub>1</sub> axis or the x<sub>2</sub> axis, find a <b>new axis z</b> that <b>lies flat in the same plot</b>. It is a <b>combination</b> of x<sub>1</sub> and x<sub>2</sub>, not a third dimension sticking out of the page.</li>
+    <li>A car’s <b>coordinate on z</b> (the distance along that axis) tells you roughly its <b>size</b>.</li>
+    <li>So <b>two numbers (length, height) become one number (z)</b>. Slide: “find new axis and coordinates, use fewer numbers to capture the ‘size’ feature”.</li>
+    <li>Goal: when you measure your data’s coordinates on the new axis, you <b>still have very useful information</b> about the car.</li>
+    <li>The next few videos formalise this.</li>
+  </ul>
+</div>
+<div class="grid2" style="margin-top:14px">
+  <div class="callout ok" style="margin:0"><b>In this video’s examples:</b> 2 features → 1 feature.</div>
+  <div class="callout ok" style="margin:0"><b>In practice:</b> many features (10, 20, 50, thousands) → 2 or 3 features, so you can plot in 2D or 3D.</div>
+</div>
+
+<h3 style="margin-top:22px">Try it: rotate the z-axis (my illustration)</h3>
+<p class="sub">Twelve fictional cars (length, height). The dashed lines show each car’s <b>coordinate on the z-axis</b>. Rotate the axis and watch how spread out the cars are along it. The lecture only says to find an axis that keeps useful information; “spread along the axis” is how the next video makes that precise, so treat it as a preview.</p>
+<div class="panel">
+  <div class="row"><label for="ang">z-axis angle</label><input id="ang" type="range" min="0" max="179" step="1" value="10"><output id="ango"></output></div>
+  <div class="btns">
+    <button type="button" id="best">Snap to best angle</button>
+    <button type="button" id="ax1">Use x₁ axis (length only)</button>
+    <button type="button" id="ax2">Use x₂ axis (height only)</button>
+  </div>
+  <svg id="demo" viewBox="0 0 440 300" width="100%" style="max-width:640px;display:block;margin:0 auto" role="img" aria-label="Scatter of cars with a rotatable z axis and projections onto it"></svg>
+  <p style="margin:10px 0 4px">Share of the data’s total spread kept by this one axis: <b id="kept"></b></p>
+  <div class="meter" aria-hidden="true"><div id="meterbar"></div></div>
+  <p style="margin:10px 0 0;color:var(--muted)" id="demoNote"></p>
+</div>
+
+<h2>4. From 3D to 2D: the “pancake”</h2>
+<p class="sub">Slide: “From 3D to 2D”.</p>
+<div class="panel">
+  <ul style="margin:0">
+    <li>A 3-feature dataset (x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>) can be rotated on screen. Seen from the right angle, <b>most points lie on a very thin surface</b>, like a <b>two-dimensional pancake</b> floating in 3D space.</li>
+    <li>PCA replaces the three features with <b>two numbers z<sub>1</sub> and z<sub>2</sub></b>, the coordinates on that pancake.</li>
+    <li>Then you can plot z<sub>1</sub> vs z<sub>2</sub> flat, for example <b>printed on paper</b>, where you cannot rotate the 3D view.</li>
+  </ul>
+</div>
+
+<h2>5. Countries: 50 features to 2</h2>
+<p class="sub">Slides: the country table and “Data visualization”. Ng’s example has 50 features per country. The table slide shows three of them.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Country</th><th class="n">GDP (trillions of US$)</th><th class="n">Per capita GDP (thousands of intl. $)</th><th class="n">Human Development Index</th></tr>
+  <tr><td>Canada</td><td class="n">1.577</td><td class="n">39.17</td><td class="n">0.908</td></tr>
+  <tr><td>China</td><td class="n">5.878</td><td class="n">7.54</td><td class="n">0.687</td></tr>
+  <tr><td>India</td><td class="n">1.632</td><td class="n">3.41</td><td class="n">0.547</td></tr>
+  <tr><td>Russia</td><td class="n">1.48</td><td class="n">19.84</td><td class="n">0.755</td></tr>
+  <tr><td>Singapore</td><td class="n">0.223</td><td class="n">56.69</td><td class="n">0.866</td></tr>
+  <tr><td>USA</td><td class="n">14.527</td><td class="n">46.86</td><td class="n">0.91</td></tr>
+  <tr><td>…</td><td class="n">…</td><td class="n">…</td><td class="n">…</td></tr>
+</table>
+</div>
+<ul>
+  <li>Possible features: GDP (x<sub>1</sub>), per capita GDP, Human Development Index (a measure of overall progress based on things like lifespan and education), life expectancy, and so on, up to 50.</li>
+  <li>PCA compresses them to <b>z<sub>1</sub> and z<sub>2</sub></b>, and you plot each country as one point.</li>
+</ul>
+<div class="grid2">
+  <div class="panel" style="border-top:5px solid var(--accent)">
+    <h3>How Ng reads the two new axes</h3>
+    <ul style="margin:0">
+      <li><b>z<sub>1</sub> ≈ country’s total GDP / how big the economy is</b> (bigger countries have more people and larger economies).</li>
+      <li><b>z<sub>2</sub> ≈ per-person GDP</b> (economic activity per person).</li>
+      <li>Words used: “loosely corresponds”, “roughly”, “perhaps”. <b>PCA does not label the axes</b>. You interpret them.</li>
+    </ul>
+  </div>
+  <div class="panel" style="border-top:5px solid var(--movie)">
+    <h3>Reading the scatter plot</h3>
+    <ul style="margin:0">
+      <li><b>USA:</b> large country, high per-person activity, so <b>up and to the right</b>.</li>
+      <li><b>Singapore:</b> smaller country, still high per-person activity, so a <b>lower z<sub>1</sub> but high z<sub>2</sub></b>.</li>
+      <li>Lower-left: a smaller country with low per-person activity. Lower-right: a large country with low per-person activity.</li>
+    </ul>
+  </div>
+</div>
+<div class="callout">
+  <b>Check against the table:</b> USA has GDP 14.527 and per capita 46.86. Singapore has GDP 0.223 but per capita 56.69. That is the same pattern the plot shows (USA far right, Singapore left but high).
+</div>
+
+<h2>Real-life scenarios</h2>
+<div class="grid2">
+  <div class="panel">
+    <h3>Cars (from the lecture)</h3>
+    <p style="margin:0">A car dataset has length, width, height, wheel diameter, and dozens more. A 2-number summary lets you see “small city cars” vs “large trucks” as clusters.</p>
+  </div>
+  <div class="panel">
+    <h3>Customers (my example)</h3>
+    <p style="margin:0">An online shop records 50 numbers per customer. Plot them in 2D to spot groups of similar customers, or one odd cluster that points to a data problem (the “something funny” case).</p>
+  </div>
+</div>
+
+<h2>Alternatives and trade-offs</h2>
+<p class="sub">My additions, not from the lecture. Details of PCA itself come in the following videos.</p>
+<div class="panel scroll">
+<table>
+  <tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+  <tr><th>Just pick the original features with the most variation (cases 1 and 2)</th><td>Easy to explain: each axis keeps its real-world meaning</td><td>Fails in case 3, where several features carry information together</td></tr>
+  <tr><th>PCA (new axes as combinations of features)</th><td>Handles case 3; automatic; fewer numbers per example</td><td>New axes are blends, so you must interpret them (like “size”). Mixed feature scales may need attention, which later videos should cover</td></tr>
+  <tr><th>Other visualisation methods (for example t-SNE, UMAP; not covered here)</th><td>Can show non-linear structure that a flat PCA plot misses</td><td>Less simple to explain; results depend more on settings</td></tr>
+</table>
+</div>
+
+<h2>Key takeaways</h2>
+<div class="panel">
+  <ul>
+    <li>PCA is an <b>unsupervised</b> algorithm that reduces many features to 2 or 3, mainly to <b>visualise</b> data.</li>
+    <li>If one feature barely varies (width, wheel diameter), you can just drop it. PCA effectively does this automatically.</li>
+    <li>If several features vary together (length and height), PCA finds a <b>new axis z</b>, a combination of them that lies <b>in the same plot</b>. A point’s coordinate on z captures things like “size”.</li>
+    <li>3D data on a “pancake” becomes 2D (z<sub>1</sub>, z<sub>2</sub>). 50 country features become 2 (roughly total GDP and per-person GDP).</li>
+    <li>Plotting helps you understand data and notice anything unexpected.</li>
+    <li><b>Next:</b> the PCA algorithm, then PCA in code, then a visualisation lab (all optional).</li>
+  </ul>
+</div>
+
+<footer>Source: Andrew Ng, DeepLearning.AI / Stanford Online, “Reducing the number of features (optional)” (transcript and five slides). The pasted transcript repeats itself; content used once. Auto-caption slips such as “PCLS” were read as PCA. Material marked “my” is not from the lecture.</footer>
+</main>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  function el(i){return document.getElementById(i);}
+  function mk(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+
+  /* mini scatterplots */
+  function mini(id,pts,xl,yl){
+    var s=el(id);
+    s.appendChild(mk("line",{x1:30,y1:110,x2:210,y2:110,stroke:"var(--muted)","stroke-width":1.5}));
+    s.appendChild(mk("line",{x1:30,y1:110,x2:30,y2:10,stroke:"var(--muted)","stroke-width":1.5}));
+    var a=mk("text",{x:210,y:125,"text-anchor":"end","font-size":11,fill:"var(--muted)"});a.textContent=xl;s.appendChild(a);
+    var b=mk("text",{x:34,y:16,"font-size":11,fill:"var(--muted)"});b.textContent=yl;s.appendChild(b);
+    pts.forEach(function(p){s.appendChild(mk("circle",{cx:30+p[0]*1.7,cy:110-p[1]*0.9,r:4.5,fill:"var(--bad)"}));});
+  }
+  var xs=[8,16,22,30,36,44,50,58,64,72,80,92];
+  mini("m1",xs.map(function(x,i){return [x,52+((i*7)%5)-2];}),"length x₁","width x₂");
+  mini("m2",xs.map(function(x,i){return [x,50+((i*5)%9)-4];}),"length x₁","wheel x₂");
+  mini("m3",xs.map(function(x,i){return [x,x*0.85+4+(((i*11)%7)-3)*2];}),"length x₁","height x₂");
+
+  /* rotating axis demo */
+  var raw=[[-3,-1.6],[-2.4,-1.5],[-2,-0.6],[-1.4,-0.9],[-0.8,-0.2],[-0.3,-0.5],[0.2,0.4],[0.7,0.2],[1.3,0.9],[1.8,0.6],[2.4,1.3],[3,1.2]];
+  var mx=0,my=0;raw.forEach(function(p){mx+=p[0];my+=p[1];});mx/=raw.length;my/=raw.length;
+  var pts=raw.map(function(p){return [p[0]-mx,p[1]-my];});
+  var vx=0,vy=0,cxy=0;pts.forEach(function(p){vx+=p[0]*p[0];vy+=p[1]*p[1];cxy+=p[0]*p[1];});
+  vx/=pts.length;vy/=pts.length;cxy/=pts.length;
+  var total=vx+vy;
+  var bestRad=0.5*Math.atan2(2*cxy,vx-vy); if(bestRad<0)bestRad+=Math.PI;
+  var bestDeg=Math.round(bestRad*180/Math.PI);
+  var S=48, CX=220, CY=150, svg=el("demo");
+  function varAt(deg){
+    var t=deg*Math.PI/180,c=Math.cos(t),s=Math.sin(t),v=0;
+    pts.forEach(function(p){var z=p[0]*c+p[1]*s;v+=z*z;});
+    return v/pts.length;
+  }
+  function draw(){
+    var deg=parseFloat(el("ang").value);
+    el("ango").textContent=deg+"°";
+    var t=deg*Math.PI/180,c=Math.cos(t),s=Math.sin(t);
+    svg.innerHTML="";
+    svg.appendChild(mk("line",{x1:20,y1:CY,x2:420,y2:CY,stroke:"var(--line)"}));
+    svg.appendChild(mk("line",{x1:CX,y1:10,x2:CX,y2:290,stroke:"var(--line)"}));
+    var L=190;
+    svg.appendChild(mk("line",{x1:CX-c*L,y1:CY+s*L,x2:CX+c*L,y2:CY-s*L,stroke:"var(--accent)","stroke-width":3}));
+    var zl=mk("text",{x:CX+c*L+(c>=0?-4:4),y:CY-s*L+(s>=0?-6:14),"font-size":14,"font-weight":600,fill:"var(--accent)","text-anchor":c>=0?"end":"start"});zl.textContent="z axis";svg.appendChild(zl);
+    pts.forEach(function(p){
+      var z=p[0]*c+p[1]*s;
+      var px=CX+p[0]*S, py=CY-p[1]*S, qx=CX+z*c*S, qy=CY-z*s*S;
+      svg.appendChild(mk("line",{x1:px,y1:py,x2:qx,y2:qy,stroke:"var(--muted)","stroke-dasharray":"3 3","stroke-width":1}));
+      svg.appendChild(mk("circle",{cx:qx,cy:qy,r:4,fill:"var(--accent)"}));
+    });
+    pts.forEach(function(p){svg.appendChild(mk("circle",{cx:CX+p[0]*S,cy:CY-p[1]*S,r:5,fill:"var(--bad)"}));});
+    var a=mk("text",{x:416,y:CY-6,"text-anchor":"end","font-size":12,fill:"var(--muted)"});a.textContent="length x₁";svg.appendChild(a);
+    var b=mk("text",{x:CX+6,y:20,"font-size":12,fill:"var(--muted)"});b.textContent="height x₂";svg.appendChild(b);
+    var kept=varAt(deg)/total;
+    el("kept").textContent=Math.round(kept*100)+"%";
+    el("meterbar").style.width=Math.round(kept*100)+"%";
+    var note;
+    if(Math.abs(deg-bestDeg)<=2) note="Near the best single axis: the projected points (blue) stay as spread out as the original cars. This is the “size” axis from the slide.";
+    else if(deg<=3||deg>=177) note="Using only length (x₁): height information is thrown away.";
+    else if(Math.abs(deg-90)<=2) note="Using only height (x₂): length information is thrown away.";
+    else note="Blue points show each car’s coordinate on z. Rotate to make them as spread out as possible.";
+    el("demoNote").textContent=note;
+  }
+  el("ang").addEventListener("input",draw);
+  el("best").addEventListener("click",function(){el("ang").value=bestDeg;draw();});
+  el("ax1").addEventListener("click",function(){el("ang").value=0;draw();});
+  el("ax2").addEventListener("click",function(){el("ang").value=90;draw();});
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PKCE vs Authorization Code Injection</title>
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#53666f; --line:#d3dcd9;
+  --front:#1f6fb2; --front-bg:#dcebf8; --back:#c2336b; --back-bg:#fbe3ec;
+  --bad:#b3261e; --bad-bg:#fbe3e1; --ok:#0b6e5b; --ok-bg:#dff3ee; --note:#e9eef0; --warn:#8a5a00; --warn-bg:#fbefcf;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+    --front:#7fbaf0; --front-bg:#14304a; --back:#ff8fb5; --back-bg:#3b1a29;
+    --bad:#ff9087; --bad-bg:#3b1c1a; --ok:#5fd3b8; --ok-bg:#12332d; --note:#1d2e36; --warn:#f2c36b; --warn-bg:#3a2e12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1a1f; --surface:#17262d; --ink:#e6eef0; --muted:#9db0b8; --line:#2b3d46;
+  --front:#7fbaf0; --front-bg:#14304a; --back:#ff8fb5; --back-bg:#3b1a29;
+  --bad:#ff9087; --bad-bg:#3b1c1a; --ok:#5fd3b8; --ok-bg:#12332d; --note:#1d2e36; --warn:#f2c36b; --warn-bg:#3a2e12;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:940px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,h3{font-family:Charter,"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,5vw,42px);margin-bottom:10px}
+h2{font-size:26px;margin:54px 0 6px}
+h3{font-size:18px;margin:0 0 6px}
+p{margin:8px 0}
+.lead{color:var(--muted);font-size:18px;max-width:64ch}
+.sub{color:var(--muted);margin:0 0 16px;max-width:66ch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.box.bad{border-left:6px solid var(--bad);background:var(--bad-bg)}
+.box.ok{border-left:6px solid var(--ok)}
+.box.front{border-left:6px solid var(--front)}
+.box.warn{border-left:6px solid var(--warn);background:var(--warn-bg)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;margin-right:4px}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.front{background:var(--front-bg);color:var(--front)}
+ul{margin:8px 0;padding-left:20px}li{margin:4px 0}
+.scroll{overflow-x:auto}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--ink)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.s-bad{fill:var(--bad-bg);stroke:var(--bad);stroke-width:2}
+.s-ok{fill:var(--ok-bg);stroke:var(--ok);stroke-width:2}
+.life{stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 4}
+.a-ok{stroke:var(--ok);stroke-width:2.5;fill:none}
+.a-bad{stroke:var(--bad);stroke-width:2.5;fill:none}
+.a-neu{stroke:var(--muted);stroke-width:2;fill:none}
+.t-ok{fill:var(--ok)!important;font-weight:600}
+.t-bad{fill:var(--bad)!important;font-weight:600}
+.t-muted{fill:var(--muted)!important}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+th{background:var(--note)}
+tr:last-child td{border-bottom:0}
+.flow{display:flex;flex-direction:column;margin:14px 0}
+.step{display:grid;grid-template-columns:42px 1fr;gap:12px;position:relative;padding-bottom:14px}
+.step:not(:last-child)::before{content:"";position:absolute;left:20px;top:40px;bottom:0;width:2px;background:var(--line)}
+.dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background:#5d6f78}
+.dot.x{background:#b3261e}.dot.g{background:#0b6e5b}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:12px 18px;margin:14px 0}
+.ex .lbl{font-weight:700;color:var(--muted);font-size:14px}
+code{background:var(--note);padding:1px 6px;border-radius:4px;font-size:14px;word-break:break-word}
+.tip{background:var(--note);border-radius:10px;padding:12px 16px;margin:14px 0}
+</style>
+</head>
+<body>
+<main>
+
+<h1>How PKCE stops authorization code injection</h1>
+<p class="lead">The lecture says PKCE defeats a subtle attack even for apps that have a client secret, but does not explain it. This page fills that gap.</p>
+
+<div class="box warn">
+  <b>Source note:</b> this explanation is not from the lecture. It is based on the general OAuth security guidance (the Security Best Current Practice and OAuth 2.1 background), simplified for learning. The lecture only states that the attack exists, lets someone "swap authorization codes", leaves you logged in to another person's account, and that PKCE solves it.
+</div>
+
+<!-- 1 -->
+<h2>1. First, the key insight</h2>
+<p class="sub">A client secret proves <b>which app</b> is redeeming a code. It says nothing about <b>which user session</b> the code belongs to.</p>
+
+<div class="grid2">
+  <div class="box">
+    <h3>What the client secret protects</h3>
+    <p>"An imposter app cannot redeem this code, because it does not know the secret."</p>
+  </div>
+  <div class="box bad">
+    <h3>What it does NOT protect</h3>
+    <p>In injection, the <b>real, legitimate app</b> redeems the code with its real secret. The attacker is not trying to be the app. They are tricking the app into redeeming the <em>wrong code</em>.</p>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>A coat check gives out numbered tickets. The attendant (the app) is honest and checks the ID of the staff window (the secret). But a prankster slips <em>their</em> ticket into your hand just before you reach the counter. The honest attendant gladly hands you the prankster's coat. Nobody was fooled about <em>who the attendant is</em>; the mix-up was about <em>whose ticket</em> it is.</p>
+</div>
+
+<!-- 2 -->
+<h2>2. The attack, step by step</h2>
+<p class="sub">One common variant: the attacker logs the <b>victim</b> into the <b>attacker's account</b> at the real app.</p>
+
+<div class="flow">
+  <div class="step"><div class="dot x">1</div>
+    <div class="box"><b>Attacker starts their own flow</b>
+      <p>They use the real app, are sent to the authorization server, and log in with <b>their own</b> account. The server issues an authorization code for the attacker's account. The attacker <b>stops here</b>, never redeeming the code, and keeps it.</p></div></div>
+  <div class="step"><div class="dot x">2</div>
+    <div class="box"><b>Attacker plants that code in the victim's browser</b>
+      <p>For example, by getting the victim to click a crafted link to the app's redirect URI: <code>https://example-app.com/redirect?code=ATTACKERS_CODE</code>.</p></div></div>
+  <div class="step"><div class="dot x">3</div>
+    <div class="box"><b>Victim's browser delivers the code to the real app</b>
+      <p>The app sees a request on its redirect URI with a code. It looks normal. The app redeems it over the back channel with its genuine client secret.</p></div></div>
+  <div class="step"><div class="dot x">4</div>
+    <div class="box bad"><b>Without PKCE: it works</b>
+      <p>The code is valid, unused, for this client, and the secret is right. The server issues a token for the <b>attacker's account</b>, and the app logs the <b>victim's session</b> into it.</p>
+      <p>Result: the victim keeps using the app while it is tied to the attacker's account. They may upload photos, documents or payment details that the attacker can then read. <b>Neither the app nor the server noticed anything wrong.</b></p></div></div>
+</div>
+
+<p>A second variant: the attacker <b>steals the victim's</b> code (from logs, a leaked referrer, a malicious app on the device) and injects it into the <b>attacker's own</b> session with the app, ending up logged in as the victim. Same root cause: the app cannot tell the code was not produced by the flow its own session started.</p>
+
+<!-- 3 -->
+<h2>3. How PKCE breaks it</h2>
+<p class="sub">PKCE <b>binds the code to the specific flow</b> that requested it.</p>
+
+<div class="scroll">
+<svg viewBox="0 0 900 470" role="img" aria-label="Injection attempt fails because the verifier does not match the challenge">
+  <rect class="s-box" x="10" y="10" width="140" height="38" rx="8"/><text x="80" y="34" text-anchor="middle" font-size="13" font-weight="700">Attacker's browser</text>
+  <rect class="s-box" x="190" y="10" width="140" height="38" rx="8"/><text x="260" y="34" text-anchor="middle" font-size="13" font-weight="700">Victim's browser</text>
+  <rect class="s-box" x="400" y="10" width="190" height="38" rx="8"/><text x="495" y="34" text-anchor="middle" font-size="13" font-weight="700">App server</text>
+  <rect class="s-box" x="680" y="10" width="200" height="38" rx="8"/><text x="780" y="34" text-anchor="middle" font-size="13" font-weight="700">Authorization server</text>
+  <line class="life" x1="80" y1="48" x2="80" y2="460"/>
+  <line class="life" x1="260" y1="48" x2="260" y2="460"/>
+  <line class="life" x1="495" y1="48" x2="495" y2="460"/>
+  <line class="life" x1="780" y1="48" x2="780" y2="460"/>
+
+  <!-- attacker flow -->
+  <rect class="s-bad" x="20" y="64" width="300" height="46" rx="8"/>
+  <text x="170" y="82" text-anchor="middle" font-size="12">Attacker's own flow uses verifier A</text>
+  <text x="170" y="98" text-anchor="middle" font-size="12">→ server stores challenge(A) with ATTACKER_CODE</text>
+  <line class="a-neu" x1="85" y1="136" x2="775" y2="136"/>
+  <text x="430" y="128" text-anchor="middle" font-size="12" class="t-muted">code issued, bound to challenge(A). Attacker keeps it, never redeems.</text>
+
+  <!-- injection -->
+  <line class="a-bad" x1="85" y1="176" x2="255" y2="176"/>
+  <text x="170" y="168" text-anchor="middle" font-size="12" class="t-bad">crafted link with ATTACKER_CODE</text>
+  <line class="a-bad" x1="265" y1="216" x2="490" y2="216"/>
+  <text x="380" y="208" text-anchor="middle" font-size="12" class="t-bad">victim lands on /redirect?code=ATTACKER_CODE</text>
+
+  <!-- app session -->
+  <rect class="s-ok" x="320" y="238" width="350" height="46" rx="8"/>
+  <text x="495" y="256" text-anchor="middle" font-size="12">App looks up the victim's session:</text>
+  <text x="495" y="272" text-anchor="middle" font-size="12">its stored verifier is B (or none was started)</text>
+
+  <!-- token req -->
+  <line class="a-ok" x1="500" y1="320" x2="775" y2="320"/>
+  <text x="640" y="312" text-anchor="middle" font-size="12" class="t-ok">POST /token: ATTACKER_CODE + verifier B + secret</text>
+
+  <rect class="s-ok" x="560" y="340" width="320" height="46" rx="8"/>
+  <text x="720" y="358" text-anchor="middle" font-size="12">sha256(B) ≠ challenge(A) → mismatch</text>
+  <text x="720" y="374" text-anchor="middle" font-size="12">stored for ATTACKER_CODE</text>
+
+  <line class="a-bad" x1="775" y1="420" x2="500" y2="420"/>
+  <text x="640" y="412" text-anchor="middle" font-size="13" class="t-bad">✗ invalid_grant: no token issued</text>
+  <text x="450" y="452" text-anchor="middle" font-size="12" class="t-muted">The attacker cannot supply verifier A, because it lives only in the attacker's own session.</text>
+</svg>
+</div>
+
+<div class="grid2" style="margin-top:14px">
+  <div class="box ok">
+    <span class="tag ok">Why it works</span>
+    <ul>
+      <li>The verifier is generated <b>per flow</b> and kept in the app's <b>session for that user</b>.</li>
+      <li>The server stores the <b>challenge</b> alongside the code when issuing it.</li>
+      <li>At redemption it hashes the submitted verifier and compares. A code only redeems for whoever holds the matching verifier.</li>
+    </ul>
+  </div>
+  <div class="box front">
+    <span class="tag front">The stolen-code variant</span>
+    <ul>
+      <li>A code stolen from the victim is bound to challenge(V), where verifier V sits in the victim's app session.</li>
+      <li>The attacker's session holds a different verifier, so redemption fails.</li>
+      <li>The attacker would need V, which never travels in the front channel (only its hash does).</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ex">
+  <div class="lbl">Real-life scenario</div>
+  <p>Back to the coat check: now each ticket also has a unique stamp, and when you hand in your coat you write a private word on a card that stays at the counter. To collect it you must say that word. The prankster's ticket belongs to a stamp-and-word pair you never saw, so the attendant refuses, and the swap fails even though the attendant is perfectly honest.</p>
+</div>
+
+<!-- 4 -->
+<h2>4. Why the other defenses are not enough</h2>
+<div class="scroll">
+<table>
+  <tr><th>Defense</th><th>Does it stop injection?</th><th>Why</th></tr>
+  <tr><td><b>Client secret</b></td><td><span class="tag bad">No</span></td><td>The real app redeems with the real secret. The secret authenticates the app, not the session.</td></tr>
+  <tr><td><b>Registered redirect URI</b></td><td><span class="tag bad">No</span></td><td>The code is injected at the legitimate redirect URI.</td></tr>
+  <tr><td><b>Short-lived, single-use code</b></td><td><span class="tag bad">No</span></td><td>The attacker plants it while still valid, and it is used only once, by the victim's session.</td></tr>
+  <tr><td><b>Random <code>state</code> checked by the client</b></td><td><span class="tag ok">Partly</span></td><td>An injected code carries the wrong state for the victim's session, so a correct client rejects it. But this relies on every client implementing the check properly and cannot be enforced by the server.</td></tr>
+  <tr><td><b>PKCE</b></td><td><span class="tag ok">Yes</span></td><td>The <b>server</b> enforces the binding at redemption, so it works even if the client is sloppy. This is why the lecture says <code>state</code> can now carry app data when PKCE is supported.</td></tr>
+</table>
+</div>
+
+<div class="tip"><b>Caveat on enforcement:</b> PKCE only protects you if the server <b>checks it</b>. Clients that send PKCE parameters to a server that ignores them are safe to ship (as the lecture notes) but not yet protected, which is why a random <code>state</code> is still needed in that case.</div>
+
+<!-- 5 -->
+<h2>5. Quick recap</h2>
+<div class="box">
+<ul>
+  <li><b>Injection attack:</b> an attacker gets the legitimate app to redeem the wrong authorization code, tying a session to the wrong account. No token theft is needed and nobody sees an error.</li>
+  <li><b>Client secret is irrelevant here</b>, since the legitimate app is the one redeeming.</li>
+  <li><b>PKCE fix:</b> the code is cryptographically bound to the flow that requested it (verifier → challenge → verifier check at the token endpoint).</li>
+  <li><b>Result:</b> an injected or stolen code fails because the redeeming session cannot present the matching verifier.</li>
+  <li><b>Practice:</b> use PKCE for every client type; still use a random <code>state</code> when the server does not enforce PKCE.</li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>

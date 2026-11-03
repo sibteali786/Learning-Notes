@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The 4D Framework – AI Fluency Summary</title>
+<style>
+:root{
+  --bg:#f5f7fa; --surface:#ffffff; --ink:#1b2430; --muted:#5a6676; --line:#d9e0e8;
+  --del:#1f6feb; --delbg:#e6f0ff;
+  --desc:#0f9d78; --descbg:#e0f6ee;
+  --disc:#c77700; --discbg:#fff1d9;
+  --dil:#8a3ffc; --dilbg:#efe5ff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151c; --surface:#18202a; --ink:#e8edf3; --muted:#9aa7b6; --line:#2a3440;
+    --del:#6ea8ff; --delbg:#16294a;
+    --desc:#4fd1a5; --descbg:#103a2e;
+    --disc:#ffb54a; --discbg:#41300f;
+    --dil:#b794ff; --dilbg:#2c1f4d;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#18202a; --ink:#e8edf3; --muted:#9aa7b6; --line:#2a3440;
+  --del:#6ea8ff; --delbg:#16294a; --desc:#4fd1a5; --descbg:#103a2e;
+  --disc:#ffb54a; --discbg:#41300f; --dil:#b794ff; --dilbg:#2c1f4d; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+main{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:2rem;line-height:1.2;margin:0 0 6px}
+h2{font-size:1.3rem;margin:44px 0 14px}
+h3{margin:0 0 6px;font-size:1.05rem}
+p{margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 22px}
+.goal{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--del);border-radius:10px;padding:14px 18px}
+.def{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;font-size:1.05rem}
+.def b{font-weight:700}
+
+/* 4D grid */
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.d{border-radius:14px;padding:16px 18px;border:2px solid}
+.d .letter{font-size:2.4rem;font-weight:800;line-height:1}
+.d p{margin:6px 0 0}
+.d.del{background:var(--delbg);border-color:var(--del)} .d.del .letter,.d.del h3{color:var(--del)}
+.d.desc{background:var(--descbg);border-color:var(--desc)} .d.desc .letter,.d.desc h3{color:var(--desc)}
+.d.disc{background:var(--discbg);border-color:var(--disc)} .d.disc .letter,.d.disc h3{color:var(--disc)}
+.d.dil{background:var(--dilbg);border-color:var(--dil)} .d.dil .letter,.d.dil h3{color:var(--dil)}
+
+/* modes */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.mode{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.mode .who{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:.9rem;color:var(--muted)}
+.chip{display:inline-block;border-radius:999px;padding:2px 12px;font-size:.85rem;font-weight:600}
+.chip.you{background:var(--delbg);color:var(--del)}
+.chip.ai{background:var(--descbg);color:var(--desc)}
+.bar{height:10px;border-radius:5px;background:var(--line);margin-top:10px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+
+.across{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.across .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.across .row span{border-radius:8px;padding:4px 12px;font-weight:600;font-size:.9rem}
+
+/* takeaways */
+ul.tk{list-style:none;margin:0;padding:0}
+ul.tk li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px}
+ul.tk li:before{content:"✔";color:var(--desc);font-weight:700}
+
+/* exercises */
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+summary{cursor:pointer;padding:12px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary:focus-visible{outline:3px solid var(--del);outline-offset:2px;border-radius:12px}
+summary .t{font-weight:500;color:var(--muted);font-size:.85rem;white-space:nowrap}
+summary:after{content:"+";font-size:1.3rem;color:var(--muted)}
+details[open] summary:after{content:"–"}
+.body{padding:0 16px 14px}
+.q{border-left:5px solid;border-radius:6px;padding:6px 12px;margin:8px 0;background:var(--bg)}
+.q.del{border-color:var(--del)} .q.desc{border-color:var(--desc)} .q.disc{border-color:var(--disc)} .q.dil{border-color:var(--dil)}
+.q b{display:block;font-size:.9rem}
+.q.del b{color:var(--del)} .q.desc b{color:var(--desc)} .q.disc b{color:var(--disc)} .q.dil b{color:var(--dil)}
+.sc{margin:14px 0 4px;font-weight:700}
+ol,ul.plain{margin:6px 0 10px;padding-left:22px}
+.notice{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:8px 0}
+.notice div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:.95rem}
+.refl{display:grid;gap:10px}
+.refl div{background:var(--surface);border:1px dashed var(--muted);border-radius:12px;padding:12px 16px}
+@media (max-width:520px){h1{font-size:1.6rem}summary .t{display:none}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>The 4D Framework</h1>
+<p class="sub">AI Fluency: Framework &amp; Foundations · Video: 5 minutes</p>
+
+<div class="goal"><b>Learning goal:</b> Explain the basic AI Fluency Framework and its core “4Ds”: Delegation, Description, Discernment, and Diligence.</div>
+
+<h2>What is AI Fluency?</h2>
+<div class="def">Engaging with AI in ways that are <b>effective</b>, <b>efficient</b>, <b>ethical</b>, and <b>safe</b>.</div>
+
+<h2>The four core competencies (4Ds)</h2>
+<div class="grid4">
+  <div class="d del"><div class="letter">D</div><h3>Delegation</h3><p>Thoughtfully deciding what work to do with AI vs. doing yourself.</p></div>
+  <div class="d desc"><div class="letter">D</div><h3>Description</h3><p>Communicating clearly with AI systems.</p></div>
+  <div class="d disc"><div class="letter">D</div><h3>Discernment</h3><p>Evaluating AI outputs and behavior with a critical eye.</p></div>
+  <div class="d dil"><div class="letter">D</div><h3>Diligence</h3><p>Ensuring you interact with AI responsibly.</p></div>
+</div>
+
+<h2>Three ways we engage with AI</h2>
+<div class="modes">
+  <div class="mode">
+    <h3>Automation</h3>
+    <p>AI executes specific tasks based on your instructions.</p>
+    <div class="bar"><i style="width:15%;background:var(--del)"></i><i style="width:85%;background:var(--desc)"></i></div>
+    <div class="who"><span class="chip you">You: instruct</span><span class="chip ai">AI: executes</span></div>
+  </div>
+  <div class="mode">
+    <h3>Augmentation</h3>
+    <p>You and AI collaborate as creative thinking and task execution partners.</p>
+    <div class="bar"><i style="width:50%;background:var(--del)"></i><i style="width:50%;background:var(--desc)"></i></div>
+    <div class="who"><span class="chip you">You</span><span class="chip ai">AI</span> partners</div>
+  </div>
+  <div class="mode">
+    <h3>Agency</h3>
+    <p>You guide AI to work independently on your behalf, shaping its knowledge and behavior rather than specific actions.</p>
+    <div class="bar"><i style="width:15%;background:var(--del)"></i><i style="width:85%;background:var(--desc)"></i></div>
+    <div class="who"><span class="chip you">You: shape knowledge &amp; behavior</span><span class="chip ai">AI: works independently</span></div>
+  </div>
+</div>
+
+<div class="across">
+  <b>The 4Ds apply across all three ways of working with AI</b>
+  <div class="row">
+    <span style="background:var(--delbg);color:var(--del)">Delegation</span>
+    <span style="background:var(--descbg);color:var(--desc)">Description</span>
+    <span style="background:var(--discbg);color:var(--disc)">Discernment</span>
+    <span style="background:var(--dilbg);color:var(--dil)">Diligence</span>
+  </div>
+  <p style="margin-top:10px">Developing these competencies prepares you for whatever AI evolution brings next.</p>
+</div>
+
+<h2>Key takeaways</h2>
+<ul class="tk">
+  <li>AI Fluency means engaging with AI in ways that are effective, efficient, ethical, and safe.</li>
+  <li>There are three primary ways we engage with AI: Automation, Augmentation, Agency.</li>
+  <li>The framework has four core competencies: Delegation, Description, Discernment, Diligence.</li>
+  <li>These competencies apply across all three ways of working with AI.</li>
+  <li>Developing these competencies prepares you for evolving AI capabilities.</li>
+</ul>
+
+<h2>Exercises</h2>
+
+<details>
+<summary>Exercise 1: Apply the 4Ds <span class="t">5 minutes</span></summary>
+<div class="body">
+<p>Pick one of these collaboration scenarios and consider how you might apply the 4D Framework.</p>
+
+<p class="sc">Communication project</p>
+<p>You’re working with an AI assistant to draft a series of emails for a marketing campaign.</p>
+<div class="q del"><b>Delegation</b>What aspects of this project would you handle yourself vs. collaborate on with AI?</div>
+<div class="q desc"><b>Description</b>How would you communicate your vision for the campaign’s tone, purpose, and success criteria to the AI?</div>
+<div class="q disc"><b>Discernment</b>What criteria would help you evaluate whether the AI-drafted emails meet your needs?</div>
+<div class="q dil"><b>Diligence</b>What considerations around transparency and responsibility would be important?</div>
+
+<p class="sc">Research project</p>
+<p>You’re using AI to help analyze a large dataset for a research paper.</p>
+<div class="q del"><b>Delegation</b>How would you divide the analytical work between yourself and the AI?</div>
+<div class="q desc"><b>Description</b>What context would the AI need to understand about your research question to do its share of the tasks well?</div>
+<div class="q disc"><b>Discernment</b>How would you verify the AI’s analysis for accuracy?</div>
+<div class="q dil"><b>Diligence</b>What ethical considerations might arise when publishing AI-assisted research?</div>
+
+<p class="sc">Creative project</p>
+<p>You’re collaborating with AI to develop character concepts for a story.</p>
+<div class="q del"><b>Delegation</b>What creative elements would you want to explore through AI collaboration vs. develop independently?</div>
+<div class="q desc"><b>Description</b>How might you guide the AI to generate characters that fit your story’s world?</div>
+<div class="q disc"><b>Discernment</b>How would you decide which AI-suggested elements to keep, modify, or discard?</div>
+<div class="q dil"><b>Diligence</b>How would you acknowledge AI’s contribution to your creative work?</div>
+</div>
+</details>
+
+<details>
+<summary>Exercise 2: Explore something you love <span class="t">5–10 minutes</span></summary>
+<div class="body">
+<p>Spend 5–10 minutes chatting with Claude about a topic you’re passionate about and know well. Claude is used across the rest of the course, but you can also do the exercises with another AI, and it may be worthwhile to try them with several AI assistants to see how they differ.</p>
+<p><b>Instructions</b></p>
+<ol>
+  <li>Choose a topic you know well and enjoy discussing (a hobby, professional interest, favorite book series, etc.).</li>
+  <li>Have a natural conversation with Claude about it, like you would with someone who shares your interest.</li>
+  <li>Notice the moments where:</li>
+</ol>
+<div class="notice">
+  <div>Claude <b>enhances your thinking</b></div>
+  <div>You need to <b>clarify or correct</b> Claude’s understanding</div>
+  <div>Your expertise leads you to <b>evaluate</b> Claude’s responses</div>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Exercise 3: Learn something new <span class="t">5–10 minutes</span></summary>
+<div class="body">
+<p>Spend 5–10 minutes asking Claude to teach you about a topic you’re unfamiliar with but interested in exploring. See how this differs from your conversation about something you love and know well.</p>
+<p><b>Instructions</b></p>
+<ol>
+  <li>Choose a topic you’d like to learn more about.</li>
+  <li>Engage Claude in a conversation to understand the basics. Don’t worry about prompting the “wrong way” or the “right way”; just ask Claude to teach you.</li>
+  <li>Notice the moments where Claude:</li>
+</ol>
+<div class="notice">
+  <div>Offers <b>helpful explanations</b></div>
+  <div>Provides <b>examples</b> that make abstract ideas concrete</div>
+  <div>Responds <b>naturally</b> to your questions as they arise</div>
+  <div>Explains things where you would want to <b>double check</b> its explanations</div>
+</div>
+</div>
+</details>
+
+<h2>Reflection</h2>
+<p>Before moving on, consider:</p>
+<div class="refl">
+  <div>Which of the 4Ds (Delegation, Description, Discernment, Diligence) do you feel most confident in already? Which might need more development?</div>
+  <div>Can you recall a recent AI interaction where the framework might have helped?</div>
+  <div>What specific skills from the 4D framework would most enhance your work or personal projects?</div>
+</div>
+
+</main>
+</body>
+</html>
