@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Postgres 13 replication demo: visual summary</title>
+<meta name="color-scheme" content="light dark">
+<style>
+:root{
+  --bg:#f5f7f6; --surface:#ffffff; --ink:#14232b; --muted:#566872; --line:#d3dcd9;
+  --master:#0b6e6e; --master-bg:#d9f0ee; --standby:#9a5b00; --standby-bg:#fbe9cc;
+  --wal:#5b4bc4; --wal-bg:#e6e2fa; --warn:#a4262c; --warn-bg:#fbe3e3; --ok:#1f7a3d; --ok-bg:#ddf2e3;
+  --code-bg:#10202a; --code-ink:#dbeaf0;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1a20; --surface:#15262e; --ink:#e4eef0; --muted:#9db3ba; --line:#2a404a;
+    --master:#52d1c8; --master-bg:#12383a; --standby:#f0b455; --standby-bg:#3d2c10;
+    --wal:#b3a8ff; --wal-bg:#2a2556; --warn:#ff9a9f; --warn-bg:#401a1d; --ok:#7fdc9c; --ok-bg:#16361f;
+    --code-bg:#091217; --code-ink:#cfe3ea;
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#0e1a20; --surface:#15262e; --ink:#e4eef0; --muted:#9db3ba; --line:#2a404a;
+    --master:#52d1c8; --master-bg:#12383a; --standby:#f0b455; --standby-bg:#3d2c10;
+    --wal:#b3a8ff; --wal-bg:#2a2556; --warn:#ff9a9f; --warn-bg:#401a1d; --ok:#7fdc9c; --ok-bg:#16361f;
+    --code-bg:#091217; --code-ink:#cfe3ea;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;line-height:1.6;font-size:16px}
+.wrap{max-width:980px;margin:0 auto;padding:28px 18px 60px}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:2rem;line-height:1.2;margin:0 0 6px}
+h2{font-family:Georgia,"Times New Roman",serif;font-size:1.45rem;margin:44px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+h3{font-size:1.05rem;margin:0 0 6px}
+p{margin:0 0 10px}
+.sub{color:var(--muted);max-width:70ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px;font-size:.85rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.scroll{overflow-x:auto}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.85rem;line-height:1.5;margin:8px 0}
+code{font-family:Consolas,"SFMono-Regular",Menlo,monospace;font-size:.88em}
+p code,li code,td code{background:var(--line);padding:1px 5px;border-radius:4px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;margin:18px 0}
+.dot{width:36px;height:36px;border-radius:50%;background:var(--master);color:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:700}
+.step.sb .dot{background:var(--standby)}
+.step.both .dot{background:var(--wal)}
+.tag{display:inline-block;font-size:.78rem;border-radius:4px;padding:1px 8px;margin-right:6px;font-weight:600}
+.tag.m{background:var(--master-bg);color:var(--master)}
+.tag.s{background:var(--standby-bg);color:var(--standby)}
+.tag.w{background:var(--wal-bg);color:var(--wal)}
+.note{border-left:4px solid var(--wal);background:var(--wal-bg);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+.warn{border-left:4px solid var(--warn);background:var(--warn-bg);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+.good{border-left:4px solid var(--ok);background:var(--ok-bg);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface)}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.pc{grid-template-columns:1fr}h1{font-size:1.6rem}}
+.pros{color:var(--ok)} .cons{color:var(--warn)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+summary:focus-visible,a:focus-visible{outline:3px solid var(--wal);outline-offset:2px}
+.nav a{color:var(--wal);text-decoration:none;margin-right:14px;font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Postgres 13 streaming replication, step by step</h1>
+<p class="sub">A hands-on demo: two Postgres containers in Docker, one master and one standby, connected with synchronous streaming replication. The presenter stresses that this is the simplest working setup to show how it works, not a best-practice or production design.</p>
+<div class="chips">
+<span class="chip">Postgres 13</span><span class="chip">Docker</span><span class="chip">1 master + 1 standby</span><span class="chip">Synchronous mode</span><span class="chip">WAL streaming</span>
+</div>
+<p class="nav" style="margin-top:14px">
+<a href="#arch">Architecture</a><a href="#steps">Steps</a><a href="#verify">Verification</a><a href="#concepts">Key concepts</a><a href="#warn">Not for production</a><a href="#alt">Alternatives</a><a href="#real">Real-world scenarios</a>
+</p>
+
+<h2 id="arch">1. The big picture</h2>
+<div class="card scroll">
+<svg viewBox="0 0 860 330" width="100%" role="img" aria-label="Architecture: host machine with pg-master on 5432 and pg-standby on 5433, connected by WAL stream, each with its own mounted data folder" style="min-width:640px;max-width:860px;display:block;margin:auto">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--wal)"/></marker>
+  </defs>
+  <rect x="8" y="8" width="844" height="314" rx="12" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="24" y="32" font-size="14" fill="var(--muted)">Host machine (folder: replication/)</text>
+
+  <rect x="40" y="60" width="270" height="130" rx="10" fill="var(--master-bg)" stroke="var(--master)" stroke-width="2"/>
+  <text x="175" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="var(--master)">pg-master</text>
+  <text x="175" y="114" text-anchor="middle" font-size="13" fill="var(--ink)">host port 5432 → 5432</text>
+  <text x="175" y="136" text-anchor="middle" font-size="13" fill="var(--ink)">read + write</text>
+  <text x="175" y="158" text-anchor="middle" font-size="13" fill="var(--ink)">pg_hba.conf: allow replication</text>
+  <text x="175" y="178" text-anchor="middle" font-size="13" fill="var(--ink)">synchronous_standby_names</text>
+
+  <rect x="550" y="60" width="270" height="130" rx="10" fill="var(--standby-bg)" stroke="var(--standby)" stroke-width="2"/>
+  <text x="685" y="90" text-anchor="middle" font-size="17" font-weight="700" fill="var(--standby)">pg-standby</text>
+  <text x="685" y="114" text-anchor="middle" font-size="13" fill="var(--ink)">host port 5433 → 5432</text>
+  <text x="685" y="136" text-anchor="middle" font-size="13" fill="var(--ink)">read-only (standby.signal)</text>
+  <text x="685" y="158" text-anchor="middle" font-size="13" fill="var(--ink)">primary_conninfo → master</text>
+  <text x="685" y="178" text-anchor="middle" font-size="13" fill="var(--ink)">application_name = standby1</text>
+
+  <line x1="310" y1="110" x2="548" y2="110" stroke="var(--wal)" stroke-width="3" marker-end="url(#arr)"/>
+  <text x="430" y="98" text-anchor="middle" font-size="13" font-weight="700" fill="var(--wal)">WAL stream</text>
+  <line x1="548" y1="150" x2="312" y2="150" stroke="var(--wal)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+  <text x="430" y="172" text-anchor="middle" font-size="12" fill="var(--wal)">standby connects in, confirms commit</text>
+
+  <rect x="40" y="230" width="270" height="56" rx="8" fill="var(--surface)" stroke="var(--master)" stroke-width="2"/>
+  <text x="175" y="254" text-anchor="middle" font-size="13" fill="var(--ink)">replication/master_data</text>
+  <text x="175" y="272" text-anchor="middle" font-size="11" fill="var(--muted)">mounted at /var/lib/postgresql/data</text>
+  <rect x="550" y="230" width="270" height="56" rx="8" fill="var(--surface)" stroke="var(--standby)" stroke-width="2"/>
+  <text x="685" y="254" text-anchor="middle" font-size="13" fill="var(--ink)">replication/standby_data</text>
+  <text x="685" y="272" text-anchor="middle" font-size="11" fill="var(--muted)">copy of master_data at start</text>
+  <line x1="175" y1="190" x2="175" y2="228" stroke="var(--master)" stroke-width="2"/>
+  <line x1="685" y1="190" x2="685" y2="228" stroke="var(--standby)" stroke-width="2"/>
+  <line x1="312" y1="258" x2="548" y2="258" stroke="var(--ink)" stroke-width="2" stroke-dasharray="3 4" marker-end="url(#arr)"/>
+  <text x="430" y="248" text-anchor="middle" font-size="12" fill="var(--ink)">cp -r (identical start)</text>
+</svg>
+</div>
+<div class="note"><strong>Why a two-way configuration?</strong> The standby must know how to reach the master (<code>primary_conninfo</code>), and the master must know which standbys it trusts and waits for (<code>pg_hba.conf</code> + <code>synchronous_standby_names</code>). Both sides use the same <code>application_name</code>, which is case-sensitive.</div>
+
+<h2 id="steps">2. Setup, step by step</h2>
+
+<div class="step"><div class="dot">1</div><div>
+<h3><span class="tag m">master</span>Create the master container</h3>
+<p>Create a <code>replication</code> folder on the host. Data for both instances lives there because the data files get edited and copied a lot. The master maps host port 5432 and mounts its own data folder (the full host path is required).</p>
+<pre><code>docker run --name pg-master \
+  -p 5432:5432 \
+  -v /path/to/replication/master_data:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=postgres \
+  -d postgres:13
+
+docker logs pg-master   # confirm it started and created config files</code></pre>
+<p>The <code>master_data</code> folder appears on the host with the Postgres data and config files.</p>
+</div></div>
+
+<div class="step sb"><div class="dot">2</div><div>
+<h3><span class="tag s">standby</span>Create the standby container</h3>
+<p>Same command with three changes: a new name, host port 5433 (5432 is taken), and its own folder. Inside the container it still listens on 5432. At this point the two are completely independent Postgres instances.</p>
+<pre><code>docker run --name pg-standby \
+  -p 5433:5432 \
+  -v /path/to/replication/standby_data:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=postgres \
+  -d postgres:13</code></pre>
+</div></div>
+
+<div class="step both"><div class="dot">3</div><div>
+<h3><span class="tag w">both</span>Stop both, then clone master data into standby</h3>
+<p>Replication requires the standby to start from data identical to the master. Different data leads to many errors (the presenter hit these repeatedly). Because everything is on the host, it is just a folder copy.</p>
+<pre><code>docker stop pg-master pg-standby
+
+mv standby_data standby_data_backup
+cp -r master_data standby_data</code></pre>
+<p>The presenter mentions <code>pg_basebackup</code> as the other common way, but prefers the copy for simplicity.</p>
+</div></div>
+
+<div class="step"><div class="dot">4</div><div>
+<h3><span class="tag m">master</span>Allow replication connections: <code>pg_hba.conf</code></h3>
+<p>Edit the file inside <code>master_data</code> and append one line. This lets the user connect in replication mode with password (md5) auth.</p>
+<pre><code># TYPE  DATABASE     USER      ADDRESS  METHOD
+host    replication  postgres  all      md5</code></pre>
+<div class="warn">Demo shortcut: this uses the <code>postgres</code> admin user with password <code>postgres</code>. In real setups create a dedicated user that can only replicate.</div>
+</div></div>
+
+<div class="step sb"><div class="dot">5</div><div>
+<h3><span class="tag s">standby</span>Point the standby at the master: <code>postgresql.conf</code></h3>
+<p>In <code>standby_data</code>, enable <code>primary_conninfo</code>. This is the only change needed in the standby config (other knobs exist but are out of scope).</p>
+<pre><code>primary_conninfo = 'application_name=standby1 host=&lt;master-host&gt; port=5432 user=postgres password=postgres'</code></pre>
+<ul>
+<li><code>application_name</code>: unique, case-sensitive ID for this standby. The master references it so only known nodes replicate (otherwise anyone could replicate from the database).</li>
+<li><code>host</code> + <code>port</code>: where the master is reachable. Both containers are on the same machine and the master port is exposed to the host, so the host name works. <em>(The transcript is unclear on the exact host name; on Docker Desktop, <code>host.docker.internal</code> is the usual value.)</em></li>
+<li><code>user</code> / <code>password</code>: same credentials as the master container, here <code>postgres</code>.</li>
+</ul>
+<p>The config file itself notes that standby settings are ignored on the master.</p>
+</div></div>
+
+<div class="step sb"><div class="dot">6</div><div>
+<h3><span class="tag s">standby</span>Create <code>standby.signal</code></h3>
+<p>In the standby data folder, create an empty file named <code>standby.signal</code>. This turns the instance into a read-only standby.</p>
+<pre><code>touch standby_data/standby.signal</code></pre>
+</div></div>
+
+<div class="step"><div class="dot">7</div><div>
+<h3><span class="tag m">master</span>Make commits synchronous: <code>synchronous_standby_names</code></h3>
+<p>In the master&rsquo;s <code>postgresql.conf</code>, list the standbys by their <code>application_name</code>. Syntax matters here.</p>
+<pre><code>synchronous_standby_names = 'FIRST 1 (standby1)'</code></pre>
+<table>
+<tr><th>Form</th><th>Meaning</th></tr>
+<tr><td><code>FIRST 1 (standby1)</code></td><td>Commit succeeds once at least one listed standby confirms. With one standby this is trivially that one.</td></tr>
+<tr><td><code>FIRST 2 (standby1, standby2, standby3)</code></td><td>Priority order: the first two in the list are preferred, the third is a fallback.</td></tr>
+<tr><td><code>ANY 2 (standby1, standby2, standby3)</code></td><td>Any two of the three may confirm; no priority.</td></tr>
+</table>
+</div></div>
+
+<div class="step both"><div class="dot">8</div><div>
+<h3><span class="tag w">both</span>Start both and read the logs</h3>
+<pre><code>docker start pg-master pg-standby
+docker logs pg-master
+docker logs pg-standby</code></pre>
+<div class="good"><strong>Master log:</strong> standby1 is now a synchronous standby with priority 1.<br><strong>Standby log:</strong> started streaming WAL from primary.</div>
+</div></div>
+
+<h2 id="verify">3. Verify it works</h2>
+<div class="card">
+<h3>Check replication state on the master</h3>
+<pre><code>docker exec -it pg-master psql -U postgres
+SELECT * FROM pg_stat_replication;</code></pre>
+<p>An empty result means no replication. A healthy one shows one row: state <strong>streaming</strong>, sync state <strong>sync</strong>, application name <strong>standby1</strong>, user <code>postgres</code>.</p>
+</div>
+
+<p>Then open a second terminal on the standby: <code>docker exec -it pg-standby psql -U postgres</code>. Tests the presenter ran:</p>
+<div class="scroll"><table>
+<tr><th>Where</th><th>Action</th><th>Result</th></tr>
+<tr><td><span class="tag m">master</span></td><td><code>CREATE TABLE test (id integer, t varchar(200));</code></td><td><span class="pros">Appears on standby</span> (<code>\d test</code> shows it immediately).</td></tr>
+<tr><td><span class="tag s">standby</span></td><td><code>CREATE TABLE test1 (id integer, t varchar(200));</code></td><td><span class="cons">Error:</span> cannot write to a replica; it is read-only.</td></tr>
+<tr><td><span class="tag m">master</span></td><td>Insert 10,000 rows with random values, e.g. <code>INSERT INTO test SELECT random()*1000 FROM generate_series(1,10000);</code></td><td>Standby <code>SELECT count(*)</code> shows 0 first, then the rows appear almost instantly (same machine, so very fast).</td></tr>
+<tr><td><span class="tag m">master</span></td><td><code>ALTER TABLE test ADD COLUMN ...</code></td><td>Schema change shows up on the standby immediately.</td></tr>
+<tr><td><span class="tag m">master</span></td><td><code>TRUNCATE TABLE test;</code></td><td>All rows disappear from the standby too.</td></tr>
+</table></div>
+<div class="note"><strong>Takeaway:</strong> data (inserts), structure (create/alter) and deletes (truncate) all flow from master to standby through the WAL. The standby is read-only.</div>
+
+<h2 id="concepts">4. Key concepts from the demo</h2>
+<div class="grid">
+<div class="card"><h3>WAL (write-ahead log)</h3><p>A compact record of every transaction. Changes go to the WAL first (in memory, then disk). Replication simply ships the WAL to the standby, which replays it.</p></div>
+<div class="card"><h3>Synchronous vs asynchronous</h3><p>Synchronous: the master waits for the named standby(s) to confirm before the commit returns. Asynchronous: the master does not wait. The demo uses synchronous.</p></div>
+<div class="card"><h3>application_name</h3><p>The unique, case-sensitive identity of a standby. It must match between the standby&rsquo;s <code>primary_conninfo</code> and the master&rsquo;s <code>synchronous_standby_names</code>.</p></div>
+<div class="card"><h3>Identical starting data</h3><p>The standby must begin as an exact copy of the master. Anything different causes errors, hence the stop, copy, start sequence.</p></div>
+<div class="card"><h3>standby.signal</h3><p>An empty file that tells Postgres 12+ to start as a read-only standby.</p></div>
+<div class="card"><h3>pg_stat_replication</h3><p>View on the master listing connected standbys, their state (streaming) and sync mode. Empty means nothing is replicating.</p></div>
+</div>
+
+<h2 id="warn">5. Shortcuts taken in the demo (don&rsquo;t copy to production)</h2>
+<div class="warn">
+<ul style="margin:0;padding-left:20px">
+<li>Using the <code>postgres</code> admin user for replication; create a user with only the replication privilege.</li>
+<li>Password equal to the username.</li>
+<li>Address <code>all</code> in <code>pg_hba.conf</code> instead of the standby&rsquo;s specific address.</li>
+<li>Master and standby on one machine: no real fault isolation.</li>
+<li>A production system needs a designed architecture; it can&rsquo;t be done in five minutes.</li>
+</ul>
+</div>
+<div class="warn"><strong>Behavior to know:</strong> with synchronous replication and a single standby, if that standby goes down, commits on the master wait for it and writes can stall until it returns or the setting is changed.</div>
+
+<h2 id="alt">6. Alternatives and trade-offs</h2>
+<div class="pc">
+<div class="card"><h3>Approach used: copy the data folder</h3>
+<p class="pros"><strong>Pros</strong></p><ul><li>Very simple with host-mounted volumes</li><li>No backup tooling to learn</li></ul>
+<p class="cons"><strong>Cons</strong></p><ul><li>Needs both instances stopped</li><li>Manual; <code>standby.signal</code> and <code>primary_conninfo</code> set by hand</li><li>Not suitable for a live production master</li></ul></div>
+<div class="card"><h3>Alternative: <code>pg_basebackup -R</code></h3>
+<pre><code>pg_basebackup -h &lt;master-host&gt; -U postgres \
+  -D standby_data -R -X stream</code></pre>
+<p class="pros"><strong>Pros</strong></p><ul><li>Works against a running master</li><li><code>-R</code> writes <code>standby.signal</code> and connection info for you</li></ul>
+<p class="cons"><strong>Cons</strong></p><ul><li>One more command and user privileges to manage</li></ul></div>
+<div class="card"><h3>Synchronous (used)</h3>
+<p class="pros"><strong>Pros</strong></p><ul><li>No data loss on master failure for confirmed commits</li></ul>
+<p class="cons"><strong>Cons</strong></p><ul><li>Higher commit latency; writes can block if the standby is unavailable</li></ul></div>
+<div class="card"><h3>Asynchronous</h3>
+<p class="pros"><strong>Pros</strong></p><ul><li>Faster commits; master unaffected by a slow or down standby</li></ul>
+<p class="cons"><strong>Cons</strong></p><ul><li>Recent commits can be lost on failover</li></ul></div>
+<div class="card"><h3><code>ANY</code> / <code>FIRST</code> with several standbys</h3>
+<p class="pros"><strong>Pros</strong></p><ul><li>Tolerates one standby failing without stalling writes</li></ul>
+<p class="cons"><strong>Cons</strong></p><ul><li>More nodes to run and monitor</li></ul></div>
+<div class="card"><h3>Logical replication (not in the demo)</h3>
+<p class="pros"><strong>Pros</strong></p><ul><li>Replicate selected tables; different versions possible</li></ul>
+<p class="cons"><strong>Cons</strong></p><ul><li>Different mechanism; schema changes are not replicated automatically</li></ul></div>
+</div>
+
+<h2 id="real">7. Real-world scenarios</h2>
+<div class="grid">
+<div class="card"><h3>Payments service</h3><p>A payments table cannot lose a confirmed transaction. Synchronous replication means a commit is acknowledged only after the standby has it, so if the master dies, the standby has every confirmed payment.</p></div>
+<div class="card"><h3>Reporting and analytics</h3><p>Heavy dashboard queries run on the read-only standby so they never slow the master that serves customer writes.</p></div>
+<div class="card"><h3>Failover and upgrades</h3><p>If the master machine fails, the standby holds a current copy and can be promoted to take over, shortening downtime.</p></div>
+<div class="card"><h3>Learning lab</h3><p>Exactly what this demo is: two containers on a laptop to see WAL streaming, read-only behavior and <code>pg_stat_replication</code> before designing a real architecture.</p></div>
+</div>
+
+<h2>8. Command cheat sheet</h2>
+<pre><code># 1-2. containers
+docker run --name pg-master  -p 5432:5432 -v $PWD/master_data:/var/lib/postgresql/data  -e POSTGRES_PASSWORD=postgres -d postgres:13
+docker run --name pg-standby -p 5433:5432 -v $PWD/standby_data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=postgres -d postgres:13
+
+# 3. clone
+docker stop pg-master pg-standby
+mv standby_data standby_data_backup &amp;&amp; cp -r master_data standby_data
+
+# 4. master pg_hba.conf
+host replication postgres all md5
+
+# 5. standby postgresql.conf
+primary_conninfo = 'application_name=standby1 host=&lt;master-host&gt; port=5432 user=postgres password=postgres'
+# 6. standby
+touch standby_data/standby.signal
+
+# 7. master postgresql.conf
+synchronous_standby_names = 'FIRST 1 (standby1)'
+
+# 8. run + verify
+docker start pg-master pg-standby
+docker exec -it pg-master psql -U postgres -c "SELECT * FROM pg_stat_replication;"</code></pre>
+
+</div>
+</body>
+</html>
