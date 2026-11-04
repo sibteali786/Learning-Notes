@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RAG M2 · Evaluating Retrieval</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--fg:#1d1d1f;--mut:#6b6b70;--line:#e3e3e0;--a:#e5395b;--b:#0e9aa7;--ok:#1f9d55;--okbg:#d9f2e3;--bad:#d64545;--badbg:#fbe1e1;--warn:#d98a00;--code:#f1f1ee;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141416;--card:#1d1d20;--fg:#ececee;--mut:#9a9aa2;--line:#2f2f34;--a:#ff5a7b;--b:#34c3d1;--ok:#3ccf7e;--okbg:#17382a;--bad:#ff6b6b;--badbg:#3d1f1f;--warn:#f0a929;--code:#25252a;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 60px}
+h1{font-size:2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.35rem;margin:2.2em 0 .6em;padding-top:.4em;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:1.2em 0 .4em}
+.tag{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.sub{color:var(--mut);margin:.2em 0 1em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+.grid{display:grid;gap:12px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+code,pre{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86rem}
+code{background:var(--code);padding:1px 6px;border-radius:5px}
+pre{background:var(--code);padding:14px;border-radius:10px;overflow-x:auto}
+pre code{background:none;padding:0}
+.callout{border-left:4px solid var(--warn);background:var(--card);padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0}
+.callout.ok{border-color:var(--ok)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--code)}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:8px 0}
+.ctl label{display:flex;gap:8px;align-items:center;font-size:.9rem}
+input[type=range]{width:170px}
+input[type=number]{width:64px;font:inherit;padding:3px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+button{font:inherit;background:var(--code);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:6px 12px;cursor:pointer}
+.val{font-family:ui-monospace,Menlo,monospace;min-width:2.5ch;display:inline-block}
+.big{font-size:1.7rem;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+.small{font-size:.85rem;color:var(--mut)}
+.formula{text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:1.05rem;padding:10px;background:var(--code);border-radius:10px;margin:8px 0}
+.meter{height:16px;background:var(--code);border-radius:9px;overflow:hidden}
+.meter i{display:block;height:100%}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.dot{width:26px;height:26px;border-radius:7px;font-size:.7rem;display:flex;align-items:center;justify-content:center;border:2px solid var(--line)}
+.dot.rel{background:var(--okbg);border-color:var(--ok)}
+.dot.irr{background:var(--badbg);border-color:var(--bad)}
+.dot.miss{background:transparent;border:2px dashed var(--warn)}
+.rk{display:flex;gap:6px;flex-wrap:wrap}
+.rk button{width:52px;height:52px;padding:0;font-weight:700;line-height:1.1}
+.rk button.on{background:var(--okbg);border-color:var(--ok)}
+.rk button small{display:block;font-weight:400;font-size:.68rem;color:var(--mut)}
+.cut{border-right:3px dashed var(--a)}
+.hl{background:var(--okbg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">DeepLearning.AI · RAG · Module 2 · Information Retrieval Foundations</span>
+<h1>Evaluating Retrieval</h1>
+<p class="sub">Precision, recall, top-k, MAP and MRR: how to tell whether your retriever is actually finding relevant documents.</p>
+
+<div class="card"><b>Why:</b> you can measure a retriever on latency, throughput and resource usage, but <b>what ultimately matters is search quality</b>: is it finding relevant documents?</div>
+
+<h2>1 · The three ingredients</h2>
+<div class="grid g3">
+<div class="card"><b>① The prompt</b><br>A retriever may do well on one prompt and poorly on another, so you test many.</div>
+<div class="card"><b>② The ranked list</b><br>The documents the retriever returned for that prompt, in order.</div>
+<div class="card"><b>③ Ground truth</b><br>The list of <em>all</em> truly relevant docs in the knowledge base. To grade the retriever you must know the right answers.</div>
+</div>
+
+<h2>2 · Precision vs recall</h2>
+<div class="grid g2">
+<div class="card"><b>Precision</b> = relevant retrieved ÷ total retrieved<br><span class="small">Penalizes returning irrelevant docs. “How trustworthy are the results?”</span></div>
+<div class="card"><b>Recall</b> = relevant retrieved ÷ total relevant in the knowledge base<br><span class="small">Penalizes leaving out relevant docs. “How comprehensive is the retriever?”</span></div>
+</div>
+
+<div class="callout ok"><b>Your question: “only 10 relevant docs exist, so how can it retrieve 12?”</b><br>
+<em>Retrieved</em> and <em>relevant</em> are different sets. The retriever doesn’t know which docs are relevant; it just returns its top results, and some of them are wrong. Retrieved = 12 docs: <b>8 relevant</b> (hits) + <b>4 irrelevant</b> (noise). The knowledge base has 10 relevant docs in total, so <b>2 relevant docs were missed</b>.
+The 10 is the size of the relevant pool, not a cap on how many docs can be returned. Retrieved can be anything from 0 up to the whole knowledge base.<br>
+Precision = 8/12 (how many of the 12 returned were good). Recall = 8/10 (how many of the 10 good ones were found).</div>
+
+<div class="card">
+<h3>Explorer (slide’s example preloaded)</h3>
+<div class="ctl">
+<label>Relevant docs in KB <input type="number" id="R" value="10" min="1" max="30"></label>
+<label>Retrieved <input type="range" id="N" min="1" max="30" value="12"><span class="val" id="Nv"></span></label>
+<label>…of which relevant <input type="range" id="H" min="0" max="10" value="8"><span class="val" id="Hv"></span></label>
+<button id="p1">First run (12 / 8)</button><button id="p2">Second run (15 / 9)</button>
+</div>
+<div class="dots" id="dots"></div>
+<div class="small">🟩 relevant &amp; retrieved &nbsp; 🟥 retrieved but irrelevant &nbsp; ⬚ relevant but missed</div>
+<div class="grid g2" style="margin-top:10px">
+<div><b>Precision</b> <span class="big" id="P"></span><div class="meter"><i id="Pm" style="background:var(--a)"></i></div><div class="small" id="Pt"></div></div>
+<div><b>Recall</b> <span class="big" id="Rc"></span><div class="meter"><i id="Rm" style="background:var(--b)"></i></div><div class="small" id="Rt"></div></div>
+</div>
+</div>
+
+<div class="card scroll"><table>
+<tr><th></th><th>Retrieved</th><th>Relevant found</th><th>Precision</th><th>Recall</th></tr>
+<tr><td>First run</td><td>12</td><td>8</td><td>8/12 = 66%</td><td>8/10 = 80%</td></tr>
+<tr><td>Second run (settings changed)</td><td>15</td><td>9</td><td>9/15 = 60% ↓</td><td>9/10 = 90% ↑</td></tr>
+</table>
+<p style="margin:8px 0 0">3 more docs returned but only 1 more relevant → <b>traded a little precision for more recall</b>. Perfect precision <em>and</em> recall needs ranking the relevant docs first <b>and returning only those</b>; otherwise you’re trading one against the other.</p></div>
+
+<div class="card"><h3>Real-life scenario</h3>
+<p>A support bot has 10 true answers about “refund policy”. If it returns 15 articles and 9 are right, agents have to wade through 6 distractors (precision 60%), but they’re rarely missing the key article (recall 90%). Legal-style search favors recall (don’t miss anything); a bot that stuffs the top 3 docs into an LLM prompt favors precision (noise hurts).</p></div>
+
+<h2>3 · Top-k: metrics depend on how many docs you look at</h2>
+<p>Metrics change with the number of docs returned, so they’re quoted <b>@K</b>: only the K highest-ranked docs count. Top-1/Top-5 is stricter; <b>top-5 to top-15</b> is the commonly used range.</p>
+
+<div class="card">
+<h3>Ranked-list lab (slide’s 10-row list preloaded: click to toggle relevance)</h3>
+<div class="rk" id="rk"></div>
+<div class="ctl"><label>K <input type="range" id="K" min="1" max="10" value="5"><span class="val" id="Kv"></span></label>
+<label>Total relevant in KB <input type="number" id="TR" value="8" min="1" max="30"></label></div>
+<div class="grid g3">
+<div class="card"><b>Precision@K</b><div class="big" id="pk"></div><div class="small" id="pkt"></div></div>
+<div class="card"><b>Recall@K</b><div class="big" id="rkk"></div><div class="small" id="rkt"></div></div>
+<div class="card"><b>Reciprocal rank</b><div class="big" id="rr"></div><div class="small" id="rrt"></div></div>
+</div>
+<p class="small">Slide values: P@5 = 2/5 = 40%, P@10 = 6/10 = 60%, Recall@10 = 6/8 = 75% (set K=10, total relevant = 8).</p>
+</div>
+
+<h2>4 · Average precision &amp; MAP@K</h2>
+<p>MAP gives a holistic view and rewards <b>ranking relevant docs high</b>. Start with <b>average precision (AP)</b> for one prompt:</p>
+<div class="card scroll">
+<table>
+<tr><th>Rank</th><th>Item</th><th>Precision@rank</th><th>Counted?</th></tr>
+<tr class="hl"><td>1</td><td>relevant</td><td>1/1 = 1.0</td><td>✔</td></tr>
+<tr><td>2</td><td>–</td><td>1/2 = 0.5</td><td>skip</td></tr>
+<tr><td>3</td><td>–</td><td>1/3 ≈ 0.3</td><td>skip</td></tr>
+<tr class="hl"><td>4</td><td>relevant</td><td>2/4 = 0.5</td><td>✔</td></tr>
+<tr class="hl"><td>5</td><td>relevant</td><td>3/5 = 0.6</td><td>✔</td></tr>
+<tr><td>6</td><td>–</td><td>3/6 = 0.5</td><td>skip</td></tr>
+</table>
+<ol>
+<li><b>Sum</b> the precisions on relevant rows only: 1 + 0.5 + 0.6 = <b>2.1</b></li>
+<li><b>Divide</b> by the number of relevant docs retrieved in the top K (3): 2.1 / 3 = <b>0.7</b> → AP@6</li>
+<li><b>MAP</b> = average the AP across many prompts → the AP of a “typical” prompt.</li>
+</ol>
+<p><b>Why it rewards good ranking:</b> an irrelevant doc high in the list lowers the precision at the rank of <em>every</em> relevant doc below it, dragging the average down. High MAP ⇒ the retriever puts the relevant docs it finds near the top.</p>
+<p class="small">Note (my addition): the lecture divides by relevant docs retrieved in the top K. Many libraries instead divide by min(K, total relevant) or total relevant, so values can differ between tools.</p>
+</div>
+
+<h2>5 · Reciprocal rank &amp; MRR</h2>
+<div class="card">
+<div class="formula">Reciprocal Rank = 1 / (rank of first relevant doc)</div>
+<p>Rank 1 → 1.0 · rank 2 → 0.5 · rank 4 → 0.25. The later the first relevant doc appears, the worse the score. <b>MRR</b> averages over many prompts and shows how soon, on average, you hit something relevant. It stresses having at least one relevant doc as high as possible.</p>
+<h3>MRR calculator (slide: ranks 1, 3, 6, 2)</h3>
+<div class="ctl">
+<label>Search 1 <input type="number" class="mr" value="1" min="1"></label>
+<label>Search 2 <input type="number" class="mr" value="3" min="1"></label>
+<label>Search 3 <input type="number" class="mr" value="6" min="1"></label>
+<label>Search 4 <input type="number" class="mr" value="2" min="1"></label>
+</div>
+<div class="small" id="mrt"></div><div class="big" id="mrv"></div>
+</div>
+<p class="small">The slide rounds 1/3 → 0.33 and 1/6 → 0.17, giving a sum of 2.0; exact arithmetic gives 1 + 0.3333 + 0.1667 + 0.5 = 2.0 → MRR = 0.5.</p>
+
+<h2>6 · Which metric when?</h2>
+<div class="card scroll"><table>
+<tr><th>Metric</th><th>Answers</th><th>Use it for</th></tr>
+<tr><td><b>Recall / Recall@K</b></td><td>Did we find the relevant docs?</td><td>Most foundational and most cited; the retriever’s core goal</td></tr>
+<tr><td><b>Precision &amp; MAP</b></td><td>Are irrelevant docs sneaking in? How well are results ranked?</td><td>Build on recall: noise and ranking quality</td></tr>
+<tr><td><b>MRR</b></td><td>How soon is the first good result?</td><td>Specialized: performance at the very top of the ranking</td></tr>
+</table></div>
+<div class="callout ok"><b>Practical loop:</b> change a setting (e.g. the semantic-vs-keyword weight in hybrid search), re-run a set of sample prompts, and watch recall/precision to see if it helped. Works in development <em>and</em> production monitoring.</div>
+<div class="callout"><b>Downside:</b> every metric needs <b>ground-truth relevant docs</b> for a collection of sample prompts, a time-consuming, manual job (e.g. “hand marked” in the lecture).</div>
+
+<h2>7 · Python sketch (mine, not from the lecture)</h2>
+<pre><code>def precision_at_k(ranked, relevant, k):
+    return sum(d in relevant for d in ranked[:k]) / k
+
+def recall_at_k(ranked, relevant, k):
+    return sum(d in relevant for d in ranked[:k]) / len(relevant)
+
+def average_precision(ranked, relevant, k):
+    hits, total = 0, 0.0
+    for i, d in enumerate(ranked[:k], start=1):
+        if d in relevant:
+            hits += 1
+            total += hits / i          # precision at this rank
+    return total / hits if hits else 0.0   # lecture's denominator
+
+def reciprocal_rank(ranked, relevant):
+    for i, d in enumerate(ranked, start=1):
+        if d in relevant:
+            return 1 / i
+    return 0.0
+
+# MAP / MRR = mean of AP / RR over all test prompts</code></pre>
+
+<h2>8 · Alternatives &amp; trade-offs</h2>
+<div class="card scroll"><table>
+<tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+<tr><td><b>Precision/recall/MAP/MRR (this lesson)</b></td><td>Simple, interpretable, standard.</td><td>Needs hand-labelled ground truth; binary relevance only.</td></tr>
+<tr><td>NDCG (graded relevance)</td><td>Handles “highly / somewhat / not relevant”.</td><td>More labelling effort; less intuitive.</td></tr>
+<tr><td>Hit rate@K (any relevant in top K?)</td><td>Very easy; fits RAG with one key passage.</td><td>Ignores how many or how well ranked.</td></tr>
+<tr><td>LLM-as-judge for relevance labels</td><td>Cheap, scales labelling.</td><td>Judge bias/noise; validate against a human sample.</td></tr>
+<tr><td>End-to-end answer evaluation</td><td>Measures what users actually see.</td><td>Mixes retriever and generator errors.</td></tr>
+</table></div>
+
+<h2>Takeaways</h2>
+<ul>
+<li>Need prompt + ranked list + ground-truth relevant docs.</li>
+<li>Precision = hits ÷ retrieved; recall = hits ÷ all relevant. Retrieved can exceed total relevant because some retrieved docs are irrelevant.</li>
+<li>Quote metrics @K (top-5 to top-15 is typical).</li>
+<li>AP/MAP reward putting relevant docs high; RR/MRR focus on the first relevant doc.</li>
+<li>Recall first, then precision/MAP, MRR for the top of the list. All need labelled data.</li>
+</ul>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const pct=x=>(x*100).toFixed(1).replace(/\.0$/,'')+'%';
+/* explorer */
+function ex(){
+ const R=+$('R').value||1;
+ $('N').max=Math.max(30,R+5);
+ const N=+$('N').value;
+ $('H').max=Math.min(N,R);
+ let H=Math.min(+$('H').value,N,R);$('H').value=H;
+ $('Nv').textContent=N;$('Hv').textContent=H;
+ let d='';
+ for(let i=0;i<H;i++)d+='<div class="dot rel">✓</div>';
+ for(let i=0;i<N-H;i++)d+='<div class="dot irr">✗</div>';
+ for(let i=0;i<R-H;i++)d+='<div class="dot miss"></div>';
+ $('dots').innerHTML=d;
+ const P=H/N,Rc=H/R;
+ $('P').textContent=pct(P);$('Rc').textContent=pct(Rc);
+ $('Pm').style.width=P*100+'%';$('Rm').style.width=Rc*100+'%';
+ $('Pt').textContent=`${H} relevant of ${N} retrieved (${N-H} irrelevant)`;
+ $('Rt').textContent=`${H} of ${R} relevant found (${R-H} missed)`;
+}
+['R','N','H'].forEach(i=>$(i).oninput=ex);
+$('p1').onclick=()=>{$('R').value=10;$('N').value=12;$('H').value=8;ex()};
+$('p2').onclick=()=>{$('R').value=10;$('N').value=15;$('H').value=9;ex()};
+ex();
+/* ranked list */
+let rel=[1,0,0,1,0,1,1,0,1,1];
+function drawRk(){
+ $('rk').innerHTML=rel.map((v,i)=>`<button class="${v?'on':''}" data-i="${i}">${i+1}<small>${v?'rel':'–'}</small></button>`).join('');
+ document.querySelectorAll('#rk button').forEach(b=>b.onclick=()=>{rel[+b.dataset.i]^=1;rk()});
+}
+function rk(){
+ drawRk();
+ const K=+$('K').value,TR=Math.max(1,+$('TR').value||1);$('Kv').textContent=K;
+ const h=rel.slice(0,K).reduce((a,b)=>a+b,0);
+ $('pk').textContent=pct(h/K);$('pkt').textContent=`${h} relevant in top ${K}`;
+ $('rkk').textContent=pct(Math.min(h/TR,1));$('rkt').textContent=`${h} of ${TR} total relevant`+(h>TR?' (total must be ≥ hits)':'');
+ const f=rel.indexOf(1);
+ $('rr').textContent=f<0?'0':(1/(f+1)).toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
+ $('rrt').textContent=f<0?'no relevant doc in list':`first relevant at rank ${f+1}: 1/${f+1}`;
+}
+$('K').oninput=rk;$('TR').oninput=rk;rk();
+/* mrr */
+function mr(){
+ const v=[...document.querySelectorAll('.mr')].map(i=>Math.max(1,+i.value||1));
+ const s=v.reduce((a,r)=>a+1/r,0);
+ $('mrt').textContent=v.map(r=>`1/${r}`).join(' + ')+` = ${s.toFixed(4)}, ÷ ${v.length}`;
+ $('mrv').textContent='MRR = '+(s/v.length).toFixed(3);
+}
+document.querySelectorAll('.mr').forEach(i=>i.oninput=mr);mr();
+</script>
+</body>
+</html>

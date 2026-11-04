@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RAG M2 · Hybrid Search (RRF + Beta)</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--fg:#1d1d1f;--mut:#6b6b70;--line:#e3e3e0;--kw:#0e9aa7;--sem:#e5395b;--flt:#7c5cff;--ok:#1f9d55;--warn:#d98a00;--code:#f1f1ee;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141416;--card:#1d1d20;--fg:#ececee;--mut:#9a9aa2;--line:#2f2f34;--kw:#34c3d1;--sem:#ff5a7b;--flt:#9b83ff;--ok:#3ccf7e;--warn:#f0a929;--code:#25252a;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 60px}
+h1{font-size:2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.35rem;margin:2.2em 0 .6em;padding-top:.4em;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:1.2em 0 .4em}
+.tag{display:inline-block;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.sub{color:var(--mut);margin:.2em 0 1em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+.grid{display:grid;gap:12px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:600;color:#fff}
+.kw{background:var(--kw)}.sem{background:var(--sem)}.flt{background:var(--flt)}
+.bt{border-top:4px solid}
+code,pre{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86rem}
+pre{background:var(--code);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0}
+code{background:var(--code);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+.callout{border-left:4px solid var(--warn);background:var(--card);padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0}
+.callout.ok{border-color:var(--ok)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--code)}
+button,select,input{font:inherit}
+button{background:var(--fg);color:var(--bg);border:0;border-radius:9px;padding:7px 14px;cursor:pointer}
+button.alt{background:var(--code);color:var(--fg);border:1px solid var(--line)}
+button:disabled{opacity:.4;cursor:default}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:8px 0}
+.ctl label{display:flex;gap:8px;align-items:center;font-size:.9rem}
+input[type=range]{width:160px}
+.val{font-family:ui-monospace,Menlo,monospace;min-width:3ch;display:inline-block}
+.row{display:flex;align-items:center;gap:10px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;margin:5px 0;background:var(--card);font-size:.9rem}
+.row .nm{font-weight:600;min-width:5.5em}
+.row .bar{flex:1;height:10px;background:var(--code);border-radius:6px;overflow:hidden}
+.row .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sem),var(--kw))}
+.row.out{opacity:.38;text-decoration:line-through}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.stepbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.step{padding:5px 12px;border-radius:99px;border:1px solid var(--line);font-size:.82rem;color:var(--mut)}
+.step.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+svg text{font-family:inherit}
+.big{font-size:1.6rem;font-weight:700}
+.small{font-size:.85rem;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">DeepLearning.AI · RAG · Module 2 · Information Retrieval Foundations</span>
+<h1>Hybrid Search</h1>
+<p class="sub">Metadata filtering + keyword search + semantic search, combined with Reciprocal Rank Fusion (RRF) and a beta weight.</p>
+
+<div class="card">
+<b>One-line idea:</b> run keyword and semantic search in parallel, filter both lists with metadata, then merge the two <em>rankings</em> into one using RRF, tuned by <code>k</code> and <code>beta</code>.
+</div>
+
+<!-- 1 -->
+<h2>1 · Quick review: three techniques, three strengths</h2>
+<div class="grid g3">
+  <div class="card bt" style="border-top-color:var(--flt)"><span class="pill flt">Metadata filtering</span>
+    <p>Rigid criteria stored in document metadata narrow the results. Fast, easy to implement, easy to interpret.</p>
+    <p><b>Gives you:</b> a strict yes/no gate neither other technique can provide.<br><b>Weakness:</b> not a good search technique on its own.</p></div>
+  <div class="card bt" style="border-top-color:var(--kw)"><span class="pill kw">Keyword search</span>
+    <p>Scores and ranks documents by sharing the prompt’s keywords. Fast and easy; can find relevant documents very well.</p>
+    <p><b>Gives you:</b> exact matches, great for technical terms and product names.<br><b>Weakness:</b> exact words only; misses same-meaning-different-words.</p></div>
+  <div class="card bt" style="border-top-color:var(--sem)"><span class="pill sem">Semantic search</span>
+    <p>Prompt and documents are embedded as vectors; the closest vector to the prompt wins.</p>
+    <p><b>Gives you:</b> flexible, meaning-based matching nothing else can do.<br><b>Weakness:</b> slower and more computationally intensive.</p></div>
+</div>
+
+<div class="card">
+<h3>Real-life scenario: internal company help search</h3>
+<table>
+<tr><th>Employee types…</th><th>Who wins</th><th>Why</th></tr>
+<tr><td><code>ERR-4021 payment gateway</code></td><td><span class="pill kw">keyword</span></td><td>Exact error code / product name must appear verbatim.</td></tr>
+<tr><td><code>I can’t get into my account</code></td><td><span class="pill sem">semantic</span></td><td>Matching doc says “login failure / password reset”: different words, same meaning.</td></tr>
+<tr><td>Any query from a contractor</td><td><span class="pill flt">metadata</span></td><td>Contractors must never see HR-confidential docs, a rule, not a ranking.</td></tr>
+</table>
+</div>
+
+<!-- 2 -->
+<h2>2 · The hybrid pipeline (step through it)</h2>
+<div class="stepbar" id="steps"></div>
+<div class="card scroll">
+<svg id="pipe" viewBox="0 0 860 300" width="100%" style="min-width:640px"></svg>
+<p id="pipeText" style="margin:6px 0 0"></p>
+<div class="ctl"><button class="alt" id="prev">← Back</button><button id="next">Next →</button></div>
+</div>
+<div class="callout ok">Both searches return about <b>50</b> documents; many appear in <em>both</em> lists, but in a different order. The filter leaves e.g. <b>35</b> (keyword) and <b>30</b> (semantic). The filter runs on <em>each</em> list <b>before</b> the merge.</div>
+
+<!-- 3 -->
+<h2>3 · Reciprocal Rank Fusion (RRF)</h2>
+<p>RRF is the commonly used algorithm for combining the two ranked lists. It rewards documents for ranking highly on <em>either</em> list, and lets you control keyword-vs-semantic weight.</p>
+<div class="card">
+<div class="big mono" style="text-align:center">score(d) = Σ 1 / (k + rank<sub>i</sub>(d))</div>
+<p class="small" style="text-align:center">sum over every ranked list i (here just two: keyword rank and semantic rank)</p>
+<ul>
+<li>With <code>k = 0</code>: 1st place = 1 pt, 2nd = 0.5, 3rd ≈ 0.33 …</li>
+<li>Points from each list are added; totals produce the final ranking.</li>
+<li><b>Example (slide):</b> keyword rank 2nd + semantic rank 10th → 1/2 + 1/10 = 0.5 + 0.1 = <b>0.6</b>.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Mini calculator</h3>
+<div class="ctl">
+<label>Keyword rank <input type="number" id="c_a" value="2" min="1" max="100" style="width:70px"></label>
+<label>Semantic rank <input type="number" id="c_b" value="10" min="1" max="100" style="width:70px"></label>
+<label>k <input type="range" id="c_k" min="0" max="100" value="0"><span class="val" id="c_kv">0</span></label>
+</div>
+<div class="big mono" id="c_out"></div>
+<div class="small" id="c_det"></div>
+</div>
+
+<h3>What k does: controlling the top ranks’ impact</h3>
+<div class="grid g2">
+<div class="card"><b>k = 0</b><br>1st scores 1 pt, 10th scores 0.1 pt → <b>10× difference</b>. A top-ranked doc on even <em>one</em> list shoots to the top of the overall ranking.</div>
+<div class="card"><b>k = 50</b><br>1st scores 1/51 (slide shows 1/50 as shorthand), 10th scores 1/60 → about <b>1.2× difference</b>. Still pays to be first, but a single high rank doesn’t dominate.</div>
+</div>
+<div class="card">
+<div class="ctl"><label>k <input type="range" id="k_s" min="0" max="100" value="0"><span class="val" id="k_v">0</span></label></div>
+<div id="k_bars"></div>
+<div class="small" id="k_ratio"></div>
+</div>
+<div class="callout"><b>Key limitation:</b> RRF only looks at <b>ranks, not scores</b>. If the top document scored far better than the second, that gap is thrown away.</div>
+
+<!-- 4 -->
+<h2>4 · Beta: weighting semantic vs keyword</h2>
+<p>A retriever’s hybrid search usually adds a second hyperparameter, <code>beta</code>, to weight the two rankings.</p>
+<div class="card">
+<div class="ctl"><label>β <input type="range" id="b_s" min="0" max="100" value="70"><span class="val" id="b_v">0.70</span></label></div>
+<div style="display:flex;height:44px;border-radius:10px;overflow:hidden;font-weight:600;color:#fff">
+<div id="b_sem" style="background:var(--sem);display:flex;align-items:center;justify-content:center"></div>
+<div id="b_kw" style="background:var(--kw);display:flex;align-items:center;justify-content:center"></div></div>
+<ul>
+<li><b>β = 0.8</b> → 80% semantic, 20% keyword. <b>β = 0.7</b> → 70/30.</li>
+<li><b>70/30 (semantic/keyword)</b> is a typical starting point; tune it for your system.</li>
+<li>Exact word matching matters (SKUs, error codes, legal terms)? Weight keyword more, i.e. <b>lower beta</b>.</li>
+<li>Meaning matters more, keywords less crucial? Weight semantic more, i.e. <b>higher beta</b>.</li>
+</ul>
+</div>
+<div class="callout">The lecture doesn’t give the exact formula for combining beta with RRF. The common implementation, and what the demo below uses (my inference), is: <code>score = β·1/(k+rank<sub>sem</sub>) + (1−β)·1/(k+rank<sub>kw</sub>)</code>.</div>
+
+<!-- 5 -->
+<h2>5 · Interactive hybrid retriever</h2>
+<p class="small">Eight invented docs, one query. Ranks come from two pre-computed lists. Apply the metadata filter, tweak k, β and top_k, and watch the merged ranking change.</p>
+<div class="card">
+<div class="ctl">
+<label>Metadata filter
+<select id="d_f"><option value="all">none (all depts)</option><option value="Eng">dept = Eng only</option><option value="HR">dept = HR only</option></select></label>
+<label>k <input type="range" id="d_k" min="0" max="60" value="0"><span class="val" id="d_kv">0</span></label>
+<label><input type="checkbox" id="d_bw" checked> use β</label>
+<label>β <input type="range" id="d_b" min="0" max="100" value="70"><span class="val" id="d_bv">0.70</span></label>
+<label>top_k <input type="range" id="d_t" min="1" max="8" value="4"><span class="val" id="d_tv">4</span></label>
+</div>
+<div class="grid g3">
+<div><b><span class="pill kw">Keyword list</span></b><div id="d_kwl"></div></div>
+<div><b><span class="pill sem">Semantic list</span></b><div id="d_seml"></div></div>
+<div><b>Fused ranking</b> <span class="small">(top_k returned = solid)</span><div id="d_fused"></div></div>
+</div>
+<p class="small" id="d_note"></p>
+</div>
+
+<!-- 6 -->
+<h2>6 · Final step &amp; tuning knobs</h2>
+<ul>
+<li>The retriever returns the top <code>top_k</code> documents (the number originally requested) from the final hybrid ranking.</li>
+<li>Keyword search → exact word matching; semantic → fuzzier, meaning-based; metadata → strict criteria.</li>
+</ul>
+<div class="card scroll"><table>
+<tr><th>Knob</th><th>Where</th><th>Effect</th></tr>
+<tr><td>BM25 <code>k1</code>, <code>b</code></td><td>keyword search</td><td>Term-frequency saturation, length normalization</td></tr>
+<tr><td>Which metadata to filter on</td><td>filter step</td><td>What gets excluded outright</td></tr>
+<tr><td>RRF <code>k</code></td><td>fusion</td><td>How much the top ranks dominate</td></tr>
+<tr><td><code>beta</code></td><td>fusion</td><td>Semantic vs keyword weight</td></tr>
+<tr><td><code>top_k</code></td><td>output</td><td>How many docs reach the LLM</td></tr>
+</table></div>
+<div class="callout"><b>To tune any of this you must measure retrieval quality.</b> That is the next lesson: <b>Evaluating retrieval</b>.</div>
+
+<h2>7 · Python sketch (my own, not from the lesson)</h2>
+<pre><code>def rrf(kw_ranked, sem_ranked, k=0, beta=None):
+    """kw_ranked / sem_ranked: lists of doc ids, best first."""
+    scores = {}
+    for rank, d in enumerate(kw_ranked, start=1):
+        w = 1.0 if beta is None else (1 - beta)
+        scores[d] = scores.get(d, 0) + w / (k + rank)
+    for rank, d in enumerate(sem_ranked, start=1):
+        w = 1.0 if beta is None else beta
+        scores[d] = scores.get(d, 0) + w / (k + rank)
+    return sorted(scores, key=scores.get, reverse=True)
+
+def hybrid(prompt, top_k=5, k=0, beta=0.7):
+    kw  = [d for d in bm25_search(prompt, 50)  if passes_filter(d)]
+    sem = [d for d in vector_search(prompt, 50) if passes_filter(d)]
+    return rrf(kw, sem, k=k, beta=beta)[:top_k]</code></pre>
+<p class="small">Note the filter is applied to each list first, so ranks are positions in the <em>filtered</em> lists. A doc missing from one list simply gets 0 from it.</p>
+
+<h2>8 · Alternatives &amp; trade-offs</h2>
+<div class="card scroll"><table>
+<tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+<tr><td><b>RRF + beta (this lesson)</b></td><td>No score normalization needed; robust; simple; two knobs.</td><td>Ignores score gaps; beta/k need tuning with an eval set.</td></tr>
+<tr><td>Weighted score fusion (min-max or z-score normalize, then blend)</td><td>Keeps score magnitude information.</td><td>BM25 and cosine scores live on different scales; normalization is brittle per query.</td></tr>
+<tr><td>Hybrid + cross-encoder reranker on the top ~50</td><td>Usually the best final precision.</td><td>Extra latency and cost; another model to run.</td></tr>
+<tr><td>Single technique only</td><td>Simplest system.</td><td>Keyword misses synonyms; semantic can miss exact IDs/terms.</td></tr>
+</table></div>
+
+<h2>Takeaways</h2>
+<ul>
+<li>Hybrid = keyword + semantic in parallel → metadata filter each list → fuse → top_k.</li>
+<li>RRF score = Σ 1/(k + rank); only ranks matter, not scores.</li>
+<li>Small k lets top ranks dominate; larger k (e.g. 50) flattens it (10× → ~1.2×).</li>
+<li>β weights semantic vs keyword; 70/30 is a typical start; lower β when exact words matter.</li>
+<li>Everything is tunable, but tuning needs measurement → retrieval metrics next.</li>
+</ul>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+/* ---- pipeline stepper ---- */
+const S=[
+ ["1 Prompt","The retriever receives the prompt."],
+ ["2 Two searches","Keyword search and semantic search both run on the prompt, each returning ~50 ranked docs (many shared, order differs)."],
+ ["3 Metadata filter","Each list is filtered to drop irrelevant docs: keyword list → 35 left, semantic list → 30 left."],
+ ["4 RRF merge","Both filtered rankings are fused into one list via reciprocal rank fusion (k, beta)."],
+ ["5 top_k","The top_k docs from the hybrid ranking are returned to build the augmented prompt."]];
+let si=0;
+function box(x,y,w,h,t,c,on){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${on?c:'none'}" stroke="${c}" stroke-width="2" opacity="${on?1:.35}"/><text x="${x+w/2}" y="${y+h/2+5}" text-anchor="middle" font-size="14" font-weight="600" fill="${on?'#fff':'currentColor'}" opacity="${on?1:.6}">${t}</text>`}
+function drawPipe(){
+ $('steps').innerHTML=S.map((s,i)=>`<span class="step ${i==si?'on':''}">${s[0]}</span>`).join('');
+ let h='';
+ h+=box(10,120,110,56,'Prompt','#888',si==0);
+ h+=box(170,40,130,56,'Keyword (50)','var(--kw)',si==1);
+ h+=box(170,200,130,56,'Semantic (50)','var(--sem)',si==1);
+ h+=box(360,40,130,56,'Filter → 35','var(--flt)',si==2);
+ h+=box(360,200,130,56,'Filter → 30','var(--flt)',si==2);
+ h+=box(550,120,130,56,'RRF merge','#d98a00',si==3);
+ h+=box(730,120,110,56,'top_k out','#1f9d55',si==4);
+ const a=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1} L${x2} ${y2}" stroke="currentColor" stroke-width="2" opacity=".45" marker-end="url(#ar)"/>`;
+ h+=`<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="currentColor" opacity=".6"/></marker></defs>`;
+ h+=a(120,138,170,70)+a(120,158,170,226)+a(300,68,360,68)+a(300,228,360,228)+a(490,68,550,138)+a(490,228,550,158)+a(680,148,730,148);
+ $('pipe').innerHTML=h;
+ $('pipeText').textContent=S[si][1];
+ $('prev').disabled=si==0;$('next').disabled=si==S.length-1;
+}
+$('prev').onclick=()=>{si--;drawPipe()};$('next').onclick=()=>{si++;drawPipe()};drawPipe();
+
+/* ---- calculator ---- */
+function calc(){
+ const a=+$('c_a').value||1,b=+$('c_b').value||1,k=+$('c_k').value;
+ $('c_kv').textContent=k;
+ const x=1/(k+a),y=1/(k+b);
+ $('c_out').textContent=(x+y).toFixed(4);
+ $('c_det').textContent=`1/(${k}+${a}) + 1/(${k}+${b}) = ${x.toFixed(4)} + ${y.toFixed(4)}`;
+}
+['c_a','c_b','c_k'].forEach(i=>$(i).oninput=calc);calc();
+
+/* ---- k bars ---- */
+function kb(){
+ const k=+$('k_s').value;$('k_v').textContent=k;
+ const r=[1,2,3,5,10];
+ const m=1/(k+1);
+ $('k_bars').innerHTML=r.map(n=>{const s=1/(k+n);return `<div class="row"><span class="nm">rank ${n}</span><span class="bar"><i style="width:${s/m*100}%"></i></span><span class="mono">${s.toFixed(4)}</span></div>`}).join('');
+ $('k_ratio').textContent=`1st vs 10th: ${((1/(k+1))/(1/(k+10))).toFixed(2)}× difference`;
+}
+$('k_s').oninput=kb;kb();
+
+/* ---- beta bar ---- */
+function bb(){
+ const b=+$('b_s').value/100;$('b_v').textContent=b.toFixed(2);
+ $('b_sem').style.width=b*100+'%';$('b_kw').style.width=(1-b)*100+'%';
+ $('b_sem').textContent=b>0.12?`Semantic ${Math.round(b*100)}%`:'';
+ $('b_kw').textContent=(1-b)>0.12?`Keyword ${Math.round((1-b)*100)}%`:'';
+}
+$('b_s').oninput=bb;bb();
+
+/* ---- demo ---- */
+const DOCS=[
+ {n:'Doc A',d:'Eng',kw:1,sem:5,t:'ERR-4021 gateway timeout fix'},
+ {n:'Doc B',d:'Eng',kw:2,sem:2,t:'Payment API troubleshooting'},
+ {n:'Doc C',d:'HR',kw:3,sem:1,t:'Account access & password policy'},
+ {n:'Doc D',d:'Eng',kw:4,sem:7,t:'Gateway release notes'},
+ {n:'Doc E',d:'HR',kw:5,sem:3,t:'Leave & benefits FAQ'},
+ {n:'Doc F',d:'Eng',kw:6,sem:4,t:'Login failure runbook'},
+ {n:'Doc G',d:'HR',kw:7,sem:6,t:'Onboarding checklist'},
+ {n:'Doc H',d:'Eng',kw:8,sem:8,t:'Legacy auth migration'}];
+function demo(){
+ const f=$('d_f').value,k=+$('d_k').value,useB=$('d_bw').checked,b=+$('d_b').value/100,t=+$('d_t').value;
+ $('d_kv').textContent=k;$('d_bv').textContent=b.toFixed(2);$('d_tv').textContent=t;$('d_b').disabled=!useB;
+ const keep=DOCS.filter(x=>f=='all'||x.d==f);
+ const kwL=[...keep].sort((a,c)=>a.kw-c.kw),semL=[...keep].sort((a,c)=>a.sem-c.sem);
+ const sc={};keep.forEach(x=>sc[x.n]=0);
+ kwL.forEach((x,i)=>sc[x.n]+=(useB?1-b:1)/(k+i+1));
+ semL.forEach((x,i)=>sc[x.n]+=(useB?b:1)/(k+i+1));
+ const fused=[...keep].sort((a,c)=>sc[c.n]-sc[a.n]);
+ const lst=(L,key)=>DOCS.slice().sort((a,c)=>a[key]-c[key]).map(x=>{const on=keep.includes(x);const r=on?L.indexOf(x)+1:'–';return `<div class="row ${on?'':'out'}"><span class="nm">${x.n}</span><span class="small">${x.d}</span><span class="mono" style="margin-left:auto">#${r}</span></div>`}).join('');
+ $('d_kwl').innerHTML=lst(kwL,'kw');$('d_seml').innerHTML=lst(semL,'sem');
+ const mx=Math.max(...fused.map(x=>sc[x.n]),1e-9);
+ $('d_fused').innerHTML=fused.map((x,i)=>`<div class="row" style="${i<t?'border-color:var(--ok);':'opacity:.5'}"><span class="nm">${i+1}. ${x.n}</span><span class="bar"><i style="width:${sc[x.n]/mx*100}%"></i></span><span class="mono">${sc[x.n].toFixed(3)}</span></div>`).join('');
+ $('d_note').textContent=`Ranks shown are positions within the filtered lists (struck-through docs were removed). ${keep.length} docs remain; top ${Math.min(t,keep.length)} returned. Try k=0 vs k=50 and β=0.2 vs 0.9.`;
+}
+['d_f','d_k','d_bw','d_b','d_t'].forEach(i=>$(i).oninput=demo);demo();
+</script>
+</body>
+</html>

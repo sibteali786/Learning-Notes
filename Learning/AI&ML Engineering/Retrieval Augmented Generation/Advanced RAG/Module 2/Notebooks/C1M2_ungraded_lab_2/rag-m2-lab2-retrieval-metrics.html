@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RAG M2 · Lab 2 · Retrieval Metrics (explained)</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--fg:#1d1d1f;--mut:#6b6b70;--line:#e3e3e0;--a:#e5395b;--b:#0e9aa7;--ok:#1f9d55;--okbg:#d9f2e3;--bad:#d64545;--badbg:#fbe1e1;--warn:#d98a00;--code:#f1f1ee;--hl:#fff3c4;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141416;--card:#1d1d20;--fg:#ececee;--mut:#9a9aa2;--line:#2f2f34;--a:#ff5a7b;--b:#34c3d1;--ok:#3ccf7e;--okbg:#17382a;--bad:#ff6b6b;--badbg:#3d1f1f;--warn:#f0a929;--code:#25252a;--hl:#4a3f10;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 "Inter",system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 18px 70px}
+h1{font-size:2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.4rem;margin:2.4em 0 .6em;padding-top:.5em;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:1.3em 0 .4em}
+.tag{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.sub{color:var(--mut);margin:.2em 0 1em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+code,pre{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.85rem}
+code{background:var(--code);padding:1px 6px;border-radius:5px}
+pre{background:var(--code);padding:14px;border-radius:10px;overflow-x:auto;margin:10px 0}
+pre code{background:none;padding:0}
+pre .l{display:block;padding:0 4px;border-radius:4px}
+pre .l.on{background:var(--hl)}
+.callout{border-left:4px solid var(--warn);background:var(--card);padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0}
+.callout.ok{border-color:var(--ok)}
+.callout.q{border-color:var(--b)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--code)}
+td.n,th.n{text-align:right;font-family:ui-monospace,Menlo,monospace}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0}
+.ctl label{display:flex;gap:6px;align-items:center;font-size:.9rem}
+input[type=number],input[type=text]{font:inherit;font-family:ui-monospace,Menlo,monospace;padding:4px 6px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+input[type=number]{width:70px}
+input.w{width:100%}
+button{font:inherit;background:var(--code);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:6px 12px;cursor:pointer}
+button.on{background:var(--fg);color:var(--bg)}
+button:disabled{opacity:.4;cursor:default}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.flow .b{padding:8px 12px;border:2px solid var(--b);border-radius:10px;font-size:.88rem;font-weight:600;background:var(--card)}
+.flow .ar{color:var(--mut)}
+.small{font-size:.85rem;color:var(--mut)}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:.75rem;font-weight:600;background:var(--code);border:1px solid var(--line)}
+.bad{background:var(--badbg)}
+.good{background:var(--okbg)}
+.stepbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.state{background:var(--code);border-radius:10px;padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;white-space:pre-wrap}
+.arr{display:inline-flex;gap:3px;margin:2px 0}
+.arr span{min-width:34px;text-align:center;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card);font-family:ui-monospace,Menlo,monospace;font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="tag">DeepLearning.AI · RAG · Module 2 · Ungraded Lab 2</span>
+<h1>Retrieval Metrics Lab, explained</h1>
+<p class="sub">What the lab does, every function line by line, and answers to your specific questions (asarray, detach, ravel, denom, the cosine snippet, sorted/lambda, retrieve_documents, compute_metrics).</p>
+
+<h2>0 · The lab at a glance</h2>
+<div class="card">
+<p><b>Goal:</b> measure how good a semantic retriever is, using <b>Precision@K</b> and <b>Recall@K</b>, on a labeled dataset.</p>
+<div class="flow">
+<span class="b">20 Newsgroups<br><small>11,314 posts, 20 categories</small></span><span class="ar">→</span>
+<span class="b">Pre-computed embeddings<br><small>embeddings.joblib (11,314 vectors)</small></span><span class="ar">→</span>
+<span class="b">Embed the query<br><small>BAAI/bge-base-en-v1.5</small></span><span class="ar">→</span>
+<span class="b">Cosine similarity vs all docs</span><span class="ar">→</span>
+<span class="b">Top-K</span><span class="ar">→</span>
+<span class="b">Precision@K / Recall@K</span>
+</div>
+<p><b>How “relevant” is defined here:</b> a retrieved post counts as relevant if its <em>newsgroup category</em> equals the category you expect for the query (e.g. query “advancements in space exploration technology” → <code>sci.space</code>). That’s the lab’s ground truth.</p>
+<p><b>Data:</b> the posts were embedded ahead of time to save time; the model is only used to embed the queries.</p>
+</div>
+
+<h2>1 · Setup cells (quick tour)</h2>
+<div class="card scroll"><table>
+<tr><th>Cell code</th><th>What it does</th></tr>
+<tr><td><code>fetch_20newsgroups(subset='train', shuffle=True, random_state=42, ...)</code></td><td>Downloads the classic text dataset (training split). <code>random_state=42</code> makes the shuffle reproducible.</td></tr>
+<tr><td><code>df = pd.DataFrame({'text': data, 'category': target})</code></td><td>One row per post: raw text + integer category id (0–19). Shape <code>(11314, 2)</code>.</td></tr>
+<tr><td><code>newsgroups_train.target_names[id]</code></td><td>Maps a category id to its name, e.g. 7 → <code>rec.autos</code>.</td></tr>
+<tr><td><code>SentenceTransformer(path/BAAI/bge-base-en-v1.5)</code></td><td>Loads the embedding model (turns text into a 768-dim vector).</td></tr>
+<tr><td><code>joblib.load('embeddings.joblib')</code></td><td>Loads the already-computed document vectors; <code>len(...)</code> = 11314, one per post.</td></tr>
+<tr><td><code>preprocess_text(text)</code></td><td>Just <code>text.strip()</code> (removes leading/trailing whitespace) as a placeholder for real cleaning.</td></tr>
+</table></div>
+
+<h2>2 · Your questions about <code>cosine_similarity</code></h2>
+<pre><code>def cosine_similarity(v1, array_of_vectors):
+    if hasattr(v1, "detach"):                      # torch tensor?
+        v1 = v1.detach().cpu().numpy()
+    v1 = np.asarray(v1, dtype=np.float32).ravel()
+
+    if hasattr(array_of_vectors, "detach"):
+        array_of_vectors = array_of_vectors.detach().cpu().numpy()
+    A = np.asarray(array_of_vectors, dtype=np.float32)
+
+    if A.ndim == 1:                                # single vector case
+        A = A.ravel()
+        denom = np.linalg.norm(v1) * np.linalg.norm(A)
+        return float(0.0 if denom == 0 else np.dot(v1, A) / denom)
+
+    # 2D case: one similarity per row of A
+    A = np.atleast_2d(A)
+    v1_norm = np.linalg.norm(v1)
+    A_norms = np.linalg.norm(A, axis=1)
+    denom = v1_norm * A_norms
+    with np.errstate(divide='ignore', invalid='ignore'):
+        sims = (A @ v1) / np.where(denom == 0, 1.0, denom)
+    sims[denom == 0] = 0.0
+    return sims.tolist()</code></pre>
+<p>The function is written defensively: it accepts either PyTorch tensors or NumPy arrays, a single vector or a whole matrix, and never crashes on zero vectors.</p>
+
+<h3>2a · What are <code>asarray</code>, <code>detach</code>, <code>cpu</code>, and why remove/detach a tensor?</h3>
+<div class="grid g2">
+<div class="card"><b>PyTorch tensor</b><br>PyTorch’s array type. It can (1) live on a <b>GPU</b>, and (2) <b>remember how it was computed</b> (an autograd “graph”) so gradients can be calculated in training.<br><br>
+<b>NumPy</b> arrays are plain CPU arrays with neither feature, so NumPy can’t read a tensor that’s on a GPU or that tracks gradients (it raises an error).</div>
+<div class="card"><b>The conversion chain</b><br>
+<code>x.detach()</code> → cuts the tensor off from the autograd graph (no gradient tracking; shares the same data)<br>
+<code>.cpu()</code> → copies it from GPU memory to normal CPU memory (no-op if already on CPU)<br>
+<code>.numpy()</code> → views it as a NumPy array<br><br>
+<code>hasattr(v1, "detach")</code> is a duck-typing check: “does this object have a <code>.detach</code> method?” Only torch tensors do, so NumPy inputs skip the conversion.</div>
+</div>
+<div class="callout ok"><b><code>np.asarray(x, dtype=np.float32)</code></b>: “make sure this is a NumPy array of 32-bit floats.” If <code>x</code> is already an ndarray of that dtype it returns it <b>without copying</b> (unlike <code>np.array</code>, which copies by default). If <code>x</code> is a list, it builds an array. float32 halves memory vs float64 and matches what the embedding model outputs.</div>
+<div class="callout q"><b>In this lab specifically:</b> <code>model.encode(..., convert_to_tensor=False)</code> already returns NumPy and the joblib embeddings are most likely NumPy too, so these branches are mostly a safety net (my inference). The comment in <code>compute_metrics</code> explains the motive: “avoid GPU→NumPy conversion errors”.</div>
+
+<h3>2b · What is <code>ravel()</code>?</h3>
+<p>It <b>flattens an array into 1-D</b> (a plain list of numbers). Returns a view of the original when possible, otherwise a copy. Why it’s used: a vector can arrive as <code>(768,)</code> or <code>(1, 768)</code> or <code>(768, 1)</code>, and the math below needs a clean 1-D shape.</p>
+<div class="card">
+<div class="ctl" id="rvBtns"></div>
+<div class="grid g2"><div><b>Before</b><div class="state" id="rvBefore"></div></div><div><b>After <code>.ravel()</code></b><div class="state" id="rvAfter"></div></div></div>
+</div>
+
+<h3>2c · What is <code>denom</code>? Are these length vectors?</h3>
+<p>Yes. <code>np.linalg.norm(v)</code> is the vector’s <b>length (L2 norm)</b>: √(v₁² + v₂² + …). Cosine similarity divides the dot product by the product of the two lengths, so it measures the <em>angle</em> between vectors, not their size:</p>
+<div class="card"><div class="state" style="text-align:center">cosine(v, a) = (v · a) / ( ‖v‖ × ‖a‖ )   ← denominator = <b>denom</b></div>
+<ul>
+<li><code>v1_norm</code> = one number: the length of the query vector.</li>
+<li><code>A_norms</code> = <code>np.linalg.norm(A, axis=1)</code> = one length <em>per row</em> of A (per document) → vector of N numbers. <code>axis=1</code> means “compute across the columns of each row”.</li>
+<li><code>denom = v1_norm * A_norms</code> = elementwise product → <b>N denominators</b>, one per document.</li>
+</ul></div>
+
+<h3>2d · The 2D snippet, step by step, with an example</h3>
+<pre id="snip"><code><span class="l" data-s="0">A = np.atleast_2d(A)</span>
+<span class="l" data-s="1">v1_norm = np.linalg.norm(v1)</span>
+<span class="l" data-s="2">A_norms = np.linalg.norm(A, axis=1)</span>
+<span class="l" data-s="3">denom = v1_norm * A_norms</span>
+<span class="l" data-s="4">with np.errstate(divide='ignore', invalid='ignore'):</span>
+<span class="l" data-s="4">    sims = (A @ v1) / np.where(denom == 0, 1.0, denom)</span>
+<span class="l" data-s="5">sims[denom == 0] = 0.0</span>
+<span class="l" data-s="6">return sims.tolist()</span></code></pre>
+<div class="card">
+<div class="stepbar" id="cosSteps"></div>
+<div id="cosExplain" style="margin:6px 0"></div>
+<h3 style="margin-top:6px">Play with it (edit the numbers)</h3>
+<div class="ctl"><b>v1 (query):</b>
+<input type="number" class="q" value="1"><input type="number" class="q" value="2"><input type="number" class="q" value="0"></div>
+<div class="small">Rows of A (documents). Row 4 is all zeros on purpose to show the zero-vector guard.</div>
+<div id="cosGrid"></div>
+<div class="scroll"><table id="cosTab"></table></div>
+<div class="small" id="cosNote"></div>
+</div>
+<ul>
+<li><code>np.atleast_2d(A)</code>: guarantees a matrix shape (N, D). A 1-D vector of 3 numbers becomes shape (1, 3).</li>
+<li><code>A @ v1</code>: matrix-vector product = dot product of every row with v1 → N numbers at once (no Python loop).</li>
+<li><code>np.where(denom == 0, 1.0, denom)</code>: wherever the denominator is 0, substitute 1.0 so the division can’t blow up (0/0 = NaN, x/0 = inf).</li>
+<li><code>np.errstate(...)</code>: silences NumPy’s divide/invalid warnings. Because of the <code>np.where</code> trick it’s likely redundant (my reading), just belt-and-braces.</li>
+<li><code>sims[denom == 0] = 0.0</code>: for zero vectors (undefined angle) the score is forced to 0 instead of the fake value produced by dividing by 1.0.</li>
+<li><code>.tolist()</code>: converts the NumPy array into a plain Python list of floats, which <code>top_k_greatest_indices</code> then sorts.</li>
+</ul>
+
+<h2>3 · <code>top_k_greatest_indices</code> and the <code>sorted(...lambda...)</code> line</h2>
+<pre><code>indexed_list = list(enumerate(lst))
+sorted_by_value = sorted(indexed_list, key=lambda x: x[1], reverse=True)
+top_k_indices = [index for index, value in sorted_by_value[:k]]</code></pre>
+<div class="grid g3">
+<div class="card"><b>1. <code>enumerate</code></b><br>Pairs every score with its position (doc id): <code>[0.2, 0.9]</code> → <code>[(0, 0.2), (1, 0.9)]</code>. Needed because sorting would otherwise lose which doc each score belonged to.</div>
+<div class="card"><b>2. <code>sorted(..., key=lambda x: x[1], reverse=True)</code></b><br><code>x</code> is one pair <code>(index, score)</code>. <code>lambda x: x[1]</code> is a tiny unnamed function returning the score (item at position 1). <code>key=</code> tells sorted “compare by this”. <code>reverse=True</code> = highest first.</div>
+<div class="card"><b>3. slice + list comprehension</b><br><code>[:k]</code> keeps the first k pairs; the comprehension unpacks each pair and keeps only the <code>index</code>. Result: doc ids of the k best matches.</div>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Live example</h3>
+<div class="ctl"><label>scores <input type="text" id="srS" value="0.2, 0.9, 0.5, 0.7" style="width:260px"></label><label>k <input type="number" id="srK" value="2" min="1"></label></div>
+<div class="state" id="srOut"></div>
+</div>
+
+<h2>4 · <code>retrieve_documents</code> with an example</h2>
+<pre><code>def retrieve_documents(query, embeddings, model, top_k=5):
+    query_clean = preprocess_text(query)
+    query_embedding = model.encode(query_clean, convert_to_tensor=False).astype(np.float32)
+
+    cosine_scores = []
+    for x in embeddings:                         # one doc vector at a time
+        if hasattr(x, "detach"): x = x.detach().cpu().numpy()
+        x = np.asarray(x, dtype=np.float32)
+        score = cosine_similarity(query_embedding, x)   # 1-D branch -> float
+        cosine_scores.append(float(score))
+
+    top_results = top_k_greatest_indices(cosine_scores, k=top_k)
+
+    print(f"Query: {query}")
+    for idx in top_results:
+        print(f"Document: {df.iloc[idx]['text'][:200]}...")
+        print(f"Category: {newsgroups_train.target_names[df.iloc[idx]['category']]}...")
+
+retrieve_documents("space exploration", embedding_vectors, model, top_k=2)</code></pre>
+<div class="card">
+<div class="stepbar" id="rdSteps"></div>
+<div id="rdBody"></div>
+</div>
+<div class="callout ok"><b>Lab output:</b> the top 2 for “space exploration” were “End of the Space Age?” and “Space class for teachers near Chicago”, both from <code>sci.space</code>. This is semantic search working: the matching is by meaning, not exact words.</div>
+<div class="callout"><b>Design note:</b> this function loops over 11,314 vectors in Python, calling <code>cosine_similarity</code> each time (slow). <code>compute_metrics</code> below fixes that with one matrix operation.</div>
+
+<h2>5 · Precision@K and Recall@K functions</h2>
+<div class="grid g2">
+<div class="card"><b>precision_at_k(relevant_count, k)</b><br>
+Guard: negative inputs → <code>ValueError</code>; <code>k == 0</code> → returns 0.0 (avoids divide-by-zero). Otherwise <code>relevant_count / k</code>.</div>
+<div class="card"><b>recall_at_k(relevant_count, total_relevant)</b><br>
+Same guards. Returns <code>relevant_count / total_relevant</code>, where the denominator is the number of relevant docs in the <em>whole corpus</em> (not just the top K).</div>
+</div>
+<div class="callout">Same numerator (relevant docs in the top K), different denominators: <b>K</b> for precision, <b>all relevant docs</b> for recall.</div>
+
+<h2>6 · <code>compute_metrics</code>, step by step</h2>
+<p>Takes a list of <code>{query, desired_category}</code> dicts and returns precision@K and recall@K per query. Click through the steps; the state panel shows what the variables hold for the lab’s first query at K=5.</p>
+<pre id="cmCode"><code></code></pre>
+<div class="card">
+<div class="stepbar" id="cmSteps"></div>
+<div id="cmText" style="margin:6px 0"></div>
+<div class="state" id="cmState"></div>
+<div class="small">Shapes and categories come from the lab; individual doc indices are made-up illustrations.</div>
+</div>
+<div class="callout ok"><b>Why the vectorized version is better:</b> stacking embeddings into <code>E</code> once (shape N × D) lets <code>cosine_similarity(q_emb, E)</code> score all 11,314 docs in one NumPy call, per query, instead of a Python loop of 11,314 calls.</div>
+
+<h3>Results from the lab (K = 5, 20, 50)</h3>
+<div class="ctl"><span>K:</span><span id="kBtns"></span></div>
+<div class="scroll"><table id="resTab"></table></div>
+
+<h3>How to read the results</h3>
+<div class="grid g2">
+<div class="card"><b>Precision falls as K grows</b><br>At K=5, 8 of 10 queries hit 1.00. By K=50 the harder ones sag: electronics 0.66, politics 0.52, Windows 0.60. More docs ⇒ more chances for off-topic ones.</div>
+<div class="card"><b>Recall looks tiny, and that’s expected</b><br>The “relevant set” is a whole category (the lab says 500–600 docs). Even a perfect top-5 gives about 5/600 ≈ 0.01, and K=50 caps near 0.08. Recall can’t get high until K is in the hundreds.</div>
+<div class="card"><b>Why some queries are weaker</b><br>“historical influence of politics on society” → <code>talk.politics.misc</code> overlaps heavily with sibling politics groups, so semantically-correct docs get labelled “wrong” (my interpretation; the lab calls it ambiguous).</div>
+<div class="card"><b>Caveat on the labels</b><br>“Relevant = same category” is a proxy. A <code>sci.space</code> post may not actually answer the query, and a post from another group might. Real evaluation sets label relevance per query.</div>
+</div>
+
+<h2>7 · Alternatives &amp; trade-offs</h2>
+<div class="card scroll"><table>
+<tr><th>Piece</th><th>Lab’s approach</th><th>Alternative</th><th>Trade-off</th></tr>
+<tr><td>Top-K selection</td><td>enumerate + sorted (O(N log N))</td><td><code>np.argpartition</code> / <code>np.argsort(-s)[:k]</code> / <code>heapq.nlargest</code></td><td>Much faster on big N; slightly less readable. The lab’s version is great for learning.</td></tr>
+<tr><td>Similarity</td><td>Divide by norms every call</td><td>Normalize embeddings once, then use <code>E @ q</code></td><td>Faster, but you must guarantee unit length (and handle zero vectors).</td></tr>
+<tr><td>Scaling the search</td><td>Brute force over all vectors</td><td>FAISS / vector DB (approximate nearest neighbours)</td><td>Orders of magnitude faster at scale; approximate results and more infrastructure.</td></tr>
+<tr><td>Total relevant count</td><td>Loop over df per query</td><td><code>(df.category == cat_id).sum()</code> or <code>value_counts()</code> once</td><td>Same answer, far faster.</td></tr>
+<tr><td>Relevance labels</td><td>Category = relevant</td><td>Per-query hand labels or LLM-as-judge</td><td>More faithful metrics, more effort.</td></tr>
+<tr><td>Extra metrics</td><td>P@K, R@K</td><td>MAP, MRR, NDCG</td><td>Capture ranking quality, not just counts.</td></tr>
+</table></div>
+
+<h2>Takeaways</h2>
+<ul>
+<li>Tensor → NumPy needs <code>detach().cpu().numpy()</code>; <code>np.asarray</code> normalizes type/dtype; <code>ravel()</code> flattens to 1-D.</li>
+<li><code>denom</code> = product of vector <em>lengths</em>; one per document in the 2-D case; zero vectors are guarded to score 0.</li>
+<li><code>A @ v1</code> scores every document at once; sorting scores with their indices yields the top-K doc ids.</li>
+<li><code>compute_metrics</code>: embed query → score all docs → top-K → map to categories → count matches → P = hits/K, R = hits/category size.</li>
+<li>Precision drops and recall rises with K; with category-sized relevant sets, recall stays low.</li>
+</ul>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+/* ---------- ravel demo ---------- */
+const RV=[
+ {n:'(3,)',a:[1,2,3],b:'[1 2 3]',sa:'shape (3,)'},
+ {n:'(1, 3)',a:[[1,2,3]],b:'[[1 2 3]]',sa:'shape (1, 3)'},
+ {n:'(3, 1)',a:[[1],[2],[3]],b:'[[1]\n [2]\n [3]]',sa:'shape (3, 1)'},
+ {n:'(2, 3)',a:[[1,2,3],[4,5,6]],b:'[[1 2 3]\n [4 5 6]]',sa:'shape (2, 3)'}];
+const flat=a=>Array.isArray(a)?a.flatMap(flat):[a];
+function rv(i){
+ document.querySelectorAll('#rvBtns button').forEach((b,j)=>b.className=j==i?'on':'');
+ $('rvBefore').textContent=RV[i].b+'\n'+RV[i].sa;
+ const f=flat(RV[i].a);$('rvAfter').textContent='['+f.join(' ')+']\nshape ('+f.length+',)';
+}
+$('rvBtns').innerHTML=RV.map((r,i)=>`<button>${r.n}</button>`).join('');
+document.querySelectorAll('#rvBtns button').forEach((b,i)=>b.onclick=()=>rv(i));rv(0);
+
+/* ---------- cosine playground ---------- */
+const CS=[
+ 'atleast_2d: make sure A is a matrix of shape (N, D) so the row-wise operations below work.',
+ 'v1_norm: the length of the query vector, √(Σ v²). One number.',
+ 'A_norms: the length of every document vector (axis=1 = per row). N numbers.',
+ 'denom = v1_norm × A_norms: the cosine denominator for every document at once.',
+ 'sims = (A @ v1) / where(denom==0, 1.0, denom): dot product of each row with v1, divided by the denominators. Zero denominators are swapped for 1.0 so nothing divides by zero.',
+ 'sims[denom == 0] = 0.0: rows whose denominator was 0 (zero vectors) get similarity 0 instead of the meaningless value from step 5.',
+ 'tolist(): turn the NumPy array into a Python list, ready for top_k_greatest_indices.'];
+let cs=0;
+function cosSteps(){
+ $('cosSteps').innerHTML=CS.map((_,i)=>`<button class="${i==cs?'on':''}" data-i="${i}">${i+1}</button>`).join('');
+ document.querySelectorAll('#cosSteps button').forEach(b=>b.onclick=()=>{cs=+b.dataset.i;cosSteps()});
+ $('cosExplain').textContent=CS[cs];
+ document.querySelectorAll('#snip .l').forEach(l=>l.classList.toggle('on',+l.dataset.s==cs));
+}
+cosSteps();
+const ROWS=[[1,2,0],[2,4,0],[0,0,5],[0,0,0]];
+$('cosGrid').innerHTML=ROWS.map((r,i)=>`<div class="ctl"><b>A[${i}]</b>${r.map(v=>`<input type="number" class="r${i}" value="${v}">`).join('')}</div>`).join('');
+const nrm=v=>Math.sqrt(v.reduce((a,x)=>a+x*x,0));
+const f3=x=>Number.isFinite(x)?(+x.toFixed(3)).toString():String(x);
+function cos(){
+ const q=[...document.querySelectorAll('.q')].map(i=>+i.value||0);
+ const A=ROWS.map((_,i)=>[...document.querySelectorAll('.r'+i)].map(x=>+x.value||0));
+ const qn=nrm(q);
+ let h='<tr><th>row</th><th class="n">‖a‖ (A_norms)</th><th class="n">denom = ‖v1‖·‖a‖</th><th class="n">A @ v1</th><th class="n">naive divide</th><th class="n">sims (final)</th></tr>';
+ A.forEach((a,i)=>{
+  const an=nrm(a),d=qn*an,dot=a.reduce((s,x,j)=>s+x*q[j],0);
+  const naive=dot/d, fin=d==0?0:dot/d;
+  h+=`<tr class="${d==0?'bad':''}"><td>A[${i}]</td><td class="n">${f3(an)}</td><td class="n">${f3(d)}</td><td class="n">${f3(dot)}</td><td class="n">${f3(naive)}</td><td class="n"><b>${f3(fin)}</b></td></tr>`;
+ });
+ $('cosTab').innerHTML=h+`<caption class="small" style="caption-side:bottom;text-align:left;padding-top:6px">‖v1‖ = ${f3(qn)}</caption>`;
+ $('cosNote').textContent='Rows pointing the same way as v1 score 1 (A[0] and A[1] differ only in length, so both are 1). Perpendicular → 0. The zero vector’s naive division gives NaN, replaced by 0.';
+}
+document.querySelectorAll('.q,#cosGrid input').forEach(i=>i.oninput=cos);cos();
+
+/* ---------- sorted demo ---------- */
+function sr(){
+ const s=$('srS').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+ const k=Math.max(1,+$('srK').value||1);
+ const idx=s.map((v,i)=>[i,v]);
+ const sorted=[...idx].sort((a,b)=>b[1]-a[1]);
+ const ps=l=>'['+l.map(p=>`(${p[0]}, ${p[1]})`).join(', ')+']';
+ $('srOut').textContent=
+`lst              = [${s.join(', ')}]
+indexed_list     = ${ps(idx)}
+sorted_by_value  = ${ps(sorted)}      # highest score first
+sorted_by_value[:${k}] = ${ps(sorted.slice(0,k))}
+top_k_indices    = [${sorted.slice(0,k).map(p=>p[0]).join(', ')}]   # doc ids of the best ${k}`;
+}
+$('srS').oninput=sr;$('srK').oninput=sr;sr();
+
+/* ---------- retrieve_documents stepper ---------- */
+const RD=[
+ ['1 · Clean the query','preprocess_text("space exploration") → "space exploration" (strip whitespace; nothing to remove here).'],
+ ['2 · Embed the query','model.encode(...) turns the text into a 768-number vector (bge-base-en-v1.5). .astype(np.float32) keeps dtype consistent with the document vectors. Same model that produced the stored embeddings, which is essential for comparable vectors.'],
+ ['3 · Score every doc','The for-loop visits all 11,314 stored vectors. Each is converted to a float32 NumPy array and compared with the query via cosine_similarity (1-D branch → one float). cosine_scores ends up as a list of 11,314 floats; position i = score of document i.'],
+ ['4 · Pick top-k','top_k_greatest_indices(cosine_scores, k=2) → e.g. [4021, 87] (illustrative ids): the two documents with the highest cosine score.'],
+ ['5 · Print results','For each id: look up df.iloc[idx] to print the first 200 characters of the post and its category name via newsgroups_train.target_names. Lab result: both docs are sci.space.']];
+let rd=0;
+function rdDraw(){
+ $('rdSteps').innerHTML=RD.map((r,i)=>`<button class="${i==rd?'on':''}" data-i="${i}">${r[0]}</button>`).join('');
+ document.querySelectorAll('#rdSteps button').forEach(b=>b.onclick=()=>{rd=+b.dataset.i;rdDraw()});
+ $('rdBody').innerHTML='<p>'+RD[rd][1]+'</p>';
+}
+rdDraw();
+
+/* ---------- compute_metrics ---------- */
+const CM=[
+ {code:['E = np.vstack([...])'],t:'Setup (once). Every document embedding is converted to float32 NumPy, flattened with ravel(), and stacked into one matrix E of shape (N, D) = (11314, 768).',s:'E.shape = (11314, 768)'},
+ {code:['query = item["query"]','desired_category = item["desired_category"]'],t:'Loop over test queries. Pull out the query text and the category that counts as “relevant”.',s:'query = "advancements in space exploration technology"\ndesired_category = "sci.space"'},
+ {code:['q_clean = preprocess_text(query)','q_emb = model.encode(...)','q_emb = np.asarray(...).ravel()'],t:'Clean the text, embed it (NumPy, not torch, to avoid GPU→NumPy errors), and flatten to a 1-D vector.',s:'q_emb.shape = (768,)'},
+ {code:['cosine_scores = cosine_similarity(q_emb, E)'],t:'Because E is 2-D, the vectorized branch runs: one cosine score per document, computed in a single call. Returns a list of N floats.',s:'len(cosine_scores) = 11314\n(illustrative) cosine_scores[0:3] = [0.41, 0.52, 0.38, ...]'},
+ {code:['top_results = top_k_greatest_indices(cosine_scores, k=top_k)'],t:'Indices of the K highest scores (K = 5 here).',s:'top_results = [4021, 87, 903, 2210, 1566]   # illustrative ids'},
+ {code:['retrieved_categories = [ ...target_names[df.iloc[idx]["category"]] for idx in top_results ]'],t:'Look up each retrieved doc’s category name. This list is what we grade against.',s:'retrieved_categories =\n["sci.space","sci.space","sci.space","sci.space","sci.space"]'},
+ {code:['relevant_in_top_k = sum(1 for cat in retrieved_categories if cat == desired_category)'],t:'Count hits: retrieved docs whose category equals the desired one.',s:'relevant_in_top_k = 5'},
+ {code:['total_relevant_in_corpus = sum(1 for idx in range(len(df)) if ... == desired_category)'],t:'Count ALL docs in the corpus with that category (the recall denominator). Done by looping over every row, repeated for each query (works, but slow; value_counts would do it once).',s:'total_relevant_in_corpus ≈ 600   # lab: categories have 500–600 docs'},
+ {code:['p = precision_at_k(relevant_in_top_k, top_k)','r = recall_at_k(relevant_in_top_k, total_relevant_in_corpus)'],t:'Apply the formulas: precision = hits / K, recall = hits / total relevant in corpus.',s:'p = 5 / 5 = 1.00\nr = 5 / ~600 ≈ 0.01   (matches the lab: P@5 = 1.00, R@5 = 0.01)'},
+ {code:['results.append({"query":..., "precision@k": p, "recall@k": r})'],t:'Store this query’s metrics. After all 10 queries, return the list; the lab then prints it for K = 5, 20, 50.',s:'results[0] = {"query": "...", "precision@k": 1.0, "recall@k": ~0.008}'}];
+$('cmCode').innerHTML='<code>'+[
+ '# once, before the loop',
+ 'np_embeddings = [np.asarray(x, dtype=np.float32).ravel() for x in embeddings]  # (+ detach/cpu if torch)',
+ 'E = np.vstack(np_embeddings)                  # shape (N, D)',
+ '',
+ 'for item in queries:',
+ '    query = item["query"]; desired_category = item["desired_category"]',
+ '    q_clean = preprocess_text(query)',
+ '    q_emb = np.asarray(model.encode(q_clean, convert_to_tensor=False), dtype=np.float32).ravel()',
+ '    cosine_scores = cosine_similarity(q_emb, E)',
+ '    top_results = top_k_greatest_indices(cosine_scores, k=top_k)',
+ '    retrieved_categories = [newsgroups_train.target_names[df.iloc[i]["category"]] for i in top_results]',
+ '    relevant_in_top_k = sum(1 for c in retrieved_categories if c == desired_category)',
+ '    total_relevant_in_corpus = sum(1 for i in range(len(df)) if newsgroups_train.target_names[df.iloc[i]["category"]] == desired_category)',
+ '    p = precision_at_k(relevant_in_top_k, top_k)',
+ '    r = recall_at_k(relevant_in_top_k, total_relevant_in_corpus)',
+ '    results.append({"query": query, "precision@k": p, "recall@k": r})'
+].map(l=>`<span class="l">${l.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`).join('')+'</code>';
+const CMmap=[[0,1,2],[4,5],[6,7],[8],[9],[10],[11],[12],[13,14],[15]];
+let cm=0;
+function cmDraw(){
+ $('cmSteps').innerHTML=CM.map((_,i)=>`<button class="${i==cm?'on':''}" data-i="${i}">${i+1}</button>`).join('');
+ document.querySelectorAll('#cmSteps button').forEach(b=>b.onclick=()=>{cm=+b.dataset.i;cmDraw()});
+ $('cmText').innerHTML='<b>Step '+(cm+1)+':</b> '+CM[cm].t;
+ $('cmState').textContent=CM[cm].s;
+ document.querySelectorAll('#cmCode .l').forEach((l,i)=>l.classList.toggle('on',CMmap[cm].includes(i)));
+}
+cmDraw();
+
+/* ---------- results table ---------- */
+const QS=['space exploration technology','real-time rendering (graphics)','cardiovascular research','NHL playoffs stats','cryptography & security','electronics in computing','motorcycle maintenance','baseball tactics','politics & society','Windows OS trends'];
+const CAT=['sci.space','comp.graphics','sci.med','rec.sport.hockey','sci.crypt','sci.electronics','rec.motorcycles','rec.sport.baseball','talk.politics.misc','comp.os.ms-windows.misc'];
+const D={5:{p:[1,1,1,1,1,1,1,1,.4,.8],r:[.01,.01,.01,.01,.01,.01,.01,.01,0,.01]},
+20:{p:[1,1,1,1,1,.8,.95,1,.5,.65],r:[.03,.03,.03,.03,.03,.03,.03,.03,.02,.02]},
+50:{p:[1,.88,1,.98,1,.66,.98,1,.52,.6],r:[.08,.08,.08,.08,.08,.06,.08,.08,.06,.05]}};
+let kk=5;
+function resDraw(){
+ $('kBtns').innerHTML=[5,20,50].map(k=>`<button class="${k==kk?'on':''}" data-k="${k}">${k}</button>`).join(' ');
+ document.querySelectorAll('#kBtns button').forEach(b=>b.onclick=()=>{kk=+b.dataset.k;resDraw()});
+ const d=D[kk];
+ let h=`<tr><th>Query</th><th>Desired category</th><th class="n">Precision@${kk}</th><th class="n">Recall@${kk}</th></tr>`;
+ QS.forEach((q,i)=>{
+  const p=d.p[i];
+  h+=`<tr><td>${q}</td><td><code>${CAT[i]}</code></td><td class="n" style="background:linear-gradient(90deg,var(--okbg) ${p*100}%,transparent ${p*100}%)">${p.toFixed(2)}</td><td class="n">${d.r[i].toFixed(2)}</td></tr>`;
+ });
+ $('resTab').innerHTML=h;
+}
+resDraw();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@ Backend engineer at Apex Research / Coastal Research (joined early Oct 2026). St
 
 **Rule for this file:** only work that was **merged** goes in. Proposals, research pages and open PRs stay out until they merge. Branch flow is QA → staging → testprod → production. "Reached" says how far each piece had got when it was written down.
 
-Last synced: 2026-11-02 (all PRs by `baqarali110` in `coastal-research/*`)
+Last synced: 2026-11-03 (all PRs by `baqarali110` in `coastal-research/*`)
 
 ## At a glance
 
@@ -27,8 +27,10 @@ Last synced: 2026-11-02 (all PRs by `baqarali110` in `coastal-research/*`)
 | Oct 30–Nov 2 | Zero-downtime deploys, phase 1: clean, fast container stops | — | 10 | Backend stop 10.3 s (killed, requests cut) → 0.2 s (clean exit); portal stop on production capped at 3 s, so the deploy gap drops from up to 13 s to about 3–6 s |
 | Nov 2 | PR-H5 to H7 portal and staff-app hardening before the OAuth consent page | — | 5 | The backend's session-signing secret no longer ships in the Coastal, apex-research or staff-app images; refused sessions no longer leave users on an empty dashboard or a login loop; Clarity session replay no longer records staff screens; staff uploads over ~75 MB no longer fail at 30 s; a partner's consent link survives sign-in, MFA and a forced password change; outages and slow links get readable messages instead of crashes or endless spinners |
 | Nov 2 | Admin Notes page no longer locks offices out of the dashboard | — | 1 | One page open sent ~2,700 API calls and used up the office's 1,000-per-15-min limit, so every admin screen failed for up to 15 min; now 2 calls, all firms' notes shown, notes no longer mixed up between firms with the same name |
+| Nov 3 | OAuth branded providers: plan and Phase A prerequisites (CI on PRs, body-parser fix, env manifest + boot check, security-event channel) | KAN-240 (KAN-242 to KAN-245) | 4 | The backend's unit and API tests now run on every backend PR, integration tests on promotions and schema changes (report-only, tiered to fit the Actions budget); a crash-the-server advisory in request parsing fixed on QA after a merge had rolled it back; all 140 backend environment variables listed in one checked file, and a wrong OAuth setting now stops a box at start instead of running a weaker server; OAuth attacks (code or refresh-token reuse, cross-brand use) now have a channel that pages IT |
+| Nov 3 | SF-1: approver decisions on a case limited to Admin and Research Manager | — | 1 | Any of the 13 researchers could approve a cancellation, re-open a case, settle a dispute with a refund, or move a case to another firm, on any case, by calling the API directly; now refused with 403 (the screens already hid these buttons) |
 
-**Totals (as of 2026-11-02):** 166 merged PRs across 5 repos (apex-v2 51, CoastalResearch-v2 31, PolicyTraceAI 29, policylimitresearch-v2 30, apex-research 25). 24 of them promoted QA → staging, 9 staging → production (the portals on 26 Oct; all five repos on 29 Oct).
+**Totals (as of 2026-11-03):** 174 merged PRs across 5 repos (apex-v2 57, CoastalResearch-v2 32, PolicyTraceAI 29, policylimitresearch-v2 31, apex-research 25). 27 of them promoted QA → staging, 9 staging → production (the portals on 26 Oct; all five repos on 29 Oct).
 
 ## Themes for case studies
 
@@ -44,8 +46,49 @@ Last synced: 2026-11-02 (all PRs by `baqarali110` in `coastal-research/*`)
 
 ## Contributions
 
+### 2026-11-03 · SF-1: approver decisions on a case are Admin / Research Manager only
+**Ticket:** — (security finding SF-1, hardening track) · **Repos:** apex-v2 · **Reached:** QA (3 Nov)
+
+**Problem:** Five staff API routes (approve a cancellation, approve a re-open, re-open a case, resolve a dispute including the refund, and move a case to another firm) checked only the `cases:manage` permission. Every researcher holds it for their own cases, but the check accepted it for any case, so any researcher could make these decisions on any case by calling the API directly. The screens hid the buttons and a code comment said the backend enforced it, which was not true.
+
+**What I did**
+- Mapped every approver action in the staff API and found which were already limited to Admin / Research Manager and which were not (5 open; the case-type conversion I first counted was already guarded).
+- Wrote read-only production checks and ran them before changing anything: only Admins and Research Managers had ever made these transitions, no role template or per-user override gave `cases:manage` to another role, and the move-to-another-firm route had never been used. So the fix blocks only the 13 researchers, who never used these routes.
+- One role check at the top of each of the 5 handlers; researchers still file their cancel, re-open and dispute requests through their own routes.
+- Tests run by both layers (fake and real Postgres): a researcher is refused on every route, Admin and RM pass, and the full approve flows work end to end. Chrome checks with screenshots for the lead page.
+
+**Impact**
+- Researcher accounts able to approve refunds, cancellations and re-opens or move cases between firms: 13 → 0.
+- No change for the 9 Admin and Research Manager accounts or for any researcher workflow seen on production.
+
+**Skills:** authorization review (role vs scope), Express middleware, Prisma, node:test (fake and real Postgres layers), production fact-finding with read-only SQL, Chrome end-to-end testing
+**PRs:** apex-v2 #1086
+
+### 2026-11-03 · OAuth branded providers: implementation plan and Phase A prerequisites
+**Ticket:** KAN-240 (epic), KAN-242 (A1), KAN-243 (A2), KAN-244 (A3), KAN-245 (A4) · **Repos:** apex-v2 · **Reached:** QA (3 Nov)
+
+**Problem:** With the hardening track mostly done, the OAuth provider had to be planned for real, with a new requirement: each of the four portals must look like its own OAuth provider (own issuer, login, consent, connected apps) on one shared backend. The earlier plan was single-brand. Before any OAuth code: no workflow ran the backend's tests on pull requests, and the token endpoint will parse form bodies through `body-parser`, which had a high advisory (one compressed request with trailing bytes can crash the process).
+
+**What I did**
+- Reviewed the earlier plan against Parecki's *OAuth 2.0 Simplified* (page by page) and the current RFCs, and checked it against the code on QA. Wrote plan v2.0: one authorization server, four issuers, one client per brand, RFC 9207 `iss` against mix-up attacks, a `PILOT` client status, per-brand switch-on. 20 corrections to the old plan, 17 prerequisites found already shipped, and one that had not (`CASE:READ`), all with evidence. The lead accepted every recommendation.
+- Phase 0 facts with read-only production checks: canonical host per brand, enforcement flags (both log-only everywhere, which led to a new rule that staff routes refuse OAuth tokens whatever the flag says), active firms per brand.
+- Set up the Jira epic (KAN-240) with one ticket per step.
+- A1: first CI workflow on backend PRs. Report-only, and tiered after measuring Actions use (Team plan, 3,000 min/month; deploys already use most of it): unit, API, docs and lint on every non-draft PR; integration on promotions, schema changes or a label. Checked with actionlint and a 12-scenario logic table.
+- A2: found that a merge earlier that day had rolled QA's lockfile back below production (18 packages behind, including this advisory); fixed `body-parser` (2.3.0 → 2.4.0, lockfile only) and reported the rest.
+- A3: first committed list of the backend's environment variables (140 names, no values) with a test that fails when code reads an unlisted one; a new `APP_ENV` because `NODE_ENV` is `production` on every box; a startup check that refuses a wrong OAuth setting (localhost redirects outside QA, unknown brand, issuer not an https origin) and lists every problem. 42 tests, plus real starts of the backend with good and bad settings.
+- A4: a security-event channel (`securityEvent()`): a fixed list of events with severities, only safe fields kept, no query strings logged, never throws; ships to CloudWatch only when configured, through the existing worker-thread transport. Set up the AWS side: per-environment log groups (production 365 days, QA 30), metric filters and alarms on the existing IT alert topics; found from CloudTrail that the backend's IAM user could already write there, so no IAM change was needed.
+
+**Impact**
+- Backend tests run on every backend PR: first run 1.9 min, 873 tests green.
+- Estimated Actions use about 1,000 min/month instead of up to ~2,900 for running everything on every push.
+- The `body-parser` crash advisory closed on QA, matching staging and production again.
+- Environment variables documented: 0 → 140, kept complete by a test.
+
+**Skills:** OAuth 2.0 / OIDC standards (RFC 6749, 7636, 8414, 9207, 9700), multi-tenant authorization server design, GitHub Actions, CI cost planning, dependency and supply-chain review, production fact-finding, Jira planning
+**PRs:** apex-v2 #1101, #1105, #1106, #1108
+
 ### 2026-11-02 · Admin Notes page no longer locks offices out of the dashboard
-**Ticket:** — (found in production logs) · **Repos:** apex-v2 · **Reached:** QA (2 Nov)
+**Ticket:** — (found in production logs) · **Repos:** apex-v2 · **Reached:** production (3 Nov, in the lead's staging → production PR #1084; QA and staging 2 Nov)
 
 **Problem:** The Client Data → Notes page asked for notes and messages once per client firm, about 2,700 API calls at 1,347 firms. Production allows 1,000 per IP per 15 minutes, so one page open used up the office's allowance and every admin screen for everyone in that office failed with "Too many requests" for up to 15 minutes. Refused calls became empty lists, so the page also hid firms' notes without saying so.
 
@@ -64,10 +107,10 @@ Last synced: 2026-11-02 (all PRs by `baqarali110` in `coastal-research/*`)
 - Page opens one office IP can make before reaching the limit: 0 → 199.
 
 **Skills:** production log analysis, API rate limiting, React Query, REST API design, Prisma, node:test, Chrome-based end-to-end and stress testing
-**PRs:** apex-v2 #1079
+**PRs:** apex-v2 #1079, #1082 (staging)
 
 ### 2026-11-02 · PR-H5 to H7: portal and staff-app hardening before the OAuth consent page
-**Ticket:** — (OAuth hardening track, H-27 to H-31) · **Repos:** CoastalResearch-v2, PolicyTraceAI, policylimitresearch-v2, apex-research, apex-v2 · **Reached:** QA (2 Nov)
+**Ticket:** — (OAuth hardening track, H-27 to H-31) · **Repos:** CoastalResearch-v2, PolicyTraceAI, policylimitresearch-v2, apex-research, apex-v2 · **Reached:** production for the staff app (apex-v2, 3 Nov, lead's PR #1084); staging for the four portals (3 Nov; PolicyTrace and apex-research through the lead's QA → staging merges); QA 2 Nov
 
 **Problem:** The OAuth consent page will live on the Coastal portal, and one "Approve" there gives a partner app access to every case of a firm. Checking the portal on QA showed: the page gate verified sessions with the backend's signing secret, baked into the Docker image (anyone holding the image could mint a session for any user), plus a `mock.` cookie bypass; after login only `/dashboard` was a valid target, so a consent link would be lost; nginx's HTML maintenance page crashed the API client; no request had a timeout; `/oauth` could be framed; Google Tag Manager ran on the login page; OAuth discovery (`/.well-known`) hit the site's own 404.
 
@@ -89,10 +132,10 @@ Last synced: 2026-11-02 (all PRs by `baqarali110` in `coastal-research/*`)
 - Staff app: no login loop; a staffer whose session ends lands back on the same case after signing in; uploads up to the 100 MB limit no longer fail at 30 s; Clarity no longer records staff screens with case data; OAuth discovery reaches the backend on the API host, which also completes the portals' path without an nginx change.
 
 **Skills:** OAuth 2.0 security (RFC 6749 §10.13, RFC 8414, RFC 9700), Next.js middleware and headers, open-redirect defence, fetch timeouts and AbortSignal, nginx proxying, browser end-to-end testing, Docker image auditing
-**PRs:** CoastalResearch-v2 #572; PolicyTraceAI #274; policylimitresearch-v2 #257; apex-research #61; apex-v2 #1075
+**PRs:** CoastalResearch-v2 #572, #584 (staging); PolicyTraceAI #274; policylimitresearch-v2 #257, #259 (staging); apex-research #61; apex-v2 #1075, #1082 (staging)
 
 ### 2026-10-30 · Zero-downtime deploys, phase 1: clean, fast container stops
-**Ticket:** — (follow-up to KAN-206 and PR-H4) · **Repos:** apex-v2, CoastalResearch-v2, policylimitresearch-v2, PolicyTraceAI, apex-research · **Reached:** staging (2 Nov; QA 30 Oct)
+**Ticket:** — (follow-up to KAN-206 and PR-H4) · **Repos:** apex-v2, CoastalResearch-v2, policylimitresearch-v2, PolicyTraceAI, apex-research · **Reached:** production for apex-v2 and Coastal (2 Nov, lead's staging → production PRs #1068 and #568); staging for PLR, PolicyTrace and apex-research (2 Nov); QA 30 Oct
 
 **Problem:** Every deploy took the app it replaced offline, and since KAN-206 that showed as the branded maintenance page; the lead saw it on QA right after submitting a form. Each container has a fixed name and host port, so the new one can only start once the old one is gone.
 
